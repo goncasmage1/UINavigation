@@ -56,7 +56,6 @@ void AUINavController::FetchUINavActionKeys()
 		{
 			KeyArray->Add(NewKey);
 		}
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("%s"), *(NewKey.ContainedKey.GetFName().ToString())));
 	}
 
 }
@@ -111,7 +110,7 @@ void AUINavController::VerifyInputType(FString ActionName)
 
 void AUINavController::NotifyMouseInputType()
 {
-	EInputType NewInputType = EInputType::Keyboard;
+	EInputType NewInputType = EInputType::Mouse;
 
 	if (NewInputType != CurrentInputType)
 	{

@@ -277,8 +277,7 @@ public:
 	*
 	*	@param  FirstButton The index of the button that will be the focus of navigation
 	*/
-	UFUNCTION(BlueprintCallable, Category = "UINavigation")
-		virtual void UINavSetup();
+	virtual void UINavSetup();
 
 	/**
 	*	Called when geometry is updated after 1st tick (ready for SetupUI)

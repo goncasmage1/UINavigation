@@ -23,20 +23,32 @@ void UUINavWidget::NativeConstruct()
 	CurrentPC = Cast<AUINavController>(GetOwningPlayer());
 
 	//check(CurrentPC != nullptr && "PlayerController isn't a UINavController");
-	if (CurrentPC == nullptr) DISPLAYERROR("PlayerController isn't a UINavController");
+	if (CurrentPC == nullptr)
+	{
+		DISPLAYERROR("PlayerController isn't a UINavController");
+		return;
+	}
 	WidgetClass = GetClass();
 
 	if (bUseSelector && bUseMovementCurve)
 	{
 		//check(MoveCurve != nullptr && "UseMovementCurve is true but MoveCurve is null");
-		if (MoveCurve == nullptr) DISPLAYERROR("UseMovementCurve is true but MoveCurve is null");
+		if (MoveCurve == nullptr)
+		{
+			DISPLAYERROR("UseMovementCurve is true but MoveCurve is null");
+			return;
+		}
 	}
 
 	FetchButtonsInHierarchy();
 	ReadyForSetup();
 
 	//check(NavButtons.Num() == ButtonNavigations.Num() && "Dimension of UINavButtons and ButtonNavigations array is not the same.");
-	if (NavButtons.Num() != ButtonNavigations.Num()) DISPLAYERROR("Dimension of UINavButtons and ButtonNavigations array is not the same.");
+	if (NavButtons.Num() != ButtonNavigations.Num())
+	{
+		DISPLAYERROR("Dimension of UINavButtons and ButtonNavigations array is not the same.");
+		return;
+	}
 
 	if (bUseTextColor) ChangeTextColorToDefault();
 
@@ -58,8 +70,17 @@ void UUINavWidget::FetchButtonsInHierarchy()
 	//check(FirstButtonIndex < NavButtons.Num() && "Invalid FirstButton index, can't be greater than number of buttons.");
 	//check(FirstButtonIndex > -1 && "Invalid FirstButton index, can't be less than 0.");
 
-	if (FirstButtonIndex >= NavButtons.Num()) DISPLAYERROR("Invalid FirstButton index, can't be greater than number of buttons.");
-	if (FirstButtonIndex < 0) DISPLAYERROR("Invalid FirstButton index, can't be less than 0.");
+	if (FirstButtonIndex >= NavButtons.Num())
+	{
+		DISPLAYERROR("Invalid FirstButton index, can't be greater than number of buttons.");
+		return;
+	}
+	if (FirstButtonIndex < 0)
+	{
+		DISPLAYERROR("Invalid FirstButton index, can't be less than 0.");
+		return;
+	}
+
 	ButtonIndex = FirstButtonIndex;
 
 	while (NavButtons[ButtonIndex]->Visibility == ESlateVisibility::Collapsed ||
@@ -130,13 +151,21 @@ void UUINavWidget::ChangeTextColorToDefault()
 		{
 			TextBlock = NavComponents[NavCompIndex]->NavText;
 			//check(TextBlock != nullptr && "When bUseTextColor is true, UINavComponent should have a valid TextBlock called NavText.");
-			if (TextBlock == nullptr) DISPLAYERROR("When bUseTextColor is true, UINavComponent should have a valid TextBlock called NavText.");
+			if (TextBlock == nullptr)
+			{
+				DISPLAYERROR("When bUseTextColor is true, UINavComponent should have a valid TextBlock called NavText.");
+				return;
+			}
 		}
 		else
 		{
 			TextBlock = Cast<UTextBlock>(NavButtons[j]->GetChildAt(0));
 			//check(TextBlock != nullptr && "When bUseTextColor is true, UINavButton should have a TextBlock as its child.");
-			if (TextBlock == nullptr) DISPLAYERROR("When bUseTextColor is true, UINavButton should have a TextBlock as its child.");
+			if (TextBlock == nullptr)
+			{
+				DISPLAYERROR("When bUseTextColor is true, UINavButton should have a TextBlock as its child.");
+				return;
+			}
 		}
 		TextBlock->SetColorAndOpacity(TextDefaultColor);
 	}
@@ -151,8 +180,16 @@ void UUINavWidget::CreateSelector()
 	//check(TheSelector != nullptr && "Couldn't construct TheSelector");
 	//check(SelectorImage != nullptr && "bUseSelector is true but SelectorImage is null!");
 
-	if (TheSelector == nullptr) DISPLAYERROR("Couldn't construct TheSelector");
-	if (SelectorImage == nullptr) DISPLAYERROR("bUseSelector is true but SelectorImage is null!");
+	if (TheSelector == nullptr)
+	{
+		DISPLAYERROR("Couldn't construct TheSelector");
+		return;
+	}
+	if (SelectorImage == nullptr)
+	{
+		DISPLAYERROR("bUseSelector is true but SelectorImage is null!");
+		return; 
+	}
 
 	RootPanel->AddChild(TheSelector);
 	TheSelector->SetBrushFromTexture(SelectorImage);
@@ -216,7 +253,11 @@ void UUINavWidget::AppendVerticalNavigation(int Dimension, FButtonNavigation Edg
 {
 	if (Dimension == -1) Dimension = NavButtons.Num();
 	//check(Dimension > 0 && "Append Navigation Dimension should be greater than 0");
-	if (Dimension <= 0) DISPLAYERROR("Append Navigation Dimension should be greater than 0");
+	if (Dimension <= 0)
+	{
+		DISPLAYERROR("Append Navigation Dimension should be greater than 0");
+		return;
+	}
 
 	TArray<FButtonNavigation> ButtonsNav = TArray<FButtonNavigation>();
 	FButtonNavigation NewNav;
@@ -262,7 +303,11 @@ void UUINavWidget::AppendHorizontalNavigation(int Dimension, FButtonNavigation E
 {
 	if (Dimension == -1) Dimension = NavButtons.Num();
 	//check(Dimension > 0 && "Append Navigation Dimension should be greater than 0");
-	if (Dimension <= 0) DISPLAYERROR("Append Navigation Dimension should be greater than 0");
+	if (Dimension <= 0)
+	{
+		DISPLAYERROR("Append Navigation Dimension should be greater than 0");
+		return;
+	}
 
 	TArray<FButtonNavigation> ButtonsNav = TArray<FButtonNavigation>();
 	FButtonNavigation NewNav;
@@ -308,8 +353,16 @@ void UUINavWidget::AppendGridNavigation(int DimensionX, int DimensionY, FButtonN
 {
 	//check(DimensionX > 0 && "Append Navigation Dimension should be greater than 0");
 	//check(DimensionY > 0 && "Append Navigation Dimension should be greater than 0");
-	if (DimensionX <= 0) DISPLAYERROR("Append Navigation Dimension should be greater than 0");
-	if (DimensionY <= 0) DISPLAYERROR("Append Navigation Dimension should be greater than 0");
+	if (DimensionX <= 0)
+	{
+		DISPLAYERROR("Append Navigation Dimension should be greater than 0");
+		return;
+	}
+	if (DimensionY <= 0)
+	{
+		DISPLAYERROR("Append Navigation Dimension should be greater than 0");
+		return;
+	}
 
 	TArray<FButtonNavigation> ButtonsNav = TArray<FButtonNavigation>();
 	FButtonNavigation NewNav;
@@ -401,7 +454,11 @@ void UUINavWidget::UINavSetup()
 	CurrentPC->SetActiveWidget(this);
 	CurrentPC->EnableInput(CurrentPC);
 
-	if (bUseSelector) TheSelector->SetVisibility(ESlateVisibility::Visible);
+	if (bUseSelector)
+	{
+		if (TheSelector == nullptr) return;
+		TheSelector->SetVisibility(ESlateVisibility::Visible);
+	}
 
 	OnNavigateTo(ButtonIndex);
 	NavigateTo(ButtonIndex);
@@ -409,6 +466,7 @@ void UUINavWidget::UINavSetup()
 
 void UUINavWidget::UpdateSelectorLocation(int Index)
 {
+	if (TheSelector == nullptr) return;
 	TheSelector->SetRenderTranslation(GetButtonLocation(Index));
 }
 
@@ -455,13 +513,21 @@ void UUINavWidget::UpdateTextColor(int Index)
 	{
 		PreviousText = NavComponents[PreviousComponentIndex]->NavText;
 		//check(PreviousText != nullptr && "When bUseTextColor is true, UINavComponent should have a valid TextBlock called NavText.");
-		if (PreviousText == nullptr) DISPLAYERROR("When bUseTextColor is true, UINavComponent should have a valid TextBlock called NavText.");
+		if (PreviousText == nullptr)
+		{
+			DISPLAYERROR("When bUseTextColor is true, UINavComponent should have a valid TextBlock called NavText.");
+			return;
+		}
 	}
 	else
 	{
 		PreviousText = Cast<UTextBlock>(NavButtons[ButtonIndex]->GetChildAt(0));
 		//check(PreviousText != nullptr && "When bUseTextColor is true, UINavButton should have a TextBlock as its child.");
-		if (PreviousText == nullptr) DISPLAYERROR("When bUseTextColor is true, UINavButton should have a TextBlock as its child.");
+		if (PreviousText == nullptr)
+		{
+			DISPLAYERROR("When bUseTextColor is true, UINavButton should have a TextBlock as its child.");
+			return;
+		}
 	}
 	PreviousText->SetColorAndOpacity(TextDefaultColor);
 
@@ -471,13 +537,21 @@ void UUINavWidget::UpdateTextColor(int Index)
 	{
 		NewText = NavComponents[NewComponentIndex]->NavText;
 		//check(NewText != nullptr && "When bUseTextColor is true, UINavComponent should have a valid TextBlock called NavText.");
-		if (NewText == nullptr) DISPLAYERROR("When bUseTextColor is true, UINavComponent should have a valid TextBlock called NavText.");
+		if (NewText == nullptr)
+		{
+			DISPLAYERROR("When bUseTextColor is true, UINavComponent should have a valid TextBlock called NavText.");
+			return;
+		}
 	}
 	else
 	{
 		NewText = Cast<UTextBlock>(NavButtons[Index]->GetChildAt(0));
 		//check(NewText != nullptr && "When bUseTextColor is true, UINavButton should have a TextBlock as its child.");
-		if (NewText == nullptr) DISPLAYERROR("When bUseTextColor is true, UINavButton should have a TextBlock as its child.");
+		if (NewText == nullptr)
+		{
+			DISPLAYERROR("When bUseTextColor is true, UINavButton should have a TextBlock as its child.");
+			return;
+		}
 	}
 	NewText->SetColorAndOpacity(TextNavigatedColor);
 }
@@ -514,6 +588,7 @@ void UUINavWidget::SwitchButtonStyle(int Index)
 
 void UUINavWidget::ChangeSelectorScale(FVector2D NewScale)
 {
+	if (TheSelector == nullptr) return;
 	TheSelector->SetRenderScale(NewScale);
 }
 
@@ -644,7 +719,11 @@ void UUINavWidget::OnSelect_Implementation(int Index)
 UWidget* UUINavWidget::GoToWidget(TSubclassOf<UUINavWidget> NewWidgetClass, bool bRemoveParent)
 {
 	//check(NewWidgetClass != nullptr && "GoToWidget: No Widget Class found");
-	if (NewWidgetClass == nullptr) DISPLAYERROR("GoToWidget: No Widget Class found");
+	if (NewWidgetClass == nullptr)
+	{
+		DISPLAYERROR("GoToWidget: No Widget Class found");
+		return nullptr;
+	}
 
 	CurrentPC->DisableInput(CurrentPC);
 	UUINavWidget* NewWidget = CreateWidget<UUINavWidget>(CurrentPC, NewWidgetClass);
