@@ -41,6 +41,7 @@ public class UINavigation : ModuleRules
                 "UMG",
                 "Slate",
                 "SlateCore",
+                "InputCore",
                 "RHI"
 				// ... add private dependencies that you statically link with here ...	
 			}

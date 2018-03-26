@@ -590,6 +590,7 @@ void UUINavWidget::OnReturnToParent_Implementation()
 
 void UUINavWidget::HoverEvent(int Index)
 {
+	CurrentPC->NotifyMouseInputType();
 	NavigateTo(Index, true);
 }
 
@@ -613,6 +614,7 @@ void UUINavWidget::UnhoverEvent(int Index)
 
 void UUINavWidget::ClickEvent(int Index)
 {
+	CurrentPC->NotifyMouseInputType();
 	OnSelect(Index);
 }
 

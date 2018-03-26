@@ -28,6 +28,39 @@ void AUINavController::SetupInputComponent()
 	Action6.bConsumeInput = false;
 }
 
+void AUINavController::Possess(APawn * InPawn)
+{
+	Super::Possess(InPawn);
+
+	FetchUINavActionKeys();
+}
+
+void AUINavController::FetchUINavActionKeys()
+{
+	const UInputSettings* Settings = GetDefault<UInputSettings>();
+	const TArray<FInputActionKeyMapping>& Actions = Settings->ActionMappings;
+	for (FInputActionKeyMapping Action : Actions)
+	{
+		FString NewName = Action.ActionName.ToString();
+		if (NewName.Left(4).Compare(TEXT("Menu")) != 0)
+			continue;
+
+		FKeyContainer NewKey = FKeyContainer(Action);
+
+		TArray<FKeyContainer>* KeyArray = KeyMap.Find(NewName);
+		if (KeyArray == nullptr)
+		{
+			KeyMap.Add(NewName, { NewKey });
+		}
+		else
+		{
+			KeyArray->Add(NewKey);
+		}
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("%s"), *(NewKey.ContainedKey.GetFName().ToString())));
+	}
+
+}
+
 bool AUINavController::IsGamepadConnected()
 {
 	return FSlateApplication::Get().IsGamepadAttached();
@@ -38,10 +71,61 @@ void AUINavController::SetActiveWidget(UUINavWidget* NewWidget)
 	ActiveWidget = NewWidget;
 }
 
+EInputType AUINavController::GetLastInputType(FString ActionName)
+{
+	TArray<FKeyContainer>* Keys = KeyMap.Find(ActionName);
+	if (Keys == nullptr) return EInputType::None;
+
+	for (FKeyContainer Key : *Keys)
+	{
+		if (WasInputKeyJustPressed(Key.ContainedKey))
+		{
+			if (Key.ContainedKey.IsGamepadKey())
+			{
+				return EInputType::Gamepad;
+			}
+			else if (Key.ContainedKey.IsMouseButton())
+			{
+				return EInputType::Mouse;
+			}
+			else
+			{
+				return EInputType::Keyboard;
+			}
+		}
+	}
+
+	return EInputType::None;
+}
+
+void AUINavController::VerifyInputType(FString ActionName)
+{
+	EInputType NewInputType = GetLastInputType(ActionName);
+
+	if (NewInputType != CurrentInputType)
+	{
+		ActiveWidget->OnInputChanged(CurrentInputType, NewInputType);
+		CurrentInputType = NewInputType;
+	}
+}
+
+void AUINavController::NotifyMouseInputType()
+{
+	EInputType NewInputType = EInputType::Keyboard;
+
+	if (NewInputType != CurrentInputType)
+	{
+		ActiveWidget->OnInputChanged(CurrentInputType, NewInputType);
+		CurrentInputType = NewInputType;
+	}
+}
+
 void AUINavController::MenuUp()
 {
 	if (ActiveWidget == nullptr ||
 		!ActiveWidget->IsInViewport()) return;
+
+	VerifyInputType(TEXT("MenuUp"));
 
 	ActiveWidget->MenuUp();
 }
@@ -51,6 +135,8 @@ void AUINavController::MenuDown()
 	if (ActiveWidget == nullptr ||
 		!ActiveWidget->IsInViewport()) return;
 
+	VerifyInputType(TEXT("MenuDown"));
+
 	ActiveWidget->MenuDown();
 }
 
@@ -58,6 +144,8 @@ void AUINavController::MenuLeft()
 {
 	if (ActiveWidget == nullptr ||
 		!ActiveWidget->IsInViewport()) return;
+
+	VerifyInputType(TEXT("MenuLeft"));
 
 	ActiveWidget->MenuLeft();
 }
@@ -67,6 +155,8 @@ void AUINavController::MenuRight()
 	if (ActiveWidget == nullptr ||
 		!ActiveWidget->IsInViewport()) return;
 
+	VerifyInputType(TEXT("MenuRight"));
+
 	ActiveWidget->MenuRight();
 }
 
@@ -75,6 +165,8 @@ void AUINavController::MenuSelect()
 	if (ActiveWidget == nullptr ||
 		!ActiveWidget->IsInViewport()) return;
 
+	VerifyInputType(TEXT("MenuSelect"));
+
 	ActiveWidget->MenuSelect();
 }
 
@@ -82,6 +174,8 @@ void AUINavController::MenuReturn()
 {
 	if (ActiveWidget == nullptr ||
 		!ActiveWidget->IsInViewport()) return;
+
+	VerifyInputType(TEXT("MenuReturn"));
 
 	ActiveWidget->MenuReturn();
 }

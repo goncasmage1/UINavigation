@@ -54,6 +54,26 @@ class UINAVIGATION_API UUINavWidget : public UUserWidget
 
 protected:
 
+	bool bShouldTick = true;
+
+	bool bMovingSelector = false;
+
+	//Used to track when the selector's position should be updated
+	int WaitForTick;
+
+	float MovementCounter;
+	float MovementTime;
+
+	FVector2D InitialOffset;
+
+	FVector2D SelectorOrigin;
+	FVector2D SelectorDestination;
+	FVector2D Distance;
+
+
+	/******************************************************************************/
+
+
 	/**
 	*	Returns the position of the UINavButton with the specified index
 	*/
@@ -81,22 +101,6 @@ protected:
 
 	void BeginSelectorMovement(int Index);
 	void HandleSelectorMovement(float DeltaTime);
-
-	bool bShouldTick = true;
-
-	bool bMovingSelector = false;
-
-	//Used to track when the selector's position should be updated
-	int WaitForTick;
-
-	float MovementCounter;
-	float MovementTime;
-
-	FVector2D InitialOffset;
-
-	FVector2D SelectorOrigin;
-	FVector2D SelectorDestination;
-	FVector2D Distance;
 
 
 public:
@@ -219,6 +223,9 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "UINavigation Text", meta = (EditCondition = "bUseTextColor"))
 		FLinearColor TextNavigatedColor = FColor::Green;
 
+
+	/*********************************************************************************/
+
 	
 	/**
 	*	The widget's construct event
@@ -278,6 +285,12 @@ public:
 	*/
 	UFUNCTION(BlueprintImplementableEvent, Category = "UINavigation")
 		void ReadyForSetup();
+
+	/**
+	*	Called when the input type changed
+	*/
+	UFUNCTION(BlueprintImplementableEvent, Category = "UINavigation")
+		void OnInputChanged(EInputType From, EInputType TO);
 
 	/**
 	*	Changes the selector's location to that of the button with the given index in the Button's array

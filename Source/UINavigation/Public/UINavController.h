@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
+#include "Engine.h"
 #include "GameFramework/PlayerController.h"
 #include "UINavController.generated.h"
 
@@ -13,6 +13,28 @@ enum class EInputType : uint8
 	Keyboard UMETA(DisplayName = "Keyboard"),
 	Mouse UMETA(DisplayName = "Mouse"),
 	Gamepad UMETA(DisplayName = "Gamepad")
+};
+
+USTRUCT(BlueprintType)
+struct FKeyContainer
+{
+	GENERATED_USTRUCT_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		FString KeyActionName;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		FKey ContainedKey;
+
+	FKeyContainer()
+	{
+	}
+
+	FKeyContainer(const FInputActionKeyMapping& Action)
+		: KeyActionName(Action.ActionName.ToString())
+		, ContainedKey(Action.Key)
+	{
+	}
 };
 
 
@@ -35,6 +57,12 @@ public:
 		bool IsGamepadConnected();
 
 	/**
+	*	Notifies this controller that a mouse is being used
+	*/
+	UFUNCTION(BlueprintCallable)
+		void NotifyMouseInputType();
+
+	/**
 	*	Changes the active widget to the specified widget
 	*
 	*	@param NewWidget The new active widget
@@ -47,21 +75,36 @@ public:
 
 protected:
 
-	/*
-	Whether the controller should notify the widget when the player
-	started using a gamepad or keyboard that he/she wasn't using
-	(i.e. notify that the player is now using a gamepad but was until now using
-	a keyboard and vice-versa)
-	*/
-	UPROPERTY(EditDefaultsOnly)
-		bool bNotifyGamepadKeyboardEvents;
-
 	UPROPERTY()
 		class UUINavWidget* ActiveWidget;
 
 	EInputType CurrentInputType = EInputType::None;
 
+	TMap<FString, TArray<FKeyContainer>> KeyMap = TMap<FString, TArray<FKeyContainer>>();
+
+
+	/*************************************************************************/
+
+
+	/**
+	*	Searches all the Input Actions relevant to UINav plugin and saves them in a map
+	*/
+	void FetchUINavActionKeys();
+
+	/**
+	*	Returns the type of input that was just executed
+	*
+	*	@return The input type that was just used
+	*/
+	EInputType GetLastInputType(FString ActionName);
+
+	/**
+	*	Verifies if a new input type is being used
+	*/
+	void VerifyInputType(FString ActionName);
+
 	virtual void SetupInputComponent() override;
+	virtual void Possess(APawn* InPawn) override;
 
 	virtual void MenuUp();
 	virtual void MenuDown();
