@@ -633,14 +633,14 @@ void UUINavWidget::NavigateTo(int Index, bool bHoverEvent)
 		UpdateTextColor(Index);
 	}
 
+	if (bShouldNotify) OnNavigate(ButtonIndex, Index);
+	ButtonIndex = Index;
+
 	//Update all the possible scroll boxes in the widget
 	for (int i = 0; i < ScrollBoxes.Num(); ++i)
 	{
-		ScrollBoxes[i]->ScrollWidgetIntoView(NavButtons[Index]);
+		ScrollBoxes[i]->ScrollWidgetIntoView(NavButtons[ButtonIndex]);
 	}
-
-	if (bShouldNotify) OnNavigate(ButtonIndex, Index);
-	ButtonIndex = Index;
 }
 
 void UUINavWidget::BeginSelectorMovement(int Index)

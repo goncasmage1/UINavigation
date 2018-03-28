@@ -54,6 +54,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavSlider, meta = (EditCondition = "bUseNumberRange"))
 		int MaxRange;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavSlider, meta = (EditCondition = "bUseNumberRange"))
+		int Interval = 1;
+
 	//If set to true, will disable buttons if the slider runs out of options on either side
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavSlider)
 		bool bDisableButtons = true;

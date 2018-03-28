@@ -14,6 +14,7 @@ void UUINavOptionBox::NativeConstruct()
 	if (bUseNumberRange)
 	{
 		check(MinRange < MaxRange && "UINavSlider: MinRange has to be smaller that MaxRange");
+		check(Interval > 0 && "UINavSlider: Interval must be at least 1");
 	}
 	else
 	{
@@ -57,7 +58,7 @@ void UUINavOptionBox::NavigateLeft()
 	//Make sure button still has options left to navigate
 	if (OptionIndex > 0)
 	{
-		OptionIndex--;
+		OptionIndex --;
 	}
 
 	UpdateTextBlock();
@@ -74,7 +75,7 @@ void UUINavOptionBox::NavigateRight()
 	//Make sure button still has options left to navigate
 	if (bUseNumberRange)
 	{
-		if (MinRange + OptionIndex < MaxRange)
+		if (MinRange + OptionIndex*Interval < MaxRange)
 		{
 			OptionIndex++;
 		}
@@ -108,7 +109,8 @@ void UUINavOptionBox::CheckRightLimit()
 {
 	if (bUseNumberRange)
 	{
-		if (OptionIndex == MaxRange - MinRange)
+		int Difference = (MaxRange - MinRange) / Interval;
+		if (OptionIndex >= Difference)
 		{
 			RightButton->SetIsEnabled(false);
 		}
@@ -127,9 +129,10 @@ void UUINavOptionBox::UpdateTextBlock()
 	//Correct OptionIndex to fit appropriate range
 	if (bUseNumberRange)
 	{
-		if (OptionIndex > (MaxRange - MinRange))
+		int Difference = (MaxRange - MinRange) / Interval;
+		if (OptionIndex > (Difference))
 		{
-			OptionIndex = MaxRange - MinRange;
+			OptionIndex = Difference;
 		}
 	}
 	else
@@ -140,7 +143,9 @@ void UUINavOptionBox::UpdateTextBlock()
 		}
 	}
 
-	NavText->SetText(bUseNumberRange ? FText::FromString(FString::FromInt(MinRange + OptionIndex)) : FText::FromName(StringOptions[OptionIndex]));
+	NavText->SetText(bUseNumberRange ? 
+		FText::FromString(FString::FromInt(MinRange + OptionIndex*Interval)) : 
+		FText::FromName(StringOptions[OptionIndex]));
 }
 
 void UUINavOptionBox::UpdateTextWithValue(int NewIndex)

@@ -358,7 +358,8 @@ public:
 	/**
 	*	Called when the button with the specified index was navigated upon
 	*
-	*	@param	Index  The index of the button that was hovered upon
+	*	@param	From  The index of the button that was navigated from
+	*	@param	To  The index of the button that was navigated to
 	*/
 	UFUNCTION(BlueprintNativeEvent, Category = "UINavigation")
 		void OnNavigate(int From, int To);
