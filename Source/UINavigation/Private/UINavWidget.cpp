@@ -460,7 +460,7 @@ void UUINavWidget::UINavSetup()
 		TheSelector->SetVisibility(ESlateVisibility::Visible);
 	}
 
-	OnNavigateTo(ButtonIndex);
+	OnNavigate(-1, ButtonIndex);
 	NavigateTo(ButtonIndex);
 }
 
@@ -594,17 +594,24 @@ void UUINavWidget::ChangeSelectorScale(FVector2D NewScale)
 
 void UUINavWidget::SetSelector(UImage * NewSelector)
 {
-	TheSelector = NewSelector;
 	//check(TheSelector != nullptr && "No Selector found");
-	if (TheSelector == nullptr) DISPLAYERROR("Received invalid Selector");
+	if (NewSelector == nullptr)
+	{
+		DISPLAYERROR("Received invalid Selector");
+	}
+	TheSelector = NewSelector;
+}
+
+void UUINavWidget::SetSelectorBrush(UTexture2D * NewBrush)
+{
+	if (NewBrush == nullptr) return;
+	TheSelector->SetBrushFromTexture(NewBrush);
 }
 
 void UUINavWidget::NavigateTo(int Index, bool bHoverEvent)
 {
 	bool bShouldNotify = false;
 	if (Index != ButtonIndex) bShouldNotify = true;
-
-	if (bShouldNotify) OnNavigateFrom(ButtonIndex);
 		
 	if (bUseButtonStates)
 	{
@@ -626,15 +633,14 @@ void UUINavWidget::NavigateTo(int Index, bool bHoverEvent)
 		UpdateTextColor(Index);
 	}
 
-	ButtonIndex = Index;
-
 	//Update all the possible scroll boxes in the widget
 	for (int i = 0; i < ScrollBoxes.Num(); ++i)
 	{
-		ScrollBoxes[i]->ScrollWidgetIntoView(NavButtons[ButtonIndex]);
+		ScrollBoxes[i]->ScrollWidgetIntoView(NavButtons[Index]);
 	}
 
-	if (bShouldNotify) OnNavigateTo(ButtonIndex);
+	if (bShouldNotify) OnNavigate(ButtonIndex, Index);
+	ButtonIndex = Index;
 }
 
 void UUINavWidget::BeginSelectorMovement(int Index)
@@ -648,12 +654,7 @@ void UUINavWidget::BeginSelectorMovement(int Index)
 	bMovingSelector = true;
 }
 
-void UUINavWidget::OnNavigateTo_Implementation(int Index)
-{
-
-}
-
-void UUINavWidget::OnNavigateFrom_Implementation(int Index)
+void UUINavWidget::OnNavigate_Implementation(int From, int To)
 {
 
 }

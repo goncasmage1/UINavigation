@@ -337,7 +337,15 @@ public:
 	*	@param	NewSelector  The new selector
 	*/
 	UFUNCTION(BlueprintCallable, Category = "UINavigation")
-		void SetSelector(UImage* NewSelector);
+		void SetSelector(class UImage* NewSelector);
+
+	/**
+	*	Changes the selector's texture
+	*
+	*	@param	NewBrush  The new brush
+	*/
+	UFUNCTION(BlueprintCallable, Category = "UINavigation")
+		void SetSelectorBrush(UTexture2D* NewBrush);
 
 	/**
 	*	Navigate to the button with the specified index
@@ -353,18 +361,8 @@ public:
 	*	@param	Index  The index of the button that was hovered upon
 	*/
 	UFUNCTION(BlueprintNativeEvent, Category = "UINavigation")
-		void OnNavigateTo(int Index);
-	virtual void OnNavigateTo_Implementation(int Index);
-
-	/**
-	*	Called when a new button was navigated to, while the button
-	*	with the specified index was the previous button
-	*
-	*	@param	Index  The index of the button that was hovered upon
-	*/
-	UFUNCTION(BlueprintNativeEvent, Category = "UINavigation")
-		void OnNavigateFrom(int Index);
-	virtual void OnNavigateFrom_Implementation(int Index);
+		void OnNavigate(int From, int To);
+	virtual void OnNavigate_Implementation(int From, int To);
 
 	/**
 	*	Called when ReturnToParent is called (i.e. the player wants to exit the menu)
