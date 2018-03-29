@@ -106,7 +106,7 @@ protected:
 public:
 
 	//The image object that will move around the UI
-	UPROPERTY(BlueprintReadWrite, Category = "UINavigation")
+	UPROPERTY(BlueprintReadOnly, Category = "UINavigation")
 		UImage* TheSelector;
 
 	//Indicates the navigation possibilities of each button
@@ -142,21 +142,22 @@ public:
 	int ButtonIndex = 0;
 
 	//Reference to the parent widget that created this widget
-	UPROPERTY(BlueprintReadWrite, meta = (ExposeOnSpawn = true), Category = "UINavigation")
+	UPROPERTY(BlueprintReadOnly, meta = (ExposeOnSpawn = true), Category = "UINavigation")
 		UUINavWidget* ParentWidget;
 
 	//Reference to this widget's class
 	TSubclassOf<UUINavWidget> WidgetClass;
 
 	//Reference to the parent widget's class
-	UPROPERTY(BlueprintReadWrite, Category = "UINavigation")
+	UPROPERTY(BlueprintReadOnly, Category = "UINavigation")
 		TSubclassOf<UUINavWidget> ParentWidgetClass;
 
 	//Reference to the current player controller
-	class AUINavController* CurrentPC;
+	UPROPERTY(BlueprintReadOnly)
+		class AUINavController* CurrentPC;
 
 	//Reference to the widget that created this widget (if returned from a child)
-	UPROPERTY(BlueprintReadWrite, Category = "UINavigation")
+	UPROPERTY(BlueprintReadOnly, Category = "UINavigation")
 		UUINavWidget* ReturnedFromWidget;
 
 	//Indicates whether this widget should remove its parent from the viewport when created
@@ -245,7 +246,7 @@ public:
 	*	@param  bWrap  Indicates whether navigation wraps around the grid
 	*	@param	StartingButtonIndex The index of the button where the grid starts
 	*/
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "UINavigation")
 		void AppendVerticalNavigation(int Dimension, FButtonNavigation EdgeNavigation, bool bWrap);
 
 	/**
@@ -256,7 +257,7 @@ public:
 	*	@param	EdgeNavigation  The intended navigation at each of the four edges of the button grid
 	*	@param  bWrap  Indicates whether navigation wraps around the grid
 	*/
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "UINavigation")
 		void AppendHorizontalNavigation(int Dimension, FButtonNavigation EdgeNavigation, bool bWrap);
 
 	/**
@@ -268,7 +269,7 @@ public:
 	*	@param	EdgeNavigation  The intended navigation at each of the four edges of the grid
 	*	@param  bWrap  Indicates whether navigation wraps around the grid
 	*/
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "UINavigation")
 		void AppendGridNavigation(int DimensionX, int DimensionY, FButtonNavigation EdgeNavigation, bool bWrap);
 
 
@@ -313,8 +314,7 @@ public:
 	*	@param	Index  The new button's index in the Button's array
 	*	@param  bHovered  Whether the function was called due to a button hover
 	*/
-	UFUNCTION(BlueprintCallable, Category = "UINavigation")
-		void UpdateButtonsStates(int Index, bool bHovered);
+	void UpdateButtonsStates(int Index, bool bHovered);
 
 	/**
 	*	Switches the button with the given index's style between normal and hovered
@@ -329,7 +329,7 @@ public:
 	*	@param	NewScale  The selector's image new scale
 	*/
 	UFUNCTION(BlueprintCallable, Category = "UINavigation")
-		void ChangeSelectorScale(FVector2D NewScale);
+		void SetSelectorScale(FVector2D NewScale);
 
 	/**
 	*	Sets this widget's selector
@@ -346,6 +346,14 @@ public:
 	*/
 	UFUNCTION(BlueprintCallable, Category = "UINavigation")
 		void SetSelectorBrush(UTexture2D* NewBrush);
+
+	/**
+	*	Changes the selector's visibility
+	*
+	*	@param	bVisible Whether the selector will be visible
+	*/
+	UFUNCTION(BlueprintCallable, Category = "UINavigation")
+		void SetSelectorVisibility(bool bVisible);
 
 	/**
 	*	Navigate to the button with the specified index
@@ -403,7 +411,7 @@ public:
 		void ReleaseEvent(int Index);
 
 	/**
-	*	Called in blueprint (or C++) to indicate what happens with each button's click event
+	*	Notifies that a button was selected, and indicates its index
 	*
 	*	@param	Index  The index of the button that was selected
 	*/
@@ -416,6 +424,7 @@ public:
 	*
 	*	@param	Direction  Direction of navigation
 	*/
+	UFUNCTION(BlueprintCallable, Category = "UINavigation")
 	virtual void MenuNavigate(ENavigationDirection Direction);
 	/**
 	*	Returns the index of the next button to navigate to

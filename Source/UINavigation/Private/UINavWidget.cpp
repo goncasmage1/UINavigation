@@ -586,7 +586,7 @@ void UUINavWidget::SwitchButtonStyle(int Index)
 	TheButton->SetStyle(NewStile);
 }
 
-void UUINavWidget::ChangeSelectorScale(FVector2D NewScale)
+void UUINavWidget::SetSelectorScale(FVector2D NewScale)
 {
 	if (TheSelector == nullptr) return;
 	TheSelector->SetRenderScale(NewScale);
@@ -606,6 +606,12 @@ void UUINavWidget::SetSelectorBrush(UTexture2D * NewBrush)
 {
 	if (NewBrush == nullptr) return;
 	TheSelector->SetBrushFromTexture(NewBrush);
+}
+
+void UUINavWidget::SetSelectorVisibility(bool bVisible)
+{
+	ESlateVisibility Vis = bVisible ? ESlateVisibility::Visible : ESlateVisibility::Hidden;
+	TheSelector->SetVisibility(Vis);
 }
 
 void UUINavWidget::NavigateTo(int Index, bool bHoverEvent)

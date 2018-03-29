@@ -37,7 +37,6 @@ struct FKeyContainer
 	}
 };
 
-
 /**
  * 
  */
@@ -59,11 +58,10 @@ public:
 	/**
 	*	Notifies this controller that a mouse is being used
 	*/
-	UFUNCTION(BlueprintCallable)
-		void NotifyMouseInputType();
+	void NotifyMouseInputType();
 
 	/**
-	*	Changes the active widget to the specified widget
+	*	Changes the widget this PC will communicate with
 	*
 	*	@param NewWidget The new active widget
 	*/
