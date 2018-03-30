@@ -15,6 +15,16 @@ enum class EInputType : uint8
 	Gamepad UMETA(DisplayName = "Gamepad")
 };
 
+UENUM(BlueprintType)
+enum class EInputDirection : uint8
+{
+	None UMETA(DisplayName = "None"),
+	Up UMETA(DisplayName = "Up"),
+	Down UMETA(DisplayName = "Down"),
+	Left UMETA(DisplayName = "Left"),
+	Right UMETA(DisplayName = "Right")
+};
+
 /**
  * 
  */
@@ -39,6 +49,11 @@ public:
 	void NotifyMouseInputType();
 
 	/**
+	*	Notifies this controller that a mouse is being used
+	*/
+	void NotifyInputTypeChange(EInputType NewInputType);
+
+	/**
 	*	Changes the widget this PC will communicate with
 	*
 	*	@param NewWidget The new active widget
@@ -54,9 +69,35 @@ protected:
 	UPROPERTY()
 		class UUINavWidget* ActiveWidget;
 
-	EInputType CurrentInputType = EInputType::None;
+	EInputType CurrentInputType = EInputType::Keyboard;
 
 	TMap<FString, TArray<FKey>> KeyMap = TMap<FString, TArray<FKey>>();
+
+	EInputDirection Direction = EInputDirection::None;
+
+
+	/*
+	Indicates whether navigation will occur periodically after the player
+	holds down a navigation key
+	*/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		bool bChainNavigation = true;
+
+	/*
+	The amount of time the player needs to hold a key for the navigation to
+	start occuring periodically
+	*/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		float InputHeldWaitTime = 0.5f;
+
+	/*
+	The amount of time that passes before the navigation chains further
+	*/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		float NavigationChainFrequency = 0.2f;
+
+	FTimerHandle NavChainHandle;
+	FTimerDelegate NavChainDelegate;
 
 
 	/*************************************************************************/
@@ -82,12 +123,22 @@ protected:
 	virtual void SetupInputComponent() override;
 	virtual void Possess(APawn* InPawn) override;
 
-	virtual void MenuUp();
-	virtual void MenuDown();
-	virtual void MenuLeft();
-	virtual void MenuRight();
-	virtual void MenuSelect();
-	virtual void MenuReturn();
+	void MenuUp();
+	void MenuDown();
+	void MenuLeft();
+	void MenuRight();
+	void MenuSelect();
+	void MenuReturn();
+
+	void MenuUpRelease();
+	void MenuDownRelease();
+	void MenuLeftRelease();
+	void MenuRightRelease();
+
+	void StartMenuUp();
+	void StartMenuDown();
+	void StartMenuLeft();
+	void StartMenuRight();
 	
 	
 };
