@@ -112,20 +112,23 @@ void UUINavWidget::TraverseHierarquy()
 			{
 				NewNavButton = Cast<UUINavButton>(UIComp->NavButton);
 
-				NavComponentsIndices.Add(NavButtons.Num());
-				NavComponents.Add(UIComp);
+				UINavComponentsIndices.Add(NavButtons.Num());
+				UINavComponents.Add(UIComp);
 
 				if (Cast<UUINavOptionBox>(Widgets[i]))
 				{
-					SliderIndices.Add(NavButtons.Num());
-					Sliders.Add(Cast<UUINavOptionBox>(Widgets[i]));
+					OptionBoxIndices.Add(NavButtons.Num());
+					OptionBoxes.Add(Cast<UUINavOptionBox>(Widgets[i]));
 				}
 			}
 		}
 
 		if (NewNavButton == nullptr) continue;
 
-		NewNavButton->ButtonIndex = NavButtons.Num();
+		if (!bOverrideButtonIndeces)
+		{
+			NewNavButton->ButtonIndex = NavButtons.Num();
+		}
 		NewNavButton->CustomHover.AddDynamic(this, &UUINavWidget::HoverEvent);
 		NewNavButton->CustomUnhover.AddDynamic(this, &UUINavWidget::UnhoverEvent);
 		NewNavButton->CustomClick.AddDynamic(this, &UUINavWidget::ClickEvent);
@@ -146,10 +149,10 @@ void UUINavWidget::ChangeTextColorToDefault()
 	UTextBlock* TextBlock = nullptr;
 	for (int j = 0; j < NavButtons.Num(); j++)
 	{
-		int NavCompIndex = NavComponentsIndices.Find(j);
+		int NavCompIndex = UINavComponentsIndices.Find(j);
 		if (NavCompIndex != INDEX_NONE)
 		{
-			TextBlock = NavComponents[NavCompIndex]->NavText;
+			TextBlock = UINavComponents[NavCompIndex]->NavText;
 			//check(TextBlock != nullptr && "When bUseTextColor is true, UINavComponent should have a valid TextBlock called NavText.");
 			if (TextBlock == nullptr)
 			{
@@ -508,10 +511,10 @@ void UUINavWidget::UpdateTextColor(int Index)
 	UTextBlock* NewText = nullptr;
 
 	//Change text color on the button that was navigated from
-	int PreviousComponentIndex = NavComponentsIndices.Find(ButtonIndex);
+	int PreviousComponentIndex = UINavComponentsIndices.Find(ButtonIndex);
 	if (PreviousComponentIndex != INDEX_NONE)
 	{
-		PreviousText = NavComponents[PreviousComponentIndex]->NavText;
+		PreviousText = UINavComponents[PreviousComponentIndex]->NavText;
 		//check(PreviousText != nullptr && "When bUseTextColor is true, UINavComponent should have a valid TextBlock called NavText.");
 		if (PreviousText == nullptr)
 		{
@@ -532,10 +535,10 @@ void UUINavWidget::UpdateTextColor(int Index)
 	PreviousText->SetColorAndOpacity(TextDefaultColor);
 
 	//Change text color on the button that was navigated to
-	int NewComponentIndex = NavComponentsIndices.Find(Index);
+	int NewComponentIndex = UINavComponentsIndices.Find(Index);
 	if (NewComponentIndex != INDEX_NONE)
 	{
-		NewText = NavComponents[NewComponentIndex]->NavText;
+		NewText = UINavComponents[NewComponentIndex]->NavText;
 		//check(NewText != nullptr && "When bUseTextColor is true, UINavComponent should have a valid TextBlock called NavText.");
 		if (NewText == nullptr)
 		{
@@ -815,6 +818,38 @@ void UUINavWidget::ReturnToParent()
 	}
 }
 
+UUINavButton * UUINavWidget::GetUINavButtonAtIndex(int Index)
+{
+	if (NavButtons.Num() <= Index)
+	{
+		DISPLAYERROR("GetUINavButtonAtIndex was given an invalid index!");
+		return nullptr;
+	}
+	return NavButtons[Index];
+}
+
+UUINavComponent * UUINavWidget::GetUINavComponentAtIndex(int Index)
+{
+	int ValidIndex = UINavComponentsIndices.Find(Index);
+	if (ValidIndex == INDEX_NONE) 
+	{
+		DISPLAYERROR("GetUINavComponentAtIndex: Element at given index isn't a UINavComponent");
+		return nullptr;
+	}
+	return UINavComponents[ValidIndex];
+}
+
+UUINavOptionBox * UUINavWidget::GetUINavOptionBoxAtIndex(int Index)
+{
+	int ValidIndex = OptionBoxIndices.Find(Index);
+	if (ValidIndex == INDEX_NONE)
+	{
+		DISPLAYERROR("GetUINavOptionBoxAtIndex: Element at given index isn't a UINavOptionBox");
+		return nullptr;
+	}
+	return OptionBoxes[ValidIndex];
+}
+
 void UUINavWidget::MenuUp()
 {
 	if (bMovingSelector) return;
@@ -831,14 +866,14 @@ void UUINavWidget::MenuLeft()
 {
 	if (bMovingSelector) return;
 
-	int SliderIndex = SliderIndices.Find(ButtonIndex);
+	int SliderIndex = OptionBoxIndices.Find(ButtonIndex);
 	if (SliderIndex == INDEX_NONE)
 	{
 		MenuNavigate(ENavigationDirection::Nav_LEFT);
 	}
 	else
 	{
-		Sliders[SliderIndex]->NavigateLeft();
+		OptionBoxes[SliderIndex]->NavigateLeft();
 	}
 }
 
@@ -846,14 +881,14 @@ void UUINavWidget::MenuRight()
 {
 	if (bMovingSelector) return;
 
-	int SliderIndex = SliderIndices.Find(ButtonIndex);
+	int SliderIndex = OptionBoxIndices.Find(ButtonIndex);
 	if (SliderIndex == INDEX_NONE)
 	{
 		MenuNavigate(ENavigationDirection::Nav_RIGHT);
 	}
 	else
 	{
-		Sliders[SliderIndex]->NavigateRight();
+		OptionBoxes[SliderIndex]->NavigateRight();
 	}
 }
 

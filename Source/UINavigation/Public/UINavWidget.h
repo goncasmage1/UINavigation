@@ -118,18 +118,18 @@ public:
 		TArray<class UUINavButton*> NavButtons;
 
 	UPROPERTY(BlueprintReadOnly, Category = "UINavigation")
-		TArray<int> NavComponentsIndices;
+		TArray<int> UINavComponentsIndices;
 
 	UPROPERTY(BlueprintReadOnly, Category = "UINavigation")
-		TArray<class UUINavComponent*> NavComponents;
+		TArray<class UUINavComponent*> UINavComponents;
 
 	//The indices of all the UINavOptionBoxes in this widget
 	UPROPERTY(BlueprintReadOnly, Category = "UINavigation")
-		TArray<int> SliderIndices;
+		TArray<int> OptionBoxIndices;
 
 	//An array with the indices of all the UINavOptionBoxes in this widget
 	UPROPERTY(BlueprintReadOnly, Category = "UINavigation")
-		TArray<class UUINavOptionBox*> Sliders;
+		TArray<class UUINavOptionBox*> OptionBoxes;
 
 	//All the scrollboxes in this widget
 	UPROPERTY(BlueprintReadOnly, Category = "UINavigation")
@@ -359,6 +359,7 @@ public:
 	*	Navigate to the button with the specified index
 	*
 	*	@param	Index  The index of the button that was hovered upon
+	*	@param	bHoverEvent  Was this triggered by a button hover event?
 	*/
 	UFUNCTION(BlueprintCallable, Category = "UINavigation")
 		void NavigateTo(int Index, bool bHoverEvent = false);
@@ -446,6 +447,32 @@ public:
 	*/
 	UFUNCTION(BlueprintCallable, Category = "UINavigation")
 		UWidget* GoToWidget(TSubclassOf<UUINavWidget> NewWidgetClass, bool bRemoveParent);
+
+	/**
+	*	Returns the UINavButton with the specified index
+	*
+	*	@return  UUINavButton  The UINavButton with the specified index
+	*/
+	UFUNCTION(BlueprintCallable, Category = "UINavigation")
+		UUINavButton* GetUINavButtonAtIndex(int Index);
+
+	/**
+	*	Returns the UINavComponent with the specified index (null if that
+	*	index doesn't correspond to a UINavComponent)
+	*
+	*	@return  UINavComponent  The UINavComponent with the specified index
+	*/
+	UFUNCTION(BlueprintCallable, Category = "UINavigation")
+		UUINavComponent* GetUINavComponentAtIndex(int Index);
+
+	/**
+	*	Returns the UINavOptionBox with the specified index (null if that
+	*	index doesn't correspond to a UINavOptionBox)
+	*
+	*	@return  UINavOptionBox  The UINavOptionBox with the specified index
+	*/
+	UFUNCTION(BlueprintCallable, Category = "UINavigation")
+		UUINavOptionBox* GetUINavOptionBoxAtIndex(int Index);
 
 
 	UFUNCTION(BlueprintCallable, Category = "UINavigation")
