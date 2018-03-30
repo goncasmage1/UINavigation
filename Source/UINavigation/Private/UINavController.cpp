@@ -45,16 +45,14 @@ void AUINavController::FetchUINavActionKeys()
 		if (NewName.Left(4).Compare(TEXT("Menu")) != 0)
 			continue;
 
-		FKeyContainer NewKey = FKeyContainer(Action);
-
-		TArray<FKeyContainer>* KeyArray = KeyMap.Find(NewName);
+		TArray<FKey>* KeyArray = KeyMap.Find(NewName);
 		if (KeyArray == nullptr)
 		{
-			KeyMap.Add(NewName, { NewKey });
+			KeyMap.Add(NewName, { Action.Key });
 		}
 		else
 		{
-			KeyArray->Add(NewKey);
+			KeyArray->Add(Action.Key);
 		}
 	}
 
@@ -72,18 +70,18 @@ void AUINavController::SetActiveWidget(UUINavWidget* NewWidget)
 
 EInputType AUINavController::GetLastInputType(FString ActionName)
 {
-	TArray<FKeyContainer>* Keys = KeyMap.Find(ActionName);
+	TArray<FKey>* Keys = KeyMap.Find(ActionName);
 	if (Keys == nullptr) return EInputType::None;
 
-	for (FKeyContainer Key : *Keys)
+	for (FKey Key : *Keys)
 	{
-		if (WasInputKeyJustPressed(Key.ContainedKey))
+		if (WasInputKeyJustPressed(Key))
 		{
-			if (Key.ContainedKey.IsGamepadKey())
+			if (Key.IsGamepadKey())
 			{
 				return EInputType::Gamepad;
 			}
-			else if (Key.ContainedKey.IsMouseButton())
+			else if (Key.IsMouseButton())
 			{
 				return EInputType::Mouse;
 			}

@@ -15,28 +15,6 @@ enum class EInputType : uint8
 	Gamepad UMETA(DisplayName = "Gamepad")
 };
 
-USTRUCT(BlueprintType)
-struct FKeyContainer
-{
-	GENERATED_USTRUCT_BODY()
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		FString KeyActionName;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		FKey ContainedKey;
-
-	FKeyContainer()
-	{
-	}
-
-	FKeyContainer(const FInputActionKeyMapping& Action)
-		: KeyActionName(Action.ActionName.ToString())
-		, ContainedKey(Action.Key)
-	{
-	}
-};
-
 /**
  * 
  */
@@ -78,7 +56,7 @@ protected:
 
 	EInputType CurrentInputType = EInputType::None;
 
-	TMap<FString, TArray<FKeyContainer>> KeyMap = TMap<FString, TArray<FKeyContainer>>();
+	TMap<FString, TArray<FKey>> KeyMap = TMap<FString, TArray<FKey>>();
 
 
 	/*************************************************************************/
