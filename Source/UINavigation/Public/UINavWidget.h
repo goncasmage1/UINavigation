@@ -118,14 +118,14 @@ public:
 		TArray<class UUINavButton*> NavButtons;
 
 	UPROPERTY(BlueprintReadOnly, Category = "UINavigation")
-		TSet<int> UINavComponentsIndices;
+		TArray<int> UINavComponentsIndices;
 
 	UPROPERTY(BlueprintReadOnly, Category = "UINavigation")
 		TArray<class UUINavComponent*> UINavComponents;
 
 	//The indices of all the UINavOptionBoxes in this widget
 	UPROPERTY(BlueprintReadOnly, Category = "UINavigation")
-		TSet<int> OptionBoxIndices;
+		TArray<int> OptionBoxIndices;
 
 	//An array with the indices of all the UINavOptionBoxes in this widget
 	UPROPERTY(BlueprintReadOnly, Category = "UINavigation")
