@@ -61,10 +61,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavSlider)
 		bool bDisableButtons = true;
 
-
-	UFUNCTION(BlueprintCallable)
-		FORCEINLINE int GetOptionIndex() const { return OptionIndex; }
-
 	UFUNCTION(BlueprintCallable)
 		void NavigateLeft();
 	UFUNCTION(BlueprintCallable)
