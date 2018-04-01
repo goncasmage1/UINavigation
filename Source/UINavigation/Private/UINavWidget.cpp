@@ -149,28 +149,7 @@ void UUINavWidget::ChangeTextColorToDefault()
 	UTextBlock* TextBlock = nullptr;
 	for (int j = 0; j < NavButtons.Num(); j++)
 	{
-		int NavCompIndex = UINavComponentsIndices.Find(j);
-		if (NavCompIndex != INDEX_NONE)
-		{
-			TextBlock = UINavComponents[NavCompIndex]->NavText;
-			//check(TextBlock != nullptr && "When bUseTextColor is true, UINavComponent should have a valid TextBlock called NavText.");
-			if (TextBlock == nullptr)
-			{
-				DISPLAYERROR("When bUseTextColor is true, UINavComponent should have a valid TextBlock called NavText.");
-				return;
-			}
-		}
-		else
-		{
-			TextBlock = Cast<UTextBlock>(NavButtons[j]->GetChildAt(0));
-			//check(TextBlock != nullptr && "When bUseTextColor is true, UINavButton should have a TextBlock as its child.");
-			if (TextBlock == nullptr)
-			{
-				DISPLAYERROR("When bUseTextColor is true, UINavButton should have a TextBlock as its child.");
-				return;
-			}
-		}
-		TextBlock->SetColorAndOpacity(TextDefaultColor);
+		SwitchTextColorTo(j, TextDefaultColor);
 	}
 }
 
@@ -507,34 +486,13 @@ FVector2D UUINavWidget::GetButtonLocation(int Index)
 
 void UUINavWidget::UpdateTextColor(int Index)
 {
-	UTextBlock* PreviousText = nullptr;
+	SwitchTextColorTo(ButtonIndex, TextDefaultColor);
+	SwitchTextColorTo(Index, TextNavigatedColor);
+}
+
+void UUINavWidget::SwitchTextColorTo(int Index, FLinearColor Color)
+{
 	UTextBlock* NewText = nullptr;
-
-	//Change text color on the button that was navigated from
-	int PreviousComponentIndex = UINavComponentsIndices.Find(ButtonIndex);
-	if (PreviousComponentIndex != INDEX_NONE)
-	{
-		PreviousText = UINavComponents[PreviousComponentIndex]->NavText;
-		//check(PreviousText != nullptr && "When bUseTextColor is true, UINavComponent should have a valid TextBlock called NavText.");
-		if (PreviousText == nullptr)
-		{
-			DISPLAYERROR("When bUseTextColor is true, UINavComponent should have a valid TextBlock called NavText.");
-			return;
-		}
-	}
-	else
-	{
-		PreviousText = Cast<UTextBlock>(NavButtons[ButtonIndex]->GetChildAt(0));
-		//check(PreviousText != nullptr && "When bUseTextColor is true, UINavButton should have a TextBlock as its child.");
-		if (PreviousText == nullptr)
-		{
-			DISPLAYERROR("When bUseTextColor is true, UINavButton should have a TextBlock as its child.");
-			return;
-		}
-	}
-	PreviousText->SetColorAndOpacity(TextDefaultColor);
-
-	//Change text color on the button that was navigated to
 	int NewComponentIndex = UINavComponentsIndices.Find(Index);
 	if (NewComponentIndex != INDEX_NONE)
 	{
@@ -556,7 +514,7 @@ void UUINavWidget::UpdateTextColor(int Index)
 			return;
 		}
 	}
-	NewText->SetColorAndOpacity(TextNavigatedColor);
+	NewText->SetColorAndOpacity(Color);
 }
 
 void UUINavWidget::UpdateButtonsStates(int Index, bool bHovered)

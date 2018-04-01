@@ -305,8 +305,16 @@ public:
 	*
 	*	@param	Index  The new button's index in the Button's array
 	*/
+	void UpdateTextColor(int Index);
+
+	/**
+	*	Changes the color of the text with the specified index to the specified color
+	*
+	*	@param	Index  The new button's index in the Button's array
+	*	@param	Color  The text's new color
+	*/
 	UFUNCTION(BlueprintCallable, Category = "UINavigation")
-		void UpdateTextColor(int Index);
+		void SwitchTextColorTo(int Index, FLinearColor Color);
 
 	/**
 	*	Changes the state of the current button to normal and the new button to hovered
