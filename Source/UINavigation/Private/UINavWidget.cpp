@@ -60,7 +60,7 @@ void UUINavWidget::NativeConstruct()
 		return;
 	}
 
-	if (TheSelector == nullptr) CreateSelector();
+	if (bUseSelector) SetupSelector();
 }
 
 void UUINavWidget::FetchButtonsInHierarchy()
@@ -125,7 +125,7 @@ void UUINavWidget::TraverseHierarquy()
 
 		if (NewNavButton == nullptr) continue;
 
-		if (!bOverrideButtonIndeces)
+		if (!bOverrideButtonIndices)
 		{
 			NewNavButton->ButtonIndex = NavButtons.Num();
 		}
@@ -153,32 +153,21 @@ void UUINavWidget::ChangeTextColorToDefault()
 	}
 }
 
-void UUINavWidget::CreateSelector()
+void UUINavWidget::SetupSelector()
 {
-	UPanelWidget* RootPanel = Cast<UPanelWidget>(GetRootWidget());
-	//Create the selector
-	TheSelector = WidgetTree->ConstructWidget<UImage>(UImage::StaticClass(), TEXT("Selector"));
-
-	//check(TheSelector != nullptr && "Couldn't construct TheSelector");
-	//check(SelectorImage != nullptr && "bUseSelector is true but SelectorImage is null!");
+	//check(TheSelector != nullptr && "Couldn't find TheSelector");
 
 	if (TheSelector == nullptr)
 	{
-		DISPLAYERROR("Couldn't construct TheSelector");
+		DISPLAYERROR("Couldn't find TheSelector");
 		return;
 	}
-	if (SelectorImage == nullptr)
-	{
-		DISPLAYERROR("bUseSelector is true but SelectorImage is null!");
-		return; 
-	}
 
-	RootPanel->AddChild(TheSelector);
-	TheSelector->SetBrushFromTexture(SelectorImage);
 	TheSelector->SetVisibility(ESlateVisibility::Hidden);
 
 	UCanvasPanelSlot* SelectorSlot = Cast<UCanvasPanelSlot>(TheSelector->Slot);
 
+	//TODO: TRY TO DEACTIVATE
 	//Make sure the selector is centered
 	SelectorSlot->SetAlignment(FVector2D(0.5f, 0.5f));
 
@@ -187,10 +176,6 @@ void UUINavWidget::CreateSelector()
 	otherwise the selector's image might get cropped*/
 	SelectorSlot->SetPosition(InitialOffset);
 
-	FVector2D SelectorSize = FVector2D(SelectorImage->GetSizeX() * SelectorScale.X, SelectorImage->GetSizeY() * SelectorScale.Y);
-	SelectorSlot->SetSize(SelectorSize);
-	SelectorSlot->SetZOrder(SelectorZOrder);
-	TheSelector->SetRenderScale(SelectorScale);
 	TheSelector->SetRenderTranslation(-InitialOffset - FVector2D(0.f, -1000.f));
 }
 
@@ -439,7 +424,7 @@ void UUINavWidget::UINavSetup()
 	if (bUseSelector)
 	{
 		if (TheSelector == nullptr) return;
-		TheSelector->SetVisibility(ESlateVisibility::Visible);
+		TheSelector->SetVisibility(ESlateVisibility::HitTestInvisible);
 	}
 
 	OnNavigate(-1, ButtonIndex);
@@ -553,9 +538,9 @@ void UUINavWidget::SetSelectorScale(FVector2D NewScale)
 	TheSelector->SetRenderScale(NewScale);
 }
 
-void UUINavWidget::SetSelector(UImage * NewSelector)
+void UUINavWidget::SetSelector(UUserWidget * NewSelector)
 {
-	//check(TheSelector != nullptr && "No Selector found");
+	//check(TheSelector != nullptr && "Received invalid Selector");
 	if (NewSelector == nullptr)
 	{
 		DISPLAYERROR("Received invalid Selector");
@@ -563,15 +548,9 @@ void UUINavWidget::SetSelector(UImage * NewSelector)
 	TheSelector = NewSelector;
 }
 
-void UUINavWidget::SetSelectorBrush(UTexture2D * NewBrush)
-{
-	if (NewBrush == nullptr) return;
-	TheSelector->SetBrushFromTexture(NewBrush);
-}
-
 void UUINavWidget::SetSelectorVisibility(bool bVisible)
 {
-	ESlateVisibility Vis = bVisible ? ESlateVisibility::Visible : ESlateVisibility::Hidden;
+	ESlateVisibility Vis = bVisible ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Hidden;
 	TheSelector->SetVisibility(Vis);
 }
 

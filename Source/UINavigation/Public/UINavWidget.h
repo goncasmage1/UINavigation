@@ -80,9 +80,9 @@ protected:
 	FVector2D GetButtonLocation(int Index);
 
 	/**
-	*	Creates the selector on event Construct
+	*	Configures the selector on event Construct
 	*/
-	void CreateSelector();
+	void SetupSelector();
 
 	/**
 	*	Sets up the UINavButtons and does error checking
@@ -106,8 +106,8 @@ protected:
 public:
 
 	//The image object that will move around the UI
-	UPROPERTY(BlueprintReadOnly, Category = "UINavigation")
-		UImage* TheSelector;
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, OptionalWidget = true), Category = "UINavigation")
+		UUserWidget* TheSelector;
 
 	//Indicates the navigation possibilities of each button
 	UPROPERTY(BlueprintReadWrite, Category = "UINavigation")
@@ -184,7 +184,7 @@ public:
 	/*If set to true, ButtonIndex will not be determined by the UINavButton's position in the
 	hierarquy and remain the same, but rather be specified in the Designer Tab.*/
 	UPROPERTY(EditDefaultsOnly, Category = "UINavigation")
-		bool bOverrideButtonIndeces = false;
+		bool bOverrideButtonIndices = false;
 
 	//If set to true, this widget will be removed if it has no ParentWidget and is returned from
 	UPROPERTY(EditDefaultsOnly, Category = "UINavigation")
@@ -198,25 +198,13 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "UINavigation Selector", meta = (EditCondition = "bUseMovementCurve"))
 		UCurveFloat* MoveCurve;
 
-	//The image of the selector
-	UPROPERTY(EditDefaultsOnly, Category = "UINavigation Selector", meta = (EditCondition = "bUseSelector"))
-		UTexture2D* SelectorImage;
-
 	//The position the selector will be in relative to the button
 	UPROPERTY(EditDefaultsOnly, Category = "UINavigation Selector", meta = (EditCondition = "bUseSelector"))
 		ESelectorPosition SelectorPositioning = ESelectorPosition::Position_Center;
 
-	//The scale of the selector's image
-	UPROPERTY(EditDefaultsOnly, Category = "UINavigation Selector", meta = (EditCondition = "bUseSelector"))
-		FVector2D SelectorScale = FVector2D(1.f, 1.f);
-
 	//The offset to apply when positioning the selector on a button
 	UPROPERTY(EditDefaultsOnly, Category = "UINavigation Selector", meta = (EditCondition = "bUseSelector"))
 		FVector2D SelectorOffset;
-
-	//The depth priority of the selector
-	UPROPERTY(EditDefaultsOnly, Category = "UINavigation Selector", meta = (EditCondition = "bUseSelector"))
-		int32 SelectorZOrder = -2;
 
 	UPROPERTY(EditDefaultsOnly, Category = "UINavigation Text", meta = (EditCondition = "bUseTextColor"))
 		FLinearColor TextDefaultColor = FColor::Blue;
@@ -332,9 +320,9 @@ public:
 	void SwitchButtonStyle(int Index);
 
 	/**
-	*	Changes the selector's image scale to the scale given
+	*	Changes the selector's scale to the scale given
 	*
-	*	@param	NewScale  The selector's image new scale
+	*	@param	NewScale  The selector's new scale
 	*/
 	UFUNCTION(BlueprintCallable, Category = "UINavigation")
 		void SetSelectorScale(FVector2D NewScale);
@@ -345,15 +333,7 @@ public:
 	*	@param	NewSelector  The new selector
 	*/
 	UFUNCTION(BlueprintCallable, Category = "UINavigation")
-		void SetSelector(class UImage* NewSelector);
-
-	/**
-	*	Changes the selector's texture
-	*
-	*	@param	NewBrush  The new brush
-	*/
-	UFUNCTION(BlueprintCallable, Category = "UINavigation")
-		void SetSelectorBrush(UTexture2D* NewBrush);
+		void SetSelector(class UUserWidget* NewSelector);
 
 	/**
 	*	Changes the selector's visibility
