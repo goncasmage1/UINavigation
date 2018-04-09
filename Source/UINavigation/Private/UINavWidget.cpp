@@ -43,10 +43,10 @@ void UUINavWidget::NativeConstruct()
 	FetchButtonsInHierarchy();
 	ReadyForSetup();
 
-	//check(NavButtons.Num() == ButtonNavigations.Num() && "Dimension of UINavButtons and ButtonNavigations array is not the same.");
-	if (NavButtons.Num() != ButtonNavigations.Num())
+	//check(UINavButtons.Num() == ButtonNavigations.Num() && "Dimension of UIUINavButtons and ButtonNavigations array is not the same.");
+	if (UINavButtons.Num() != ButtonNavigations.Num())
 	{
-		DISPLAYERROR("Dimension of UINavButtons and ButtonNavigations array is not the same.");
+		DISPLAYERROR("Dimension of UIUINavButtons and ButtonNavigations array is not the same.");
 		return;
 	}
 
@@ -67,10 +67,10 @@ void UUINavWidget::FetchButtonsInHierarchy()
 {
 	TraverseHierarquy();
 
-	//check(FirstButtonIndex < NavButtons.Num() && "Invalid FirstButton index, can't be greater than number of buttons.");
+	//check(FirstButtonIndex < UINavButtons.Num() && "Invalid FirstButton index, can't be greater than number of buttons.");
 	//check(FirstButtonIndex > -1 && "Invalid FirstButton index, can't be less than 0.");
 
-	if (FirstButtonIndex >= NavButtons.Num())
+	if (FirstButtonIndex >= UINavButtons.Num())
 	{
 		DISPLAYERROR("Invalid FirstButton index, can't be greater than number of buttons.");
 		return;
@@ -83,9 +83,9 @@ void UUINavWidget::FetchButtonsInHierarchy()
 
 	ButtonIndex = FirstButtonIndex;
 
-	while (NavButtons[ButtonIndex]->Visibility == ESlateVisibility::Collapsed ||
-		NavButtons[ButtonIndex]->Visibility == ESlateVisibility::Hidden ||
-		!NavButtons[ButtonIndex]->bIsEnabled)
+	while (UINavButtons[ButtonIndex]->Visibility == ESlateVisibility::Collapsed ||
+		UINavButtons[ButtonIndex]->Visibility == ESlateVisibility::Hidden ||
+		!UINavButtons[ButtonIndex]->bIsEnabled)
 	{
 		ButtonIndex++;
 	}
@@ -93,7 +93,7 @@ void UUINavWidget::FetchButtonsInHierarchy()
 
 void UUINavWidget::TraverseHierarquy()
 {
-	//Find UINavButtons in the widget hierarchy
+	//Find UIUINavButtons in the widget hierarchy
 	TArray<UWidget*> Widgets;
 	WidgetTree->GetAllWidgets(Widgets);
 	for (int i = 0; i < Widgets.Num(); ++i)
@@ -112,13 +112,13 @@ void UUINavWidget::TraverseHierarquy()
 			{
 				NewNavButton = Cast<UUINavButton>(UIComp->NavButton);
 
-				UINavComponentsIndices.Add(NavButtons.Num());
+				UINavComponentsIndices.Add(UINavButtons.Num());
 				UINavComponents.Add(UIComp);
 
 				if (Cast<UUINavOptionBox>(Widgets[i]))
 				{
-					OptionBoxIndices.Add(NavButtons.Num());
-					OptionBoxes.Add(Cast<UUINavOptionBox>(Widgets[i]));
+					OptionBoxIndices.Add(UINavButtons.Num());
+					UINavOptionBoxes.Add(Cast<UUINavOptionBox>(Widgets[i]));
 				}
 			}
 		}
@@ -127,7 +127,7 @@ void UUINavWidget::TraverseHierarquy()
 
 		if (!bOverrideButtonIndices)
 		{
-			NewNavButton->ButtonIndex = NavButtons.Num();
+			NewNavButton->ButtonIndex = UINavButtons.Num();
 		}
 		NewNavButton->CustomHover.AddDynamic(this, &UUINavWidget::HoverEvent);
 		NewNavButton->CustomUnhover.AddDynamic(this, &UUINavWidget::UnhoverEvent);
@@ -135,10 +135,10 @@ void UUINavWidget::TraverseHierarquy()
 		NewNavButton->CustomRelease.AddDynamic(this, &UUINavWidget::ReleaseEvent);
 		bSwitchedStyle.Add(false);
 
-		//Add button to array of UINavButtons
-		NavButtons.Add(NewNavButton);
+		//Add button to array of UIUINavButtons
+		UINavButtons.Add(NewNavButton);
 	}
-	/*NavButtons.Sort([](const UUINavButton& Wid1, const UUINavButton& Wid2)
+	/*UINavButtons.Sort([](const UUINavButton& Wid1, const UUINavButton& Wid2)
 	{
 	return Wid1.ButtonIndex < Wid2.ButtonIndex;
 	});*/
@@ -147,7 +147,7 @@ void UUINavWidget::TraverseHierarquy()
 void UUINavWidget::ChangeTextColorToDefault()
 {
 	UTextBlock* TextBlock = nullptr;
-	for (int j = 0; j < NavButtons.Num(); j++)
+	for (int j = 0; j < UINavButtons.Num(); j++)
 	{
 		SwitchTextColorTo(j, TextDefaultColor);
 	}
@@ -209,6 +209,7 @@ void UUINavWidget::HandleSelectorMovement(float DeltaTime)
 	{
 		MovementCounter = 0.f;
 		bMovingSelector = false;
+		bAllowNavigation = true;
 		TheSelector->SetRenderTranslation(SelectorDestination);
 		return;
 	}
@@ -218,7 +219,7 @@ void UUINavWidget::HandleSelectorMovement(float DeltaTime)
 
 void UUINavWidget::AppendVerticalNavigation(int Dimension, FButtonNavigation EdgeNavigation, bool bWrap)
 {
-	if (Dimension == -1) Dimension = NavButtons.Num();
+	if (Dimension == -1) Dimension = UINavButtons.Num();
 	//check(Dimension > 0 && "Append Navigation Dimension should be greater than 0");
 	if (Dimension <= 0)
 	{
@@ -268,7 +269,7 @@ void UUINavWidget::AppendVerticalNavigation(int Dimension, FButtonNavigation Edg
 
 void UUINavWidget::AppendHorizontalNavigation(int Dimension, FButtonNavigation EdgeNavigation, bool bWrap)
 {
-	if (Dimension == -1) Dimension = NavButtons.Num();
+	if (Dimension == -1) Dimension = UINavButtons.Num();
 	//check(Dimension > 0 && "Append Navigation Dimension should be greater than 0");
 	if (Dimension <= 0)
 	{
@@ -439,7 +440,7 @@ void UUINavWidget::UpdateSelectorLocation(int Index)
 
 FVector2D UUINavWidget::GetButtonLocation(int Index)
 {
-	FGeometry Geom = NavButtons[Index]->GetCachedGeometry();
+	FGeometry Geom = UINavButtons[Index]->GetCachedGeometry();
 	FVector2D LocalSize = Geom.GetLocalSize();
 	FVector2D LocalPosition;
 	switch (SelectorPositioning)
@@ -491,7 +492,7 @@ void UUINavWidget::SwitchTextColorTo(int Index, FLinearColor Color)
 	}
 	else
 	{
-		NewText = Cast<UTextBlock>(NavButtons[Index]->GetChildAt(0));
+		NewText = Cast<UTextBlock>(UINavButtons[Index]->GetChildAt(0));
 		//check(NewText != nullptr && "When bUseTextColor is true, UINavButton should have a TextBlock as its child.");
 		if (NewText == nullptr)
 		{
@@ -523,13 +524,18 @@ void UUINavWidget::UpdateButtonsStates(int Index, bool bHovered)
 
 void UUINavWidget::SwitchButtonStyle(int Index)
 {
-	UUINavButton* TheButton = NavButtons[Index];
+	UUINavButton* TheButton = UINavButtons[Index];
 	FButtonStyle NewStile = TheButton->WidgetStyle;
 	FSlateBrush TempState;
 	TempState = NewStile.Hovered;
 	NewStile.Hovered = NewStile.Normal;
 	NewStile.Normal = TempState;
 	TheButton->SetStyle(NewStile);
+}
+
+void UUINavWidget::SetAllowNavigation(bool bAllow)
+{
+	bAllowNavigation = bAllow;
 }
 
 void UUINavWidget::SetSelectorScale(FVector2D NewScale)
@@ -585,7 +591,7 @@ void UUINavWidget::NavigateTo(int Index, bool bHoverEvent)
 	//Update all the possible scroll boxes in the widget
 	for (int i = 0; i < ScrollBoxes.Num(); ++i)
 	{
-		ScrollBoxes[i]->ScrollWidgetIntoView(NavButtons[ButtonIndex]);
+		ScrollBoxes[i]->ScrollWidgetIntoView(UINavButtons[ButtonIndex]);
 	}
 }
 
@@ -598,6 +604,7 @@ void UUINavWidget::BeginSelectorMovement(int Index)
 	MoveCurve->GetTimeRange(MinTime, MaxTime);
 	MovementTime = MaxTime - MinTime;
 	bMovingSelector = true;
+	bAllowNavigation = false;
 }
 
 void UUINavWidget::OnNavigate_Implementation(int From, int To)
@@ -613,6 +620,9 @@ void UUINavWidget::OnReturnToParent_Implementation()
 void UUINavWidget::HoverEvent(int Index)
 {
 	CurrentPC->NotifyMouseInputType();
+
+	if (!bAllowNavigation) return;
+
 	NavigateTo(Index, true);
 }
 
@@ -637,19 +647,22 @@ void UUINavWidget::UnhoverEvent(int Index)
 void UUINavWidget::ClickEvent(int Index)
 {
 	CurrentPC->NotifyMouseInputType();
+
+	if (!bAllowNavigation) return;
+
 	OnSelect(Index);
 }
 
 void UUINavWidget::ReleaseEvent(int Index)
 {
 	//Handle button style switching when mouse is released
-	if (!NavButtons[Index]->IsHovered())
+	if (!UINavButtons[Index]->IsHovered())
 	{
 		SwitchButtonStyle(Index);
-		for (int i = 0; i < NavButtons.Num(); i++)
+		for (int i = 0; i < UINavButtons.Num(); i++)
 		{
 			if (i == Index) continue;
-			if (NavButtons[i]->IsHovered())
+			if (UINavButtons[i]->IsHovered())
 			{
 				SwitchButtonStyle(i);
 				return;
@@ -687,9 +700,9 @@ void UUINavWidget::MenuNavigate(ENavigationDirection Direction)
 	if (LocalIndex == -1) return;
 
 	//Check if the button is visible, if not, skip to next button
-	while (NavButtons[LocalIndex]->Visibility == ESlateVisibility::Collapsed ||
-		NavButtons[LocalIndex]->Visibility == ESlateVisibility::Hidden ||
-		!NavButtons[ButtonIndex]->bIsEnabled)
+	while (UINavButtons[LocalIndex]->Visibility == ESlateVisibility::Collapsed ||
+		UINavButtons[LocalIndex]->Visibility == ESlateVisibility::Hidden ||
+		!UINavButtons[ButtonIndex]->bIsEnabled)
 	{
 		LocalIndex = FetchDirection(Direction);
 	}
@@ -757,12 +770,12 @@ void UUINavWidget::ReturnToParent()
 
 UUINavButton * UUINavWidget::GetUINavButtonAtIndex(int Index)
 {
-	if (NavButtons.Num() <= Index)
+	if (UINavButtons.Num() <= Index)
 	{
 		DISPLAYERROR("GetUINavButtonAtIndex was given an invalid index!");
 		return nullptr;
 	}
-	return NavButtons[Index];
+	return UINavButtons[Index];
 }
 
 UUINavComponent * UUINavWidget::GetUINavComponentAtIndex(int Index)
@@ -784,24 +797,24 @@ UUINavOptionBox * UUINavWidget::GetUINavOptionBoxAtIndex(int Index)
 		DISPLAYERROR("GetUINavOptionBoxAtIndex: Element at given index isn't a UINavOptionBox");
 		return nullptr;
 	}
-	return OptionBoxes[ValidIndex];
+	return UINavOptionBoxes[ValidIndex];
 }
 
 void UUINavWidget::MenuUp()
 {
-	if (bMovingSelector) return;
+	if (!bAllowNavigation) return;
 	MenuNavigate(ENavigationDirection::Nav_UP);
 }
 
 void UUINavWidget::MenuDown()
 {
-	if (bMovingSelector) return;
+	if (!bAllowNavigation) return;
 	MenuNavigate(ENavigationDirection::Nav_DOWN);
 }
 
 void UUINavWidget::MenuLeft()
 {
-	if (bMovingSelector) return;
+	if (!bAllowNavigation) return;
 
 	int SliderIndex = OptionBoxIndices.Find(ButtonIndex);
 	if (SliderIndex == INDEX_NONE)
@@ -810,13 +823,13 @@ void UUINavWidget::MenuLeft()
 	}
 	else
 	{
-		OptionBoxes[SliderIndex]->NavigateLeft();
+		UINavOptionBoxes[SliderIndex]->NavigateLeft();
 	}
 }
 
 void UUINavWidget::MenuRight()
 {
-	if (bMovingSelector) return;
+	if (!bAllowNavigation) return;
 
 	int SliderIndex = OptionBoxIndices.Find(ButtonIndex);
 	if (SliderIndex == INDEX_NONE)
@@ -825,21 +838,19 @@ void UUINavWidget::MenuRight()
 	}
 	else
 	{
-		OptionBoxes[SliderIndex]->NavigateRight();
+		UINavOptionBoxes[SliderIndex]->NavigateRight();
 	}
 }
 
 void UUINavWidget::MenuSelect()
 {
-	if (bMovingSelector) return;
-
+	if (!bAllowNavigation) return;
 	OnSelect(ButtonIndex);
 }
 
 void UUINavWidget::MenuReturn()
 {
-	if (bMovingSelector) return;
-
+	if (!bAllowNavigation) return;
 	ReturnToParent();
 }
 

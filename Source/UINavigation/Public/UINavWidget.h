@@ -57,6 +57,7 @@ protected:
 	bool bShouldTick = true;
 
 	bool bMovingSelector = false;
+	bool bAllowNavigation = true;
 
 	//Used to track when the selector's position should be updated
 	int WaitForTick;
@@ -85,12 +86,12 @@ protected:
 	void SetupSelector();
 
 	/**
-	*	Sets up the UINavButtons and does error checking
+	*	Sets up the UIUINavButtons and does error checking
 	*/
 	void FetchButtonsInHierarchy();
 
 	/**
-	*	Traverses this widget's hierarchy to setup all the UINavButtons
+	*	Traverses this widget's hierarchy to setup all the UIUINavButtons
 	*/
 	void TraverseHierarquy();
 
@@ -105,7 +106,7 @@ protected:
 
 public:
 
-	//The image object that will move around the UI
+	//The UserWidget object that will move along the Widget
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, OptionalWidget = true), Category = "UINavigation")
 		UUserWidget* TheSelector;
 
@@ -113,23 +114,24 @@ public:
 	UPROPERTY(BlueprintReadWrite, Category = "UINavigation")
 		TArray<FButtonNavigation> ButtonNavigations;
 
-	//All the UINavButtons in this Widget
+	//All the UIUINavButtons in this Widget
 	UPROPERTY(BlueprintReadOnly, Category = "UINavigation")
-		TArray<class UUINavButton*> NavButtons;
+		TArray<class UUINavButton*> UINavButtons;
 
 	UPROPERTY(BlueprintReadOnly, Category = "UINavigation")
 		TArray<int> UINavComponentsIndices;
 
+	//All the UINavComponents in this Widget
 	UPROPERTY(BlueprintReadOnly, Category = "UINavigation")
 		TArray<class UUINavComponent*> UINavComponents;
 
-	//The indices of all the UINavOptionBoxes in this widget
+	//The indices of all the UINavUINavOptionBoxes in this widget
 	UPROPERTY(BlueprintReadOnly, Category = "UINavigation")
 		TArray<int> OptionBoxIndices;
 
-	//An array with the indices of all the UINavOptionBoxes in this widget
+	//All the UINavUINavOptionBoxes in this Widget
 	UPROPERTY(BlueprintReadOnly, Category = "UINavigation")
-		TArray<class UUINavOptionBox*> OptionBoxes;
+		TArray<class UUINavOptionBox*> UINavOptionBoxes;
 
 	//All the scrollboxes in this widget
 	UPROPERTY(BlueprintReadOnly, Category = "UINavigation")
@@ -139,32 +141,33 @@ public:
 	TArray<bool> bSwitchedStyle;
 
 	//The index of the button that is currently the focus of navigation
-	int ButtonIndex = 0;
+	UPROPERTY(BlueprintReadOnly, Category = "UINavigation")
+		int ButtonIndex = 0;
 
 	//Reference to the parent widget that created this widget
 	UPROPERTY(BlueprintReadOnly, meta = (ExposeOnSpawn = true), Category = "UINavigation")
 		UUINavWidget* ParentWidget;
 
-	//Reference to this widget's class
+	//This widget's class
 	TSubclassOf<UUINavWidget> WidgetClass;
 
-	//Reference to the parent widget's class
+	//Parent widget's class
 	UPROPERTY(BlueprintReadOnly, Category = "UINavigation")
 		TSubclassOf<UUINavWidget> ParentWidgetClass;
 
-	//Reference to the current player controller
+	//Current player controller
 	UPROPERTY(BlueprintReadOnly)
 		class AUINavController* CurrentPC;
 
-	//Reference to the widget that created this widget (if returned from a child)
+	//Widget that created this widget (if returned from a child)
 	UPROPERTY(BlueprintReadOnly, Category = "UINavigation")
 		UUINavWidget* ReturnedFromWidget;
 
-	//Indicates whether this widget should remove its parent from the viewport when created
+	//Should this widget remove its parent from the viewport when created?
 	bool bParentRemoved = true;
 
 
-	//If set to true, buttons will be navigated using states (Normal and Hovered)
+	//If set to true, buttons will be navigated by switching button states (Normal and Hovered)
 	UPROPERTY(EditDefaultsOnly, Category = "UINavigation")
 		bool bUseButtonStates = false;
 
@@ -172,8 +175,8 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "UINavigation")
 		bool bUseSelector = true;
 
-	/*If set to true, buttons will be navigated by changing the text's color
-	TEXT HAS TO BE INSIDE A UINavButton*/
+	/*If set to true, buttons will be navigated by changing the text's color.
+	Immediate child of UINavButton must be TextBlock */
 	UPROPERTY(EditDefaultsOnly, Category = "UINavigation")
 		bool bUseTextColor = false;
 
@@ -181,7 +184,7 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "UINavigation")
 		int FirstButtonIndex = 0;
 
-	/*If set to true, ButtonIndex will not be determined by the UINavButton's position in the
+	/*If set to true, ButtonIndex will NOT be determined by the UINavButton's position in the
 	hierarquy and remain the same, but rather be specified in the Designer Tab.*/
 	UPROPERTY(EditDefaultsOnly, Category = "UINavigation")
 		bool bOverrideButtonIndices = false;
@@ -190,7 +193,7 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "UINavigation")
 		bool bAllowRemoveIfRoot = false;
 
-	/*If set to true, this widget move the selector using a curve guiding movement animation.
+	/*If set to true, this widget move the selector using a curve-guided movement animation.
 	Otherwise it will snap the selector to its desired location*/
 	UPROPERTY(EditDefaultsOnly, Category = "UINavigation Selector", meta = (EditCondition = "bUseSelector"))
 		bool bUseMovementCurve = false;
@@ -213,9 +216,11 @@ public:
 		FLinearColor TextNavigatedColor = FColor::Green;
 
 
+
 	/*********************************************************************************/
 
 	
+
 	/**
 	*	The widget's construct event
 	*/
@@ -229,7 +234,7 @@ public:
 	*	Appends a new array of FButtonNavigations to the already existing navigation graph with the given dimension
 	*	Used for vertical grids.
 	*
-	*	@param	Dimension  The amount of buttons in this vertical grid (If set to -1 will match number of UINavButtons)
+	*	@param	Dimension  The amount of buttons in this vertical grid (If set to -1 will match number of UIUINavButtons)
 	*	@param	EdgeNavigation  The intended navigation at each of the four edges of the button grid
 	*	@param  bWrap  Indicates whether navigation wraps around the grid
 	*	@param	StartingButtonIndex The index of the button where the grid starts
@@ -241,7 +246,7 @@ public:
 	*	Appends a new array of FButtonNavigations to the already existing navigation graph with the given dimension
 	*	Used for horizontal grids.
 	*
-	*	@param	Dimension  The amount of buttons in this vertical grid (If set to -1 will match number of UINavButtons)
+	*	@param	Dimension  The amount of buttons in this vertical grid (If set to -1 will match number of UIUINavButtons)
 	*	@param	EdgeNavigation  The intended navigation at each of the four edges of the button grid
 	*	@param  bWrap  Indicates whether navigation wraps around the grid
 	*/
@@ -318,6 +323,14 @@ public:
 	*	@param Index The button's index in the Button's array
 	*/
 	void SwitchButtonStyle(int Index);
+
+	/**
+	*	Allows or forbids the player from using UINav Input
+	*
+	*	@param bAllow  Whether navigation should be allowed
+	*/
+	UFUNCTION(BlueprintCallable, Category = "UINavigation")
+		void SetAllowNavigation(bool bAllow);
 
 	/**
 	*	Changes the selector's scale to the scale given

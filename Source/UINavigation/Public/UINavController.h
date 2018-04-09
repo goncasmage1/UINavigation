@@ -26,7 +26,7 @@ enum class EInputDirection : uint8
 };
 
 /**
- * 
+ * This class contains the logic for input-related actions with UINavWidgets
  */
 UCLASS()
 class UINAVIGATION_API AUINavController : public APlayerController
