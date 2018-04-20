@@ -230,6 +230,8 @@ public:
 	*/
 	virtual void NativeTick(const FGeometry & MyGeometry, float DeltaTime) override;
 
+	virtual FReply NativeOnMouseMove(const FGeometry & InGeometry, const FPointerEvent & InMouseEvent);
+
 	/**
 	*	Appends a new array of FButtonNavigations to the already existing navigation graph with the given dimension
 	*	Used for vertical grids.

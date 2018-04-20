@@ -4,27 +4,29 @@ UINavigation is a UE4 plugin that allows you to easily setup Navigation within U
 
 ## Documentation
 
-![Documentation](/Screens/Docs_Overview.png)
+![Documentation 1](/Screens/Docs_Overview.png)
 
-![Documentation](/Screens/Docs_1.png)
+![Documentation 2](/Screens/Docs_1.png)
 
-![Documentation](/Screens/Docs_2.png)
+![Documentation 3](/Screens/Docs_2.png)
 
-![Documentation](/Screens/Docs_3.png)
+![Documentation 4](/Screens/Docs_3.png)
+
+![Options](/Screens/DefaultsPanel.png)
 
 ## Examples
 
 Simple menus have minimal required setup:
 
-![Example 1](/Screens/SimpleMenu_Designer.png)
+![Example 1.1](/Screens/SimpleMenu_Designer.png)
 
-![Example 1](/Screens/SimpleMenu_Graph.png)
+![Example 1.2](/Screens/SimpleMenu_Graph.png)
 
 Complex menus are manageable:
 
-![Example 1](/Screens/OptionsMenu_Designer.png)
+![Example 2.1](/Screens/OptionsMenu_Designer.png)
 
-![Example 1](/Screens/OptionsMenu_Graph.png)
+![Example 2.2](/Screens/OptionsMenu_Graph.png)
 
 
 ### Attribution

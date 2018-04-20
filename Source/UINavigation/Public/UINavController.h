@@ -53,6 +53,8 @@ public:
 	*/
 	void NotifyInputTypeChange(EInputType NewInputType);
 
+	FORCEINLINE EInputType GetCurrentInputType() const { return CurrentInputType; }
+
 	/**
 	*	Changes the widget this PC will communicate with
 	*
@@ -69,7 +71,8 @@ protected:
 	UPROPERTY()
 		class UUINavWidget* ActiveWidget;
 
-	EInputType CurrentInputType = EInputType::Keyboard;
+	UPROPERTY(BlueprintReadOnly)
+		EInputType CurrentInputType = EInputType::Keyboard;
 
 	TMap<FString, TArray<FKey>> KeyMap = TMap<FString, TArray<FKey>>();
 

@@ -201,6 +201,15 @@ void UUINavWidget::NativeTick(const FGeometry & MyGeometry, float DeltaTime)
 	}
 }
 
+FReply UUINavWidget::NativeOnMouseMove(const FGeometry & InGeometry, const FPointerEvent & InMouseEvent)
+{
+	if (CurrentPC->GetCurrentInputType() != EInputType::Mouse && InMouseEvent.GetCursorDelta().Size() > 0.f)
+	{
+		CurrentPC->NotifyMouseInputType();
+	}
+	return FReply::Handled();
+}
+
 void UUINavWidget::HandleSelectorMovement(float DeltaTime)
 {
 	MovementCounter += DeltaTime;
