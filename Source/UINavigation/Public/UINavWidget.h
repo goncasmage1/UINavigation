@@ -247,10 +247,6 @@ public:
 	virtual FReply NativeOnKeyDown(const FGeometry & InGeometry, const FKeyEvent & InKeyEvent);
 	virtual FReply NativeOnKeyUp(const FGeometry & InGeometry, const FKeyEvent & InKeyEvent);
 
-	void FindActionByKey(FKey PressedKey, bool bPressed);
-
-	void NotifyPCByAction(FString Action, bool bPressed);
-
 	/**
 	*	Appends a new array of FButtonNavigations to the already existing navigation graph with the given dimension
 	*	Used for vertical grids.
@@ -454,7 +450,7 @@ public:
 	*
 	*	@param	Direction  Direction of navigation
 	*/
-	int FetchDirection(ENavigationDirection Direction);
+	int FetchDirection(ENavigationDirection Direction, int Index);
 	
 	/**
 	*	Adds this widget's parent to the viewport (if applicable)

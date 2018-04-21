@@ -44,16 +44,23 @@ public:
 		bool IsGamepadConnected();
 
 	/**
-	*	Notifies this controller that a mouse is being used
+	*	Notifies the controller that a mouse is being used
 	*/
 	void NotifyMouseInputType();
 
 	/**
-	*	Notifies this controller that a mouse is being used
+	*	Notifies the controller that the given key was just pressed
+	*
+	*	@param PressedKey The pressed key
 	*/
-	void NotifyInputTypeChange(EInputType NewInputType);
+	void NotifyKeyPressed(FKey PressedKey);
 
-	FORCEINLINE EInputType GetCurrentInputType() const { return CurrentInputType; }
+	/**
+	*	Notifies the controller that the given key was just released
+	*
+	*	@param ReleasedKey The released key
+	*/
+	void NotifyKeyReleased(FKey ReleasedKey);
 
 	/**
 	*	Changes the widget this PC will communicate with
@@ -80,14 +87,14 @@ public:
 	void StartMenuRight();
 	void MenuRightRelease();
 
-	FORCEINLINE UUINavWidget* GetActiveWidget() const { return ActiveWidget; }
+	FORCEINLINE EInputType GetCurrentInputType() const { return CurrentInputType; }
 
-	FORCEINLINE TMap<FString, TArray<FKey>> GetKeyMap() const { return KeyMap; }
+	FORCEINLINE UUINavWidget* GetActiveWidget() const { return ActiveWidget; }
 
 
 protected:
 
-	UPROPERTY()
+	UPROPERTY(BlueprintReadOnly)
 		class UUINavWidget* ActiveWidget;
 
 	UPROPERTY(BlueprintReadOnly)
@@ -131,16 +138,41 @@ protected:
 	void FetchUINavActionKeys();
 
 	/**
-	*	Returns the type of input that was just executed
+	*	Returns the input type of the given key
 	*
-	*	@return The input type that was just used
+	*	@return The input type of the given key
 	*/
-	EInputType GetLastInputType(FString ActionName);
+	EInputType GetKeyInputType(FKey Key);
 
 	/**
 	*	Verifies if a new input type is being used
+	*
+	*	@param PressedKey The pressed key
 	*/
-	void VerifyInputType(FString ActionName);
+	void VerifyInputTypeChange(FKey Key);
+
+	/**
+	*	Notifies to the active UUINavWidget that the input type changed
+	*
+	*	@param NewInputType The new input type that is being used
+	*/
+	void NotifyInputTypeChange(EInputType NewInputType);
+
+	/**
+	*	Notifies to the active UUINavWidget that the input type changed
+	*
+	*	@param Action The action's name
+	*	@param bPressed Whether the action was pressed or released
+	*/
+	void ExecuteActionByName(FString Action, bool bPressed);
+
+	/**
+	*	Traverses the key map to find the action name associated with the given key
+	*
+	*	@param PressedKey The pressed key
+	*	@param bPressed Whether the action was pressed or released
+	*/
+	void FindActionByKey(FKey PressedKey, bool bPressed);
 
 	virtual void SetupInputComponent() override;
 	virtual void Possess(APawn* InPawn) override;

@@ -22,10 +22,7 @@ void UUINavWidget::NativeConstruct()
 
 	CurrentPC = Cast<AUINavController>(GetOwningPlayer());
 
-	if (InputMode == EInputMode::UIOnly)
-	{
-		SetUserFocus(CurrentPC);
-	}
+	SetUserFocus(CurrentPC);
 
 	//check(CurrentPC != nullptr && "PlayerController isn't a UINavController");
 	if (CurrentPC == nullptr)
@@ -218,103 +215,24 @@ FReply UUINavWidget::NativeOnMouseMove(const FGeometry & InGeometry, const FPoin
 FReply UUINavWidget::NativeOnKeyDown(const FGeometry & InGeometry, const FKeyEvent & InKeyEvent)
 {
 	Super::NativeOnKeyDown(InGeometry, InKeyEvent);
+
 	if (PressedKeys.Find(InKeyEvent.GetKey()) == INDEX_NONE)
 	{
 		PressedKeys.Add(InKeyEvent.GetKey());
-		FindActionByKey(InKeyEvent.GetKey(), true);
+		CurrentPC->NotifyKeyPressed(InKeyEvent.GetKey());
 	}
+
 	return FReply::Handled();
 }
 
 FReply UUINavWidget::NativeOnKeyUp(const FGeometry & InGeometry, const FKeyEvent & InKeyEvent)
 {
 	Super::NativeOnKeyUp(InGeometry, InKeyEvent);
+
 	PressedKeys.Remove(InKeyEvent.GetKey());
-	FindActionByKey(InKeyEvent.GetKey(), false);
+	CurrentPC->NotifyKeyReleased(InKeyEvent.GetKey());
+
 	return FReply::Handled();
-}
-
-void UUINavWidget::FindActionByKey(FKey PressedKey, bool bPressed)
-{
-	TArray<FString> ActionNames;
-	TMap<FString, TArray<FKey>> KeyMap = CurrentPC->GetKeyMap();
-	KeyMap.GetKeys(ActionNames);
-
-	for (FString Action : ActionNames)
-	{
-		TArray<FKey> Keys = KeyMap[Action];
-		for (FKey Key : Keys)
-		{
-			if (Key == PressedKey)
-			{
-				GEngine->AddOnScreenDebugMessage(-1, 4.f, FColor::Red, TEXT("Notify PC"));
-				NotifyPCByAction(Action, bPressed);
-				return;
-			}
-		}
-	}
-}
-
-void UUINavWidget::NotifyPCByAction(FString Action, bool bPressed)
-{
-	if (Action.Equals("MenuUp"))
-	{
-		if (bPressed)
-		{
-			CurrentPC->StartMenuUp();
-		}
-		else
-		{
-			CurrentPC->MenuUpRelease();
-		}
-	}
-	else if (Action.Equals("MenuDown"))
-	{
-		if (bPressed)
-		{
-			CurrentPC->StartMenuDown();
-		}
-		else
-		{
-			CurrentPC->MenuDownRelease();
-		}
-	}
-	else if (Action.Equals("MenuLeft"))
-	{
-		if (bPressed)
-		{
-			CurrentPC->StartMenuLeft();
-		}
-		else
-		{
-			CurrentPC->MenuLeftRelease();
-		}
-	}
-	else if (Action.Equals("MenuRight"))
-	{
-		if (bPressed)
-		{
-			CurrentPC->StartMenuRight();
-		}
-		else
-		{
-			CurrentPC->MenuRightRelease();
-		}
-	}
-	else if (Action.Equals("MenuSelect"))
-	{
-		if (bPressed)
-		{
-			CurrentPC->MenuSelect();
-		}
-	}
-	else if (Action.Equals("MenuReturn"))
-	{
-		if (bPressed)
-		{
-			CurrentPC->MenuReturn();
-		}
-	}
 }
 
 void UUINavWidget::HandleSelectorMovement(float DeltaTime)
@@ -813,37 +731,37 @@ UWidget* UUINavWidget::GoToWidget(TSubclassOf<UUINavWidget> NewWidgetClass, bool
 
 void UUINavWidget::MenuNavigate(ENavigationDirection Direction)
 {
-	int LocalIndex = FetchDirection(Direction);
-	if (LocalIndex == -1) return;
+	int NewIndex = FetchDirection(Direction, ButtonIndex);
+	if (NewIndex == -1) return;
 
 	//Check if the button is visible, if not, skip to next button
-	while (UINavButtons[LocalIndex]->Visibility == ESlateVisibility::Collapsed ||
-		UINavButtons[LocalIndex]->Visibility == ESlateVisibility::Hidden ||
-		!UINavButtons[ButtonIndex]->bIsEnabled)
+	while (UINavButtons[NewIndex]->Visibility == ESlateVisibility::Collapsed ||
+		UINavButtons[NewIndex]->Visibility == ESlateVisibility::Hidden ||
+		!UINavButtons[NewIndex]->bIsEnabled)
 	{
-		LocalIndex = FetchDirection(Direction);
+		NewIndex = FetchDirection(Direction, NewIndex);
 	}
 
-	NavigateTo(LocalIndex);
+	NavigateTo(NewIndex);
 }
 
-int UUINavWidget::FetchDirection(ENavigationDirection Direction)
+int UUINavWidget::FetchDirection(ENavigationDirection Direction, int Index)
 {
 	int LocalIndex = -1;
 
 	switch (Direction)
 	{
 		case ENavigationDirection::Nav_UP:
-			LocalIndex = ButtonNavigations[ButtonIndex].UpButton;
+			LocalIndex = ButtonNavigations[Index].UpButton;
 			break;
 		case ENavigationDirection::Nav_DOWN:
-			LocalIndex = ButtonNavigations[ButtonIndex].DownButton;
+			LocalIndex = ButtonNavigations[Index].DownButton;
 			break;
 		case ENavigationDirection::Nav_LEFT:
-			LocalIndex = ButtonNavigations[ButtonIndex].LeftButton;
+			LocalIndex = ButtonNavigations[Index].LeftButton;
 			break;
 		case ENavigationDirection::Nav_RIGHT:
-			LocalIndex = ButtonNavigations[ButtonIndex].RightButton;
+			LocalIndex = ButtonNavigations[Index].RightButton;
 			break;
 		default:
 			break;
