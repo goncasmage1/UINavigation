@@ -63,7 +63,26 @@ public:
 	UFUNCTION(BlueprintCallable)
 		void SetActiveWidget(class UUINavWidget* NewWidget);
 
+	void MenuUp();
+	void MenuDown();
+	void MenuLeft();
+	void MenuRight();
+	void MenuSelect();
+	void MenuReturn();
+
+	void MenuUpRelease();
+	void MenuDownRelease();
+	void MenuLeftRelease();
+
+	void StartMenuUp();
+	void StartMenuDown();
+	void StartMenuLeft();
+	void StartMenuRight();
+	void MenuRightRelease();
+
 	FORCEINLINE UUINavWidget* GetActiveWidget() const { return ActiveWidget; }
+
+	FORCEINLINE TMap<FString, TArray<FKey>> GetKeyMap() const { return KeyMap; }
 
 
 protected:
@@ -125,23 +144,5 @@ protected:
 
 	virtual void SetupInputComponent() override;
 	virtual void Possess(APawn* InPawn) override;
-
-	void MenuUp();
-	void MenuDown();
-	void MenuLeft();
-	void MenuRight();
-	void MenuSelect();
-	void MenuReturn();
-
-	void MenuUpRelease();
-	void MenuDownRelease();
-	void MenuLeftRelease();
-	void MenuRightRelease();
-
-	void StartMenuUp();
-	void StartMenuDown();
-	void StartMenuLeft();
-	void StartMenuRight();
-	
 	
 };

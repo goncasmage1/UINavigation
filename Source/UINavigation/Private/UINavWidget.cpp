@@ -18,9 +18,14 @@ void UUINavWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	bIsFocusable = false;
+	bIsFocusable = true;
 
 	CurrentPC = Cast<AUINavController>(GetOwningPlayer());
+
+	if (InputMode == EInputMode::UIOnly)
+	{
+		SetUserFocus(CurrentPC);
+	}
 
 	//check(CurrentPC != nullptr && "PlayerController isn't a UINavController");
 	if (CurrentPC == nullptr)
@@ -208,6 +213,108 @@ FReply UUINavWidget::NativeOnMouseMove(const FGeometry & InGeometry, const FPoin
 		CurrentPC->NotifyMouseInputType();
 	}
 	return FReply::Handled();
+}
+
+FReply UUINavWidget::NativeOnKeyDown(const FGeometry & InGeometry, const FKeyEvent & InKeyEvent)
+{
+	Super::NativeOnKeyDown(InGeometry, InKeyEvent);
+	if (PressedKeys.Find(InKeyEvent.GetKey()) == INDEX_NONE)
+	{
+		PressedKeys.Add(InKeyEvent.GetKey());
+		FindActionByKey(InKeyEvent.GetKey(), true);
+	}
+	return FReply::Handled();
+}
+
+FReply UUINavWidget::NativeOnKeyUp(const FGeometry & InGeometry, const FKeyEvent & InKeyEvent)
+{
+	Super::NativeOnKeyUp(InGeometry, InKeyEvent);
+	PressedKeys.Remove(InKeyEvent.GetKey());
+	FindActionByKey(InKeyEvent.GetKey(), false);
+	return FReply::Handled();
+}
+
+void UUINavWidget::FindActionByKey(FKey PressedKey, bool bPressed)
+{
+	TArray<FString> ActionNames;
+	TMap<FString, TArray<FKey>> KeyMap = CurrentPC->GetKeyMap();
+	KeyMap.GetKeys(ActionNames);
+
+	for (FString Action : ActionNames)
+	{
+		TArray<FKey> Keys = KeyMap[Action];
+		for (FKey Key : Keys)
+		{
+			if (Key == PressedKey)
+			{
+				GEngine->AddOnScreenDebugMessage(-1, 4.f, FColor::Red, TEXT("Notify PC"));
+				NotifyPCByAction(Action, bPressed);
+				return;
+			}
+		}
+	}
+}
+
+void UUINavWidget::NotifyPCByAction(FString Action, bool bPressed)
+{
+	if (Action.Equals("MenuUp"))
+	{
+		if (bPressed)
+		{
+			CurrentPC->StartMenuUp();
+		}
+		else
+		{
+			CurrentPC->MenuUpRelease();
+		}
+	}
+	else if (Action.Equals("MenuDown"))
+	{
+		if (bPressed)
+		{
+			CurrentPC->StartMenuDown();
+		}
+		else
+		{
+			CurrentPC->MenuDownRelease();
+		}
+	}
+	else if (Action.Equals("MenuLeft"))
+	{
+		if (bPressed)
+		{
+			CurrentPC->StartMenuLeft();
+		}
+		else
+		{
+			CurrentPC->MenuLeftRelease();
+		}
+	}
+	else if (Action.Equals("MenuRight"))
+	{
+		if (bPressed)
+		{
+			CurrentPC->StartMenuRight();
+		}
+		else
+		{
+			CurrentPC->MenuRightRelease();
+		}
+	}
+	else if (Action.Equals("MenuSelect"))
+	{
+		if (bPressed)
+		{
+			CurrentPC->MenuSelect();
+		}
+	}
+	else if (Action.Equals("MenuReturn"))
+	{
+		if (bPressed)
+		{
+			CurrentPC->MenuReturn();
+		}
+	}
 }
 
 void UUINavWidget::HandleSelectorMovement(float DeltaTime)
@@ -699,6 +806,7 @@ UWidget* UUINavWidget::GoToWidget(TSubclassOf<UUINavWidget> NewWidgetClass, bool
 	NewWidget->ParentWidget = this;
 	NewWidget->ParentWidgetClass = WidgetClass;
 	NewWidget->bParentRemoved = bRemoveParent;
+	NewWidget->InputMode = InputMode;
 	NewWidget->AddToViewport();
 	return NewWidget;
 }
@@ -774,6 +882,20 @@ void UUINavWidget::ReturnToParent()
 
 		CurrentPC->SetActiveWidget(ParentWidget);
 		CurrentPC->EnableInput(CurrentPC);
+	}
+}
+
+void UUINavWidget::ChangeInputMode(EInputMode NewInputMode)
+{
+	InputMode = NewInputMode;
+	switch (InputMode)
+	{
+		case EInputMode::GameAndUI:
+			SetUserFocus(nullptr);
+			break;
+		case EInputMode::UIOnly:
+			SetUserFocus(CurrentPC);
+			break;
 	}
 }
 

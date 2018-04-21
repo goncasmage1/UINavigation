@@ -14,6 +14,13 @@
 */
 
 UENUM(BlueprintType)
+enum class EInputMode : uint8
+{
+	GameAndUI  UMETA(DisplayName = "GameAndUI"),
+	UIOnly  UMETA(DisplayName = "UIOnly")
+};
+
+UENUM(BlueprintType)
 enum class ESelectorPosition : uint8
 {
 	Position_Center UMETA(DisplayName = "Center"),
@@ -70,6 +77,8 @@ protected:
 	FVector2D SelectorOrigin;
 	FVector2D SelectorDestination;
 	FVector2D Distance;
+
+	TArray<FKey> PressedKeys;
 
 
 	/******************************************************************************/
@@ -159,6 +168,10 @@ public:
 	UPROPERTY(BlueprintReadOnly)
 		class AUINavController* CurrentPC;
 
+	//Reference to the parent widget that created this widget
+	UPROPERTY(BlueprintReadOnly, meta = (ExposeOnSpawn = true), Category = "UINavigation")
+		EInputMode InputMode;
+
 	//Widget that created this widget (if returned from a child)
 	UPROPERTY(BlueprintReadOnly, Category = "UINavigation")
 		UUINavWidget* ReturnedFromWidget;
@@ -231,6 +244,12 @@ public:
 	virtual void NativeTick(const FGeometry & MyGeometry, float DeltaTime) override;
 
 	virtual FReply NativeOnMouseMove(const FGeometry & InGeometry, const FPointerEvent & InMouseEvent);
+	virtual FReply NativeOnKeyDown(const FGeometry & InGeometry, const FKeyEvent & InKeyEvent);
+	virtual FReply NativeOnKeyUp(const FGeometry & InGeometry, const FKeyEvent & InKeyEvent);
+
+	void FindActionByKey(FKey PressedKey, bool bPressed);
+
+	void NotifyPCByAction(FString Action, bool bPressed);
 
 	/**
 	*	Appends a new array of FButtonNavigations to the already existing navigation graph with the given dimension
@@ -442,6 +461,14 @@ public:
 	*	and removes this widget from viewport
 	*/
 	void ReturnToParent();
+
+	/**
+	*	Notifies this widget of a change of input mode
+	*
+	*	@param	NewInputMode  The new input mode
+	*/
+	UFUNCTION(BlueprintCallable, Category = "UINavigation")
+		void ChangeInputMode(EInputMode NewInputMode);
 
 	/**
 	*	Adds given widget to screen (strongly recomended over manual alternative)
