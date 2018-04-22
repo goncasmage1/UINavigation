@@ -18,11 +18,30 @@ void UUINavWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 
+	//If widget was already setup, apply only certain steps
+	if (bCompletedSetup)
+	{
+		if (bUseTextColor) ChangeTextColorToDefault();
+
+		//If this widget doesn't need to create the selector, notify ReadyForSetup
+		if (!bUseSelector)
+		{
+			UINavSetup();
+			return;
+		}
+
+		bShouldTick = true;
+		WaitForTick = 0;
+
+		PressedKeys.Empty();
+
+		if (bUseSelector) SetupSelector();
+		return;
+	}
+
 	bIsFocusable = true;
 
-	CurrentPC = Cast<AUINavController>(GetOwningPlayer());
-
-	SetUserFocus(CurrentPC);
+	if (CurrentPC == nullptr) CurrentPC = Cast<AUINavController>(GetOwningPlayer());
 
 	//check(CurrentPC != nullptr && "PlayerController isn't a UINavController");
 	if (CurrentPC == nullptr)
@@ -44,6 +63,8 @@ void UUINavWidget::NativeConstruct()
 
 	FetchButtonsInHierarchy();
 	ReadyForSetup();
+
+	bCompletedSetup = true;
 
 	//check(UINavButtons.Num() == ButtonNavigations.Num() && "Dimension of UIUINavButtons and ButtonNavigations array is not the same.");
 	if (UINavButtons.Num() != ButtonNavigations.Num())
@@ -193,13 +214,12 @@ void UUINavWidget::UINavSetup()
 		{
 			CurrentPC = ParentWidget->CurrentPC;
 			ParentWidget->RemoveFromParent();
-			ParentWidget->Destruct();
 		}
 	}
 	//If this widget was added through a child widget, remove it from viewport
 	else if (ReturnedFromWidget != nullptr)
 	{
-		CurrentPC = ReturnedFromWidget->CurrentPC;
+		//CurrentPC = ReturnedFromWidget->CurrentPC;
 		if (ReturnedFromWidget->IsInViewport())
 		{
 			ReturnedFromWidget->RemoveFromParent();
@@ -217,6 +237,8 @@ void UUINavWidget::UINavSetup()
 		TheSelector->SetVisibility(ESlateVisibility::HitTestInvisible);
 	}
 
+	SetUserFocus(CurrentPC);
+
 	OnNavigate(-1, ButtonIndex);
 	NavigateTo(ButtonIndex);
 }
@@ -224,6 +246,8 @@ void UUINavWidget::UINavSetup()
 void UUINavWidget::NativeTick(const FGeometry & MyGeometry, float DeltaTime)
 {
 	Super::NativeTick(MyGeometry, DeltaTime);
+
+	if (!bUseSelector) return;
 
 	if (bMovingSelector)
 	{
@@ -682,7 +706,6 @@ void UUINavWidget::ReturnToParent()
 		if (bAllowRemoveIfRoot)
 		{
 			RemoveFromParent();
-			Destruct();
 		}
 		return;
 	}
@@ -692,14 +715,12 @@ void UUINavWidget::ReturnToParent()
 	{
 		CurrentPC->DisableInput(CurrentPC);
 
-		ParentWidget = CreateWidget<UUINavWidget>(CurrentPC, ParentWidgetClass);
 		ParentWidget->ReturnedFromWidget = this;
 		ParentWidget->AddToViewport();
 	}
 	else
 	{
 		RemoveFromParent();
-		Destruct();
 
 		CurrentPC->SetActiveWidget(ParentWidget);
 		CurrentPC->EnableInput(CurrentPC);

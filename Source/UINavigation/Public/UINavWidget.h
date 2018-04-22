@@ -61,6 +61,8 @@ class UINAVIGATION_API UUINavWidget : public UUserWidget
 
 protected:
 
+	bool bCompletedSetup = false;
+
 	bool bShouldTick = true;
 
 	bool bMovingSelector = false;
