@@ -723,6 +723,7 @@ void UUINavWidget::ReturnToParent()
 		RemoveFromParent();
 
 		CurrentPC->SetActiveWidget(ParentWidget);
+		ParentWidget->SetUserFocus(CurrentPC);
 		CurrentPC->EnableInput(CurrentPC);
 	}
 }
