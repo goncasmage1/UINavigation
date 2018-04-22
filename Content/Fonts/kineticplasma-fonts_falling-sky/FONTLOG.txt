@@ -1,0 +1,15 @@
+﻿Falling Sky FontLog;
+
+Forked from Source Sans Pro version on July 1, 2015.
+
+Summary of Changes:
+
+New Name; Falling Sky, New and modified characters, New weights and styles.
+
+Detailed Change list:
+
+Modified Dollar Sign, new apostrophe and quotation marks, tweaked number 5, new serifless number 1, tweaked uppercase A, new alternate uppercase G, tweaks to accented uppercase A variants within Latin Extended range, tweaked double s, added uppercase and lower case IJ digraphs, added Russian Ruble sign, added Telephone sign, New Outline variants, New Widths and Matching Italics.
+
+Updated on August 2, 2015 with 5 new Weights and 5 matching italics added, plus smaller file sizes for all weights without removing any characters.
+
+Modifications by Cannot Into Space Fonts (cannotintospacefonts@gmail.com)

@@ -646,9 +646,9 @@ void UUINavWidget::OnNavigate_Implementation(int From, int To)
 
 }
 
-void UUINavWidget::OnReturnToParent_Implementation()
+void UUINavWidget::OnReturn_Implementation()
 {
-
+	ReturnToParent();
 }
 
 void UUINavWidget::HoverEvent(int Index)
@@ -776,14 +776,12 @@ void UUINavWidget::ReturnToParent()
 	{
 		if (bAllowRemoveIfRoot)
 		{
-			OnReturnToParent();
 			RemoveFromParent();
 			Destruct();
 		}
 		return;
 	}
 
-	OnReturnToParent();
 	//If parent was removed, add it to viewport
 	if (bParentRemoved)
 	{
@@ -900,7 +898,7 @@ void UUINavWidget::MenuSelect()
 void UUINavWidget::MenuReturn()
 {
 	if (!bAllowNavigation) return;
-	ReturnToParent();
+	OnReturn();
 }
 
 

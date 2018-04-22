@@ -198,7 +198,7 @@ public:
 		int FirstButtonIndex = 0;
 
 	/*If set to true, ButtonIndex will NOT be determined by the UINavButton's position in the
-	hierarquy and remain the same, but rather be specified in the Designer Tab.*/
+	hierarquy, but rather be specified in the Designer Tab.*/
 	UPROPERTY(EditDefaultsOnly, Category = "UINavigation")
 		bool bOverrideButtonIndices = false;
 
@@ -396,8 +396,8 @@ public:
 	*	Called when ReturnToParent is called (i.e. the player wants to exit the menu)
 	*/
 	UFUNCTION(BlueprintNativeEvent, Category = "UINavigation")
-		void OnReturnToParent();
-	virtual void OnReturnToParent_Implementation();
+		void OnReturn();
+	virtual void OnReturn_Implementation();
 
 	/**
 	*	Button Hover event
@@ -456,7 +456,8 @@ public:
 	*	Adds this widget's parent to the viewport (if applicable)
 	*	and removes this widget from viewport
 	*/
-	void ReturnToParent();
+	UFUNCTION(BlueprintCallable, Category = "UINavigation")
+		void ReturnToParent();
 
 	/**
 	*	Notifies this widget of a change of input mode

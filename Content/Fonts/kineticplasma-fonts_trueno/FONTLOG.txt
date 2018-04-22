@@ -1,0 +1,7 @@
+Changelog:
+
+New name: "Trueno", New uppercase J, new 7, new weights including Italics and Outline variants for Bold, Extra Bold and Black weights.
+
+Update: Version 3.001b; Minor fixes in TTF Names section, UltraBlack weights added, and Improvements which reduce space taken up by all weights to some degree.
+
+Changes made by by Jasper at Cannot Into Space Fonts.
