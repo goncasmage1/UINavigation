@@ -176,6 +176,7 @@ void AUINavController::NotifyInputTypeChange(EInputType NewInputType)
 {
 	GetWorldTimerManager().ClearTimer(NavChainHandle);
 
+	if (ActiveWidget == nullptr) return;
 	ActiveWidget->OnInputChanged(CurrentInputType, NewInputType);
 	CurrentInputType = NewInputType;
 }

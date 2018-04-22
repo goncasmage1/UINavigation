@@ -297,10 +297,13 @@ public:
 		void ReadyForSetup();
 
 	/**
-	*	Called when the input type changed
+	*	Navigate to the button with the specified index
+	*
+	*	@param	Index  The index of the button that was hovered upon
+	*	@param	bHoverEvent  Was this triggered by a button hover event?
 	*/
-	UFUNCTION(BlueprintImplementableEvent, Category = "UINavigation")
-		void OnInputChanged(EInputType From, EInputType TO);
+	UFUNCTION(BlueprintCallable, Category = "UINavigation")
+		void NavigateTo(int Index, bool bHoverEvent = false);
 
 	/**
 	*	Changes the selector's location to that of the button with the given index in the Button's array
@@ -309,13 +312,6 @@ public:
 	*/
 	UFUNCTION(BlueprintCallable, Category = "UINavigation")
 		void UpdateSelectorLocation(int Index);
-
-	/**
-	*	Changes the new text and previous text's colors to the desired colors
-	*
-	*	@param	Index  The new button's index in the Button's array
-	*/
-	void UpdateTextColor(int Index);
 
 	/**
 	*	Changes the color of the text with the specified index to the specified color
@@ -332,7 +328,15 @@ public:
 	*	@param	Index  The new button's index in the Button's array
 	*	@param  bHovered  Whether the function was called due to a button hover
 	*/
-	void UpdateButtonsStates(int Index, bool bHovered);
+	UFUNCTION(BlueprintCallable, Category = "UINavigation")
+		void UpdateButtonsStates(int Index, bool bHovered);
+
+	/**
+	*	Changes the new text and previous text's colors to the desired colors
+	*
+	*	@param	Index  The new button's index in the Button's array
+	*/
+	void UpdateTextColor(int Index);
 
 	/**
 	*	Switches the button with the given index's style between normal and hovered
@@ -340,22 +344,6 @@ public:
 	*	@param Index The button's index in the Button's array
 	*/
 	void SwitchButtonStyle(int Index);
-
-	/**
-	*	Allows or forbids the player from using UINav Input
-	*
-	*	@param bAllow  Whether navigation should be allowed
-	*/
-	UFUNCTION(BlueprintCallable, Category = "UINavigation")
-		void SetAllowNavigation(bool bAllow);
-
-	/**
-	*	Changes the selector's scale to the scale given
-	*
-	*	@param	NewScale  The selector's new scale
-	*/
-	UFUNCTION(BlueprintCallable, Category = "UINavigation")
-		void SetSelectorScale(FVector2D NewScale);
 
 	/**
 	*	Sets this widget's selector
@@ -366,21 +354,20 @@ public:
 		void SetSelector(class UUserWidget* NewSelector);
 
 	/**
+	*	Changes the selector's scale to the scale given
+	*
+	*	@param	NewScale  The selector's new scale
+	*/
+	UFUNCTION(BlueprintCallable, Category = "UINavigation")
+		void SetSelectorScale(FVector2D NewScale);
+
+	/**
 	*	Changes the selector's visibility
 	*
 	*	@param	bVisible Whether the selector will be visible
 	*/
 	UFUNCTION(BlueprintCallable, Category = "UINavigation")
 		void SetSelectorVisibility(bool bVisible);
-
-	/**
-	*	Navigate to the button with the specified index
-	*
-	*	@param	Index  The index of the button that was hovered upon
-	*	@param	bHoverEvent  Was this triggered by a button hover event?
-	*/
-	UFUNCTION(BlueprintCallable, Category = "UINavigation")
-		void NavigateTo(int Index, bool bHoverEvent = false);
 
 	/**
 	*	Called when the button with the specified index was navigated upon
@@ -393,43 +380,6 @@ public:
 	virtual void OnNavigate_Implementation(int From, int To);
 
 	/**
-	*	Called when ReturnToParent is called (i.e. the player wants to exit the menu)
-	*/
-	UFUNCTION(BlueprintNativeEvent, Category = "UINavigation")
-		void OnReturn();
-	virtual void OnReturn_Implementation();
-
-	/**
-	*	Button Hover event
-	*
-	*	@param	Index  The index of the button that was hovered upon
-	*/
-	UFUNCTION(Category = "UINavigation")
-		void HoverEvent(int Index);
-	/**
-	*	Button UnHover event
-	*
-	*	@param	Index  The index of the button that was unhovered upon
-	*/
-	UFUNCTION(Category = "UINavigation")
-		void UnhoverEvent(int Index);
-	/**
-	*	Button Click event
-	*
-	*	@param	Index  The index of the button that was clicked upon
-	*/
-	UFUNCTION(Category = "UINavigation")
-		void ClickEvent(int Index);
-
-	/**
-	*	Button Release event
-	*
-	*	@param	Index  The index of the button that was released
-	*/
-	UFUNCTION(Category = "UINavigation")
-		void ReleaseEvent(int Index);
-
-	/**
 	*	Notifies that a button was selected, and indicates its index
 	*
 	*	@param	Index  The index of the button that was selected
@@ -439,33 +389,47 @@ public:
 	virtual void OnSelect_Implementation(int Index);
 
 	/**
+	*	Called when ReturnToParent is called (i.e. the player wants to exit the menu)
+	*/
+	UFUNCTION(BlueprintNativeEvent, Category = "UINavigation")
+		void OnReturn();
+	virtual void OnReturn_Implementation();
+
+	/**
+	*	Called when the input type changed
+	*/
+	UFUNCTION(BlueprintImplementableEvent, Category = "UINavigation")
+		void OnInputChanged(EInputType From, EInputType TO);
+
+	/**
 	*	Handles navigation according to direction
 	*
 	*	@param	Direction  Direction of navigation
 	*/
 	UFUNCTION(BlueprintCallable, Category = "UINavigation")
 	virtual void MenuNavigate(ENavigationDirection Direction);
+
 	/**
 	*	Returns the index of the next button to navigate to
 	*
 	*	@param	Direction  Direction of navigation
 	*/
 	int FetchDirection(ENavigationDirection Direction, int Index);
-	
-	/**
-	*	Adds this widget's parent to the viewport (if applicable)
-	*	and removes this widget from viewport
-	*/
-	UFUNCTION(BlueprintCallable, Category = "UINavigation")
-		void ReturnToParent();
 
 	/**
 	*	Notifies this widget of a change of input mode
 	*
 	*	@param	NewInputMode  The new input mode
 	*/
+	void ChangeInputMode(EInputMode NewInputMode);
+
+	/**
+	*	Allows or forbids the player from using UINav Input
+	*
+	*	@param bAllow  Whether navigation should be allowed
+	*/
 	UFUNCTION(BlueprintCallable, Category = "UINavigation")
-		void ChangeInputMode(EInputMode NewInputMode);
+		void SetAllowNavigation(bool bAllow);
 
 	/**
 	*	Adds given widget to screen (strongly recomended over manual alternative)
@@ -474,6 +438,13 @@ public:
 	*/
 	UFUNCTION(BlueprintCallable, Category = "UINavigation")
 		UWidget* GoToWidget(TSubclassOf<UUINavWidget> NewWidgetClass, bool bRemoveParent);
+	
+	/**
+	*	Adds this widget's parent to the viewport (if applicable)
+	*	and removes this widget from viewport
+	*/
+	UFUNCTION(BlueprintCallable, Category = "UINavigation")
+		void ReturnToParent();
 
 	/**
 	*	Returns the UINavButton with the specified index
@@ -500,6 +471,35 @@ public:
 	*/
 	UFUNCTION(BlueprintCallable, Category = "UINavigation")
 		UUINavOptionBox* GetUINavOptionBoxAtIndex(int Index);
+
+	/**
+	*	Button Hover event
+	*
+	*	@param	Index  The index of the button that was hovered upon
+	*/
+	UFUNCTION(Category = "UINavigation")
+		void HoverEvent(int Index);
+	/**
+	*	Button UnHover event
+	*
+	*	@param	Index  The index of the button that was unhovered upon
+	*/
+	UFUNCTION(Category = "UINavigation")
+		void UnhoverEvent(int Index);
+	/**
+	*	Button Click event
+	*
+	*	@param	Index  The index of the button that was clicked upon
+	*/
+	UFUNCTION(Category = "UINavigation")
+		void ClickEvent(int Index);
+	/**
+	*	Button Release event
+	*
+	*	@param	Index  The index of the button that was released
+	*/
+	UFUNCTION(Category = "UINavigation")
+		void ReleaseEvent(int Index);
 
 
 	UFUNCTION(BlueprintCallable, Category = "UINavigation")

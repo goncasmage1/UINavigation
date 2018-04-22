@@ -181,6 +181,46 @@ void UUINavWidget::SetupSelector()
 	TheSelector->SetRenderTranslation(-InitialOffset - FVector2D(0.f, -1000.f));
 }
 
+void UUINavWidget::UINavSetup()
+{
+	/*
+	If this widget was added through a parent widget and should remove it from the viewport,
+	remove that widget from viewport
+	*/
+	if (ParentWidget != nullptr && ParentWidget->IsInViewport())
+	{
+		if (bParentRemoved)
+		{
+			CurrentPC = ParentWidget->CurrentPC;
+			ParentWidget->RemoveFromParent();
+			ParentWidget->Destruct();
+		}
+	}
+	//If this widget was added through a child widget, remove it from viewport
+	else if (ReturnedFromWidget != nullptr)
+	{
+		CurrentPC = ReturnedFromWidget->CurrentPC;
+		if (ReturnedFromWidget->IsInViewport())
+		{
+			ReturnedFromWidget->RemoveFromParent();
+			ReturnedFromWidget->Destruct();
+		}
+		ReturnedFromWidget = nullptr;
+	}
+
+	CurrentPC->SetActiveWidget(this);
+	CurrentPC->EnableInput(CurrentPC);
+
+	if (bUseSelector)
+	{
+		if (TheSelector == nullptr) return;
+		TheSelector->SetVisibility(ESlateVisibility::HitTestInvisible);
+	}
+
+	OnNavigate(-1, ButtonIndex);
+	NavigateTo(ButtonIndex);
+}
+
 void UUINavWidget::NativeTick(const FGeometry & MyGeometry, float DeltaTime)
 {
 	Super::NativeTick(MyGeometry, DeltaTime);
@@ -426,46 +466,6 @@ void UUINavWidget::AppendGridNavigation(int DimensionX, int DimensionY, FButtonN
 	ButtonNavigations.Append(ButtonsNav);
 }
 
-void UUINavWidget::UINavSetup()
-{
-	/*
-	If this widget was added through a parent widget and should remove it from the viewport,
-	remove that widget from viewport
-	*/
-	if (ParentWidget != nullptr && ParentWidget->IsInViewport())
-	{
-		if (bParentRemoved)
-		{
-			CurrentPC = ParentWidget->CurrentPC;
-			ParentWidget->RemoveFromParent();
-			ParentWidget->Destruct();
-		}
-	}
-	//If this widget was added through a child widget, remove it from viewport
-	else if (ReturnedFromWidget != nullptr)
-	{
-		CurrentPC = ReturnedFromWidget->CurrentPC;
-		if (ReturnedFromWidget->IsInViewport())
-		{
-			ReturnedFromWidget->RemoveFromParent();
-			ReturnedFromWidget->Destruct();
-		}
-		ReturnedFromWidget = nullptr;
-	}
-
-	CurrentPC->SetActiveWidget(this);
-	CurrentPC->EnableInput(CurrentPC);
-
-	if (bUseSelector)
-	{
-		if (TheSelector == nullptr) return;
-		TheSelector->SetVisibility(ESlateVisibility::HitTestInvisible);
-	}
-
-	OnNavigate(-1, ButtonIndex);
-	NavigateTo(ButtonIndex);
-}
-
 void UUINavWidget::UpdateSelectorLocation(int Index)
 {
 	if (TheSelector == nullptr) return;
@@ -572,12 +572,6 @@ void UUINavWidget::SetAllowNavigation(bool bAllow)
 	bAllowNavigation = bAllow;
 }
 
-void UUINavWidget::SetSelectorScale(FVector2D NewScale)
-{
-	if (TheSelector == nullptr) return;
-	TheSelector->SetRenderScale(NewScale);
-}
-
 void UUINavWidget::SetSelector(UUserWidget * NewSelector)
 {
 	//check(TheSelector != nullptr && "Received invalid Selector");
@@ -586,6 +580,12 @@ void UUINavWidget::SetSelector(UUserWidget * NewSelector)
 		DISPLAYERROR("Received invalid Selector");
 	}
 	TheSelector = NewSelector;
+}
+
+void UUINavWidget::SetSelectorScale(FVector2D NewScale)
+{
+	if (TheSelector == nullptr) return;
+	TheSelector->SetRenderScale(NewScale);
 }
 
 void UUINavWidget::SetSelectorVisibility(bool bVisible)
@@ -646,9 +646,151 @@ void UUINavWidget::OnNavigate_Implementation(int From, int To)
 
 }
 
+void UUINavWidget::OnSelect_Implementation(int Index)
+{
+
+}
+
 void UUINavWidget::OnReturn_Implementation()
 {
 	ReturnToParent();
+}
+
+UWidget* UUINavWidget::GoToWidget(TSubclassOf<UUINavWidget> NewWidgetClass, bool bRemoveParent)
+{
+	//check(NewWidgetClass != nullptr && "GoToWidget: No Widget Class found");
+	if (NewWidgetClass == nullptr)
+	{
+		DISPLAYERROR("GoToWidget: No Widget Class found");
+		return nullptr;
+	}
+
+	CurrentPC->DisableInput(CurrentPC);
+	UUINavWidget* NewWidget = CreateWidget<UUINavWidget>(CurrentPC, NewWidgetClass);
+	NewWidget->ParentWidget = this;
+	NewWidget->ParentWidgetClass = WidgetClass;
+	NewWidget->bParentRemoved = bRemoveParent;
+	NewWidget->InputMode = InputMode;
+	NewWidget->AddToViewport();
+	return NewWidget;
+}
+
+void UUINavWidget::ReturnToParent()
+{
+	if (ParentWidget == nullptr)
+	{
+		if (bAllowRemoveIfRoot)
+		{
+			RemoveFromParent();
+			Destruct();
+		}
+		return;
+	}
+
+	//If parent was removed, add it to viewport
+	if (bParentRemoved)
+	{
+		CurrentPC->DisableInput(CurrentPC);
+
+		ParentWidget = CreateWidget<UUINavWidget>(CurrentPC, ParentWidgetClass);
+		ParentWidget->ReturnedFromWidget = this;
+		ParentWidget->AddToViewport();
+	}
+	else
+	{
+		RemoveFromParent();
+		Destruct();
+
+		CurrentPC->SetActiveWidget(ParentWidget);
+		CurrentPC->EnableInput(CurrentPC);
+	}
+}
+
+void UUINavWidget::MenuNavigate(ENavigationDirection Direction)
+{
+	int NewIndex = FetchDirection(Direction, ButtonIndex);
+	if (NewIndex == -1) return;
+
+	//Check if the button is visible, if not, skip to next button
+	while (UINavButtons[NewIndex]->Visibility == ESlateVisibility::Collapsed ||
+		UINavButtons[NewIndex]->Visibility == ESlateVisibility::Hidden ||
+		!UINavButtons[NewIndex]->bIsEnabled)
+	{
+		NewIndex = FetchDirection(Direction, NewIndex);
+	}
+
+	NavigateTo(NewIndex);
+}
+
+int UUINavWidget::FetchDirection(ENavigationDirection Direction, int Index)
+{
+	int LocalIndex = -1;
+
+	switch (Direction)
+	{
+		case ENavigationDirection::Nav_UP:
+			LocalIndex = ButtonNavigations[Index].UpButton;
+			break;
+		case ENavigationDirection::Nav_DOWN:
+			LocalIndex = ButtonNavigations[Index].DownButton;
+			break;
+		case ENavigationDirection::Nav_LEFT:
+			LocalIndex = ButtonNavigations[Index].LeftButton;
+			break;
+		case ENavigationDirection::Nav_RIGHT:
+			LocalIndex = ButtonNavigations[Index].RightButton;
+			break;
+		default:
+			break;
+	}
+
+	return LocalIndex;
+}
+
+void UUINavWidget::ChangeInputMode(EInputMode NewInputMode)
+{
+	InputMode = NewInputMode;
+	switch (InputMode)
+	{
+		case EInputMode::GameAndUI:
+			SetUserFocus(nullptr);
+			break;
+		case EInputMode::UIOnly:
+			SetUserFocus(CurrentPC);
+			break;
+	}
+}
+
+UUINavButton * UUINavWidget::GetUINavButtonAtIndex(int Index)
+{
+	if (UINavButtons.Num() <= Index)
+	{
+		DISPLAYERROR("GetUINavButtonAtIndex was given an invalid index!");
+		return nullptr;
+	}
+	return UINavButtons[Index];
+}
+
+UUINavComponent * UUINavWidget::GetUINavComponentAtIndex(int Index)
+{
+	int ValidIndex = UINavComponentsIndices.Find(Index);
+	if (ValidIndex == INDEX_NONE) 
+	{
+		DISPLAYERROR("GetUINavComponentAtIndex: Element at given index isn't a UINavComponent");
+		return nullptr;
+	}
+	return UINavComponents[ValidIndex];
+}
+
+UUINavOptionBox * UUINavWidget::GetUINavOptionBoxAtIndex(int Index)
+{
+	int ValidIndex = OptionBoxIndices.Find(Index);
+	if (ValidIndex == INDEX_NONE)
+	{
+		DISPLAYERROR("GetUINavOptionBoxAtIndex: Element at given index isn't a UINavOptionBox");
+		return nullptr;
+	}
+	return UINavOptionBoxes[ValidIndex];
 }
 
 void UUINavWidget::HoverEvent(int Index)
@@ -703,148 +845,6 @@ void UUINavWidget::ReleaseEvent(int Index)
 			}
 		}
 	}
-}
-
-void UUINavWidget::OnSelect_Implementation(int Index)
-{
-
-}
-
-UWidget* UUINavWidget::GoToWidget(TSubclassOf<UUINavWidget> NewWidgetClass, bool bRemoveParent)
-{
-	//check(NewWidgetClass != nullptr && "GoToWidget: No Widget Class found");
-	if (NewWidgetClass == nullptr)
-	{
-		DISPLAYERROR("GoToWidget: No Widget Class found");
-		return nullptr;
-	}
-
-	CurrentPC->DisableInput(CurrentPC);
-	UUINavWidget* NewWidget = CreateWidget<UUINavWidget>(CurrentPC, NewWidgetClass);
-	NewWidget->ParentWidget = this;
-	NewWidget->ParentWidgetClass = WidgetClass;
-	NewWidget->bParentRemoved = bRemoveParent;
-	NewWidget->InputMode = InputMode;
-	NewWidget->AddToViewport();
-	return NewWidget;
-}
-
-void UUINavWidget::MenuNavigate(ENavigationDirection Direction)
-{
-	int NewIndex = FetchDirection(Direction, ButtonIndex);
-	if (NewIndex == -1) return;
-
-	//Check if the button is visible, if not, skip to next button
-	while (UINavButtons[NewIndex]->Visibility == ESlateVisibility::Collapsed ||
-		UINavButtons[NewIndex]->Visibility == ESlateVisibility::Hidden ||
-		!UINavButtons[NewIndex]->bIsEnabled)
-	{
-		NewIndex = FetchDirection(Direction, NewIndex);
-	}
-
-	NavigateTo(NewIndex);
-}
-
-int UUINavWidget::FetchDirection(ENavigationDirection Direction, int Index)
-{
-	int LocalIndex = -1;
-
-	switch (Direction)
-	{
-		case ENavigationDirection::Nav_UP:
-			LocalIndex = ButtonNavigations[Index].UpButton;
-			break;
-		case ENavigationDirection::Nav_DOWN:
-			LocalIndex = ButtonNavigations[Index].DownButton;
-			break;
-		case ENavigationDirection::Nav_LEFT:
-			LocalIndex = ButtonNavigations[Index].LeftButton;
-			break;
-		case ENavigationDirection::Nav_RIGHT:
-			LocalIndex = ButtonNavigations[Index].RightButton;
-			break;
-		default:
-			break;
-	}
-
-	return LocalIndex;
-}
-
-void UUINavWidget::ReturnToParent()
-{
-	if (ParentWidget == nullptr)
-	{
-		if (bAllowRemoveIfRoot)
-		{
-			RemoveFromParent();
-			Destruct();
-		}
-		return;
-	}
-
-	//If parent was removed, add it to viewport
-	if (bParentRemoved)
-	{
-		CurrentPC->DisableInput(CurrentPC);
-
-		ParentWidget = CreateWidget<UUINavWidget>(CurrentPC, ParentWidgetClass);
-		ParentWidget->ReturnedFromWidget = this;
-		ParentWidget->AddToViewport();
-	}
-	else
-	{
-		RemoveFromParent();
-		Destruct();
-
-		CurrentPC->SetActiveWidget(ParentWidget);
-		CurrentPC->EnableInput(CurrentPC);
-	}
-}
-
-void UUINavWidget::ChangeInputMode(EInputMode NewInputMode)
-{
-	InputMode = NewInputMode;
-	switch (InputMode)
-	{
-		case EInputMode::GameAndUI:
-			SetUserFocus(nullptr);
-			break;
-		case EInputMode::UIOnly:
-			SetUserFocus(CurrentPC);
-			break;
-	}
-}
-
-UUINavButton * UUINavWidget::GetUINavButtonAtIndex(int Index)
-{
-	if (UINavButtons.Num() <= Index)
-	{
-		DISPLAYERROR("GetUINavButtonAtIndex was given an invalid index!");
-		return nullptr;
-	}
-	return UINavButtons[Index];
-}
-
-UUINavComponent * UUINavWidget::GetUINavComponentAtIndex(int Index)
-{
-	int ValidIndex = UINavComponentsIndices.Find(Index);
-	if (ValidIndex == INDEX_NONE) 
-	{
-		DISPLAYERROR("GetUINavComponentAtIndex: Element at given index isn't a UINavComponent");
-		return nullptr;
-	}
-	return UINavComponents[ValidIndex];
-}
-
-UUINavOptionBox * UUINavWidget::GetUINavOptionBoxAtIndex(int Index)
-{
-	int ValidIndex = OptionBoxIndices.Find(Index);
-	if (ValidIndex == INDEX_NONE)
-	{
-		DISPLAYERROR("GetUINavOptionBoxAtIndex: Element at given index isn't a UINavOptionBox");
-		return nullptr;
-	}
-	return UINavOptionBoxes[ValidIndex];
 }
 
 void UUINavWidget::MenuUp()
