@@ -64,6 +64,9 @@ protected:
 	//Used to track when the selector's position should be updated
 	int WaitForTick;
 
+	//The index of the button that will be navigated to when movement is allowed
+	int HaltedIndex = -1;
+
 	float MovementCounter;
 	float MovementTime;
 
@@ -414,6 +417,15 @@ public:
 	*/
 	UFUNCTION(BlueprintCallable, Category = "UINavigation")
 	virtual void MenuNavigate(ENavigationDirection Direction);
+
+	/**
+	*	Returns the index of the button that will be navigated to according to the given direction
+	*
+	*	@param	Direction  Direction of navigation
+	*	@return int The index of the button that will be navigated to
+	*/
+	UFUNCTION(BlueprintCallable, Category = "UINavigation")
+		virtual int FindNextIndex(ENavigationDirection Direction);
 
 	/**
 	*	Returns the index of the next button to navigate to

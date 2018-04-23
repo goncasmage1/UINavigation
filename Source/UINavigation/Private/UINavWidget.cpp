@@ -283,7 +283,7 @@ void UUINavWidget::NativeTick(const FGeometry & MyGeometry, float DeltaTime)
 
 FReply UUINavWidget::NativeOnMouseMove(const FGeometry & InGeometry, const FPointerEvent & InMouseEvent)
 {
-	if (CurrentPC->GetCurrentInputType() != EInputType::Mouse && InMouseEvent.GetCursorDelta().Size() > 0.f)
+	if (CurrentPC->GetCurrentInputType() != EInputType::Mouse && InMouseEvent.GetCursorDelta().Size() > 0.000f)
 	{
 		CurrentPC->NotifyMouseInputType();
 	}
@@ -323,6 +323,11 @@ void UUINavWidget::HandleSelectorMovement(float DeltaTime)
 		bMovingSelector = false;
 		bAllowNavigation = true;
 		TheSelector->SetRenderTranslation(SelectorDestination);
+		if (HaltedIndex != -1)
+		{
+			NavigateTo(HaltedIndex);
+			HaltedIndex = -1;
+		}
 		return;
 	}
 
@@ -743,8 +748,13 @@ void UUINavWidget::ReturnToParent()
 
 void UUINavWidget::MenuNavigate(ENavigationDirection Direction)
 {
+	NavigateTo(FindNextIndex(Direction));
+}
+
+int UUINavWidget::FindNextIndex(ENavigationDirection Direction)
+{
 	int NewIndex = FetchDirection(Direction, ButtonIndex);
-	if (NewIndex == -1) return;
+	if (NewIndex == -1) return -1;
 
 	//Check if the button is visible, if not, skip to next button
 	while (UINavButtons[NewIndex]->Visibility == ESlateVisibility::Collapsed ||
@@ -753,8 +763,7 @@ void UUINavWidget::MenuNavigate(ENavigationDirection Direction)
 	{
 		NewIndex = FetchDirection(Direction, NewIndex);
 	}
-
-	NavigateTo(NewIndex);
+	return NewIndex;
 }
 
 int UUINavWidget::FetchDirection(ENavigationDirection Direction, int Index)
@@ -818,7 +827,11 @@ void UUINavWidget::HoverEvent(int Index)
 {
 	CurrentPC->NotifyMouseInputType();
 
-	if (!bAllowNavigation) return;
+	if (!bAllowNavigation)
+	{
+		HaltedIndex = Index;
+		return;
+	}
 
 	NavigateTo(Index, true);
 }
@@ -870,19 +883,31 @@ void UUINavWidget::ReleaseEvent(int Index)
 
 void UUINavWidget::MenuUp()
 {
-	if (!bAllowNavigation) return;
+	if (!bAllowNavigation)
+	{
+		HaltedIndex = FindNextIndex(ENavigationDirection::Nav_UP);
+		return;
+	}
 	MenuNavigate(ENavigationDirection::Nav_UP);
 }
 
 void UUINavWidget::MenuDown()
 {
-	if (!bAllowNavigation) return;
+	if (!bAllowNavigation)
+	{
+		HaltedIndex = FindNextIndex(ENavigationDirection::Nav_DOWN);
+		return;
+	}
 	MenuNavigate(ENavigationDirection::Nav_DOWN);
 }
 
 void UUINavWidget::MenuLeft()
 {
-	if (!bAllowNavigation) return;
+	if (!bAllowNavigation)
+	{
+		HaltedIndex = FindNextIndex(ENavigationDirection::Nav_LEFT);
+		return;
+	}
 
 	int SliderIndex = OptionBoxIndices.Find(ButtonIndex);
 	if (SliderIndex == INDEX_NONE)
@@ -897,7 +922,11 @@ void UUINavWidget::MenuLeft()
 
 void UUINavWidget::MenuRight()
 {
-	if (!bAllowNavigation) return;
+	if (!bAllowNavigation)
+	{
+		HaltedIndex = FindNextIndex(ENavigationDirection::Nav_RIGHT);
+		return;
+	}
 
 	int SliderIndex = OptionBoxIndices.Find(ButtonIndex);
 	if (SliderIndex == INDEX_NONE)
