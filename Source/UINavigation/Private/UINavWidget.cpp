@@ -18,29 +18,20 @@ void UUINavWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 
+	InitialSetup();
+}
+
+void UUINavWidget::InitialSetup()
+{
 	//If widget was already setup, apply only certain steps
 	if (bCompletedSetup)
 	{
-		if (bUseTextColor) ChangeTextColorToDefault();
-
-		//If this widget doesn't need to create the selector, notify ReadyForSetup
-		if (!bUseSelector)
-		{
-			UINavSetup();
-			return;
-		}
-
-		bShouldTick = true;
-		WaitForTick = 0;
-
-		PressedKeys.Empty();
-
-		if (bUseSelector) SetupSelector();
+		ReconfigureSetup();
 		return;
 	}
 
 	bIsFocusable = true;
-
+	WidgetClass = GetClass();
 	if (CurrentPC == nullptr) CurrentPC = Cast<AUINavController>(GetOwningPlayer());
 
 	//check(CurrentPC != nullptr && "PlayerController isn't a UINavController");
@@ -49,7 +40,6 @@ void UUINavWidget::NativeConstruct()
 		DISPLAYERROR("PlayerController isn't a UINavController");
 		return;
 	}
-	WidgetClass = GetClass();
 
 	if (bUseSelector && bUseMovementCurve)
 	{
@@ -64,8 +54,6 @@ void UUINavWidget::NativeConstruct()
 	FetchButtonsInHierarchy();
 	ReadyForSetup();
 
-	bCompletedSetup = true;
-
 	//check(UINavButtons.Num() == ButtonNavigations.Num() && "Dimension of UIUINavButtons and ButtonNavigations array is not the same.");
 	if (UINavButtons.Num() != ButtonNavigations.Num())
 	{
@@ -75,13 +63,35 @@ void UUINavWidget::NativeConstruct()
 
 	if (bUseTextColor) ChangeTextColorToDefault();
 
-	//If this widget doesn't need to create the selector, notify ReadyForSetup
+	//If this widget doesn't need to create the selector, skip to setup
 	if (!bUseSelector)
 	{
 		UINavSetup();
 		bShouldTick = false;
 		return;
 	}
+	else
+	{
+		SetupSelector();
+	}
+
+}
+
+void UUINavWidget::ReconfigureSetup()
+{
+	if (bUseTextColor) ChangeTextColorToDefault();
+
+	//If this widget doesn't need to create the selector, notify ReadyForSetup
+	if (!bUseSelector)
+	{
+		UINavSetup();
+		return;
+	}
+
+	bShouldTick = true;
+	WaitForTick = 0;
+
+	PressedKeys.Empty();
 
 	if (bUseSelector) SetupSelector();
 }
@@ -239,8 +249,12 @@ void UUINavWidget::UINavSetup()
 
 	SetUserFocus(CurrentPC);
 
+	bCompletedSetup = true;
+
 	OnNavigate(-1, ButtonIndex);
 	NavigateTo(ButtonIndex);
+
+	OnSetupCompleted();
 }
 
 void UUINavWidget::NativeTick(const FGeometry & MyGeometry, float DeltaTime)
@@ -694,7 +708,6 @@ UWidget* UUINavWidget::GoToWidget(TSubclassOf<UUINavWidget> NewWidgetClass, bool
 	NewWidget->ParentWidget = this;
 	NewWidget->ParentWidgetClass = WidgetClass;
 	NewWidget->bParentRemoved = bRemoveParent;
-	NewWidget->InputMode = InputMode;
 	NewWidget->AddToViewport();
 	return NewWidget;
 }
@@ -767,20 +780,6 @@ int UUINavWidget::FetchDirection(ENavigationDirection Direction, int Index)
 	}
 
 	return LocalIndex;
-}
-
-void UUINavWidget::ChangeInputMode(EInputMode NewInputMode)
-{
-	InputMode = NewInputMode;
-	switch (InputMode)
-	{
-		case EInputMode::GameAndUI:
-			SetUserFocus(nullptr);
-			break;
-		case EInputMode::UIOnly:
-			SetUserFocus(CurrentPC);
-			break;
-	}
 }
 
 UUINavButton * UUINavWidget::GetUINavButtonAtIndex(int Index)

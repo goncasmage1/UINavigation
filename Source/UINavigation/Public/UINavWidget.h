@@ -14,13 +14,6 @@
 */
 
 UENUM(BlueprintType)
-enum class EInputMode : uint8
-{
-	GameAndUI  UMETA(DisplayName = "GameAndUI"),
-	UIOnly  UMETA(DisplayName = "UIOnly")
-};
-
-UENUM(BlueprintType)
 enum class ESelectorPosition : uint8
 {
 	Position_Center UMETA(DisplayName = "Center"),
@@ -85,16 +78,15 @@ protected:
 
 	/******************************************************************************/
 
+	/**
+	*	Configures the blueprint on Construct event
+	*/
+	void InitialSetup();
 
 	/**
-	*	Returns the position of the UINavButton with the specified index
+	*	Reconfigures the blueprint if it has already been setup
 	*/
-	FVector2D GetButtonLocation(int Index);
-
-	/**
-	*	Configures the selector on event Construct
-	*/
-	void SetupSelector();
+	void ReconfigureSetup();
 
 	/**
 	*	Sets up the UIUINavButtons and does error checking
@@ -107,9 +99,19 @@ protected:
 	void TraverseHierarquy();
 
 	/**
+	*	Configures the selector on event Construct
+	*/
+	void SetupSelector();
+
+	/**
 	*	Sets all the UTextBlocks to the default color
 	*/
 	void ChangeTextColorToDefault();
+
+	/**
+	*	Returns the position of the UINavButton with the specified index
+	*/
+	FVector2D GetButtonLocation(int Index);
 
 	void BeginSelectorMovement(int Index);
 	void HandleSelectorMovement(float DeltaTime);
@@ -118,7 +120,7 @@ protected:
 public:
 
 	//The UserWidget object that will move along the Widget
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, OptionalWidget = true), Category = "UINavigation")
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget, OptionalWidget = true), Category = "UINavigation")
 		UUserWidget* TheSelector;
 
 	//Indicates the navigation possibilities of each button
@@ -169,10 +171,6 @@ public:
 	//Current player controller
 	UPROPERTY(BlueprintReadOnly)
 		class AUINavController* CurrentPC;
-
-	//Reference to the parent widget that created this widget
-	UPROPERTY(BlueprintReadOnly, meta = (ExposeOnSpawn = true), Category = "UINavigation")
-		EInputMode InputMode;
 
 	//Widget that created this widget (if returned from a child)
 	UPROPERTY(BlueprintReadOnly, Category = "UINavigation")
@@ -404,6 +402,12 @@ public:
 		void OnInputChanged(EInputType From, EInputType TO);
 
 	/**
+	*	Called when this widget completed UINavSetup
+	*/
+	UFUNCTION(BlueprintImplementableEvent, Category = "UINavigation")
+		void OnSetupCompleted();
+
+	/**
 	*	Handles navigation according to direction
 	*
 	*	@param	Direction  Direction of navigation
@@ -417,13 +421,6 @@ public:
 	*	@param	Direction  Direction of navigation
 	*/
 	int FetchDirection(ENavigationDirection Direction, int Index);
-
-	/**
-	*	Notifies this widget of a change of input mode
-	*
-	*	@param	NewInputMode  The new input mode
-	*/
-	void ChangeInputMode(EInputMode NewInputMode);
 
 	/**
 	*	Allows or forbids the player from using UINav Input
