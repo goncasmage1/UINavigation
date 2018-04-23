@@ -748,7 +748,9 @@ void UUINavWidget::ReturnToParent()
 
 void UUINavWidget::MenuNavigate(ENavigationDirection Direction)
 {
-	NavigateTo(FindNextIndex(Direction));
+	int NewIndex = FindNextIndex(Direction);
+	if (NewIndex == -1) return;
+	NavigateTo(NewIndex);
 }
 
 int UUINavWidget::FindNextIndex(ENavigationDirection Direction)
