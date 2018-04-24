@@ -12,6 +12,7 @@
 #include "TextBlock.h"
 #include "ScrollBox.h"
 #include "CanvasPanelSlot.h"
+#include "WidgetAnimation.h"
 #include "Blueprint/SlateBlueprintLibrary.h"
 
 void UUINavWidget::NativeConstruct()
@@ -51,13 +52,31 @@ void UUINavWidget::InitialSetup()
 		}
 	}
 
+	/*
+	If this widget was added through a parent widget and should remove it from the viewport,
+	remove that widget from viewport
+	*/
+	if (ParentWidget != nullptr && ParentWidget->IsInViewport())
+	{
+		if (bParentRemoved)
+		{
+			ParentWidget->RemoveFromParent();
+		}
+	}
+
 	FetchButtonsInHierarchy();
 	ReadyForSetup();
 
 	//check(UINavButtons.Num() == ButtonNavigations.Num() && "Dimension of UIUINavButtons and ButtonNavigations array is not the same.");
 	if (UINavButtons.Num() != ButtonNavigations.Num())
 	{
-		DISPLAYERROR("Dimension of UIUINavButtons and ButtonNavigations array is not the same.");
+		DISPLAYERROR("Dimension of UINavButtons and ButtonNavigations array is not the same.");
+		return;
+	}
+
+	if (UINavAnimations.Num() > 0 && UINavAnimations.Num() != UINavButtons.Num())
+	{
+		DISPLAYERROR("Number of animations doesn't match number of UINavButtons.");
 		return;
 	}
 
@@ -90,6 +109,8 @@ void UUINavWidget::ReconfigureSetup()
 
 	bShouldTick = true;
 	WaitForTick = 0;
+
+	ButtonIndex = FirstButtonIndex;
 
 	PressedKeys.Empty();
 
@@ -214,32 +235,17 @@ void UUINavWidget::SetupSelector()
 
 void UUINavWidget::UINavSetup()
 {
-	/*
-	If this widget was added through a parent widget and should remove it from the viewport,
-	remove that widget from viewport
-	*/
-	if (ParentWidget != nullptr && ParentWidget->IsInViewport())
+	//If this widget was added through a child widget, destroy it
+	if (ReturnedFromWidget != nullptr)
 	{
-		if (bParentRemoved)
+		if (ReturnedFromWidget != nullptr)
 		{
-			CurrentPC = ParentWidget->CurrentPC;
-			ParentWidget->RemoveFromParent();
-		}
-	}
-	//If this widget was added through a child widget, remove it from viewport
-	else if (ReturnedFromWidget != nullptr)
-	{
-		//CurrentPC = ReturnedFromWidget->CurrentPC;
-		if (ReturnedFromWidget->IsInViewport())
-		{
-			ReturnedFromWidget->RemoveFromParent();
 			ReturnedFromWidget->Destruct();
 		}
 		ReturnedFromWidget = nullptr;
 	}
 
 	CurrentPC->SetActiveWidget(this);
-	CurrentPC->EnableInput(CurrentPC);
 
 	if (bUseSelector)
 	{
@@ -251,8 +257,9 @@ void UUINavWidget::UINavSetup()
 
 	bCompletedSetup = true;
 
-	OnNavigate(-1, ButtonIndex);
 	NavigateTo(ButtonIndex);
+	OnNavigate(-1, ButtonIndex);
+	ExecuteAnimations(-1, ButtonIndex);
 
 	OnSetupCompleted();
 }
@@ -269,12 +276,17 @@ void UUINavWidget::NativeTick(const FGeometry & MyGeometry, float DeltaTime)
 	}
 	else
 	{
+
+		if (WaitForTick == 0) GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Red, TEXT("Started"));
 		if (!bShouldTick) return;
 
 		if (WaitForTick == 1)
 		{
+			GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Red, TEXT("Almost"));
 			UINavSetup();
 			bShouldTick = false;
+			GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Red, TEXT("Ended"));
+			return;
 		}
 
 		WaitForTick++;
@@ -547,6 +559,31 @@ FVector2D UUINavWidget::GetButtonLocation(int Index)
 	return ViewportPos;
 }
 
+void UUINavWidget::ExecuteAnimations(int From, int To)
+{
+	if (UINavAnimations.Num() == 0) return;
+
+	if (From != -1)
+	{
+		if (IsAnimationPlaying(UINavAnimations[From]))
+		{
+			ReverseAnimation(UINavAnimations[From]);
+		}
+		else
+		{
+			PlayAnimation(UINavAnimations[From], 0.0f, 1, EUMGSequencePlayMode::Reverse, AnimationPlaybackSpeed);
+		}
+	}
+	if (IsAnimationPlaying(UINavAnimations[To]))
+	{
+		ReverseAnimation(UINavAnimations[To]);
+	}
+	else
+	{
+		PlayAnimation(UINavAnimations[To], 0.0f, 1, EUMGSequencePlayMode::Forward, AnimationPlaybackSpeed);
+	}
+}
+
 void UUINavWidget::UpdateTextColor(int Index)
 {
 	SwitchTextColorTo(ButtonIndex, TextDefaultColor);
@@ -662,7 +699,11 @@ void UUINavWidget::NavigateTo(int Index, bool bHoverEvent)
 		UpdateTextColor(Index);
 	}
 
-	if (bShouldNotify) OnNavigate(ButtonIndex, Index);
+	if (bShouldNotify)
+	{
+		OnNavigate(ButtonIndex, Index);
+		ExecuteAnimations(ButtonIndex, Index);
+	}
 	ButtonIndex = Index;
 
 	//Update all the possible scroll boxes in the widget
@@ -708,7 +749,7 @@ UWidget* UUINavWidget::GoToWidget(TSubclassOf<UUINavWidget> NewWidgetClass, bool
 		return nullptr;
 	}
 
-	CurrentPC->DisableInput(CurrentPC);
+	//CurrentPC->DisableInput(CurrentPC);
 	UUINavWidget* NewWidget = CreateWidget<UUINavWidget>(CurrentPC, NewWidgetClass);
 	NewWidget->ParentWidget = this;
 	NewWidget->ParentWidgetClass = WidgetClass;
@@ -731,19 +772,18 @@ void UUINavWidget::ReturnToParent()
 	//If parent was removed, add it to viewport
 	if (bParentRemoved)
 	{
-		CurrentPC->DisableInput(CurrentPC);
+		//CurrentPC->DisableInput(CurrentPC);
 
 		ParentWidget->ReturnedFromWidget = this;
 		ParentWidget->AddToViewport();
 	}
 	else
 	{
-		RemoveFromParent();
-
 		CurrentPC->SetActiveWidget(ParentWidget);
 		ParentWidget->SetUserFocus(CurrentPC);
-		CurrentPC->EnableInput(CurrentPC);
+		//CurrentPC->EnableInput(CurrentPC);
 	}
+	RemoveFromParent();
 }
 
 void UUINavWidget::MenuNavigate(ENavigationDirection Direction)

@@ -130,7 +130,7 @@ public:
 	UPROPERTY(BlueprintReadWrite, Category = "UINavigation")
 		TArray<FButtonNavigation> ButtonNavigations;
 
-	//All the UIUINavButtons in this Widget
+	//All the UINavButtons in this Widget
 	UPROPERTY(BlueprintReadOnly, Category = "UINavigation")
 		TArray<class UUINavButton*> UINavButtons;
 
@@ -152,6 +152,10 @@ public:
 	//All the scrollboxes in this widget
 	UPROPERTY(BlueprintReadOnly, Category = "UINavigation")
 		TArray<class UScrollBox*> ScrollBoxes;
+
+	//All the scrollboxes in this widget
+	UPROPERTY(BlueprintReadWrite, Category = "UINavigation")
+		TArray<class UWidgetAnimation*> UINavAnimations;
 
 	//Indicates whether the Normal and Hovered style of a button were switched
 	TArray<bool> bSwitchedStyle;
@@ -208,6 +212,10 @@ public:
 	//If set to true, this widget will be removed if it has no ParentWidget and is returned from
 	UPROPERTY(EditDefaultsOnly, Category = "UINavigation")
 		bool bAllowRemoveIfRoot = false;
+
+	//The speed at which the given animations will play
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UINavigation")
+		float AnimationPlaybackSpeed = 1.f;
 
 	/*If set to true, this widget move the selector using a curve-guided movement animation.
 	Otherwise it will snap the selector to its desired location*/
@@ -313,8 +321,7 @@ public:
 	*
 	*	@param	Index  The new button's index in the Button's array
 	*/
-	UFUNCTION(BlueprintCallable, Category = "UINavigation")
-		void UpdateSelectorLocation(int Index);
+	void UpdateSelectorLocation(int Index);
 
 	/**
 	*	Changes the color of the text with the specified index to the specified color
@@ -322,8 +329,7 @@ public:
 	*	@param	Index  The new button's index in the Button's array
 	*	@param	Color  The text's new color
 	*/
-	UFUNCTION(BlueprintCallable, Category = "UINavigation")
-		void SwitchTextColorTo(int Index, FLinearColor Color);
+	void SwitchTextColorTo(int Index, FLinearColor Color);
 
 	/**
 	*	Changes the state of the current button to normal and the new button to hovered
@@ -331,8 +337,15 @@ public:
 	*	@param	Index  The new button's index in the Button's array
 	*	@param  bHovered  Whether the function was called due to a button hover
 	*/
-	UFUNCTION(BlueprintCallable, Category = "UINavigation")
-		void UpdateButtonsStates(int Index, bool bHovered);
+	void UpdateButtonsStates(int Index, bool bHovered);
+
+	/**
+	*	Plays the animations in the UINavAnimations array
+	*
+	*	@param	From  The index of the button that was navigated from
+	*	@param	To  The index of the button that was navigated to
+	*/
+	void ExecuteAnimations(int From, int To);
 
 	/**
 	*	Changes the new text and previous text's colors to the desired colors
