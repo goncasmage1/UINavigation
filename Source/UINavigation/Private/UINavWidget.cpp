@@ -108,13 +108,13 @@ void UUINavWidget::ReconfigureSetup()
 	}
 
 	if (bUseSelector) SetupSelector();
+
+	bShouldTick = true;
+	WaitForTick = 0;
 }
 
 void UUINavWidget::CleanSetup()
 {
-	bShouldTick = true;
-	WaitForTick = 0;
-
 	//Disable all buttons (bug fix)
 	for (UUINavButton* button : UINavButtons)
 	{
@@ -761,7 +761,6 @@ UWidget* UUINavWidget::GoToWidget(TSubclassOf<UUINavWidget> NewWidgetClass, bool
 		return nullptr;
 	}
 
-	//CurrentPC->DisableInput(CurrentPC);
 	UUINavWidget* NewWidget = CreateWidget<UUINavWidget>(CurrentPC, NewWidgetClass);
 	NewWidget->ParentWidget = this;
 	NewWidget->ParentWidgetClass = WidgetClass;
@@ -785,8 +784,6 @@ void UUINavWidget::ReturnToParent()
 	//If parent was removed, add it to viewport
 	if (bParentRemoved)
 	{
-		//CurrentPC->DisableInput(CurrentPC);
-
 		ParentWidget->ReturnedFromWidget = this;
 		ParentWidget->AddToViewport();
 	}
@@ -794,7 +791,7 @@ void UUINavWidget::ReturnToParent()
 	{
 		CurrentPC->SetActiveWidget(ParentWidget);
 		ParentWidget->SetUserFocus(CurrentPC);
-		//CurrentPC->EnableInput(CurrentPC);
+		ParentWidget->ReconfigureSetup();
 	}
 	RemoveFromParent();
 }

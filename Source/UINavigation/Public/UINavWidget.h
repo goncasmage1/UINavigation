@@ -7,7 +7,7 @@
 #include "Blueprint/UserWidget.h"
 #include "UINavWidget.generated.h"
 
-#define DISPLAYERROR(Text) GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Green, FString::Printf(TEXT("%s"), *(FString(TEXT("Error in ")).Append(GetName()).Append(TEXT(": ")).Append(Text))));
+#define DISPLAYERROR(Text) GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, FString::Printf(TEXT("%s"), *(FString(TEXT("Error in ")).Append(GetName()).Append(TEXT(": ")).Append(Text))));
 
 /**
 * This class contains the logic for UserWidget navigation
@@ -85,11 +85,6 @@ protected:
 	*	Configures the blueprint on Construct event
 	*/
 	void InitialSetup();
-
-	/**
-	*	Reconfigures the blueprint if it has already been setup
-	*/
-	void ReconfigureSetup();
 
 	/**
 	*	Resets the necessary variables in order for this widget to be used again
@@ -249,6 +244,11 @@ public:
 	/*********************************************************************************/
 
 	
+
+	/**
+	*	Reconfigures the blueprint if it has already been setup
+	*/
+	void ReconfigureSetup();
 
 	/**
 	*	The widget's construct event

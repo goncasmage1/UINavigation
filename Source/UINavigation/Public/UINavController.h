@@ -140,16 +140,32 @@ protected:
 	/**
 	*	Returns the input type of the given key
 	*
+	*	@param Key The specified key	
 	*	@return The input type of the given key
 	*/
 	EInputType GetKeyInputType(FKey Key);
 
 	/**
+	*	Returns the input type of the given action
+	*
+	*	@return The input type of the given action
+	*/
+	EInputType GetActionInputType(FString Action);
+
+	/**
 	*	Verifies if a new input type is being used
 	*
+	*	@param Key The specified key
 	*	@param PressedKey The pressed key
 	*/
-	void VerifyInputTypeChange(FKey Key);
+	void VerifyInputTypeChangeByKey(FKey Key);
+
+	/**
+	*	Verifies if a new input type is being used
+	*
+	*	@param Action The specified action
+	*/
+	void VerifyInputTypeChangeByAction(FString Action);
 
 	/**
 	*	Notifies to the active UUINavWidget that the input type changed
