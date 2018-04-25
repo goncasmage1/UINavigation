@@ -107,14 +107,23 @@ void UUINavWidget::ReconfigureSetup()
 		return;
 	}
 
+	if (bUseSelector) SetupSelector();
+}
+
+void UUINavWidget::CleanSetup()
+{
 	bShouldTick = true;
 	WaitForTick = 0;
 
-	ButtonIndex = FirstButtonIndex;
+	//ButtonIndex = FirstButtonIndex;
+
+	//Disable all buttons (bug fix)
+	for (UUINavButton* button : UINavButtons)
+	{
+		button->SetIsEnabled(false);
+	}
 
 	PressedKeys.Empty();
-
-	if (bUseSelector) SetupSelector();
 }
 
 void UUINavWidget::FetchButtonsInHierarchy()
@@ -235,6 +244,12 @@ void UUINavWidget::SetupSelector()
 
 void UUINavWidget::UINavSetup()
 {
+	//Re-enable all buttons (bug fix)
+	for (UUINavButton* button : UINavButtons)
+	{
+		button->SetIsEnabled(true);
+	}
+
 	//If this widget was added through a child widget, destroy it
 	if (ReturnedFromWidget != nullptr)
 	{
@@ -276,16 +291,12 @@ void UUINavWidget::NativeTick(const FGeometry & MyGeometry, float DeltaTime)
 	}
 	else
 	{
-
-		if (WaitForTick == 0) GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Red, TEXT("Started"));
 		if (!bShouldTick) return;
 
 		if (WaitForTick == 1)
 		{
-			GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Red, TEXT("Almost"));
 			UINavSetup();
 			bShouldTick = false;
-			GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Red, TEXT("Ended"));
 			return;
 		}
 
@@ -755,6 +766,7 @@ UWidget* UUINavWidget::GoToWidget(TSubclassOf<UUINavWidget> NewWidgetClass, bool
 	NewWidget->ParentWidgetClass = WidgetClass;
 	NewWidget->bParentRemoved = bRemoveParent;
 	NewWidget->AddToViewport();
+	CleanSetup();
 	return NewWidget;
 }
 
@@ -795,7 +807,7 @@ void UUINavWidget::MenuNavigate(ENavigationDirection Direction)
 
 int UUINavWidget::FindNextIndex(ENavigationDirection Direction)
 {
-	int NewIndex = FetchDirection(Direction, ButtonIndex);
+	int NewIndex = FetchIndexByDirection(Direction, ButtonIndex);
 	if (NewIndex == -1) return -1;
 
 	//Check if the button is visible, if not, skip to next button
@@ -803,12 +815,12 @@ int UUINavWidget::FindNextIndex(ENavigationDirection Direction)
 		UINavButtons[NewIndex]->Visibility == ESlateVisibility::Hidden ||
 		!UINavButtons[NewIndex]->bIsEnabled)
 	{
-		NewIndex = FetchDirection(Direction, NewIndex);
+		NewIndex = FetchIndexByDirection(Direction, NewIndex);
 	}
 	return NewIndex;
 }
 
-int UUINavWidget::FetchDirection(ENavigationDirection Direction, int Index)
+int UUINavWidget::FetchIndexByDirection(ENavigationDirection Direction, int Index)
 {
 	int LocalIndex = -1;
 

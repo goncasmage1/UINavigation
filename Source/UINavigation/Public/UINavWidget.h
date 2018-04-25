@@ -92,6 +92,11 @@ protected:
 	void ReconfigureSetup();
 
 	/**
+	*	Resets the necessary variables in order for this widget to be used again
+	*/
+	void CleanSetup();
+
+	/**
 	*	Sets up the UIUINavButtons and does error checking
 	*/
 	void FetchButtonsInHierarchy();
@@ -445,7 +450,7 @@ public:
 	*
 	*	@param	Direction  Direction of navigation
 	*/
-	int FetchDirection(ENavigationDirection Direction, int Index);
+	int FetchIndexByDirection(ENavigationDirection Direction, int Index);
 
 	/**
 	*	Allows or forbids the player from using UINav Input
