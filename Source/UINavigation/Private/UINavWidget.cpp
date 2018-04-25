@@ -339,6 +339,7 @@ void UUINavWidget::HandleSelectorMovement(float DeltaTime)
 {
 	MovementCounter += DeltaTime;
 
+	//Movement is finished
 	if (MovementCounter >= MovementTime)
 	{
 		MovementCounter = 0.f;
@@ -347,7 +348,18 @@ void UUINavWidget::HandleSelectorMovement(float DeltaTime)
 		TheSelector->SetRenderTranslation(SelectorDestination);
 		if (HaltedIndex != -1)
 		{
-			NavigateTo(HaltedIndex);
+			if (HaltedIndex == SELECT_INDEX)
+			{
+				OnSelect(ButtonIndex);
+			}
+			else if (HaltedIndex == RETURN_INDEX)
+			{
+				OnReturn();
+			}
+			else
+			{
+				NavigateTo(HaltedIndex);
+			}
 			HaltedIndex = -1;
 		}
 		return;
@@ -1002,13 +1014,21 @@ void UUINavWidget::MenuRight()
 
 void UUINavWidget::MenuSelect()
 {
-	if (!bAllowNavigation) return;
+	if (!bAllowNavigation)
+	{
+		HaltedIndex = SELECT_INDEX;
+		return;
+	}
 	OnSelect(ButtonIndex);
 }
 
 void UUINavWidget::MenuReturn()
 {
-	if (!bAllowNavigation) return;
+	if (!bAllowNavigation)
+	{
+		HaltedIndex = RETURN_INDEX;
+		return;
+	}
 	OnReturn();
 }
 
