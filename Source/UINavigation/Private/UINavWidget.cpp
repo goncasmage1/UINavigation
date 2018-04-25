@@ -269,8 +269,6 @@ void UUINavWidget::UINavSetup()
 		TheSelector->SetVisibility(ESlateVisibility::HitTestInvisible);
 	}
 
-	SetUserFocus(CurrentPC);
-
 	bCompletedSetup = true;
 
 	NavigateTo(ButtonIndex);
@@ -561,6 +559,18 @@ FVector2D UUINavWidget::GetButtonLocation(int Index)
 		case ESelectorPosition::Position_Right:
 			LocalPosition = FVector2D(LocalSize.X, LocalSize.Y / 2);
 			break;
+		case ESelectorPosition::Position_Top_Right:
+			LocalPosition = FVector2D(LocalSize.X, 0.f);
+			break;
+		case ESelectorPosition::Position_Top_Left:
+			LocalPosition = FVector2D(0.f, 0.f);
+			break;
+		case ESelectorPosition::Position_Bottom_Right:
+			LocalPosition = FVector2D(LocalSize.X, LocalSize.Y);
+			break;
+		case ESelectorPosition::Position_Bottom_Left:
+			LocalPosition = FVector2D(0.f, LocalSize.Y);
+			break;
 	}
 	
 	FVector2D PixelPos, ViewportPos;
@@ -790,7 +800,6 @@ void UUINavWidget::ReturnToParent()
 	else
 	{
 		CurrentPC->SetActiveWidget(ParentWidget);
-		ParentWidget->SetUserFocus(CurrentPC);
 		ParentWidget->ReconfigureSetup();
 	}
 	RemoveFromParent();
