@@ -115,8 +115,6 @@ void UUINavWidget::CleanSetup()
 	bShouldTick = true;
 	WaitForTick = 0;
 
-	//ButtonIndex = FirstButtonIndex;
-
 	//Disable all buttons (bug fix)
 	for (UUINavButton* button : UINavButtons)
 	{
@@ -156,7 +154,7 @@ void UUINavWidget::FetchButtonsInHierarchy()
 
 void UUINavWidget::TraverseHierarquy()
 {
-	//Find UIUINavButtons in the widget hierarchy
+	//Find UINavButtons in the widget hierarchy
 	TArray<UWidget*> Widgets;
 	WidgetTree->GetAllWidgets(Widgets);
 	for (int i = 0; i < Widgets.Num(); ++i)
@@ -201,10 +199,13 @@ void UUINavWidget::TraverseHierarquy()
 		//Add button to array of UIUINavButtons
 		UINavButtons.Add(NewNavButton);
 	}
-	/*UINavButtons.Sort([](const UUINavButton& Wid1, const UUINavButton& Wid2)
+	if (bOverrideButtonIndices)
 	{
-	return Wid1.ButtonIndex < Wid2.ButtonIndex;
-	});*/
+		UINavButtons.HeapSort([](const UUINavButton& Wid1, const UUINavButton& Wid2)
+		{
+			return Wid1.ButtonIndex < Wid2.ButtonIndex;
+		});
+	}
 }
 
 void UUINavWidget::ChangeTextColorToDefault()
