@@ -982,14 +982,14 @@ void UUINavWidget::MenuLeft()
 		return;
 	}
 
-	int SliderIndex = OptionBoxIndices.Find(ButtonIndex);
-	if (SliderIndex == INDEX_NONE)
+	int OptionBoxIndex = OptionBoxIndices.Find(ButtonIndex);
+	if (OptionBoxIndex == INDEX_NONE)
 	{
 		MenuNavigate(ENavigationDirection::Nav_LEFT);
 	}
 	else
 	{
-		UINavOptionBoxes[SliderIndex]->NavigateLeft();
+		UINavOptionBoxes[OptionBoxIndex]->NavigateLeft();
 	}
 }
 
@@ -1001,14 +1001,14 @@ void UUINavWidget::MenuRight()
 		return;
 	}
 
-	int SliderIndex = OptionBoxIndices.Find(ButtonIndex);
-	if (SliderIndex == INDEX_NONE)
+	int OptionBoxIndex = OptionBoxIndices.Find(ButtonIndex);
+	if (OptionBoxIndex == INDEX_NONE)
 	{
 		MenuNavigate(ENavigationDirection::Nav_RIGHT);
 	}
 	else
 	{
-		UINavOptionBoxes[SliderIndex]->NavigateRight();
+		UINavOptionBoxes[OptionBoxIndex]->NavigateRight();
 	}
 }
 

@@ -2,34 +2,25 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
-#include "UINavComponent.h"
+#include "Engine.h"
+#include "UINavComponentBox.h"
 #include "UINavOptionBox.generated.h"
+
+#define DISPLAYERROR(Text) GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, FString::Printf(TEXT("%s"), *(FString(TEXT("Error in ")).Append(GetName()).Append(TEXT(": ")).Append(Text))));
 
 /**
  * 
  */
 UCLASS()
-class UINAVIGATION_API UUINavOptionBox : public UUINavComponent
+class UINAVIGATION_API UUINavOptionBox : public UUINavComponentBox
 {
 	GENERATED_BODY()
 	
 protected:
 
-	UPROPERTY(BlueprintReadOnly)
-		int OptionIndex = 0;
+	virtual void CheckRightLimit() override;
 
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
-		class UButton* LeftButton;
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
-		class UButton* RightButton;
-
-	void CheckLeftLimit();
-	void CheckRightLimit();
-
-	void UpdateTextBlock();
-	UFUNCTION(BlueprintCallable, Category = UINavSlider)
-		void UpdateTextWithValue(int NewIndex);
+	virtual void UpdateTextBlock() override;
 
 public:
 
@@ -37,34 +28,14 @@ public:
 
 	/*If set to false, will use StringOptions, otherwise will use
 	all integers in designated range (from MinRange to MaxRange, inclusive)*/
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavSlider)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavOptionBox)
 		bool bUseNumberRange = false;
 
-	//Indicates the option that should appear first in the slider
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavSlider)
-		int DefaultOptionIndex;
-
 	//The list of Names to display as options in this slider
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavSlider, meta = (EditCondition = "!bUseNumberRange"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavOptionBox, meta = (EditCondition = "!bUseNumberRange"))
 		TArray<FName> StringOptions;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavSlider, meta = (EditCondition = "bUseNumberRange"))
-		int MinRange;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavSlider, meta = (EditCondition = "bUseNumberRange"))
-		int MaxRange;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavSlider, meta = (EditCondition = "bUseNumberRange"))
-		int Interval = 1;
-
-	//If set to true, will disable buttons if the slider runs out of options on either side
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavSlider)
-		bool bDisableButtons = true;
-
 	UFUNCTION(BlueprintCallable)
-		void NavigateLeft();
-	UFUNCTION(BlueprintCallable)
-		void NavigateRight();
-	
-	
+		virtual void NavigateRight() override;
+
 };
