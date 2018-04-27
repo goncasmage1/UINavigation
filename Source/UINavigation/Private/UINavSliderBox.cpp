@@ -2,6 +2,7 @@
 
 #include "UINavSliderBox.h"
 #include "ProgressBar.h"
+#include "Kismet/KismetMathLibrary.h"
 
 void UUINavSliderBox::NativeConstruct()
 {
@@ -36,7 +37,8 @@ void UUINavSliderBox::UpdateTextBlock()
 
 	NavText->SetText(FText::FromString(FString::FromInt(MinRange + OptionIndex*Interval)));
 
-	SliderBar->SetPercent(FMath::Lerp(MinRange, MaxRange, OptionIndex * Interval));
+	float Percent = UKismetMathLibrary::InverseLerp(MinRange, MaxRange, MinRange + OptionIndex * Interval);
+	SliderBar->SetPercent(Percent);
 }
 
 void UUINavSliderBox::NavigateRight()

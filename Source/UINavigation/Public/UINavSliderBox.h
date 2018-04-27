@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
+#include "Engine.h"
 #include "UINavComponentBox.h"
 #include "UINavSliderBox.generated.h"
 

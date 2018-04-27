@@ -2,7 +2,7 @@
 
 #include "UINavWidget.h"
 #include "UINavButton.h"
-#include "UINavOptionBox.h"
+#include "UINavComponentBox.h"
 #include "UINavComponent.h"
 #include "UINavController.h"
 #include "Blueprint/UserWidget.h"
@@ -176,10 +176,10 @@ void UUINavWidget::TraverseHierarquy()
 				UINavComponentsIndices.Add(UINavButtons.Num());
 				UINavComponents.Add(UIComp);
 
-				if (Cast<UUINavOptionBox>(Widgets[i]))
+				if (Cast<UUINavComponentBox>(Widgets[i]))
 				{
-					OptionBoxIndices.Add(UINavButtons.Num());
-					UINavOptionBoxes.Add(Cast<UUINavOptionBox>(Widgets[i]));
+					ComponentBoxIndices.Add(UINavButtons.Num());
+					UINavComponentBoxes.Add(Cast<UUINavComponentBox>(Widgets[i]));
 				}
 			}
 		}
@@ -885,15 +885,15 @@ UUINavComponent * UUINavWidget::GetUINavComponentAtIndex(int Index)
 	return UINavComponents[ValidIndex];
 }
 
-UUINavOptionBox * UUINavWidget::GetUINavOptionBoxAtIndex(int Index)
+UUINavComponentBox * UUINavWidget::GetUINavComponentBoxAtIndex(int Index)
 {
-	int ValidIndex = OptionBoxIndices.Find(Index);
+	int ValidIndex = ComponentBoxIndices.Find(Index);
 	if (ValidIndex == INDEX_NONE)
 	{
-		DISPLAYERROR("GetUINavOptionBoxAtIndex: Element at given index isn't a UINavOptionBox");
+		DISPLAYERROR("GetUINavComponentBoxAtIndex: Element at given index isn't a UINavComponentBox");
 		return nullptr;
 	}
-	return UINavOptionBoxes[ValidIndex];
+	return UINavComponentBoxes[ValidIndex];
 }
 
 void UUINavWidget::HoverEvent(int Index)
@@ -982,14 +982,14 @@ void UUINavWidget::MenuLeft()
 		return;
 	}
 
-	int OptionBoxIndex = OptionBoxIndices.Find(ButtonIndex);
-	if (OptionBoxIndex == INDEX_NONE)
+	int ComponentBoxIndex = ComponentBoxIndices.Find(ButtonIndex);
+	if (ComponentBoxIndex == INDEX_NONE)
 	{
 		MenuNavigate(ENavigationDirection::Nav_LEFT);
 	}
 	else
 	{
-		UINavOptionBoxes[OptionBoxIndex]->NavigateLeft();
+		UINavComponentBoxes[ComponentBoxIndex]->NavigateLeft();
 	}
 }
 
@@ -1001,14 +1001,14 @@ void UUINavWidget::MenuRight()
 		return;
 	}
 
-	int OptionBoxIndex = OptionBoxIndices.Find(ButtonIndex);
-	if (OptionBoxIndex == INDEX_NONE)
+	int ComponentBoxIndex = ComponentBoxIndices.Find(ButtonIndex);
+	if (ComponentBoxIndex == INDEX_NONE)
 	{
 		MenuNavigate(ENavigationDirection::Nav_RIGHT);
 	}
 	else
 	{
-		UINavOptionBoxes[OptionBoxIndex]->NavigateRight();
+		UINavComponentBoxes[ComponentBoxIndex]->NavigateRight();
 	}
 }
 

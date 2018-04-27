@@ -147,13 +147,13 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = "UINavigation")
 		TArray<class UUINavComponent*> UINavComponents;
 
-	//The indices of all the UINavUINavOptionBoxes in this widget
+	//The indices of all the UINavUINavComponentBoxes in this widget
 	UPROPERTY(BlueprintReadOnly, Category = "UINavigation")
-		TArray<int> OptionBoxIndices;
+		TArray<int> ComponentBoxIndices;
 
-	//All the UINavUINavOptionBoxes in this Widget
+	//All the UINavUINavComponentBoxes in this Widget
 	UPROPERTY(BlueprintReadOnly, Category = "UINavigation")
-		TArray<class UUINavOptionBox*> UINavOptionBoxes;
+		TArray<class UUINavComponentBox*> UINavComponentBoxes;
 
 	//All the scrollboxes in this widget
 	UPROPERTY(BlueprintReadOnly, Category = "UINavigation")
@@ -499,13 +499,13 @@ public:
 		UUINavComponent* GetUINavComponentAtIndex(int Index);
 
 	/**
-	*	Returns the UINavOptionBox with the specified index (null if that
-	*	index doesn't correspond to a UINavOptionBox)
+	*	Returns the UINavComponentBox with the specified index (null if that
+	*	index doesn't correspond to a UINavComponentBox)
 	*
-	*	@return  UINavOptionBox  The UINavOptionBox with the specified index
+	*	@return  UINavComponentBox  The UINavComponentBox with the specified index
 	*/
 	UFUNCTION(BlueprintCallable, Category = "UINavigation")
-		UUINavOptionBox* GetUINavOptionBoxAtIndex(int Index);
+		UUINavComponentBox* GetUINavComponentBoxAtIndex(int Index);
 
 	/**
 	*	Button Hover event
