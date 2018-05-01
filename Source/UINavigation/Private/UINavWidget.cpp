@@ -33,13 +33,15 @@ void UUINavWidget::InitialSetup()
 
 	bIsFocusable = true;
 	WidgetClass = GetClass();
-	if (CurrentPC == nullptr) CurrentPC = Cast<AUINavController>(GetOwningPlayer());
-
-	//check(CurrentPC != nullptr && "PlayerController isn't a UINavController");
 	if (CurrentPC == nullptr)
 	{
-		DISPLAYERROR("PlayerController isn't a UINavController");
-		return;
+		CurrentPC = Cast<AUINavController>(GetOwningPlayer());
+		//check(CurrentPC != nullptr && "PlayerController isn't a UINavController");
+		if (CurrentPC == nullptr)
+		{
+			DISPLAYERROR("PlayerController isn't a UINavController");
+			return;
+		}
 	}
 
 	if (bUseSelector && bUseMovementCurve)
@@ -56,12 +58,9 @@ void UUINavWidget::InitialSetup()
 	If this widget was added through a parent widget and should remove it from the viewport,
 	remove that widget from viewport
 	*/
-	if (ParentWidget != nullptr && ParentWidget->IsInViewport())
+	if (ParentWidget != nullptr && ParentWidget->IsInViewport() && bParentRemoved)
 	{
-		if (bParentRemoved)
-		{
-			ParentWidget->RemoveFromParent();
-		}
+		ParentWidget->RemoveFromParent();
 	}
 
 	FetchButtonsInHierarchy();
@@ -100,14 +99,16 @@ void UUINavWidget::ReconfigureSetup()
 {
 	if (bUseTextColor) ChangeTextColorToDefault();
 
-	//If this widget doesn't need to create the selector, notify ReadyForSetup
+	//If this widget doesn't need to create the selector, skip to setup
 	if (!bUseSelector)
 	{
 		UINavSetup();
 		return;
 	}
-
-	if (bUseSelector) SetupSelector();
+	else
+	{
+		SetupSelector();
+	}
 
 	bShouldTick = true;
 	WaitForTick = 0;
@@ -157,18 +158,18 @@ void UUINavWidget::TraverseHierarquy()
 	//Find UINavButtons in the widget hierarchy
 	TArray<UWidget*> Widgets;
 	WidgetTree->GetAllWidgets(Widgets);
-	for (int i = 0; i < Widgets.Num(); ++i)
+	for (UWidget* widget : Widgets)
 	{
-		UScrollBox* Scroll = Cast<UScrollBox>(Widgets[i]);
+		UScrollBox* Scroll = Cast<UScrollBox>(widget);
 		if (Scroll != nullptr)
 		{
 			ScrollBoxes.Add(Scroll);
 		}
 
-		UUINavButton* NewNavButton = Cast<UUINavButton>(Widgets[i]);
+		UUINavButton* NewNavButton = Cast<UUINavButton>(widget);
 		if (NewNavButton == nullptr)
 		{
-			UUINavComponent* UIComp = Cast<UUINavComponent>(Widgets[i]);
+			UUINavComponent* UIComp = Cast<UUINavComponent>(widget);
 			if (UIComp != nullptr)
 			{
 				NewNavButton = Cast<UUINavButton>(UIComp->NavButton);
@@ -176,10 +177,10 @@ void UUINavWidget::TraverseHierarquy()
 				UINavComponentsIndices.Add(UINavButtons.Num());
 				UINavComponents.Add(UIComp);
 
-				if (Cast<UUINavComponentBox>(Widgets[i]))
+				if (Cast<UUINavComponentBox>(widget))
 				{
 					ComponentBoxIndices.Add(UINavButtons.Num());
-					UINavComponentBoxes.Add(Cast<UUINavComponentBox>(Widgets[i]));
+					UINavComponentBoxes.Add(Cast<UUINavComponentBox>(widget));
 				}
 			}
 		}
@@ -199,6 +200,7 @@ void UUINavWidget::TraverseHierarquy()
 		//Add button to array of UIUINavButtons
 		UINavButtons.Add(NewNavButton);
 	}
+
 	if (bOverrideButtonIndices)
 	{
 		UINavButtons.HeapSort([](const UUINavButton& Wid1, const UUINavButton& Wid2)
@@ -220,7 +222,6 @@ void UUINavWidget::ChangeTextColorToDefault()
 void UUINavWidget::SetupSelector()
 {
 	//check(TheSelector != nullptr && "Couldn't find TheSelector");
-
 	if (TheSelector == nullptr)
 	{
 		DISPLAYERROR("Couldn't find TheSelector");
@@ -231,16 +232,8 @@ void UUINavWidget::SetupSelector()
 
 	UCanvasPanelSlot* SelectorSlot = Cast<UCanvasPanelSlot>(TheSelector->Slot);
 
-	//TODO: TRY TO DEACTIVATE
-	//Make sure the selector is centered
 	SelectorSlot->SetAlignment(FVector2D(0.5f, 0.5f));
-
-	InitialOffset = GEngine->GameViewport->Viewport->GetSizeXY() / 2;
-	/*Set an initial position close to the middle of the screen,
-	otherwise the selector's image might get cropped*/
-	SelectorSlot->SetPosition(InitialOffset);
-
-	TheSelector->SetRenderTranslation(-InitialOffset - FVector2D(0.f, -1000.f));
+	SelectorSlot->SetPosition(FVector2D(0.f, 0.f));
 }
 
 void UUINavWidget::UINavSetup()
@@ -273,7 +266,7 @@ void UUINavWidget::UINavSetup()
 
 	NavigateTo(ButtonIndex);
 	OnNavigate(-1, ButtonIndex);
-	ExecuteAnimations(-1, ButtonIndex);
+	if (UINavAnimations.Num() > 0) ExecuteAnimations(-1, ButtonIndex);
 
 	OnSetupCompleted();
 }
@@ -587,17 +580,13 @@ FVector2D UUINavWidget::GetButtonLocation(int Index)
 	
 	FVector2D PixelPos, ViewportPos;
 	USlateBlueprintLibrary::LocalToViewport(GetWorld(), Geom, LocalPosition, PixelPos, ViewportPos);
-	//The selector's position is initially set to (500, 500) so subtract that from the new position
-	ViewportPos -= InitialOffset;
 	ViewportPos += SelectorOffset;
 	return ViewportPos;
 }
 
 void UUINavWidget::ExecuteAnimations(int From, int To)
 {
-	if (UINavAnimations.Num() == 0) return;
-
-	if (From != -1)
+		if (From != -1)
 	{
 		if (IsAnimationPlaying(UINavAnimations[From]))
 		{
@@ -710,13 +699,13 @@ void UUINavWidget::SetSelectorVisibility(bool bVisible)
 
 void UUINavWidget::NavigateTo(int Index, bool bHoverEvent)
 {
-	bool bShouldNotify = false;
-	if (Index != ButtonIndex) bShouldNotify = true;
+	bool bShouldNotify = Index != ButtonIndex ? true : false;
 		
 	if (bUseButtonStates)
 	{
 		UpdateButtonsStates(Index, bHoverEvent);
 	}
+
 	if (bUseSelector)
 	{
 		if (bUseMovementCurve)
@@ -728,6 +717,7 @@ void UUINavWidget::NavigateTo(int Index, bool bHoverEvent)
 			UpdateSelectorLocation(Index);
 		}
 	}
+
 	if (bUseTextColor)
 	{
 		UpdateTextColor(Index);
@@ -736,7 +726,7 @@ void UUINavWidget::NavigateTo(int Index, bool bHoverEvent)
 	if (bShouldNotify)
 	{
 		OnNavigate(ButtonIndex, Index);
-		ExecuteAnimations(ButtonIndex, Index);
+		if (UINavAnimations.Num() > 0) ExecuteAnimations(ButtonIndex, Index);
 	}
 	ButtonIndex = Index;
 
@@ -752,9 +742,11 @@ void UUINavWidget::BeginSelectorMovement(int Index)
 	SelectorOrigin = GetButtonLocation(ButtonIndex);
 	SelectorDestination = GetButtonLocation(Index);
 	Distance = SelectorDestination - SelectorOrigin;
+
 	float MinTime, MaxTime;
 	MoveCurve->GetTimeRange(MinTime, MaxTime);
 	MovementTime = MaxTime - MinTime;
+
 	bMovingSelector = true;
 	bAllowNavigation = false;
 }
