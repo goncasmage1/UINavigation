@@ -22,9 +22,9 @@ public:
 	UFUNCTION(BlueprintPure, Category = "UINav Sound")
 		static float GetSoundClassVolume(class USoundClass* TargetClass);
 	
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "UINav Graphics")
 		static void SetPostProcessSettings(FString Variable, FString Value);
-	UFUNCTION(BlueprintPure)
+	UFUNCTION(BlueprintPure, Category = "UINav Graphics")
 		static FString GetPostProcessSettings(FString Variable);
 	
 };
