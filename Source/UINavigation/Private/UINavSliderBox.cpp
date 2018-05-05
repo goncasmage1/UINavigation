@@ -56,3 +56,8 @@ void UUINavSliderBox::NavigateRight()
 	//Enable button if previously disabled
 	if (!LeftButton->bIsEnabled) LeftButton->SetIsEnabled(true);
 }
+
+float UUINavSliderBox::GetSliderPercent() const
+{
+	return SliderBar->Percent;
+}

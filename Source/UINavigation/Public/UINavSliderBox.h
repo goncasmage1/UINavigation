@@ -29,5 +29,8 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 		virtual void NavigateRight() override;
+
+	UFUNCTION(BlueprintCallable)
+		float GetSliderPercent() const;
 	
 };
