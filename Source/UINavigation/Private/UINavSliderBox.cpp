@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Copyright (C) 2018 Gonçalo Marques - All Rights Reserved
 
 #include "UINavSliderBox.h"
 #include "ProgressBar.h"
