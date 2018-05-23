@@ -790,6 +790,7 @@ void UUINavWidget::ReturnToParent()
 	{
 		if (bAllowRemoveIfRoot)
 		{
+			CurrentPC->OnRootWidgetRemoved();
 			RemoveFromParent();
 		}
 		return;

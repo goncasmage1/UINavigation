@@ -70,6 +70,10 @@ public:
 	UFUNCTION(BlueprintCallable)
 		void SetActiveWidget(class UUINavWidget* NewWidget);
 
+	UFUNCTION(BlueprintNativeEvent)
+		void OnRootWidgetRemoved();
+	void OnRootWidgetRemoved_Implementation();
+
 	void MenuUp();
 	void MenuDown();
 	void MenuLeft();

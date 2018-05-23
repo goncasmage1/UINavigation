@@ -256,6 +256,11 @@ bool AUINavController::IsGamepadConnected()
 	return FSlateApplication::Get().IsGamepadAttached();
 }
 
+void AUINavController::OnRootWidgetRemoved_Implementation()
+{
+
+}
+
 void AUINavController::MenuUp()
 {
 	if (ActiveWidget == nullptr ||
@@ -342,6 +347,9 @@ void AUINavController::MenuRightRelease()
 
 void AUINavController::StartMenuUp()
 {
+	if (ActiveWidget == nullptr ||
+		!ActiveWidget->IsInViewport()) return;
+
 	MenuUp();
 	Direction = EInputDirection::Up;
 
@@ -351,6 +359,9 @@ void AUINavController::StartMenuUp()
 
 void AUINavController::StartMenuDown()
 {
+	if (ActiveWidget == nullptr ||
+		!ActiveWidget->IsInViewport()) return;
+
 	MenuDown();
 	Direction = EInputDirection::Down;
 
@@ -360,6 +371,9 @@ void AUINavController::StartMenuDown()
 
 void AUINavController::StartMenuLeft()
 {
+	if (ActiveWidget == nullptr ||
+		!ActiveWidget->IsInViewport()) return;
+
 	MenuLeft();
 	Direction = EInputDirection::Left;
 
@@ -369,6 +383,9 @@ void AUINavController::StartMenuLeft()
 
 void AUINavController::StartMenuRight()
 {
+	if (ActiveWidget == nullptr ||
+		!ActiveWidget->IsInViewport()) return;
+
 	MenuRight();
 	Direction = EInputDirection::Right;
 
