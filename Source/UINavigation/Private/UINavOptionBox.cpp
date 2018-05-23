@@ -105,4 +105,9 @@ void UUINavOptionBox::UpdateTextBlock()
 		FText::FromName(StringOptions[OptionIndex]));
 }
 
+void UUINavOptionBox::SetOptionText(FText NewText)
+{
+	NavText->SetText(NewText);
+}
+
 

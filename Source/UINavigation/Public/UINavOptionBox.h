@@ -22,6 +22,8 @@ protected:
 
 	virtual void UpdateTextBlock() override;
 
+	void SetOptionText(FText NewText);
+
 public:
 
 	virtual void NativeConstruct() override;
