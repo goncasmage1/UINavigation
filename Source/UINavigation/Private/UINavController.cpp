@@ -354,6 +354,7 @@ void AUINavController::StartMenuUp()
 	Direction = EInputDirection::Up;
 
 	if (!bChainNavigation) return;
+
 	GetWorldTimerManager().SetTimer(NavChainHandle, this, &AUINavController::MenuUp, NavigationChainFrequency, true, InputHeldWaitTime);
 }
 
