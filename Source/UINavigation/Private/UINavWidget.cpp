@@ -728,13 +728,13 @@ void UUINavWidget::NavigateTo(int Index, bool bHoverEvent)
 		OnNavigate(ButtonIndex, Index);
 		if (UINavAnimations.Num() > 0) ExecuteAnimations(ButtonIndex, Index);
 	}
-	ButtonIndex = Index;
-
 	//Update all the possible scroll boxes in the widget
 	for (int i = 0; i < ScrollBoxes.Num(); ++i)
 	{
-		ScrollBoxes[i]->ScrollWidgetIntoView(UINavButtons[ButtonIndex]);
+		ScrollBoxes[i]->ScrollWidgetIntoView(UINavButtons[Index]);
 	}
+	ButtonIndex = Index;
+
 }
 
 void UUINavWidget::BeginSelectorMovement(int Index)
