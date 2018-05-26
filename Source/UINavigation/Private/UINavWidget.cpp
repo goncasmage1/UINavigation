@@ -891,6 +891,7 @@ UUINavComponentBox * UUINavWidget::GetUINavComponentBoxAtIndex(int Index)
 
 void UUINavWidget::HoverEvent(int Index)
 {
+	if (CurrentPC->GetCurrentInputType() != EInputType::Mouse) return;
 	CurrentPC->NotifyMouseInputType();
 
 	if (!bAllowNavigation)
