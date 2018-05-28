@@ -40,7 +40,7 @@ public:
 	*
 	*	@return Whether a gamepad is connected
 	*/
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "UINavigation")
 		bool IsGamepadConnected();
 
 	/**
@@ -67,7 +67,7 @@ public:
 	*
 	*	@param NewWidget The new active widget
 	*/
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "UINavigation")
 		void SetActiveWidget(class UUINavWidget* NewWidget);
 
 	UFUNCTION(BlueprintNativeEvent)

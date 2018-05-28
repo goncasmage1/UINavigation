@@ -486,7 +486,7 @@ public:
 	*
 	*	@return  UUINavButton  The UINavButton with the specified index
 	*/
-	UFUNCTION(BlueprintCallable, Category = "UINavigation")
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "UINavigation")
 		UUINavButton* GetUINavButtonAtIndex(int Index);
 
 	/**
@@ -495,7 +495,7 @@ public:
 	*
 	*	@return  UINavComponent  The UINavComponent with the specified index
 	*/
-	UFUNCTION(BlueprintCallable, Category = "UINavigation")
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "UINavigation")
 		UUINavComponent* GetUINavComponentAtIndex(int Index);
 
 	/**
@@ -504,7 +504,7 @@ public:
 	*
 	*	@return  UINavComponentBox  The UINavComponentBox with the specified index
 	*/
-	UFUNCTION(BlueprintCallable, Category = "UINavigation")
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "UINavigation")
 		UUINavComponentBox* GetUINavComponentBoxAtIndex(int Index);
 
 	/**
