@@ -2,7 +2,7 @@
 
 UINavigation is a UE4 plugin that allows you to easily setup Navigation within UMG that works with Mouse, Keyboard, Gamepad, or any combination of those. It's designed to be hands-off, flexible and extendable. It has quite a few examples and a thorough documentation.
 
-###Known issues
+### Known issues
 
 When the game is paused, if the player is using a UINavWidget, chaining navigation doesn't work out of the box (you'll have to modify the Engine's source code in order for this to work).
 This happens due to the fact that timers run alogn with the World's DeltaTime (which remains the same when the game is paused).
