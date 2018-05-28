@@ -13,13 +13,12 @@
 	"CanContainContent": true,
 	"IsBetaVersion": false,
 	"Installed": true,
-	"BlacklistPlatforms": [ "Mac", "IOS"],
 	"Modules": [
 		{
 			"Name": "UINavigation",
 			"Type": "Runtime",
 			"LoadingPhase": "Default",
-			"WhitelistPlatforms": [ "Win64", "Win32", "Linux"]
+			"WhitelistPlatforms": [ "Win64", "Win32"]
 		}
 	]
 }
