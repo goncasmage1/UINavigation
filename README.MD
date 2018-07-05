@@ -36,6 +36,6 @@ Complex menus are manageable:
 
 ### Attribution
 
-All item slots were made by yinakoSGA (https://opengameart.org/users/yinakosga) under the CC-BY 3.0 license (https://creativecommons.org/licenses/by/3.0/).
+All item slots were made by pauliuw (https://opengameart.org/users/pauliuw) under the CC 0 license (Public Domain)).
 
 Font credits located in fonts folder.
