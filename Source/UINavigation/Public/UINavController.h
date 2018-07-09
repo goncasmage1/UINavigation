@@ -25,6 +25,14 @@ enum class EInputDirection : uint8
 	Right UMETA(DisplayName = "Right")
 };
 
+UENUM(BlueprintType)
+enum class ECountdownPhase : uint8
+{
+	None UMETA(DisplayName = "None"),
+	First UMETA(DisplayName = "First"),
+	Looping UMETA(DisplayName = "Looping")
+};
+
 /**
  * This class contains the logic for input-related actions with UINavWidgets
  */
@@ -33,6 +41,122 @@ class UINAVIGATION_API AUINavController : public APlayerController
 {
 	GENERATED_BODY()
 	
+protected:
+
+	UPROPERTY(BlueprintReadOnly)
+		class UUINavWidget* ActiveWidget;
+
+	UPROPERTY(BlueprintReadOnly)
+		EInputType CurrentInputType = EInputType::Keyboard;
+
+	TMap<FString, TArray<FKey>> KeyMap = TMap<FString, TArray<FKey>>();
+
+	EInputDirection Direction = EInputDirection::None;
+
+	/*
+	Indicates whether navigation will occur periodically after the player
+	holds down a navigation key
+	*/
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+		bool bChainNavigation = true;
+
+	/*
+	If set to true, will spawn a dedicated actor to be used as a timer
+	for chaining navigation, so that even when the game is paused, navigation
+	chaining remains possible
+	*/
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+		bool bAllowChainingWhilePaused = false;
+
+	/*
+	The amount of time the player needs to hold a key for the navigation to
+	start occuring periodically
+	*/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		float InputHeldWaitTime = 0.5f;
+
+	/*
+	The amount of time that passes before the navigation chains further
+	*/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		float NavigationChainFrequency = 0.2f;
+
+	FTimerHandle NavChainHandle;
+	FTimerDelegate NavChainDelegate;
+
+	ECountdownPhase CountdownPhase = ECountdownPhase::None;
+
+	EInputDirection CallbackDirection;
+	float TimerCounter = 0.f;
+
+	/*************************************************************************/
+
+	void TimerCallback();
+	void SetTimer(EInputDirection Direction);
+	void ClearTimer();
+
+	/**
+	*	Searches all the Input Actions relevant to UINav plugin and saves them in a map
+	*/
+	void FetchUINavActionKeys();
+
+	/**
+	*	Returns the input type of the given key
+	*
+	*	@param Key The specified key	
+	*	@return The input type of the given key
+	*/
+	EInputType GetKeyInputType(FKey Key);
+
+	/**
+	*	Returns the input type of the given action
+	*
+	*	@return The input type of the given action
+	*/
+	EInputType GetActionInputType(FString Action);
+
+	/**
+	*	Verifies if a new input type is being used
+	*
+	*	@param Key The specified key
+	*	@param PressedKey The pressed key
+	*/
+	void VerifyInputTypeChangeByKey(FKey Key);
+
+	/**
+	*	Verifies if a new input type is being used
+	*
+	*	@param Action The specified action
+	*/
+	void VerifyInputTypeChangeByAction(FString Action);
+
+	/**
+	*	Notifies to the active UUINavWidget that the input type changed
+	*
+	*	@param NewInputType The new input type that is being used
+	*/
+	void NotifyInputTypeChange(EInputType NewInputType);
+
+	/**
+	*	Notifies to the active UUINavWidget that the input type changed
+	*
+	*	@param Action The action's name
+	*	@param bPressed Whether the action was pressed or released
+	*/
+	void ExecuteActionByName(FString Action, bool bPressed);
+
+	/**
+	*	Traverses the key map to find the action name associated with the given key
+	*
+	*	@param PressedKey The pressed key
+	*	@param bPressed Whether the action was pressed or released
+	*/
+	void FindActionByKey(FKey PressedKey, bool bPressed);
+
+	virtual void SetupInputComponent() override;
+	virtual void Possess(APawn* InPawn) override;
+	virtual void Tick(float DeltaTime) override;
+
 public:
 
 	/**
@@ -96,105 +220,5 @@ public:
 	FORCEINLINE UUINavWidget* GetActiveWidget() const { return ActiveWidget; }
 
 
-protected:
-
-	UPROPERTY(BlueprintReadOnly)
-		class UUINavWidget* ActiveWidget;
-
-	UPROPERTY(BlueprintReadOnly)
-		EInputType CurrentInputType = EInputType::Keyboard;
-
-	TMap<FString, TArray<FKey>> KeyMap = TMap<FString, TArray<FKey>>();
-
-	EInputDirection Direction = EInputDirection::None;
-
-
-	/*
-	Indicates whether navigation will occur periodically after the player
-	holds down a navigation key
-	*/
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		bool bChainNavigation = true;
-
-	/*
-	The amount of time the player needs to hold a key for the navigation to
-	start occuring periodically
-	*/
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		float InputHeldWaitTime = 0.5f;
-
-	/*
-	The amount of time that passes before the navigation chains further
-	*/
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		float NavigationChainFrequency = 0.2f;
-
-	FTimerHandle NavChainHandle;
-	FTimerDelegate NavChainDelegate;
-
-
-	/*************************************************************************/
-
-
-	/**
-	*	Searches all the Input Actions relevant to UINav plugin and saves them in a map
-	*/
-	void FetchUINavActionKeys();
-
-	/**
-	*	Returns the input type of the given key
-	*
-	*	@param Key The specified key	
-	*	@return The input type of the given key
-	*/
-	EInputType GetKeyInputType(FKey Key);
-
-	/**
-	*	Returns the input type of the given action
-	*
-	*	@return The input type of the given action
-	*/
-	EInputType GetActionInputType(FString Action);
-
-	/**
-	*	Verifies if a new input type is being used
-	*
-	*	@param Key The specified key
-	*	@param PressedKey The pressed key
-	*/
-	void VerifyInputTypeChangeByKey(FKey Key);
-
-	/**
-	*	Verifies if a new input type is being used
-	*
-	*	@param Action The specified action
-	*/
-	void VerifyInputTypeChangeByAction(FString Action);
-
-	/**
-	*	Notifies to the active UUINavWidget that the input type changed
-	*
-	*	@param NewInputType The new input type that is being used
-	*/
-	void NotifyInputTypeChange(EInputType NewInputType);
-
-	/**
-	*	Notifies to the active UUINavWidget that the input type changed
-	*
-	*	@param Action The action's name
-	*	@param bPressed Whether the action was pressed or released
-	*/
-	void ExecuteActionByName(FString Action, bool bPressed);
-
-	/**
-	*	Traverses the key map to find the action name associated with the given key
-	*
-	*	@param PressedKey The pressed key
-	*	@param bPressed Whether the action was pressed or released
-	*/
-	void FindActionByKey(FKey PressedKey, bool bPressed);
-
-	virtual void SetupInputComponent() override;
-	virtual void Possess(APawn* InPawn) override;
 	
 };
