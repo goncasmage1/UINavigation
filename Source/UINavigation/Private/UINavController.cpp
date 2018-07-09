@@ -48,6 +48,96 @@ void AUINavController::Possess(APawn * InPawn)
 	FetchUINavActionKeys();
 }
 
+void AUINavController::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	switch (CountdownPhase)
+	{
+		case ECountdownPhase::None:
+			return;
+			break;
+		case ECountdownPhase::First:
+			TimerCounter += DeltaTime;
+			if (TimerCounter >= InputHeldWaitTime)
+			{
+				TimerCallback();
+				TimerCounter -= InputHeldWaitTime;
+				CountdownPhase = ECountdownPhase::Looping;
+			}
+			break;
+		case ECountdownPhase::Looping:
+			TimerCounter += DeltaTime;
+			if (TimerCounter >= NavigationChainFrequency)
+			{
+				TimerCallback();
+				TimerCounter -= NavigationChainFrequency;
+			}
+			break;
+	}
+}
+
+void AUINavController::TimerCallback()
+{
+	switch (CallbackDirection)
+	{
+		case EInputDirection::Up:
+			MenuUp();
+			break;
+		case EInputDirection::Down:
+			MenuDown();
+			break;
+		case EInputDirection::Left:
+			MenuLeft();
+			break;
+		case EInputDirection::Right:
+			MenuRight();
+			break;
+	}
+}
+
+void AUINavController::SetTimer(EInputDirection Direction)
+{
+	if (bAllowChainingWhilePaused)
+	{
+		TimerCounter = 0.f;
+		CallbackDirection = Direction;
+		CountdownPhase = ECountdownPhase::First;
+	}
+	else
+	{
+		switch (Direction)
+		{
+			case EInputDirection::Up:
+				GetWorldTimerManager().SetTimer(NavChainHandle, this, &AUINavController::MenuUp, NavigationChainFrequency, true, InputHeldWaitTime);
+				break;
+			case EInputDirection::Down:
+				GetWorldTimerManager().SetTimer(NavChainHandle, this, &AUINavController::MenuDown, NavigationChainFrequency, true, InputHeldWaitTime);
+				break;
+			case EInputDirection::Left:
+				GetWorldTimerManager().SetTimer(NavChainHandle, this, &AUINavController::MenuLeft, NavigationChainFrequency, true, InputHeldWaitTime);
+				break;
+			case EInputDirection::Right:
+				GetWorldTimerManager().SetTimer(NavChainHandle, this, &AUINavController::MenuRight, NavigationChainFrequency, true, InputHeldWaitTime);
+				break;
+		}
+	}
+}
+
+void AUINavController::ClearTimer()
+{
+	if (bAllowChainingWhilePaused)
+	{
+		TimerCounter = 0.f;
+		CallbackDirection = EInputDirection::None;
+		CountdownPhase = ECountdownPhase::None;
+	}
+	else
+	{
+		GetWorldTimerManager().ClearTimer(NavChainHandle);
+	}
+}
+
 void AUINavController::FetchUINavActionKeys()
 {
 	const UInputSettings* Settings = GetDefault<UInputSettings>();
@@ -244,7 +334,7 @@ void AUINavController::NotifyMouseInputType()
 
 void AUINavController::NotifyInputTypeChange(EInputType NewInputType)
 {
-	GetWorldTimerManager().ClearTimer(NavChainHandle);
+	ClearTimer();
 
 	if (ActiveWidget == nullptr) return;
 	ActiveWidget->OnInputChanged(CurrentInputType, NewInputType);
@@ -302,7 +392,7 @@ void AUINavController::MenuSelect()
 	if (ActiveWidget == nullptr ||
 		!ActiveWidget->IsInViewport()) return;
 
-	GetWorldTimerManager().ClearTimer(NavChainHandle);
+	ClearTimer();
 	VerifyInputTypeChangeByAction(TEXT("MenuSelect"));
 	ActiveWidget->MenuSelect();
 }
@@ -312,7 +402,7 @@ void AUINavController::MenuReturn()
 	if (ActiveWidget == nullptr ||
 		!ActiveWidget->IsInViewport()) return;
 
-	GetWorldTimerManager().ClearTimer(NavChainHandle);
+	ClearTimer();
 	VerifyInputTypeChangeByAction(TEXT("MenuReturn"));
 	ActiveWidget->MenuReturn();
 }
@@ -321,28 +411,28 @@ void AUINavController::MenuUpRelease()
 {
 	if (Direction != EInputDirection::Up) return;
 
-	GetWorldTimerManager().ClearTimer(NavChainHandle);
+	ClearTimer();
 }
 
 void AUINavController::MenuDownRelease()
 {
 	if (Direction != EInputDirection::Down) return;
 
-	GetWorldTimerManager().ClearTimer(NavChainHandle);
+	ClearTimer();
 }
 
 void AUINavController::MenuLeftRelease()
 {
 	if (Direction != EInputDirection::Left) return;
 
-	GetWorldTimerManager().ClearTimer(NavChainHandle);
+	ClearTimer();
 }
 
 void AUINavController::MenuRightRelease()
 {
 	if (Direction != EInputDirection::Right) return;
 
-	GetWorldTimerManager().ClearTimer(NavChainHandle);
+	ClearTimer();
 }
 
 void AUINavController::StartMenuUp()
@@ -355,7 +445,7 @@ void AUINavController::StartMenuUp()
 
 	if (!bChainNavigation) return;
 
-	GetWorldTimerManager().SetTimer(NavChainHandle, this, &AUINavController::MenuUp, NavigationChainFrequency, true, InputHeldWaitTime);
+	SetTimer(EInputDirection::Up);
 }
 
 void AUINavController::StartMenuDown()
@@ -367,7 +457,8 @@ void AUINavController::StartMenuDown()
 	Direction = EInputDirection::Down;
 
 	if (!bChainNavigation) return;
-	GetWorldTimerManager().SetTimer(NavChainHandle, this, &AUINavController::MenuDown, NavigationChainFrequency, true, InputHeldWaitTime);
+	
+	SetTimer(EInputDirection::Down);
 }
 
 void AUINavController::StartMenuLeft()
@@ -379,7 +470,8 @@ void AUINavController::StartMenuLeft()
 	Direction = EInputDirection::Left;
 
 	if (!bChainNavigation) return;
-	GetWorldTimerManager().SetTimer(NavChainHandle, this, &AUINavController::MenuLeft, NavigationChainFrequency, true, InputHeldWaitTime);
+
+	SetTimer(EInputDirection::Left);
 }
 
 void AUINavController::StartMenuRight()
@@ -391,5 +483,6 @@ void AUINavController::StartMenuRight()
 	Direction = EInputDirection::Right;
 
 	if (!bChainNavigation) return;
-	GetWorldTimerManager().SetTimer(NavChainHandle, this, &AUINavController::MenuRight, NavigationChainFrequency, true, InputHeldWaitTime);
+
+	SetTimer(EInputDirection::Right);
 }
