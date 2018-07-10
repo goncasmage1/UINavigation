@@ -61,14 +61,6 @@ protected:
 		bool bChainNavigation = true;
 
 	/*
-	If set to true, will spawn a dedicated actor to be used as a timer
-	for chaining navigation, so that even when the game is paused, navigation
-	chaining remains possible
-	*/
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-		bool bAllowChainingWhilePaused = false;
-
-	/*
 	The amount of time the player needs to hold a key for the navigation to
 	start occuring periodically
 	*/
@@ -80,9 +72,6 @@ protected:
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		float NavigationChainFrequency = 0.2f;
-
-	FTimerHandle NavChainHandle;
-	FTimerDelegate NavChainDelegate;
 
 	ECountdownPhase CountdownPhase = ECountdownPhase::None;
 
@@ -194,7 +183,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "UINavigation")
 		void SetActiveWidget(class UUINavWidget* NewWidget);
 
-	UFUNCTION(BlueprintNativeEvent)
+	UFUNCTION(BlueprintNativeEvent, Category = "UINavigation")
 		void OnRootWidgetRemoved();
 	void OnRootWidgetRemoved_Implementation();
 
