@@ -98,44 +98,16 @@ void AUINavController::TimerCallback()
 
 void AUINavController::SetTimer(EInputDirection Direction)
 {
-	if (bAllowChainingWhilePaused)
-	{
-		TimerCounter = 0.f;
-		CallbackDirection = Direction;
-		CountdownPhase = ECountdownPhase::First;
-	}
-	else
-	{
-		switch (Direction)
-		{
-			case EInputDirection::Up:
-				GetWorldTimerManager().SetTimer(NavChainHandle, this, &AUINavController::MenuUp, NavigationChainFrequency, true, InputHeldWaitTime);
-				break;
-			case EInputDirection::Down:
-				GetWorldTimerManager().SetTimer(NavChainHandle, this, &AUINavController::MenuDown, NavigationChainFrequency, true, InputHeldWaitTime);
-				break;
-			case EInputDirection::Left:
-				GetWorldTimerManager().SetTimer(NavChainHandle, this, &AUINavController::MenuLeft, NavigationChainFrequency, true, InputHeldWaitTime);
-				break;
-			case EInputDirection::Right:
-				GetWorldTimerManager().SetTimer(NavChainHandle, this, &AUINavController::MenuRight, NavigationChainFrequency, true, InputHeldWaitTime);
-				break;
-		}
-	}
+	TimerCounter = 0.f;
+	CallbackDirection = Direction;
+	CountdownPhase = ECountdownPhase::First;
 }
 
 void AUINavController::ClearTimer()
 {
-	if (bAllowChainingWhilePaused)
-	{
-		TimerCounter = 0.f;
-		CallbackDirection = EInputDirection::None;
-		CountdownPhase = ECountdownPhase::None;
-	}
-	else
-	{
-		GetWorldTimerManager().ClearTimer(NavChainHandle);
-	}
+	TimerCounter = 0.f;
+	CallbackDirection = EInputDirection::None;
+	CountdownPhase = ECountdownPhase::None;
 }
 
 void AUINavController::FetchUINavActionKeys()
