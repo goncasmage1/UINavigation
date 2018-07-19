@@ -2,7 +2,6 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
 #include "Engine.h"
 #include "Blueprint/UserWidget.h"
 #include "UINavWidget.generated.h"

@@ -37,7 +37,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavOptionBox, meta = (EditCondition = "!bUseNumberRange"))
 		TArray<FName> StringOptions;
 
-	UFUNCTION(BlueprintCallable)
-		virtual void NavigateRight() override;
+	virtual void NavigateRight() override;
 
 };
