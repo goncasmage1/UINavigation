@@ -1,8 +1,7 @@
 // Copyright (C) 2018 Gonçalo Marques - All Rights Reserved
 
 #include "UINavOptionBox.h"
-#include "TextBlock.h"
-#include "WidgetTree.h"
+#include "Blueprint/WidgetTree.h"
 
 
 void UUINavOptionBox::NativeConstruct()

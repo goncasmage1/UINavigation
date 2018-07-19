@@ -96,10 +96,10 @@ void AUINavController::TimerCallback()
 	}
 }
 
-void AUINavController::SetTimer(EInputDirection Direction)
+void AUINavController::SetTimer(EInputDirection TimerDirection)
 {
 	TimerCounter = 0.f;
-	CallbackDirection = Direction;
+	CallbackDirection = TimerDirection;
 	CountdownPhase = ECountdownPhase::First;
 }
 

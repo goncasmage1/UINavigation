@@ -11,15 +11,13 @@ public class UINavigation : ModuleRules
 		PublicIncludePaths.AddRange(
 			new string[] {
 				"UINavigation/Public"
-				// ... add public include paths required here ...
 			}
 			);
 				
 		
 		PrivateIncludePaths.AddRange(
 			new string[] {
-				"UINavigation/Private",
-				// ... add other private include paths required here ...
+				"UINavigation/Private"
 			}
 			);
 			
@@ -27,8 +25,7 @@ public class UINavigation : ModuleRules
 		PublicDependencyModuleNames.AddRange(
 			new string[]
 			{
-				"Core",
-				// ... add other public dependencies that you statically link with here ...
+				"Core"
 			}
 			);
 			
@@ -43,7 +40,6 @@ public class UINavigation : ModuleRules
                 "SlateCore",
                 "InputCore",
                 "RHI"
-				// ... add private dependencies that you statically link with here ...	
 			}
 			);
 		
@@ -51,7 +47,6 @@ public class UINavigation : ModuleRules
 		DynamicallyLoadedModuleNames.AddRange(
 			new string[]
 			{
-				// ... add any modules that your module loads dynamically here ...
 			}
 			);
 	}

@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "ModuleManager.h"
+//#include "ModuleManager.h"
 
 class FUINavigationModule : public IModuleInterface
 {
