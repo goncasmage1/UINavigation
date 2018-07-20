@@ -27,8 +27,7 @@ public:
 
 	virtual void NativeConstruct() override;
 
-	UFUNCTION(BlueprintCallable)
-		virtual void NavigateRight() override;
+	virtual void NavigateRight() override;
 
 	UFUNCTION(BlueprintCallable)
 		float GetSliderPercent() const;

@@ -1,6 +1,15 @@
 # UINavigation
 
-UINavigation is a UE4 plugin that allows you to easily setup Navigation within UMG that works with Mouse, Keyboard, Gamepad, or any combination of those. It's designed to be hands-off, flexible and extendable. It has quite a few examples and a thorough documentation.
+UINavigation is a UE4 plugin that allows you to easily setup Navigation within UMG that works with Mouse, Keyboard, Gamepad, or any combination of those. It's designed to be hands-off, flexible and extendable. It features:
+- 4 Navigation options (used in 99% of video game menus) that you can use simultaneously, including:
+    - Changing text color of currently selected option
+    - Changing the location of a selector (2D image that indicates which option is currently selected)
+    - Changing button states
+    - Applying animations (i.e. text size, text offset, etc.)
+- Navigation chaining (when holding down a button)
+- A functional graphics options menu
+- Standard menu examples
+- A thorough documentation blueprint
 
 ## Documentation
 
