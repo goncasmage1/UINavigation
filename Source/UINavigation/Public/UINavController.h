@@ -208,6 +208,7 @@ public:
 
 	FORCEINLINE UUINavWidget* GetActiveWidget() const { return ActiveWidget; }
 
+	FORCEINLINE TMap<FString, TArray<FKey>> GetKeyMap() const { return KeyMap; }
 
 	
 };

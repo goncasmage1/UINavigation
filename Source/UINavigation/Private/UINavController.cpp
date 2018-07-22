@@ -117,8 +117,7 @@ void AUINavController::FetchUINavActionKeys()
 	for (FInputActionKeyMapping Action : Actions)
 	{
 		FString NewName = Action.ActionName.ToString();
-		if (NewName.Left(4).Compare(TEXT("Menu")) != 0)
-			continue;
+		if (NewName.Left(4).Compare(TEXT("Menu")) != 0) continue;
 
 		TArray<FKey>* KeyArray = KeyMap.Find(NewName);
 		if (KeyArray == nullptr)

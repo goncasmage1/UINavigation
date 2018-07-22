@@ -3,6 +3,7 @@
 #include "UINavWidget.h"
 #include "UINavButton.h"
 #include "UINavComponentBox.h"
+#include "UINavInputBox.h"
 #include "UINavComponent.h"
 #include "UINavController.h"
 #include "Blueprint/UserWidget.h"
@@ -167,6 +168,8 @@ void UUINavWidget::TraverseHierarquy()
 		}
 
 		UUINavButton* NewNavButton = Cast<UUINavButton>(widget);
+		UUINavButton* InputBoxExtraButton = nullptr;
+
 		if (NewNavButton == nullptr)
 		{
 			UUINavComponent* UIComp = Cast<UUINavComponent>(widget);
@@ -177,28 +180,43 @@ void UUINavWidget::TraverseHierarquy()
 				UINavComponentsIndices.Add(UINavButtons.Num());
 				UINavComponents.Add(UIComp);
 
-				if (Cast<UUINavComponentBox>(widget))
+				UUINavComponentBox* UICompBox = Cast<UUINavComponentBox>(widget);
+				if (UICompBox != nullptr)
 				{
 					ComponentBoxIndices.Add(UINavButtons.Num());
-					UINavComponentBoxes.Add(Cast<UUINavComponentBox>(widget));
+					UINavComponentBoxes.Add(UICompBox);
+				}
+
+				UUINavInputBox* InputBox = Cast<UUINavInputBox>(widget);
+				if (InputBox != nullptr)
+				{
+					InputBoxIndices.Add({ UINavButtons.Num() , UINavButtons.Num() + 1});
+					UINavInputBoxes.Add(InputBox);
+
+					InputBoxExtraButton = InputBox->NavButton2;
 				}
 			}
 		}
 
 		if (NewNavButton == nullptr) continue;
 
-		if (!bOverrideButtonIndices)
+		for (int i = 0; i <= (int)(InputBoxExtraButton != nullptr); ++i)
 		{
-			NewNavButton->ButtonIndex = UINavButtons.Num();
-		}
-		NewNavButton->CustomHover.AddDynamic(this, &UUINavWidget::HoverEvent);
-		NewNavButton->CustomUnhover.AddDynamic(this, &UUINavWidget::UnhoverEvent);
-		NewNavButton->CustomClick.AddDynamic(this, &UUINavWidget::ClickEvent);
-		NewNavButton->CustomRelease.AddDynamic(this, &UUINavWidget::ReleaseEvent);
-		bSwitchedStyle.Add(false);
+			if (!bOverrideButtonIndices)
+			{
+				NewNavButton->ButtonIndex = UINavButtons.Num();
+			}
+			NewNavButton->CustomHover.AddDynamic(this, &UUINavWidget::HoverEvent);
+			NewNavButton->CustomUnhover.AddDynamic(this, &UUINavWidget::UnhoverEvent);
+			NewNavButton->CustomClick.AddDynamic(this, &UUINavWidget::ClickEvent);
+			NewNavButton->CustomRelease.AddDynamic(this, &UUINavWidget::ReleaseEvent);
+			bSwitchedStyle.Add(false);
 
-		//Add button to array of UIUINavButtons
-		UINavButtons.Add(NewNavButton);
+			//Add button to array of UIUINavButtons
+			UINavButtons.Add(NewNavButton);
+
+			if (InputBoxExtraButton != nullptr) NewNavButton = InputBoxExtraButton;
+		}
 	}
 
 	if (bOverrideButtonIndices)
@@ -728,6 +746,7 @@ void UUINavWidget::NavigateTo(int Index, bool bHoverEvent)
 		OnNavigate(ButtonIndex, Index);
 		if (UINavAnimations.Num() > 0) ExecuteAnimations(ButtonIndex, Index);
 	}
+
 	//Update all the possible scroll boxes in the widget
 	for (int i = 0; i < ScrollBoxes.Num(); ++i)
 	{
