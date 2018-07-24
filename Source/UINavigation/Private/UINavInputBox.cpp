@@ -45,23 +45,17 @@ void UUINavInputBox::UpdateActionKey(FKey NewKey, bool SecondKey)
 	UInputSettings* Settings = const_cast<UInputSettings*>(GetDefault<UInputSettings>());
 	TArray<FInputActionKeyMapping>& Actions = Settings->ActionMappings;
 
-	int Found = 0;
 	for (FInputActionKeyMapping& Action : Actions)
 	{
 		FString NewName = Action.ActionName.ToString();
 		if (NewName.Compare(ActionName) != 0) continue;
 
-		Found++;
+		Action.Key = NewKey;
+		if (SecondKey) Key2 = NewKey;
+		else Key1 = NewKey;
 
-		if ((Found == 1 && !SecondKey) || (Found == 2 && SecondKey))
-		{
-			Action.Key = NewKey;
-			if (SecondKey) Key2 = NewKey;
-			else Key1 = NewKey;
-
-			if (SecondKey) NavText2->SetText(Key2.GetDisplayName());
-			else NavText->SetText(Key1.GetDisplayName());
-		}
+		if (SecondKey) NavText2->SetText(Key2.GetDisplayName());
+		else NavText->SetText(Key1.GetDisplayName());
 	}
 
 	Settings->SaveKeyMappings();

@@ -353,6 +353,8 @@ FReply UUINavWidget::NativeOnKeyDown(const FGeometry & InGeometry, const FKeyEve
 	{
 		UINavInputBoxes[InputBoxIndex / 2]->UpdateActionKey(InKeyEvent.GetKey(), InputBoxIndex % 2 != 0);
 		bWaitForInput = false;
+
+		if (bRemoveFocus) SetUserFocus(nullptr);
 	}
 	else
 	{
