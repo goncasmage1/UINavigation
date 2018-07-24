@@ -176,7 +176,7 @@ void UUINavWidget::TraverseHierarquy()
 
 			InputContainer->StartingIndex = UINavButtons.Num();
 
-			for (int i = 0; i < InputContainer->ActionIndexes.Num(); ++i)
+			for (int i = 0; i < InputContainer->ActionNames.Num(); ++i)
 			{
 				InputBoxIndices.Add(UINavButtons.Num());
 				InputBoxIndices.Add(UINavButtons.Num() + 1);
@@ -429,7 +429,7 @@ void UUINavWidget::AppendVerticalNavigation(int Dimension, FButtonNavigation Edg
 	{
 		if (InputContainerIndices[j] >= StartingIndex && InputContainerIndices[j] <= StartingIndex + Dimension)
 		{
-			ExtraButtons += (UINavInputContainers[j]->ActionIndexes.Num() * 2) - 1;
+			ExtraButtons += (UINavInputContainers[j]->ActionNames.Num() * 2) - 1;
 		}
 	}
 	if (Dimension == UINavButtons.Num() && ExtraButtons > 0) Dimension -= (ExtraButtons);
@@ -439,7 +439,7 @@ void UUINavWidget::AppendVerticalNavigation(int Dimension, FButtonNavigation Edg
 		int InputContainerIndex = InputContainerIndices.Find(i);
 		if (InputContainerIndex != INDEX_NONE)
 		{
-			int NumberOfActions = UINavInputContainers[InputContainerIndex]->ActionIndexes.Num();
+			int NumberOfActions = UINavInputContainers[InputContainerIndex]->ActionNames.Num();
 			for (int j = 0; j < NumberOfActions; ++j)
 			{
 				if (j != 0) NewNav.UpButton = ButtonsNav.Num() - 2;
@@ -511,7 +511,7 @@ void UUINavWidget::AppendHorizontalNavigation(int Dimension, FButtonNavigation E
 	{
 		if (InputContainerIndices[j] >= StartingIndex && InputContainerIndices[j] <= StartingIndex + Dimension)
 		{
-			ExtraButtons += (UINavInputContainers[j]->ActionIndexes.Num() * 2) - 1;
+			ExtraButtons += (UINavInputContainers[j]->ActionNames.Num() * 2) - 1;
 		}
 	}
 
@@ -522,7 +522,7 @@ void UUINavWidget::AppendHorizontalNavigation(int Dimension, FButtonNavigation E
 		int InputContainerIndex = InputContainerIndices.Find(i);
 		if (InputContainerIndex != INDEX_NONE)
 		{
-			int NumberOfActions = UINavInputContainers[InputContainerIndex]->ActionIndexes.Num();
+			int NumberOfActions = UINavInputContainers[InputContainerIndex]->ActionNames.Num();
 			for (int j = 0; j < NumberOfActions; ++j)
 			{
 				if (i == 0) NewNav.LeftButton = EdgeNavigation.LeftButton == -1 ? (bWrap ? StartingIndex + Dimension + ExtraButtons - 1 : NewNav.LeftButton) : EdgeNavigation.LeftButton;
@@ -1083,6 +1083,15 @@ void UUINavWidget::ReleaseEvent(int Index)
 			}
 		}
 	}
+}
+
+void UUINavWidget::SetupUINavButtonDelegates(UUINavButton * NewButton)
+{
+	NewButton->CustomHover.AddDynamic(this, &UUINavWidget::HoverEvent);
+	NewButton->CustomUnhover.AddDynamic(this, &UUINavWidget::UnhoverEvent);
+	NewButton->CustomClick.AddDynamic(this, &UUINavWidget::ClickEvent);
+	NewButton->CustomRelease.AddDynamic(this, &UUINavWidget::ReleaseEvent);
+	bSwitchedStyle.Add(false);
 }
 
 void UUINavWidget::MenuUp()

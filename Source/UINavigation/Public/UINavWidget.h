@@ -556,6 +556,7 @@ public:
 	UFUNCTION(Category = "UINavigation")
 		void ReleaseEvent(int Index);
 
+	void SetupUINavButtonDelegates(class UUINavButton* NewButton);
 
 	UFUNCTION(BlueprintCallable, Category = "UINavigation")
 		virtual void MenuUp();

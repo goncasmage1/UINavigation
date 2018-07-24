@@ -43,7 +43,7 @@ public:
 	The indexes of the desired actions to allow for rebinding
 	*/
 	UPROPERTY(EditAnywhere)
-		TArray<int> ActionIndexes;
+		TArray<FName> ActionNames;
 
 	UPROPERTY()
 		TArray<class UUINavInputBox*> InputBoxes;
