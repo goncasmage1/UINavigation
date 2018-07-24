@@ -154,6 +154,13 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = "UINavigation")
 		TArray<class UUINavComponentBox*> UINavComponentBoxes;
 
+	//The indices of all the UINavInputContainers in this widget
+	TArray<int> InputContainerIndices;
+
+	//All the UINavInputContainers in this Widget
+	UPROPERTY(BlueprintReadOnly, Category = "UINavigation")
+		TArray<class UUINavInputContainer*> UINavInputContainers;
+
 	//The indices of all the UINavInputBoxes in this widget
 	TArray<TArray<int>> InputBoxIndices;
 

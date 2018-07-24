@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "UINavInputContainer.h"
+#include "UINavWidget.h"
 #include "UINavInputBox.h"
 #include "UINavController.h"
 #include "GameFramework/InputSettings.h"
@@ -12,7 +13,10 @@
 void UUINavInputContainer::NativePreConstruct()
 {
 	Super::NativePreConstruct();
+}
 
+void UUINavInputContainer::CreateInputBoxes()
+{
 	if (InputBox_BP == nullptr) return;
 
 	AUINavController* PC = Cast<AUINavController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
@@ -22,18 +26,30 @@ void UUINavInputContainer::NativePreConstruct()
 	TArray<FKey> ActionKeys;
 	TArray<FName> FoundNames;
 
-	for (FInputActionKeyMapping& Action : Actions)
+	//TODO: Optimize action finding in UINavInputBox
+
+	for (int i = 0; i < Actions.Num(); ++i)
 	{
-		FName NewName = Action.ActionName;
+		if (ActionIndexes.Find(i) == INDEX_NONE) continue;
 
-		if (FoundNames.Find(NewName) != INDEX_NONE) continue;
-		FoundNames.Add(NewName);
-
-		ActionKeys.Add(Action.Key);
+		FName NewName = Actions[i].ActionName;
+		ActionKeys.Add(Actions[i].Key);
 
 		UUINavInputBox* NewInputBox = CreateWidget<UUINavInputBox>(PC, InputBox_BP);
+		if (NewInputBox == nullptr) continue;
+
+		ParentWidget->UINavButtons[StartingIndex + i * 2] = NewInputBox->NavButton;
+		ParentWidget->UINavButtons[StartingIndex + i * 2 + 1] = NewInputBox->NavButton2;
+		ParentWidget->UINavInputBoxes.Add(NewInputBox);
 		NewInputBox->ActionName = NewName.ToString();
 		NewInputBox->AddToViewport();
 		Panel->AddChild(NewInputBox);
 	}
+}
+
+void UUINavInputContainer::SetParentWidget(UUINavWidget * NewParent)
+{
+	ParentWidget = NewParent;
+
+	CreateInputBoxes();
 }

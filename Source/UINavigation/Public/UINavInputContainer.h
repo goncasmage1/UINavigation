@@ -16,6 +16,8 @@ class UINAVIGATION_API UUINavInputContainer : public UUserWidget
 	
 protected:
 
+	void CreateInputBoxes();
+
 	/*
 	The desired InputBox widget blueprint
 	*/
@@ -24,12 +26,18 @@ protected:
 
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UPanelWidget* Panel;
+	
+	class UUINavWidget* ParentWidget;
 
 public:
 
 	virtual void NativePreConstruct() override;
 
+	void SetParentWidget(class UUINavWidget* NewParent);
+
 	//-----------------------------------------------------------------------
+
+	int StartingIndex = -1;
 
 	/*
 	The indexes of the desired actions to allow for rebinding
@@ -39,5 +47,5 @@ public:
 
 	UPROPERTY()
 		TArray<class UUINavInputBox*> InputBoxes;
-	
+
 };
