@@ -515,7 +515,7 @@ void UUINavWidget::AppendHorizontalNavigation(int Dimension, FButtonNavigation E
 		}
 	}
 
-	if (Dimension == UINavButtons.Num()) Dimension -= (ExtraButtons - 1);
+	if (Dimension == UINavButtons.Num() && ExtraButtons > 0) Dimension -= (ExtraButtons);
 
 	for (int i = 0; i < Dimension; i++)
 	{
