@@ -81,6 +81,8 @@ protected:
 	/*************************************************************************/
 
 	void TimerCallback();
+	void SetTimer(EInputDirection Direction);
+	void ClearTimer();
 
 	/**
 	*	Searches all the Input Actions relevant to UINav plugin and saves them in a map
@@ -185,9 +187,6 @@ public:
 		void OnRootWidgetRemoved();
 	void OnRootWidgetRemoved_Implementation();
 
-	void SetTimer(EInputDirection Direction);
-	void ClearTimer();
-
 	void MenuUp();
 	void MenuDown();
 	void MenuLeft();
@@ -209,7 +208,6 @@ public:
 
 	FORCEINLINE UUINavWidget* GetActiveWidget() const { return ActiveWidget; }
 
-	FORCEINLINE TMap<FString, TArray<FKey>> GetKeyMap() const { return KeyMap; }
 
 	
 };

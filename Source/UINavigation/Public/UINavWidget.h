@@ -66,16 +66,11 @@ protected:
 	bool bMovingSelector = false;
 	bool bAllowNavigation = true;
 
-	bool bWaitForInput = false;
-	bool bRemoveFocus = false;
-
 	//Used to track when the selector's position should be updated
 	int WaitForTick;
 
 	//The index of the button that will be navigated to when movement is allowed
 	int HaltedIndex = -1;
-
-	int InputBoxIndex = -1;
 
 	float MovementCounter;
 	float MovementTime;
@@ -151,27 +146,13 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = "UINavigation")
 		TArray<class UUINavComponent*> UINavComponents;
 
-	//The indices of all the UINavComponentBoxes in this widget
+	//The indices of all the UINavUINavComponentBoxes in this widget
 	UPROPERTY(BlueprintReadOnly, Category = "UINavigation")
 		TArray<int> ComponentBoxIndices;
 
-	//All the UINavComponentBoxes in this Widget
+	//All the UINavUINavComponentBoxes in this Widget
 	UPROPERTY(BlueprintReadOnly, Category = "UINavigation")
 		TArray<class UUINavComponentBox*> UINavComponentBoxes;
-
-	//The indices of all the UINavInputContainers in this widget
-	TArray<int> InputContainerIndices;
-
-	//All the UINavInputContainers in this Widget
-	UPROPERTY(BlueprintReadOnly, Category = "UINavigation")
-		TArray<class UUINavInputContainer*> UINavInputContainers;
-
-	//The indices of all the UINavInputBoxes in this widget
-	TArray<int> InputBoxIndices;
-
-	//All the UINavInputBoxes in this Widget
-	UPROPERTY(BlueprintReadOnly, Category = "UINavigation")
-		TArray<class UUINavInputBox*> UINavInputBoxes;
 
 	//All the scrollboxes in this widget
 	UPROPERTY(BlueprintReadOnly, Category = "UINavigation")
@@ -433,8 +414,6 @@ public:
 		void OnSelect(int Index);
 	virtual void OnSelect_Implementation(int Index);
 
-	void OnPreSelect(int Index);
-
 	/**
 	*	Called when ReturnToParent is called (i.e. the player wants to exit the menu)
 	*/
@@ -556,7 +535,6 @@ public:
 	UFUNCTION(Category = "UINavigation")
 		void ReleaseEvent(int Index);
 
-	void SetupUINavButtonDelegates(class UUINavButton* NewButton);
 
 	UFUNCTION(BlueprintCallable, Category = "UINavigation")
 		virtual void MenuUp();

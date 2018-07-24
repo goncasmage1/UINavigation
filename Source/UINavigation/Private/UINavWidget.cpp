@@ -3,8 +3,6 @@
 #include "UINavWidget.h"
 #include "UINavButton.h"
 #include "UINavComponentBox.h"
-#include "UINavInputBox.h"
-#include "UINavInputContainer.h"
 #include "UINavComponent.h"
 #include "UINavController.h"
 #include "Blueprint/UserWidget.h"
@@ -168,29 +166,7 @@ void UUINavWidget::TraverseHierarquy()
 			ScrollBoxes.Add(Scroll);
 		}
 
-		UUINavInputContainer* InputContainer = Cast<UUINavInputContainer>(widget);
-		if (InputContainer != nullptr)
-		{
-			InputContainerIndices.Add(UINavButtons.Num());
-			UINavInputContainers.Add(InputContainer);
-
-			InputContainer->StartingIndex = UINavButtons.Num();
-
-			for (int i = 0; i < InputContainer->ActionNames.Num(); ++i)
-			{
-				InputBoxIndices.Add(UINavButtons.Num());
-				InputBoxIndices.Add(UINavButtons.Num() + 1);
-
-				UINavButtons.Add(nullptr);
-				UINavButtons.Add(nullptr);
-			}
-
-			InputContainer->SetParentWidget(this);
-		}
-
 		UUINavButton* NewNavButton = Cast<UUINavButton>(widget);
-		UUINavButton* InputBoxExtraButton = nullptr;
-
 		if (NewNavButton == nullptr)
 		{
 			UUINavComponent* UIComp = Cast<UUINavComponent>(widget);
@@ -201,44 +177,28 @@ void UUINavWidget::TraverseHierarquy()
 				UINavComponentsIndices.Add(UINavButtons.Num());
 				UINavComponents.Add(UIComp);
 
-				UUINavComponentBox* UICompBox = Cast<UUINavComponentBox>(widget);
-				if (UICompBox != nullptr)
+				if (Cast<UUINavComponentBox>(widget))
 				{
 					ComponentBoxIndices.Add(UINavButtons.Num());
-					UINavComponentBoxes.Add(UICompBox);
-				}
-
-				UUINavInputBox* InputBox = Cast<UUINavInputBox>(widget);
-				if (InputBox != nullptr)
-				{
-					InputBoxIndices.Add(UINavButtons.Num());
-					InputBoxIndices.Add(UINavButtons.Num() + 1);
-					UINavInputBoxes.Add(InputBox);
-
-					InputBoxExtraButton = InputBox->NavButton2;
+					UINavComponentBoxes.Add(Cast<UUINavComponentBox>(widget));
 				}
 			}
 		}
 
 		if (NewNavButton == nullptr) continue;
 
-		for (int i = 0; i <= (int)(InputBoxExtraButton != nullptr); ++i)
+		if (!bOverrideButtonIndices)
 		{
-			if (!bOverrideButtonIndices)
-			{
-				NewNavButton->ButtonIndex = UINavButtons.Num();
-			}
-			NewNavButton->CustomHover.AddDynamic(this, &UUINavWidget::HoverEvent);
-			NewNavButton->CustomUnhover.AddDynamic(this, &UUINavWidget::UnhoverEvent);
-			NewNavButton->CustomClick.AddDynamic(this, &UUINavWidget::ClickEvent);
-			NewNavButton->CustomRelease.AddDynamic(this, &UUINavWidget::ReleaseEvent);
-			bSwitchedStyle.Add(false);
-
-			//Add button to array of UIUINavButtons
-			UINavButtons.Add(NewNavButton);
-
-			if (InputBoxExtraButton != nullptr) NewNavButton = InputBoxExtraButton;
+			NewNavButton->ButtonIndex = UINavButtons.Num();
 		}
+		NewNavButton->CustomHover.AddDynamic(this, &UUINavWidget::HoverEvent);
+		NewNavButton->CustomUnhover.AddDynamic(this, &UUINavWidget::UnhoverEvent);
+		NewNavButton->CustomClick.AddDynamic(this, &UUINavWidget::ClickEvent);
+		NewNavButton->CustomRelease.AddDynamic(this, &UUINavWidget::ReleaseEvent);
+		bSwitchedStyle.Add(false);
+
+		//Add button to array of UIUINavButtons
+		UINavButtons.Add(NewNavButton);
 	}
 
 	if (bOverrideButtonIndices)
@@ -349,18 +309,10 @@ FReply UUINavWidget::NativeOnKeyDown(const FGeometry & InGeometry, const FKeyEve
 {
 	Super::NativeOnKeyDown(InGeometry, InKeyEvent);
 
-	if (bWaitForInput)
+	if (PressedKeys.Find(InKeyEvent.GetKey()) == INDEX_NONE)
 	{
-		UINavInputBoxes[InputBoxIndex / 2]->UpdateActionKey(InKeyEvent.GetKey(), InputBoxIndex % 2 != 0);
-		bWaitForInput = false;
-	}
-	else
-	{
-		if (PressedKeys.Find(InKeyEvent.GetKey()) == INDEX_NONE)
-		{
-			PressedKeys.Add(InKeyEvent.GetKey());
-			CurrentPC->NotifyKeyPressed(InKeyEvent.GetKey());
-		}
+		PressedKeys.Add(InKeyEvent.GetKey());
+		CurrentPC->NotifyKeyPressed(InKeyEvent.GetKey());
 	}
 
 	return FReply::Handled();
@@ -423,67 +375,35 @@ void UUINavWidget::AppendVerticalNavigation(int Dimension, FButtonNavigation Edg
 	FButtonNavigation NewNav;
 
 	int StartingIndex = ButtonNavigations.Num();
-	int ExtraButtons = 0;
-
-	for (int j = 0; j < InputContainerIndices.Num(); ++j)
-	{
-		if (InputContainerIndices[j] >= StartingIndex && InputContainerIndices[j] <= StartingIndex + Dimension)
-		{
-			ExtraButtons += (UINavInputContainers[j]->ActionNames.Num() * 2) - 1;
-		}
-	}
-	if (Dimension == UINavButtons.Num() && ExtraButtons > 0) Dimension -= (ExtraButtons);
 
 	for (int i = 0; i < Dimension; i++)
 	{
-		int InputContainerIndex = InputContainerIndices.Find(i);
-		if (InputContainerIndex != INDEX_NONE)
+		if (i == 0)
 		{
-			int NumberOfActions = UINavInputContainers[InputContainerIndex]->ActionNames.Num();
-			for (int j = 0; j < NumberOfActions; ++j)
-			{
-				if (j != 0) NewNav.UpButton = ButtonsNav.Num() - 2;
-				else
-				{
-					if (i == 0) NewNav.UpButton = EdgeNavigation.UpButton == -1 ? (bWrap ? StartingIndex + Dimension + ExtraButtons - 1 : NewNav.UpButton) : EdgeNavigation.UpButton;
-					else NewNav.UpButton = StartingIndex + i - 1;
-				}
-
-				if (j != NumberOfActions - 1) NewNav.DownButton = ButtonsNav.Num() + 2;
-				else
-				{
-					if (i == Dimension - 1) NewNav.DownButton = EdgeNavigation.DownButton == -1 ? (bWrap ? StartingIndex : NewNav.DownButton) : EdgeNavigation.DownButton;
-					else NewNav.DownButton = StartingIndex + i + ExtraButtons + 1;
-				}
-
-				if (EdgeNavigation.LeftButton != -1) NewNav.LeftButton = EdgeNavigation.LeftButton;
-				else NewNav.LeftButton = -1;
-				NewNav.RightButton = ButtonsNav.Num() + 1;
-
-				ButtonsNav.Add(NewNav);
-
-				if (j != 0) NewNav.UpButton++;
-
-				if (j != NumberOfActions - 1) NewNav.DownButton++;
-
-				NewNav.LeftButton = ButtonsNav.Num() - 1;
-				if (EdgeNavigation.RightButton != -1) NewNav.RightButton = EdgeNavigation.RightButton;
-				else NewNav.RightButton = -1;
-
-				ButtonsNav.Add(NewNav);
-			}
-
-			continue;
+			NewNav.UpButton = EdgeNavigation.UpButton == -1 ? (bWrap ? StartingIndex + Dimension - 1 : NewNav.UpButton) : EdgeNavigation.UpButton;
+		}
+		else
+		{
+			NewNav.UpButton = StartingIndex + i - 1;
 		}
 
-		if (i == 0) NewNav.UpButton = EdgeNavigation.UpButton == -1 ? (bWrap ? StartingIndex + Dimension + ExtraButtons - 1 : NewNav.UpButton) : EdgeNavigation.UpButton;
-		else NewNav.UpButton = StartingIndex + i - 1;
+		if (i == Dimension - 1)
+		{
+			NewNav.DownButton = EdgeNavigation.DownButton == -1 ? (bWrap ? StartingIndex : NewNav.DownButton) : EdgeNavigation.DownButton;
+		}
+		else
+		{
+			NewNav.DownButton = StartingIndex + i + 1;
+		}
 
-		if (i == Dimension - 1) NewNav.DownButton = EdgeNavigation.DownButton == -1 ? (bWrap ? StartingIndex : NewNav.DownButton) : EdgeNavigation.DownButton;
-		else NewNav.DownButton = StartingIndex + i + 1;
-
-		if (EdgeNavigation.LeftButton != -1) NewNav.LeftButton = EdgeNavigation.LeftButton;
-		if (EdgeNavigation.RightButton != -1) NewNav.RightButton = EdgeNavigation.RightButton;
+		if (EdgeNavigation.LeftButton != -1)
+		{
+			NewNav.LeftButton = EdgeNavigation.LeftButton;
+		}
+		if (EdgeNavigation.RightButton != -1)
+		{
+			NewNav.RightButton = EdgeNavigation.RightButton;
+		}
 
 		ButtonsNav.Add(NewNav);
 	}
@@ -505,69 +425,35 @@ void UUINavWidget::AppendHorizontalNavigation(int Dimension, FButtonNavigation E
 	FButtonNavigation NewNav;
 
 	int StartingIndex = ButtonNavigations.Num();
-	int ExtraButtons = 0;
-
-	for (int j = 0; j < InputContainerIndices.Num(); ++j)
-	{
-		if (InputContainerIndices[j] >= StartingIndex && InputContainerIndices[j] <= StartingIndex + Dimension)
-		{
-			ExtraButtons += (UINavInputContainers[j]->ActionNames.Num() * 2) - 1;
-		}
-	}
-
-	if (Dimension == UINavButtons.Num()) Dimension -= (ExtraButtons - 1);
 
 	for (int i = 0; i < Dimension; i++)
 	{
-		int InputContainerIndex = InputContainerIndices.Find(i);
-		if (InputContainerIndex != INDEX_NONE)
+		if (i == 0)
 		{
-			int NumberOfActions = UINavInputContainers[InputContainerIndex]->ActionNames.Num();
-			for (int j = 0; j < NumberOfActions; ++j)
-			{
-				if (i == 0) NewNav.LeftButton = EdgeNavigation.LeftButton == -1 ? (bWrap ? StartingIndex + Dimension + ExtraButtons - 1 : NewNav.LeftButton) : EdgeNavigation.LeftButton;
-				else NewNav.LeftButton = StartingIndex + i - 1;
-
-				NewNav.RightButton = ButtonsNav.Num() + 1;
-
-				if (j == 0)
-				{
-					if (EdgeNavigation.UpButton != -1) NewNav.UpButton = EdgeNavigation.UpButton;
-					else NewNav.UpButton = -1;
-				}
-				else NewNav.UpButton = ButtonsNav.Num() - 2;
-
-				if (j == NumberOfActions - 1)
-				{
-					if (EdgeNavigation.DownButton != -1) NewNav.DownButton = EdgeNavigation.DownButton;
-					else NewNav.DownButton = -1;
-				}
-				else NewNav.DownButton = ButtonsNav.Num() + 2;
-
-				ButtonsNav.Add(NewNav);
-
-				NewNav.LeftButton = ButtonsNav.Num() - 1;
-
-				if (i == Dimension - 1) NewNav.RightButton = EdgeNavigation.RightButton == -1 ? (bWrap ? StartingIndex : NewNav.RightButton) : EdgeNavigation.RightButton;
-				else NewNav.RightButton = StartingIndex + i + ExtraButtons + 1;
-
-				if (j != 0) NewNav.UpButton++;
-				if (j != NumberOfActions - 1) NewNav.DownButton++;
-
-				ButtonsNav.Add(NewNav);
-			}
-
-			continue;
+			NewNav.LeftButton = EdgeNavigation.LeftButton == -1 ? (bWrap ? StartingIndex + Dimension - 1 : NewNav.LeftButton) : EdgeNavigation.LeftButton;
+		}
+		else
+		{
+			NewNav.LeftButton = StartingIndex + i - 1;
 		}
 
-		if (i == 0) NewNav.LeftButton = EdgeNavigation.LeftButton == -1 ? (bWrap ? StartingIndex + Dimension + ExtraButtons - 1 : NewNav.LeftButton) : EdgeNavigation.LeftButton;
-		else NewNav.LeftButton = StartingIndex + i - 1;
+		if (i == Dimension - 1)
+		{
+			NewNav.RightButton = EdgeNavigation.RightButton == -1 ? (bWrap ? StartingIndex : NewNav.RightButton) : EdgeNavigation.RightButton;
+		}
+		else
+		{
+			NewNav.RightButton = StartingIndex + i + 1;
+		}
 
-		if (i == Dimension - 1) NewNav.RightButton = EdgeNavigation.RightButton == -1 ? (bWrap ? StartingIndex : NewNav.RightButton) : EdgeNavigation.RightButton;
-		else NewNav.RightButton = StartingIndex + i + 1;
-
-		if (EdgeNavigation.UpButton != -1) NewNav.UpButton = EdgeNavigation.UpButton;
-		if (EdgeNavigation.DownButton != -1) NewNav.DownButton = EdgeNavigation.DownButton;
+		if (EdgeNavigation.UpButton != -1)
+		{
+			NewNav.UpButton = EdgeNavigation.UpButton;
+		}
+		if (EdgeNavigation.DownButton != -1)
+		{
+			NewNav.DownButton = EdgeNavigation.DownButton;
+		}
 
 		ButtonsNav.Add(NewNav);
 	}
@@ -842,7 +728,6 @@ void UUINavWidget::NavigateTo(int Index, bool bHoverEvent)
 		OnNavigate(ButtonIndex, Index);
 		if (UINavAnimations.Num() > 0) ExecuteAnimations(ButtonIndex, Index);
 	}
-
 	//Update all the possible scroll boxes in the widget
 	for (int i = 0; i < ScrollBoxes.Num(); ++i)
 	{
@@ -874,28 +759,6 @@ void UUINavWidget::OnNavigate_Implementation(int From, int To)
 void UUINavWidget::OnSelect_Implementation(int Index)
 {
 
-}
-
-void UUINavWidget::OnPreSelect(int Index)
-{
-	InputBoxIndex = InputBoxIndices.Find(Index);
-	if (InputBoxIndex != INDEX_NONE)
-	{
-		UINavInputBoxes[InputBoxIndex / 2]->NotifySelected(InputBoxIndex % 2 != 0);
-
-		CurrentPC->ClearTimer();
-		bWaitForInput = true;
-
-		bRemoveFocus = !HasUserFocus(CurrentPC);
-		if (bRemoveFocus)
-		{
-			SetUserFocus(CurrentPC);
-		}
-	}
-	else
-	{
-		OnSelect(Index);
-	}
 }
 
 void UUINavWidget::OnReturn_Implementation()
@@ -1064,7 +927,7 @@ void UUINavWidget::ClickEvent(int Index)
 
 	if (!bAllowNavigation) return;
 
-	OnPreSelect(Index);
+	OnSelect(Index);
 }
 
 void UUINavWidget::ReleaseEvent(int Index)
@@ -1083,15 +946,6 @@ void UUINavWidget::ReleaseEvent(int Index)
 			}
 		}
 	}
-}
-
-void UUINavWidget::SetupUINavButtonDelegates(UUINavButton * NewButton)
-{
-	NewButton->CustomHover.AddDynamic(this, &UUINavWidget::HoverEvent);
-	NewButton->CustomUnhover.AddDynamic(this, &UUINavWidget::UnhoverEvent);
-	NewButton->CustomClick.AddDynamic(this, &UUINavWidget::ClickEvent);
-	NewButton->CustomRelease.AddDynamic(this, &UUINavWidget::ReleaseEvent);
-	bSwitchedStyle.Add(false);
 }
 
 void UUINavWidget::MenuUp()
@@ -1159,7 +1013,7 @@ void UUINavWidget::MenuSelect()
 		HaltedIndex = SELECT_INDEX;
 		return;
 	}
-	OnPreSelect(ButtonIndex);
+	OnSelect(ButtonIndex);
 }
 
 void UUINavWidget::MenuReturn()
