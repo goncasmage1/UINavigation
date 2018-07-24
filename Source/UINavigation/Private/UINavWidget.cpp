@@ -178,7 +178,8 @@ void UUINavWidget::TraverseHierarquy()
 
 			for (int i = 0; i < InputContainer->ActionIndexes.Num(); ++i)
 			{
-				InputBoxIndices.Add({ UINavButtons.Num() + (i * 2) , UINavButtons.Num() + 1 + (i * 2) });
+				InputBoxIndices.Add(UINavButtons.Num());
+				InputBoxIndices.Add(UINavButtons.Num() + 1);
 
 				UINavButtons.Add(nullptr);
 				UINavButtons.Add(nullptr);
@@ -210,7 +211,8 @@ void UUINavWidget::TraverseHierarquy()
 				UUINavInputBox* InputBox = Cast<UUINavInputBox>(widget);
 				if (InputBox != nullptr)
 				{
-					InputBoxIndices.Add({ UINavButtons.Num() , UINavButtons.Num() + 1});
+					InputBoxIndices.Add(UINavButtons.Num());
+					InputBoxIndices.Add(UINavButtons.Num() + 1);
 					UINavInputBoxes.Add(InputBox);
 
 					InputBoxExtraButton = InputBox->NavButton2;
@@ -347,10 +349,18 @@ FReply UUINavWidget::NativeOnKeyDown(const FGeometry & InGeometry, const FKeyEve
 {
 	Super::NativeOnKeyDown(InGeometry, InKeyEvent);
 
-	if (PressedKeys.Find(InKeyEvent.GetKey()) == INDEX_NONE)
+	if (bWaitForInput)
 	{
-		PressedKeys.Add(InKeyEvent.GetKey());
-		CurrentPC->NotifyKeyPressed(InKeyEvent.GetKey());
+		UINavInputBoxes[InputBoxIndex / 2]->UpdateActionKey(InKeyEvent.GetKey(), InputBoxIndex % 2 != 0);
+		bWaitForInput = false;
+	}
+	else
+	{
+		if (PressedKeys.Find(InKeyEvent.GetKey()) == INDEX_NONE)
+		{
+			PressedKeys.Add(InKeyEvent.GetKey());
+			CurrentPC->NotifyKeyPressed(InKeyEvent.GetKey());
+		}
 	}
 
 	return FReply::Handled();
@@ -422,7 +432,7 @@ void UUINavWidget::AppendVerticalNavigation(int Dimension, FButtonNavigation Edg
 			ExtraButtons += (UINavInputContainers[j]->ActionIndexes.Num() * 2) - 1;
 		}
 	}
-	if (Dimension == UINavButtons.Num()) Dimension -= (ExtraButtons - 1);
+	if (Dimension == UINavButtons.Num() && ExtraButtons > 0) Dimension -= (ExtraButtons);
 
 	for (int i = 0; i < Dimension; i++)
 	{
@@ -454,7 +464,7 @@ void UUINavWidget::AppendVerticalNavigation(int Dimension, FButtonNavigation Edg
 
 				if (j != 0) NewNav.UpButton++;
 
-				if (i != NumberOfActions - 1) NewNav.DownButton++;
+				if (j != NumberOfActions - 1) NewNav.DownButton++;
 
 				NewNav.LeftButton = ButtonsNav.Num() - 1;
 				if (EdgeNavigation.RightButton != -1) NewNav.RightButton = EdgeNavigation.RightButton;
@@ -866,6 +876,28 @@ void UUINavWidget::OnSelect_Implementation(int Index)
 
 }
 
+void UUINavWidget::OnPreSelect(int Index)
+{
+	InputBoxIndex = InputBoxIndices.Find(Index);
+	if (InputBoxIndex != INDEX_NONE)
+	{
+		UINavInputBoxes[InputBoxIndex / 2]->NotifySelected(InputBoxIndex % 2 != 0);
+
+		CurrentPC->ClearTimer();
+		bWaitForInput = true;
+
+		bRemoveFocus = !HasUserFocus(CurrentPC);
+		if (bRemoveFocus)
+		{
+			SetUserFocus(CurrentPC);
+		}
+	}
+	else
+	{
+		OnSelect(Index);
+	}
+}
+
 void UUINavWidget::OnReturn_Implementation()
 {
 	ReturnToParent();
@@ -1032,7 +1064,7 @@ void UUINavWidget::ClickEvent(int Index)
 
 	if (!bAllowNavigation) return;
 
-	OnSelect(Index);
+	OnPreSelect(Index);
 }
 
 void UUINavWidget::ReleaseEvent(int Index)
@@ -1118,7 +1150,7 @@ void UUINavWidget::MenuSelect()
 		HaltedIndex = SELECT_INDEX;
 		return;
 	}
-	OnSelect(ButtonIndex);
+	OnPreSelect(ButtonIndex);
 }
 
 void UUINavWidget::MenuReturn()

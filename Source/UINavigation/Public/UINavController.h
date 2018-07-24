@@ -81,8 +81,6 @@ protected:
 	/*************************************************************************/
 
 	void TimerCallback();
-	void SetTimer(EInputDirection Direction);
-	void ClearTimer();
 
 	/**
 	*	Searches all the Input Actions relevant to UINav plugin and saves them in a map
@@ -186,6 +184,9 @@ public:
 	UFUNCTION(BlueprintNativeEvent, Category = "UINavigation")
 		void OnRootWidgetRemoved();
 	void OnRootWidgetRemoved_Implementation();
+
+	void SetTimer(EInputDirection Direction);
+	void ClearTimer();
 
 	void MenuUp();
 	void MenuDown();

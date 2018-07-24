@@ -4,20 +4,6 @@
 #include "UINavController.h"
 #include "Components/TextBlock.h"
 
-
-FReply UUINavInputBox::NativeOnKeyDown(const FGeometry & InGeometry, const FKeyEvent & InKeyEvent)
-{
-	Super::NativeOnKeyDown(InGeometry, InKeyEvent);
-	
-	if (bWaitingForInput)
-	{
-		ConsumedKey = InKeyEvent.GetKey();
-		UpdateActionKey(ConsumedKey, bSecondKey);
-	}
-
-	return FReply::Handled();
-}
-
 void UUINavInputBox::NativeConstruct()
 {
 	Super::NativeConstruct();
@@ -58,27 +44,39 @@ void UUINavInputBox::UpdateActionKey(FKey NewKey, bool SecondKey)
 {
 	UInputSettings* Settings = const_cast<UInputSettings*>(GetDefault<UInputSettings>());
 	TArray<FInputActionKeyMapping>& Actions = Settings->ActionMappings;
+
+	int Found = 0;
 	for (FInputActionKeyMapping& Action : Actions)
 	{
 		FString NewName = Action.ActionName.ToString();
 		if (NewName.Compare(ActionName) != 0) continue;
 
-		Action.Key = NewKey;
-		if (SecondKey) Key2 = NewKey;
-		else Key1 = NewKey;
+		Found++;
+
+		if ((Found == 1 && !SecondKey) || (Found == 2 && SecondKey))
+		{
+			Action.Key = NewKey;
+			if (SecondKey) Key2 = NewKey;
+			else Key1 = NewKey;
+
+			if (SecondKey) NavText2->SetText(Key2.GetDisplayName());
+			else NavText->SetText(Key1.GetDisplayName());
+		}
 	}
 
 	Settings->SaveKeyMappings();
 
-	for (TObjectIterator<UPlayerInput> It; It; ++It)
+	/*for (TObjectIterator<UPlayerInput> It; It; ++It)
 	{
 		It->ForceRebuildingKeyMaps(true);
-	}
+	}*/
 }
 
-void UUINavInputBox::OnReceiveNewKey()
+void UUINavInputBox::NotifySelected(bool SecondKey)
 {
-	bWaitingForInput = true;
+	if (SecondKey) NavText2->SetText(FText::FromName(FName("Press Any Key")));
+	else NavText->SetText(FText::FromName(FName("Press Any Key")));
 }
+
 
 

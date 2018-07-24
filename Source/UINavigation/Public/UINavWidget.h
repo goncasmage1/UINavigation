@@ -66,11 +66,16 @@ protected:
 	bool bMovingSelector = false;
 	bool bAllowNavigation = true;
 
+	bool bWaitForInput = false;
+	bool bRemoveFocus = false;
+
 	//Used to track when the selector's position should be updated
 	int WaitForTick;
 
 	//The index of the button that will be navigated to when movement is allowed
 	int HaltedIndex = -1;
+
+	int InputBoxIndex = -1;
 
 	float MovementCounter;
 	float MovementTime;
@@ -162,7 +167,7 @@ public:
 		TArray<class UUINavInputContainer*> UINavInputContainers;
 
 	//The indices of all the UINavInputBoxes in this widget
-	TArray<TArray<int>> InputBoxIndices;
+	TArray<int> InputBoxIndices;
 
 	//All the UINavInputBoxes in this Widget
 	UPROPERTY(BlueprintReadOnly, Category = "UINavigation")
@@ -427,6 +432,8 @@ public:
 	UFUNCTION(BlueprintNativeEvent, Category = "UINavigation")
 		void OnSelect(int Index);
 	virtual void OnSelect_Implementation(int Index);
+
+	void OnPreSelect(int Index);
 
 	/**
 	*	Called when ReturnToParent is called (i.e. the player wants to exit the menu)

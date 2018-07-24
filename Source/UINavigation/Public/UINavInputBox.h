@@ -18,23 +18,16 @@ class UINAVIGATION_API UUINavInputBox : public UUINavComponent
 	
 protected:
 
-	void UpdateActionKey(FKey NewKey, bool SecondKey);
-
-	bool bWaitingForInput = false;
-	bool bSecondKey = false;
-
-	FKey ConsumedKey;
 	FKey Key1, Key2;
-
-	class AUINavController* PC;
 
 public:
 
 	virtual void NativeConstruct() override;
-	virtual FReply NativeOnKeyDown(const FGeometry & InGeometry, const FKeyEvent & InKeyEvent);
-	
-	void OnReceiveNewKey();
 
+	void UpdateActionKey(FKey NewKey, bool SecondKey);
+
+	void NotifySelected(bool SecondKey);
+	
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UUINavButton* NavButton2;
 
