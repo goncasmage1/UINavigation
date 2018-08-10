@@ -16,13 +16,13 @@ enum class EInputType : uint8
 };
 
 UENUM(BlueprintType)
-enum class EInputDirection : uint8
+enum class ENavigationDirection : uint8
 {
-	None UMETA(DisplayName = "None"),
-	Up UMETA(DisplayName = "Up"),
-	Down UMETA(DisplayName = "Down"),
-	Left UMETA(DisplayName = "Left"),
-	Right UMETA(DisplayName = "Right")
+	None,
+	Up,
+	Down,
+	Left,
+	Right
 };
 
 UENUM(BlueprintType)
@@ -51,7 +51,7 @@ protected:
 
 	TMap<FString, TArray<FKey>> KeyMap = TMap<FString, TArray<FKey>>();
 
-	EInputDirection Direction = EInputDirection::None;
+	ENavigationDirection Direction = ENavigationDirection::None;
 
 	/*
 	Indicates whether navigation will occur periodically after the player
@@ -75,13 +75,13 @@ protected:
 
 	ECountdownPhase CountdownPhase = ECountdownPhase::None;
 
-	EInputDirection CallbackDirection;
+	ENavigationDirection CallbackDirection;
 	float TimerCounter = 0.f;
 
 	/*************************************************************************/
 
 	void TimerCallback();
-	void SetTimer(EInputDirection Direction);
+	void SetTimer(ENavigationDirection Direction);
 	void ClearTimer();
 
 	/**
@@ -183,9 +183,32 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "UINavigation")
 		void SetActiveWidget(class UUINavWidget* NewWidget);
 
+	/**
+	*	Called when the root UINavWidget is removed from the viewport
+	*/
 	UFUNCTION(BlueprintNativeEvent, Category = "UINavigation")
 		void OnRootWidgetRemoved();
 	void OnRootWidgetRemoved_Implementation();
+
+	/**
+	*	Called when the input type changes
+	*
+	*	@param From The input type being used before
+	*	@param To The input type being used now
+	*/
+	UFUNCTION(BlueprintNativeEvent, Category = "UINavigation")
+		void OnInputChanged(EInputType From, EInputType To);
+	virtual void OnInputChanged_Implementation(EInputType From, EInputType To);
+
+	//Called when the player navigates in a certain direction
+	/**
+	*	Called when the input type changes
+	*
+	*	@param Direction The direction of navigation
+	*/
+	UFUNCTION(BlueprintNativeEvent, Category = "UINavigation")
+		void OnNavigated(ENavigationDirection Direction);
+	void OnNavigated_Implementation(ENavigationDirection Direction);
 
 	void MenuUp();
 	void MenuDown();
