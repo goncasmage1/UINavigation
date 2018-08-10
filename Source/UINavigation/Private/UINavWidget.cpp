@@ -4,7 +4,6 @@
 #include "UINavButton.h"
 #include "UINavComponentBox.h"
 #include "UINavComponent.h"
-#include "UINavController.h"
 #include "Blueprint/UserWidget.h"
 #include "Blueprint/WidgetTree.h"
 #include "Components/Image.h"
@@ -269,6 +268,11 @@ void UUINavWidget::UINavSetup()
 	if (UINavAnimations.Num() > 0) ExecuteAnimations(-1, ButtonIndex);
 
 	OnSetupCompleted();
+}
+
+void UUINavWidget::ReadyForSetup_Implementation()
+{
+
 }
 
 void UUINavWidget::NativeTick(const FGeometry & MyGeometry, float DeltaTime)
@@ -726,6 +730,12 @@ void UUINavWidget::NavigateTo(int Index, bool bHoverEvent)
 	if (bShouldNotify)
 	{
 		OnNavigate(ButtonIndex, Index);
+
+		UUINavComponent* FromComponent = GetUINavComponentAtIndex(ButtonIndex);
+		UUINavComponent* ToComponent = GetUINavComponentAtIndex(Index);
+		if (FromComponent != nullptr) FromComponent->OnNavigatedFrom();
+		if (ToComponent != nullptr) ToComponent->OnNavigatedTo();
+
 		if (UINavAnimations.Num() > 0) ExecuteAnimations(ButtonIndex, Index);
 	}
 	//Update all the possible scroll boxes in the widget
@@ -764,6 +774,16 @@ void UUINavWidget::OnSelect_Implementation(int Index)
 void UUINavWidget::OnReturn_Implementation()
 {
 	ReturnToParent();
+}
+
+void UUINavWidget::OnInputChanged_Implementation(EInputType From, EInputType To)
+{
+
+}
+
+void UUINavWidget::OnSetupCompleted_Implementation()
+{
+
 }
 
 UWidget* UUINavWidget::GoToWidget(TSubclassOf<UUINavWidget> NewWidgetClass, bool bRemoveParent)
@@ -838,16 +858,16 @@ int UUINavWidget::FetchIndexByDirection(ENavigationDirection Direction, int Inde
 
 	switch (Direction)
 	{
-		case ENavigationDirection::Nav_UP:
+		case ENavigationDirection::Up:
 			LocalIndex = ButtonNavigations[Index].UpButton;
 			break;
-		case ENavigationDirection::Nav_DOWN:
+		case ENavigationDirection::Down:
 			LocalIndex = ButtonNavigations[Index].DownButton;
 			break;
-		case ENavigationDirection::Nav_LEFT:
+		case ENavigationDirection::Left:
 			LocalIndex = ButtonNavigations[Index].LeftButton;
 			break;
-		case ENavigationDirection::Nav_RIGHT:
+		case ENavigationDirection::Right:
 			LocalIndex = ButtonNavigations[Index].RightButton;
 			break;
 		default:
@@ -870,22 +890,16 @@ UUINavButton * UUINavWidget::GetUINavButtonAtIndex(int Index)
 UUINavComponent * UUINavWidget::GetUINavComponentAtIndex(int Index)
 {
 	int ValidIndex = UINavComponentsIndices.Find(Index);
-	if (ValidIndex == INDEX_NONE) 
-	{
-		DISPLAYERROR("GetUINavComponentAtIndex: Element at given index isn't a UINavComponent");
-		return nullptr;
-	}
+	if (ValidIndex == INDEX_NONE) return nullptr;
+	
 	return UINavComponents[ValidIndex];
 }
 
 UUINavComponentBox * UUINavWidget::GetUINavComponentBoxAtIndex(int Index)
 {
 	int ValidIndex = ComponentBoxIndices.Find(Index);
-	if (ValidIndex == INDEX_NONE)
-	{
-		DISPLAYERROR("GetUINavComponentBoxAtIndex: Element at given index isn't a UINavComponentBox");
-		return nullptr;
-	}
+	if (ValidIndex == INDEX_NONE) return nullptr;
+	
 	return UINavComponentBoxes[ValidIndex];
 }
 
@@ -948,62 +962,22 @@ void UUINavWidget::ReleaseEvent(int Index)
 	}
 }
 
-void UUINavWidget::MenuUp()
+void UUINavWidget::NavigateInDirection(ENavigationDirection Direction)
 {
 	if (!bAllowNavigation)
 	{
-		HaltedIndex = FindNextIndex(ENavigationDirection::Nav_UP);
-		return;
-	}
-	MenuNavigate(ENavigationDirection::Nav_UP);
-}
-
-void UUINavWidget::MenuDown()
-{
-	if (!bAllowNavigation)
-	{
-		HaltedIndex = FindNextIndex(ENavigationDirection::Nav_DOWN);
-		return;
-	}
-	MenuNavigate(ENavigationDirection::Nav_DOWN);
-}
-
-void UUINavWidget::MenuLeft()
-{
-	if (!bAllowNavigation)
-	{
-		HaltedIndex = FindNextIndex(ENavigationDirection::Nav_LEFT);
+		HaltedIndex = FindNextIndex(Direction);
 		return;
 	}
 
-	int ComponentBoxIndex = ComponentBoxIndices.Find(ButtonIndex);
-	if (ComponentBoxIndex == INDEX_NONE)
+	UUINavComponentBox* ComponentBox = GetUINavComponentBoxAtIndex(ButtonIndex);
+	if (ComponentBox != nullptr && (Direction == ENavigationDirection::Left || Direction == ENavigationDirection::Right))
 	{
-		MenuNavigate(ENavigationDirection::Nav_LEFT);
+		if (Direction == ENavigationDirection::Left) ComponentBox->NavigateLeft();
+		else if (Direction == ENavigationDirection::Right) ComponentBox->NavigateRight();
 	}
-	else
-	{
-		UINavComponentBoxes[ComponentBoxIndex]->NavigateLeft();
-	}
-}
-
-void UUINavWidget::MenuRight()
-{
-	if (!bAllowNavigation)
-	{
-		HaltedIndex = FindNextIndex(ENavigationDirection::Nav_RIGHT);
-		return;
-	}
-
-	int ComponentBoxIndex = ComponentBoxIndices.Find(ButtonIndex);
-	if (ComponentBoxIndex == INDEX_NONE)
-	{
-		MenuNavigate(ENavigationDirection::Nav_RIGHT);
-	}
-	else
-	{
-		UINavComponentBoxes[ComponentBoxIndex]->NavigateRight();
-	}
+	else MenuNavigate(Direction);
+	
 }
 
 void UUINavWidget::MenuSelect()

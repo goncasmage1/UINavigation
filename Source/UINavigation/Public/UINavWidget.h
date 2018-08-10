@@ -4,6 +4,7 @@
 
 #include "Engine.h"
 #include "Blueprint/UserWidget.h"
+#include "UINavController.h"
 #include "UINavWidget.generated.h"
 
 #define DISPLAYERROR(Text) GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, FString::Printf(TEXT("%s"), *(FString(TEXT("Error in ")).Append(GetName()).Append(TEXT(": ")).Append(Text))));
@@ -28,14 +29,6 @@ enum class ESelectorPosition : uint8
 	Position_Bottom_Left UMETA(DisplayName = "Bottom Left")
 };
 
-UENUM(BlueprintType)
-enum class ENavigationDirection : uint8
-{
-	Nav_UP,
-	Nav_DOWN,
-	Nav_LEFT,
-	Nav_RIGHT
-};
 
 USTRUCT(BlueprintType)
 struct FButtonNavigation
@@ -314,8 +307,9 @@ public:
 	/**
 	*	Called when geometry is updated after 1st tick (ready for SetupUI)
 	*/
-	UFUNCTION(BlueprintImplementableEvent, Category = "UINavigation")
+	UFUNCTION(BlueprintNativeEvent, Category = "UINavigation")
 		void ReadyForSetup();
+	virtual void ReadyForSetup_Implementation();
 
 	/**
 	*	Navigate to the button with the specified index
@@ -424,14 +418,18 @@ public:
 	/**
 	*	Called when the input type changed
 	*/
-	UFUNCTION(BlueprintImplementableEvent, Category = "UINavigation")
-		void OnInputChanged(EInputType From, EInputType TO);
+	UFUNCTION(BlueprintNativeEvent, Category = "UINavigation")
+		void OnInputChanged(EInputType From, EInputType To);
+	virtual void OnInputChanged_Implementation(EInputType From, EInputType To);
+
 
 	/**
 	*	Called when this widget completed UINavSetup
 	*/
-	UFUNCTION(BlueprintImplementableEvent, Category = "UINavigation")
+	UFUNCTION(BlueprintNativeEvent, Category = "UINavigation")
 		void OnSetupCompleted();
+	virtual void OnSetupCompleted_Implementation();
+
 
 	/**
 	*	Handles navigation according to direction
@@ -535,15 +533,14 @@ public:
 	UFUNCTION(Category = "UINavigation")
 		void ReleaseEvent(int Index);
 
+	/**
+	*	Notifies this widget to navigate in the specified direction
+	*
+	*	@param	Direction  The direction of navigation
+	*/
+	UFUNCTION(BlueprintCallable, Category = "UINavigation")
+		virtual void NavigateInDirection(ENavigationDirection Direction);
 
-	UFUNCTION(BlueprintCallable, Category = "UINavigation")
-		virtual void MenuUp();
-	UFUNCTION(BlueprintCallable, Category = "UINavigation")
-		virtual void MenuDown();
-	UFUNCTION(BlueprintCallable, Category = "UINavigation")
-		virtual void MenuLeft();
-	UFUNCTION(BlueprintCallable, Category = "UINavigation")
-		virtual void MenuRight();
 	UFUNCTION(BlueprintCallable, Category = "UINavigation")
 		virtual void MenuSelect();
 	UFUNCTION(BlueprintCallable, Category = "UINavigation")
