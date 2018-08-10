@@ -29,38 +29,29 @@ void UUINavInputContainer::CreateInputBoxes()
 
 	//TODO: Optimize action finding in UINavInputBox
 
-	int Counter = 0;
-	for (int i = 0; i < Actions.Num(); ++i)
+	for (int i = 0; i < ActionNames.Num(); ++i)
 	{
-		FName NewName = Actions[i].ActionName;
-		if (ActionNames.Find(NewName) == INDEX_NONE) continue;
-
-		if (ActionsFound.Find(NewName) == nullptr) ActionsFound.Add(NewName, 1);
-		else continue;
-
 		ActionKeys.Add(Actions[i].Key);
 
 		UUINavInputBox* NewInputBox = CreateWidget<UUINavInputBox>(PC, InputBox_BP);
 		if (NewInputBox == nullptr) continue;
 
-		ParentWidget->UINavButtons[StartingIndex + Counter * 2] = NewInputBox->NavButton;
-		ParentWidget->UINavButtons[StartingIndex + Counter * 2 + 1] = NewInputBox->NavButton2;
+		ParentWidget->UINavButtons[StartingIndex + i * 2] = NewInputBox->NavButton;
+		ParentWidget->UINavButtons[StartingIndex + i * 2 + 1] = NewInputBox->NavButton2;
 		ParentWidget->UINavInputBoxes.Add(NewInputBox);
 
 		if (!ParentWidget->bOverrideButtonIndices)
 		{
-			NewInputBox->NavButton->ButtonIndex = StartingIndex + Counter * 2;
-			NewInputBox->NavButton2->ButtonIndex = StartingIndex + Counter * 2 + 1;
+			NewInputBox->NavButton->ButtonIndex = StartingIndex + i * 2;
+			NewInputBox->NavButton2->ButtonIndex = StartingIndex + i * 2 + 1;
 		}
-		
+
 		ParentWidget->SetupUINavButtonDelegates(NewInputBox->NavButton);
 		ParentWidget->SetupUINavButtonDelegates(NewInputBox->NavButton2);
 
-		NewInputBox->ActionName = NewName.ToString();
+		NewInputBox->ActionName = ActionNames[i].ToString();
 		NewInputBox->AddToViewport();
 		Panel->AddChild(NewInputBox);
-
-		Counter++;
 	}
 }
 

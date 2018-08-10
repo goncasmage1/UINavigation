@@ -9,31 +9,27 @@ void UUINavInputBox::NativeConstruct()
 	Super::NativeConstruct();
 
 	const UInputSettings* Settings = GetDefault<UInputSettings>();
-	const TArray<FInputActionKeyMapping>& Actions = Settings->ActionMappings;
+	TArray<FInputActionKeyMapping> Actions;
 
 	ActionText->SetText(FText::FromString(ActionName));
 
-	int Found = 0;
-	for (FInputActionKeyMapping Action : Actions)
+	Settings->GetActionMappingByName(FName(*ActionName), Actions);
+
+	for (int i = 0; i < Actions.Num(); i++)
 	{
-		FString NewName = Action.ActionName.ToString();
-		if (NewName.Compare(ActionName) != 0) continue;
-		
-		if (Found > 1) continue;
-		
-		if (Found > 0)
+		if (i == Actions.Num() - 1)
 		{
-			Key2 = Action.Key;
-			NavText2->SetText(Key2.GetDisplayName());
+			Key1 = Actions[Actions.Num() - 1].Key;
+			NavText->SetText(Key1.GetDisplayName());
 		}
 		else
 		{
-			Key1 = Action.Key;
-			NavText->SetText(Key1.GetDisplayName());
+			Key2 = Actions[Actions.Num() - 2].Key;
+			NavText2->SetText(Key2.GetDisplayName());
 		}
-		Found++;
 	}
-	if (Found == 0)
+
+	if (Actions.Num() == 0)
 	{
 		DISPLAYERROR(TEXT("UINavInputBox: Couldn't find Action with given name."));
 		return;
@@ -45,20 +41,26 @@ void UUINavInputBox::UpdateActionKey(FKey NewKey, bool SecondKey)
 	UInputSettings* Settings = const_cast<UInputSettings*>(GetDefault<UInputSettings>());
 	TArray<FInputActionKeyMapping>& Actions = Settings->ActionMappings;
 
+	int Found = 0;
 	for (FInputActionKeyMapping& Action : Actions)
 	{
 		FString NewName = Action.ActionName.ToString();
 		if (NewName.Compare(ActionName) != 0) continue;
 
-		Action.Key = NewKey;
-		if (SecondKey) Key2 = NewKey;
-		else Key1 = NewKey;
+		if ((Found == 0 && !SecondKey) || (Found == 1 && SecondKey))
+		{
+			Action.Key = NewKey;
+			if (SecondKey) Key2 = NewKey;
+			else Key1 = NewKey;
 
-		if (SecondKey) NavText2->SetText(Key2.GetDisplayName());
-		else NavText->SetText(Key1.GetDisplayName());
+			if (SecondKey) NavText2->SetText(Key2.GetDisplayName());
+			else NavText->SetText(Key1.GetDisplayName());
+		}
+		Found++;
 	}
 
 	Settings->SaveKeyMappings();
+	Settings->ForceRebuildKeymaps();
 
 	/*for (TObjectIterator<UPlayerInput> It; It; ++It)
 	{
