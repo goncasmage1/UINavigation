@@ -60,6 +60,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 		bool bChainNavigation = true;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+		bool bReceiveEventsFromSelf = true;
+
 	/*
 	The amount of time the player needs to hold a key for the navigation to
 	start occuring periodically
@@ -200,15 +203,22 @@ public:
 		void OnInputChanged(EInputType From, EInputType To);
 	virtual void OnInputChanged_Implementation(EInputType From, EInputType To);
 
-	//Called when the player navigates in a certain direction
 	/**
-	*	Called when the input type changes
+	*	Called when the player navigates in a certain direction
 	*
 	*	@param Direction The direction of navigation
 	*/
 	UFUNCTION(BlueprintNativeEvent, Category = "UINavigation")
 		void OnNavigated(ENavigationDirection Direction);
 	void OnNavigated_Implementation(ENavigationDirection Direction);
+
+	UFUNCTION(BlueprintNativeEvent, Category = "UINavigation")
+		void OnSelect();
+	void OnSelect_Implementation();
+
+	UFUNCTION(BlueprintNativeEvent, Category = "UINavigation")
+		void OnReturn();
+	void OnReturn_Implementation();
 
 	void MenuUp();
 	void MenuDown();
