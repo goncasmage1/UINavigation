@@ -19,12 +19,19 @@ public:
 	virtual void NativeConstruct() override;
 
 	UFUNCTION(BlueprintNativeEvent, Category = "UINavigation")
+		void OverrideButtonIndex();
+	virtual void OverrideButtonIndex_Implementation();
+
+	UFUNCTION(BlueprintNativeEvent, Category = "UINavigation")
 		void OnNavigatedTo();
 	virtual void OnNavigatedTo_Implementation();
 
 	UFUNCTION(BlueprintNativeEvent, Category = "UINavigation")
 		void OnNavigatedFrom();
 	virtual void OnNavigatedFrom_Implementation();
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+		int ComponentIndex = -1;
 
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UUINavButton* NavButton;
