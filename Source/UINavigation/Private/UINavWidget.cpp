@@ -172,6 +172,7 @@ void UUINavWidget::TraverseHierarquy()
 			if (UIComp != nullptr)
 			{
 				NewNavButton = Cast<UUINavButton>(UIComp->NavButton);
+				if (bOverrideButtonIndices) UIComp->OverrideButtonIndex();
 
 				UINavComponentsIndices.Add(UINavButtons.Num());
 				UINavComponents.Add(UIComp);
@@ -964,6 +965,8 @@ void UUINavWidget::ReleaseEvent(int Index)
 
 void UUINavWidget::NavigateInDirection(ENavigationDirection Direction)
 {
+	if (Direction == ENavigationDirection::None) return;
+
 	if (!bAllowNavigation)
 	{
 		HaltedIndex = FindNextIndex(Direction);
