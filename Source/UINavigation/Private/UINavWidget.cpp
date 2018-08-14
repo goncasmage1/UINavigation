@@ -800,6 +800,10 @@ UWidget* UUINavWidget::GoToWidget(TSubclassOf<UUINavWidget> NewWidgetClass, bool
 	NewWidget->ParentWidget = this;
 	NewWidget->ParentWidgetClass = WidgetClass;
 	NewWidget->bParentRemoved = bRemoveParent;
+	if (HasUserFocus(CurrentPC))
+	{
+		NewWidget->SetUserFocus(CurrentPC);
+	}
 	NewWidget->AddToViewport();
 	CleanSetup();
 	return NewWidget;
@@ -815,6 +819,11 @@ void UUINavWidget::ReturnToParent()
 			RemoveFromParent();
 		}
 		return;
+	}
+
+	if (HasUserFocus(CurrentPC))
+	{
+		ParentWidget->SetUserFocus(CurrentPC);
 	}
 
 	//If parent was removed, add it to viewport
@@ -906,7 +915,12 @@ UUINavComponentBox * UUINavWidget::GetUINavComponentBoxAtIndex(int Index)
 
 void UUINavWidget::HoverEvent(int Index)
 {
-	if (CurrentPC->GetCurrentInputType() != EInputType::Mouse) return;
+	if (CurrentPC->GetCurrentInputType() != EInputType::Mouse)
+	{
+		SwitchButtonStyle(Index);
+		return;
+	}
+
 	CurrentPC->NotifyMouseInputType();
 
 	if (!bAllowNavigation)

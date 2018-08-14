@@ -35,13 +35,13 @@ struct FButtonNavigation
 {
 	GENERATED_BODY()
 	
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(BlueprintReadWrite, Category = ButtonNavigation)
 		int UpButton = -1;
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(BlueprintReadWrite, Category = ButtonNavigation)
 		int DownButton = -1;
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(BlueprintReadWrite, Category = ButtonNavigation)
 		int LeftButton = -1;
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(BlueprintReadWrite, Category = ButtonNavigation)
 		int RightButton = -1;
 };
 
@@ -121,56 +121,56 @@ protected:
 public:
 
 	//The UserWidget object that will move along the Widget
-	UPROPERTY(BlueprintReadOnly, meta = (BindWidget, OptionalWidget = true), Category = "UINavigation")
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget, OptionalWidget = true), Category = UINavWidget)
 		UUserWidget* TheSelector;
 
 	//Indicates the navigation possibilities of each button
-	UPROPERTY(BlueprintReadWrite, Category = "UINavigation")
+	UPROPERTY(BlueprintReadWrite, Category = UINavWidget)
 		TArray<FButtonNavigation> ButtonNavigations;
 
 	//All the UINavButtons in this Widget
-	UPROPERTY(BlueprintReadOnly, Category = "UINavigation")
+	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
 		TArray<class UUINavButton*> UINavButtons;
 
-	UPROPERTY(BlueprintReadOnly, Category = "UINavigation")
+	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
 		TArray<int> UINavComponentsIndices;
 
 	//All the UINavComponents in this Widget
-	UPROPERTY(BlueprintReadOnly, Category = "UINavigation")
+	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
 		TArray<class UUINavComponent*> UINavComponents;
 
 	//The indices of all the UINavUINavComponentBoxes in this widget
-	UPROPERTY(BlueprintReadOnly, Category = "UINavigation")
+	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
 		TArray<int> ComponentBoxIndices;
 
 	//All the UINavUINavComponentBoxes in this Widget
-	UPROPERTY(BlueprintReadOnly, Category = "UINavigation")
+	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
 		TArray<class UUINavComponentBox*> UINavComponentBoxes;
 
 	//All the scrollboxes in this widget
-	UPROPERTY(BlueprintReadOnly, Category = "UINavigation")
+	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
 		TArray<class UScrollBox*> ScrollBoxes;
 
 	//All the scrollboxes in this widget
-	UPROPERTY(BlueprintReadWrite, Category = "UINavigation")
+	UPROPERTY(BlueprintReadWrite, Category = UINavWidget)
 		TArray<class UWidgetAnimation*> UINavAnimations;
 
 	//Indicates whether the Normal and Hovered style of a button were switched
 	TArray<bool> bSwitchedStyle;
 
 	//The index of the button that is currently the focus of navigation
-	UPROPERTY(BlueprintReadOnly, Category = "UINavigation")
+	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
 		int ButtonIndex = 0;
 
 	//Reference to the parent widget that created this widget
-	UPROPERTY(BlueprintReadOnly, meta = (ExposeOnSpawn = true), Category = "UINavigation")
+	UPROPERTY(BlueprintReadOnly, meta = (ExposeOnSpawn = true), Category = UINavWidget)
 		UUINavWidget* ParentWidget;
 
 	//This widget's class
 	TSubclassOf<UUINavWidget> WidgetClass;
 
 	//Parent widget's class
-	UPROPERTY(BlueprintReadOnly, Category = "UINavigation")
+	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
 		TSubclassOf<UUINavWidget> ParentWidgetClass;
 
 	//Current player controller
@@ -178,7 +178,7 @@ public:
 		class AUINavController* CurrentPC;
 
 	//Widget that created this widget (if returned from a child)
-	UPROPERTY(BlueprintReadOnly, Category = "UINavigation")
+	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
 		UUINavWidget* ReturnedFromWidget;
 
 	//Should this widget remove its parent from the viewport when created?
@@ -186,33 +186,33 @@ public:
 
 
 	//If set to true, buttons will be navigated by switching button states (Normal and Hovered)
-	UPROPERTY(EditDefaultsOnly, Category = "UINavigation")
+	UPROPERTY(EditDefaultsOnly, Category = UINavWidget)
 		bool bUseButtonStates = false;
 
 	//If set to true, buttons will be navigated by changing the position of the selector
-	UPROPERTY(EditDefaultsOnly, Category = "UINavigation")
+	UPROPERTY(EditDefaultsOnly, Category = UINavWidget)
 		bool bUseSelector = true;
 
 	/*If set to true, buttons will be navigated by changing the text's color.
 	Immediate child of UINavButton must be TextBlock */
-	UPROPERTY(EditDefaultsOnly, Category = "UINavigation")
+	UPROPERTY(EditDefaultsOnly, Category = UINavWidget)
 		bool bUseTextColor = false;
 
 	//The index of the button to be first navigated to (when the widget is added to viewport)
-	UPROPERTY(EditDefaultsOnly, Category = "UINavigation")
+	UPROPERTY(EditDefaultsOnly, Category = UINavWidget)
 		int FirstButtonIndex = 0;
 
 	/*If set to true, ButtonIndex will NOT be determined by the UINavButton's position in the
 	hierarquy, but rather be specified in the Designer Tab.*/
-	UPROPERTY(EditDefaultsOnly, Category = "UINavigation")
+	UPROPERTY(EditDefaultsOnly, Category = UINavWidget)
 		bool bOverrideButtonIndices = false;
 
 	//If set to true, this widget will be removed if it has no ParentWidget and is returned from
-	UPROPERTY(EditDefaultsOnly, Category = "UINavigation")
+	UPROPERTY(EditDefaultsOnly, Category = UINavWidget)
 		bool bAllowRemoveIfRoot = false;
 
 	//The speed at which the given animations will play
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UINavigation")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = UINavWidget)
 		float AnimationPlaybackSpeed = 1.f;
 
 	/*If set to true, this widget move the selector using a curve-guided movement animation.
@@ -270,7 +270,7 @@ public:
 	*	@param  bWrap  Indicates whether navigation wraps around the grid
 	*	@param	StartingButtonIndex The index of the button where the grid starts
 	*/
-	UFUNCTION(BlueprintCallable, Category = "UINavigation")
+	UFUNCTION(BlueprintCallable, Category = UINavWidget)
 		void AppendVerticalNavigation(int Dimension, FButtonNavigation EdgeNavigation, bool bWrap);
 
 	/**
@@ -281,7 +281,7 @@ public:
 	*	@param	EdgeNavigation  The intended navigation at each of the four edges of the button grid
 	*	@param  bWrap  Indicates whether navigation wraps around the grid
 	*/
-	UFUNCTION(BlueprintCallable, Category = "UINavigation")
+	UFUNCTION(BlueprintCallable, Category = UINavWidget)
 		void AppendHorizontalNavigation(int Dimension, FButtonNavigation EdgeNavigation, bool bWrap);
 
 	/**
@@ -293,7 +293,7 @@ public:
 	*	@param	EdgeNavigation  The intended navigation at each of the four edges of the grid
 	*	@param  bWrap  Indicates whether navigation wraps around the grid
 	*/
-	UFUNCTION(BlueprintCallable, Category = "UINavigation")
+	UFUNCTION(BlueprintCallable, Category = UINavWidget)
 		void AppendGridNavigation(int DimensionX, int DimensionY, FButtonNavigation EdgeNavigation, bool bWrap);
 
 
@@ -307,7 +307,7 @@ public:
 	/**
 	*	Called when geometry is updated after 1st tick (ready for SetupUI)
 	*/
-	UFUNCTION(BlueprintNativeEvent, Category = "UINavigation")
+	UFUNCTION(BlueprintNativeEvent, Category = UINavWidget)
 		void ReadyForSetup();
 	virtual void ReadyForSetup_Implementation();
 
@@ -317,7 +317,7 @@ public:
 	*	@param	Index  The index of the button that was hovered upon
 	*	@param	bHoverEvent  Was this triggered by a button hover event?
 	*/
-	UFUNCTION(BlueprintCallable, Category = "UINavigation")
+	UFUNCTION(BlueprintCallable, Category = UINavWidget)
 		void NavigateTo(int Index, bool bHoverEvent = false);
 
 	/**
@@ -370,7 +370,7 @@ public:
 	*
 	*	@param	NewSelector  The new selector
 	*/
-	UFUNCTION(BlueprintCallable, Category = "UINavigation")
+	UFUNCTION(BlueprintCallable, Category = UINavWidget)
 		void SetSelector(class UUserWidget* NewSelector);
 
 	/**
@@ -378,7 +378,7 @@ public:
 	*
 	*	@param	NewScale  The selector's new scale
 	*/
-	UFUNCTION(BlueprintCallable, Category = "UINavigation")
+	UFUNCTION(BlueprintCallable, Category = UINavWidget)
 		void SetSelectorScale(FVector2D NewScale);
 
 	/**
@@ -386,7 +386,7 @@ public:
 	*
 	*	@param	bVisible Whether the selector will be visible
 	*/
-	UFUNCTION(BlueprintCallable, Category = "UINavigation")
+	UFUNCTION(BlueprintCallable, Category = UINavWidget)
 		void SetSelectorVisibility(bool bVisible);
 
 	/**
@@ -395,7 +395,7 @@ public:
 	*	@param	From  The index of the button that was navigated from
 	*	@param	To  The index of the button that was navigated to
 	*/
-	UFUNCTION(BlueprintNativeEvent, Category = "UINavigation")
+	UFUNCTION(BlueprintNativeEvent, Category = UINavWidget)
 		void OnNavigate(int From, int To);
 	virtual void OnNavigate_Implementation(int From, int To);
 
@@ -404,21 +404,21 @@ public:
 	*
 	*	@param	Index  The index of the button that was selected
 	*/
-	UFUNCTION(BlueprintNativeEvent, Category = "UINavigation")
+	UFUNCTION(BlueprintNativeEvent, Category = UINavWidget)
 		void OnSelect(int Index);
 	virtual void OnSelect_Implementation(int Index);
 
 	/**
 	*	Called when ReturnToParent is called (i.e. the player wants to exit the menu)
 	*/
-	UFUNCTION(BlueprintNativeEvent, Category = "UINavigation")
+	UFUNCTION(BlueprintNativeEvent, Category = UINavWidget)
 		void OnReturn();
 	virtual void OnReturn_Implementation();
 
 	/**
 	*	Called when the input type changed
 	*/
-	UFUNCTION(BlueprintNativeEvent, Category = "UINavigation")
+	UFUNCTION(BlueprintNativeEvent, Category = UINavWidget)
 		void OnInputChanged(EInputType From, EInputType To);
 	virtual void OnInputChanged_Implementation(EInputType From, EInputType To);
 
@@ -426,7 +426,7 @@ public:
 	/**
 	*	Called when this widget completed UINavSetup
 	*/
-	UFUNCTION(BlueprintNativeEvent, Category = "UINavigation")
+	UFUNCTION(BlueprintNativeEvent, Category = UINavWidget)
 		void OnSetupCompleted();
 	virtual void OnSetupCompleted_Implementation();
 
@@ -436,7 +436,7 @@ public:
 	*
 	*	@param	Direction  Direction of navigation
 	*/
-	UFUNCTION(BlueprintCallable, Category = "UINavigation")
+	UFUNCTION(BlueprintCallable, Category = UINavWidget)
 	virtual void MenuNavigate(ENavigationDirection Direction);
 
 	/**
@@ -445,7 +445,7 @@ public:
 	*	@param	Direction  Direction of navigation
 	*	@return int The index of the button that will be navigated to
 	*/
-	UFUNCTION(BlueprintCallable, Category = "UINavigation")
+	UFUNCTION(BlueprintCallable, Category = UINavWidget)
 		virtual int FindNextIndex(ENavigationDirection Direction);
 
 	/**
@@ -460,7 +460,7 @@ public:
 	*
 	*	@param bAllow  Whether navigation should be allowed
 	*/
-	UFUNCTION(BlueprintCallable, Category = "UINavigation")
+	UFUNCTION(BlueprintCallable, Category = UINavWidget)
 		void SetAllowNavigation(bool bAllow);
 
 	/**
@@ -468,14 +468,14 @@ public:
 	*
 	*	@param	WidgetClass  The class of the widget to add to the screen
 	*/
-	UFUNCTION(BlueprintCallable, Category = "UINavigation")
+	UFUNCTION(BlueprintCallable, Category = UINavWidget)
 		UWidget* GoToWidget(TSubclassOf<UUINavWidget> NewWidgetClass, bool bRemoveParent);
 	
 	/**
 	*	Adds this widget's parent to the viewport (if applicable)
 	*	and removes this widget from viewport
 	*/
-	UFUNCTION(BlueprintCallable, Category = "UINavigation")
+	UFUNCTION(BlueprintCallable, Category = UINavWidget)
 		void ReturnToParent();
 
 	/**
@@ -483,7 +483,7 @@ public:
 	*
 	*	@return  UUINavButton  The UINavButton with the specified index
 	*/
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "UINavigation")
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
 		UUINavButton* GetUINavButtonAtIndex(int Index);
 
 	/**
@@ -492,7 +492,7 @@ public:
 	*
 	*	@return  UINavComponent  The UINavComponent with the specified index
 	*/
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "UINavigation")
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
 		UUINavComponent* GetUINavComponentAtIndex(int Index);
 
 	/**
@@ -501,7 +501,7 @@ public:
 	*
 	*	@return  UINavComponentBox  The UINavComponentBox with the specified index
 	*/
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "UINavigation")
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
 		UUINavComponentBox* GetUINavComponentBoxAtIndex(int Index);
 
 	/**
@@ -509,28 +509,28 @@ public:
 	*
 	*	@param	Index  The index of the button that was hovered upon
 	*/
-	UFUNCTION(Category = "UINavigation")
+	UFUNCTION(Category = UINavWidget)
 		void HoverEvent(int Index);
 	/**
 	*	Button UnHover event
 	*
 	*	@param	Index  The index of the button that was unhovered upon
 	*/
-	UFUNCTION(Category = "UINavigation")
+	UFUNCTION(Category = UINavWidget)
 		void UnhoverEvent(int Index);
 	/**
 	*	Button Click event
 	*
 	*	@param	Index  The index of the button that was clicked upon
 	*/
-	UFUNCTION(Category = "UINavigation")
+	UFUNCTION(Category = UINavWidget)
 		void ClickEvent(int Index);
 	/**
 	*	Button Release event
 	*
 	*	@param	Index  The index of the button that was released
 	*/
-	UFUNCTION(Category = "UINavigation")
+	UFUNCTION(Category = UINavWidget)
 		void ReleaseEvent(int Index);
 
 	/**
@@ -538,12 +538,12 @@ public:
 	*
 	*	@param	Direction  The direction of navigation
 	*/
-	UFUNCTION(BlueprintCallable, Category = "UINavigation")
+	UFUNCTION(BlueprintCallable, Category = UINavWidget)
 		virtual void NavigateInDirection(ENavigationDirection Direction);
 
-	UFUNCTION(BlueprintCallable, Category = "UINavigation")
+	UFUNCTION(BlueprintCallable, Category = UINavWidget)
 		virtual void MenuSelect();
-	UFUNCTION(BlueprintCallable, Category = "UINavigation")
+	UFUNCTION(BlueprintCallable, Category = UINavWidget)
 		virtual void MenuReturn();
 
 };
