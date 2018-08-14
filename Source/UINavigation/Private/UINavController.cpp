@@ -52,6 +52,13 @@ void AUINavController::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	if (CurrentInputType != EInputType::Mouse)
+	{
+		float DeltaX, DeltaY;
+		GetInputMouseDelta(DeltaX, DeltaY);
+		if (DeltaX > 0.f || DeltaY > 0.f) NotifyMouseInputType();
+	}
+
 	switch (CountdownPhase)
 	{
 		case ECountdownPhase::None:
@@ -307,7 +314,7 @@ void AUINavController::NotifyMouseInputType()
 void AUINavController::NotifyInputTypeChange(EInputType NewInputType)
 {
 	ClearTimer();
-	OnInputChanged(CurrentInputType, NewInputType);
+	if (bReceiveInputChangeEvents) OnInputChanged(CurrentInputType, NewInputType);
 
 	if (ActiveWidget != nullptr) ActiveWidget->OnInputChanged(CurrentInputType, NewInputType);
 
@@ -344,11 +351,8 @@ void AUINavController::OnReturn_Implementation()
 
 void AUINavController::MenuUp()
 {
-	if (bReceiveEventsFromSelf)
-	{
-		OnNavigated(ENavigationDirection::Up);
-		VerifyInputTypeChangeByAction(TEXT("MenuUp"));
-	}
+	if (bReceiveInputActionEvents) OnNavigated(ENavigationDirection::Up);
+	VerifyInputTypeChangeByAction(TEXT("MenuUp"));
 
 	if (ActiveWidget == nullptr ||
 		!ActiveWidget->IsInViewport()) return;
@@ -358,11 +362,8 @@ void AUINavController::MenuUp()
 
 void AUINavController::MenuDown()
 {
-	if (bReceiveEventsFromSelf)
-	{
-		OnNavigated(ENavigationDirection::Down);
-		VerifyInputTypeChangeByAction(TEXT("MenuDown"));
-	}
+	if (bReceiveInputActionEvents) OnNavigated(ENavigationDirection::Down);
+	VerifyInputTypeChangeByAction(TEXT("MenuDown"));
 
 	if (ActiveWidget == nullptr ||
 		!ActiveWidget->IsInViewport()) return;
@@ -372,11 +373,8 @@ void AUINavController::MenuDown()
 
 void AUINavController::MenuLeft()
 {
-	if (bReceiveEventsFromSelf)
-	{
-		OnNavigated(ENavigationDirection::Left);
-		VerifyInputTypeChangeByAction(TEXT("MenuLeft"));
-	}
+	if (bReceiveInputActionEvents) OnNavigated(ENavigationDirection::Left);
+	VerifyInputTypeChangeByAction(TEXT("MenuLeft"));
 
 	if (ActiveWidget == nullptr ||
 		!ActiveWidget->IsInViewport()) return;
@@ -386,11 +384,8 @@ void AUINavController::MenuLeft()
 
 void AUINavController::MenuRight()
 {
-	if (bReceiveEventsFromSelf)
-	{
-		OnNavigated(ENavigationDirection::Right);
-		VerifyInputTypeChangeByAction(TEXT("MenuRight"));
-	}
+	if (bReceiveInputActionEvents) OnNavigated(ENavigationDirection::Right);
+	VerifyInputTypeChangeByAction(TEXT("MenuRight"));
 
 	if (ActiveWidget == nullptr ||
 		!ActiveWidget->IsInViewport()) return;
@@ -400,11 +395,8 @@ void AUINavController::MenuRight()
 
 void AUINavController::MenuSelect()
 {
-	if (bReceiveEventsFromSelf)
-	{
-		OnSelect();
-		VerifyInputTypeChangeByAction(TEXT("MenuSelect"));
-	}
+	if (bReceiveInputActionEvents) OnSelect();
+	VerifyInputTypeChangeByAction(TEXT("MenuSelect"));
 
 	if (ActiveWidget == nullptr ||
 		!ActiveWidget->IsInViewport()) return;
@@ -415,11 +407,8 @@ void AUINavController::MenuSelect()
 
 void AUINavController::MenuReturn()
 {
-	if (bReceiveEventsFromSelf)
-	{
-		OnReturn();
-		VerifyInputTypeChangeByAction(TEXT("MenuReturn"));
-	}
+	if (bReceiveInputActionEvents) OnReturn();
+	VerifyInputTypeChangeByAction(TEXT("MenuReturn"));
 
 	if (ActiveWidget == nullptr ||
 		!ActiveWidget->IsInViewport()) return;
@@ -462,7 +451,8 @@ void AUINavController::StartMenuUp()
 	Direction = ENavigationDirection::Up;
 
 	if (!bChainNavigation) return;
-	if ((ActiveWidget == nullptr || !ActiveWidget->IsInViewport()) && !bReceiveEventsFromSelf) return;
+	if (ActiveWidget == nullptr || !ActiveWidget->IsInViewport())
+		if (!(bReceiveInputActionEvents || bReceiveInputChangeEvents)) return;
 
 	SetTimer(ENavigationDirection::Up);
 }
@@ -473,7 +463,8 @@ void AUINavController::StartMenuDown()
 	Direction = ENavigationDirection::Down;
 
 	if (!bChainNavigation) return;
-	if ((ActiveWidget == nullptr || !ActiveWidget->IsInViewport()) && !bReceiveEventsFromSelf) return;
+	if (ActiveWidget == nullptr || !ActiveWidget->IsInViewport())
+		if (!(bReceiveInputActionEvents || bReceiveInputChangeEvents)) return;
 	
 	SetTimer(ENavigationDirection::Down);
 }
@@ -484,7 +475,8 @@ void AUINavController::StartMenuLeft()
 	Direction = ENavigationDirection::Left;
 
 	if (!bChainNavigation) return;
-	if ((ActiveWidget == nullptr || !ActiveWidget->IsInViewport()) && !bReceiveEventsFromSelf) return;
+	if (ActiveWidget == nullptr || !ActiveWidget->IsInViewport())
+		if (!(bReceiveInputActionEvents || bReceiveInputChangeEvents)) return;
 
 	SetTimer(ENavigationDirection::Left);
 }
@@ -495,7 +487,8 @@ void AUINavController::StartMenuRight()
 	Direction = ENavigationDirection::Right;
 
 	if (!bChainNavigation) return;
-	if ((ActiveWidget == nullptr || !ActiveWidget->IsInViewport()) && !bReceiveEventsFromSelf) return;
+	if (ActiveWidget == nullptr || !ActiveWidget->IsInViewport())
+		if (!(bReceiveInputActionEvents || bReceiveInputChangeEvents)) return;
 
 	SetTimer(ENavigationDirection::Right);
 }

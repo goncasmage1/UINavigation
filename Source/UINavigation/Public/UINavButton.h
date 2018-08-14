@@ -32,7 +32,7 @@ public:
 	UPROPERTY()
 		FCustomReleaseDelegate CustomRelease;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavButton)
 		int ButtonIndex = -1;
 
 

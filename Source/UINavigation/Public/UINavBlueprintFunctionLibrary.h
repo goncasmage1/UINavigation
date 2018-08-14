@@ -17,14 +17,14 @@ class UINAVIGATION_API UUINavBlueprintFunctionLibrary : public UBlueprintFunctio
 
 public:
 
-	UFUNCTION(BlueprintCallable, Category = "UINav Sound")
+	UFUNCTION(BlueprintCallable, Category = "UINavigationLibrary")
 		static void SetSoundClassVolume(class USoundClass* TargetClass, float NewVolume);
-	UFUNCTION(BlueprintPure, Category = "UINav Sound")
+	UFUNCTION(BlueprintPure, Category = "UINavigationLibrary")
 		static float GetSoundClassVolume(class USoundClass* TargetClass);
 	
-	UFUNCTION(BlueprintCallable, Category = "UINav Graphics")
+	UFUNCTION(BlueprintCallable, Category = "UINavigationLibrary")
 		static void SetPostProcessSettings(FString Variable, FString Value);
-	UFUNCTION(BlueprintPure, Category = "UINav Graphics")
+	UFUNCTION(BlueprintPure, Category = "UINavigationLibrary")
 		static FString GetPostProcessSettings(FString Variable);
 	
 };

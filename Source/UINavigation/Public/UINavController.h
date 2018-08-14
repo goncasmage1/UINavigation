@@ -43,10 +43,10 @@ class UINAVIGATION_API AUINavController : public APlayerController
 	
 protected:
 
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(BlueprintReadOnly, Category = UINavComponent)
 		class UUINavWidget* ActiveWidget;
 
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(BlueprintReadOnly, Category = UINavComponent)
 		EInputType CurrentInputType = EInputType::Keyboard;
 
 	TMap<FString, TArray<FKey>> KeyMap = TMap<FString, TArray<FKey>>();
@@ -57,23 +57,33 @@ protected:
 	Indicates whether navigation will occur periodically after the player
 	holds down a navigation key
 	*/
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavController)
 		bool bChainNavigation = true;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-		bool bReceiveEventsFromSelf = true;
+	/*
+	Indicates whether this controller will be notified when UINav actions are executed
+	(MenuUp, MenuDown, etc.)
+	*/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavController)
+		bool bReceiveInputActionEvents = true;
+
+	/*
+	Indicates whether this controller will be notified when Input type changes
+	*/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavController)
+		bool bReceiveInputChangeEvents = true;
 
 	/*
 	The amount of time the player needs to hold a key for the navigation to
 	start occuring periodically
 	*/
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavController)
 		float InputHeldWaitTime = 0.5f;
 
 	/*
 	The amount of time that passes before the navigation chains further
 	*/
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavController)
 		float NavigationChainFrequency = 0.2f;
 
 	ECountdownPhase CountdownPhase = ECountdownPhase::None;
@@ -156,7 +166,7 @@ public:
 	*
 	*	@return Whether a gamepad is connected
 	*/
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "UINavigation")
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
 		bool IsGamepadConnected();
 
 	/**
@@ -183,13 +193,13 @@ public:
 	*
 	*	@param NewWidget The new active widget
 	*/
-	UFUNCTION(BlueprintCallable, Category = "UINavigation")
+	UFUNCTION(BlueprintCallable, Category = UINavController)
 		void SetActiveWidget(class UUINavWidget* NewWidget);
 
 	/**
 	*	Called when the root UINavWidget is removed from the viewport
 	*/
-	UFUNCTION(BlueprintNativeEvent, Category = "UINavigation")
+	UFUNCTION(BlueprintNativeEvent, Category = UINavController)
 		void OnRootWidgetRemoved();
 	void OnRootWidgetRemoved_Implementation();
 
@@ -199,7 +209,7 @@ public:
 	*	@param From The input type being used before
 	*	@param To The input type being used now
 	*/
-	UFUNCTION(BlueprintNativeEvent, Category = "UINavigation")
+	UFUNCTION(BlueprintNativeEvent, Category = UINavController)
 		void OnInputChanged(EInputType From, EInputType To);
 	virtual void OnInputChanged_Implementation(EInputType From, EInputType To);
 
@@ -208,15 +218,15 @@ public:
 	*
 	*	@param Direction The direction of navigation
 	*/
-	UFUNCTION(BlueprintNativeEvent, Category = "UINavigation")
+	UFUNCTION(BlueprintNativeEvent, Category = UINavController)
 		void OnNavigated(ENavigationDirection Direction);
 	void OnNavigated_Implementation(ENavigationDirection Direction);
 
-	UFUNCTION(BlueprintNativeEvent, Category = "UINavigation")
+	UFUNCTION(BlueprintNativeEvent, Category = UINavController)
 		void OnSelect();
 	void OnSelect_Implementation();
 
-	UFUNCTION(BlueprintNativeEvent, Category = "UINavigation")
+	UFUNCTION(BlueprintNativeEvent, Category = UINavController)
 		void OnReturn();
 	void OnReturn_Implementation();
 
