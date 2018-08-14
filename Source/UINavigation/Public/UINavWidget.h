@@ -174,7 +174,7 @@ public:
 		TSubclassOf<UUINavWidget> ParentWidgetClass;
 
 	//Current player controller
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
 		class AUINavController* CurrentPC;
 
 	//Widget that created this widget (if returned from a child)
