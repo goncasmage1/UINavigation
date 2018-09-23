@@ -59,13 +59,8 @@ void UUINavInputBox::UpdateActionKey(FKey NewKey, bool SecondKey)
 		Found++;
 	}
 
-	Settings->SaveKeyMappings();
+	Settings->SaveConfig();
 	Settings->ForceRebuildKeymaps();
-
-	/*for (TObjectIterator<UPlayerInput> It; It; ++It)
-	{
-		It->ForceRebuildingKeyMaps(true);
-	}*/
 }
 
 void UUINavInputBox::NotifySelected(bool SecondKey)
