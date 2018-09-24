@@ -2,6 +2,7 @@
 
 #include "UINavInputBox.h"
 #include "UINavController.h"
+#include "UINavComponent.h"
 #include "Components/TextBlock.h"
 #include "Components/HorizontalBox.h"
 
@@ -24,21 +25,25 @@ void UUINavInputBox::NativeConstruct()
 		return;
 	}
 
-	for (int i = 0; i < InputsPerAction; i++)
+	for (int i = 0; i < 3; i++)
 	{
-		UUINavComponent* NewInputButton = CreateWidget<UUINavComponent>(PC, InputButton_BP);
-
-		if (i < Actions.Num())
-		{
-			FKey NewKey = Actions[i].Key;
-			Keys.Add(NewKey);
-			NewInputButton->NavText->SetText(NewKey.GetDisplayName());
-		}
-		else NewInputButton->NavText->SetText(FText::FromName(FName(TEXT("Unbound"))));
-
+		UUINavComponent* NewInputButton = i == 0 ? InputButton1 : (i == 1 ? InputButton2 : InputButton3);
 		InputButtons.Add(NewInputButton);
-		NewInputButton->AddToViewport();
-		HorizontalBox->AddChild(NewInputButton);
+
+		if (i < InputsPerAction)
+		{
+			if (i < Actions.Num())
+			{
+				FKey NewKey = Actions[Actions.Num() - 1 - i].Key;
+				Keys.Add(NewKey);
+				NewInputButton->NavText->SetText(NewKey.GetDisplayName());
+			}
+			else NewInputButton->NavText->SetText(FText::FromName(FName(TEXT("Unbound"))));
+		}
+		else
+		{
+			NewInputButton->SetVisibility(ESlateVisibility::Hidden);
+		}
 	}
 }
 

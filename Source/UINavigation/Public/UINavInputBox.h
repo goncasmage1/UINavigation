@@ -30,9 +30,16 @@ public:
 	void NotifyUnbound(int Index);
 
 	UPROPERTY(EditDefaultsOnly)
-		TSubclassOf<UUINavComponent> InputButton_BP;
+		TSubclassOf<class UUINavComponent> InputButton_BP;
 
-	TArray<UUINavComponent*> InputButtons;
+	TArray<class UUINavComponent*> InputButtons;
+
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+		class UUINavComponent* InputButton1;
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+		class UUINavComponent* InputButton2;
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+		class UUINavComponent* InputButton3;
 
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UTextBlock* ActionText;
