@@ -41,6 +41,19 @@ USTRUCT(BlueprintType)
 struct FButtonNavigation
 {
 	GENERATED_BODY()
+
+	FButtonNavigation()
+	{
+
+	}
+
+	FButtonNavigation(int NewUp, int NewDown, int NewLeft, int NewRight)
+	{
+		UpButton = NewUp;
+		DownButton = NewDown;
+		LeftButton = NewLeft;
+		RightButton = NewRight;
+	}
 	
 	UPROPERTY(BlueprintReadWrite)
 		int UpButton = -1;
@@ -159,15 +172,17 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = "UINavigation")
 		TArray<class UUINavComponentBox*> UINavComponentBoxes;
 
-	//The indices of all the UINavInputContainers in this widget
-	TArray<int> InputContainerIndices;
+	//The index of the UINavInputContainer found
+	int InputContainerIndex = -1;
 
-	//All the UINavInputContainers in this Widget
+	//The UINavInputContainer in this Widget
 	UPROPERTY(BlueprintReadOnly, Category = "UINavigation")
-		TArray<class UUINavInputContainer*> UINavInputContainers;
+		class UUINavInputContainer* UINavInputContainer;
 
-	//The indices of all the UINavInputBoxes in this widget
-	TArray<int> InputBoxIndices;
+	//The starting index of the UINavInputBoxes in this widget
+	int InputBoxStartIndex = -1;
+	//The starting index of the UINavInputBoxes in this widget
+	int InputBoxEndIndex = -1;
 
 	//All the UINavInputBoxes in this Widget
 	UPROPERTY(BlueprintReadOnly, Category = "UINavigation")
@@ -321,7 +336,6 @@ public:
 	*/
 	UFUNCTION(BlueprintCallable, Category = "UINavigation")
 		void AppendGridNavigation(int DimensionX, int DimensionY, FButtonNavigation EdgeNavigation, bool bWrap);
-
 
 	/**
 	*	Called manually to setup all the elements in the Widget

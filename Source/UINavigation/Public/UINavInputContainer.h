@@ -37,6 +37,9 @@ public:
 
 	//-----------------------------------------------------------------------
 
+	UPROPERTY(EditAnywhere, meta = (ClampMin = "1", ClampMax = "3", UIMin = "1", UIMax = "3"))
+		int InputsPerAction = 2;
+
 	int StartingIndex = -1;
 
 	/*

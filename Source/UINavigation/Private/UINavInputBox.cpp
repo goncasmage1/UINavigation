@@ -3,6 +3,7 @@
 #include "UINavInputBox.h"
 #include "UINavController.h"
 #include "Components/TextBlock.h"
+#include "Components/HorizontalBox.h"
 
 void UUINavInputBox::NativeConstruct()
 {
@@ -15,28 +16,33 @@ void UUINavInputBox::NativeConstruct()
 
 	Settings->GetActionMappingByName(FName(*ActionName), Actions);
 
-	for (int i = 0; i < Actions.Num(); i++)
-	{
-		if (i == Actions.Num() - 1)
-		{
-			Key1 = Actions[Actions.Num() - 1].Key;
-			NavText->SetText(Key1.GetDisplayName());
-		}
-		else
-		{
-			Key2 = Actions[Actions.Num() - 2].Key;
-			NavText2->SetText(Key2.GetDisplayName());
-		}
-	}
+	AUINavController* PC = Cast<AUINavController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
 
 	if (Actions.Num() == 0)
 	{
-		DISPLAYERROR(TEXT("UINavInputBox: Couldn't find Action with given name."));
+		DISPLAYERROR(TEXT("Couldn't find Action with given name."));
 		return;
+	}
+
+	for (int i = 0; i < InputsPerAction; i++)
+	{
+		UUINavComponent* NewInputButton = CreateWidget<UUINavComponent>(PC, InputButton_BP);
+
+		if (i < Actions.Num())
+		{
+			FKey NewKey = Actions[i].Key;
+			Keys.Add(NewKey);
+			NewInputButton->NavText->SetText(NewKey.GetDisplayName());
+		}
+		else NewInputButton->NavText->SetText(FText::FromName(FName(TEXT("Unbound"))));
+
+		InputButtons.Add(NewInputButton);
+		NewInputButton->AddToViewport();
+		HorizontalBox->AddChild(NewInputButton);
 	}
 }
 
-void UUINavInputBox::UpdateActionKey(FKey NewKey, bool SecondKey)
+void UUINavInputBox::UpdateActionKey(FKey NewKey, int Index)
 {
 	UInputSettings* Settings = const_cast<UInputSettings*>(GetDefault<UInputSettings>());
 	TArray<FInputActionKeyMapping>& Actions = Settings->ActionMappings;
@@ -47,14 +53,11 @@ void UUINavInputBox::UpdateActionKey(FKey NewKey, bool SecondKey)
 		FString NewName = Action.ActionName.ToString();
 		if (NewName.Compare(ActionName) != 0) continue;
 
-		if ((Found == 0 && !SecondKey) || (Found == 1 && SecondKey))
+		if (Found == Index)
 		{
 			Action.Key = NewKey;
-			if (SecondKey) Key2 = NewKey;
-			else Key1 = NewKey;
-
-			if (SecondKey) NavText2->SetText(Key2.GetDisplayName());
-			else NavText->SetText(Key1.GetDisplayName());
+			Keys[Index] = NewKey;
+			InputButtons[Index]->NavText->SetText(NewKey.GetDisplayName());
 		}
 		Found++;
 	}
@@ -63,11 +66,20 @@ void UUINavInputBox::UpdateActionKey(FKey NewKey, bool SecondKey)
 	Settings->ForceRebuildKeymaps();
 }
 
-void UUINavInputBox::NotifySelected(bool SecondKey)
+void UUINavInputBox::NotifySelected(int Index)
 {
-	if (SecondKey) NavText2->SetText(FText::FromName(FName("Press Any Key")));
-	else NavText->SetText(FText::FromName(FName("Press Any Key")));
+	FName NewName = FName("Press Any Key");
+
+	InputButtons[Index]->NavText->SetText(FText::FromName(NewName));
 }
+
+void UUINavInputBox::NotifyUnbound(int Index)
+{
+	FName NewName = FName("Unbound");
+
+	InputButtons[Index]->NavText->SetText(FText::FromName(NewName));
+}
+
 
 
 
