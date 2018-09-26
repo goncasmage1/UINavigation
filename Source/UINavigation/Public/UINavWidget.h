@@ -93,14 +93,13 @@ protected:
 	float MovementCounter;
 	float MovementTime;
 
-	FVector2D InitialOffset;
+	FInputActionKeyMapping TempMapping;
 
 	FVector2D SelectorOrigin;
 	FVector2D SelectorDestination;
 	FVector2D Distance;
 
 	TArray<FKey> PressedKeys;
-	TArray<FKey> ModifierKeys;
 
 	/******************************************************************************/
 

@@ -11,15 +11,15 @@ void UUINavInputBox::NativeConstruct()
 	Super::NativeConstruct();
 
 	const UInputSettings* Settings = GetDefault<UInputSettings>();
-	TArray<FInputActionKeyMapping> Actions;
+	TArray<FInputActionKeyMapping> TempActions;
 
 	ActionText->SetText(FText::FromString(ActionName));
 
-	Settings->GetActionMappingByName(FName(*ActionName), Actions);
+	Settings->GetActionMappingByName(FName(*ActionName), TempActions);
 
 	AUINavController* PC = Cast<AUINavController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
 
-	if (Actions.Num() == 0)
+	if (TempActions.Num() == 0)
 	{
 		DISPLAYERROR(TEXT("Couldn't find Action with given name."));
 		return;
@@ -32,11 +32,11 @@ void UUINavInputBox::NativeConstruct()
 
 		if (i < InputsPerAction)
 		{
-			if (i < Actions.Num())
+			if (i < TempActions.Num())
 			{
-				FKey NewKey = Actions[Actions.Num() - 1 - i].Key;
-				Keys.Add(NewKey);
-				NewInputButton->NavText->SetText(NewKey.GetDisplayName());
+				FInputActionKeyMapping NewAction = TempActions[TempActions.Num() - 1 - i];
+				Actions.Add(NewAction);
+				NewInputButton->NavText->SetText(NewAction.Key.GetDisplayName());
 			}
 			else NewInputButton->NavText->SetText(FText::FromName(FName(TEXT("Unbound"))));
 		}
@@ -50,10 +50,10 @@ void UUINavInputBox::NativeConstruct()
 void UUINavInputBox::UpdateActionKey(FInputActionKeyMapping NewAction, int Index)
 {
 	UInputSettings* Settings = const_cast<UInputSettings*>(GetDefault<UInputSettings>());
-	TArray<FInputActionKeyMapping>& Actions = Settings->ActionMappings;
+	TArray<FInputActionKeyMapping>& TempActions = Settings->ActionMappings;
 
 	int Found = 0;
-	for (FInputActionKeyMapping& Action : Actions)
+	for (FInputActionKeyMapping& Action : TempActions)
 	{
 		FString NewName = Action.ActionName.ToString();
 		if (NewName.Compare(ActionName) != 0) continue;
@@ -61,8 +61,8 @@ void UUINavInputBox::UpdateActionKey(FInputActionKeyMapping NewAction, int Index
 		if (Found == Index)
 		{
 			Action = NewAction;
-			Keys[Index] = NewKey;
-			InputButtons[Index]->NavText->SetText(NewKey.GetDisplayName());
+			Actions[Index] = NewAction;
+			InputButtons[Index]->NavText->SetText(Action.Key.GetDisplayName());
 		}
 		Found++;
 	}

@@ -18,7 +18,7 @@ class UINAVIGATION_API UUINavInputBox : public UUserWidget
 	
 protected:
 
-	TArray<FKey> Keys;
+	TArray<FInputActionKeyMapping> Actions;
 
 public:
 

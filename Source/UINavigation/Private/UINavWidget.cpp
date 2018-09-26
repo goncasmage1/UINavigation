@@ -174,18 +174,13 @@ void UUINavWidget::TraverseHierarquy()
 			if (UINavInputContainer != nullptr)
 			{
 				DISPLAYERROR("Found more than 1 UINavInputContainer!");
-				return;
+				continue;
 			}
 
 			InputContainerIndex = UINavButtons.Num();
 			UINavInputContainer = InputContainer;
 
 			InputContainer->StartingIndex = UINavButtons.Num();
-
-			InputBoxStartIndex = UINavButtons.Num();
-			for (int i = 0; i < (InputContainer->ActionNames.Num() * InputContainer->InputsPerAction); i++) UINavButtons.Add(nullptr);
-			InputBoxEndIndex = UINavButtons.Num() - 1;
-
 			InputContainer->SetParentWidget(this);
 		}
 
@@ -346,19 +341,18 @@ FReply UUINavWidget::NativeOnKeyDown(const FGeometry & InGeometry, const FKeyEve
 		FKey PressedKey = InKeyEvent.GetKey();
 		if (!PressedKey.IsModifierKey())
 		{
-			FInputActionKeyMapping NewMapping;
-			NewMapping.Key = PressedKey;
-			UINavInputBoxes[InputBoxIndex / InputsPerAction]->UpdateActionKey(NewMapping, InputBoxIndex % InputsPerAction != 0);
+			TempMapping.Key = PressedKey;
+			UINavInputBoxes[InputBoxIndex / InputsPerAction]->UpdateActionKey(TempMapping, InputBoxIndex % InputsPerAction != 0);
+			TempMapping.bShift = TempMapping.bCtrl = TempMapping.bAlt = TempMapping.bCmd = false;
 			bWaitForInput = false;
 		}
 		else
 		{
 			FName KeyName = PressedKey.GetFName();
-			if (KeyName.IsEqual(FName(TEXT("LeftShift"))) || KeyName.IsEqual(FName(TEXT("RightShift")))) NewMapping.bShift = true;
-			if (KeyName.IsEqual(FName(TEXT("LeftControl"))) || KeyName.IsEqual(FName(TEXT("RightControl")))) NewMapping.bCtrl = true;
-			if (KeyName.IsEqual(FName(TEXT("LeftAlt"))) || KeyName.IsEqual(FName(TEXT("RightAlt")))) NewMapping.bAlt = true;
-			if (KeyName.IsEqual(FName(TEXT("LeftCommand"))) || KeyName.IsEqual(FName(TEXT("RightCommand")))) NewMapping.bCmd = true;
-
+			if (KeyName.IsEqual(FName(TEXT("LeftShift"))) || KeyName.IsEqual(FName(TEXT("RightShift")))) TempMapping.bShift = true;
+			if (KeyName.IsEqual(FName(TEXT("LeftControl"))) || KeyName.IsEqual(FName(TEXT("RightControl")))) TempMapping.bCtrl = true;
+			if (KeyName.IsEqual(FName(TEXT("LeftAlt"))) || KeyName.IsEqual(FName(TEXT("RightAlt")))) TempMapping.bAlt = true;
+			if (KeyName.IsEqual(FName(TEXT("LeftCommand"))) || KeyName.IsEqual(FName(TEXT("RightCommand")))) TempMapping.bCmd = true;
 		}
 	}
 	else
@@ -436,7 +430,7 @@ void UUINavWidget::AppendVerticalNavigation(int Dimension, FButtonNavigation Edg
 	{
 		if (InputContainerIndex >= StartingIndex && InputContainerIndex <= StartingIndex + Dimension)
 		{
-			ExtraButtons = (UINavInputContainer->ActionNames.Num() * UINavInputContainer->InputsPerAction) - 1;
+			ExtraButtons = (UINavInputBoxes.Num() * UINavInputContainer->InputsPerAction) - 1;
 		}
 	}
 	if (Dimension == UINavButtons.Num() && ExtraButtons > 0) Dimension -= (ExtraButtons);
@@ -451,7 +445,7 @@ void UUINavWidget::AppendVerticalNavigation(int Dimension, FButtonNavigation Edg
 			InputEdgeNav.UpButton = i == 0 ? (bWrap ? StartingIndex + Dimension + ExtraButtons - 1 : -1) : StartingIndex + Dimension - 1;
 			InputEdgeNav.DownButton = i == Dimension - 1 ? (bWrap ? StartingIndex : -1) : StartingIndex + ExtraButtons + i;
 
-			AppendGridNavigation(UINavInputContainer->InputsPerAction, UINavInputContainer->ActionNames.Num(), InputEdgeNav, false);
+			AppendGridNavigation(UINavInputContainer->InputsPerAction, UINavInputBoxes.Num(), InputEdgeNav, false);
 			continue;
 		}
 
