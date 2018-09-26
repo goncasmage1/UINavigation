@@ -182,12 +182,9 @@ void UUINavWidget::TraverseHierarquy()
 
 			InputContainer->StartingIndex = UINavButtons.Num();
 
-			for (int i = 0; i < InputContainer->ActionNames.Num(); i++)
-			{
-				InputBoxStartIndex = UINavButtons.Num();
-				for (int j = 0; j < InputContainer->InputsPerAction; j++) UINavButtons.Add(nullptr);
-				InputBoxEndIndex = UINavButtons.Num() - 1;
-			}
+			InputBoxStartIndex = UINavButtons.Num();
+			for (int i = 0; i < (InputContainer->ActionNames.Num() * InputContainer->InputsPerAction); i++) UINavButtons.Add(nullptr);
+			InputBoxEndIndex = UINavButtons.Num() - 1;
 
 			InputContainer->SetParentWidget(this);
 		}
@@ -346,8 +343,23 @@ FReply UUINavWidget::NativeOnKeyDown(const FGeometry & InGeometry, const FKeyEve
 	if (bWaitForInput)
 	{
 		int InputsPerAction = UINavInputContainer->InputsPerAction;
-		UINavInputBoxes[InputBoxIndex / InputsPerAction]->UpdateActionKey(InKeyEvent.GetKey(), InputBoxIndex % InputsPerAction != 0);
-		bWaitForInput = false;
+		FKey PressedKey = InKeyEvent.GetKey();
+		if (!PressedKey.IsModifierKey())
+		{
+			FInputActionKeyMapping NewMapping;
+			NewMapping.Key = PressedKey;
+			UINavInputBoxes[InputBoxIndex / InputsPerAction]->UpdateActionKey(NewMapping, InputBoxIndex % InputsPerAction != 0);
+			bWaitForInput = false;
+		}
+		else
+		{
+			FName KeyName = PressedKey.GetFName();
+			if (KeyName.IsEqual(FName(TEXT("LeftShift"))) || KeyName.IsEqual(FName(TEXT("RightShift")))) NewMapping.bShift = true;
+			if (KeyName.IsEqual(FName(TEXT("LeftControl"))) || KeyName.IsEqual(FName(TEXT("RightControl")))) NewMapping.bCtrl = true;
+			if (KeyName.IsEqual(FName(TEXT("LeftAlt"))) || KeyName.IsEqual(FName(TEXT("RightAlt")))) NewMapping.bAlt = true;
+			if (KeyName.IsEqual(FName(TEXT("LeftCommand"))) || KeyName.IsEqual(FName(TEXT("RightCommand")))) NewMapping.bCmd = true;
+
+		}
 	}
 	else
 	{
@@ -406,8 +418,6 @@ void UUINavWidget::HandleSelectorMovement(float DeltaTime)
 
 void UUINavWidget::AppendVerticalNavigation(int Dimension, FButtonNavigation EdgeNavigation, bool bWrap)
 {
-	//TODO: Update with input boxes
-
 	if (Dimension == -1) Dimension = UINavButtons.Num();
 	//check(Dimension > 0 && "Append Navigation Dimension should be greater than 0");
 	if (Dimension <= 0)
@@ -460,8 +470,6 @@ void UUINavWidget::AppendVerticalNavigation(int Dimension, FButtonNavigation Edg
 
 void UUINavWidget::AppendHorizontalNavigation(int Dimension, FButtonNavigation EdgeNavigation, bool bWrap)
 {
-	//TODO: Update with input boxes
-
 	if (Dimension == -1) Dimension = UINavButtons.Num();
 	//check(Dimension > 0 && "Append Navigation Dimension should be greater than 0");
 	if (Dimension <= 0)

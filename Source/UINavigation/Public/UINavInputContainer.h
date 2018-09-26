@@ -24,6 +24,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly)
 		TSubclassOf<class UUINavInputBox> InputBox_BP;
 
+	UPROPERTY(EditDefaultsOnly)
+		class UDataTable* ControllerMapping;
+
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UPanelWidget* Panel;
 	

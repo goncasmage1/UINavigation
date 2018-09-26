@@ -24,7 +24,7 @@ public:
 
 	virtual void NativeConstruct() override;
 
-	void UpdateActionKey(FKey NewKey, int Index);
+	void UpdateActionKey(FInputActionKeyMapping NewAction, int Index);
 
 	void NotifySelected(int Index);
 	void NotifyUnbound(int Index);

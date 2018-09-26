@@ -100,7 +100,7 @@ protected:
 	FVector2D Distance;
 
 	TArray<FKey> PressedKeys;
-
+	TArray<FKey> ModifierKeys;
 
 	/******************************************************************************/
 

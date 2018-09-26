@@ -7,9 +7,10 @@
 #include "UINavController.h"
 #include "GameFramework/InputSettings.h"
 #include "Blueprint/UserWidget.h"
-#include "Kismet/GameplayStatics.h"
-#include "Components/PanelWidget.h"
 #include "Blueprint/WidgetTree.h"
+#include "Components/PanelWidget.h"
+#include "DataTable.h"
+#include "Kismet/GameplayStatics.h"
 
 void UUINavInputContainer::NativePreConstruct()
 {
@@ -41,7 +42,6 @@ void UUINavInputContainer::CreateInputBoxes()
 	for (int i = 0; i < ActionNames.Num(); ++i)
 	{
 		ActionKeys.Add(Actions[i].Key);
-
 		UUINavInputBox* NewInputBox = CreateWidget<UUINavInputBox>(PC, InputBox_BP);
 		if (NewInputBox == nullptr) continue;
 

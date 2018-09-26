@@ -47,7 +47,7 @@ void UUINavInputBox::NativeConstruct()
 	}
 }
 
-void UUINavInputBox::UpdateActionKey(FKey NewKey, int Index)
+void UUINavInputBox::UpdateActionKey(FInputActionKeyMapping NewAction, int Index)
 {
 	UInputSettings* Settings = const_cast<UInputSettings*>(GetDefault<UInputSettings>());
 	TArray<FInputActionKeyMapping>& Actions = Settings->ActionMappings;
@@ -60,7 +60,7 @@ void UUINavInputBox::UpdateActionKey(FKey NewKey, int Index)
 
 		if (Found == Index)
 		{
-			Action.Key = NewKey;
+			Action = NewAction;
 			Keys[Index] = NewKey;
 			InputButtons[Index]->NavText->SetText(NewKey.GetDisplayName());
 		}
