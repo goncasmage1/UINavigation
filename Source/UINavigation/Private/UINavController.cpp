@@ -39,6 +39,10 @@ void AUINavController::SetupInputComponent()
 	FInputActionBinding& Action4_2 = InputComponent->BindAction("MenuRight", IE_Released, this, &AUINavController::MenuRightRelease);
 	Action4_2.bExecuteWhenPaused = true;
 	Action4_2.bConsumeInput = false;
+
+	FInputKeyBinding& Action1_3 = InputComponent->BindKey(EKeys::AnyKey, IE_Pressed, this, &AUINavController::MouseInputWorkaround);
+	Action1_3.bExecuteWhenPaused = true;
+	Action1_3.bConsumeInput = false;
 }
 
 void AUINavController::Possess(APawn * InPawn)
@@ -404,6 +408,20 @@ void AUINavController::MenuRightRelease()
 	if (Direction != EInputDirection::Right) return;
 
 	ClearTimer();
+}
+
+void AUINavController::MouseInputWorkaround()
+{
+	if (ActiveWidget->bWaitForInput)
+	{
+		if (WasInputKeyJustPressed(EKeys::LeftMouseButton)) ActiveWidget->ProcessMouseKeybind(FKey(EKeys::LeftMouseButton));
+		else if (WasInputKeyJustPressed(EKeys::RightMouseButton)) ActiveWidget->ProcessMouseKeybind(FKey(EKeys::RightMouseButton));
+		else if (WasInputKeyJustPressed(EKeys::MiddleMouseButton)) ActiveWidget->ProcessMouseKeybind(FKey(EKeys::MiddleMouseButton));
+		else if (WasInputKeyJustPressed(EKeys::MouseScrollUp)) ActiveWidget->ProcessMouseKeybind(FKey(EKeys::MouseScrollUp));
+		else if (WasInputKeyJustPressed(EKeys::MouseScrollDown)) ActiveWidget->ProcessMouseKeybind(FKey(EKeys::MouseScrollDown));
+		else if (WasInputKeyJustPressed(EKeys::ThumbMouseButton)) ActiveWidget->ProcessMouseKeybind(FKey(EKeys::ThumbMouseButton));
+		else if (WasInputKeyJustPressed(EKeys::ThumbMouseButton2)) ActiveWidget->ProcessMouseKeybind(FKey(EKeys::ThumbMouseButton2));
+	}
 }
 
 void AUINavController::StartMenuUp()

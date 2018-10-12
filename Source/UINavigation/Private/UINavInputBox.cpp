@@ -10,6 +10,8 @@ void UUINavInputBox::NativeConstruct()
 {
 	Super::NativeConstruct();
 
+	bIsFocusable = true;
+
 	const UInputSettings* Settings = GetDefault<UInputSettings>();
 	TArray<FInputActionKeyMapping> TempActions;
 
@@ -36,7 +38,14 @@ void UUINavInputBox::NativeConstruct()
 			{
 				FInputActionKeyMapping NewAction = TempActions[TempActions.Num() - 1 - i];
 				Actions.Add(NewAction);
-				NewInputButton->NavText->SetText(NewAction.Key.GetDisplayName());
+
+				FString NewActionName = FString();
+				if (NewAction.bShift) NewActionName.Append(TEXT("Shift +"));
+				if (NewAction.bAlt) NewActionName.Append(TEXT("Alt +"));
+				if (NewAction.bCtrl) NewActionName.Append(TEXT("Ctrl +"));
+				if (NewAction.bCmd) NewActionName.Append(TEXT("Cmd +"));
+				NewActionName.Append(NewAction.Key.GetDisplayName().ToString());
+				NewInputButton->NavText->SetText(FText::FromString(*NewActionName));
 			}
 			else NewInputButton->NavText->SetText(FText::FromName(FName(TEXT("Unbound"))));
 		}
@@ -61,6 +70,7 @@ void UUINavInputBox::UpdateActionKey(FInputActionKeyMapping NewAction, int Index
 		if (Found == Index)
 		{
 			Action = NewAction;
+			Action.ActionName = FName(*ActionName);
 			Actions[Index] = NewAction;
 			InputButtons[Index]->NavText->SetText(Action.Key.GetDisplayName());
 		}

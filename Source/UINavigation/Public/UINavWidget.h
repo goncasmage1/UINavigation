@@ -78,8 +78,6 @@ protected:
 
 	bool bMovingSelector = false;
 	bool bAllowNavigation = true;
-
-	bool bWaitForInput = false;
 	bool bRemoveFocus = false;
 
 	//Used to track when the selector's position should be updated
@@ -143,6 +141,8 @@ protected:
 
 
 public:
+
+	bool bWaitForInput = false;
 
 	//The UserWidget object that will move along the Widget
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget, OptionalWidget = true), Category = "UINavigation")
@@ -297,9 +297,12 @@ public:
 	*/
 	virtual void NativeTick(const FGeometry & MyGeometry, float DeltaTime) override;
 
-	virtual FReply NativeOnMouseMove(const FGeometry & InGeometry, const FPointerEvent & InMouseEvent);
-	virtual FReply NativeOnKeyDown(const FGeometry & InGeometry, const FKeyEvent & InKeyEvent);
-	virtual FReply NativeOnKeyUp(const FGeometry & InGeometry, const FKeyEvent & InKeyEvent);
+	virtual FReply NativeOnMouseMove(const FGeometry & InGeometry, const FPointerEvent & InMouseEvent) override;
+	virtual FReply NativeOnMouseWheel(const FGeometry & InGeometry, const FPointerEvent & InMouseEvent) override;
+	virtual FReply NativeOnKeyDown(const FGeometry & InGeometry, const FKeyEvent & InKeyEvent) override;
+	virtual FReply NativeOnKeyUp(const FGeometry & InGeometry, const FKeyEvent & InKeyEvent) override;
+	virtual FReply NativeOnMouseButtonDown(const FGeometry & InGeometry, const FPointerEvent & InMouseEvent) override;
+	virtual FReply NativeOnMouseButtonUp(const FGeometry & InGeometry, const FPointerEvent & InMouseEvent) override;
 
 	/**
 	*	Appends a new array of FButtonNavigations to the already existing navigation graph with the given dimension
@@ -570,6 +573,7 @@ public:
 		void ReleaseEvent(int Index);
 
 	void SetupUINavButtonDelegates(class UUINavButton* NewButton);
+	void ProcessMouseKeybind(FKey PressedMouseKey);
 
 	UFUNCTION(BlueprintCallable, Category = "UINavigation")
 		virtual void MenuUp();

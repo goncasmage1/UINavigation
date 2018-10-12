@@ -7,15 +7,16 @@
 #include "UINavInputContainer.h"
 #include "UINavComponent.h"
 #include "UINavController.h"
+#include "Animation/WidgetAnimation.h"
 #include "Blueprint/UserWidget.h"
 #include "Blueprint/WidgetTree.h"
+#include "Blueprint/SlateBlueprintLibrary.h"
+#include "Blueprint/WidgetBlueprintLibrary.h"
 #include "Components/Image.h"
 #include "Components/Border.h"
 #include "Components/TextBlock.h"
 #include "Components/ScrollBox.h"
 #include "Components/CanvasPanelSlot.h"
-#include "Animation/WidgetAnimation.h"
-#include "Blueprint/SlateBlueprintLibrary.h"
 
 void UUINavWidget::NativeConstruct()
 {
@@ -324,7 +325,16 @@ void UUINavWidget::NativeTick(const FGeometry & MyGeometry, float DeltaTime)
 
 FReply UUINavWidget::NativeOnMouseMove(const FGeometry & InGeometry, const FPointerEvent & InMouseEvent)
 {
-	if (CurrentPC->GetCurrentInputType() != EInputType::Mouse && InMouseEvent.GetCursorDelta().Size() > 0.000f)
+	if (CurrentPC->GetCurrentInputType() != EInputType::Mouse)
+	{
+		CurrentPC->NotifyMouseInputType();
+	}
+	return FReply::Handled();
+}
+
+FReply UUINavWidget::NativeOnMouseWheel(const FGeometry & InGeometry, const FPointerEvent & InMouseEvent)
+{
+	if (CurrentPC->GetCurrentInputType() != EInputType::Mouse)
 	{
 		CurrentPC->NotifyMouseInputType();
 	}
@@ -344,7 +354,10 @@ FReply UUINavWidget::NativeOnKeyDown(const FGeometry & InGeometry, const FKeyEve
 			TempMapping.Key = PressedKey;
 			UINavInputBoxes[InputBoxIndex / InputsPerAction]->UpdateActionKey(TempMapping, InputBoxIndex % InputsPerAction != 0);
 			TempMapping.bShift = TempMapping.bCtrl = TempMapping.bAlt = TempMapping.bCmd = false;
+			UINavInputBoxes[InputBoxIndex / InputsPerAction]->SetUserFocus(CurrentPC);
+			SetUserFocus(CurrentPC);
 			bWaitForInput = false;
+			PressedKeys.Empty();
 		}
 		else
 		{
@@ -371,8 +384,57 @@ FReply UUINavWidget::NativeOnKeyUp(const FGeometry & InGeometry, const FKeyEvent
 {
 	Super::NativeOnKeyUp(InGeometry, InKeyEvent);
 
-	PressedKeys.Remove(InKeyEvent.GetKey());
-	CurrentPC->NotifyKeyReleased(InKeyEvent.GetKey());
+	if (bWaitForInput)
+	{
+		if (InKeyEvent.GetKey().IsModifierKey())
+		{
+			FName KeyName = InKeyEvent.GetKey().GetFName();
+			if (KeyName.IsEqual(FName(TEXT("LeftShift"))) || KeyName.IsEqual(FName(TEXT("RightShift")))) TempMapping.bShift = false;
+			if (KeyName.IsEqual(FName(TEXT("LeftControl"))) || KeyName.IsEqual(FName(TEXT("RightControl")))) TempMapping.bCtrl = false;
+			if (KeyName.IsEqual(FName(TEXT("LeftAlt"))) || KeyName.IsEqual(FName(TEXT("RightAlt")))) TempMapping.bAlt = false;
+			if (KeyName.IsEqual(FName(TEXT("LeftCommand"))) || KeyName.IsEqual(FName(TEXT("RightCommand")))) TempMapping.bCmd = false;
+		}
+	}
+	else
+	{
+		PressedKeys.Remove(InKeyEvent.GetKey());
+		CurrentPC->NotifyKeyReleased(InKeyEvent.GetKey());
+	}
+
+	return FReply::Handled();
+}
+
+FReply UUINavWidget::NativeOnMouseButtonDown(const FGeometry & InGeometry, const FPointerEvent & InMouseEvent)
+{
+	Super::NativeOnMouseButtonDown(InGeometry, InMouseEvent);
+
+	if (bWaitForInput)
+	{
+		if (!InMouseEvent.GetEffectingButton().IsMouseButton()) return FReply::Handled();
+
+		ProcessMouseKeybind(InMouseEvent.GetEffectingButton());
+	}
+	else
+	{
+		if (PressedKeys.Find(InMouseEvent.GetEffectingButton()) == INDEX_NONE)
+		{
+			PressedKeys.Add(InMouseEvent.GetEffectingButton());
+			CurrentPC->NotifyKeyPressed(InMouseEvent.GetEffectingButton());
+		}
+	}
+
+	return FReply::Handled();
+}
+
+FReply UUINavWidget::NativeOnMouseButtonUp(const FGeometry & InGeometry, const FPointerEvent & InMouseEvent)
+{
+	Super::NativeOnMouseButtonUp(InGeometry, InMouseEvent);
+
+	if (!bWaitForInput && InMouseEvent.GetEffectingButton().IsMouseButton())
+	{
+		PressedKeys.Remove(InMouseEvent.GetEffectingButton());
+		CurrentPC->NotifyKeyReleased(InMouseEvent.GetEffectingButton());
+	}
 
 	return FReply::Handled();
 }
@@ -442,7 +504,7 @@ void UUINavWidget::AppendVerticalNavigation(int Dimension, FButtonNavigation Edg
 			FButtonNavigation InputEdgeNav;
 			InputEdgeNav.LeftButton = EdgeNavigation.LeftButton;
 			InputEdgeNav.RightButton = EdgeNavigation.RightButton;
-			InputEdgeNav.UpButton = i == 0 ? (bWrap ? StartingIndex + Dimension + ExtraButtons - 1 : -1) : StartingIndex + Dimension - 1;
+			InputEdgeNav.UpButton = i == 0 ? (bWrap ? StartingIndex + Dimension + ExtraButtons - 1 : -1) : StartingIndex + i - 1;
 			InputEdgeNav.DownButton = i == Dimension - 1 ? (bWrap ? StartingIndex : -1) : StartingIndex + ExtraButtons + i;
 
 			AppendGridNavigation(UINavInputContainer->InputsPerAction, UINavInputBoxes.Num(), InputEdgeNav, false);
@@ -827,6 +889,9 @@ void UUINavWidget::OnPreSelect(int Index)
 		{
 			SetUserFocus(CurrentPC);
 		}
+		SetKeyboardFocus();
+		FEventReply Reply = FEventReply();
+		UWidgetBlueprintLibrary::CaptureMouse(Reply, this);
 	}
 	else
 	{
@@ -964,7 +1029,7 @@ UUINavComponentBox * UUINavWidget::GetUINavComponentBoxAtIndex(int Index)
 
 void UUINavWidget::HoverEvent(int Index)
 {
-	if (CurrentPC->GetCurrentInputType() != EInputType::Mouse) return;
+	if (CurrentPC->GetCurrentInputType() != EInputType::Mouse || bWaitForInput) return;
 	CurrentPC->NotifyMouseInputType();
 
 	if (!bAllowNavigation)
@@ -978,6 +1043,8 @@ void UUINavWidget::HoverEvent(int Index)
 
 void UUINavWidget::UnhoverEvent(int Index)
 {
+	if (bWaitForInput) return;
+
 	if (bUseButtonStates)
 	{
 		/*
@@ -1028,6 +1095,19 @@ void UUINavWidget::SetupUINavButtonDelegates(UUINavButton * NewButton)
 	NewButton->CustomClick.AddDynamic(this, &UUINavWidget::ClickEvent);
 	NewButton->CustomRelease.AddDynamic(this, &UUINavWidget::ReleaseEvent);
 	bSwitchedStyle.Add(false);
+}
+
+void UUINavWidget::ProcessMouseKeybind(FKey PressedMouseKey)
+{
+	int InputsPerAction = UINavInputContainer->InputsPerAction;
+
+	TempMapping.Key = PressedMouseKey;
+	UINavInputBoxes[InputBoxIndex / InputsPerAction]->UpdateActionKey(TempMapping, InputBoxIndex % InputsPerAction != 0);
+	TempMapping.bShift = TempMapping.bCtrl = TempMapping.bAlt = TempMapping.bCmd = false;
+	UINavInputBoxes[InputBoxIndex / InputsPerAction]->SetUserFocus(CurrentPC);
+	SetUserFocus(CurrentPC);
+	bWaitForInput = false;
+	PressedKeys.Empty();
 }
 
 void UUINavWidget::MenuUp()

@@ -199,6 +199,8 @@ public:
 	void MenuDownRelease();
 	void MenuLeftRelease();
 
+	void MouseInputWorkaround();
+
 	void StartMenuUp();
 	void StartMenuDown();
 	void StartMenuLeft();
