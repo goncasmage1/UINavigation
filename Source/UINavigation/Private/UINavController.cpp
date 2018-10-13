@@ -217,6 +217,12 @@ void AUINavController::NotifyKeyReleased(FKey ReleasedKey)
 	FindActionByKey(ReleasedKey, false);
 }
 
+bool AUINavController::IsReturnKey(FKey PressedKey)
+{
+	for (FKey key : KeyMap[TEXT("MenuReturn")]) if (key == PressedKey) return true;
+	return false;
+}
+
 void AUINavController::FindActionByKey(FKey PressedKey, bool bPressed)
 {
 	TArray<FString> Actions;

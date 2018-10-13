@@ -174,6 +174,13 @@ public:
 	void NotifyKeyReleased(FKey ReleasedKey);
 
 	/**
+	*	Indicates whether the pressed key is associated with the return action
+	*
+	*	@param PressedKey The pressed key
+	*/
+	bool IsReturnKey(FKey PressedKey);
+
+	/**
 	*	Changes the widget this PC will communicate with
 	*
 	*	@param NewWidget The new active widget

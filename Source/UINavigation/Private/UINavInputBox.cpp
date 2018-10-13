@@ -81,6 +81,13 @@ void UUINavInputBox::UpdateActionKey(FInputActionKeyMapping NewAction, int Index
 	Settings->ForceRebuildKeymaps();
 }
 
+void UUINavInputBox::RevertToActionText(int Index)
+{
+	InputButtons[Index]->NavText->SetText(Actions[Index].Key.GetDisplayName());
+	UInputSettings* Settings = const_cast<UInputSettings*>(GetDefault<UInputSettings>());
+	Settings->ForceRebuildKeymaps();
+}
+
 void UUINavInputBox::NotifySelected(int Index)
 {
 	FName NewName = FName("Press Any Key");

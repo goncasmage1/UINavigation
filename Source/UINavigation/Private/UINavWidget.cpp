@@ -349,10 +349,18 @@ FReply UUINavWidget::NativeOnKeyDown(const FGeometry & InGeometry, const FKeyEve
 	{
 		int InputsPerAction = UINavInputContainer->InputsPerAction;
 		FKey PressedKey = InKeyEvent.GetKey();
+
+		if (CurrentPC->IsReturnKey(PressedKey))
+		{
+			bWaitForInput = false;
+			PressedKeys.Empty();
+			UINavInputBoxes[InputBoxIndex / InputsPerAction]->RevertToActionText(InputBoxIndex % InputsPerAction);
+			return FReply::Handled();
+		}
 		if (!PressedKey.IsModifierKey())
 		{
 			TempMapping.Key = PressedKey;
-			UINavInputBoxes[InputBoxIndex / InputsPerAction]->UpdateActionKey(TempMapping, InputBoxIndex % InputsPerAction != 0);
+			UINavInputBoxes[InputBoxIndex / InputsPerAction]->UpdateActionKey(TempMapping, InputBoxIndex % InputsPerAction);
 			TempMapping.bShift = TempMapping.bCtrl = TempMapping.bAlt = TempMapping.bCmd = false;
 			UINavInputBoxes[InputBoxIndex / InputsPerAction]->SetUserFocus(CurrentPC);
 			SetUserFocus(CurrentPC);
@@ -397,8 +405,7 @@ FReply UUINavWidget::NativeOnKeyUp(const FGeometry & InGeometry, const FKeyEvent
 	}
 	else
 	{
-		PressedKeys.Remove(InKeyEvent.GetKey());
-		CurrentPC->NotifyKeyReleased(InKeyEvent.GetKey());
+		if (PressedKeys.Remove(InKeyEvent.GetKey()) > 0) CurrentPC->NotifyKeyReleased(InKeyEvent.GetKey());
 	}
 
 	return FReply::Handled();
