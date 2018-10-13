@@ -82,8 +82,9 @@ void UUINavInputBox::UpdateActionKey(FInputActionKeyMapping NewAction, int Index
 }
 
 void UUINavInputBox::RevertToActionText(int Index)
-{
-	InputButtons[Index]->NavText->SetText(Actions[Index].Key.GetDisplayName());
+{ 
+	FText OldName = (Index < Actions.Num()) ? Actions[Index].Key.GetDisplayName() : FText::FromName(FName(TEXT("Unbound")));
+	InputButtons[Index]->NavText->SetText(OldName);
 	UInputSettings* Settings = const_cast<UInputSettings*>(GetDefault<UInputSettings>());
 	Settings->ForceRebuildKeymaps();
 }
