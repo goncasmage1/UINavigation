@@ -71,22 +71,32 @@ void UUINavInputBox::ResetKeyMappings()
 void UUINavInputBox::UpdateActionKey(FInputActionKeyMapping NewAction, int Index)
 {
 	UInputSettings* Settings = const_cast<UInputSettings*>(GetDefault<UInputSettings>());
-	TArray<FInputActionKeyMapping>& TempActions = Settings->ActionMappings;
+	TArray<FInputActionKeyMapping> TempActions;
+	Settings->GetActionMappingByName(FName(*ActionName), TempActions);
 
-	int Found = 0;
-	for (FInputActionKeyMapping& Action : TempActions)
+	if (Index < Actions.Num())
 	{
-		FString NewName = Action.ActionName.ToString();
-		if (NewName.Compare(ActionName) != 0) continue;
+		int Found = 0;
 
-		if (Found == Index)
+		for (FInputActionKeyMapping& Action : TempActions)
 		{
-			Action = NewAction;
-			Action.ActionName = FName(*ActionName);
-			Actions[Index] = NewAction;
-			InputButtons[Index]->NavText->SetText(Action.Key.GetDisplayName());
+			if (Found == Index)
+			{
+				Action = NewAction;
+				Action.ActionName = FName(*ActionName);
+				Actions[Index] = NewAction;
+				InputButtons[Index]->NavText->SetText(Action.Key.GetDisplayName());
+			}
+			Found++;
 		}
-		Found++;
+	}
+	else
+	{
+		FInputActionKeyMapping Action = NewAction;
+		Action.ActionName = FName(*ActionName);
+		Settings->AddActionMapping(NewAction, true);
+		Settings->ActionMappings.Add(Action);
+		InputButtons[Index]->NavText->SetText(Action.Key.GetDisplayName());
 	}
 
 	Settings->SaveConfig();

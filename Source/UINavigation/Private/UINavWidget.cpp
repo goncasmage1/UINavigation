@@ -512,7 +512,7 @@ void UUINavWidget::AppendVerticalNavigation(int Dimension, FButtonNavigation Edg
 			InputEdgeNav.LeftButton = EdgeNavigation.LeftButton;
 			InputEdgeNav.RightButton = EdgeNavigation.RightButton;
 			InputEdgeNav.UpButton = i == 0 ? (bWrap ? StartingIndex + Dimension + ExtraButtons - 1 : -1) : StartingIndex + i - 1;
-			InputEdgeNav.DownButton = i == Dimension - 1 ? (bWrap ? StartingIndex : -1) : StartingIndex + ExtraButtons + i;
+			InputEdgeNav.DownButton = (i == Dimension - 1 ? (bWrap ? StartingIndex : -1) : StartingIndex + ExtraButtons + i + 1);
 
 			AppendGridNavigation(UINavInputContainer->InputsPerAction, UINavInputBoxes.Num(), InputEdgeNav, false);
 			continue;
