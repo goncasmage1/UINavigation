@@ -26,5 +26,9 @@ public:
 		static void SetPostProcessSettings(FString Variable, FString Value);
 	UFUNCTION(BlueprintPure, Category = "UINav Graphics")
 		static FString GetPostProcessSettings(FString Variable);
+
+	//Resets the input settings to their default state
+	UFUNCTION(BlueprintCallable, Category = "UINav Input")
+		static void ResetInputSettings();
 	
 };

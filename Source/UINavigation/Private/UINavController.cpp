@@ -2,7 +2,7 @@
 
 #include "UINavController.h"
 #include "UINavWidget.h"
-
+#include "UINavSettings.h"
 
 void AUINavController::SetupInputComponent()
 {
@@ -43,6 +43,15 @@ void AUINavController::SetupInputComponent()
 	FInputKeyBinding& Action1_3 = InputComponent->BindKey(EKeys::AnyKey, IE_Pressed, this, &AUINavController::MouseInputWorkaround);
 	Action1_3.bExecuteWhenPaused = true;
 	Action1_3.bConsumeInput = false;
+
+	//Save default settings
+	UUINavSettings *MySettings = GetMutableDefault<UUINavSettings>();
+	if (MySettings->ActionMappings.Num() == 0)
+	{
+		UInputSettings* Settings = const_cast<UInputSettings*>(GetDefault<UInputSettings>());
+		MySettings->ActionMappings = Settings->ActionMappings;
+		MySettings->SaveConfig();
+	}
 }
 
 void AUINavController::Possess(APawn * InPawn)

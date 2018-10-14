@@ -9,13 +9,15 @@
 /**
  * 
  */
-UCLASS(config = Input)
+UCLASS(config = UINavInput)
 class UINAVIGATION_API UUINavSettings : public UObject
 {
 	GENERATED_BODY()
 	
-	UPROPERTY(config, EditAnywhere, EditFixedSize, Category = "Bindings", meta = (ToolTip = "List of Axis Properties"), AdvancedDisplay)
-		TArray<struct FInputAxisConfigEntry> AxisConfig;
+public:
+
+	UPROPERTY(config, EditAnywhere, Category = "Bindings")
+		TArray<struct FInputActionKeyMapping> ActionMappings;
 	
 	
 };

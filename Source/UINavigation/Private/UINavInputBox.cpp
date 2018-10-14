@@ -3,6 +3,7 @@
 #include "UINavInputBox.h"
 #include "UINavController.h"
 #include "UINavComponent.h"
+#include "UINavSettings.h"
 #include "Components/TextBlock.h"
 #include "Components/HorizontalBox.h"
 
@@ -12,6 +13,11 @@ void UUINavInputBox::NativeConstruct()
 
 	bIsFocusable = true;
 
+	BuildKeyMappings();
+}
+
+void UUINavInputBox::BuildKeyMappings()
+{
 	const UInputSettings* Settings = GetDefault<UInputSettings>();
 	TArray<FInputActionKeyMapping> TempActions;
 
@@ -56,6 +62,12 @@ void UUINavInputBox::NativeConstruct()
 	}
 }
 
+void UUINavInputBox::ResetKeyMappings()
+{
+	Actions.Empty();
+	BuildKeyMappings();
+}
+
 void UUINavInputBox::UpdateActionKey(FInputActionKeyMapping NewAction, int Index)
 {
 	UInputSettings* Settings = const_cast<UInputSettings*>(GetDefault<UInputSettings>());
@@ -86,7 +98,6 @@ void UUINavInputBox::RevertToActionText(int Index)
 	FText OldName = (Index < Actions.Num()) ? Actions[Index].Key.GetDisplayName() : FText::FromName(FName(TEXT("Unbound")));
 	InputButtons[Index]->NavText->SetText(OldName);
 	UInputSettings* Settings = const_cast<UInputSettings*>(GetDefault<UInputSettings>());
-	Settings->ForceRebuildKeymaps();
 }
 
 void UUINavInputBox::NotifySelected(int Index)

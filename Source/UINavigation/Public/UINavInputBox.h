@@ -24,6 +24,8 @@ public:
 
 	virtual void NativeConstruct() override;
 
+	void BuildKeyMappings();
+	void ResetKeyMappings();
 	void UpdateActionKey(FInputActionKeyMapping NewAction, int Index);
 	void RevertToActionText(int Index);
 

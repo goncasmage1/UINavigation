@@ -38,6 +38,9 @@ public:
 
 	void SetParentWidget(class UUINavWidget* NewParent);
 
+	UFUNCTION(BlueprintCallable, Category = "UINav Input")
+		void ResetKeyMappings();
+
 	//-----------------------------------------------------------------------
 
 	UPROPERTY(EditAnywhere, meta = (ClampMin = "1", ClampMax = "3", UIMin = "1", UIMax = "3"))
@@ -50,8 +53,5 @@ public:
 	*/
 	UPROPERTY(EditAnywhere)
 		TArray<FName> ActionNames;
-
-	UPROPERTY()
-		TArray<class UUINavInputBox*> InputBoxes;
 
 };

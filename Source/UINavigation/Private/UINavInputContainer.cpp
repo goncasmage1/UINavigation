@@ -26,6 +26,11 @@ void UUINavInputContainer::SetParentWidget(UUINavWidget * NewParent)
 	CreateInputBoxes();
 }
 
+void UUINavInputContainer::ResetKeyMappings()
+{
+	for (UUINavInputBox* InputBox : ParentWidget->UINavInputBoxes) InputBox->ResetKeyMappings();
+}
+
 void UUINavInputContainer::CreateInputBoxes()
 {
 	if (InputBox_BP == nullptr) return;
