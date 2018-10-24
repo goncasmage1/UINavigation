@@ -334,9 +334,16 @@ FReply UUINavWidget::NativeOnMouseMove(const FGeometry & InGeometry, const FPoin
 
 FReply UUINavWidget::NativeOnMouseWheel(const FGeometry & InGeometry, const FPointerEvent & InMouseEvent)
 {
-	if (CurrentPC->GetCurrentInputType() != EInputType::Mouse)
+	if (bWaitForInput)
 	{
-		CurrentPC->NotifyMouseInputType();
+		ProcessMouseKeybind(InMouseEvent.GetWheelDelta() > 0.f ? FKey(EKeys::MouseScrollUp) : FKey(EKeys::MouseScrollDown));
+	}
+	else
+	{
+		if (CurrentPC->GetCurrentInputType() != EInputType::Mouse)
+		{
+			CurrentPC->NotifyMouseInputType();
+		}
 	}
 	return FReply::Handled();
 }
