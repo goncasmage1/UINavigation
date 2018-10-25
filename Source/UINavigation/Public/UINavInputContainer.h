@@ -43,15 +43,16 @@ public:
 
 	//-----------------------------------------------------------------------
 
-	UPROPERTY(EditAnywhere, meta = (ClampMin = "1", ClampMax = "3", UIMin = "1", UIMax = "3"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (ClampMin = "1", ClampMax = "3", UIMin = "1", UIMax = "3"), Category = "UINav Input")
 		int InputsPerAction = 2;
 
+	UPROPERTY(BlueprintReadOnly, Category = "UINav Input")
 	int StartingIndex = -1;
 
 	/*
 	The indexes of the desired actions to allow for rebinding
 	*/
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 		TArray<FName> ActionNames;
 
 };
