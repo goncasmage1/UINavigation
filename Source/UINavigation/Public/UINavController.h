@@ -192,7 +192,7 @@ public:
 		void OnRootWidgetRemoved();
 	void OnRootWidgetRemoved_Implementation();
 
-	void SetTimer(EInputDirection Direction);
+	void SetTimer(EInputDirection TimerDirection);
 	void ClearTimer();
 
 	void MenuUp();

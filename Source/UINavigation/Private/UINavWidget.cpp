@@ -513,7 +513,7 @@ void UUINavWidget::AppendVerticalNavigation(int Dimension, FButtonNavigation Edg
 
 	for (int i = 0; i < Dimension; i++)
 	{
-		if (InputContainerIndex == i)
+		if ((InputContainerIndex - StartingIndex) == i)
 		{
 			FButtonNavigation InputEdgeNav;
 			InputEdgeNav.LeftButton = EdgeNavigation.LeftButton;
@@ -603,7 +603,6 @@ void UUINavWidget::AppendGridNavigation(int DimensionX, int DimensionY, FButtonN
 		return;
 	}
 
-	TArray<FButtonNavigation> ButtonsNav = TArray<FButtonNavigation>();
 	FButtonNavigation NewNav;
 
 	int StartingIndex = ButtonNavigations.Num();
