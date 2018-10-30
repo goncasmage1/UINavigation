@@ -65,6 +65,18 @@ void AUINavController::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	if (CurrentInputType != EInputType::Mouse)
+	{
+		float PosX, PosY;
+		GetMousePosition(PosX, PosY);
+		if (PosX != PreviousX || PosY != PreviousY)
+		{
+			PreviousX = PosX;
+			PreviousY = PosY;
+			NotifyMouseInputType();
+		}
+	}
+
 	switch (CountdownPhase)
 	{
 		case ECountdownPhase::None:

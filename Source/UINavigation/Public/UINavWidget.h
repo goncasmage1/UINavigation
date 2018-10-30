@@ -297,7 +297,6 @@ public:
 	*/
 	virtual void NativeTick(const FGeometry & MyGeometry, float DeltaTime) override;
 
-	virtual FReply NativeOnMouseMove(const FGeometry & InGeometry, const FPointerEvent & InMouseEvent) override;
 	virtual FReply NativeOnMouseWheel(const FGeometry & InGeometry, const FPointerEvent & InMouseEvent) override;
 	virtual FReply NativeOnKeyDown(const FGeometry & InGeometry, const FKeyEvent & InKeyEvent) override;
 	virtual FReply NativeOnKeyUp(const FGeometry & InGeometry, const FKeyEvent & InKeyEvent) override;
@@ -462,7 +461,7 @@ public:
 	*	Called when the input type changed
 	*/
 	UFUNCTION(BlueprintImplementableEvent, Category = "UINavigation")
-		void OnInputChanged(EInputType From, EInputType TO);
+		void OnInputChanged(EInputType From, EInputType To);
 
 	/**
 	*	Called when this widget completed UINavSetup

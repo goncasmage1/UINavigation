@@ -53,6 +53,9 @@ protected:
 
 	EInputDirection Direction = EInputDirection::None;
 
+	float PreviousX = -1.f;
+	float PreviousY = -1.f;
+
 	/*
 	Indicates whether navigation will occur periodically after the player
 	holds down a navigation key
