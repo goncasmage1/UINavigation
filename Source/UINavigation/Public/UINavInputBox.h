@@ -26,6 +26,7 @@ public:
 
 	void BuildKeyMappings();
 	void ResetKeyMappings();
+	bool UpdateKeyIconForKey(FName KeyName, int Index);
 	void UpdateActionKey(FInputActionKeyMapping NewAction, int Index);
 	void RevertToActionText(int Index);
 
@@ -33,22 +34,24 @@ public:
 	void NotifyUnbound(int Index);
 
 	UPROPERTY(EditDefaultsOnly)
-		TSubclassOf<class UUINavComponent> InputButton_BP;
+		TSubclassOf<class UUINavInputComponent> InputButton_BP;
 
-	TArray<class UUINavComponent*> InputButtons;
+	TArray<class UUINavInputComponent*> InputButtons;
 
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
-		class UUINavComponent* InputButton1;
+		class UUINavInputComponent* InputButton1;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
-		class UUINavComponent* InputButton2;
+		class UUINavInputComponent* InputButton2;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
-		class UUINavComponent* InputButton3;
+		class UUINavInputComponent* InputButton3;
 
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UTextBlock* ActionText;
 
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		class UHorizontalBox* HorizontalBox;
+
+	class UUINavInputContainer* Container;
 
 	FString ActionName;
 

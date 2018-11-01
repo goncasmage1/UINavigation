@@ -2,10 +2,13 @@
 
 #include "UINavInputBox.h"
 #include "UINavController.h"
-#include "UINavComponent.h"
+#include "UINavInputComponent.h"
+#include "UINavInputContainer.h"
 #include "UINavSettings.h"
 #include "Components/TextBlock.h"
 #include "Components/HorizontalBox.h"
+#include "Components/Image.h"
+#include "Engine/DataTable.h"
 
 void UUINavInputBox::NativeConstruct()
 {
@@ -35,7 +38,7 @@ void UUINavInputBox::BuildKeyMappings()
 
 	for (int i = 0; i < 3; i++)
 	{
-		UUINavComponent* NewInputButton = i == 0 ? InputButton1 : (i == 1 ? InputButton2 : InputButton3);
+		UUINavInputComponent* NewInputButton = i == 0 ? InputButton1 : (i == 1 ? InputButton2 : InputButton3);
 		InputButtons.Add(NewInputButton);
 
 		if (i < InputsPerAction)
@@ -46,6 +49,11 @@ void UUINavInputBox::BuildKeyMappings()
 				Actions.Add(NewAction);
 
 				FString NewActionName = FString();
+				if (UpdateKeyIconForKey(FName(*NewAction.Key.GetDisplayName().ToString()), i))
+				{
+					NewInputButton->InputImage->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+					NewInputButton->NavText->SetVisibility(ESlateVisibility::Collapsed);
+				}
 				if (NewAction.bShift) NewActionName.Append(TEXT("Shift +"));
 				if (NewAction.bAlt) NewActionName.Append(TEXT("Alt +"));
 				if (NewAction.bCtrl) NewActionName.Append(TEXT("Ctrl +"));
@@ -86,6 +94,8 @@ void UUINavInputBox::UpdateActionKey(FInputActionKeyMapping NewAction, int Index
 				Action.ActionName = FName(*ActionName);
 				Actions[Index] = NewAction;
 				InputButtons[Index]->NavText->SetText(Action.Key.GetDisplayName());
+
+				UpdateKeyIconForKey(FName(*Action.Key.GetDisplayName().ToString()), Index);
 			}
 			Found++;
 		}
@@ -97,10 +107,30 @@ void UUINavInputBox::UpdateActionKey(FInputActionKeyMapping NewAction, int Index
 		Settings->AddActionMapping(NewAction, true);
 		Settings->ActionMappings.Add(Action);
 		InputButtons[Index]->NavText->SetText(Action.Key.GetDisplayName());
+
+		//Search using FindRow. It returns a handle to the row. Access the variables like GOLookupRow->Blueprint_Class, GOLookupRow->Usecode FGameObjectLookupTable* GOLookupRow = GameObjectLookupTable->FindRow<FGameObjectLookupTable>( *FString::Printf( TEXT("%d"), GoID), ContextString );
+
 	}
 
 	Settings->SaveConfig();
 	Settings->ForceRebuildKeymaps();
+}
+
+bool UUINavInputBox::UpdateKeyIconForKey(FName KeyName, int Index)
+{
+	FInputIconMapping* KeyIcon = nullptr;
+	if (Container->GamepadKeyData != nullptr)
+	{
+		KeyIcon = Container->GamepadKeyData->FindRow<FInputIconMapping>(KeyName, TEXT("GENERAL"));
+		if (KeyIcon == nullptr)
+		{
+			KeyIcon = Container->KeyboardMouseKeyData->FindRow<FInputIconMapping>(KeyName, TEXT("GENERAL"));
+			if (KeyIcon == nullptr) return false;
+		}
+	}
+
+	//InputButtons[Index]->InputImage->SetBrushFromTexture();
+	return true;
 }
 
 void UUINavInputBox::RevertToActionText(int Index)
@@ -123,7 +153,4 @@ void UUINavInputBox::NotifyUnbound(int Index)
 
 	InputButtons[Index]->NavText->SetText(FText::FromName(NewName));
 }
-
-
-
 
