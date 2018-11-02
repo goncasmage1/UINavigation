@@ -181,7 +181,6 @@ void UUINavWidget::TraverseHierarquy()
 			InputContainerIndex = UINavButtons.Num();
 			UINavInputContainer = InputContainer;
 
-			InputContainer->StartingIndex = UINavButtons.Num();
 			InputContainer->SetParentWidget(this);
 		}
 

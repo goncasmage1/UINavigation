@@ -9,6 +9,7 @@
 #include "Components/HorizontalBox.h"
 #include "Components/Image.h"
 #include "Engine/DataTable.h"
+#include "Kismet/KismetStringLibrary.h"
 
 void UUINavInputBox::NativeConstruct()
 {
@@ -49,7 +50,7 @@ void UUINavInputBox::BuildKeyMappings()
 				Actions.Add(NewAction);
 
 				FString NewActionName = FString();
-				if (UpdateKeyIconForKey(FName(*NewAction.Key.GetDisplayName().ToString()), i))
+				if (UpdateKeyIconForKey(NewAction.Key, i))
 				{
 					NewInputButton->InputImage->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
 					NewInputButton->NavText->SetVisibility(ESlateVisibility::Collapsed);
@@ -94,8 +95,6 @@ void UUINavInputBox::UpdateActionKey(FInputActionKeyMapping NewAction, int Index
 				Action.ActionName = FName(*ActionName);
 				Actions[Index] = NewAction;
 				InputButtons[Index]->NavText->SetText(Action.Key.GetDisplayName());
-
-				UpdateKeyIconForKey(FName(*Action.Key.GetDisplayName().ToString()), Index);
 			}
 			Found++;
 		}
@@ -107,30 +106,45 @@ void UUINavInputBox::UpdateActionKey(FInputActionKeyMapping NewAction, int Index
 		Settings->AddActionMapping(NewAction, true);
 		Settings->ActionMappings.Add(Action);
 		InputButtons[Index]->NavText->SetText(Action.Key.GetDisplayName());
-
-		//Search using FindRow. It returns a handle to the row. Access the variables like GOLookupRow->Blueprint_Class, GOLookupRow->Usecode FGameObjectLookupTable* GOLookupRow = GameObjectLookupTable->FindRow<FGameObjectLookupTable>( *FString::Printf( TEXT("%d"), GoID), ContextString );
-
 	}
+	UpdateKeyIconForKey(NewAction.Key, Index);
 
 	Settings->SaveConfig();
 	Settings->ForceRebuildKeymaps();
 }
 
-bool UUINavInputBox::UpdateKeyIconForKey(FName KeyName, int Index)
+bool UUINavInputBox::UpdateKeyIconForKey(FKey Key, int Index)
 {
 	FInputIconMapping* KeyIcon = nullptr;
-	if (Container->GamepadKeyData != nullptr)
+
+	if (Key.IsGamepadKey())
 	{
-		KeyIcon = Container->GamepadKeyData->FindRow<FInputIconMapping>(KeyName, TEXT("GENERAL"));
-		if (KeyIcon == nullptr)
+		if (Container->GamepadKeyData != nullptr && Container->GamepadKeyData->RowMap.Contains(Key.GetFName()))
 		{
-			KeyIcon = Container->KeyboardMouseKeyData->FindRow<FInputIconMapping>(KeyName, TEXT("GENERAL"));
-			if (KeyIcon == nullptr) return false;
+			KeyIcon = (FInputIconMapping*)Container->GamepadKeyData->RowMap[Key.GetFName()];
 		}
 	}
+	else
+	{
+		if (Container->KeyboardMouseKeyData != nullptr && Container->KeyboardMouseKeyData->RowMap.Contains(Key.GetFName()))
+		{
+			KeyIcon = (FInputIconMapping*)Container->KeyboardMouseKeyData->RowMap[Key.GetFName()];
+		}
+	}
+	if (KeyIcon == nullptr) return false;
 
-	//InputButtons[Index]->InputImage->SetBrushFromTexture();
-	return true;
+	bool bValid = false;
+	int32 Width, Height;
+	
+	FString str1 = KeyIcon->InputIcon.GetAssetPathString();
+	TArray<FString> Paths1 = UKismetStringLibrary::ParseIntoArray(str1, TEXT("."));
+	TArray<FString> Paths2 = UKismetStringLibrary::ParseIntoArray(Paths1[0], TEXT("/"));
+	Paths2.RemoveAt(0);
+	FString Combined = TEXT("");
+	for (int i = 0; i < Paths2.Num(); i++) Combined = FPaths::Combine(Combined, Paths2[i]);
+	UTexture2D* LoadedTexture = Container->LoadTexture2D(FPaths::ConvertRelativePathToFull(FPaths::Combine(FPaths::ProjectPluginsDir(), TEXT("UINavigation"), TEXT("Content"), Combined)), bValid, Width, Height);
+	if (bValid) InputButtons[Index]->InputImage->SetBrushFromTexture(LoadedTexture);
+	return bValid;
 }
 
 void UUINavInputBox::RevertToActionText(int Index)

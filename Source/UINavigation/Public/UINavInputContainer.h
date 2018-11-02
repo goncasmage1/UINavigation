@@ -28,6 +28,11 @@ protected:
 
 	void CreateInputBoxes();
 
+	//-----------------------------------------------------------------------
+
+	UPROPERTY(BlueprintReadOnly, Category = "UINav Input")
+	int StartingIndex = -1;
+
 	/*
 	The desired InputBox widget blueprint
 	*/
@@ -63,9 +68,6 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (ClampMin = "1", ClampMax = "3", UIMin = "1", UIMax = "3"), Category = "UINav Input")
 		int InputsPerAction = 2;
-
-	UPROPERTY(BlueprintReadOnly, Category = "UINav Input")
-	int StartingIndex = -1;
 
 	/*
 	The indexes of the desired actions to allow for rebinding

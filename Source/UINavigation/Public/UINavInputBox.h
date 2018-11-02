@@ -26,7 +26,7 @@ public:
 
 	void BuildKeyMappings();
 	void ResetKeyMappings();
-	bool UpdateKeyIconForKey(FName KeyName, int Index);
+	bool UpdateKeyIconForKey(FKey Key, int Index);
 	void UpdateActionKey(FInputActionKeyMapping NewAction, int Index);
 	void RevertToActionText(int Index);
 
