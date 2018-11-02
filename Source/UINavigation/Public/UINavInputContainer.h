@@ -13,7 +13,7 @@ struct FInputIconMapping : public FTableRowBase
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input Icon")
-		FSoftObjectPath InputIcon;
+		TAssetPtr<class UTexture2D> InputIcon;
 };
 
 /**
@@ -74,5 +74,7 @@ public:
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 		TArray<FName> ActionNames;
+
+	FStreamableManager AssetLoader;
 
 };

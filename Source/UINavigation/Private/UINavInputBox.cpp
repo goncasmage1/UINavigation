@@ -133,18 +133,13 @@ bool UUINavInputBox::UpdateKeyIconForKey(FKey Key, int Index)
 	}
 	if (KeyIcon == nullptr) return false;
 
-	bool bValid = false;
-	int32 Width, Height;
-	
-	FString str1 = KeyIcon->InputIcon.GetAssetPathString();
-	TArray<FString> Paths1 = UKismetStringLibrary::ParseIntoArray(str1, TEXT("."));
-	TArray<FString> Paths2 = UKismetStringLibrary::ParseIntoArray(Paths1[0], TEXT("/"));
-	Paths2.RemoveAt(0);
-	FString Combined = TEXT("");
-	for (int i = 0; i < Paths2.Num(); i++) Combined = FPaths::Combine(Combined, Paths2[i]);
-	UTexture2D* LoadedTexture = Container->LoadTexture2D(FPaths::ConvertRelativePathToFull(FPaths::Combine(FPaths::ProjectPluginsDir(), TEXT("UINavigation"), TEXT("Content"), Combined)), bValid, Width, Height);
-	if (bValid) InputButtons[Index]->InputImage->SetBrushFromTexture(LoadedTexture);
-	return bValid;
+	UTexture2D* NewTexture = KeyIcon->InputIcon.LoadSynchronous();
+	if (NewTexture != nullptr)
+	{
+		InputButtons[Index]->InputImage->SetBrushFromTexture(NewTexture);
+		return true;
+	}
+	return false;
 }
 
 void UUINavInputBox::RevertToActionText(int Index)
