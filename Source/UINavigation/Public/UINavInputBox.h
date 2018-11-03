@@ -20,6 +20,8 @@ protected:
 
 	TArray<FInputActionKeyMapping> Actions;
 
+	TArray<bool> bUsingKeyImage = { false, false, false };
+
 public:
 
 	virtual void NativeConstruct() override;

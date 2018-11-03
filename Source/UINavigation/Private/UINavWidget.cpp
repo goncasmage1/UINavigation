@@ -354,24 +354,12 @@ FReply UUINavWidget::NativeOnKeyDown(const FGeometry & InGeometry, const FKeyEve
 			UINavInputBoxes[InputBoxIndex / InputsPerAction]->RevertToActionText(InputBoxIndex % InputsPerAction);
 			return FReply::Handled();
 		}
-		if (!PressedKey.IsModifierKey())
-		{
-			TempMapping.Key = PressedKey;
-			UINavInputBoxes[InputBoxIndex / InputsPerAction]->UpdateActionKey(TempMapping, InputBoxIndex % InputsPerAction);
-			TempMapping.bShift = TempMapping.bCtrl = TempMapping.bAlt = TempMapping.bCmd = false;
-			UINavInputBoxes[InputBoxIndex / InputsPerAction]->SetUserFocus(CurrentPC);
-			SetUserFocus(CurrentPC);
-			bWaitForInput = false;
-			PressedKeys.Empty();
-		}
-		else
-		{
-			FName KeyName = PressedKey.GetFName();
-			if (KeyName.IsEqual(FName(TEXT("LeftShift"))) || KeyName.IsEqual(FName(TEXT("RightShift")))) TempMapping.bShift = true;
-			if (KeyName.IsEqual(FName(TEXT("LeftControl"))) || KeyName.IsEqual(FName(TEXT("RightControl")))) TempMapping.bCtrl = true;
-			if (KeyName.IsEqual(FName(TEXT("LeftAlt"))) || KeyName.IsEqual(FName(TEXT("RightAlt")))) TempMapping.bAlt = true;
-			if (KeyName.IsEqual(FName(TEXT("LeftCommand"))) || KeyName.IsEqual(FName(TEXT("RightCommand")))) TempMapping.bCmd = true;
-		}
+		TempMapping.Key = PressedKey;
+		UINavInputBoxes[InputBoxIndex / InputsPerAction]->UpdateActionKey(TempMapping, InputBoxIndex % InputsPerAction);
+		/*UINavInputBoxes[InputBoxIndex / InputsPerAction]->SetUserFocus(CurrentPC);
+		SetUserFocus(CurrentPC);*/
+		bWaitForInput = false;
+		PressedKeys.Empty();
 	}
 	else
 	{

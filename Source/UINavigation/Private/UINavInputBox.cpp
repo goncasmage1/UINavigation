@@ -9,7 +9,7 @@
 #include "Components/HorizontalBox.h"
 #include "Components/Image.h"
 #include "Engine/DataTable.h"
-#include "Kismet/KismetStringLibrary.h"
+#include "Blueprint/WidgetBlueprintLibrary.h"
 
 void UUINavInputBox::NativeConstruct()
 {
@@ -49,18 +49,13 @@ void UUINavInputBox::BuildKeyMappings()
 				FInputActionKeyMapping NewAction = TempActions[TempActions.Num() - 1 - i];
 				Actions.Add(NewAction);
 
-				FString NewActionName = FString();
 				if (UpdateKeyIconForKey(NewAction.Key, i))
 				{
+					bUsingKeyImage[i] = true;
 					NewInputButton->InputImage->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
 					NewInputButton->NavText->SetVisibility(ESlateVisibility::Collapsed);
 				}
-				if (NewAction.bShift) NewActionName.Append(TEXT("Shift +"));
-				if (NewAction.bAlt) NewActionName.Append(TEXT("Alt +"));
-				if (NewAction.bCtrl) NewActionName.Append(TEXT("Ctrl +"));
-				if (NewAction.bCmd) NewActionName.Append(TEXT("Cmd +"));
-				NewActionName.Append(NewAction.Key.GetDisplayName().ToString());
-				NewInputButton->NavText->SetText(FText::FromString(*NewActionName));
+				NewInputButton->NavText->SetText(NewAction.Key.GetDisplayName());
 			}
 			else NewInputButton->NavText->SetText(FText::FromName(FName(TEXT("Unbound"))));
 		}
@@ -107,10 +102,19 @@ void UUINavInputBox::UpdateActionKey(FInputActionKeyMapping NewAction, int Index
 		Settings->ActionMappings.Add(Action);
 		InputButtons[Index]->NavText->SetText(Action.Key.GetDisplayName());
 	}
-	UpdateKeyIconForKey(NewAction.Key, Index);
+
+	if (UpdateKeyIconForKey(NewAction.Key, Index) != bUsingKeyImage[Index]) bUsingKeyImage[Index] = !bUsingKeyImage[Index];
+		
+	if (bUsingKeyImage[Index])
+	{
+		InputButtons[Index]->InputImage->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+		InputButtons[Index]->NavText->SetVisibility(ESlateVisibility::Collapsed);
+	}
 
 	Settings->SaveConfig();
 	Settings->ForceRebuildKeymaps();
+
+	UWidgetBlueprintLibrary::SetFocusToGameViewport();
 }
 
 bool UUINavInputBox::UpdateKeyIconForKey(FKey Key, int Index)
@@ -146,7 +150,6 @@ void UUINavInputBox::RevertToActionText(int Index)
 { 
 	FText OldName = (Index < Actions.Num()) ? Actions[Index].Key.GetDisplayName() : FText::FromName(FName(TEXT("Unbound")));
 	InputButtons[Index]->NavText->SetText(OldName);
-	UInputSettings* Settings = const_cast<UInputSettings*>(GetDefault<UInputSettings>());
 }
 
 void UUINavInputBox::NotifySelected(int Index)
@@ -154,6 +157,12 @@ void UUINavInputBox::NotifySelected(int Index)
 	FName NewName = FName("Press Any Key");
 
 	InputButtons[Index]->NavText->SetText(FText::FromName(NewName));
+
+	if (bUsingKeyImage[Index])
+	{
+		InputButtons[Index]->InputImage->SetVisibility(ESlateVisibility::Collapsed);
+		InputButtons[Index]->NavText->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+	}
 }
 
 void UUINavInputBox::NotifyUnbound(int Index)

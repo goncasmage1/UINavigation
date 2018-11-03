@@ -47,7 +47,7 @@ void UUINavInputContainer::CreateInputBoxes()
 	TArray<FKey> ActionKeys;
 	TArray<FName> FoundActions;
 
-	int StartingIndex = ParentWidget->UINavButtons.Num();
+	FirstButtonIndex = ParentWidget->UINavButtons.Num();
 	int StartingInputComponentIndex = ParentWidget->UINavComponents.Num();
 
 	//TODO: Optimize action finding in UINavInputBox
@@ -81,14 +81,14 @@ void UUINavInputContainer::CreateInputBoxes()
 
 		for (int j = 0; j < InputsPerAction; j++)
 		{
-			int NewButtonIndex = StartingIndex + (bUseActionNames ? i : FoundActions.Num() - 1) * InputsPerAction + j;
+			int NewButtonIndex = FirstButtonIndex + (bUseActionNames ? i : FoundActions.Num() - 1) * InputsPerAction + j;
 			int NewComponentIndex = StartingInputComponentIndex + (bUseActionNames ? i : FoundActions.Num() - 1) * InputsPerAction + j;
 			ParentWidget->UINavButtons[NewButtonIndex] = NewInputBox->InputButtons[j]->NavButton;
 			ParentWidget->UINavComponents[NewComponentIndex] = NewInputBox->InputButtons[j];
 			ParentWidget->UINavComponentsIndices.Add(NewButtonIndex);
 			if (!ParentWidget->bOverrideButtonIndices)
 			{
-				NewInputBox->InputButtons[j]->NavButton->ButtonIndex = StartingIndex + i * InputsPerAction + j;
+				NewInputBox->InputButtons[j]->NavButton->ButtonIndex = FirstButtonIndex + i * InputsPerAction + j;
 			}
 			ParentWidget->SetupUINavButtonDelegates(NewInputBox->InputButtons[j]->NavButton);
 		}
