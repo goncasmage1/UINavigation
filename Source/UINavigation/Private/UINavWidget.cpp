@@ -356,8 +356,6 @@ FReply UUINavWidget::NativeOnKeyDown(const FGeometry & InGeometry, const FKeyEve
 		}
 		TempMapping.Key = PressedKey;
 		UINavInputBoxes[InputBoxIndex / InputsPerAction]->UpdateActionKey(TempMapping, InputBoxIndex % InputsPerAction);
-		/*UINavInputBoxes[InputBoxIndex / InputsPerAction]->SetUserFocus(CurrentPC);
-		SetUserFocus(CurrentPC);*/
 		bWaitForInput = false;
 		PressedKeys.Empty();
 	}
@@ -496,8 +494,8 @@ void UUINavWidget::AppendVerticalNavigation(int Dimension, FButtonNavigation Edg
 			FButtonNavigation InputEdgeNav;
 			InputEdgeNav.LeftButton = EdgeNavigation.LeftButton;
 			InputEdgeNav.RightButton = EdgeNavigation.RightButton;
-			InputEdgeNav.UpButton = i == 0 ? (bWrap ? StartingIndex + Dimension + ExtraButtons - 1 : -1) : StartingIndex + i - 1;
-			InputEdgeNav.DownButton = (i == Dimension - 1 ? (bWrap ? StartingIndex : -1) : StartingIndex + ExtraButtons + i + 1);
+			InputEdgeNav.UpButton = EdgeNavigation.UpButton != -1 ? EdgeNavigation.UpButton : (i == 0 ? (bWrap ? StartingIndex + Dimension + ExtraButtons - 1 : -1) : StartingIndex + i - 1);
+			InputEdgeNav.DownButton = EdgeNavigation.DownButton != -1 ? EdgeNavigation.DownButton : (i == Dimension - 1 ? (bWrap ? StartingIndex : -1) : StartingIndex + ExtraButtons + i + 1);
 
 			AppendGridNavigation(UINavInputContainer->InputsPerAction, UINavInputBoxes.Num(), InputEdgeNav, false);
 			continue;
@@ -802,7 +800,7 @@ void UUINavWidget::SetSelectorVisibility(bool bVisible)
 void UUINavWidget::NavigateTo(int Index, bool bHoverEvent)
 {
 	bool bShouldNotify = Index != ButtonIndex ? true : false;
-		
+	
 	if (bUseButtonStates)
 	{
 		UpdateButtonsStates(Index, bHoverEvent);
