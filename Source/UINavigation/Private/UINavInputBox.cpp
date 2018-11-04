@@ -75,30 +75,29 @@ void UUINavInputBox::ResetKeyMappings()
 void UUINavInputBox::UpdateActionKey(FInputActionKeyMapping NewAction, int Index)
 {
 	UInputSettings* Settings = const_cast<UInputSettings*>(GetDefault<UInputSettings>());
-	TArray<FInputActionKeyMapping> TempActions;
-	Settings->GetActionMappingByName(FName(*ActionName), TempActions);
+	TArray<FInputActionKeyMapping>& Actions = Settings->ActionMappings;
 
-	if (Index < Actions.Num())
+	int Found = 0;
+	bool bFound = false;
+	for (int i = 0; i < Actions.Num(); i++)
 	{
-		int Found = 0;
-
-		for (FInputActionKeyMapping& Action : TempActions)
+		if (Actions[i].ActionName.IsEqual(FName(*ActionName)))
 		{
 			if (Found == Index)
 			{
-				Action = NewAction;
-				Action.ActionName = FName(*ActionName);
-				Actions[Index] = NewAction;
-				InputButtons[Index]->NavText->SetText(Action.Key.GetDisplayName());
+				Actions[i].Key = NewAction.Key;
+				InputButtons[Index]->NavText->SetText(NewAction.Key.GetDisplayName());
+				bFound = true;
+				break;
 			}
 			Found++;
 		}
 	}
-	else
+	if (!bFound)
 	{
 		FInputActionKeyMapping Action = NewAction;
 		Action.ActionName = FName(*ActionName);
-		Settings->AddActionMapping(NewAction, true);
+		Settings->AddActionMapping(Action, true);
 		Settings->ActionMappings.Add(Action);
 		InputButtons[Index]->NavText->SetText(Action.Key.GetDisplayName());
 	}

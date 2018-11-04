@@ -33,6 +33,9 @@ protected:
 	UPROPERTY(BlueprintReadOnly, Category = "UINav Input")
 	int FirstButtonIndex = -1;
 
+	UPROPERTY(BlueprintReadOnly, Category = "UINav Input")
+	int NumberOfButtons = -1;
+
 	/*
 	The desired InputBox widget blueprint
 	*/
