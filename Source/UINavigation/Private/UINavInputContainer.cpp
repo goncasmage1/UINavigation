@@ -49,7 +49,6 @@ void UUINavInputContainer::CreateInputBoxes()
 
 	FirstButtonIndex = ParentWidget->UINavButtons.Num();
 	int StartingInputComponentIndex = ParentWidget->UINavComponents.Num();
-	NumberOfButtons = 0;
 
 	bool bUseActionNames = ActionNames.Num() > 0;
 	int Iterations = bUseActionNames ? ActionNames.Num() : Actions.Num();
@@ -66,7 +65,6 @@ void UUINavInputContainer::CreateInputBoxes()
 		{
 			ParentWidget->UINavButtons.Add(nullptr);
 			ParentWidget->UINavComponents.Add(nullptr);
-			NumberOfButtons++;
 		}
 		ActionKeys.Add(Actions[i].Key);
 		UUINavInputBox* NewInputBox = CreateWidget<UUINavInputBox>(PC, InputBox_BP);
@@ -78,6 +76,7 @@ void UUINavInputContainer::CreateInputBoxes()
 		Panel->AddChild(NewInputBox);
 
 		ParentWidget->UINavInputBoxes.Add(NewInputBox);
+		NumberOfActions++;
 
 		for (int j = 0; j < InputsPerAction; j++)
 		{

@@ -12,7 +12,7 @@ struct FInputIconMapping : public FTableRowBase
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input Icon")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UINav Input")
 		TAssetPtr<class UTexture2D> InputIcon;
 };
 
@@ -31,21 +31,18 @@ protected:
 	//-----------------------------------------------------------------------
 
 	UPROPERTY(BlueprintReadOnly, Category = "UINav Input")
-	int FirstButtonIndex = -1;
+		int FirstButtonIndex = -1;
 
 	UPROPERTY(BlueprintReadOnly, Category = "UINav Input")
-	int NumberOfButtons = -1;
+		int NumberOfActions = -1;
 
 	/*
 	The desired InputBox widget blueprint
 	*/
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "UINav Input")
 		TSubclassOf<class UUINavInputBox> InputBox_BP;
 
-	UPROPERTY(EditDefaultsOnly)
-		class UDataTable* ControllerMapping;
-
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget), Category = "UINav Input")
 		class UPanelWidget* Panel;
 	
 	class UUINavWidget* ParentWidget;
@@ -63,19 +60,26 @@ public:
 
 	//-----------------------------------------------------------------------
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	/*
+	Holds the key icons for the gamepad
+	*/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Input")
 		UDataTable* GamepadKeyData;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	/*
+	Holds the key icons for mouse and keyboard
+	*/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Input")
 		UDataTable* KeyboardMouseKeyData;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (ClampMin = "1", ClampMax = "3", UIMin = "1", UIMax = "3"), Category = "UINav Input")
 		int InputsPerAction = 2;
 
 	/*
-	The indexes of the desired actions to allow for rebinding
+	The names of the desired actions to allow for rebinding
+	Can be left empty if all actions are to be rebindable
 	*/
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Input")
 		TArray<FName> ActionNames;
 
 	FStreamableManager AssetLoader;
