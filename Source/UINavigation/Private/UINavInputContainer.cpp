@@ -95,6 +95,16 @@ void UUINavInputContainer::CreateInputBoxes()
 	ParentWidget->InputBoxEndIndex = ParentWidget->UINavButtons.Num() - 1;
 }
 
+bool UUINavInputContainer::IsKeyBeingUsed(FKey CompareKey) const
+{
+	for (UUINavInputBox* box : ParentWidget->UINavInputBoxes)
+	{
+		if (box->ContainsKey(CompareKey)) return true;
+	}
+
+	return false;
+}
+
 UTexture2D* UUINavInputContainer::LoadTexture2D(const FString& FullFilePath, bool& IsValid, int32& Width, int32& Height)
 {
 	IsValid = false;

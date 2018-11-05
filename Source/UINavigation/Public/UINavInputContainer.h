@@ -56,6 +56,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "UINav Input")
 		void ResetKeyMappings();
 
+	UFUNCTION(BlueprintCallable, Category = "UINav Input")
+		bool IsKeyBeingUsed(FKey CompareKey) const;
+
 	class UTexture2D* LoadTexture2D(const FString& FullFilePath, bool& IsValid, int32& Width, int32& Height);
 
 	//-----------------------------------------------------------------------

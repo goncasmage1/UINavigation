@@ -18,9 +18,13 @@ class UINAVIGATION_API UUINavInputBox : public UUserWidget
 	
 protected:
 
-	TArray<FInputActionKeyMapping> Actions;
+	TArray<FKey> Keys;
 
 	TArray<bool> bUsingKeyImage = { false, false, false };
+
+	bool ShouldRegisterKey(FKey NewKey) const;
+	bool UpdateKeyIconForKey(FKey Key, int Index);
+	void CheckKeyIcon(FKey Key, int Index);
 
 public:
 
@@ -28,12 +32,13 @@ public:
 
 	void BuildKeyMappings();
 	void ResetKeyMappings();
-	bool UpdateKeyIconForKey(FKey Key, int Index);
 	void UpdateActionKey(FInputActionKeyMapping NewAction, int Index);
 	void RevertToActionText(int Index);
 
 	void NotifySelected(int Index);
 	void NotifyUnbound(int Index);
+
+	bool ContainsKey(FKey CompareKey) const;
 
 	UPROPERTY(EditDefaultsOnly)
 		TSubclassOf<class UUINavInputComponent> InputButton_BP;

@@ -47,7 +47,7 @@ void UUINavInputBox::BuildKeyMappings()
 			if (i < TempActions.Num())
 			{
 				FInputActionKeyMapping NewAction = TempActions[TempActions.Num() - 1 - i];
-				Actions.Add(NewAction);
+				Keys.Add(NewAction.Key);
 
 				if (UpdateKeyIconForKey(NewAction.Key, i))
 				{
@@ -68,12 +68,18 @@ void UUINavInputBox::BuildKeyMappings()
 
 void UUINavInputBox::ResetKeyMappings()
 {
-	Actions.Empty();
+	Keys.Empty();
 	BuildKeyMappings();
 }
 
 void UUINavInputBox::UpdateActionKey(FInputActionKeyMapping NewAction, int Index)
 {
+	if (!ShouldRegisterKey(NewAction.Key))
+	{
+		RevertToActionText(Index);
+		return;
+	}
+
 	UInputSettings* Settings = const_cast<UInputSettings*>(GetDefault<UInputSettings>());
 	TArray<FInputActionKeyMapping>& Actions = Settings->ActionMappings;
 
@@ -85,7 +91,8 @@ void UUINavInputBox::UpdateActionKey(FInputActionKeyMapping NewAction, int Index
 		{
 			if (Found == Index)
 			{
-				Actions[i].Key = NewAction.Key;
+				Actions[Index].Key = NewAction.Key;
+				Keys[Index] = NewAction.Key;
 				InputButtons[Index]->NavText->SetText(NewAction.Key.GetDisplayName());
 				bFound = true;
 				break;
@@ -98,22 +105,22 @@ void UUINavInputBox::UpdateActionKey(FInputActionKeyMapping NewAction, int Index
 		FInputActionKeyMapping Action = NewAction;
 		Action.ActionName = FName(*ActionName);
 		Settings->AddActionMapping(Action, true);
-		Settings->ActionMappings.Add(Action);
+		//Settings->ActionMappings.Add(Action);
+		Keys[Index] = NewAction.Key;
 		InputButtons[Index]->NavText->SetText(Action.Key.GetDisplayName());
 	}
 
-	if (UpdateKeyIconForKey(NewAction.Key, Index) != bUsingKeyImage[Index]) bUsingKeyImage[Index] = !bUsingKeyImage[Index];
-		
-	if (bUsingKeyImage[Index])
-	{
-		InputButtons[Index]->InputImage->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
-		InputButtons[Index]->NavText->SetVisibility(ESlateVisibility::Collapsed);
-	}
+	CheckKeyIcon(NewAction.Key, Index);
 
 	Settings->SaveConfig();
 	Settings->ForceRebuildKeymaps();
 
 	UWidgetBlueprintLibrary::SetFocusToGameViewport();
+}
+
+bool UUINavInputBox::ShouldRegisterKey(FKey NewKey) const
+{
+	return !(Container->IsKeyBeingUsed(NewKey));
 }
 
 bool UUINavInputBox::UpdateKeyIconForKey(FKey Key, int Index)
@@ -145,9 +152,30 @@ bool UUINavInputBox::UpdateKeyIconForKey(FKey Key, int Index)
 	return false;
 }
 
+void UUINavInputBox::CheckKeyIcon(FKey Key, int Index)
+{
+	if (UpdateKeyIconForKey(Key, Index) != bUsingKeyImage[Index]) bUsingKeyImage[Index] = !bUsingKeyImage[Index];
+
+	if (bUsingKeyImage[Index])
+	{
+		InputButtons[Index]->InputImage->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+		InputButtons[Index]->NavText->SetVisibility(ESlateVisibility::Collapsed);
+	}
+}
+
 void UUINavInputBox::RevertToActionText(int Index)
 { 
-	FText OldName = (Index < Actions.Num()) ? Actions[Index].Key.GetDisplayName() : FText::FromName(FName(TEXT("Unbound")));
+	FText OldName;
+	if (Index < Keys.Num())
+	{
+		OldName = Keys[Index].GetDisplayName();
+		CheckKeyIcon(Keys[Index], Index);
+	}
+	else
+	{
+		OldName = FText::FromName(FName(TEXT("Unbound")));
+	}
+
 	InputButtons[Index]->NavText->SetText(OldName);
 }
 
@@ -169,5 +197,10 @@ void UUINavInputBox::NotifyUnbound(int Index)
 	FName NewName = FName("Unbound");
 
 	InputButtons[Index]->NavText->SetText(FText::FromName(NewName));
+}
+
+bool UUINavInputBox::ContainsKey(FKey CompareKey) const
+{
+	return Keys.Contains(CompareKey);
 }
 
