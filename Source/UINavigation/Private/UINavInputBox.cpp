@@ -74,7 +74,7 @@ void UUINavInputBox::ResetKeyMappings()
 
 void UUINavInputBox::UpdateActionKey(FInputActionKeyMapping NewAction, int Index)
 {
-	if (!ShouldRegisterKey(NewAction.Key))
+	if (!ShouldRegisterKey(NewAction.Key, Index))
 	{
 		RevertToActionText(Index);
 		return;
@@ -89,7 +89,7 @@ void UUINavInputBox::UpdateActionKey(FInputActionKeyMapping NewAction, int Index
 	{
 		if (Actions[i].ActionName.IsEqual(FName(*ActionName)))
 		{
-			if (Found == Index)
+			if (Found == Index && Container->RespectsRestriction(NewAction.Key, Index))
 			{
 				Actions[Index].Key = NewAction.Key;
 				Keys[Index] = NewAction.Key;
@@ -118,9 +118,10 @@ void UUINavInputBox::UpdateActionKey(FInputActionKeyMapping NewAction, int Index
 	UWidgetBlueprintLibrary::SetFocusToGameViewport();
 }
 
-bool UUINavInputBox::ShouldRegisterKey(FKey NewKey) const
+bool UUINavInputBox::ShouldRegisterKey(FKey NewKey, int Index) const
 {
-	return !(Container->IsKeyBeingUsed(NewKey));
+	if (Container->IsKeyBeingUsed(NewKey)) return false;
+	else return Container->RespectsRestriction(NewKey, Index);
 }
 
 bool UUINavInputBox::UpdateKeyIconForKey(FKey Key, int Index)

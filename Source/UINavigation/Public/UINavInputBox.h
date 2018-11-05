@@ -22,7 +22,7 @@ protected:
 
 	TArray<bool> bUsingKeyImage = { false, false, false };
 
-	bool ShouldRegisterKey(FKey NewKey) const;
+	bool ShouldRegisterKey(FKey NewKey, int Index) const;
 	bool UpdateKeyIconForKey(FKey Key, int Index);
 	void CheckKeyIcon(FKey Key, int Index);
 

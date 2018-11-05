@@ -16,16 +16,14 @@
 #include "IImageWrapper.h"
 #include "IImageWrapperModule.h"
 
-void UUINavInputContainer::NativePreConstruct()
-{
-	Super::NativePreConstruct();
-
-	if (InputsPerAction < 1 || InputsPerAction > 3) DISPLAYERROR("Inputs Per Action must be between 1 and 3");
-}
-
 void UUINavInputContainer::SetParentWidget(UUINavWidget * NewParent)
 {
 	ParentWidget = NewParent;
+
+	if (InputRestrictions.Num() == 0) InputRestrictions.Add(EInputRestriction::None);
+	else if (InputRestrictions.Num() > 3) InputRestrictions.SetNum(3);
+	InputsPerAction = InputRestrictions.Num();
+
 	CreateInputBoxes();
 }
 
@@ -100,6 +98,34 @@ bool UUINavInputContainer::IsKeyBeingUsed(FKey CompareKey) const
 	for (UUINavInputBox* box : ParentWidget->UINavInputBoxes)
 	{
 		if (box->ContainsKey(CompareKey)) return true;
+	}
+
+	return false;
+}
+
+bool UUINavInputContainer::RespectsRestriction(FKey CompareKey, int Index)
+{
+	EInputRestriction Restriction = InputRestrictions[Index];
+
+	switch (Restriction)
+	{
+		case EInputRestriction::None:
+			return true;
+			break;
+		case EInputRestriction::Keyboard:
+			return (!CompareKey.IsMouseButton() && !CompareKey.IsGamepadKey());
+			break;
+		case EInputRestriction::Mouse:
+			return CompareKey.IsMouseButton();
+			break;
+		case EInputRestriction::Keyboard_Mouse:
+			return !CompareKey.IsGamepadKey();
+			break;
+		case EInputRestriction::Gamepad:
+			return CompareKey.IsGamepadKey();
+			break;
+		default:
+			break;
 	}
 
 	return false;

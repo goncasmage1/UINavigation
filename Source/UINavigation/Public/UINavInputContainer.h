@@ -7,6 +7,16 @@
 #include "Blueprint/UserWidget.h"
 #include "UINavInputContainer.generated.h"
 
+UENUM(BlueprintType)
+enum class EInputRestriction : uint8
+{
+	None UMETA(DisplayName = "None"),
+	Keyboard UMETA(DisplayName = "Keyboard"),
+	Mouse UMETA(DisplayName = "Mouse"),
+	Keyboard_Mouse UMETA(DisplayName = "Keyboard and Mouse"),
+	Gamepad UMETA(DisplayName = "Gamepad"),
+};
+
 USTRUCT(Blueprintable, BlueprintType)
 struct FInputIconMapping : public FTableRowBase
 {
@@ -49,8 +59,6 @@ protected:
 
 public:
 
-	virtual void NativePreConstruct() override;
-
 	void SetParentWidget(class UUINavWidget* NewParent);
 
 	UFUNCTION(BlueprintCallable, Category = "UINav Input")
@@ -58,6 +66,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "UINav Input")
 		bool IsKeyBeingUsed(FKey CompareKey) const;
+
+	UFUNCTION(BlueprintCallable, Category = "UINav Input")
+		bool RespectsRestriction(FKey CompareKey, int Index);
 
 	class UTexture2D* LoadTexture2D(const FString& FullFilePath, bool& IsValid, int32& Width, int32& Height);
 
@@ -75,8 +86,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Input")
 		UDataTable* KeyboardMouseKeyData;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (ClampMin = "1", ClampMax = "3", UIMin = "1", UIMax = "3"), Category = "UINav Input")
-		int InputsPerAction = 2;
+	UPROPERTY(BlueprintReadOnly, Category = "UINav Input")
+		int InputsPerAction = 0;
 
 	/*
 	The names of the desired actions to allow for rebinding
@@ -84,6 +95,13 @@ public:
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Input")
 		TArray<FName> ActionNames;
+
+	/*
+	The restrictions for the type of input associated with each column
+	in the Input Container
+	*/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Input")
+		TArray<EInputRestriction> InputRestrictions;
 
 	FStreamableManager AssetLoader;
 
