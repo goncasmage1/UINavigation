@@ -57,7 +57,11 @@ void UUINavInputBox::BuildKeyMappings()
 				}
 				NewInputButton->NavText->SetText(NewAction.Key.GetDisplayName());
 			}
-			else NewInputButton->NavText->SetText(FText::FromName(FName(TEXT("Unbound"))));
+			else
+			{
+				NewInputButton->NavText->SetText(FText::FromName(FName(TEXT("Unbound"))));
+				Keys.Add(FKey());
+			}
 		}
 		else
 		{
