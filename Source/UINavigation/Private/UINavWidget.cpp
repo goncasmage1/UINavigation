@@ -487,6 +487,7 @@ void UUINavWidget::AppendVerticalNavigation(int Dimension, FButtonNavigation Edg
 	}
 	if (Dimension == UINavButtons.Num() && ExtraButtons > 0) Dimension -= (ExtraButtons);
 
+	bool bReachedInputContainer = false;
 	for (int i = 0; i < Dimension; i++)
 	{
 		if ((InputContainerIndex - StartingIndex) == i)
@@ -494,18 +495,18 @@ void UUINavWidget::AppendVerticalNavigation(int Dimension, FButtonNavigation Edg
 			FButtonNavigation InputEdgeNav;
 			InputEdgeNav.LeftButton = EdgeNavigation.LeftButton;
 			InputEdgeNav.RightButton = EdgeNavigation.RightButton;
-			InputEdgeNav.UpButton = EdgeNavigation.UpButton != -1 ? EdgeNavigation.UpButton : (i == 0 ? (bWrap ? StartingIndex + Dimension + ExtraButtons - 1 : -1) : StartingIndex + i - 1);
-			InputEdgeNav.DownButton = EdgeNavigation.DownButton != -1 ? EdgeNavigation.DownButton : (i == Dimension - 1 ? (bWrap ? StartingIndex : -1) : StartingIndex + ExtraButtons + i + 1);
-
+			InputEdgeNav.UpButton =  i == 0 ? (EdgeNavigation.UpButton != -1 ? EdgeNavigation.UpButton : (bWrap ? StartingIndex + Dimension + ExtraButtons - 1 : -1)) : StartingIndex + i - 1;
+			InputEdgeNav.DownButton = i == Dimension - 1 ? (EdgeNavigation.DownButton != -1 ? EdgeNavigation.DownButton : (bWrap ? StartingIndex : -1)) : StartingIndex + ExtraButtons + i + 1;
+			bReachedInputContainer = true;
 			AppendGridNavigation(UINavInputContainer->InputsPerAction, UINavInputBoxes.Num(), InputEdgeNav, false);
 			continue;
 		}
 
 		if (i == 0) NewNav.UpButton = EdgeNavigation.UpButton == -1 ? (bWrap ? StartingIndex + Dimension + ExtraButtons - 1 : NewNav.UpButton) : EdgeNavigation.UpButton;
-		else NewNav.UpButton = StartingIndex + i - 1;
+		else NewNav.UpButton = StartingIndex + i + (bReachedInputContainer ? ExtraButtons : 0) - 1;
 
 		if (i == Dimension - 1) NewNav.DownButton = EdgeNavigation.DownButton == -1 ? (bWrap ? StartingIndex : NewNav.DownButton) : EdgeNavigation.DownButton;
-		else NewNav.DownButton = StartingIndex + i + 1;
+		else NewNav.DownButton = StartingIndex + i + (bReachedInputContainer ? ExtraButtons : 0) + 1;
 
 		if (EdgeNavigation.LeftButton != -1) NewNav.LeftButton = EdgeNavigation.LeftButton;
 		if (EdgeNavigation.RightButton != -1) NewNav.RightButton = EdgeNavigation.RightButton;
@@ -1018,7 +1019,11 @@ UUINavComponentBox * UUINavWidget::GetUINavComponentBoxAtIndex(int Index)
 
 void UUINavWidget::HoverEvent(int Index)
 {
-	if (CurrentPC->GetCurrentInputType() != EInputType::Mouse || bWaitForInput) return;
+	if (CurrentPC->GetCurrentInputType() != EInputType::Mouse || bWaitForInput)
+	{
+		if (bUseButtonStates) SwitchButtonStyle(Index);
+		return;
+	}
 
 	if (!bAllowNavigation)
 	{
