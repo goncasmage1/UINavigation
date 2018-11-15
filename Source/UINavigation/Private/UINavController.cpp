@@ -439,7 +439,7 @@ void AUINavController::MenuRightRelease()
 
 void AUINavController::MouseInputWorkaround()
 {
-	if (ActiveWidget->bWaitForInput)
+	if (ActiveWidget != nullptr && ActiveWidget->bWaitForInput)
 	{
 		if (WasInputKeyJustPressed(EKeys::LeftMouseButton)) ActiveWidget->ProcessMouseKeybind(FKey(EKeys::LeftMouseButton));
 		else if (WasInputKeyJustPressed(EKeys::RightMouseButton)) ActiveWidget->ProcessMouseKeybind(FKey(EKeys::RightMouseButton));
