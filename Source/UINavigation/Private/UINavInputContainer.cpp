@@ -7,6 +7,7 @@
 #include "UINavController.h"
 #include "UINavComponent.h"
 #include "UINavInputComponent.h"
+#include "UINavBlueprintFunctionLibrary.h"
 #include "GameFramework/InputSettings.h"
 #include "Blueprint/UserWidget.h"
 #include "Blueprint/WidgetTree.h"
@@ -29,6 +30,7 @@ void UUINavInputContainer::SetParentWidget(UUINavWidget * NewParent)
 
 void UUINavInputContainer::ResetKeyMappings()
 {
+	UUINavBlueprintFunctionLibrary::ResetInputSettings();
 	for (UUINavInputBox* InputBox : ParentWidget->UINavInputBoxes) InputBox->ResetKeyMappings();
 }
 
