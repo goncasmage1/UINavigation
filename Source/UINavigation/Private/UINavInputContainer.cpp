@@ -92,7 +92,20 @@ void UUINavInputContainer::CreateInputBoxes()
 			ParentWidget->SetupUINavButtonDelegates(NewInputBox->InputButtons[j]->NavButton);
 		}
 	}
-	ParentWidget->InputBoxEndIndex = ParentWidget->UINavButtons.Num() - 1;
+
+	LastButtonIndex = ParentWidget->UINavButtons.Num() - 1;
+
+	switch (InputsPerAction)
+	{
+		case 2:
+			TopButtonIndex = FirstButtonIndex + (TargetColumn == ETargetColumn::Right);
+			BottomButtonIndex = LastButtonIndex -(TargetColumn != ETargetColumn::Right);
+			break;
+		case 3:
+			TopButtonIndex = FirstButtonIndex + (int)TargetColumn;
+			BottomButtonIndex = LastButtonIndex - (2 - (int)TargetColumn);
+			break;
+	}
 }
 
 bool UUINavInputContainer::IsKeyBeingUsed(FKey CompareKey) const
@@ -183,16 +196,14 @@ int UUINavInputContainer::GetOffsetFromTargetColumn(bool bTop)
 {
 	switch (InputsPerAction)
 	{
-		case 1:
-			return 0;
-			break;
 		case 2:
 			if (bTop) return (TargetColumn == ETargetColumn::Right);
 			else return -(TargetColumn != ETargetColumn::Right);
 			break;
 		case 3:
-			if (bTop) return TargetColumn;
-			else return (-2 - TargetColumn);
+			if (bTop) return (int)TargetColumn;
+			else return (-2 - (int)TargetColumn);
 			break;
 	}
+	return 0;
 }

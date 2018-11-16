@@ -48,14 +48,8 @@ protected:
 
 	//-----------------------------------------------------------------------
 
-	UPROPERTY(BlueprintReadOnly, Category = "UINav Input")
-		int FirstButtonIndex = -1;
-
-	UPROPERTY(BlueprintReadOnly, Category = "UINav Input")
-		int NumberOfActions = -1;
-
 	//Indicates which column to navigate to when navigating to this Input Container
-	UPROPERTY(BlueprintReadOnly, Category = "UINav Input")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Input")
 		ETargetColumn TargetColumn = ETargetColumn::Left;
 
 	/*
@@ -92,8 +86,27 @@ public:
 
 	//-----------------------------------------------------------------------
 
+	//The index of the button in the top left corner of the grid
+	UPROPERTY(BlueprintReadOnly, Category = "UINav Input")
+		int FirstButtonIndex = -1;
+	//The index of the button in the bottom right corner of the grid
+	UPROPERTY(BlueprintReadOnly, Category = "UINav Input")
+		int LastButtonIndex = -1;
+
+	UPROPERTY(BlueprintReadOnly, Category = "UINav Input")
+		int NumberOfActions = -1;
+
+	/*The index of the button at the top of the grid that should be navigated to
+	when entering this grid*/
+	UPROPERTY(BlueprintReadOnly, Category = "UINav Input")
+		int TopButtonIndex = -1;
+	/*The index of the button at the bottom of the grid that should be navigated to
+	when entering this grid*/
+	UPROPERTY(BlueprintReadOnly, Category = "UINav Input")
+		int BottomButtonIndex = -1;
+
 	/*
-	Holds the key icons for the gamepad
+	Holds the key icons for gamepad
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Input")
 		UDataTable* GamepadKeyData;
