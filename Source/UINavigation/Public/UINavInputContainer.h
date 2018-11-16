@@ -17,6 +17,14 @@ enum class EInputRestriction : uint8
 	Gamepad UMETA(DisplayName = "Gamepad"),
 };
 
+UENUM(BlueprintType)
+enum class ETargetColumn : uint8
+{
+	Left UMETA(DisplayName = "Left"),
+	Middle UMETA(DisplayName = "Middle"),
+	Right UMETA(DisplayName = "Right"),
+};
+
 USTRUCT(Blueprintable, BlueprintType)
 struct FInputIconMapping : public FTableRowBase
 {
@@ -46,6 +54,10 @@ protected:
 	UPROPERTY(BlueprintReadOnly, Category = "UINav Input")
 		int NumberOfActions = -1;
 
+	//Indicates which column to navigate to when navigating to this Input Container
+	UPROPERTY(BlueprintReadOnly, Category = "UINav Input")
+		ETargetColumn TargetColumn = ETargetColumn::Left;
+
 	/*
 	The desired InputBox widget blueprint
 	*/
@@ -71,6 +83,12 @@ public:
 		bool RespectsRestriction(FKey CompareKey, int Index);
 
 	class UTexture2D* LoadTexture2D(const FString& FullFilePath, bool& IsValid, int32& Width, int32& Height);
+
+	//Fetches the index offset from the TargetColumn variable for both the top and bottom of the Input Container
+	int GetOffsetFromTargetColumn(bool bTop);
+
+	UFUNCTION(BlueprintCallable, Category = "UINav Input")
+		FORCEINLINE ETargetColumn GetTargetColumn() const { return TargetColumn; }
 
 	//-----------------------------------------------------------------------
 

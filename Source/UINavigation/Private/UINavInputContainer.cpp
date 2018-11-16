@@ -178,3 +178,21 @@ UTexture2D* UUINavInputContainer::LoadTexture2D(const FString& FullFilePath, boo
 	IsValid = true;
 	return LoadedT2D;
 }
+
+int UUINavInputContainer::GetOffsetFromTargetColumn(bool bTop)
+{
+	switch (InputsPerAction)
+	{
+		case 1:
+			return 0;
+			break;
+		case 2:
+			if (bTop) return (TargetColumn == ETargetColumn::Right);
+			else return -(TargetColumn != ETargetColumn::Right);
+			break;
+		case 3:
+			if (bTop) return TargetColumn;
+			else return (-2 - TargetColumn);
+			break;
+	}
+}

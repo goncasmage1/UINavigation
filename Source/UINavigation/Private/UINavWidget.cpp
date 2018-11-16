@@ -1,4 +1,4 @@
-// Copyright (C) 2018 Gonçalo Marques - All Rights Reserved
+// Copyright (C) 2018 Gonï¿½alo Marques - All Rights Reserved
 
 #include "UINavWidget.h"
 #include "UINavButton.h"
@@ -477,6 +477,7 @@ void UUINavWidget::AppendVerticalNavigation(int Dimension, FButtonNavigation Edg
 
 	int StartingIndex = ButtonNavigations.Num();
 	int ExtraButtons = 0;
+	int ColumnModifier = 0;
 
 	if (InputContainerIndex != -1)
 	{
@@ -492,11 +493,12 @@ void UUINavWidget::AppendVerticalNavigation(int Dimension, FButtonNavigation Edg
 	{
 		if ((InputContainerIndex - StartingIndex) == i)
 		{
+			ETargetColumn TargetColumn = UINavInputContainer->GetTargetColumn();
 			FButtonNavigation InputEdgeNav;
 			InputEdgeNav.LeftButton = EdgeNavigation.LeftButton;
 			InputEdgeNav.RightButton = EdgeNavigation.RightButton;
-			InputEdgeNav.UpButton =  i == 0 ? (EdgeNavigation.UpButton != -1 ? EdgeNavigation.UpButton : (bWrap ? StartingIndex + Dimension + ExtraButtons - 1 : -1)) : StartingIndex + i - 1;
-			InputEdgeNav.DownButton = i == Dimension - 1 ? (EdgeNavigation.DownButton != -1 ? EdgeNavigation.DownButton : (bWrap ? StartingIndex : -1)) : StartingIndex + ExtraButtons + i + 1;
+			InputEdgeNav.UpButton =  i == 0 ? (EdgeNavigation.UpButton != -1 ? EdgeNavigation.UpButton : (bWrap ? StartingIndex + Dimension + ExtraButtons - 1 : -1)) : StartingIndex + i + GetOffsetFromTargetColumn(true) - 1;
+			InputEdgeNav.DownButton = i == Dimension - 1 ? (EdgeNavigation.DownButton != -1 ? EdgeNavigation.DownButton : (bWrap ? StartingIndex : -1)) : StartingIndex + ExtraButtons + i - GetOffsetFromTargetColumn(false) + 1;
 			bReachedInputContainer = true;
 			AppendGridNavigation(UINavInputContainer->InputsPerAction, UINavInputBoxes.Num(), InputEdgeNav, false);
 			continue;
@@ -543,10 +545,10 @@ void UUINavWidget::AppendHorizontalNavigation(int Dimension, FButtonNavigation E
 		if (InputContainerIndex == i)
 		{
 			FButtonNavigation InputEdgeNav;
-			InputEdgeNav.UpButton = EdgeNavigation.UpButton;
-			InputEdgeNav.DownButton = EdgeNavigation.DownButton;
-			InputEdgeNav.LeftButton = i == 0 ? (bWrap ? StartingIndex + Dimension + ExtraButtons - 1 : -1) : StartingIndex + i - 1;
-			InputEdgeNav.RightButton = i == Dimension - 1 ? (bWrap ? StartingIndex : -1) : StartingIndex + ExtraButtons + i;
+			InputEdgeNav.UpButton = EdgeNavigation.LeftButton;
+			InputEdgeNav.DownButton = EdgeNavigation.RightButton;
+			InputEdgeNav.LeftButton =  i == 0 ? (EdgeNavigation.UpButton != -1 ? EdgeNavigation.UpButton : (bWrap ? StartingIndex + Dimension + ExtraButtons - 1 : -1)) : StartingIndex + i - 1;
+			InputEdgeNav.RightButton = i == Dimension - 1 ? (EdgeNavigation.DownButton != -1 ? EdgeNavigation.DownButton : (bWrap ? StartingIndex : -1)) : StartingIndex + ExtraButtons + i + 1;
 
 			AppendGridNavigation(UINavInputContainer->InputsPerAction, UINavInputContainer->ActionNames.Num(), InputEdgeNav, false);
 			continue;
