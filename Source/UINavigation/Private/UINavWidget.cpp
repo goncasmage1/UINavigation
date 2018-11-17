@@ -1055,7 +1055,7 @@ void UUINavWidget::HoverEvent(int Index)
 		return;
 	}
 
-	NavigateTo(Index, true);
+	if (Index != ButtonIndex) NavigateTo(Index, true);
 }
 
 void UUINavWidget::UnhoverEvent(int Index)
@@ -1080,11 +1080,18 @@ void UUINavWidget::UnhoverEvent(int Index)
 
 void UUINavWidget::ClickEvent(int Index)
 {
-	CurrentPC->NotifyMouseInputType();
+	if (bWaitForInput)
+	{
+		CurrentPC->MouseInputWorkaround();
+	}
+	else
+	{
+		CurrentPC->NotifyMouseInputType();
 
-	if (!bAllowNavigation) return;
+		if (!bAllowNavigation) return;
 
-	OnPreSelect(Index);
+		OnPreSelect(Index);
+	}
 }
 
 void UUINavWidget::ReleaseEvent(int Index)
