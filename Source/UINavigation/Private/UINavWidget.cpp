@@ -1082,7 +1082,7 @@ void UUINavWidget::ClickEvent(int Index)
 {
 	if (bWaitForInput)
 	{
-		CurrentPC->MouseInputWorkaround();
+		ProcessMouseKeybind(FKey(EKeys::LeftMouseButton));
 	}
 	else
 	{
