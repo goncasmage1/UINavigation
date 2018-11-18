@@ -98,7 +98,7 @@ void UUINavInputBox::UpdateActionKey(FInputActionKeyMapping NewAction, int Index
 		{
 			if (Found == Index && Container->RespectsRestriction(NewAction.Key, Index))
 			{
-				Actions[Index].Key = NewAction.Key;
+				Actions[i].Key = NewAction.Key;
 				Keys[Index] = NewAction.Key;
 				InputButtons[Index]->NavText->SetText(NewAction.Key.GetDisplayName());
 				bFound = true;
@@ -174,7 +174,7 @@ void UUINavInputBox::CheckKeyIcon(FKey Key, int Index)
 void UUINavInputBox::RevertToActionText(int Index)
 { 
 	FText OldName;
-	if (Index < Keys.Num())
+	if (Index < InputsPerAction && !(Keys[Index].GetFName().IsEqual(FName("None"))))
 	{
 		OldName = Keys[Index].GetDisplayName();
 		CheckKeyIcon(Keys[Index], Index);
