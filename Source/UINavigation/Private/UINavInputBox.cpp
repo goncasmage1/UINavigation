@@ -60,6 +60,8 @@ void UUINavInputBox::BuildKeyMappings()
 			else
 			{
 				NewInputButton->NavText->SetText(FText::FromName(FName(TEXT("Unbound"))));
+				NewInputButton->InputImage->SetVisibility(ESlateVisibility::Collapsed);
+				NewInputButton->NavText->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
 				Keys.Add(FKey());
 			}
 		}
@@ -73,6 +75,7 @@ void UUINavInputBox::BuildKeyMappings()
 void UUINavInputBox::ResetKeyMappings()
 {
 	Keys.Empty();
+	bUsingKeyImage = { false, false, false };
 	BuildKeyMappings();
 }
 
