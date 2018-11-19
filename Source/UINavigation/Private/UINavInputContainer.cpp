@@ -21,6 +21,8 @@ void UUINavInputContainer::SetParentWidget(UUINavWidget * NewParent)
 {
 	ParentWidget = NewParent;
 
+	bIsFocusable = false;
+
 	if (InputRestrictions.Num() == 0) InputRestrictions.Add(EInputRestriction::None);
 	else if (InputRestrictions.Num() > 3) InputRestrictions.SetNum(3);
 	InputsPerAction = InputRestrictions.Num();

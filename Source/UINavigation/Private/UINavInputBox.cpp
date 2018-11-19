@@ -15,7 +15,7 @@ void UUINavInputBox::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	bIsFocusable = true;
+	bIsFocusable = false;
 
 	BuildKeyMappings();
 }
