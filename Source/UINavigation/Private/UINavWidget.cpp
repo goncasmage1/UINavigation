@@ -1128,8 +1128,6 @@ void UUINavWidget::ProcessMouseKeybind(FKey PressedMouseKey)
 	TempMapping.Key = PressedMouseKey;
 	UINavInputBoxes[InputBoxIndex / InputsPerAction]->UpdateActionKey(TempMapping, InputBoxIndex % InputsPerAction);
 	TempMapping.bShift = TempMapping.bCtrl = TempMapping.bAlt = TempMapping.bCmd = false;
-	UINavInputBoxes[InputBoxIndex / InputsPerAction]->SetUserFocus(CurrentPC);
-	SetUserFocus(CurrentPC);
 	bWaitForInput = false;
 	PressedKeys.Empty();
 }

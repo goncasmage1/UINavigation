@@ -121,8 +121,6 @@ void UUINavInputBox::UpdateActionKey(FInputActionKeyMapping NewAction, int Index
 
 	Settings->SaveConfig();
 	Settings->ForceRebuildKeymaps();
-
-	UWidgetBlueprintLibrary::SetFocusToGameViewport();
 }
 
 bool UUINavInputBox::ShouldRegisterKey(FKey NewKey, int Index) const
