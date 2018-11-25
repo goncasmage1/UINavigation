@@ -49,13 +49,13 @@ void UUINavInputBox::BuildKeyMappings()
 				FInputActionKeyMapping NewAction = TempActions[TempActions.Num() - 1 - i];
 				Keys.Add(NewAction.Key);
 
-				if (UpdateKeyIconForKey(NewAction.Key, i))
+				if (UpdateKeyIconForKey(i))
 				{
 					bUsingKeyImage[i] = true;
 					NewInputButton->InputImage->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
 					NewInputButton->NavText->SetVisibility(ESlateVisibility::Collapsed);
 				}
-				NewInputButton->NavText->SetText(NewAction.Key.GetDisplayName());
+				NewInputButton->NavText->SetText(GetKeyName(i));
 			}
 			else
 			{
@@ -100,7 +100,7 @@ void UUINavInputBox::UpdateActionKey(FInputActionKeyMapping NewAction, int Index
 			{
 				Actions[i].Key = NewAction.Key;
 				Keys[Index] = NewAction.Key;
-				InputButtons[Index]->NavText->SetText(NewAction.Key.GetDisplayName());
+				InputButtons[Index]->NavText->SetText(GetKeyName(Index));
 				bFound = true;
 				break;
 			}
@@ -112,12 +112,11 @@ void UUINavInputBox::UpdateActionKey(FInputActionKeyMapping NewAction, int Index
 		FInputActionKeyMapping Action = NewAction;
 		Action.ActionName = FName(*ActionName);
 		Settings->AddActionMapping(Action, true);
-		//Settings->ActionMappings.Add(Action);
 		Keys[Index] = NewAction.Key;
-		InputButtons[Index]->NavText->SetText(Action.Key.GetDisplayName());
+		InputButtons[Index]->NavText->SetText(GetKeyName(Index));
 	}
 
-	CheckKeyIcon(NewAction.Key, Index);
+	CheckKeyIcon(Index);
 
 	Settings->SaveConfig();
 	Settings->ForceRebuildKeymaps();
@@ -129,22 +128,23 @@ bool UUINavInputBox::ShouldRegisterKey(FKey NewKey, int Index) const
 	else return Container->RespectsRestriction(NewKey, Index);
 }
 
-bool UUINavInputBox::UpdateKeyIconForKey(FKey Key, int Index)
+bool UUINavInputBox::UpdateKeyIconForKey(int Index)
 {
+	FKey Key = Keys[Index];
 	FInputIconMapping* KeyIcon = nullptr;
 
 	if (Key.IsGamepadKey())
 	{
-		if (Container->GamepadKeyData != nullptr && Container->GamepadKeyData->RowMap.Contains(Key.GetFName()))
+		if (Container->GamepadKeyIconData != nullptr && Container->GamepadKeyIconData->RowMap.Contains(Key.GetFName()))
 		{
-			KeyIcon = (FInputIconMapping*)Container->GamepadKeyData->RowMap[Key.GetFName()];
+			KeyIcon = (FInputIconMapping*)Container->GamepadKeyIconData->RowMap[Key.GetFName()];
 		}
 	}
 	else
 	{
-		if (Container->KeyboardMouseKeyData != nullptr && Container->KeyboardMouseKeyData->RowMap.Contains(Key.GetFName()))
+		if (Container->KeyboardMouseKeyIconData != nullptr && Container->KeyboardMouseKeyIconData->RowMap.Contains(Key.GetFName()))
 		{
-			KeyIcon = (FInputIconMapping*)Container->KeyboardMouseKeyData->RowMap[Key.GetFName()];
+			KeyIcon = (FInputIconMapping*)Container->KeyboardMouseKeyIconData->RowMap[Key.GetFName()];
 		}
 	}
 	if (KeyIcon == nullptr) return false;
@@ -158,9 +158,33 @@ bool UUINavInputBox::UpdateKeyIconForKey(FKey Key, int Index)
 	return false;
 }
 
-void UUINavInputBox::CheckKeyIcon(FKey Key, int Index)
+FText UUINavInputBox::GetKeyName(int Index)
 {
-	if (UpdateKeyIconForKey(Key, Index) != bUsingKeyImage[Index]) bUsingKeyImage[Index] = !bUsingKeyImage[Index];
+	FKey Key = Keys[Index];
+	FInputNameMapping* KeyName = nullptr;
+
+	if (Key.IsGamepadKey())
+	{
+		if (Container->GamepadKeyNameData != nullptr && Container->GamepadKeyNameData->RowMap.Contains(Key.GetFName()))
+		{
+			KeyName = (FInputNameMapping*)Container->GamepadKeyNameData->RowMap[Key.GetFName()];
+			return FText::FromString(KeyName->InputName);
+		}
+	}
+	else
+	{
+		if (Container->KeyboardMouseKeyNameData != nullptr && Container->KeyboardMouseKeyNameData->RowMap.Contains(Key.GetFName()))
+		{
+			KeyName = (FInputNameMapping*)Container->KeyboardMouseKeyNameData->RowMap[Key.GetFName()];
+			return FText::FromString(KeyName->InputName);
+		}
+	}
+	return Key.GetDisplayName();
+}
+
+void UUINavInputBox::CheckKeyIcon(int Index)
+{
+	if (UpdateKeyIconForKey(Index) != bUsingKeyImage[Index]) bUsingKeyImage[Index] = !bUsingKeyImage[Index];
 
 	if (bUsingKeyImage[Index])
 	{
@@ -174,8 +198,8 @@ void UUINavInputBox::RevertToActionText(int Index)
 	FText OldName;
 	if (Index < InputsPerAction && !(Keys[Index].GetFName().IsEqual(FName("None"))))
 	{
-		OldName = Keys[Index].GetDisplayName();
-		CheckKeyIcon(Keys[Index], Index);
+		OldName = GetKeyName(Index);
+		CheckKeyIcon(Index);
 	}
 	else
 	{
@@ -196,13 +220,6 @@ void UUINavInputBox::NotifySelected(int Index)
 		InputButtons[Index]->InputImage->SetVisibility(ESlateVisibility::Collapsed);
 		InputButtons[Index]->NavText->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
 	}
-}
-
-void UUINavInputBox::NotifyUnbound(int Index)
-{
-	FName NewName = FName("Unbound");
-
-	InputButtons[Index]->NavText->SetText(FText::FromName(NewName));
 }
 
 bool UUINavInputBox::ContainsKey(FKey CompareKey) const

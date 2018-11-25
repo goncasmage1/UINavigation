@@ -23,8 +23,9 @@ protected:
 	TArray<bool> bUsingKeyImage = { false, false, false };
 
 	bool ShouldRegisterKey(FKey NewKey, int Index) const;
-	bool UpdateKeyIconForKey(FKey Key, int Index);
-	void CheckKeyIcon(FKey Key, int Index);
+	bool UpdateKeyIconForKey(int Index);
+	FText GetKeyName(int Index);
+	void CheckKeyIcon(int Index);
 
 public:
 
@@ -36,7 +37,6 @@ public:
 	void RevertToActionText(int Index);
 
 	void NotifySelected(int Index);
-	void NotifyUnbound(int Index);
 
 	bool ContainsKey(FKey CompareKey) const;
 

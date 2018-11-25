@@ -34,6 +34,15 @@ struct FInputIconMapping : public FTableRowBase
 		TAssetPtr<class UTexture2D> InputIcon;
 };
 
+USTRUCT(Blueprintable, BlueprintType)
+struct FInputNameMapping : public FTableRowBase
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UINav Input")
+		FString InputName;
+};
+
 /**
 * This class contains the logic for aggregating several input boxes
 */
@@ -109,13 +118,23 @@ public:
 	Holds the key icons for gamepad
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Input")
-		UDataTable* GamepadKeyData;
-
+		UDataTable* GamepadKeyIconData;
 	/*
 	Holds the key icons for mouse and keyboard
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Input")
-		UDataTable* KeyboardMouseKeyData;
+		UDataTable* KeyboardMouseKeyIconData;
+
+	/*
+	Holds the key names for gamepad
+	*/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Input")
+		UDataTable* GamepadKeyNameData;
+	/*
+	Holds the key names for mouse and keyboard
+	*/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Input")
+		UDataTable* KeyboardMouseKeyNameData;
 
 	UPROPERTY(BlueprintReadOnly, Category = "UINav Input")
 		int InputsPerAction = 0;
