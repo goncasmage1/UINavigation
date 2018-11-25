@@ -114,6 +114,23 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = "UINav Input")
 		int BottomButtonIndex = -1;
 
+	UPROPERTY(BlueprintReadOnly, Category = "UINav Input")
+		int InputsPerAction = 0;
+
+	/*
+	The names of the desired actions to allow for rebinding
+	Can be left empty if all actions are to be rebindable
+	*/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Input")
+		TArray<FName> ActionNames;
+
+	/*
+	The restrictions for the type of input associated with each column
+	in the Input Container
+	*/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Input")
+		TArray<EInputRestriction> InputRestrictions;
+
 	/*
 	Holds the key icons for gamepad
 	*/
@@ -135,23 +152,6 @@ public:
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Input")
 		UDataTable* KeyboardMouseKeyNameData;
-
-	UPROPERTY(BlueprintReadOnly, Category = "UINav Input")
-		int InputsPerAction = 0;
-
-	/*
-	The names of the desired actions to allow for rebinding
-	Can be left empty if all actions are to be rebindable
-	*/
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Input")
-		TArray<FName> ActionNames;
-
-	/*
-	The restrictions for the type of input associated with each column
-	in the Input Container
-	*/
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Input")
-		TArray<EInputRestriction> InputRestrictions;
 
 	FStreamableManager AssetLoader;
 
