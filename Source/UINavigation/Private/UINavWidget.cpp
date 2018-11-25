@@ -1055,7 +1055,7 @@ void UUINavWidget::HoverEvent(int Index)
 		return;
 	}
 
-	if (Index != ButtonIndex) NavigateTo(Index, true);
+	NavigateTo(Index, true);
 }
 
 void UUINavWidget::UnhoverEvent(int Index)
