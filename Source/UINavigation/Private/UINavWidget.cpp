@@ -347,7 +347,7 @@ FReply UUINavWidget::NativeOnKeyDown(const FGeometry & InGeometry, const FKeyEve
 		int InputsPerAction = UINavInputContainer->InputsPerAction;
 		FKey PressedKey = InKeyEvent.GetKey();
 
-		if (CurrentPC->IsReturnKey(PressedKey))
+		if (UINavInputContainer->bCanCancelKeybind && CurrentPC->IsReturnKey(PressedKey))
 		{
 			bWaitForInput = false;
 			PressedKeys.Empty();

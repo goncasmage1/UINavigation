@@ -118,6 +118,12 @@ public:
 		int InputsPerAction = 0;
 
 	/*
+	Indicates whether the player can cancel changing the keybind for an action
+	*/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Input")
+		bool bCanCancelKeybind = true;
+
+	/*
 	The names of the desired actions to allow for rebinding
 	Can be left empty if all actions are to be rebindable
 	*/
