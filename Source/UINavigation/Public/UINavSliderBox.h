@@ -16,7 +16,7 @@ class UINAVIGATION_API UUINavSliderBox : public UUINavComponentBox
 	
 protected:
 
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget), Category = UINavSliderBox)
 		class UProgressBar* SliderBar;
 
 	virtual void CheckRightLimit() override;
@@ -29,7 +29,7 @@ public:
 
 	virtual void NavigateRight() override;
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = UINavSliderBox)
 		float GetSliderPercent() const;
 	
 };

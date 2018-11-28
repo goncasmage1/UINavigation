@@ -4,6 +4,7 @@
 
 #include "Engine.h"
 #include "GameFramework/PlayerController.h"
+#include "NavigationDirection.h"
 #include "UINavController.generated.h"
 
 UENUM(BlueprintType)
@@ -13,16 +14,6 @@ enum class EInputType : uint8
 	Keyboard UMETA(DisplayName = "Keyboard"),
 	Mouse UMETA(DisplayName = "Mouse"),
 	Gamepad UMETA(DisplayName = "Gamepad")
-};
-
-UENUM(BlueprintType)
-enum class EInputDirection : uint8
-{
-	None UMETA(DisplayName = "None"),
-	Up UMETA(DisplayName = "Up"),
-	Down UMETA(DisplayName = "Down"),
-	Left UMETA(DisplayName = "Left"),
-	Right UMETA(DisplayName = "Right")
 };
 
 UENUM(BlueprintType)
@@ -43,15 +34,15 @@ class UINAVIGATION_API AUINavController : public APlayerController
 	
 protected:
 
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(BlueprintReadOnly, Category = UINavComponent)
 		class UUINavWidget* ActiveWidget;
 
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(BlueprintReadOnly, Category = UINavComponent)
 		EInputType CurrentInputType = EInputType::Keyboard;
 
 	TMap<FString, TArray<FKey>> KeyMap = TMap<FString, TArray<FKey>>();
 
-	EInputDirection Direction = EInputDirection::None;
+	ENavigationDirection Direction = ENavigationDirection::None;
 
 	float PreviousX = -1.f;
 	float PreviousY = -1.f;
@@ -60,30 +51,44 @@ protected:
 	Indicates whether navigation will occur periodically after the player
 	holds down a navigation key
 	*/
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavController)
 		bool bChainNavigation = true;
+
+	/*
+	Indicates whether this controller will be notified when UINav actions are executed
+	(MenuUp, MenuDown, etc.)
+	*/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavController)
+		bool bReceiveInputActionEvents = true;
+
+	/*
+	Indicates whether this controller will be notified when Input type changes
+	*/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavController)
+		bool bReceiveInputChangeEvents = true;
 
 	/*
 	The amount of time the player needs to hold a key for the navigation to
 	start occuring periodically
 	*/
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavController)
 		float InputHeldWaitTime = 0.5f;
 
 	/*
 	The amount of time that passes before the navigation chains further
 	*/
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavController)
 		float NavigationChainFrequency = 0.2f;
 
 	ECountdownPhase CountdownPhase = ECountdownPhase::None;
 
-	EInputDirection CallbackDirection;
+	ENavigationDirection CallbackDirection;
 	float TimerCounter = 0.f;
 
 	/*************************************************************************/
 
 	void TimerCallback();
+	void SetTimer(ENavigationDirection Direction);
 
 	/**
 	*	Searches all the Input Actions relevant to UINav plugin and saves them in a map
@@ -154,7 +159,7 @@ public:
 	*
 	*	@return Whether a gamepad is connected
 	*/
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "UINavigation")
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
 		bool IsGamepadConnected();
 
 	/**
@@ -188,15 +193,42 @@ public:
 	*
 	*	@param NewWidget The new active widget
 	*/
-	UFUNCTION(BlueprintCallable, Category = "UINavigation")
+	UFUNCTION(BlueprintCallable, Category = UINavController)
 		void SetActiveWidget(class UUINavWidget* NewWidget);
 
-	UFUNCTION(BlueprintNativeEvent, Category = "UINavigation")
+	/**
+	*	Called when the root UINavWidget is removed from the viewport
+	*/
+	UFUNCTION(BlueprintNativeEvent, Category = UINavController)
 		void OnRootWidgetRemoved();
 	void OnRootWidgetRemoved_Implementation();
 
-	void SetTimer(EInputDirection TimerDirection);
-	void ClearTimer();
+	/**
+	*	Called when the input type changes
+	*
+	*	@param From The input type being used before
+	*	@param To The input type being used now
+	*/
+	UFUNCTION(BlueprintNativeEvent, Category = UINavController)
+		void OnInputChanged(EInputType From, EInputType To);
+	virtual void OnInputChanged_Implementation(EInputType From, EInputType To);
+
+	/**
+	*	Called when the player navigates in a certain direction
+	*
+	*	@param Direction The direction of navigation
+	*/
+	UFUNCTION(BlueprintNativeEvent, Category = UINavController)
+		void OnNavigated(ENavigationDirection Direction);
+	void OnNavigated_Implementation(ENavigationDirection Direction);
+
+	UFUNCTION(BlueprintNativeEvent, Category = UINavController)
+		void OnSelect();
+	void OnSelect_Implementation();
+
+	UFUNCTION(BlueprintNativeEvent, Category = UINavController)
+		void OnReturn();
+	void OnReturn_Implementation();
 
 	void MenuUp();
 	void MenuDown();
@@ -211,6 +243,8 @@ public:
 
 	void MouseInputWorkaround();
 
+	void ClearTimer();
+
 	void StartMenuUp();
 	void StartMenuDown();
 	void StartMenuLeft();
@@ -221,7 +255,6 @@ public:
 
 	FORCEINLINE UUINavWidget* GetActiveWidget() const { return ActiveWidget; }
 
-	FORCEINLINE TMap<FString, TArray<FKey>> GetKeyMap() const { return KeyMap; }
 
 	
 };

@@ -3,9 +3,9 @@
 #include "UINavWidget.h"
 #include "UINavButton.h"
 #include "UINavComponentBox.h"
+#include "UINavComponent.h"
 #include "UINavInputBox.h"
 #include "UINavInputContainer.h"
-#include "UINavComponent.h"
 #include "UINavController.h"
 #include "Animation/WidgetAnimation.h"
 #include "Blueprint/UserWidget.h"
@@ -185,7 +185,6 @@ void UUINavWidget::TraverseHierarquy()
 		}
 
 		UUINavButton* NewNavButton = Cast<UUINavButton>(widget);
-		UUINavButton* InputBoxExtraButton = nullptr;
 
 		if (NewNavButton == nullptr)
 		{
@@ -193,6 +192,7 @@ void UUINavWidget::TraverseHierarquy()
 			if (UIComp != nullptr)
 			{
 				NewNavButton = Cast<UUINavButton>(UIComp->NavButton);
+				if (bOverrideButtonIndices) UIComp->OverrideButtonIndex();
 
 				UINavComponentsIndices.Add(UINavButtons.Num());
 				UINavComponents.Add(UIComp);
@@ -208,23 +208,18 @@ void UUINavWidget::TraverseHierarquy()
 
 		if (NewNavButton == nullptr) continue;
 
-		for (int i = 0; i <= (int)(InputBoxExtraButton != nullptr); ++i)
+		if (!bOverrideButtonIndices)
 		{
-			if (!bOverrideButtonIndices)
-			{
-				NewNavButton->ButtonIndex = UINavButtons.Num();
-			}
-			NewNavButton->CustomHover.AddDynamic(this, &UUINavWidget::HoverEvent);
-			NewNavButton->CustomUnhover.AddDynamic(this, &UUINavWidget::UnhoverEvent);
-			NewNavButton->CustomClick.AddDynamic(this, &UUINavWidget::ClickEvent);
-			NewNavButton->CustomRelease.AddDynamic(this, &UUINavWidget::ReleaseEvent);
-			bSwitchedStyle.Add(false);
-
-			//Add button to array of UIUINavButtons
-			UINavButtons.Add(NewNavButton);
-
-			if (InputBoxExtraButton != nullptr) NewNavButton = InputBoxExtraButton;
+			NewNavButton->ButtonIndex = UINavButtons.Num();
 		}
+		NewNavButton->CustomHover.AddDynamic(this, &UUINavWidget::HoverEvent);
+		NewNavButton->CustomUnhover.AddDynamic(this, &UUINavWidget::UnhoverEvent);
+		NewNavButton->CustomClick.AddDynamic(this, &UUINavWidget::ClickEvent);
+		NewNavButton->CustomRelease.AddDynamic(this, &UUINavWidget::ReleaseEvent);
+		bSwitchedStyle.Add(false);
+
+		//Add button to array of UIUINavButtons
+		UINavButtons.Add(NewNavButton);
 	}
 
 	if (bOverrideButtonIndices)
@@ -297,6 +292,11 @@ void UUINavWidget::UINavSetup()
 	OnSetupCompleted();
 }
 
+void UUINavWidget::ReadyForSetup_Implementation()
+{
+
+}
+
 void UUINavWidget::NativeTick(const FGeometry & MyGeometry, float DeltaTime)
 {
 	Super::NativeTick(MyGeometry, DeltaTime);
@@ -361,11 +361,8 @@ FReply UUINavWidget::NativeOnKeyDown(const FGeometry & InGeometry, const FKeyEve
 	}
 	else
 	{
-		if (PressedKeys.Find(InKeyEvent.GetKey()) == INDEX_NONE)
-		{
-			PressedKeys.Add(InKeyEvent.GetKey());
-			CurrentPC->NotifyKeyPressed(InKeyEvent.GetKey());
-		}
+		PressedKeys.Add(InKeyEvent.GetKey());
+		CurrentPC->NotifyKeyPressed(InKeyEvent.GetKey());
 	}
 
 	return FReply::Handled();
@@ -375,18 +372,7 @@ FReply UUINavWidget::NativeOnKeyUp(const FGeometry & InGeometry, const FKeyEvent
 {
 	Super::NativeOnKeyUp(InGeometry, InKeyEvent);
 
-	if (bWaitForInput)
-	{
-		if (InKeyEvent.GetKey().IsModifierKey())
-		{
-			FName KeyName = InKeyEvent.GetKey().GetFName();
-			if (KeyName.IsEqual(FName(TEXT("LeftShift"))) || KeyName.IsEqual(FName(TEXT("RightShift")))) TempMapping.bShift = false;
-			if (KeyName.IsEqual(FName(TEXT("LeftControl"))) || KeyName.IsEqual(FName(TEXT("RightControl")))) TempMapping.bCtrl = false;
-			if (KeyName.IsEqual(FName(TEXT("LeftAlt"))) || KeyName.IsEqual(FName(TEXT("RightAlt")))) TempMapping.bAlt = false;
-			if (KeyName.IsEqual(FName(TEXT("LeftCommand"))) || KeyName.IsEqual(FName(TEXT("RightCommand")))) TempMapping.bCmd = false;
-		}
-	}
-	else
+	if (!bWaitForInput)
 	{
 		if (PressedKeys.Remove(InKeyEvent.GetKey()) > 0) CurrentPC->NotifyKeyReleased(InKeyEvent.GetKey());
 	}
@@ -520,8 +506,14 @@ void UUINavWidget::AppendVerticalNavigation(int Dimension, FButtonNavigation Edg
 		if (i == Dimension - 1) NewNav.DownButton = EdgeNavigation.DownButton == -1 ? (bWrap ? StartingIndex : NewNav.DownButton) : EdgeNavigation.DownButton;
 		else NewNav.DownButton = StartingIndex + i + (bReachedInputContainer ? ExtraButtons : 0) + 1;
 
-		if (EdgeNavigation.LeftButton != -1) NewNav.LeftButton = EdgeNavigation.LeftButton;
-		if (EdgeNavigation.RightButton != -1) NewNav.RightButton = EdgeNavigation.RightButton;
+		if (EdgeNavigation.LeftButton != -1)
+		{
+			NewNav.LeftButton = EdgeNavigation.LeftButton;
+		}
+		if (EdgeNavigation.RightButton != -1)
+		{
+			NewNav.RightButton = EdgeNavigation.RightButton;
+		}
 
 		ButtonNavigations.Add(NewNav);
 	}
@@ -582,8 +574,14 @@ void UUINavWidget::AppendHorizontalNavigation(int Dimension, FButtonNavigation E
 		if (i == Dimension - 1) NewNav.RightButton = EdgeNavigation.RightButton == -1 ? (bWrap ? StartingIndex : NewNav.RightButton) : EdgeNavigation.RightButton;
 		else NewNav.RightButton = StartingIndex + i + (bReachedInputContainer ? ExtraButtons : 0) + 1;
 
-		if (EdgeNavigation.UpButton != -1) NewNav.UpButton = EdgeNavigation.UpButton;
-		if (EdgeNavigation.DownButton != -1) NewNav.DownButton = EdgeNavigation.DownButton;
+		if (EdgeNavigation.UpButton != -1)
+		{
+			NewNav.UpButton = EdgeNavigation.UpButton;
+		}
+		if (EdgeNavigation.DownButton != -1)
+		{
+			NewNav.DownButton = EdgeNavigation.DownButton;
+		}
 
 		ButtonNavigations.Add(NewNav);
 	}
@@ -851,9 +849,14 @@ void UUINavWidget::NavigateTo(int Index, bool bHoverEvent)
 	if (bShouldNotify)
 	{
 		OnNavigate(ButtonIndex, Index);
+
+		UUINavComponent* FromComponent = GetUINavComponentAtIndex(ButtonIndex);
+		UUINavComponent* ToComponent = GetUINavComponentAtIndex(Index);
+		if (FromComponent != nullptr) FromComponent->OnNavigatedFrom();
+		if (ToComponent != nullptr) ToComponent->OnNavigatedTo();
+
 		if (UINavAnimations.Num() > 0) ExecuteAnimations(ButtonIndex, Index);
 	}
-
 	//Update all the possible scroll boxes in the widget
 	for (int i = 0; i < ScrollBoxes.Num(); ++i)
 	{
@@ -903,6 +906,7 @@ void UUINavWidget::OnPreSelect(int Index)
 		{
 			SetUserFocus(CurrentPC);
 		}
+		//TODO: Check if necessary
 		SetKeyboardFocus();
 		FEventReply Reply = FEventReply();
 		UWidgetBlueprintLibrary::CaptureMouse(Reply, this);
@@ -918,6 +922,16 @@ void UUINavWidget::OnReturn_Implementation()
 	ReturnToParent();
 }
 
+void UUINavWidget::OnInputChanged_Implementation(EInputType From, EInputType To)
+{
+
+}
+
+void UUINavWidget::OnSetupCompleted_Implementation()
+{
+
+}
+
 UWidget* UUINavWidget::GoToWidget(TSubclassOf<UUINavWidget> NewWidgetClass, bool bRemoveParent)
 {
 	//check(NewWidgetClass != nullptr && "GoToWidget: No Widget Class found");
@@ -931,6 +945,10 @@ UWidget* UUINavWidget::GoToWidget(TSubclassOf<UUINavWidget> NewWidgetClass, bool
 	NewWidget->ParentWidget = this;
 	NewWidget->ParentWidgetClass = WidgetClass;
 	NewWidget->bParentRemoved = bRemoveParent;
+	if (HasUserFocus(CurrentPC))
+	{
+		NewWidget->SetUserFocus(CurrentPC);
+	}
 	NewWidget->AddToViewport();
 	CleanSetup();
 	return NewWidget;
@@ -946,6 +964,11 @@ void UUINavWidget::ReturnToParent()
 			RemoveFromParent();
 		}
 		return;
+	}
+
+	if (HasUserFocus(CurrentPC))
+	{
+		ParentWidget->SetUserFocus(CurrentPC);
 	}
 
 	//If parent was removed, add it to viewport
@@ -990,16 +1013,16 @@ int UUINavWidget::FetchIndexByDirection(ENavigationDirection Direction, int Inde
 
 	switch (Direction)
 	{
-		case ENavigationDirection::Nav_UP:
+		case ENavigationDirection::Up:
 			LocalIndex = ButtonNavigations[Index].UpButton;
 			break;
-		case ENavigationDirection::Nav_DOWN:
+		case ENavigationDirection::Down:
 			LocalIndex = ButtonNavigations[Index].DownButton;
 			break;
-		case ENavigationDirection::Nav_LEFT:
+		case ENavigationDirection::Left:
 			LocalIndex = ButtonNavigations[Index].LeftButton;
 			break;
-		case ENavigationDirection::Nav_RIGHT:
+		case ENavigationDirection::Right:
 			LocalIndex = ButtonNavigations[Index].RightButton;
 			break;
 		default:
@@ -1022,22 +1045,16 @@ UUINavButton * UUINavWidget::GetUINavButtonAtIndex(int Index)
 UUINavComponent * UUINavWidget::GetUINavComponentAtIndex(int Index)
 {
 	int ValidIndex = UINavComponentsIndices.Find(Index);
-	if (ValidIndex == INDEX_NONE) 
-	{
-		DISPLAYERROR("GetUINavComponentAtIndex: Element at given index isn't a UINavComponent");
-		return nullptr;
-	}
+	if (ValidIndex == INDEX_NONE) return nullptr;
+	
 	return UINavComponents[ValidIndex];
 }
 
 UUINavComponentBox * UUINavWidget::GetUINavComponentBoxAtIndex(int Index)
 {
 	int ValidIndex = ComponentBoxIndices.Find(Index);
-	if (ValidIndex == INDEX_NONE)
-	{
-		DISPLAYERROR("GetUINavComponentBoxAtIndex: Element at given index isn't a UINavComponentBox");
-		return nullptr;
-	}
+	if (ValidIndex == INDEX_NONE) return nullptr;
+	
 	return UINavComponentBoxes[ValidIndex];
 }
 
@@ -1132,62 +1149,24 @@ void UUINavWidget::ProcessMouseKeybind(FKey PressedMouseKey)
 	PressedKeys.Empty();
 }
 
-void UUINavWidget::MenuUp()
+void UUINavWidget::NavigateInDirection(ENavigationDirection Direction)
 {
-	if (!bAllowNavigation)
-	{
-		HaltedIndex = FindNextIndex(ENavigationDirection::Nav_UP);
-		return;
-	}
-	MenuNavigate(ENavigationDirection::Nav_UP);
-}
+	if (Direction == ENavigationDirection::None) return;
 
-void UUINavWidget::MenuDown()
-{
 	if (!bAllowNavigation)
 	{
-		HaltedIndex = FindNextIndex(ENavigationDirection::Nav_DOWN);
-		return;
-	}
-	MenuNavigate(ENavigationDirection::Nav_DOWN);
-}
-
-void UUINavWidget::MenuLeft()
-{
-	if (!bAllowNavigation)
-	{
-		HaltedIndex = FindNextIndex(ENavigationDirection::Nav_LEFT);
+		HaltedIndex = FindNextIndex(Direction);
 		return;
 	}
 
-	int ComponentBoxIndex = ComponentBoxIndices.Find(ButtonIndex);
-	if (ComponentBoxIndex == INDEX_NONE)
+	UUINavComponentBox* ComponentBox = GetUINavComponentBoxAtIndex(ButtonIndex);
+	if (ComponentBox != nullptr && (Direction == ENavigationDirection::Left || Direction == ENavigationDirection::Right))
 	{
-		MenuNavigate(ENavigationDirection::Nav_LEFT);
+		if (Direction == ENavigationDirection::Left) ComponentBox->NavigateLeft();
+		else if (Direction == ENavigationDirection::Right) ComponentBox->NavigateRight();
 	}
-	else
-	{
-		UINavComponentBoxes[ComponentBoxIndex]->NavigateLeft();
-	}
-}
-
-void UUINavWidget::MenuRight()
-{
-	if (!bAllowNavigation)
-	{
-		HaltedIndex = FindNextIndex(ENavigationDirection::Nav_RIGHT);
-		return;
-	}
-
-	int ComponentBoxIndex = ComponentBoxIndices.Find(ButtonIndex);
-	if (ComponentBoxIndex == INDEX_NONE)
-	{
-		MenuNavigate(ENavigationDirection::Nav_RIGHT);
-	}
-	else
-	{
-		UINavComponentBoxes[ComponentBoxIndex]->NavigateRight();
-	}
+	else MenuNavigate(Direction);
+	
 }
 
 void UUINavWidget::MenuSelect()
@@ -1197,7 +1176,7 @@ void UUINavWidget::MenuSelect()
 		HaltedIndex = SELECT_INDEX;
 		return;
 	}
-	OnPreSelect(ButtonIndex);
+	OnSelect(ButtonIndex);
 }
 
 void UUINavWidget::MenuReturn()

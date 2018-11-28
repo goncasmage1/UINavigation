@@ -14,3 +14,17 @@ void UUINavComponent::NativeConstruct()
 	check(NavButton != nullptr && "Button Component has no associated UINavButton");
 }
 
+void UUINavComponent::OverrideButtonIndex_Implementation()
+{
+	NavButton->ButtonIndex = ComponentIndex;
+}
+
+void UUINavComponent::OnNavigatedTo_Implementation()
+{
+
+}
+
+void UUINavComponent::OnNavigatedFrom_Implementation()
+{
+
+}
