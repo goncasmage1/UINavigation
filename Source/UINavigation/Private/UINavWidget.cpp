@@ -53,7 +53,6 @@ void UUINavWidget::InitialSetup()
 		if (MoveCurve == nullptr)
 		{
 			DISPLAYERROR("UseMovementCurve is true but MoveCurve is null");
-			return;
 		}
 	}
 
@@ -437,6 +436,8 @@ FReply UUINavWidget::OnKeyReleased(FKey PressedKey)
 
 void UUINavWidget::HandleSelectorMovement(float DeltaTime)
 {
+	if (MoveCurve == nullptr) return;
+
 	MovementCounter += DeltaTime;
 
 	//Movement is finished
@@ -888,6 +889,8 @@ void UUINavWidget::NavigateTo(int Index, bool bHoverEvent)
 
 void UUINavWidget::BeginSelectorMovement(int Index)
 {
+	if (MoveCurve == nullptr) return;
+
 	SelectorOrigin = GetButtonLocation(ButtonIndex);
 	SelectorDestination = GetButtonLocation(Index);
 	Distance = SelectorDestination - SelectorOrigin;
