@@ -132,35 +132,14 @@ protected:
 	*/
 	void NotifyInputTypeChange(EInputType NewInputType);
 
-	/**
-	*	Notifies to the active UUINavWidget that the input type changed
-	*
-	*	@param Action The action's name
-	*	@param bPressed Whether the action was pressed or released
-	*/
-	void ExecuteActionByName(FString Action, bool bPressed);
-
-	/**
-	*	Traverses the key map to find the action name associated with the given key
-	*
-	*	@param PressedKey The pressed key
-	*	@param bPressed Whether the action was pressed or released
-	*/
-	void FindActionByKey(FKey PressedKey, bool bPressed);
-
 	virtual void SetupInputComponent() override;
 	virtual void Possess(APawn* InPawn) override;
 	virtual void Tick(float DeltaTime) override;
 
 public:
 
-	/**
-	*	Checks whether a gamepad is connected
-	*
-	*	@return Whether a gamepad is connected
-	*/
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
-		bool IsGamepadConnected();
+	TArray<FString> PressedActions;
+	TArray<FKey> PressedKeys;
 
 	/**
 	*	Notifies the controller that a mouse is being used
@@ -187,6 +166,43 @@ public:
 	*	@param PressedKey The pressed key
 	*/
 	bool IsReturnKey(FKey PressedKey);
+
+	/**
+	*	Executes a Menu Action by its name
+	*
+	*	@param Action The action's name
+	*	@param bPressed Whether the action was pressed or released
+	*/
+	void ExecuteActionByName(FString Action, bool bPressed);
+
+	/**
+	*	Executes a Menu Action by its key
+	*
+	*	@param PressedKey The given key
+	*	@param bPressed Whether the action was pressed or released
+	*/
+	void ExecuteActionByKey(FKey ActionKey, bool bPressed);
+
+	/**
+	*	Returns the action that contains the given key
+	*
+	*	@param PressedKey The given key
+	*/
+	FString FindActionByKey(FKey ActionKey);
+
+	/**
+	*	Called when an action key is pressed
+	*
+	*	@param ActionName The name of the action
+	*/
+	FReply OnActionPressed(FString ActionName);
+
+	/**
+	*	Called when an action key is released
+	*
+	*	@param ActionName The name of the action
+	*/
+	FReply OnActionReleased(FString ActionName);
 
 	/**
 	*	Changes the widget this PC will communicate with

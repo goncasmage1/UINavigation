@@ -89,8 +89,6 @@ protected:
 	FVector2D SelectorDestination;
 	FVector2D Distance;
 
-	TArray<FKey> PressedKeys;
-
 	/******************************************************************************/
 
 	/**
@@ -294,6 +292,9 @@ public:
 	virtual FReply NativeOnKeyUp(const FGeometry & InGeometry, const FKeyEvent & InKeyEvent) override;
 	virtual FReply NativeOnMouseButtonDown(const FGeometry & InGeometry, const FPointerEvent & InMouseEvent) override;
 	virtual FReply NativeOnMouseButtonUp(const FGeometry & InGeometry, const FPointerEvent & InMouseEvent) override;
+
+	FReply OnKeyPressed(FKey PressedKey);
+	FReply OnKeyReleased(FKey PressedKey);
 
 	/**
 	*	Appends a new array of FButtonNavigations to the already existing navigation graph with the given dimension

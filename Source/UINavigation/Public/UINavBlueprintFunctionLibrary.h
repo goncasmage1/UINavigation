@@ -17,18 +17,26 @@ class UINAVIGATION_API UUINavBlueprintFunctionLibrary : public UBlueprintFunctio
 
 public:
 
-	UFUNCTION(BlueprintCallable, Category = "UINavigationLibrary")
+	UFUNCTION(BlueprintCallable, Category = UINavigationLibrary)
 		static void SetSoundClassVolume(class USoundClass* TargetClass, float NewVolume);
-	UFUNCTION(BlueprintPure, Category = "UINavigationLibrary")
+	UFUNCTION(BlueprintPure, Category = UINavigationLibrary)
 		static float GetSoundClassVolume(class USoundClass* TargetClass);
 	
-	UFUNCTION(BlueprintCallable, Category = "UINavigationLibrary")
+	UFUNCTION(BlueprintCallable, Category = UINavigationLibrary)
 		static void SetPostProcessSettings(FString Variable, FString Value);
-	UFUNCTION(BlueprintPure, Category = "UINavigationLibrary")
+	UFUNCTION(BlueprintPure, Category = UINavigationLibrary)
 		static FString GetPostProcessSettings(FString Variable);
 
 	//Resets the input settings to their default state
-	UFUNCTION(BlueprintCallable, Category = "UINav Input")
+	UFUNCTION(BlueprintCallable, Category = UINavInput)
 		static void ResetInputSettings();
+
+	/**
+	*	Checks whether a gamepad is connected
+	*
+	*	@return Whether a gamepad is connected
+	*/
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavigationLibrary)
+		bool IsGamepadConnected();
 	
 };

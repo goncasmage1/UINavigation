@@ -124,8 +124,6 @@ void UUINavWidget::CleanSetup()
 	{
 		button->SetIsEnabled(false);
 	}
-
-	PressedKeys.Empty();
 }
 
 void UUINavWidget::FetchButtonsInHierarchy()
@@ -350,20 +348,28 @@ FReply UUINavWidget::NativeOnKeyDown(const FGeometry & InGeometry, const FKeyEve
 		if (UINavInputContainer->bCanCancelKeybind && CurrentPC->IsReturnKey(PressedKey))
 		{
 			bWaitForInput = false;
-			PressedKeys.Empty();
+			CurrentPC->PressedKeys.Empty();
 			UINavInputBoxes[InputBoxIndex / InputsPerAction]->RevertToActionText(InputBoxIndex % InputsPerAction);
 			return FReply::Handled();
 		}
 		TempMapping.Key = PressedKey;
 		UINavInputBoxes[InputBoxIndex / InputsPerAction]->UpdateActionKey(TempMapping, InputBoxIndex % InputsPerAction);
 		bWaitForInput = false;
-		PressedKeys.Empty();
+		CurrentPC->PressedKeys.Empty();
 	}
 	else
 	{
-		PressedKeys.Add(InKeyEvent.GetKey());
-		CurrentPC->NotifyKeyPressed(InKeyEvent.GetKey());
+		FReply reply = OnKeyPressed(InKeyEvent.GetKey());
+		if (reply.IsEventHandled()) return FReply::Handled();
 	}
+
+	/*if (CurrentPC->PressedKeys.Find(InKeyEvent.GetKey()) == INDEX_NONE)
+	{
+	if (CurrentPC->PressedKeys.Find(InKeyEvent.GetKey()))
+
+	CurrentPC->PressedKeys.Add(InKeyEvent.GetKey());
+	CurrentPC->NotifyKeyPressed(InKeyEvent.GetKey());
+	}*/
 
 	return FReply::Handled();
 }
@@ -374,7 +380,8 @@ FReply UUINavWidget::NativeOnKeyUp(const FGeometry & InGeometry, const FKeyEvent
 
 	if (!bWaitForInput)
 	{
-		if (PressedKeys.Remove(InKeyEvent.GetKey()) > 0) CurrentPC->NotifyKeyReleased(InKeyEvent.GetKey());
+		FReply reply = OnKeyReleased(InKeyEvent.GetKey());
+		if (reply.IsEventHandled()) return FReply::Handled();
 	}
 
 	return FReply::Handled();
@@ -392,11 +399,8 @@ FReply UUINavWidget::NativeOnMouseButtonDown(const FGeometry & InGeometry, const
 	}
 	else
 	{
-		if (PressedKeys.Find(InMouseEvent.GetEffectingButton()) == INDEX_NONE)
-		{
-			PressedKeys.Add(InMouseEvent.GetEffectingButton());
-			CurrentPC->NotifyKeyPressed(InMouseEvent.GetEffectingButton());
-		}
+		FReply reply = OnKeyPressed(InMouseEvent.GetEffectingButton());
+		if (reply.IsEventHandled()) return FReply::Handled();
 	}
 
 	return FReply::Handled();
@@ -408,11 +412,27 @@ FReply UUINavWidget::NativeOnMouseButtonUp(const FGeometry & InGeometry, const F
 
 	if (!bWaitForInput && InMouseEvent.GetEffectingButton().IsMouseButton())
 	{
-		PressedKeys.Remove(InMouseEvent.GetEffectingButton());
-		CurrentPC->NotifyKeyReleased(InMouseEvent.GetEffectingButton());
+		FReply reply = OnKeyReleased(InMouseEvent.GetEffectingButton());
+		if (reply.IsEventHandled()) return FReply::Handled();
 	}
 
 	return FReply::Handled();
+}
+
+FReply UUINavWidget::OnKeyPressed(FKey PressedKey)
+{
+	FString ActionName = CurrentPC->FindActionByKey(PressedKey);
+	if (ActionName.Equals(TEXT(""))) return FReply::Handled();
+
+	return CurrentPC->OnActionPressed(ActionName);
+}
+
+FReply UUINavWidget::OnKeyReleased(FKey PressedKey)
+{
+	FString ActionName = CurrentPC->FindActionByKey(PressedKey);
+	if (ActionName.Equals(TEXT(""))) return FReply::Handled();
+
+	return CurrentPC->OnActionReleased(ActionName);
 }
 
 void UUINavWidget::HandleSelectorMovement(float DeltaTime)
@@ -898,7 +918,6 @@ void UUINavWidget::OnPreSelect(int Index)
 		int InputsPerAction = UINavInputContainer->InputsPerAction;
 		UINavInputBoxes[InputBoxIndex / InputsPerAction]->NotifySelected(InputBoxIndex % InputsPerAction);
 
-		CurrentPC->ClearTimer();
 		bWaitForInput = true;
 
 		bRemoveFocus = !HasUserFocus(CurrentPC);
@@ -1146,7 +1165,8 @@ void UUINavWidget::ProcessMouseKeybind(FKey PressedMouseKey)
 	UINavInputBoxes[InputBoxIndex / InputsPerAction]->UpdateActionKey(TempMapping, InputBoxIndex % InputsPerAction);
 	TempMapping.bShift = TempMapping.bCtrl = TempMapping.bAlt = TempMapping.bCmd = false;
 	bWaitForInput = false;
-	PressedKeys.Empty();
+	//TODO:
+	//CurrentPC->PressedKeys.Empty();
 }
 
 void UUINavWidget::NavigateInDirection(ENavigationDirection Direction)
@@ -1176,7 +1196,8 @@ void UUINavWidget::MenuSelect()
 		HaltedIndex = SELECT_INDEX;
 		return;
 	}
-	OnSelect(ButtonIndex);
+	CurrentPC->ClearTimer();
+	OnPreSelect(ButtonIndex);
 }
 
 void UUINavWidget::MenuReturn()
@@ -1186,6 +1207,7 @@ void UUINavWidget::MenuReturn()
 		HaltedIndex = RETURN_INDEX;
 		return;
 	}
+	CurrentPC->ClearTimer();
 	OnReturn();
 }
 

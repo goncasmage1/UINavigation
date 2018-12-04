@@ -54,3 +54,8 @@ void UUINavBlueprintFunctionLibrary::ResetInputSettings()
 	Settings->SaveConfig();
 	Settings->ForceRebuildKeymaps();
 }
+
+bool UUINavBlueprintFunctionLibrary::IsGamepadConnected()
+{
+	return FSlateApplication::Get().IsGamepadAttached();
+}
