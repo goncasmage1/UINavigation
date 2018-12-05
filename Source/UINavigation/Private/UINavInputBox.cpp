@@ -135,16 +135,16 @@ bool UUINavInputBox::UpdateKeyIconForKey(int Index)
 
 	if (Key.IsGamepadKey())
 	{
-		if (Container->GamepadKeyIconData != nullptr && Container->GamepadKeyIconData->GetRowMap().Contains(Key.GetFName()))
+		if (Container->GamepadKeyIconData != nullptr && Container->GamepadKeyIconData->RowMap.Contains(Key.GetFName()))
 		{
-			KeyIcon = (FInputIconMapping*)Container->GamepadKeyIconData->GetRowMap()[Key.GetFName()];
+			KeyIcon = (FInputIconMapping*)Container->GamepadKeyIconData->RowMap[Key.GetFName()];
 		}
 	}
 	else
 	{
-		if (Container->KeyboardMouseKeyIconData != nullptr && Container->KeyboardMouseKeyIconData->GetRowMap().Contains(Key.GetFName()))
+		if (Container->KeyboardMouseKeyIconData != nullptr && Container->KeyboardMouseKeyIconData->RowMap.Contains(Key.GetFName()))
 		{
-			KeyIcon = (FInputIconMapping*)Container->KeyboardMouseKeyIconData->GetRowMap()[Key.GetFName()];
+			KeyIcon = (FInputIconMapping*)Container->KeyboardMouseKeyIconData->RowMap[Key.GetFName()];
 		}
 	}
 	if (KeyIcon == nullptr) return false;
@@ -165,17 +165,17 @@ FText UUINavInputBox::GetKeyName(int Index)
 
 	if (Key.IsGamepadKey())
 	{
-		if (Container->GamepadKeyNameData != nullptr && Container->GamepadKeyNameData->GetRowMap().Contains(Key.GetFName()))
+		if (Container->GamepadKeyNameData != nullptr && Container->GamepadKeyNameData->RowMap.Contains(Key.GetFName()))
 		{
-			KeyName = (FInputNameMapping*)Container->GamepadKeyNameData->GetRowMap()[Key.GetFName()];
+			KeyName = (FInputNameMapping*)Container->GamepadKeyNameData->RowMap[Key.GetFName()];
 			return FText::FromString(KeyName->InputName);
 		}
 	}
 	else
 	{
-		if (Container->KeyboardMouseKeyNameData != nullptr && Container->KeyboardMouseKeyNameData->GetRowMap().Contains(Key.GetFName()))
+		if (Container->KeyboardMouseKeyNameData != nullptr && Container->KeyboardMouseKeyNameData->RowMap.Contains(Key.GetFName()))
 		{
-			KeyName = (FInputNameMapping*)Container->KeyboardMouseKeyNameData->GetRowMap()[Key.GetFName()];
+			KeyName = (FInputNameMapping*)Container->KeyboardMouseKeyNameData->RowMap[Key.GetFName()];
 			return FText::FromString(KeyName->InputName);
 		}
 	}
