@@ -1119,6 +1119,8 @@ void UUINavWidget::ClickEvent(int Index)
 		if (!bAllowNavigation) return;
 
 		OnPreSelect(Index);
+
+		if (Index != ButtonIndex) NavigateTo(Index);
 	}
 }
 

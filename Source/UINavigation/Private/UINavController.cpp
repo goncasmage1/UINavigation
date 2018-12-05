@@ -261,16 +261,11 @@ FReply AUINavController::OnActionPressed(FString ActionName)
 {
 	if (!PressedActions.Contains(ActionName))
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Red, TEXT("Valid action"));
 		PressedActions.AddUnique(ActionName);
 		ExecuteActionByName(ActionName, true);
 		return FReply::Unhandled();
 	}
-	else
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Red, TEXT("Invalid action"));
-		return FReply::Handled();
-	}
+	else return FReply::Handled();
 }
 
 FReply AUINavController::OnActionReleased(FString ActionName)
