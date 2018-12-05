@@ -1048,6 +1048,7 @@ void UUINavWidget::HoverEvent(int Index)
 	{
 		bWaitForInput = false;
 		UINavInputBoxes[InputBoxIndex / UINavInputContainer->InputsPerAction]->RevertToActionText(InputBoxIndex % UINavInputContainer->InputsPerAction);
+		CurrentPC->PressedActions.Empty();
 	}
 	if (CurrentPC->GetCurrentInputType() != EInputType::Mouse)
 	{
@@ -1070,6 +1071,7 @@ void UUINavWidget::UnhoverEvent(int Index)
 	{
 		bWaitForInput = false;
 		UINavInputBoxes[InputBoxIndex / UINavInputContainer->InputsPerAction]->RevertToActionText(InputBoxIndex % UINavInputContainer->InputsPerAction);
+		CurrentPC->PressedActions.Empty();
 	}
 
 	if (bUseButtonStates)
