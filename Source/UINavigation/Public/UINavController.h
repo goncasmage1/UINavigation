@@ -139,7 +139,6 @@ protected:
 public:
 
 	TArray<FString> PressedActions;
-	TArray<FKey> PressedKeys;
 
 	/**
 	*	Notifies the controller that a mouse is being used

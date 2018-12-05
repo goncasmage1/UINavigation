@@ -70,7 +70,6 @@ protected:
 
 	bool bMovingSelector = false;
 	bool bAllowNavigation = true;
-	bool bRemoveFocus = false;
 
 	//Used to track when the selector's position should be updated
 	int WaitForTick;
@@ -188,7 +187,7 @@ public:
 	//Indicates whether the Normal and Hovered style of a button were switched
 	TArray<bool> bSwitchedStyle;
 
-	//The index of the button that is currently the focus of navigation
+	//The index of the button that was last navigated upon
 	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
 		int ButtonIndex = 0;
 
@@ -333,8 +332,6 @@ public:
 
 	/**
 	*	Called manually to setup all the elements in the Widget
-	*
-	*	@param  FirstButton The index of the button that will be the focus of navigation
 	*/
 	virtual void UINavSetup();
 

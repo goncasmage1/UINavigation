@@ -80,9 +80,6 @@ void AUINavController::Tick(float DeltaTime)
 
 	switch (CountdownPhase)
 	{
-		/*case ECountdownPhase::None:
-			return;
-			break;*/
 		case ECountdownPhase::First:
 			TimerCounter += DeltaTime;
 			if (TimerCounter >= InputHeldWaitTime)
@@ -264,11 +261,16 @@ FReply AUINavController::OnActionPressed(FString ActionName)
 {
 	if (!PressedActions.Contains(ActionName))
 	{
+		GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Red, TEXT("Valid action"));
 		PressedActions.AddUnique(ActionName);
 		ExecuteActionByName(ActionName, true);
 		return FReply::Unhandled();
 	}
-	else return FReply::Handled();
+	else
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Red, TEXT("Invalid action"));
+		return FReply::Handled();
+	}
 }
 
 FReply AUINavController::OnActionReleased(FString ActionName)
