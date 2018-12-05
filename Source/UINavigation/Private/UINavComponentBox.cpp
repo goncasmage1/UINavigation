@@ -93,6 +93,7 @@ void UUINavComponentBox::NavigateLeft()
 	}
 
 	UpdateTextBlock();
+	OnNavigateLeft();
 
 	if (!bDisableButtons) return;
 
@@ -103,5 +104,13 @@ void UUINavComponentBox::NavigateLeft()
 
 void UUINavComponentBox::NavigateRight()
 {
+	OnNavigateRight();
+}
 
+void UUINavComponentBox::OnNavigateLeft_Implementation()
+{
+}
+
+void UUINavComponentBox::OnNavigateRight_Implementation()
+{
 }

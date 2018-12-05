@@ -1,26 +1,16 @@
 // Copyright (C) 2018 Gonçalo Marques - All Rights Reserved
 
 using UnrealBuildTool;
+using System.IO;
 
 public class UINavigation : ModuleRules
 {
 	public UINavigation(ReadOnlyTargetRules Target) : base(Target)
 	{
-		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
-		
-		PublicIncludePaths.AddRange(
-			new string[] {
-				"UINavigation/Public"
-			}
-			);
-				
-		
-		PrivateIncludePaths.AddRange(
-			new string[] {
-				"UINavigation/Private"
-			}
-			);
-			
+        PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
+
+        PublicIncludePaths.Add(Path.Combine(ModuleDirectory, "Public"));
+        PrivateIncludePaths.Add(Path.Combine(ModuleDirectory, "Private"));
 		
 		PublicDependencyModuleNames.AddRange(
 			new string[]
@@ -29,7 +19,6 @@ public class UINavigation : ModuleRules
 			}
 			);
 			
-		
 		PrivateDependencyModuleNames.AddRange(
 			new string[]
 			{
@@ -42,7 +31,6 @@ public class UINavigation : ModuleRules
                 "RHI"
 			}
 			);
-		
 		
 		DynamicallyLoadedModuleNames.AddRange(
 			new string[]

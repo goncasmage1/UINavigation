@@ -2,6 +2,7 @@
 
 #include "UINavController.h"
 #include "UINavWidget.h"
+#include "UINavSettings.h"
 
 
 void AUINavController::SetupInputComponent()
@@ -39,6 +40,19 @@ void AUINavController::SetupInputComponent()
 	FInputActionBinding& Action4_2 = InputComponent->BindAction("MenuRight", IE_Released, this, &AUINavController::MenuRightRelease);
 	Action4_2.bExecuteWhenPaused = true;
 	Action4_2.bConsumeInput = false;
+
+	FInputKeyBinding& Action1_3 = InputComponent->BindKey(EKeys::AnyKey, IE_Pressed, this, &AUINavController::MouseInputWorkaround);
+	Action1_3.bExecuteWhenPaused = true;
+	Action1_3.bConsumeInput = false;
+
+	//Save default settings
+	UUINavSettings *MySettings = GetMutableDefault<UUINavSettings>();
+	if (MySettings->ActionMappings.Num() == 0)
+	{
+		UInputSettings* Settings = const_cast<UInputSettings*>(GetDefault<UInputSettings>());
+		MySettings->ActionMappings = Settings->ActionMappings;
+		MySettings->SaveConfig();
+	}
 }
 
 void AUINavController::Possess(APawn * InPawn)
@@ -52,18 +66,20 @@ void AUINavController::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	float PosX, PosY;
+	GetMousePosition(PosX, PosY);
 	if (CurrentInputType != EInputType::Mouse)
 	{
-		float DeltaX, DeltaY;
-		GetInputMouseDelta(DeltaX, DeltaY);
-		if (DeltaX > 0.f || DeltaY > 0.f) NotifyMouseInputType();
+		if (PosX != PreviousX || PosY != PreviousY)
+		{
+			NotifyMouseInputType();
+		}
 	}
+	PreviousX = PosX;
+	PreviousY = PosY;
 
 	switch (CountdownPhase)
 	{
-		case ECountdownPhase::None:
-			return;
-			break;
 		case ECountdownPhase::First:
 			TimerCounter += DeltaTime;
 			if (TimerCounter >= InputHeldWaitTime)
@@ -112,6 +128,8 @@ void AUINavController::SetTimer(ENavigationDirection TimerDirection)
 
 void AUINavController::ClearTimer()
 {
+	if (CallbackDirection == ENavigationDirection::None) return;
+
 	TimerCounter = 0.f;
 	CallbackDirection = ENavigationDirection::None;
 	CountdownPhase = ECountdownPhase::None;
@@ -137,7 +155,6 @@ void AUINavController::FetchUINavActionKeys()
 			KeyArray->Add(Action.Key);
 		}
 	}
-
 }
 
 void AUINavController::SetActiveWidget(UUINavWidget* NewWidget)
@@ -173,18 +190,7 @@ EInputType AUINavController::GetActionInputType(FString Action)
 		{
 			if (WasInputKeyJustPressed(key))
 			{
-				if (key.IsGamepadKey())
-				{
-					return EInputType::Gamepad;
-				}
-				else if (key.IsMouseButton())
-				{
-					return EInputType::Mouse;
-				}
-				else
-				{
-					return EInputType::Keyboard;
-				}
+				return GetKeyInputType(key);
 			}
 		}
 	}
@@ -213,15 +219,26 @@ void AUINavController::VerifyInputTypeChangeByAction(FString Action)
 
 void AUINavController::NotifyKeyPressed(FKey PressedKey)
 {
-	FindActionByKey(PressedKey, true);
+	ExecuteActionByKey(PressedKey, true);
 }
 
 void AUINavController::NotifyKeyReleased(FKey ReleasedKey)
 {
-	FindActionByKey(ReleasedKey, false);
+	ExecuteActionByKey(ReleasedKey, false);
 }
 
-void AUINavController::FindActionByKey(FKey PressedKey, bool bPressed)
+bool AUINavController::IsReturnKey(FKey PressedKey)
+{
+	for (FKey key : KeyMap[TEXT("MenuReturn")]) if (key == PressedKey) return true;
+	return false;
+}
+
+void AUINavController::ExecuteActionByKey(FKey PressedKey, bool bPressed)
+{
+	ExecuteActionByName(FindActionByKey(PressedKey), bPressed);
+}
+
+FString AUINavController::FindActionByKey(FKey ActionKey)
 {
 	TArray<FString> Actions;
 	KeyMap.GenerateKeyArray(Actions);
@@ -229,14 +246,35 @@ void AUINavController::FindActionByKey(FKey PressedKey, bool bPressed)
 	{
 		for (FKey key : KeyMap[action])
 		{
-			if (key == PressedKey)
+			if (key == ActionKey)
 			{
-				VerifyInputTypeChangeByKey(PressedKey);
-				ExecuteActionByName(action, bPressed);
-				return;
+				return action;
 			}
 		}
 	}
+	return TEXT("");
+}
+
+FReply AUINavController::OnActionPressed(FString ActionName)
+{
+	if (!PressedActions.Contains(ActionName))
+	{
+		PressedActions.AddUnique(ActionName);
+		ExecuteActionByName(ActionName, true);
+		return FReply::Unhandled();
+	}
+	else return FReply::Handled();
+}
+
+FReply AUINavController::OnActionReleased(FString ActionName)
+{
+	if (PressedActions.Contains(ActionName))
+	{
+		PressedActions.Remove(ActionName);
+		ExecuteActionByName(ActionName, false);
+		return FReply::Unhandled();
+	}
+	else return FReply::Handled();
 }
 
 void AUINavController::ExecuteActionByName(FString Action, bool bPressed)
@@ -319,11 +357,6 @@ void AUINavController::NotifyInputTypeChange(EInputType NewInputType)
 	if (ActiveWidget != nullptr) ActiveWidget->OnInputChanged(CurrentInputType, NewInputType);
 
 	CurrentInputType = NewInputType;
-}
-
-bool AUINavController::IsGamepadConnected()
-{
-	return FSlateApplication::Get().IsGamepadAttached();
 }
 
 void AUINavController::OnRootWidgetRemoved_Implementation()
@@ -420,6 +453,7 @@ void AUINavController::MenuReturn()
 void AUINavController::MenuUpRelease()
 {
 	if (Direction != ENavigationDirection::Up) return;
+	Direction = ENavigationDirection::None;
 
 	ClearTimer();
 }
@@ -427,6 +461,7 @@ void AUINavController::MenuUpRelease()
 void AUINavController::MenuDownRelease()
 {
 	if (Direction != ENavigationDirection::Down) return;
+	Direction = ENavigationDirection::None;
 
 	ClearTimer();
 }
@@ -434,6 +469,7 @@ void AUINavController::MenuDownRelease()
 void AUINavController::MenuLeftRelease()
 {
 	if (Direction != ENavigationDirection::Left) return;
+	Direction = ENavigationDirection::None;
 
 	ClearTimer();
 }
@@ -441,12 +477,31 @@ void AUINavController::MenuLeftRelease()
 void AUINavController::MenuRightRelease()
 {
 	if (Direction != ENavigationDirection::Right) return;
+	Direction = ENavigationDirection::None;
 
 	ClearTimer();
 }
 
+void AUINavController::MouseInputWorkaround()
+{
+	if (ActiveWidget != nullptr && ActiveWidget->bWaitForInput)
+	{
+		if (WasInputKeyJustPressed(EKeys::LeftMouseButton)) ActiveWidget->ProcessMouseKeybind(FKey(EKeys::LeftMouseButton));
+		else if (WasInputKeyJustPressed(EKeys::RightMouseButton)) ActiveWidget->ProcessMouseKeybind(FKey(EKeys::RightMouseButton));
+		else if (WasInputKeyJustPressed(EKeys::MiddleMouseButton)) ActiveWidget->ProcessMouseKeybind(FKey(EKeys::MiddleMouseButton));
+		else if (WasInputKeyJustPressed(EKeys::MouseScrollUp)) ActiveWidget->ProcessMouseKeybind(FKey(EKeys::MouseScrollUp));
+		else if (WasInputKeyJustPressed(EKeys::MouseScrollDown)) ActiveWidget->ProcessMouseKeybind(FKey(EKeys::MouseScrollDown));
+		else if (WasInputKeyJustPressed(EKeys::ThumbMouseButton)) ActiveWidget->ProcessMouseKeybind(FKey(EKeys::ThumbMouseButton));
+		else if (WasInputKeyJustPressed(EKeys::ThumbMouseButton2)) ActiveWidget->ProcessMouseKeybind(FKey(EKeys::ThumbMouseButton2));
+		else if (WasInputKeyJustPressed(EKeys::MouseScrollDown)) ActiveWidget->ProcessMouseKeybind(FKey(EKeys::MouseScrollDown));
+		else if (WasInputKeyJustPressed(EKeys::MouseScrollUp)) ActiveWidget->ProcessMouseKeybind(FKey(EKeys::MouseScrollUp));
+	}
+}
+
 void AUINavController::StartMenuUp()
 {
+	if (Direction == ENavigationDirection::Up) return;
+
 	MenuUp();
 	Direction = ENavigationDirection::Up;
 
@@ -459,6 +514,8 @@ void AUINavController::StartMenuUp()
 
 void AUINavController::StartMenuDown()
 {
+	if (Direction == ENavigationDirection::Down) return;
+
 	MenuDown();
 	Direction = ENavigationDirection::Down;
 
@@ -471,6 +528,8 @@ void AUINavController::StartMenuDown()
 
 void AUINavController::StartMenuLeft()
 {
+	if (Direction == ENavigationDirection::Left) return;
+
 	MenuLeft();
 	Direction = ENavigationDirection::Left;
 
@@ -483,6 +542,8 @@ void AUINavController::StartMenuLeft()
 
 void AUINavController::StartMenuRight()
 {
+	if (Direction == ENavigationDirection::Right) return;
+
 	MenuRight();
 	Direction = ENavigationDirection::Right;
 

@@ -43,6 +43,8 @@ void UUINavSliderBox::UpdateTextBlock()
 
 void UUINavSliderBox::NavigateRight()
 {
+	Super::NavigateRight();
+
 	if (MinRange + OptionIndex*Interval < MaxRange)
 	{
 		OptionIndex++;
