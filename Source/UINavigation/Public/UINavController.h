@@ -138,6 +138,10 @@ protected:
 
 public:
 
+	//Indicates whether the player can navigate the widget
+	UPROPERTY(BlueprintReadWrite, Category = UINavWidget)
+		bool bAllowNavigation = true;
+
 	TArray<FString> PressedActions;
 
 	/**

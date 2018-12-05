@@ -69,7 +69,6 @@ protected:
 	bool bShouldTick = true;
 
 	bool bMovingSelector = false;
-	bool bAllowNavigation = true;
 
 	//Used to track when the selector's position should be updated
 	int WaitForTick;
@@ -486,14 +485,6 @@ public:
 	*	@param	Direction  Direction of navigation
 	*/
 	int FetchIndexByDirection(ENavigationDirection Direction, int Index);
-
-	/**
-	*	Allows or forbids the player from using UINav Input
-	*
-	*	@param bAllow  Whether navigation should be allowed
-	*/
-	UFUNCTION(BlueprintCallable, Category = UINavWidget)
-		void SetAllowNavigation(bool bAllow);
 
 	/**
 	*	Adds given widget to screen (strongly recomended over manual alternative)

@@ -39,7 +39,6 @@ void UUINavWidget::InitialSetup()
 	if (CurrentPC == nullptr)
 	{
 		CurrentPC = Cast<AUINavController>(GetOwningPlayer());
-		//check(CurrentPC != nullptr && "PlayerController isn't a UINavController");
 		if (CurrentPC == nullptr)
 		{
 			DISPLAYERROR("PlayerController isn't a UINavController");
@@ -49,7 +48,6 @@ void UUINavWidget::InitialSetup()
 
 	if (bUseSelector && bUseMovementCurve)
 	{
-		//check(MoveCurve != nullptr && "UseMovementCurve is true but MoveCurve is null");
 		if (MoveCurve == nullptr)
 		{
 			DISPLAYERROR("UseMovementCurve is true but MoveCurve is null");
@@ -68,7 +66,6 @@ void UUINavWidget::InitialSetup()
 	FetchButtonsInHierarchy();
 	ReadyForSetup();
 
-	//check(UINavButtons.Num() == ButtonNavigations.Num() && "Dimension of UIUINavButtons and ButtonNavigations array is not the same.");
 	if (UINavButtons.Num() != ButtonNavigations.Num())
 	{
 		DISPLAYERROR("Dimension of UINavButtons and ButtonNavigations array is not the same.");
@@ -83,6 +80,8 @@ void UUINavWidget::InitialSetup()
 
 	if (bUseTextColor) ChangeTextColorToDefault();
 
+	CurrentPC->bAllowNavigation = true;
+
 	//If this widget doesn't need to create the selector, skip to setup
 	if (!bUseSelector)
 	{
@@ -94,7 +93,6 @@ void UUINavWidget::InitialSetup()
 	{
 		SetupSelector();
 	}
-
 }
 
 void UUINavWidget::ReconfigureSetup()
@@ -128,9 +126,6 @@ void UUINavWidget::CleanSetup()
 void UUINavWidget::FetchButtonsInHierarchy()
 {
 	TraverseHierarquy();
-
-	//check(FirstButtonIndex < UINavButtons.Num() && "Invalid FirstButton index, can't be greater than number of buttons.");
-	//check(FirstButtonIndex > -1 && "Invalid FirstButton index, can't be less than 0.");
 
 	if (FirstButtonIndex >= UINavButtons.Num())
 	{
@@ -239,7 +234,6 @@ void UUINavWidget::ChangeTextColorToDefault()
 
 void UUINavWidget::SetupSelector()
 {
-	//check(TheSelector != nullptr && "Couldn't find TheSelector");
 	if (TheSelector == nullptr)
 	{
 		DISPLAYERROR("Couldn't find TheSelector");
@@ -436,7 +430,7 @@ void UUINavWidget::HandleSelectorMovement(float DeltaTime)
 	{
 		MovementCounter = 0.f;
 		bMovingSelector = false;
-		bAllowNavigation = true;
+		CurrentPC->bAllowNavigation = true;
 		TheSelector->SetRenderTranslation(SelectorDestination);
 		if (HaltedIndex != -1)
 		{
@@ -463,7 +457,6 @@ void UUINavWidget::HandleSelectorMovement(float DeltaTime)
 void UUINavWidget::AppendVerticalNavigation(int Dimension, FButtonNavigation EdgeNavigation, bool bWrap)
 {
 	if (Dimension == -1) Dimension = UINavButtons.Num();
-	//check(Dimension > 0 && "Append Navigation Dimension should be greater than 0");
 	if (Dimension <= 0)
 	{
 		DISPLAYERROR("Append Navigation Dimension should be greater than 0");
@@ -534,7 +527,6 @@ void UUINavWidget::AppendVerticalNavigation(int Dimension, FButtonNavigation Edg
 void UUINavWidget::AppendHorizontalNavigation(int Dimension, FButtonNavigation EdgeNavigation, bool bWrap)
 {
 	if (Dimension == -1) Dimension = UINavButtons.Num();
-	//check(Dimension > 0 && "Append Navigation Dimension should be greater than 0");
 	if (Dimension <= 0)
 	{
 		DISPLAYERROR("Append Navigation Dimension should be greater than 0");
@@ -601,8 +593,6 @@ void UUINavWidget::AppendHorizontalNavigation(int Dimension, FButtonNavigation E
 
 void UUINavWidget::AppendGridNavigation(int DimensionX, int DimensionY, FButtonNavigation EdgeNavigation, bool bWrap)
 {
-	//check(DimensionX > 0 && "Append Navigation Dimension should be greater than 0");
-	//check(DimensionY > 0 && "Append Navigation Dimension should be greater than 0");
 	if (DimensionX <= 0)
 	{
 		DISPLAYERROR("Append Navigation Dimension should be greater than 0");
@@ -755,7 +745,6 @@ void UUINavWidget::SwitchTextColorTo(int Index, FLinearColor Color)
 	if (NewComponentIndex != INDEX_NONE)
 	{
 		NewText = UINavComponents[NewComponentIndex]->NavText;
-		//check(NewText != nullptr && "When bUseTextColor is true, UINavComponent should have a valid TextBlock called NavText.");
 		if (NewText == nullptr)
 		{
 			DISPLAYERROR("When bUseTextColor is true, UINavComponent should have a valid TextBlock called NavText.");
@@ -765,7 +754,6 @@ void UUINavWidget::SwitchTextColorTo(int Index, FLinearColor Color)
 	else
 	{
 		NewText = Cast<UTextBlock>(UINavButtons[Index]->GetChildAt(0));
-		//check(NewText != nullptr && "When bUseTextColor is true, UINavButton should have a TextBlock as its child.");
 		if (NewText == nullptr)
 		{
 			DISPLAYERROR("When bUseTextColor is true, UINavButton should have a TextBlock as its child.");
@@ -805,14 +793,8 @@ void UUINavWidget::SwitchButtonStyle(int Index)
 	TheButton->SetStyle(NewStile);
 }
 
-void UUINavWidget::SetAllowNavigation(bool bAllow)
-{
-	bAllowNavigation = bAllow;
-}
-
 void UUINavWidget::SetSelector(UUserWidget * NewSelector)
 {
-	//check(TheSelector != nullptr && "Received invalid Selector");
 	if (NewSelector == nullptr)
 	{
 		DISPLAYERROR("Received invalid Selector");
@@ -891,7 +873,7 @@ void UUINavWidget::BeginSelectorMovement(int Index)
 	MovementTime = MaxTime - MinTime;
 
 	bMovingSelector = true;
-	bAllowNavigation = false;
+	CurrentPC->bAllowNavigation = false;
 }
 
 void UUINavWidget::OnNavigate_Implementation(int From, int To)
@@ -936,7 +918,6 @@ void UUINavWidget::OnSetupCompleted_Implementation()
 
 UWidget* UUINavWidget::GoToWidget(TSubclassOf<UUINavWidget> NewWidgetClass, bool bRemoveParent)
 {
-	//check(NewWidgetClass != nullptr && "GoToWidget: No Widget Class found");
 	if (NewWidgetClass == nullptr)
 	{
 		DISPLAYERROR("GoToWidget: No Widget Class found");
@@ -1073,7 +1054,7 @@ void UUINavWidget::HoverEvent(int Index)
 		return;
 	}
 
-	if (!bAllowNavigation)
+	if (!CurrentPC->bAllowNavigation)
 	{
 		HaltedIndex = Index;
 		return;
@@ -1116,7 +1097,7 @@ void UUINavWidget::ClickEvent(int Index)
 	{
 		CurrentPC->NotifyMouseInputType();
 
-		if (!bAllowNavigation) return;
+		if (!CurrentPC->bAllowNavigation) return;
 
 		OnPreSelect(Index);
 
@@ -1166,7 +1147,7 @@ void UUINavWidget::NavigateInDirection(ENavigationDirection Direction)
 {
 	if (Direction == ENavigationDirection::None) return;
 
-	if (!bAllowNavigation)
+	if (!CurrentPC->bAllowNavigation)
 	{
 		HaltedIndex = FindNextIndex(Direction);
 		return;
@@ -1184,7 +1165,7 @@ void UUINavWidget::NavigateInDirection(ENavigationDirection Direction)
 
 void UUINavWidget::MenuSelect()
 {
-	if (!bAllowNavigation)
+	if (!CurrentPC->bAllowNavigation)
 	{
 		HaltedIndex = SELECT_INDEX;
 		return;
@@ -1195,7 +1176,7 @@ void UUINavWidget::MenuSelect()
 
 void UUINavWidget::MenuReturn()
 {
-	if (!bAllowNavigation)
+	if (!CurrentPC->bAllowNavigation)
 	{
 		HaltedIndex = RETURN_INDEX;
 		return;
