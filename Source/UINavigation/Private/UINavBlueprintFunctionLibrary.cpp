@@ -3,6 +3,7 @@
 #include "UINavBlueprintFunctionLibrary.h"
 #include "Sound/SoundClass.h"
 #include "GameFramework/GameUserSettings.h"
+#include "UINavSettings.h"
 
 void UUINavBlueprintFunctionLibrary::SetSoundClassVolume(USoundClass * TargetClass, float NewVolume)
 {
@@ -43,4 +44,18 @@ FString UUINavBlueprintFunctionLibrary::GetPostProcessSettings(FString Variable)
 		GScalabilityIni
 	);
 	return ValueReceived;
+}
+
+void UUINavBlueprintFunctionLibrary::ResetInputSettings()
+{
+	UInputSettings* Settings = const_cast<UInputSettings*>(GetDefault<UInputSettings>());
+	UUINavSettings *MySettings = GetMutableDefault<UUINavSettings>();
+	Settings->ActionMappings = MySettings->ActionMappings;
+	Settings->SaveConfig();
+	Settings->ForceRebuildKeymaps();
+}
+
+bool UUINavBlueprintFunctionLibrary::IsGamepadConnected()
+{
+	return FSlateApplication::Get().IsGamepadAttached();
 }
