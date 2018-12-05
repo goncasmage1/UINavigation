@@ -4,6 +4,7 @@
 
 #include "Engine.h"
 #include "GameFramework/PlayerController.h"
+#include "NavigationDirection.h"
 #include "UINavController.generated.h"
 
 UENUM(BlueprintType)
@@ -13,16 +14,6 @@ enum class EInputType : uint8
 	Keyboard UMETA(DisplayName = "Keyboard"),
 	Mouse UMETA(DisplayName = "Mouse"),
 	Gamepad UMETA(DisplayName = "Gamepad")
-};
-
-UENUM(BlueprintType)
-enum class ENavigationDirection : uint8
-{
-	None,
-	Up,
-	Down,
-	Left,
-	Right
 };
 
 UENUM(BlueprintType)
@@ -52,6 +43,9 @@ protected:
 	TMap<FString, TArray<FKey>> KeyMap = TMap<FString, TArray<FKey>>();
 
 	ENavigationDirection Direction = ENavigationDirection::None;
+
+	float PreviousX = -1.f;
+	float PreviousY = -1.f;
 
 	/*
 	Indicates whether navigation will occur periodically after the player
@@ -95,7 +89,6 @@ protected:
 
 	void TimerCallback();
 	void SetTimer(ENavigationDirection Direction);
-	void ClearTimer();
 
 	/**
 	*	Searches all the Input Actions relevant to UINav plugin and saves them in a map
@@ -139,35 +132,17 @@ protected:
 	*/
 	void NotifyInputTypeChange(EInputType NewInputType);
 
-	/**
-	*	Notifies to the active UUINavWidget that the input type changed
-	*
-	*	@param Action The action's name
-	*	@param bPressed Whether the action was pressed or released
-	*/
-	void ExecuteActionByName(FString Action, bool bPressed);
-
-	/**
-	*	Traverses the key map to find the action name associated with the given key
-	*
-	*	@param PressedKey The pressed key
-	*	@param bPressed Whether the action was pressed or released
-	*/
-	void FindActionByKey(FKey PressedKey, bool bPressed);
-
 	virtual void SetupInputComponent() override;
 	virtual void Possess(APawn* InPawn) override;
 	virtual void Tick(float DeltaTime) override;
 
 public:
 
-	/**
-	*	Checks whether a gamepad is connected
-	*
-	*	@return Whether a gamepad is connected
-	*/
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
-		bool IsGamepadConnected();
+	//Indicates whether the player can navigate the widget
+	UPROPERTY(BlueprintReadWrite, Category = UINavWidget)
+		bool bAllowNavigation = true;
+
+	TArray<FString> PressedActions;
 
 	/**
 	*	Notifies the controller that a mouse is being used
@@ -187,6 +162,50 @@ public:
 	*	@param ReleasedKey The released key
 	*/
 	void NotifyKeyReleased(FKey ReleasedKey);
+
+	/**
+	*	Indicates whether the pressed key is associated with the return action
+	*
+	*	@param PressedKey The pressed key
+	*/
+	bool IsReturnKey(FKey PressedKey);
+
+	/**
+	*	Executes a Menu Action by its name
+	*
+	*	@param Action The action's name
+	*	@param bPressed Whether the action was pressed or released
+	*/
+	void ExecuteActionByName(FString Action, bool bPressed);
+
+	/**
+	*	Executes a Menu Action by its key
+	*
+	*	@param PressedKey The given key
+	*	@param bPressed Whether the action was pressed or released
+	*/
+	void ExecuteActionByKey(FKey ActionKey, bool bPressed);
+
+	/**
+	*	Returns the action that contains the given key
+	*
+	*	@param PressedKey The given key
+	*/
+	FString FindActionByKey(FKey ActionKey);
+
+	/**
+	*	Called when an action key is pressed
+	*
+	*	@param ActionName The name of the action
+	*/
+	FReply OnActionPressed(FString ActionName);
+
+	/**
+	*	Called when an action key is released
+	*
+	*	@param ActionName The name of the action
+	*/
+	FReply OnActionReleased(FString ActionName);
 
 	/**
 	*	Changes the widget this PC will communicate with
@@ -240,6 +259,10 @@ public:
 	void MenuUpRelease();
 	void MenuDownRelease();
 	void MenuLeftRelease();
+
+	void MouseInputWorkaround();
+
+	void ClearTimer();
 
 	void StartMenuUp();
 	void StartMenuDown();

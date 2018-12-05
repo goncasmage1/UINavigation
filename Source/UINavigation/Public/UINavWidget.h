@@ -4,7 +4,7 @@
 
 #include "Engine.h"
 #include "Blueprint/UserWidget.h"
-#include "UINavController.h"
+#include "NavigationDirection.h"
 #include "UINavWidget.generated.h"
 
 #define DISPLAYERROR(Text) GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, FString::Printf(TEXT("%s"), *(FString(TEXT("Error in ")).Append(GetName()).Append(TEXT(": ")).Append(Text))));
@@ -29,11 +29,23 @@ enum class ESelectorPosition : uint8
 	Position_Bottom_Left UMETA(DisplayName = "Bottom Left")
 };
 
-
 USTRUCT(BlueprintType)
 struct FButtonNavigation
 {
 	GENERATED_BODY()
+
+	FButtonNavigation()
+	{
+
+	}
+
+	FButtonNavigation(int NewUp, int NewDown, int NewLeft, int NewRight)
+	{
+		UpButton = NewUp;
+		DownButton = NewDown;
+		LeftButton = NewLeft;
+		RightButton = NewRight;
+	}
 	
 	UPROPERTY(BlueprintReadWrite, Category = ButtonNavigation)
 		int UpButton = -1;
@@ -57,7 +69,6 @@ protected:
 	bool bShouldTick = true;
 
 	bool bMovingSelector = false;
-	bool bAllowNavigation = true;
 
 	//Used to track when the selector's position should be updated
 	int WaitForTick;
@@ -65,17 +76,16 @@ protected:
 	//The index of the button that will be navigated to when movement is allowed
 	int HaltedIndex = -1;
 
+	int InputBoxIndex = -1;
+
 	float MovementCounter;
 	float MovementTime;
 
-	FVector2D InitialOffset;
+	FInputActionKeyMapping TempMapping;
 
 	FVector2D SelectorOrigin;
 	FVector2D SelectorDestination;
 	FVector2D Distance;
-
-	TArray<FKey> PressedKeys;
-
 
 	/******************************************************************************/
 
@@ -120,6 +130,8 @@ protected:
 
 public:
 
+	bool bWaitForInput = false;
+
 	//The UserWidget object that will move along the Widget
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget, OptionalWidget = true), Category = UINavWidget)
 		UUserWidget* TheSelector;
@@ -139,13 +151,29 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
 		TArray<class UUINavComponent*> UINavComponents;
 
-	//The indices of all the UINavUINavComponentBoxes in this widget
+	//The indices of all the UINavComponentBoxes in this widget
 	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
 		TArray<int> ComponentBoxIndices;
 
-	//All the UINavUINavComponentBoxes in this Widget
+	//All the UINavComponentBoxes in this Widget
 	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
 		TArray<class UUINavComponentBox*> UINavComponentBoxes;
+
+	//The index of the UINavInputContainer found
+	int InputContainerIndex = -1;
+
+	//The UINavInputContainer in this Widget
+	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
+		class UUINavInputContainer* UINavInputContainer;
+
+	//The starting index of the UINavInputBoxes in this widget
+	int InputBoxStartIndex = -1;
+	//The starting index of the UINavInputBoxes in this widget
+	int InputBoxEndIndex = -1;
+
+	//All the UINavInputBoxes in this Widget
+	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
+		TArray<class UUINavInputBox*> UINavInputBoxes;
 
 	//All the scrollboxes in this widget
 	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
@@ -158,7 +186,7 @@ public:
 	//Indicates whether the Normal and Hovered style of a button were switched
 	TArray<bool> bSwitchedStyle;
 
-	//The index of the button that is currently the focus of navigation
+	//The index of the button that was last navigated upon
 	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
 		int ButtonIndex = 0;
 
@@ -257,9 +285,14 @@ public:
 	*/
 	virtual void NativeTick(const FGeometry & MyGeometry, float DeltaTime) override;
 
-	virtual FReply NativeOnMouseMove(const FGeometry & InGeometry, const FPointerEvent & InMouseEvent);
-	virtual FReply NativeOnKeyDown(const FGeometry & InGeometry, const FKeyEvent & InKeyEvent);
-	virtual FReply NativeOnKeyUp(const FGeometry & InGeometry, const FKeyEvent & InKeyEvent);
+	virtual FReply NativeOnMouseWheel(const FGeometry & InGeometry, const FPointerEvent & InMouseEvent) override;
+	virtual FReply NativeOnKeyDown(const FGeometry & InGeometry, const FKeyEvent & InKeyEvent) override;
+	virtual FReply NativeOnKeyUp(const FGeometry & InGeometry, const FKeyEvent & InKeyEvent) override;
+	virtual FReply NativeOnMouseButtonDown(const FGeometry & InGeometry, const FPointerEvent & InMouseEvent) override;
+	virtual FReply NativeOnMouseButtonUp(const FGeometry & InGeometry, const FPointerEvent & InMouseEvent) override;
+
+	FReply OnKeyPressed(FKey PressedKey);
+	FReply OnKeyReleased(FKey PressedKey);
 
 	/**
 	*	Appends a new array of FButtonNavigations to the already existing navigation graph with the given dimension
@@ -296,11 +329,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = UINavWidget)
 		void AppendGridNavigation(int DimensionX, int DimensionY, FButtonNavigation EdgeNavigation, bool bWrap);
 
-
 	/**
 	*	Called manually to setup all the elements in the Widget
-	*
-	*	@param  FirstButton The index of the button that will be the focus of navigation
 	*/
 	virtual void UINavSetup();
 
@@ -408,6 +438,8 @@ public:
 		void OnSelect(int Index);
 	virtual void OnSelect_Implementation(int Index);
 
+	void OnPreSelect(int Index);
+
 	/**
 	*	Called when ReturnToParent is called (i.e. the player wants to exit the menu)
 	*/
@@ -421,7 +453,6 @@ public:
 	UFUNCTION(BlueprintNativeEvent, Category = UINavWidget)
 		void OnInputChanged(EInputType From, EInputType To);
 	virtual void OnInputChanged_Implementation(EInputType From, EInputType To);
-
 
 	/**
 	*	Called when this widget completed UINavSetup
@@ -454,14 +485,6 @@ public:
 	*	@param	Direction  Direction of navigation
 	*/
 	int FetchIndexByDirection(ENavigationDirection Direction, int Index);
-
-	/**
-	*	Allows or forbids the player from using UINav Input
-	*
-	*	@param bAllow  Whether navigation should be allowed
-	*/
-	UFUNCTION(BlueprintCallable, Category = UINavWidget)
-		void SetAllowNavigation(bool bAllow);
 
 	/**
 	*	Adds given widget to screen (strongly recomended over manual alternative)
@@ -532,6 +555,9 @@ public:
 	*/
 	UFUNCTION(Category = UINavWidget)
 		void ReleaseEvent(int Index);
+
+	void SetupUINavButtonDelegates(class UUINavButton* NewButton);
+	void ProcessMouseKeybind(FKey PressedMouseKey);
 
 	/**
 	*	Notifies this widget to navigate in the specified direction

@@ -36,10 +36,3 @@ Complex menus are manageable:
 ![Example 2.1](/Screens/OptionsMenu_Designer.png)
 
 ![Example 2.2](/Screens/OptionsMenu_Graph.png)
-
-
-### Attribution
-
-All item slots were made by pauliuw (https://opengameart.org/users/pauliuw) under the CC 0 license (Public Domain)).
-
-Font credits located in fonts folder.

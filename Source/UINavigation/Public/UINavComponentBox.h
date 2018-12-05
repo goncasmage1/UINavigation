@@ -58,5 +58,12 @@ public:
 		virtual void NavigateLeft();
 	UFUNCTION(BlueprintCallable, Category = UINavComponentBox)
 		virtual void NavigateRight();
+
+	UFUNCTION(BlueprintNativeEvent, Category = UINavComponentBox)
+		void OnNavigateLeft();
+	void OnNavigateLeft_Implementation();
+	UFUNCTION(BlueprintNativeEvent, Category = UINavComponentBox)
+		void OnNavigateRight();
+	void OnNavigateRight_Implementation();
 	
 };

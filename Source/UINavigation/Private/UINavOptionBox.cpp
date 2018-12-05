@@ -36,6 +36,8 @@ void UUINavOptionBox::NativeConstruct()
 
 void UUINavOptionBox::NavigateRight()
 {
+	Super::NavigateRight();
+
 	//Make sure button still has options left to navigate
 	if (bUseNumberRange)
 	{
