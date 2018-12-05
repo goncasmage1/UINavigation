@@ -893,6 +893,7 @@ void UUINavWidget::OnPreSelect(int Index)
 		InputBoxIndex = Index - InputBoxStartIndex;
 		int InputsPerAction = UINavInputContainer->InputsPerAction;
 		UINavInputBoxes[InputBoxIndex / InputsPerAction]->NotifySelected(InputBoxIndex % InputsPerAction);
+		SetUserFocus(CurrentPC);
 		bWaitForInput = true;
 	}
 	else
