@@ -145,7 +145,6 @@ void AUINavController::FetchUINavActionKeys()
 		if (NewName.Left(4).Compare(TEXT("Menu")) != 0)
 			continue;
 
-		//TODO: Check if KeyMap necessary
 		TArray<FKey>* KeyArray = KeyMap.Find(NewName);
 		if (KeyArray == nullptr)
 		{
@@ -156,7 +155,6 @@ void AUINavController::FetchUINavActionKeys()
 			KeyArray->Add(Action.Key);
 		}
 	}
-
 }
 
 void AUINavController::SetActiveWidget(UUINavWidget* NewWidget)
