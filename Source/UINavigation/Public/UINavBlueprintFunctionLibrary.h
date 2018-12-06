@@ -27,16 +27,12 @@ public:
 	UFUNCTION(BlueprintPure, Category = UINavigationLibrary)
 		static FString GetPostProcessSettings(FString Variable);
 
-	//Resets the input settings to their default state
+	// Resets the input settings to their default state
 	UFUNCTION(BlueprintCallable, Category = UINavInput)
 		static void ResetInputSettings();
 
-	/**
-	*	Checks whether a gamepad is connected
-	*
-	*	@return Whether a gamepad is connected
-	*/
+	// Checks whether a gamepad is connected
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavigationLibrary)
-		bool IsGamepadConnected();
+		static bool IsGamepadConnected();
 	
 };
