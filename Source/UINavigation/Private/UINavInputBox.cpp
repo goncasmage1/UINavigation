@@ -116,6 +116,9 @@ void UUINavInputBox::UpdateActionKey(FInputActionKeyMapping NewAction, int Index
 		InputButtons[Index]->NavText->SetText(GetKeyName(Index));
 	}
 
+	AUINavController* UINavPC = Cast<AUINavController>(GetOwningPlayer());
+	if (UINavPC != nullptr) UINavPC->PressedActions.Empty();
+
 	CheckKeyIcon(Index);
 
 	Settings->SaveConfig();
