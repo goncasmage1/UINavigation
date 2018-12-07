@@ -369,7 +369,7 @@ void AUINavController::OnInputChanged_Implementation(EInputType From, EInputType
 
 }
 
-void AUINavController::OnNavigated_Implementation(ENavigationDirection Direction)
+void AUINavController::OnNavigated_Implementation(ENavigationDirection NewDirection)
 {
 
 }
