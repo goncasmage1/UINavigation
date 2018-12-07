@@ -1,4 +1,4 @@
-// Copyright (C) 2018 Gonçalo Marques - All Rights Reserved
+// Copyright (C) 2018 Gonï¿½alo Marques - All Rights Reserved
 
 using UnrealBuildTool;
 using System.IO;
