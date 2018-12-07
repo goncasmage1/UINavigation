@@ -341,14 +341,12 @@ FReply UUINavWidget::NativeOnKeyDown(const FGeometry & InGeometry, const FKeyEve
 		if (UINavInputContainer->bCanCancelKeybind && CurrentPC->IsReturnKey(PressedKey))
 		{
 			bWaitForInput = false;
-			CurrentPC->PressedActions.Empty();
 			UINavInputBoxes[InputBoxIndex / InputsPerAction]->RevertToActionText(InputBoxIndex % InputsPerAction);
 			return FReply::Handled();
 		}
 		TempMapping.Key = PressedKey;
 		UINavInputBoxes[InputBoxIndex / InputsPerAction]->UpdateActionKey(TempMapping, InputBoxIndex % InputsPerAction);
 		bWaitForInput = false;
-		CurrentPC->PressedActions.Empty();
 	}
 	else
 	{
@@ -1048,7 +1046,6 @@ void UUINavWidget::HoverEvent(int Index)
 	{
 		bWaitForInput = false;
 		UINavInputBoxes[InputBoxIndex / UINavInputContainer->InputsPerAction]->RevertToActionText(InputBoxIndex % UINavInputContainer->InputsPerAction);
-		CurrentPC->PressedActions.Empty();
 	}
 	if (CurrentPC->GetCurrentInputType() != EInputType::Mouse)
 	{
@@ -1071,7 +1068,6 @@ void UUINavWidget::UnhoverEvent(int Index)
 	{
 		bWaitForInput = false;
 		UINavInputBoxes[InputBoxIndex / UINavInputContainer->InputsPerAction]->RevertToActionText(InputBoxIndex % UINavInputContainer->InputsPerAction);
-		CurrentPC->PressedActions.Empty();
 	}
 
 	if (bUseButtonStates)
@@ -1143,7 +1139,6 @@ void UUINavWidget::ProcessMouseKeybind(FKey PressedMouseKey)
 	UINavInputBoxes[InputBoxIndex / InputsPerAction]->UpdateActionKey(TempMapping, InputBoxIndex % InputsPerAction);
 	TempMapping.bShift = TempMapping.bCtrl = TempMapping.bAlt = TempMapping.bCmd = false;
 	bWaitForInput = false;
-	CurrentPC->PressedActions.Empty();
 }
 
 void UUINavWidget::NavigateInDirection(ENavigationDirection Direction)
