@@ -1059,6 +1059,7 @@ void UUINavWidget::HoverEvent(int Index)
 		return;
 	}
 
+	CurrentPC->ClearTimer();
 	NavigateTo(Index, true);
 }
 
