@@ -80,7 +80,7 @@ void UUINavWidget::InitialSetup()
 
 	if (bUseTextColor) ChangeTextColorToDefault();
 
-	CurrentPC->bAllowNavigation = true;
+	if (CurrentPC != nullptr) CurrentPC->bAllowNavigation = true;
 
 	//If this widget doesn't need to create the selector, skip to setup
 	if (!bUseSelector)
@@ -266,7 +266,7 @@ void UUINavWidget::UINavSetup()
 		ReturnedFromWidget = nullptr;
 	}
 
-	CurrentPC->SetActiveWidget(this);
+	if (CurrentPC != nullptr) CurrentPC->SetActiveWidget(this);
 
 	if (bUseSelector)
 	{
@@ -1059,6 +1059,7 @@ void UUINavWidget::HoverEvent(int Index)
 		return;
 	}
 
+	CurrentPC->ClearTimer();
 	NavigateTo(Index, true);
 }
 
