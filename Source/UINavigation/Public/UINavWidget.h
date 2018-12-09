@@ -461,13 +461,6 @@ public:
 		void OnSetupCompleted();
 	virtual void OnSetupCompleted_Implementation();
 
-
-	/**
-	*	Handles navigation according to direction
-	*
-	*	@param	Direction  Direction of navigation
-	*/
-	UFUNCTION(BlueprintCallable, Category = UINavWidget)
 	virtual void MenuNavigate(ENavigationDirection Direction);
 
 	/**
