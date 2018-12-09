@@ -202,7 +202,7 @@ public:
 		TSubclassOf<UUINavWidget> ParentWidgetClass;
 
 	//Current player controller
-	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
+	UPROPERTY(BlueprintReadWrite, Category = UINavWidget)
 		class AUINavController* CurrentPC;
 
 	//Widget that created this widget (if returned from a child)
@@ -461,13 +461,6 @@ public:
 		void OnSetupCompleted();
 	virtual void OnSetupCompleted_Implementation();
 
-
-	/**
-	*	Handles navigation according to direction
-	*
-	*	@param	Direction  Direction of navigation
-	*/
-	UFUNCTION(BlueprintCallable, Category = UINavWidget)
 	virtual void MenuNavigate(ENavigationDirection Direction);
 
 	/**

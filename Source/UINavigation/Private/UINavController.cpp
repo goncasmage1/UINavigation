@@ -351,7 +351,6 @@ void AUINavController::NotifyMouseInputType()
 
 void AUINavController::NotifyInputTypeChange(EInputType NewInputType)
 {
-	ClearTimer();
 	if (bReceiveInputChangeEvents) OnInputChanged(CurrentInputType, NewInputType);
 
 	if (ActiveWidget != nullptr) ActiveWidget->OnInputChanged(CurrentInputType, NewInputType);
