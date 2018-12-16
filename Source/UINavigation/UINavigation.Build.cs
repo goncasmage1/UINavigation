@@ -1,4 +1,4 @@
-// Copyright (C) 2018 Gon�alo Marques - All Rights Reserved
+// Copyright (C) 2018 Gonçalo Marques - All Rights Reserved
 
 using UnrealBuildTool;
 using System.IO;
@@ -7,7 +7,7 @@ public class UINavigation : ModuleRules
 {
 	public UINavigation(ReadOnlyTargetRules Target) : base(Target)
 	{
-        PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
+        PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
         PublicIncludePaths.Add(Path.Combine(ModuleDirectory, "Public"));
         PrivateIncludePaths.Add(Path.Combine(ModuleDirectory, "Private"));

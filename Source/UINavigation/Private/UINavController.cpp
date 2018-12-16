@@ -1,4 +1,4 @@
-// Copyright (C) 2018 Gon�alo Marques - All Rights Reserved
+// Copyright (C) 2018 Gonçalo Marques - All Rights Reserved
 
 #include "UINavController.h"
 #include "UINavWidget.h"
