@@ -40,22 +40,22 @@ public:
 
 	bool ContainsKey(FKey CompareKey) const;
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "UINav Input")
 		TSubclassOf<class UUINavInputComponent> InputButton_BP;
 
 	TArray<class UUINavInputComponent*> InputButtons;
 
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget), Category = "UINav Input")
 		class UUINavInputComponent* InputButton1;
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget), Category = "UINav Input")
 		class UUINavInputComponent* InputButton2;
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget), Category = "UINav Input")
 		class UUINavInputComponent* InputButton3;
 
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget), Category = "UINav Input")
 		class UTextBlock* ActionText;
 
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget), Category = "UINav Input")
 		class UHorizontalBox* HorizontalBox;
 
 	class UUINavInputContainer* Container;
