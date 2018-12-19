@@ -16,7 +16,7 @@ class UINAVIGATION_API UUINavInputComponent : public UUINavComponent
 
 public:
 
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget), Category = "UINav Input")
 		class UImage* InputImage;
 
 };
