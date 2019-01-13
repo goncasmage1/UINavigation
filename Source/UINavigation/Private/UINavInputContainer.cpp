@@ -89,11 +89,11 @@ void UUINavInputContainer::CreateInputBoxes()
 			ParentWidget->UINavComponentsIndices.Add(NewButtonIndex);
 			if (!ParentWidget->bOverrideButtonIndices)
 			{
-				NewInputBox->InputButtons[j]->NavButton->ButtonIndex = FirstButtonIndex + i * InputsPerAction + j;
+				NewInputBox->InputButtons[j]->NavButton->ButtonIndex = FirstButtonIndex + (bUseActionNames ? i : (FoundActions.Num() - 1)) * InputsPerAction + j;
 			}
 			ParentWidget->SetupUINavButtonDelegates(NewInputBox->InputButtons[j]->NavButton);
 		}
-	}
+	} 
 
 	LastButtonIndex = ParentWidget->UINavButtons.Num() - 1;
 
