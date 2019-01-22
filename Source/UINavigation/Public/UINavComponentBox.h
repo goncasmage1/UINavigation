@@ -53,6 +53,9 @@ public:
 	//If set to true, will disable buttons if the slider runs out of options on either side
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavComponentBox)
 		bool bDisableButtons = true;
+
+	UFUNCTION(BlueprintPure, BlueprintCallable, Category = UINavComponentBox)
+		FORCEINLINE int GetCurrentNumber() const { return (MinRange + OptionIndex * Interval); }
 	
 	UFUNCTION(BlueprintCallable, Category = UINavComponentBox)
 		virtual void NavigateLeft();
