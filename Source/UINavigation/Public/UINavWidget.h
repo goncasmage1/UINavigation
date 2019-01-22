@@ -65,6 +65,7 @@ class UINAVIGATION_API UUINavWidget : public UUserWidget
 protected:
 
 	bool bCompletedSetup = false;
+	bool bSetupStarted = false;
 
 	bool bShouldTick = true;
 
@@ -453,6 +454,13 @@ public:
 	UFUNCTION(BlueprintNativeEvent, Category = UINavWidget)
 		void OnInputChanged(EInputType From, EInputType To);
 	virtual void OnInputChanged_Implementation(EInputType From, EInputType To);
+
+	/**
+	*	Called before this widget is setup for UINav logic
+	*/
+	UFUNCTION(BlueprintNativeEvent, Category = UINavWidget)
+		void PreSetup();
+	virtual void PreSetup_Implementation();
 
 	/**
 	*	Called when this widget completed UINavSetup

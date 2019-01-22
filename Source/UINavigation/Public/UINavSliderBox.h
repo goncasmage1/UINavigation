@@ -29,7 +29,7 @@ public:
 
 	virtual void NavigateRight() override;
 
-	UFUNCTION(BlueprintCallable, Category = UINavSliderBox)
+	UFUNCTION(BlueprintPure, BlueprintCallable, Category = UINavSliderBox)
 		float GetSliderPercent() const;
 	
 };
