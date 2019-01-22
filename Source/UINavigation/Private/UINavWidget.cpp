@@ -22,7 +22,26 @@ void UUINavWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	InitialSetup();
+	/*
+	If this widget was added through a parent widget and should remove it from the viewport,
+	remove that widget from viewport
+	*/
+	if (ParentWidget != nullptr && ParentWidget->IsInViewport() && bParentRemoved)
+	{
+		ParentWidget->RemoveFromParent();
+	}
+
+	//If this widget was added through a child widget, destroy it
+	if (ReturnedFromWidget != nullptr)
+	{
+		if (ReturnedFromWidget != nullptr)
+		{
+			ReturnedFromWidget->Destruct();
+		}
+		ReturnedFromWidget = nullptr;
+	}
+
+	PreSetup();
 }
 
 void UUINavWidget::InitialSetup()
@@ -34,6 +53,7 @@ void UUINavWidget::InitialSetup()
 		return;
 	}
 
+	bSetupStarted = true;
 	bIsFocusable = true;
 	WidgetClass = GetClass();
 	if (CurrentPC == nullptr)
@@ -52,15 +72,6 @@ void UUINavWidget::InitialSetup()
 		{
 			DISPLAYERROR("UseMovementCurve is true but MoveCurve is null");
 		}
-	}
-
-	/*
-	If this widget was added through a parent widget and should remove it from the viewport,
-	remove that widget from viewport
-	*/
-	if (ParentWidget != nullptr && ParentWidget->IsInViewport() && bParentRemoved)
-	{
-		ParentWidget->RemoveFromParent();
 	}
 
 	FetchButtonsInHierarchy();
@@ -97,6 +108,8 @@ void UUINavWidget::InitialSetup()
 
 void UUINavWidget::ReconfigureSetup()
 {
+	bSetupStarted = true;
+
 	if (bUseTextColor) ChangeTextColorToDefault();
 
 	//If this widget doesn't need to create the selector, skip to setup
@@ -121,6 +134,7 @@ void UUINavWidget::CleanSetup()
 	{
 		button->SetIsEnabled(false);
 	}
+	bSetupStarted = false;
 }
 
 void UUINavWidget::FetchButtonsInHierarchy()
@@ -256,16 +270,6 @@ void UUINavWidget::UINavSetup()
 		button->SetIsEnabled(true);
 	}
 
-	//If this widget was added through a child widget, destroy it
-	if (ReturnedFromWidget != nullptr)
-	{
-		if (ReturnedFromWidget != nullptr)
-		{
-			ReturnedFromWidget->Destruct();
-		}
-		ReturnedFromWidget = nullptr;
-	}
-
 	if (CurrentPC != nullptr) CurrentPC->SetActiveWidget(this);
 
 	if (bUseSelector)
@@ -292,7 +296,7 @@ void UUINavWidget::NativeTick(const FGeometry & MyGeometry, float DeltaTime)
 {
 	Super::NativeTick(MyGeometry, DeltaTime);
 
-	if (!bUseSelector) return;
+	if (!bUseSelector || !bSetupStarted) return;
 
 	if (bMovingSelector)
 	{
@@ -908,6 +912,11 @@ void UUINavWidget::OnReturn_Implementation()
 void UUINavWidget::OnInputChanged_Implementation(EInputType From, EInputType To)
 {
 
+}
+
+void UUINavWidget::PreSetup_Implementation()
+{
+	InitialSetup();
 }
 
 void UUINavWidget::OnSetupCompleted_Implementation()
