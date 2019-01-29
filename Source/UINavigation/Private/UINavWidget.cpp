@@ -159,6 +159,8 @@ void UUINavWidget::FetchButtonsInHierarchy()
 		!UINavButtons[ButtonIndex]->bIsEnabled)
 	{
 		ButtonIndex++;
+		if (ButtonIndex >= UINavButtons.Num()) ButtonIndex = 0;
+		if (ButtonIndex == FirstButtonIndex) break;
 	}
 }
 
@@ -994,6 +996,8 @@ int UUINavWidget::FindNextIndex(ENavigationDirection Direction)
 		!UINavButtons[NewIndex]->bIsEnabled)
 	{
 		NewIndex = FetchIndexByDirection(Direction, NewIndex);
+		if (NewIndex >= UINavButtons.Num()) NewIndex = 0;
+		if (NewIndex == ButtonIndex) return -1;
 	}
 	return NewIndex;
 }
