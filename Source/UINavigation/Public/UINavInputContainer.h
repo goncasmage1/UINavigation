@@ -54,6 +54,7 @@ class UINAVIGATION_API UUINavInputContainer : public UUserWidget
 protected:
 
 	void CreateInputBoxes();
+	void CreateBoxes(bool bUseAxis);
 
 	//-----------------------------------------------------------------------
 
@@ -61,14 +62,14 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Input")
 		ETargetColumn TargetColumn = ETargetColumn::Left;
 
-	/*
-	The desired InputBox widget blueprint
-	*/
 	UPROPERTY(EditDefaultsOnly, Category = "UINav Input")
 		TSubclassOf<class UUINavInputBox> InputBox_BP;
 
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget), Category = "UINav Input")
-		class UPanelWidget* Panel;
+		class UPanelWidget* ActionPanel;
+
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget), Category = "UINav Input")
+		class UPanelWidget* AxisPanel;
 	
 	class UUINavWidget* ParentWidget;
 
@@ -129,6 +130,17 @@ public:
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Input")
 		TArray<FName> ActionNames;
+
+	/*
+	The names of the desired axes to allow for rebinding
+	Can be left empty if all axes are to be rebindable
+	*/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Input")
+		TArray<FName> AxisNames;
+
+	//The name used for empty key buttons
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Input")
+		FName EmptyKeyName = FName("Unbound");
 
 	/*
 	The restrictions for the type of input associated with each column

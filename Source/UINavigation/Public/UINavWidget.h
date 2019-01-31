@@ -16,6 +16,14 @@
 */
 
 UENUM(BlueprintType)
+enum class EReceiveInputType : uint8
+{
+	None UMETA(DisplayName = "None"),
+	Action UMETA(DisplayName = "Action"),
+	Axis UMETA(DisplayName = "Axis")
+};
+
+UENUM(BlueprintType)
 enum class ESelectorPosition : uint8
 {
 	Position_Center UMETA(DisplayName = "Center"),
@@ -133,6 +141,8 @@ public:
 
 	bool bWaitForInput = false;
 
+	EReceiveInputType ReceiveInputType = EReceiveInputType::None;
+
 	//The UserWidget object that will move along the Widget
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget, OptionalWidget = true), Category = UINavWidget)
 		UUserWidget* TheSelector;
@@ -145,6 +155,7 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
 		TArray<class UUINavButton*> UINavButtons;
 
+	//The indices of all the UINavComponents in this widget
 	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
 		TArray<int> UINavComponentsIndices;
 

@@ -339,7 +339,7 @@ FReply UUINavWidget::NativeOnKeyDown(const FGeometry & InGeometry, const FKeyEve
 {
 	Super::NativeOnKeyDown(InGeometry, InKeyEvent);
 
-	if (bWaitForInput)
+	if (ReceiveInputType != EReceiveInputType::None)
 	{
 		int InputsPerAction = UINavInputContainer->InputsPerAction;
 		FKey PressedKey = InKeyEvent.GetKey();
@@ -350,9 +350,18 @@ FReply UUINavWidget::NativeOnKeyDown(const FGeometry & InGeometry, const FKeyEve
 			UINavInputBoxes[InputBoxIndex / InputsPerAction]->RevertToActionText(InputBoxIndex % InputsPerAction);
 			return FReply::Handled();
 		}
-		TempMapping.Key = PressedKey;
-		UINavInputBoxes[InputBoxIndex / InputsPerAction]->UpdateActionKey(TempMapping, InputBoxIndex % InputsPerAction);
-		bWaitForInput = false;
+
+		switch (ReceiveInputType)
+		{
+			case EReceiveInputType::Action:
+				//PressedKey.IsFloatAxis();
+				TempMapping.Key = PressedKey;
+				UINavInputBoxes[InputBoxIndex / InputsPerAction]->UpdateInputKey(TempMapping, InputBoxIndex % InputsPerAction);
+				bWaitForInput = false;
+				break;
+			case EReceiveInputType::Axis:
+				break;
+		}
 	}
 	else
 	{
@@ -1150,7 +1159,7 @@ void UUINavWidget::ProcessMouseKeybind(FKey PressedMouseKey)
 	int InputsPerAction = UINavInputContainer->InputsPerAction;
 
 	TempMapping.Key = PressedMouseKey;
-	UINavInputBoxes[InputBoxIndex / InputsPerAction]->UpdateActionKey(TempMapping, InputBoxIndex % InputsPerAction);
+	UINavInputBoxes[InputBoxIndex / InputsPerAction]->UpdateInputKey(TempMapping, InputBoxIndex % InputsPerAction);
 	TempMapping.bShift = TempMapping.bCtrl = TempMapping.bAlt = TempMapping.bCmd = false;
 	bWaitForInput = false;
 }

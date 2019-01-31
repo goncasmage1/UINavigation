@@ -24,16 +24,18 @@ void UUINavInputBox::BuildKeyMappings()
 {
 	const UInputSettings* Settings = GetDefault<UInputSettings>();
 	TArray<FInputActionKeyMapping> TempActions;
+	TArray<FInputAxisKeyMapping> TempAxes;
 
-	ActionText->SetText(FText::FromString(ActionName));
+	InputText->SetText(FText::FromString(InputName));
 
-	Settings->GetActionMappingByName(FName(*ActionName), TempActions);
+	if (bIsAxis) Settings->GetAxisMappingByName(FName(*InputName), TempAxes);
+	else Settings->GetActionMappingByName(FName(*InputName), TempActions);
 
 	AUINavController* PC = Cast<AUINavController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
 
-	if (TempActions.Num() == 0)
+	if ((bIsAxis && TempAxes.Num() == 0) || !bIsAxis && TempActions.Num() == 0)
 	{
-		DISPLAYERROR(TEXT("Couldn't find Action with given name."));
+		DISPLAYERROR(TEXT("Couldn't find Input with given name."));
 		return;
 	}
 
@@ -44,10 +46,9 @@ void UUINavInputBox::BuildKeyMappings()
 
 		if (i < InputsPerAction)
 		{
-			if (i < TempActions.Num())
+			if ((bIsAxis && i < TempAxes.Num()) || (!bIsAxis && i < TempActions.Num()))
 			{
-				FInputActionKeyMapping NewAction = TempActions[TempActions.Num() - 1 - i];
-				Keys.Add(NewAction.Key);
+				Keys.Add(bIsAxis ? TempAxes[TempAxes.Num() - 1 - i].Key : TempActions[TempActions.Num() - 1 - i].Key);
 
 				if (UpdateKeyIconForKey(i))
 				{
@@ -59,7 +60,7 @@ void UUINavInputBox::BuildKeyMappings()
 			}
 			else
 			{
-				NewInputButton->NavText->SetText(FText::FromName(FName(TEXT("Unbound"))));
+				NewInputButton->NavText->SetText(FText::FromName(Container->EmptyKeyName));
 				NewInputButton->InputImage->SetVisibility(ESlateVisibility::Collapsed);
 				NewInputButton->NavText->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
 				Keys.Add(FKey());
@@ -79,7 +80,7 @@ void UUINavInputBox::ResetKeyMappings()
 	BuildKeyMappings();
 }
 
-void UUINavInputBox::UpdateActionKey(FInputActionKeyMapping NewAction, int Index)
+void UUINavInputBox::UpdateInputKey(FInputActionKeyMapping NewAction, int Index)
 {
 	if (!ShouldRegisterKey(NewAction.Key, Index))
 	{
@@ -89,16 +90,18 @@ void UUINavInputBox::UpdateActionKey(FInputActionKeyMapping NewAction, int Index
 
 	UInputSettings* Settings = const_cast<UInputSettings*>(GetDefault<UInputSettings>());
 	TArray<FInputActionKeyMapping>& Actions = Settings->ActionMappings;
+	TArray<FInputAxisKeyMapping>& Axes = Settings->AxisMappings;
 
 	int Found = 0;
 	bool bFound = false;
 	for (int i = 0; i < Actions.Num(); i++)
 	{
-		if (Actions[i].ActionName.IsEqual(FName(*ActionName)))
+		if ((bIsAxis && Axes[i].AxisName.IsEqual(FName(*InputName))) || (!bIsAxis && Actions[i].ActionName.IsEqual(FName(*InputName))))
 		{
 			if (Found == Index && Container->RespectsRestriction(NewAction.Key, Index))
 			{
-				Actions[i].Key = NewAction.Key;
+				if (bIsAxis) Axes[i].Key = NewAction.Key;
+				else Actions[i].Key = NewAction.Key;
 				Keys[Index] = NewAction.Key;
 				InputButtons[Index]->NavText->SetText(GetKeyName(Index));
 				bFound = true;
@@ -109,11 +112,23 @@ void UUINavInputBox::UpdateActionKey(FInputActionKeyMapping NewAction, int Index
 	}
 	if (!bFound)
 	{
-		FInputActionKeyMapping Action = NewAction;
-		Action.ActionName = FName(*ActionName);
-		Settings->AddActionMapping(Action, true);
-		Keys[Index] = NewAction.Key;
-		InputButtons[Index]->NavText->SetText(GetKeyName(Index));
+		if (bIsAxis)
+		{
+			FInputAxisKeyMapping Axis;
+			Axis.Key = NewAction.Key;
+			Axis.AxisName = FName(*InputName);
+			Settings->AddAxisMapping(Axis, true);
+			Keys[Index] = NewAction.Key;
+			InputButtons[Index]->NavText->SetText(GetKeyName(Index));
+		}
+		else
+		{
+			FInputActionKeyMapping Action = NewAction;
+			Action.ActionName = FName(*InputName);
+			Settings->AddActionMapping(Action, true);
+			Keys[Index] = NewAction.Key;
+			InputButtons[Index]->NavText->SetText(GetKeyName(Index));
+		}
 	}
 
 	AUINavController* UINavPC = Cast<AUINavController>(GetOwningPlayer());
@@ -206,7 +221,7 @@ void UUINavInputBox::RevertToActionText(int Index)
 	}
 	else
 	{
-		OldName = FText::FromName(FName(TEXT("Unbound")));
+		OldName = FText::FromName(Container->EmptyKeyName);
 	}
 
 	InputButtons[Index]->NavText->SetText(OldName);
