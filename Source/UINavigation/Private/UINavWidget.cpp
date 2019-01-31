@@ -344,24 +344,18 @@ FReply UUINavWidget::NativeOnKeyDown(const FGeometry & InGeometry, const FKeyEve
 		int InputsPerAction = UINavInputContainer->InputsPerAction;
 		FKey PressedKey = InKeyEvent.GetKey();
 
-		if (UINavInputContainer->bCanCancelKeybind && CurrentPC->IsReturnKey(PressedKey))
+		if ((ReceiveInputType == EReceiveInputType::Axis && !PressedKey.IsFloatAxis()) || 
+			(UINavInputContainer->bCanCancelKeybind && CurrentPC->IsReturnKey(PressedKey)))
 		{
-			bWaitForInput = false;
-			UINavInputBoxes[InputBoxIndex / InputsPerAction]->RevertToActionText(InputBoxIndex % InputsPerAction);
+			CancelRebind();
 			return FReply::Handled();
 		}
 
-		switch (ReceiveInputType)
-		{
-			case EReceiveInputType::Action:
-				//PressedKey.IsFloatAxis();
-				TempMapping.Key = PressedKey;
-				UINavInputBoxes[InputBoxIndex / InputsPerAction]->UpdateInputKey(TempMapping, InputBoxIndex % InputsPerAction);
-				bWaitForInput = false;
-				break;
-			case EReceiveInputType::Axis:
-				break;
-		}
+		TempMapping.Key = PressedKey;
+		UINavInputBoxes[InputBoxIndex / InputsPerAction]->UpdateInputKey(TempMapping, InputBoxIndex % InputsPerAction);
+		bWaitForInput = false;
+
+		ReceiveInputType = EReceiveInputType::None;
 	}
 	else
 	{
@@ -391,7 +385,11 @@ FReply UUINavWidget::NativeOnMouseButtonDown(const FGeometry & InGeometry, const
 
 	if (bWaitForInput)
 	{
-		if (!InMouseEvent.GetEffectingButton().IsMouseButton()) return FReply::Handled();
+		if (ReceiveInputType == EReceiveInputType::Axis)
+		{
+			CancelRebind();
+			return FReply::Handled();
+		}
 		ProcessMouseKeybind(InMouseEvent.GetEffectingButton());
 	}
 	else
@@ -906,6 +904,7 @@ void UUINavWidget::OnPreSelect(int Index)
 		InputBoxIndex = Index - UINavInputContainer->FirstButtonIndex;
 		int InputsPerAction = UINavInputContainer->InputsPerAction;
 		UINavInputBoxes[InputBoxIndex / InputsPerAction]->NotifySelected(InputBoxIndex % InputsPerAction);
+		ReceiveInputType = UINavInputBoxes[InputBoxIndex / InputsPerAction]->bIsAxis ? EReceiveInputType::Axis : EReceiveInputType::Action;
 		SetUserFocus(CurrentPC);
 		bWaitForInput = true;
 	}
@@ -1113,7 +1112,8 @@ void UUINavWidget::ClickEvent(int Index)
 {
 	if (bWaitForInput)
 	{
-		ProcessMouseKeybind(FKey(EKeys::LeftMouseButton));
+		if (ReceiveInputType == EReceiveInputType::Axis) CancelRebind();
+		else ProcessMouseKeybind(FKey(EKeys::LeftMouseButton));
 	}
 	else
 	{
@@ -1162,6 +1162,13 @@ void UUINavWidget::ProcessMouseKeybind(FKey PressedMouseKey)
 	UINavInputBoxes[InputBoxIndex / InputsPerAction]->UpdateInputKey(TempMapping, InputBoxIndex % InputsPerAction);
 	TempMapping.bShift = TempMapping.bCtrl = TempMapping.bAlt = TempMapping.bCmd = false;
 	bWaitForInput = false;
+}
+
+void UUINavWidget::CancelRebind()
+{
+	bWaitForInput = false;
+	UINavInputBoxes[InputBoxIndex / UINavInputContainer->InputsPerAction]->RevertToActionText(InputBoxIndex % UINavInputContainer->InputsPerAction);
+	ReceiveInputType = EReceiveInputType::None;
 }
 
 void UUINavWidget::NavigateInDirection(ENavigationDirection Direction)

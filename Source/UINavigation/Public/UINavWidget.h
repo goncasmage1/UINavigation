@@ -565,6 +565,7 @@ public:
 
 	void SetupUINavButtonDelegates(class UUINavButton* NewButton);
 	void ProcessMouseKeybind(FKey PressedMouseKey);
+	void CancelRebind();
 
 	/**
 	*	Notifies this widget to navigate in the specified direction
