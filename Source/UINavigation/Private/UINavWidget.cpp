@@ -903,7 +903,7 @@ void UUINavWidget::OnPreSelect(int Index)
 {
 	if (UINavInputContainer != nullptr && Index >= UINavInputContainer->FirstButtonIndex && Index <= UINavInputContainer->LastButtonIndex)
 	{
-		InputBoxIndex = Index - InputBoxStartIndex;
+		InputBoxIndex = Index - UINavInputContainer->FirstButtonIndex;
 		int InputsPerAction = UINavInputContainer->InputsPerAction;
 		UINavInputBoxes[InputBoxIndex / InputsPerAction]->NotifySelected(InputBoxIndex % InputsPerAction);
 		SetUserFocus(CurrentPC);

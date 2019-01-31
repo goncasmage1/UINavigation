@@ -79,7 +79,6 @@ void UUINavInputContainer::CreateBoxes(bool bUseAxis)
 	bool bUseInputNames = (bUseAxis && AxisNames.Num() > 0) || (!bUseAxis && ActionNames.Num() > 0);
 	int Iterations = bUseInputNames ? (bUseAxis ? AxisNames.Num() : ActionNames.Num()) : (bUseAxis ? Axes.Num() : Actions.Num());
 
-	ParentWidget->InputBoxStartIndex = ParentWidget->UINavButtons.Num();
 	for (int i = 0; i < Iterations; ++i)
 	{
 		if (!bUseInputNames)

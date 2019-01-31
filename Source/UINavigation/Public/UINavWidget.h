@@ -178,11 +178,6 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
 		class UUINavInputContainer* UINavInputContainer;
 
-	//The starting index of the UINavInputBoxes in this widget
-	int InputBoxStartIndex = -1;
-	//The starting index of the UINavInputBoxes in this widget
-	int InputBoxEndIndex = -1;
-
 	//All the UINavInputBoxes in this Widget
 	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
 		TArray<class UUINavInputBox*> UINavInputBoxes;
