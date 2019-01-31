@@ -40,12 +40,10 @@ void UUINavInputContainer::CreateInputBoxes()
 {
 	if (InputBox_BP == nullptr) return;
 
-	ActionPanel->ClearChildren();
-
 	FirstButtonIndex = ParentWidget->UINavButtons.Num();
 
-	CreateBoxes(false);
-	CreateBoxes(true);
+	CreateActionBoxes();
+	CreateAxisBoxes();
 
 	LastButtonIndex = ParentWidget->UINavButtons.Num() - 1;
 
@@ -62,51 +60,102 @@ void UUINavInputContainer::CreateInputBoxes()
 	}
 }
 
-void UUINavInputContainer::CreateBoxes(bool bUseAxis)
+void UUINavInputContainer::CreateActionBoxes()
 {
 	AUINavController* PC = Cast<AUINavController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
 
 	UInputSettings* Settings = const_cast<UInputSettings*>(GetDefault<UInputSettings>());
 	TArray<FInputActionKeyMapping>& Actions = Settings->ActionMappings;
-	TArray<FInputAxisKeyMapping>& Axes = Settings->AxisMappings;
 	TArray<FName> FoundInputs;
 
-	if ((bUseAxis && Axes.Num() == 0) || (!bUseAxis && Actions.Num() == 0)) return;
+	if (Actions.Num() == 0) return;
 
 	int TempFirstButtonIndex = ParentWidget->UINavButtons.Num();
 	int StartingInputComponentIndex = ParentWidget->UINavComponents.Num();
 
-	bool bUseInputNames = (bUseAxis && AxisNames.Num() > 0) || (!bUseAxis && ActionNames.Num() > 0);
-	int Iterations = bUseInputNames ? (bUseAxis ? AxisNames.Num() : ActionNames.Num()) : (bUseAxis ? Axes.Num() : Actions.Num());
+	bool bUseInputNames = ActionNames.Num() > 0;
+	int Iterations = bUseInputNames ? ActionNames.Num() : Actions.Num();
 
 	for (int i = 0; i < Iterations; ++i)
 	{
 		if (!bUseInputNames)
 		{
-			if (FoundInputs.Contains(bUseAxis ? Axes[i].AxisName : Actions[i].ActionName)) continue;
-			else FoundInputs.Add(bUseAxis ? Axes[i].AxisName : Actions[i].ActionName);
+			if (FoundInputs.Contains(Actions[i].ActionName)) continue;
+			else FoundInputs.Add(Actions[i].ActionName);
 		}
-		for (int k = 0; k < InputsPerAction; k++)
-		{
-			ParentWidget->UINavButtons.Add(nullptr);
-			ParentWidget->UINavComponents.Add(nullptr);
-		}
+
 		UUINavInputBox* NewInputBox = CreateWidget<UUINavInputBox>(PC, InputBox_BP);
 		if (NewInputBox == nullptr) continue;
-
 		NewInputBox->Container = this;
-		NewInputBox->bIsAxis = bUseAxis;
+		NewInputBox->bIsAxis = false;
 		NewInputBox->InputsPerAction = InputsPerAction;
-		NewInputBox->InputName = bUseInputNames ? (bUseAxis ? AxisNames[i].ToString() : ActionNames[i].ToString()) : (bUseAxis ? Axes[i].AxisName.ToString() : Actions[i].ActionName.ToString());
-		
-		if (bUseAxis) AxisPanel->AddChild(NewInputBox);
-		else ActionPanel->AddChild(NewInputBox);
+		NewInputBox->InputName = bUseInputNames ? ActionNames[i].ToString() : Actions[i].ActionName.ToString();
+
+		ActionPanel->AddChild(NewInputBox);
 
 		ParentWidget->UINavInputBoxes.Add(NewInputBox);
-		NumberOfActions++;
+		NumberOfInputs++;
 
 		for (int j = 0; j < InputsPerAction; j++)
 		{
+			ParentWidget->UINavButtons.Add(nullptr);
+			ParentWidget->UINavComponents.Add(nullptr);
+
+			int NewButtonIndex = TempFirstButtonIndex + (bUseInputNames ? i : FoundInputs.Num() - 1) * InputsPerAction + j;
+			int NewComponentIndex = StartingInputComponentIndex + (bUseInputNames ? i : FoundInputs.Num() - 1) * InputsPerAction + j;
+			ParentWidget->UINavButtons[NewButtonIndex] = NewInputBox->InputButtons[j]->NavButton;
+			ParentWidget->UINavComponents[NewComponentIndex] = NewInputBox->InputButtons[j];
+			ParentWidget->UINavComponentsIndices.Add(NewButtonIndex);
+			if (!ParentWidget->bOverrideButtonIndices)
+			{
+				NewInputBox->InputButtons[j]->NavButton->ButtonIndex = TempFirstButtonIndex + (bUseInputNames ? i : (FoundInputs.Num() - 1)) * InputsPerAction + j;
+			}
+			ParentWidget->SetupUINavButtonDelegates(NewInputBox->InputButtons[j]->NavButton);
+		}
+	} 
+}
+
+void UUINavInputContainer::CreateAxisBoxes()
+{
+	AUINavController* PC = Cast<AUINavController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
+
+	UInputSettings* Settings = const_cast<UInputSettings*>(GetDefault<UInputSettings>());
+	TArray<FInputAxisKeyMapping>& Axes = Settings->AxisMappings;
+	TArray<FName> FoundInputs;
+
+	if (Axes.Num() == 0) return;
+
+	int TempFirstButtonIndex = ParentWidget->UINavButtons.Num();
+	int StartingInputComponentIndex = ParentWidget->UINavComponents.Num();
+
+	bool bUseInputNames = AxisNames.Num() > 0;
+	int Iterations = bUseInputNames ? AxisNames.Num() : Axes.Num();
+
+	for (int i = 0; i < Iterations; ++i)
+	{
+		if (!bUseInputNames)
+		{
+			if (FoundInputs.Contains(Axes[i].AxisName)) continue;
+			else FoundInputs.Add(Axes[i].AxisName);
+		}
+
+		UUINavInputBox* NewInputBox = CreateWidget<UUINavInputBox>(PC, InputBox_BP);
+		if (NewInputBox == nullptr) continue;
+		NewInputBox->Container = this;
+		NewInputBox->bIsAxis = true;
+		NewInputBox->InputsPerAction = InputsPerAction;
+		NewInputBox->InputName = bUseInputNames ? AxisNames[i].ToString() : Axes[i].AxisName.ToString();
+
+		AxisPanel->AddChild(NewInputBox);
+
+		ParentWidget->UINavInputBoxes.Add(NewInputBox);
+		NumberOfInputs++;
+
+		for (int j = 0; j < InputsPerAction; j++)
+		{
+			ParentWidget->UINavButtons.Add(nullptr);
+			ParentWidget->UINavComponents.Add(nullptr);
+
 			int NewButtonIndex = TempFirstButtonIndex + (bUseInputNames ? i : FoundInputs.Num() - 1) * InputsPerAction + j;
 			int NewComponentIndex = StartingInputComponentIndex + (bUseInputNames ? i : FoundInputs.Num() - 1) * InputsPerAction + j;
 			ParentWidget->UINavButtons[NewButtonIndex] = NewInputBox->InputButtons[j]->NavButton;

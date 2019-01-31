@@ -54,6 +54,8 @@ class UINAVIGATION_API UUINavInputContainer : public UUserWidget
 protected:
 
 	void CreateInputBoxes();
+	void CreateActionBoxes();
+	void CreateAxisBoxes();
 	void CreateBoxes(bool bUseAxis);
 
 	//-----------------------------------------------------------------------
@@ -104,7 +106,7 @@ public:
 		int LastButtonIndex = -1;
 
 	UPROPERTY(BlueprintReadOnly, Category = "UINav Input")
-		int NumberOfActions = -1;
+		int NumberOfInputs = -1;
 
 	/*The index of the button at the top of the grid that should be navigated to
 	when entering this grid*/
