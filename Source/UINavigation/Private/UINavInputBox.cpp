@@ -17,12 +17,6 @@ void UUINavInputBox::NativeConstruct()
 
 	bIsFocusable = false;
 
-	InputButtons = {
-		InputButton1,
-		InputButton2,
-		InputButton3
-	};
-
 	BuildKeyMappings();
 }
 
@@ -31,6 +25,12 @@ void UUINavInputBox::BuildKeyMappings()
 	const UInputSettings* Settings = GetDefault<UInputSettings>();
 	TArray<FInputActionKeyMapping> TempActions;
 	TArray<FInputAxisKeyMapping> TempAxes;
+
+	InputButtons = {
+		InputButton1,
+		InputButton2,
+		InputButton3
+	};
 
 	InputText->SetText(FText::FromName(InputName));
 
