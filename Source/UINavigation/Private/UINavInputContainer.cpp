@@ -45,7 +45,7 @@ void UUINavInputContainer::CreateInputBoxes()
 	CreateActionBoxes();
 	CreateAxisBoxes();
 
-	LastButtonIndex = ParentWidget->UINavButtons.Num() - 1;
+	LastButtonIndex = ParentWidget->UINavButtons.Num() != FirstButtonIndex ? ParentWidget->UINavButtons.Num() - 1 : FirstButtonIndex;
 
 	switch (InputsPerAction)
 	{
@@ -66,30 +66,23 @@ void UUINavInputContainer::CreateActionBoxes()
 
 	UInputSettings* Settings = const_cast<UInputSettings*>(GetDefault<UInputSettings>());
 	TArray<FInputActionKeyMapping>& Actions = Settings->ActionMappings;
-	TArray<FName> FoundInputs;
 
 	if (Actions.Num() == 0) return;
 
 	int TempFirstButtonIndex = ParentWidget->UINavButtons.Num();
 	int StartingInputComponentIndex = ParentWidget->UINavComponents.Num();
 
-	bool bUseInputNames = ActionNames.Num() > 0;
-	int Iterations = bUseInputNames ? ActionNames.Num() : Actions.Num();
+	int Iterations = ActionNames.Num();
 
 	for (int i = 0; i < Iterations; ++i)
 	{
-		if (!bUseInputNames)
-		{
-			if (FoundInputs.Contains(Actions[i].ActionName)) continue;
-			else FoundInputs.Add(Actions[i].ActionName);
-		}
 
 		UUINavInputBox* NewInputBox = CreateWidget<UUINavInputBox>(PC, InputBox_BP);
 		if (NewInputBox == nullptr) continue;
 		NewInputBox->Container = this;
 		NewInputBox->bIsAxis = false;
 		NewInputBox->InputsPerAction = InputsPerAction;
-		NewInputBox->InputName = bUseInputNames ? ActionNames[i].ToString() : Actions[i].ActionName.ToString();
+		NewInputBox->InputName = ActionNames[i];
 
 		ActionPanel->AddChild(NewInputBox);
 
@@ -101,14 +94,14 @@ void UUINavInputContainer::CreateActionBoxes()
 			ParentWidget->UINavButtons.Add(nullptr);
 			ParentWidget->UINavComponents.Add(nullptr);
 
-			int NewButtonIndex = TempFirstButtonIndex + (bUseInputNames ? i : FoundInputs.Num() - 1) * InputsPerAction + j;
-			int NewComponentIndex = StartingInputComponentIndex + (bUseInputNames ? i : FoundInputs.Num() - 1) * InputsPerAction + j;
+			int NewButtonIndex = TempFirstButtonIndex + i * InputsPerAction + j;
+			int NewComponentIndex = StartingInputComponentIndex + i * InputsPerAction + j;
 			ParentWidget->UINavButtons[NewButtonIndex] = NewInputBox->InputButtons[j]->NavButton;
 			ParentWidget->UINavComponents[NewComponentIndex] = NewInputBox->InputButtons[j];
 			ParentWidget->UINavComponentsIndices.Add(NewButtonIndex);
 			if (!ParentWidget->bOverrideButtonIndices)
 			{
-				NewInputBox->InputButtons[j]->NavButton->ButtonIndex = TempFirstButtonIndex + (bUseInputNames ? i : (FoundInputs.Num() - 1)) * InputsPerAction + j;
+				NewInputBox->InputButtons[j]->NavButton->ButtonIndex = TempFirstButtonIndex + i * InputsPerAction + j;
 			}
 			ParentWidget->SetupUINavButtonDelegates(NewInputBox->InputButtons[j]->NavButton);
 		}
@@ -121,30 +114,22 @@ void UUINavInputContainer::CreateAxisBoxes()
 
 	UInputSettings* Settings = const_cast<UInputSettings*>(GetDefault<UInputSettings>());
 	TArray<FInputAxisKeyMapping>& Axes = Settings->AxisMappings;
-	TArray<FName> FoundInputs;
 
 	if (Axes.Num() == 0) return;
 
 	int TempFirstButtonIndex = ParentWidget->UINavButtons.Num();
 	int StartingInputComponentIndex = ParentWidget->UINavComponents.Num();
 
-	bool bUseInputNames = AxisNames.Num() > 0;
-	int Iterations = bUseInputNames ? AxisNames.Num() : Axes.Num();
+	int Iterations = AxisNames.Num();
 
 	for (int i = 0; i < Iterations; ++i)
 	{
-		if (!bUseInputNames)
-		{
-			if (FoundInputs.Contains(Axes[i].AxisName)) continue;
-			else FoundInputs.Add(Axes[i].AxisName);
-		}
-
 		UUINavInputBox* NewInputBox = CreateWidget<UUINavInputBox>(PC, InputBox_BP);
 		if (NewInputBox == nullptr) continue;
 		NewInputBox->Container = this;
 		NewInputBox->bIsAxis = true;
 		NewInputBox->InputsPerAction = InputsPerAction;
-		NewInputBox->InputName = bUseInputNames ? AxisNames[i].ToString() : Axes[i].AxisName.ToString();
+		NewInputBox->InputName = AxisNames[i];
 
 		AxisPanel->AddChild(NewInputBox);
 
@@ -156,14 +141,14 @@ void UUINavInputContainer::CreateAxisBoxes()
 			ParentWidget->UINavButtons.Add(nullptr);
 			ParentWidget->UINavComponents.Add(nullptr);
 
-			int NewButtonIndex = TempFirstButtonIndex + (bUseInputNames ? i : FoundInputs.Num() - 1) * InputsPerAction + j;
-			int NewComponentIndex = StartingInputComponentIndex + (bUseInputNames ? i : FoundInputs.Num() - 1) * InputsPerAction + j;
+			int NewButtonIndex = TempFirstButtonIndex + i * InputsPerAction + j;
+			int NewComponentIndex = StartingInputComponentIndex + i * InputsPerAction + j;
 			ParentWidget->UINavButtons[NewButtonIndex] = NewInputBox->InputButtons[j]->NavButton;
 			ParentWidget->UINavComponents[NewComponentIndex] = NewInputBox->InputButtons[j];
 			ParentWidget->UINavComponentsIndices.Add(NewButtonIndex);
 			if (!ParentWidget->bOverrideButtonIndices)
 			{
-				NewInputBox->InputButtons[j]->NavButton->ButtonIndex = TempFirstButtonIndex + (bUseInputNames ? i : (FoundInputs.Num() - 1)) * InputsPerAction + j;
+				NewInputBox->InputButtons[j]->NavButton->ButtonIndex = TempFirstButtonIndex + i * InputsPerAction + j;
 			}
 			ParentWidget->SetupUINavButtonDelegates(NewInputBox->InputButtons[j]->NavButton);
 		}
@@ -268,4 +253,43 @@ int UUINavInputContainer::GetOffsetFromTargetColumn(bool bTop)
 			break;
 	}
 	return 0;
+}
+
+FKey UUINavInputContainer::GetAxisKeyFromActionKey(FKey ActionKey)
+{
+	FString KeyName = ActionKey.GetFName().ToString();
+	int KeyIndex = PossibleAxisNames.Find(KeyName);
+	if (KeyIndex == INDEX_NONE) return FKey();
+
+	switch (KeyIndex)
+	{
+		case 0:
+			return FKey(FName("Gamepad_LeftTriggerAxis"));
+			break;
+		case 1:
+			return FKey(FName("Gamepad_RightTriggerAxis"));
+			break;
+		case 2:
+			return FKey(FName("MotionController_Left_TriggerAxis"));
+			break;
+		case 3:
+			return FKey(FName("MotionController_Left_Grip1Axis"));
+			break;
+		case 4:
+			return FKey(FName("MotionController_Left_Grip2Axis"));
+			break;
+		case 5:
+			return FKey(FName("MotionController_Right_TriggerAxis"));
+			break;
+		case 6:
+			return FKey(FName("MotionController_Right_Grip1Axis"));
+			break;
+		case 7:
+			return FKey(FName("MotionController_Right_Grip2Axis"));
+			break;
+		default:
+			break;
+	}
+
+	return FKey();
 }

@@ -344,15 +344,24 @@ FReply UUINavWidget::NativeOnKeyDown(const FGeometry & InGeometry, const FKeyEve
 		int InputsPerAction = UINavInputContainer->InputsPerAction;
 		FKey PressedKey = InKeyEvent.GetKey();
 
-		if ((ReceiveInputType == EReceiveInputType::Axis && !PressedKey.IsFloatAxis()) || 
-			(UINavInputContainer->bCanCancelKeybind && CurrentPC->IsReturnKey(PressedKey)))
+		if ((UINavInputContainer->bCanCancelKeybind && CurrentPC->IsReturnKey(PressedKey)))
 		{
 			CancelRebind();
 			return FReply::Handled();
 		}
 
-		TempMapping.Key = PressedKey;
-		UINavInputBoxes[InputBoxIndex / InputsPerAction]->UpdateInputKey(TempMapping, InputBoxIndex % InputsPerAction);
+		if (ReceiveInputType == EReceiveInputType::Axis)
+		{
+			FKey AxisKey = UINavInputContainer->GetAxisKeyFromActionKey(PressedKey);
+			if (AxisKey.GetFName().IsEqual(FName("None")))
+			{
+				CancelRebind();
+				return FReply::Handled();
+			}
+			PressedKey = AxisKey;
+		}
+
+		UINavInputBoxes[InputBoxIndex / InputsPerAction]->UpdateInputKey(PressedKey, InputBoxIndex % InputsPerAction);
 		bWaitForInput = false;
 
 		ReceiveInputType = EReceiveInputType::None;
@@ -1157,17 +1166,17 @@ void UUINavWidget::SetupUINavButtonDelegates(UUINavButton * NewButton)
 void UUINavWidget::ProcessMouseKeybind(FKey PressedMouseKey)
 {
 	int InputsPerAction = UINavInputContainer->InputsPerAction;
-
-	TempMapping.Key = PressedMouseKey;
-	UINavInputBoxes[InputBoxIndex / InputsPerAction]->UpdateInputKey(TempMapping, InputBoxIndex % InputsPerAction);
-	TempMapping.bShift = TempMapping.bCtrl = TempMapping.bAlt = TempMapping.bCmd = false;
+	if (ReceiveInputType == EReceiveInputType::Axis) PressedMouseKey = FKey(FName("MouseWheelAxis"));
+	UINavInputBoxes[InputBoxIndex / InputsPerAction]->UpdateInputKey(PressedMouseKey, InputBoxIndex % InputsPerAction);
 	bWaitForInput = false;
+	ReceiveInputType = EReceiveInputType::None;
 }
 
 void UUINavWidget::CancelRebind()
 {
 	bWaitForInput = false;
-	UINavInputBoxes[InputBoxIndex / UINavInputContainer->InputsPerAction]->RevertToActionText(InputBoxIndex % UINavInputContainer->InputsPerAction);
+	int InputsPerAction = UINavInputContainer->InputsPerAction;
+	UINavInputBoxes[InputBoxIndex / InputsPerAction]->RevertToActionText(InputBoxIndex % InputsPerAction);
 	ReceiveInputType = EReceiveInputType::None;
 }
 

@@ -56,9 +56,19 @@ protected:
 	void CreateInputBoxes();
 	void CreateActionBoxes();
 	void CreateAxisBoxes();
-	void CreateBoxes(bool bUseAxis);
 
 	//-----------------------------------------------------------------------
+
+	TArray<FString> PossibleAxisNames = {
+		TEXT("Gamepad_LeftTrigger"),
+		TEXT("Gamepad_RightTrigger"),
+		TEXT("MotionController_Left_Trigger"),
+		TEXT("MotionController_Left_Grip1"),
+		TEXT("MotionController_Left_Grip2"),
+		TEXT("MotionController_Right_Trigger"),
+		TEXT("MotionController_Right_Grip1"),
+		TEXT("MotionController_Right_Grip2"),
+	};
 
 	//Indicates which column to navigate to when navigating to this Input Container
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Input")
@@ -92,6 +102,8 @@ public:
 
 	//Fetches the index offset from the TargetColumn variable for both the top and bottom of the Input Container
 	int GetOffsetFromTargetColumn(bool bTop);
+
+	FKey GetAxisKeyFromActionKey(FKey ActionKey);
 
 	UFUNCTION(BlueprintCallable, Category = "UINav Input")
 		FORCEINLINE ETargetColumn GetTargetColumn() const { return TargetColumn; }
@@ -128,14 +140,12 @@ public:
 
 	/*
 	The names of the desired actions to allow for rebinding
-	Can be left empty if all actions are to be rebindable
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Input")
 		TArray<FName> ActionNames;
 
 	/*
 	The names of the desired axes to allow for rebinding
-	Can be left empty if all axes are to be rebindable
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Input")
 		TArray<FName> AxisNames;

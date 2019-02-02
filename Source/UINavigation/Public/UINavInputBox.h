@@ -33,7 +33,7 @@ public:
 
 	void BuildKeyMappings();
 	void ResetKeyMappings();
-	void UpdateInputKey(FInputActionKeyMapping NewAction, int Index);
+	void UpdateInputKey(FKey NewKey, int Index);
 	void RevertToActionText(int Index);
 
 	void NotifySelected(int Index);
@@ -56,7 +56,7 @@ public:
 
 	class UUINavInputContainer* Container;
 
-	FString InputName;
+	FName InputName;
 
 	int InputsPerAction = 2;
 };

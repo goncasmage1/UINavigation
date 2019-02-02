@@ -26,10 +26,10 @@ void UUINavInputBox::BuildKeyMappings()
 	TArray<FInputActionKeyMapping> TempActions;
 	TArray<FInputAxisKeyMapping> TempAxes;
 
-	InputText->SetText(FText::FromString(InputName));
+	InputText->SetText(FText::FromName(InputName));
 
-	if (bIsAxis) Settings->GetAxisMappingByName(FName(*InputName), TempAxes);
-	else Settings->GetActionMappingByName(FName(*InputName), TempActions);
+	if (bIsAxis) Settings->GetAxisMappingByName(InputName, TempAxes);
+	else Settings->GetActionMappingByName(InputName, TempActions);
 
 	AUINavController* PC = Cast<AUINavController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
 
@@ -77,12 +77,13 @@ void UUINavInputBox::ResetKeyMappings()
 {
 	Keys.Empty();
 	bUsingKeyImage = { false, false, false };
+	InputButtons.Empty();
 	BuildKeyMappings();
 }
 
-void UUINavInputBox::UpdateInputKey(FInputActionKeyMapping NewAction, int Index)
+void UUINavInputBox::UpdateInputKey(FKey NewKey, int Index)
 {
-	if (!ShouldRegisterKey(NewAction.Key, Index))
+	if (!ShouldRegisterKey(NewKey, Index))
 	{
 		RevertToActionText(Index);
 		return;
@@ -94,15 +95,16 @@ void UUINavInputBox::UpdateInputKey(FInputActionKeyMapping NewAction, int Index)
 
 	int Found = 0;
 	bool bFound = false;
-	for (int i = 0; i < Actions.Num(); i++)
+	int Iterations = bIsAxis ? Axes.Num() : Actions.Num();
+	for (int i = 0; i < Iterations; i++)
 	{
-		if ((bIsAxis && Axes[i].AxisName.IsEqual(FName(*InputName))) || (!bIsAxis && Actions[i].ActionName.IsEqual(FName(*InputName))))
+		if ((bIsAxis && Axes[i].AxisName.IsEqual(InputName)) || (!bIsAxis && Actions[i].ActionName.IsEqual(InputName)))
 		{
-			if (Found == Index && Container->RespectsRestriction(NewAction.Key, Index))
+			if (Found == Index && Container->RespectsRestriction(NewKey, Index))
 			{
-				if (bIsAxis) Axes[i].Key = NewAction.Key;
-				else Actions[i].Key = NewAction.Key;
-				Keys[Index] = NewAction.Key;
+				if (bIsAxis) Axes[i].Key = NewKey;
+				else Actions[i].Key = NewKey;
+				Keys[Index] = NewKey;
 				InputButtons[Index]->NavText->SetText(GetKeyName(Index));
 				bFound = true;
 				break;
@@ -115,18 +117,19 @@ void UUINavInputBox::UpdateInputKey(FInputActionKeyMapping NewAction, int Index)
 		if (bIsAxis)
 		{
 			FInputAxisKeyMapping Axis;
-			Axis.Key = NewAction.Key;
-			Axis.AxisName = FName(*InputName);
+			Axis.Key = NewKey;
+			Axis.AxisName = InputName;
 			Settings->AddAxisMapping(Axis, true);
-			Keys[Index] = NewAction.Key;
+			Keys[Index] = NewKey;
 			InputButtons[Index]->NavText->SetText(GetKeyName(Index));
 		}
 		else
 		{
-			FInputActionKeyMapping Action = NewAction;
-			Action.ActionName = FName(*InputName);
+			FInputActionKeyMapping Action = FInputActionKeyMapping();
+			Action.ActionName = InputName;
+			Action.Key = NewKey;
 			Settings->AddActionMapping(Action, true);
-			Keys[Index] = NewAction.Key;
+			Keys[Index] = NewKey;
 			InputButtons[Index]->NavText->SetText(GetKeyName(Index));
 		}
 	}

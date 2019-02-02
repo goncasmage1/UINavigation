@@ -47,10 +47,11 @@ void AUINavController::SetupInputComponent()
 
 	//Save default settings
 	UUINavSettings *MySettings = GetMutableDefault<UUINavSettings>();
-	if (MySettings->ActionMappings.Num() == 0)
+	if (MySettings->ActionMappings.Num() == 0 && MySettings->AxisMappings.Num() == 0)
 	{
 		UInputSettings* Settings = const_cast<UInputSettings*>(GetDefault<UInputSettings>());
 		MySettings->ActionMappings = Settings->ActionMappings;
+		MySettings->AxisMappings = Settings->AxisMappings;
 		MySettings->SaveConfig();
 	}
 }
@@ -66,6 +67,11 @@ void AUINavController::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	//TODO!
+	/*
+	if (ActiveWidget == nullptr || !ActiveWidget->IsInViewport())
+	*/
+
 	float PosX, PosY;
 	GetMousePosition(PosX, PosY);
 	if (CurrentInputType != EInputType::Mouse)
@@ -77,6 +83,19 @@ void AUINavController::Tick(float DeltaTime)
 	}
 	PreviousX = PosX;
 	PreviousY = PosY;
+
+	if (ActiveWidget != nullptr && ActiveWidget->ReceiveInputType == EReceiveInputType::Axis)
+	{
+		for (int i = 0; i < AxisKeys.Num(); i++)
+		{
+			float AxisValue = GetInputAnalogKeyState(AxisKeys[i]);
+			if (FMath::Abs(AxisValue) > RebindThreshold)
+			{
+				GEngine->AddOnScreenDebugMessage(-1, 0.5f, FColor::Green, *(AxisKeys[i].GetDisplayName().ToString()));
+				//TODO:
+			}
+		}
+	}
 
 	switch (CountdownPhase)
 	{

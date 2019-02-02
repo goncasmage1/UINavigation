@@ -90,8 +90,6 @@ protected:
 	float MovementCounter;
 	float MovementTime;
 
-	FInputActionKeyMapping TempMapping;
-
 	FVector2D SelectorOrigin;
 	FVector2D SelectorDestination;
 	FVector2D Distance;
