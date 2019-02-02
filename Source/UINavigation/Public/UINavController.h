@@ -44,17 +44,6 @@ protected:
 
 	ENavigationDirection Direction = ENavigationDirection::None;
 
-	TArray<FKey> AxisKeys = {
-		FKey(FName("Gamepad_LeftX")),
-		FKey(FName("Gamepad_LeftY")),
-		FKey(FName("Gamepad_RightX")),
-		FKey(FName("Gamepad_RightY")),
-		FKey(FName("MotionController_Left_Thumbstick_X")),
-		FKey(FName("MotionController_Left_Thumbstick_Y")),
-		FKey(FName("MotionController_Right_Thumbstick_X")),
-		FKey(FName("MotionController_Right_Thumbstick_Y")),
-	};
-
 	float PreviousX = -1.f;
 	float PreviousY = -1.f;
 

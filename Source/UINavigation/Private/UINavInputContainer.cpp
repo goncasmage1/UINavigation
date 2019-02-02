@@ -263,24 +263,54 @@ FKey UUINavInputContainer::GetAxisKeyFromActionKey(FKey ActionKey)
 			return FKey(FName("Gamepad_RightTriggerAxis"));
 			break;
 		case 2:
-			return FKey(FName("MotionController_Left_TriggerAxis"));
-			break;
 		case 3:
-			return FKey(FName("MotionController_Left_Grip1Axis"));
+			return FKey(FName("Gamepad_LeftY"));
 			break;
 		case 4:
-			return FKey(FName("MotionController_Left_Grip2Axis"));
-			break;
 		case 5:
-			return FKey(FName("MotionController_Right_TriggerAxis"));
+			return FKey(FName("Gamepad_LeftX"));
 			break;
 		case 6:
+		case 7:
+			return FKey(FName("Gamepad_RightY"));
+			break;
+		case 8:
+		case 9:
+			return FKey(FName("Gamepad_RightX"));
+			break;
+		case 10:
+		case 11:
+			return FKey(FName("MotionController_Left_Thumbstick_Y"));
+			break;
+		case 12:
+		case 13:
+			return FKey(FName("MotionController_Left_Thumbstick_X"));
+			break;
+		case 14:
+		case 15:
+			return FKey(FName("MotionController_Right_Thumbstick_Y"));
+			break;
+		case 16:
+		case 17:
+			return FKey(FName("MotionController_Right_Thumbstick_X"));
+			break;
+		case 18:
+			return FKey(FName("MotionController_Left_TriggerAxis"));
+			break;
+		case 19:
+			return FKey(FName("MotionController_Left_Grip1Axis"));
+			break;
+		case 20:
+			return FKey(FName("MotionController_Left_Grip2Axis"));
+			break;
+		case 21:
+			return FKey(FName("MotionController_Right_TriggerAxis"));
+			break;
+		case 22:
 			return FKey(FName("MotionController_Right_Grip1Axis"));
 			break;
-		case 7:
+		case 23:
 			return FKey(FName("MotionController_Right_Grip2Axis"));
-			break;
-		default:
 			break;
 	}
 

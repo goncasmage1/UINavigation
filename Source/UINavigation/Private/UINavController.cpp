@@ -99,19 +99,6 @@ void AUINavController::Tick(float DeltaTime)
 	}
 	PreviousX = PosX;
 	PreviousY = PosY;
-
-	if (ActiveWidget != nullptr && ActiveWidget->ReceiveInputType == EReceiveInputType::Axis)
-	{
-		for (int i = 0; i < AxisKeys.Num(); i++)
-		{
-			float AxisValue = GetInputAnalogKeyState(AxisKeys[i]);
-			if (FMath::Abs(AxisValue) > RebindThreshold)
-			{
-				GEngine->AddOnScreenDebugMessage(-1, 0.5f, FColor::Green, *(AxisKeys[i].GetDisplayName().ToString()));
-				ActiveWidget->ProcessNonMouseKeybind(AxisKeys[i]);
-			}
-		}
-	}
 }
 
 void AUINavController::TimerCallback()
