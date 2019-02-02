@@ -42,14 +42,14 @@ public:
 
 	bool bIsAxis = false;
 
-	TArray<class UUINavInputComponent*> InputButtons;
-
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget), Category = "UINav Input")
 		class UUINavInputComponent* InputButton1;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget), Category = "UINav Input")
 		class UUINavInputComponent* InputButton2;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget), Category = "UINav Input")
 		class UUINavInputComponent* InputButton3;
+
+	TArray<class UUINavInputComponent*> InputButtons;
 
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget), Category = "UINav Input")
 		class UTextBlock* InputText;

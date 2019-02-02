@@ -17,6 +17,12 @@ void UUINavInputBox::NativeConstruct()
 
 	bIsFocusable = false;
 
+	InputButtons = {
+		InputButton1,
+		InputButton2,
+		InputButton3
+	};
+
 	BuildKeyMappings();
 }
 
@@ -39,37 +45,45 @@ void UUINavInputBox::BuildKeyMappings()
 		return;
 	}
 
-	for (int i = 0; i < 3; i++)
+	for (int j = 0; j < 3; j++)
 	{
-		UUINavInputComponent* NewInputButton = i == 0 ? InputButton1 : (i == 1 ? InputButton2 : InputButton3);
-		InputButtons.Add(NewInputButton);
+		UUINavInputComponent* NewInputButton = InputButtons[j];
 
-		if (i < InputsPerAction)
+		for (int i = 0; i < 3; i++)
 		{
-			FKey NewKey = bIsAxis ? TempAxes[TempAxes.Num() - 1 - i].Key : TempActions[TempActions.Num() - 1 - i].Key;
-			if (((bIsAxis && i < TempAxes.Num()) || (!bIsAxis && i < TempActions.Num())) && ShouldRegisterKey(NewKey, i))
-			{
-				Keys.Add(NewKey);
+			if (j + 1 <= Keys.Num()) break;
 
-				if (UpdateKeyIconForKey(i))
+			if (i < InputsPerAction)
+			{
+				if ((bIsAxis && i < TempAxes.Num()) || (!bIsAxis && i < TempActions.Num()))
 				{
-					bUsingKeyImage[i] = true;
-					NewInputButton->InputImage->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
-					NewInputButton->NavText->SetVisibility(ESlateVisibility::Collapsed);
+					FKey NewKey = bIsAxis ? TempAxes[i].Key : TempActions[i].Key;
+
+					if (Keys.Contains(NewKey) || !ShouldRegisterKey(NewKey, j)) continue;
+
+					Keys.Add(NewKey);
+
+					if (UpdateKeyIconForKey(j))
+					{
+						bUsingKeyImage[j] = true;
+						NewInputButton->InputImage->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+						NewInputButton->NavText->SetVisibility(ESlateVisibility::Collapsed);
+					}
+					NewInputButton->NavText->SetText(GetKeyName(j));
 				}
-				NewInputButton->NavText->SetText(GetKeyName(i));
 			}
 			else
 			{
-				NewInputButton->NavText->SetText(FText::FromName(Container->EmptyKeyName));
-				NewInputButton->InputImage->SetVisibility(ESlateVisibility::Collapsed);
-				NewInputButton->NavText->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
-				Keys.Add(FKey());
+				NewInputButton->SetVisibility(ESlateVisibility::Hidden);
 			}
 		}
-		else
+
+		if (Keys.Num() - 1 < j)
 		{
-			NewInputButton->SetVisibility(ESlateVisibility::Hidden);
+			NewInputButton->NavText->SetText(FText::FromName(Container->EmptyKeyName));
+			NewInputButton->InputImage->SetVisibility(ESlateVisibility::Collapsed);
+			NewInputButton->NavText->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+			Keys.Add(FKey());
 		}
 	}
 }
