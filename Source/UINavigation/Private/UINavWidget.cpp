@@ -200,6 +200,7 @@ void UUINavWidget::TraverseHierarquy()
 			if (UIComp != nullptr)
 			{
 				NewNavButton = Cast<UUINavButton>(UIComp->NavButton);
+				if (UIComp->ComponentIndex != -1) NewNavButton->ButtonIndex = UIComp->ComponentIndex;
 
 				UINavComponentsIndices.Add(UINavButtons.Num());
 				UINavComponents.Add(UIComp);
@@ -226,6 +227,11 @@ void UUINavWidget::TraverseHierarquy()
 		//Add button to array of UIUINavButtons
 		UINavButtons.Add(NewNavButton);
 	}
+
+	UINavButtons.HeapSort([](const UUINavButton& Wid1, const UUINavButton& Wid2)
+	{
+		return Wid1.ButtonIndex < Wid2.ButtonIndex;
+	});
 }
 
 void UUINavWidget::ChangeTextColorToDefault()
