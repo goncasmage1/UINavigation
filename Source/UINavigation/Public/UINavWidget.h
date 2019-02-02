@@ -235,11 +235,6 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = UINavWidget)
 		int FirstButtonIndex = 0;
 
-	/*If set to true, ButtonIndex will NOT be determined by the UINavButton's position in the
-	hierarquy, but rather be specified in the Designer Tab.*/
-	UPROPERTY(EditDefaultsOnly, Category = UINavWidget)
-		bool bOverrideButtonIndices = false;
-
 	//If set to true, this widget will be removed if it has no ParentWidget and is returned from
 	UPROPERTY(EditDefaultsOnly, Category = UINavWidget)
 		bool bAllowRemoveIfRoot = false;
@@ -562,6 +557,7 @@ public:
 		void ReleaseEvent(int Index);
 
 	void SetupUINavButtonDelegates(class UUINavButton* NewButton);
+	void ProcessNonMouseKeybind(FKey PressedMouseKey);
 	void ProcessMouseKeybind(FKey PressedMouseKey);
 	void CancelRebind();
 

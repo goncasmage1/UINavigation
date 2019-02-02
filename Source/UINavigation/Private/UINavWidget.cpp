@@ -200,7 +200,6 @@ void UUINavWidget::TraverseHierarquy()
 			if (UIComp != nullptr)
 			{
 				NewNavButton = Cast<UUINavButton>(UIComp->NavButton);
-				if (bOverrideButtonIndices) UIComp->OverrideButtonIndex();
 
 				UINavComponentsIndices.Add(UINavButtons.Num());
 				UINavComponents.Add(UIComp);
@@ -216,10 +215,8 @@ void UUINavWidget::TraverseHierarquy()
 
 		if (NewNavButton == nullptr) continue;
 
-		if (!bOverrideButtonIndices)
-		{
-			NewNavButton->ButtonIndex = UINavButtons.Num();
-		}
+		if (NewNavButton->ButtonIndex == -1) NewNavButton->ButtonIndex = UINavButtons.Num();
+
 		NewNavButton->CustomHover.AddDynamic(this, &UUINavWidget::HoverEvent);
 		NewNavButton->CustomUnhover.AddDynamic(this, &UUINavWidget::UnhoverEvent);
 		NewNavButton->CustomClick.AddDynamic(this, &UUINavWidget::ClickEvent);
@@ -228,14 +225,6 @@ void UUINavWidget::TraverseHierarquy()
 
 		//Add button to array of UIUINavButtons
 		UINavButtons.Add(NewNavButton);
-	}
-
-	if (bOverrideButtonIndices)
-	{
-		UINavButtons.HeapSort([](const UUINavButton& Wid1, const UUINavButton& Wid2)
-		{
-			return Wid1.ButtonIndex < Wid2.ButtonIndex;
-		});
 	}
 }
 
@@ -319,29 +308,12 @@ void UUINavWidget::NativeTick(const FGeometry & MyGeometry, float DeltaTime)
 	}
 }
 
-FReply UUINavWidget::NativeOnMouseWheel(const FGeometry & InGeometry, const FPointerEvent & InMouseEvent)
-{
-	if (bWaitForInput)
-	{
-		ProcessMouseKeybind(InMouseEvent.GetWheelDelta() > 0.f ? FKey(EKeys::MouseScrollUp) : FKey(EKeys::MouseScrollDown));
-	}
-	else
-	{
-		if (CurrentPC->GetCurrentInputType() != EInputType::Mouse)
-		{
-			CurrentPC->NotifyMouseInputType();
-		}
-	}
-	return FReply::Handled();
-}
-
 FReply UUINavWidget::NativeOnKeyDown(const FGeometry & InGeometry, const FKeyEvent & InKeyEvent)
 {
 	Super::NativeOnKeyDown(InGeometry, InKeyEvent);
 
 	if (ReceiveInputType != EReceiveInputType::None)
 	{
-		int InputsPerAction = UINavInputContainer->InputsPerAction;
 		FKey PressedKey = InKeyEvent.GetKey();
 
 		if ((UINavInputContainer->bCanCancelKeybind && CurrentPC->IsReturnKey(PressedKey)))
@@ -361,10 +333,7 @@ FReply UUINavWidget::NativeOnKeyDown(const FGeometry & InGeometry, const FKeyEve
 			PressedKey = AxisKey;
 		}
 
-		UINavInputBoxes[InputBoxIndex / InputsPerAction]->UpdateInputKey(PressedKey, InputBoxIndex % InputsPerAction);
-		bWaitForInput = false;
-
-		ReceiveInputType = EReceiveInputType::None;
+		ProcessNonMouseKeybind(PressedKey);
 	}
 	else
 	{
@@ -385,6 +354,22 @@ FReply UUINavWidget::NativeOnKeyUp(const FGeometry & InGeometry, const FKeyEvent
 		if (reply.IsEventHandled()) return FReply::Handled();
 	}
 
+	return FReply::Handled();
+}
+
+FReply UUINavWidget::NativeOnMouseWheel(const FGeometry & InGeometry, const FPointerEvent & InMouseEvent)
+{
+	if (bWaitForInput)
+	{
+		ProcessMouseKeybind(InMouseEvent.GetWheelDelta() > 0.f ? FKey(EKeys::MouseScrollUp) : FKey(EKeys::MouseScrollDown));
+	}
+	else
+	{
+		if (CurrentPC->GetCurrentInputType() != EInputType::Mouse)
+		{
+			CurrentPC->NotifyMouseInputType();
+		}
+	}
 	return FReply::Handled();
 }
 
@@ -1161,6 +1146,14 @@ void UUINavWidget::SetupUINavButtonDelegates(UUINavButton * NewButton)
 	NewButton->CustomClick.AddDynamic(this, &UUINavWidget::ClickEvent);
 	NewButton->CustomRelease.AddDynamic(this, &UUINavWidget::ReleaseEvent);
 	bSwitchedStyle.Add(false);
+}
+
+void UUINavWidget::ProcessNonMouseKeybind(FKey PressedKey)
+{
+	int InputsPerAction = UINavInputContainer->InputsPerAction;
+	UINavInputBoxes[InputBoxIndex / InputsPerAction]->UpdateInputKey(PressedKey, InputBoxIndex % InputsPerAction);
+	bWaitForInput = false;
+	ReceiveInputType = EReceiveInputType::None;
 }
 
 void UUINavWidget::ProcessMouseKeybind(FKey PressedMouseKey)

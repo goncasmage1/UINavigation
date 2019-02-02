@@ -66,19 +66,6 @@ protected:
 		bool bChainNavigation = true;
 
 	/*
-	Indicates whether this controller will be notified when UINav actions are executed
-	(MenuUp, MenuDown, etc.)
-	*/
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavController)
-		bool bReceiveInputActionEvents = true;
-
-	/*
-	Indicates whether this controller will be notified when Input type changes
-	*/
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavController)
-		bool bReceiveInputChangeEvents = true;
-
-	/*
 	The amount of time the player needs to hold a key for the navigation to
 	start occuring periodically
 	*/

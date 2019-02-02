@@ -46,9 +46,10 @@ void UUINavInputBox::BuildKeyMappings()
 
 		if (i < InputsPerAction)
 		{
-			if ((bIsAxis && i < TempAxes.Num()) || (!bIsAxis && i < TempActions.Num()))
+			FKey NewKey = bIsAxis ? TempAxes[TempAxes.Num() - 1 - i].Key : TempActions[TempActions.Num() - 1 - i].Key;
+			if (((bIsAxis && i < TempAxes.Num()) || (!bIsAxis && i < TempActions.Num())) && ShouldRegisterKey(NewKey, i))
 			{
-				Keys.Add(bIsAxis ? TempAxes[TempAxes.Num() - 1 - i].Key : TempActions[TempActions.Num() - 1 - i].Key);
+				Keys.Add(NewKey);
 
 				if (UpdateKeyIconForKey(i))
 				{
