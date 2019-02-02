@@ -491,8 +491,8 @@ public:
 	*
 	*	@param	WidgetClass  The class of the widget to add to the screen
 	*/
-	UFUNCTION(BlueprintCallable, Category = UINavWidget)
-		UWidget* GoToWidget(TSubclassOf<UUINavWidget> NewWidgetClass, bool bRemoveParent);
+	UFUNCTION(BlueprintCallable, Category = UINavWidget, meta = (AdvancedDisplay=2))
+		UWidget* GoToWidget(TSubclassOf<UUINavWidget> NewWidgetClass, bool bRemoveParent, int ZOrder = 0);
 	
 	/**
 	*	Adds this widget's parent to the viewport (if applicable)

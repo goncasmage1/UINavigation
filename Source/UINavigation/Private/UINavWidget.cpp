@@ -934,7 +934,7 @@ void UUINavWidget::OnSetupCompleted_Implementation()
 
 }
 
-UWidget* UUINavWidget::GoToWidget(TSubclassOf<UUINavWidget> NewWidgetClass, bool bRemoveParent)
+UWidget* UUINavWidget::GoToWidget(TSubclassOf<UUINavWidget> NewWidgetClass, bool bRemoveParent, int ZOrder)
 {
 	if (NewWidgetClass == nullptr)
 	{
@@ -950,7 +950,7 @@ UWidget* UUINavWidget::GoToWidget(TSubclassOf<UUINavWidget> NewWidgetClass, bool
 	{
 		NewWidget->SetUserFocus(CurrentPC);
 	}
-	NewWidget->AddToViewport();
+	NewWidget->AddToViewport(ZOrder);
 	CleanSetup();
 	return NewWidget;
 }
