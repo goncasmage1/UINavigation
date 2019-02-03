@@ -25,7 +25,7 @@ void UUINavInputContainer::SetParentWidget(UUINavWidget * NewParent)
 
 	if (InputRestrictions.Num() == 0) InputRestrictions.Add(EInputRestriction::None);
 	else if (InputRestrictions.Num() > 3) InputRestrictions.SetNum(3);
-	InputsPerAction = InputRestrictions.Num();
+	KeysPerInput = InputRestrictions.Num();
 
 	CreateInputBoxes();
 }
@@ -47,7 +47,7 @@ void UUINavInputContainer::CreateInputBoxes()
 
 	LastButtonIndex = ParentWidget->UINavButtons.Num() != FirstButtonIndex ? ParentWidget->UINavButtons.Num() - 1 : FirstButtonIndex;
 
-	switch (InputsPerAction)
+	switch (KeysPerInput)
 	{
 		case 2:
 			TopButtonIndex = FirstButtonIndex + (TargetColumn == ETargetColumn::Right);
@@ -80,7 +80,7 @@ void UUINavInputContainer::CreateActionBoxes()
 		if (NewInputBox == nullptr) continue;
 		NewInputBox->Container = this;
 		NewInputBox->bIsAxis = false;
-		NewInputBox->InputsPerAction = InputsPerAction;
+		NewInputBox->KeysPerInput = KeysPerInput;
 		NewInputBox->InputName = ActionNames[i];
 
 		ActionPanel->AddChild(NewInputBox);
@@ -88,17 +88,17 @@ void UUINavInputContainer::CreateActionBoxes()
 		ParentWidget->UINavInputBoxes.Add(NewInputBox);
 		NumberOfInputs++;
 
-		for (int j = 0; j < InputsPerAction; j++)
+		for (int j = 0; j < KeysPerInput; j++)
 		{
 			ParentWidget->UINavButtons.Add(nullptr);
 			ParentWidget->UINavComponents.Add(nullptr);
 
-			int NewButtonIndex = TempFirstButtonIndex + i * InputsPerAction + j;
-			int NewComponentIndex = StartingInputComponentIndex + i * InputsPerAction + j;
+			int NewButtonIndex = TempFirstButtonIndex + i * KeysPerInput + j;
+			int NewComponentIndex = StartingInputComponentIndex + i * KeysPerInput + j;
 			ParentWidget->UINavButtons[NewButtonIndex] = NewInputBox->InputButtons[j]->NavButton;
 			ParentWidget->UINavComponents[NewComponentIndex] = NewInputBox->InputButtons[j];
 			ParentWidget->UINavComponentsIndices.Add(NewButtonIndex);
-			NewInputBox->InputButtons[j]->NavButton->ButtonIndex = TempFirstButtonIndex + i * InputsPerAction + j;
+			NewInputBox->InputButtons[j]->NavButton->ButtonIndex = TempFirstButtonIndex + i * KeysPerInput + j;
 			ParentWidget->SetupUINavButtonDelegates(NewInputBox->InputButtons[j]->NavButton);
 		}
 	} 
@@ -124,7 +124,7 @@ void UUINavInputContainer::CreateAxisBoxes()
 		if (NewInputBox == nullptr) continue;
 		NewInputBox->Container = this;
 		NewInputBox->bIsAxis = true;
-		NewInputBox->InputsPerAction = InputsPerAction;
+		NewInputBox->KeysPerInput = KeysPerInput;
 		NewInputBox->InputName = AxisNames[i];
 
 		AxisPanel->AddChild(NewInputBox);
@@ -132,17 +132,17 @@ void UUINavInputContainer::CreateAxisBoxes()
 		ParentWidget->UINavInputBoxes.Add(NewInputBox);
 		NumberOfInputs++;
 
-		for (int j = 0; j < InputsPerAction; j++)
+		for (int j = 0; j < KeysPerInput; j++)
 		{
 			ParentWidget->UINavButtons.Add(nullptr);
 			ParentWidget->UINavComponents.Add(nullptr);
 
-			int NewButtonIndex = TempFirstButtonIndex + i * InputsPerAction + j;
-			int NewComponentIndex = StartingInputComponentIndex + i * InputsPerAction + j;
+			int NewButtonIndex = TempFirstButtonIndex + i * KeysPerInput + j;
+			int NewComponentIndex = StartingInputComponentIndex + i * KeysPerInput + j;
 			ParentWidget->UINavButtons[NewButtonIndex] = NewInputBox->InputButtons[j]->NavButton;
 			ParentWidget->UINavComponents[NewComponentIndex] = NewInputBox->InputButtons[j];
 			ParentWidget->UINavComponentsIndices.Add(NewButtonIndex);
-			NewInputBox->InputButtons[j]->NavButton->ButtonIndex = TempFirstButtonIndex + i * InputsPerAction + j;
+			NewInputBox->InputButtons[j]->NavButton->ButtonIndex = TempFirstButtonIndex + i * KeysPerInput + j;
 			ParentWidget->SetupUINavButtonDelegates(NewInputBox->InputButtons[j]->NavButton);
 		}
 	} 
@@ -234,7 +234,7 @@ UTexture2D* UUINavInputContainer::LoadTexture2D(const FString& FullFilePath, boo
 
 int UUINavInputContainer::GetOffsetFromTargetColumn(bool bTop)
 {
-	switch (InputsPerAction)
+	switch (KeysPerInput)
 	{
 		case 2:
 			if (bTop) return (TargetColumn == ETargetColumn::Right);

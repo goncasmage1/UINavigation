@@ -146,7 +146,7 @@ public:
 		int BottomButtonIndex = -1;
 
 	UPROPERTY(BlueprintReadOnly, Category = "UINav Input")
-		int InputsPerAction = 0;
+		int KeysPerInput = 0;
 
 	/*
 	Indicates whether the player can cancel changing the keybind for an action

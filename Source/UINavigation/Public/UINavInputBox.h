@@ -58,5 +58,5 @@ public:
 
 	FName InputName;
 
-	int InputsPerAction = 2;
+	int KeysPerInput = 2;
 };

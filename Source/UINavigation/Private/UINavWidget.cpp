@@ -398,7 +398,7 @@ FReply UUINavWidget::NativeOnMouseButtonDown(const FGeometry & InGeometry, const
 		if (reply.IsEventHandled()) return FReply::Handled();
 	}
 
-	return FReply::Handled();
+	return FReply::Unhandled();
 }
 
 FReply UUINavWidget::NativeOnMouseButtonUp(const FGeometry & InGeometry, const FPointerEvent & InMouseEvent)
@@ -484,7 +484,7 @@ void UUINavWidget::AppendVerticalNavigation(int Dimension, FButtonNavigation Edg
 	{
 		if (InputContainerIndex >= StartingIndex && InputContainerIndex <= StartingIndex + Dimension)
 		{
-			ExtraButtons = (UINavInputBoxes.Num() * UINavInputContainer->InputsPerAction) - 1;
+			ExtraButtons = (UINavInputBoxes.Num() * UINavInputContainer->KeysPerInput) - 1;
 		}
 	}
 	if (Dimension == UINavButtons.Num() && ExtraButtons > 0) Dimension -= (ExtraButtons);
@@ -502,7 +502,7 @@ void UUINavWidget::AppendVerticalNavigation(int Dimension, FButtonNavigation Edg
 			InputEdgeNav.UpButton =  i == 0 ? (EdgeNavigation.UpButton != -1 ? EdgeNavigation.UpButton : (bWrap ? StartingIndex + Dimension + ExtraButtons - 1 : -1)) : UINavInputContainer->FirstButtonIndex + i - 1;
 			InputEdgeNav.DownButton = i == Dimension - 1 ? (EdgeNavigation.DownButton != -1 ? EdgeNavigation.DownButton : (bWrap ? StartingIndex : -1)) : UINavInputContainer->LastButtonIndex + i + 1;
 			bReachedInputContainer = true;
-			AppendGridNavigation(UINavInputContainer->InputsPerAction, UINavInputBoxes.Num(), InputEdgeNav, false);
+			AppendGridNavigation(UINavInputContainer->KeysPerInput, UINavInputBoxes.Num(), InputEdgeNav, false);
 
 			if (i != 0) ButtonNavigations[UINavInputContainer->FirstButtonIndex + i - 1].DownButton = UINavInputContainer->TopButtonIndex;
 			ContainerUpIndex = UINavInputContainer->LastButtonIndex + i + 1;
@@ -569,7 +569,7 @@ void UUINavWidget::AppendHorizontalNavigation(int Dimension, FButtonNavigation E
 			InputEdgeNav.LeftButton =  i == 0 ? (EdgeNavigation.UpButton != -1 ? EdgeNavigation.UpButton : (bWrap ? StartingIndex + Dimension + ExtraButtons - 1 : -1)) : UINavInputContainer->FirstButtonIndex + i - 1;
 			InputEdgeNav.RightButton = i == Dimension - 1 ? (EdgeNavigation.DownButton != -1 ? EdgeNavigation.DownButton : (bWrap ? StartingIndex : -1)) : UINavInputContainer->LastButtonIndex + i + 1;
 			bReachedInputContainer = true;
-			AppendGridNavigation(UINavInputContainer->InputsPerAction, UINavInputBoxes.Num(), InputEdgeNav, false);
+			AppendGridNavigation(UINavInputContainer->KeysPerInput, UINavInputBoxes.Num(), InputEdgeNav, false);
 			
 			if (i != 0) ButtonNavigations[UINavInputContainer->FirstButtonIndex + i - 1].RightButton = UINavInputContainer->TopButtonIndex;
 			ContainerUpIndex = UINavInputContainer->LastButtonIndex + i + 1;
@@ -902,9 +902,9 @@ void UUINavWidget::OnPreSelect(int Index)
 	if (UINavInputContainer != nullptr && Index >= UINavInputContainer->FirstButtonIndex && Index <= UINavInputContainer->LastButtonIndex)
 	{
 		InputBoxIndex = Index - UINavInputContainer->FirstButtonIndex;
-		int InputsPerAction = UINavInputContainer->InputsPerAction;
-		UINavInputBoxes[InputBoxIndex / InputsPerAction]->NotifySelected(InputBoxIndex % InputsPerAction);
-		ReceiveInputType = UINavInputBoxes[InputBoxIndex / InputsPerAction]->bIsAxis ? EReceiveInputType::Axis : EReceiveInputType::Action;
+		int KeysPerInput = UINavInputContainer->KeysPerInput;
+		UINavInputBoxes[InputBoxIndex / KeysPerInput]->NotifySelected(InputBoxIndex % KeysPerInput);
+		ReceiveInputType = UINavInputBoxes[InputBoxIndex / KeysPerInput]->bIsAxis ? EReceiveInputType::Axis : EReceiveInputType::Action;
 		SetUserFocus(CurrentPC);
 		bWaitForInput = true;
 	}
@@ -1066,7 +1066,7 @@ void UUINavWidget::HoverEvent(int Index)
 	if (bWaitForInput)
 	{
 		bWaitForInput = false;
-		UINavInputBoxes[InputBoxIndex / UINavInputContainer->InputsPerAction]->RevertToActionText(InputBoxIndex % UINavInputContainer->InputsPerAction);
+		UINavInputBoxes[InputBoxIndex / UINavInputContainer->KeysPerInput]->RevertToActionText(InputBoxIndex % UINavInputContainer->KeysPerInput);
 	}
 	if (CurrentPC->GetCurrentInputType() != EInputType::Mouse)
 	{
@@ -1089,7 +1089,7 @@ void UUINavWidget::UnhoverEvent(int Index)
 	if (bWaitForInput)
 	{
 		bWaitForInput = false;
-		UINavInputBoxes[InputBoxIndex / UINavInputContainer->InputsPerAction]->RevertToActionText(InputBoxIndex % UINavInputContainer->InputsPerAction);
+		UINavInputBoxes[InputBoxIndex / UINavInputContainer->KeysPerInput]->RevertToActionText(InputBoxIndex % UINavInputContainer->KeysPerInput);
 	}
 
 	if (bUseButtonStates)
@@ -1156,17 +1156,17 @@ void UUINavWidget::SetupUINavButtonDelegates(UUINavButton * NewButton)
 
 void UUINavWidget::ProcessNonMouseKeybind(FKey PressedKey)
 {
-	int InputsPerAction = UINavInputContainer->InputsPerAction;
-	UINavInputBoxes[InputBoxIndex / InputsPerAction]->UpdateInputKey(PressedKey, InputBoxIndex % InputsPerAction);
+	int KeysPerInput = UINavInputContainer->KeysPerInput;
+	UINavInputBoxes[InputBoxIndex / KeysPerInput]->UpdateInputKey(PressedKey, InputBoxIndex % KeysPerInput);
 	bWaitForInput = false;
 	ReceiveInputType = EReceiveInputType::None;
 }
 
 void UUINavWidget::ProcessMouseKeybind(FKey PressedMouseKey)
 {
-	int InputsPerAction = UINavInputContainer->InputsPerAction;
+	int KeysPerInput = UINavInputContainer->KeysPerInput;
 	if (ReceiveInputType == EReceiveInputType::Axis) PressedMouseKey = FKey(FName("MouseWheelAxis"));
-	UINavInputBoxes[InputBoxIndex / InputsPerAction]->UpdateInputKey(PressedMouseKey, InputBoxIndex % InputsPerAction);
+	UINavInputBoxes[InputBoxIndex / KeysPerInput]->UpdateInputKey(PressedMouseKey, InputBoxIndex % KeysPerInput);
 	bWaitForInput = false;
 	ReceiveInputType = EReceiveInputType::None;
 }
@@ -1174,8 +1174,8 @@ void UUINavWidget::ProcessMouseKeybind(FKey PressedMouseKey)
 void UUINavWidget::CancelRebind()
 {
 	bWaitForInput = false;
-	int InputsPerAction = UINavInputContainer->InputsPerAction;
-	UINavInputBoxes[InputBoxIndex / InputsPerAction]->RevertToActionText(InputBoxIndex % InputsPerAction);
+	int KeysPerInput = UINavInputContainer->KeysPerInput;
+	UINavInputBoxes[InputBoxIndex / KeysPerInput]->RevertToActionText(InputBoxIndex % KeysPerInput);
 	ReceiveInputType = EReceiveInputType::None;
 }
 

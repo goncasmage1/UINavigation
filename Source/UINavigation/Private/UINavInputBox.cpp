@@ -53,7 +53,7 @@ void UUINavInputBox::BuildKeyMappings()
 		{
 			if (j + 1 <= Keys.Num()) break;
 
-			if (i < InputsPerAction)
+			if (i < KeysPerInput)
 			{
 				if ((bIsAxis && i < TempAxes.Num()) || (!bIsAxis && i < TempActions.Num()))
 				{
@@ -232,7 +232,7 @@ void UUINavInputBox::CheckKeyIcon(int Index)
 void UUINavInputBox::RevertToActionText(int Index)
 { 
 	FText OldName;
-	if (Index < InputsPerAction && !(Keys[Index].GetFName().IsEqual(FName("None"))))
+	if (Index < KeysPerInput && !(Keys[Index].GetFName().IsEqual(FName("None"))))
 	{
 		OldName = GetKeyName(Index);
 		CheckKeyIcon(Index);
