@@ -124,7 +124,7 @@ protected:
 	/**
 	*	Sets all the UTextBlocks to the default color
 	*/
-	void ChangeTextColorToDefault();
+	inline void ChangeTextColorToDefault();
 
 	/**
 	*	Returns the position of the UINavButton with the specified index
@@ -202,10 +202,6 @@ public:
 	//This widget's class
 	TSubclassOf<UUINavWidget> WidgetClass;
 
-	//Parent widget's class
-	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
-		TSubclassOf<UUINavWidget> ParentWidgetClass;
-
 	//Current player controller
 	UPROPERTY(BlueprintReadWrite, Category = UINavWidget)
 		class AUINavController* CurrentPC;
@@ -242,11 +238,6 @@ public:
 	//The speed at which the given animations will play
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = UINavWidget)
 		float AnimationPlaybackSpeed = 1.f;
-
-	/*If set to true, this widget move the selector using a curve-guided movement animation.
-	Otherwise it will snap the selector to its desired location*/
-	UPROPERTY(EditDefaultsOnly, Category = "UINavigation Selector", meta = (EditCondition = "bUseSelector"))
-		bool bUseMovementCurve = false;
 
 	UPROPERTY(EditDefaultsOnly, Category = "UINavigation Selector", meta = (EditCondition = "bUseMovementCurve"))
 		UCurveFloat* MoveCurve;
@@ -500,14 +491,6 @@ public:
 	*/
 	UFUNCTION(BlueprintCallable, Category = UINavWidget)
 		void ReturnToParent();
-
-	/**
-	*	Returns the UINavButton with the specified index
-	*
-	*	@return  UUINavButton  The UINavButton with the specified index
-	*/
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
-		UUINavButton* GetUINavButtonAtIndex(int Index);
 
 	/**
 	*	Returns the UINavComponent with the specified index (null if that

@@ -103,7 +103,7 @@ protected:
 
 public:
 
-	void SetParentWidget(class UUINavWidget* NewParent);
+	void Init(class UUINavWidget* NewParent);
 
 	UFUNCTION(BlueprintCallable, Category = "UINav Input")
 		void ResetKeyMappings();

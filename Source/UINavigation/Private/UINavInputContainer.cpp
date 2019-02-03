@@ -17,7 +17,7 @@
 #include "IImageWrapper.h"
 #include "IImageWrapperModule.h"
 
-void UUINavInputContainer::SetParentWidget(UUINavWidget * NewParent)
+void UUINavInputContainer::Init(UUINavWidget * NewParent)
 {
 	ParentWidget = NewParent;
 

@@ -34,10 +34,7 @@ void UUINavWidget::NativeConstruct()
 	//If this widget was added through a child widget, destroy it
 	if (ReturnedFromWidget != nullptr)
 	{
-		if (ReturnedFromWidget != nullptr)
-		{
-			ReturnedFromWidget->Destruct();
-		}
+		ReturnedFromWidget->Destruct();
 		ReturnedFromWidget = nullptr;
 	}
 
@@ -66,14 +63,6 @@ void UUINavWidget::InitialSetup()
 		}
 	}
 
-	if (bUseSelector && bUseMovementCurve)
-	{
-		if (MoveCurve == nullptr)
-		{
-			DISPLAYERROR("UseMovementCurve is true but MoveCurve is null");
-		}
-	}
-
 	FetchButtonsInHierarchy();
 	ReadyForSetup();
 
@@ -90,8 +79,6 @@ void UUINavWidget::InitialSetup()
 	}
 
 	if (bUseTextColor) ChangeTextColorToDefault();
-
-	if (CurrentPC != nullptr) CurrentPC->bAllowNavigation = true;
 
 	//If this widget doesn't need to create the selector, skip to setup
 	if (!bUseSelector)
@@ -183,13 +170,13 @@ void UUINavWidget::TraverseHierarquy()
 			if (UINavInputContainer != nullptr)
 			{
 				DISPLAYERROR("Found more than 1 UINavInputContainer!");
-				continue;
+				return;
 			}
 
 			InputContainerIndex = UINavButtons.Num();
 			UINavInputContainer = InputContainer;
 
-			InputContainer->SetParentWidget(this);
+			InputContainer->Init(this);
 		}
 
 		UUINavButton* NewNavButton = Cast<UUINavButton>(widget);
@@ -236,11 +223,7 @@ void UUINavWidget::TraverseHierarquy()
 
 void UUINavWidget::ChangeTextColorToDefault()
 {
-	UTextBlock* TextBlock = nullptr;
-	for (int j = 0; j < UINavButtons.Num(); j++)
-	{
-		SwitchTextColorTo(j, TextDefaultColor);
-	}
+	for (int j = 0; j < UINavButtons.Num(); j++) SwitchTextColorTo(j, TextDefaultColor);
 }
 
 void UUINavWidget::SetupSelector()
@@ -340,6 +323,7 @@ FReply UUINavWidget::NativeOnKeyDown(const FGeometry & InGeometry, const FKeyEve
 		}
 
 		ProcessNonMouseKeybind(PressedKey);
+		return FReply::Handled();
 	}
 	else
 	{
@@ -347,7 +331,7 @@ FReply UUINavWidget::NativeOnKeyDown(const FGeometry & InGeometry, const FKeyEve
 		if (reply.IsEventHandled()) return FReply::Handled();
 	}
 
-	return FReply::Handled();
+	return FReply::Unhandled();
 }
 
 FReply UUINavWidget::NativeOnKeyUp(const FGeometry & InGeometry, const FKeyEvent & InKeyEvent)
@@ -360,7 +344,7 @@ FReply UUINavWidget::NativeOnKeyUp(const FGeometry & InGeometry, const FKeyEvent
 		if (reply.IsEventHandled()) return FReply::Handled();
 	}
 
-	return FReply::Handled();
+	return FReply::Unhandled();
 }
 
 FReply UUINavWidget::NativeOnMouseWheel(const FGeometry & InGeometry, const FPointerEvent & InMouseEvent)
@@ -391,6 +375,7 @@ FReply UUINavWidget::NativeOnMouseButtonDown(const FGeometry & InGeometry, const
 			return FReply::Handled();
 		}
 		ProcessMouseKeybind(InMouseEvent.GetEffectingButton());
+		return FReply::Handled();
 	}
 	else
 	{
@@ -411,7 +396,7 @@ FReply UUINavWidget::NativeOnMouseButtonUp(const FGeometry & InGeometry, const F
 		if (reply.IsEventHandled()) return FReply::Handled();
 	}
 
-	return FReply::Handled();
+	return FReply::Unhandled();
 }
 
 FReply UUINavWidget::OnKeyPressed(FKey PressedKey)
@@ -445,18 +430,10 @@ void UUINavWidget::HandleSelectorMovement(float DeltaTime)
 		TheSelector->SetRenderTranslation(SelectorDestination);
 		if (HaltedIndex != -1)
 		{
-			if (HaltedIndex == SELECT_INDEX)
-			{
-				OnSelect(ButtonIndex);
-			}
-			else if (HaltedIndex == RETURN_INDEX)
-			{
-				OnReturn();
-			}
-			else
-			{
-				NavigateTo(HaltedIndex);
-			}
+			if (HaltedIndex == SELECT_INDEX) OnSelect(ButtonIndex);
+			else if (HaltedIndex == RETURN_INDEX) OnReturn();
+			else NavigateTo(HaltedIndex);
+
 			HaltedIndex = -1;
 		}
 		return;
@@ -722,7 +699,7 @@ FVector2D UUINavWidget::GetButtonLocation(int Index)
 
 void UUINavWidget::ExecuteAnimations(int From, int To)
 {
-		if (From != -1)
+	if (From != -1)
 	{
 		if (IsAnimationPlaying(UINavAnimations[From]))
 		{
@@ -733,6 +710,7 @@ void UUINavWidget::ExecuteAnimations(int From, int To)
 			PlayAnimation(UINavAnimations[From], 0.0f, 1, EUMGSequencePlayMode::Reverse, AnimationPlaybackSpeed);
 		}
 	}
+
 	if (IsAnimationPlaying(UINavAnimations[To]))
 	{
 		ReverseAnimation(UINavAnimations[To]);
@@ -758,7 +736,7 @@ void UUINavWidget::SwitchTextColorTo(int Index, FLinearColor Color)
 		NewText = UINavComponents[NewComponentIndex]->NavText;
 		if (NewText == nullptr)
 		{
-			DISPLAYERROR("When bUseTextColor is true, UINavComponent should have a valid TextBlock called NavText.");
+			DISPLAYERROR("When UseTextColor is true, UINavComponent should have a valid TextBlock called NavText.");
 			return;
 		}
 	}
@@ -767,7 +745,7 @@ void UUINavWidget::SwitchTextColorTo(int Index, FLinearColor Color)
 		NewText = Cast<UTextBlock>(UINavButtons[Index]->GetChildAt(0));
 		if (NewText == nullptr)
 		{
-			DISPLAYERROR("When bUseTextColor is true, UINavButton should have a TextBlock as its child.");
+			DISPLAYERROR("When UseTextColor is true, UINavButton should have a TextBlock as its child.");
 			return;
 		}
 	}
@@ -806,10 +784,8 @@ void UUINavWidget::SwitchButtonStyle(int Index)
 
 void UUINavWidget::SetSelector(UUserWidget * NewSelector)
 {
-	if (NewSelector == nullptr)
-	{
-		DISPLAYERROR("Received invalid Selector");
-	}
+	if (NewSelector == nullptr) DISPLAYERROR("Received invalid Selector");
+		
 	TheSelector = NewSelector;
 }
 
@@ -827,29 +803,17 @@ void UUINavWidget::SetSelectorVisibility(bool bVisible)
 
 void UUINavWidget::NavigateTo(int Index, bool bHoverEvent)
 {
-	bool bShouldNotify = Index != ButtonIndex ? true : false;
+	bool bShouldNotify = Index != ButtonIndex;
 	
-	if (bUseButtonStates)
-	{
-		UpdateButtonsStates(Index, bHoverEvent);
-	}
+	if (bUseButtonStates) UpdateButtonsStates(Index, bHoverEvent);
 
 	if (bUseSelector)
 	{
-		if (bUseMovementCurve)
-		{
-			BeginSelectorMovement(Index);
-		}
-		else
-		{
-			UpdateSelectorLocation(Index);
-		}
+		if (MoveCurve != nullptr) BeginSelectorMovement(Index);
+		else UpdateSelectorLocation(Index);
 	}
 
-	if (bUseTextColor)
-	{
-		UpdateTextColor(Index);
-	}
+	if (bUseTextColor) UpdateTextColor(Index);
 
 	if (bShouldNotify)
 	{
@@ -862,13 +826,14 @@ void UUINavWidget::NavigateTo(int Index, bool bHoverEvent)
 
 		if (UINavAnimations.Num() > 0) ExecuteAnimations(ButtonIndex, Index);
 	}
+
 	//Update all the possible scroll boxes in the widget
 	for (int i = 0; i < ScrollBoxes.Num(); ++i)
 	{
 		ScrollBoxes[i]->ScrollWidgetIntoView(UINavButtons[Index]);
 	}
-	ButtonIndex = Index;
 
+	ButtonIndex = Index;
 }
 
 void UUINavWidget::BeginSelectorMovement(int Index)
@@ -944,12 +909,8 @@ UWidget* UUINavWidget::GoToWidget(TSubclassOf<UUINavWidget> NewWidgetClass, bool
 
 	UUINavWidget* NewWidget = CreateWidget<UUINavWidget>(CurrentPC, NewWidgetClass);
 	NewWidget->ParentWidget = this;
-	NewWidget->ParentWidgetClass = WidgetClass;
 	NewWidget->bParentRemoved = bRemoveParent;
-	if (HasUserFocus(CurrentPC))
-	{
-		NewWidget->SetUserFocus(CurrentPC);
-	}
+	if (HasUserFocus(CurrentPC)) NewWidget->SetUserFocus(CurrentPC);
 	NewWidget->AddToViewport(ZOrder);
 	CleanSetup();
 	return NewWidget;
@@ -967,10 +928,7 @@ void UUINavWidget::ReturnToParent()
 		return;
 	}
 
-	if (HasUserFocus(CurrentPC))
-	{
-		ParentWidget->SetUserFocus(CurrentPC);
-	}
+	if (HasUserFocus(CurrentPC)) ParentWidget->SetUserFocus(CurrentPC);
 
 	//If parent was removed, add it to viewport
 	if (bParentRemoved)
@@ -1033,16 +991,6 @@ int UUINavWidget::FetchIndexByDirection(ENavigationDirection Direction, int Inde
 	}
 
 	return LocalIndex;
-}
-
-UUINavButton * UUINavWidget::GetUINavButtonAtIndex(int Index)
-{
-	if (UINavButtons.Num() <= Index)
-	{
-		DISPLAYERROR("GetUINavButtonAtIndex was given an invalid index!");
-		return nullptr;
-	}
-	return UINavButtons[Index];
 }
 
 UUINavComponent * UUINavWidget::GetUINavComponentAtIndex(int Index)
@@ -1129,20 +1077,7 @@ void UUINavWidget::ClickEvent(int Index)
 
 void UUINavWidget::ReleaseEvent(int Index)
 {
-	//Handle button style switching when mouse is released
-	if (!UINavButtons[Index]->IsHovered())
-	{
-		SwitchButtonStyle(Index);
-		for (int i = 0; i < UINavButtons.Num(); i++)
-		{
-			if (i == Index) continue;
-			if (UINavButtons[i]->IsHovered())
-			{
-				SwitchButtonStyle(i);
-				return;
-			}
-		}
-	}
+	if (!UINavButtons[Index]->IsHovered()) SwitchButtonStyle(Index);
 }
 
 void UUINavWidget::SetupUINavButtonDelegates(UUINavButton * NewButton)
@@ -1190,13 +1125,12 @@ void UUINavWidget::NavigateInDirection(ENavigationDirection Direction)
 	}
 
 	UUINavComponentBox* ComponentBox = GetUINavComponentBoxAtIndex(ButtonIndex);
-	if (ComponentBox != nullptr && (Direction == ENavigationDirection::Left || Direction == ENavigationDirection::Right))
+	if (ComponentBox != nullptr)
 	{
 		if (Direction == ENavigationDirection::Left) ComponentBox->NavigateLeft();
 		else if (Direction == ENavigationDirection::Right) ComponentBox->NavigateRight();
 	}
 	else MenuNavigate(Direction);
-	
 }
 
 void UUINavWidget::MenuSelect()
