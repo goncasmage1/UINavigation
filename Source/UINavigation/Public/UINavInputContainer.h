@@ -114,8 +114,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "UINav Input")
 		bool RespectsRestriction(FKey CompareKey, int Index);
 
-	class UTexture2D* LoadTexture2D(const FString& FullFilePath, bool& IsValid, int32& Width, int32& Height);
-
 	//Fetches the index offset from the TargetColumn variable for both the top and bottom of the Input Container
 	int GetOffsetFromTargetColumn(bool bTop);
 

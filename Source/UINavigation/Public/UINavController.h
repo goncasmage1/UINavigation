@@ -83,6 +83,8 @@ protected:
 	void TimerCallback();
 	void SetTimer(ENavigationDirection Direction);
 
+	void VerifyDefaultInputs();
+
 	/**
 	*	Searches all the Input Actions relevant to UINav plugin and saves them in a map
 	*/
@@ -126,6 +128,7 @@ protected:
 	void NotifyInputTypeChange(EInputType NewInputType);
 
 	virtual void SetupInputComponent() override;
+	virtual void BeginPlay() override;
 	virtual void Possess(APawn* InPawn) override;
 	virtual void Tick(float DeltaTime) override;
 

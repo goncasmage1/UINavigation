@@ -44,8 +44,17 @@ void AUINavController::SetupInputComponent()
 	FInputKeyBinding& Action1_3 = InputComponent->BindKey(EKeys::AnyKey, IE_Pressed, this, &AUINavController::MouseInputWorkaround);
 	Action1_3.bExecuteWhenPaused = true;
 	Action1_3.bConsumeInput = false;
+}
 
-	//Save default settings
+void AUINavController::BeginPlay()
+{
+	Super::BeginPlay();
+
+	VerifyDefaultInputs();
+}
+
+void AUINavController::VerifyDefaultInputs()
+{
 	UUINavSettings *MySettings = GetMutableDefault<UUINavSettings>();
 	if (MySettings->ActionMappings.Num() == 0 && MySettings->AxisMappings.Num() == 0)
 	{
@@ -127,6 +136,7 @@ void AUINavController::SetTimer(ENavigationDirection TimerDirection)
 	CountdownPhase = ECountdownPhase::First;
 }
 
+
 void AUINavController::ClearTimer()
 {
 	if (CallbackDirection == ENavigationDirection::None) return;
@@ -183,17 +193,9 @@ EInputType AUINavController::GetKeyInputType(FKey Key)
 
 EInputType AUINavController::GetActionInputType(FString Action)
 {
-	TArray<FString> Actions;
-	KeyMap.GenerateKeyArray(Actions);
-	for (FString action : Actions)
+	for (FKey key : KeyMap[Action])
 	{
-		for (FKey key : KeyMap[action])
-		{
-			if (WasInputKeyJustPressed(key))
-			{
-				return GetKeyInputType(key);
-			}
-		}
+		if (WasInputKeyJustPressed(key)) return GetKeyInputType(key);
 	}
 	return CurrentInputType;
 }
@@ -236,7 +238,10 @@ bool AUINavController::IsReturnKey(FKey PressedKey)
 
 void AUINavController::ExecuteActionByKey(FKey PressedKey, bool bPressed)
 {
-	ExecuteActionByName(FindActionByKey(PressedKey), bPressed);
+	FString ActionName = FindActionByKey(PressedKey);
+	if (ActionName.Equals(TEXT(""))) return;
+
+	ExecuteActionByName(ActionName, bPressed);
 }
 
 FString AUINavController::FindActionByKey(FKey ActionKey)
@@ -247,10 +252,7 @@ FString AUINavController::FindActionByKey(FKey ActionKey)
 	{
 		for (FKey key : KeyMap[action])
 		{
-			if (key == ActionKey)
-			{
-				return action;
-			}
+			if (key == ActionKey) return action;
 		}
 	}
 	return TEXT("");
@@ -282,71 +284,39 @@ void AUINavController::ExecuteActionByName(FString Action, bool bPressed)
 {
 	if (Action.Equals("MenuUp"))
 	{
-		if (bPressed)
-		{
-			StartMenuUp();
-		}
-		else
-		{
-			MenuUpRelease();
-		}
+		if (bPressed) StartMenuUp();
+		else MenuUpRelease();
 	}
 	else if (Action.Equals("MenuDown"))
 	{
-		if (bPressed)
-		{
-			StartMenuDown();
-		}
-		else
-		{
-			MenuDownRelease();
-		}
+		if (bPressed) StartMenuDown();
+		else MenuDownRelease();
 	}
 	else if (Action.Equals("MenuLeft"))
 	{
-		if (bPressed)
-		{
-			StartMenuLeft();
-		}
-		else
-		{
-			MenuLeftRelease();
-		}
+		if (bPressed) StartMenuLeft();
+		else MenuLeftRelease();
 	}
 	else if (Action.Equals("MenuRight"))
 	{
-		if (bPressed)
-		{
-			StartMenuRight();
-		}
-		else
-		{
-			MenuRightRelease();
-		}
+		if (bPressed) StartMenuRight();
+		else MenuRightRelease();
 	}
-	else if (Action.Equals("MenuSelect"))
+	else if (Action.Equals("MenuSelect") && bPressed)
 	{
-		if (bPressed)
-		{
-			MenuSelect();
-		}
+		MenuSelect();
 	}
-	else if (Action.Equals("MenuReturn"))
+	else if (Action.Equals("MenuReturn") && bPressed)
 	{
-		if (bPressed)
-		{
-			MenuReturn();
-		}
+		MenuReturn();
 	}
 }
 
 void AUINavController::NotifyMouseInputType()
 {
-	EInputType NewInputType = EInputType::Mouse;
-
-	if (NewInputType != CurrentInputType)
+	if (EInputType::Mouse != CurrentInputType)
 	{
-		NotifyInputTypeChange(NewInputType);
+		NotifyInputTypeChange(EInputType::Mouse);
 	}
 }
 
