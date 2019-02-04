@@ -11,7 +11,7 @@ void UUINavComponent::NativeConstruct()
 
 	bIsFocusable = false;
 
-	check(NavButton != nullptr && "Button Component has no associated UINavButton");
+	check(NavButton != nullptr && "UINavComponent has no associated UINavButton");
 }
 
 void UUINavComponent::OnNavigatedTo_Implementation()

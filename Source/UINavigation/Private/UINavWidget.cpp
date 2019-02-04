@@ -1125,7 +1125,7 @@ void UUINavWidget::NavigateInDirection(ENavigationDirection Direction)
 	}
 
 	UUINavComponentBox* ComponentBox = GetUINavComponentBoxAtIndex(ButtonIndex);
-	if (ComponentBox != nullptr)
+	if (ComponentBox != nullptr && (Direction == ENavigationDirection::Left || Direction == ENavigationDirection::Right))
 	{
 		if (Direction == ENavigationDirection::Left) ComponentBox->NavigateLeft();
 		else if (Direction == ENavigationDirection::Right) ComponentBox->NavigateRight();
