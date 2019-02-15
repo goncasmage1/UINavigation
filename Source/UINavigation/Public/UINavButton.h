@@ -44,7 +44,5 @@ public:
 		void OnClick();
 	UFUNCTION()
 		void OnRelease();
-
-	void SetButtonIndex(int NewIndex);
 	
 };

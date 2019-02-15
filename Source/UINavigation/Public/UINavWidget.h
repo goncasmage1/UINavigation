@@ -16,6 +16,14 @@
 */
 
 UENUM(BlueprintType)
+enum class EReceiveInputType : uint8
+{
+	None UMETA(DisplayName = "None"),
+	Action UMETA(DisplayName = "Action"),
+	Axis UMETA(DisplayName = "Axis")
+};
+
+UENUM(BlueprintType)
 enum class ESelectorPosition : uint8
 {
 	Position_Center UMETA(DisplayName = "Center"),
@@ -82,8 +90,6 @@ protected:
 	float MovementCounter;
 	float MovementTime;
 
-	FInputActionKeyMapping TempMapping;
-
 	FVector2D SelectorOrigin;
 	FVector2D SelectorDestination;
 	FVector2D Distance;
@@ -118,7 +124,7 @@ protected:
 	/**
 	*	Sets all the UTextBlocks to the default color
 	*/
-	void ChangeTextColorToDefault();
+	inline void ChangeTextColorToDefault();
 
 	/**
 	*	Returns the position of the UINavButton with the specified index
@@ -133,6 +139,8 @@ public:
 
 	bool bWaitForInput = false;
 
+	EReceiveInputType ReceiveInputType = EReceiveInputType::None;
+
 	//The UserWidget object that will move along the Widget
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget, OptionalWidget = true), Category = UINavWidget)
 		UUserWidget* TheSelector;
@@ -145,6 +153,7 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
 		TArray<class UUINavButton*> UINavButtons;
 
+	//The indices of all the UINavComponents in this widget
 	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
 		TArray<int> UINavComponentsIndices;
 
@@ -166,11 +175,6 @@ public:
 	//The UINavInputContainer in this Widget
 	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
 		class UUINavInputContainer* UINavInputContainer;
-
-	//The starting index of the UINavInputBoxes in this widget
-	int InputBoxStartIndex = -1;
-	//The starting index of the UINavInputBoxes in this widget
-	int InputBoxEndIndex = -1;
 
 	//All the UINavInputBoxes in this Widget
 	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
@@ -197,10 +201,6 @@ public:
 
 	//This widget's class
 	TSubclassOf<UUINavWidget> WidgetClass;
-
-	//Parent widget's class
-	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
-		TSubclassOf<UUINavWidget> ParentWidgetClass;
 
 	//Current player controller
 	UPROPERTY(BlueprintReadWrite, Category = UINavWidget)
@@ -231,11 +231,6 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = UINavWidget)
 		int FirstButtonIndex = 0;
 
-	/*If set to true, ButtonIndex will NOT be determined by the UINavButton's position in the
-	hierarquy, but rather be specified in the Designer Tab.*/
-	UPROPERTY(EditDefaultsOnly, Category = UINavWidget)
-		bool bOverrideButtonIndices = false;
-
 	//If set to true, this widget will be removed if it has no ParentWidget and is returned from
 	UPROPERTY(EditDefaultsOnly, Category = UINavWidget)
 		bool bAllowRemoveIfRoot = false;
@@ -243,11 +238,6 @@ public:
 	//The speed at which the given animations will play
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = UINavWidget)
 		float AnimationPlaybackSpeed = 1.f;
-
-	/*If set to true, this widget move the selector using a curve-guided movement animation.
-	Otherwise it will snap the selector to its desired location*/
-	UPROPERTY(EditDefaultsOnly, Category = "UINavigation Selector", meta = (EditCondition = "bUseSelector"))
-		bool bUseMovementCurve = false;
 
 	UPROPERTY(EditDefaultsOnly, Category = "UINavigation Selector", meta = (EditCondition = "bUseMovementCurve"))
 		UCurveFloat* MoveCurve;
@@ -449,6 +439,15 @@ public:
 	virtual void OnReturn_Implementation();
 
 	/**
+	*	Notifies that the player navigated in the specified direction
+	*
+	*	@param	Direction  The direction of navigation
+	*/
+	UFUNCTION(BlueprintNativeEvent, Category = UINavWidget)
+		void OnNavigatedDirection(ENavigationDirection Direction);
+	virtual void OnNavigatedDirection_Implementation(ENavigationDirection Direction);
+
+	/**
 	*	Called when the input type changed
 	*/
 	UFUNCTION(BlueprintNativeEvent, Category = UINavWidget)
@@ -492,8 +491,8 @@ public:
 	*
 	*	@param	WidgetClass  The class of the widget to add to the screen
 	*/
-	UFUNCTION(BlueprintCallable, Category = UINavWidget)
-		UWidget* GoToWidget(TSubclassOf<UUINavWidget> NewWidgetClass, bool bRemoveParent);
+	UFUNCTION(BlueprintCallable, Category = UINavWidget, meta = (AdvancedDisplay=2))
+		UWidget* GoToWidget(TSubclassOf<UUINavWidget> NewWidgetClass, bool bRemoveParent, int ZOrder = 0);
 	
 	/**
 	*	Adds this widget's parent to the viewport (if applicable)
@@ -501,14 +500,6 @@ public:
 	*/
 	UFUNCTION(BlueprintCallable, Category = UINavWidget)
 		void ReturnToParent();
-
-	/**
-	*	Returns the UINavButton with the specified index
-	*
-	*	@return  UUINavButton  The UINavButton with the specified index
-	*/
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
-		UUINavButton* GetUINavButtonAtIndex(int Index);
 
 	/**
 	*	Returns the UINavComponent with the specified index (null if that
@@ -558,7 +549,9 @@ public:
 		void ReleaseEvent(int Index);
 
 	void SetupUINavButtonDelegates(class UUINavButton* NewButton);
+	void ProcessNonMouseKeybind(FKey PressedMouseKey);
 	void ProcessMouseKeybind(FKey PressedMouseKey);
+	void CancelRebind();
 
 	/**
 	*	Notifies this widget to navigate in the specified direction

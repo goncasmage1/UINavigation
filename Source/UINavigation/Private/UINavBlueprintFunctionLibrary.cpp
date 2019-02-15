@@ -51,6 +51,7 @@ void UUINavBlueprintFunctionLibrary::ResetInputSettings()
 	UInputSettings* Settings = const_cast<UInputSettings*>(GetDefault<UInputSettings>());
 	UUINavSettings *MySettings = GetMutableDefault<UUINavSettings>();
 	Settings->ActionMappings = MySettings->ActionMappings;
+	Settings->AxisMappings = MySettings->AxisMappings;
 	Settings->SaveConfig();
 	Settings->ForceRebuildKeymaps();
 }
