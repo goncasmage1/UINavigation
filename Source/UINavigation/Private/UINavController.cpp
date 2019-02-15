@@ -44,13 +44,23 @@ void AUINavController::SetupInputComponent()
 	FInputKeyBinding& Action1_3 = InputComponent->BindKey(EKeys::AnyKey, IE_Pressed, this, &AUINavController::MouseInputWorkaround);
 	Action1_3.bExecuteWhenPaused = true;
 	Action1_3.bConsumeInput = false;
+}
 
-	//Save default settings
+void AUINavController::BeginPlay()
+{
+	Super::BeginPlay();
+
+	VerifyDefaultInputs();
+}
+
+void AUINavController::VerifyDefaultInputs()
+{
 	UUINavSettings *MySettings = GetMutableDefault<UUINavSettings>();
-	if (MySettings->ActionMappings.Num() == 0)
+	if (MySettings->ActionMappings.Num() == 0 && MySettings->AxisMappings.Num() == 0)
 	{
 		UInputSettings* Settings = const_cast<UInputSettings*>(GetDefault<UInputSettings>());
 		MySettings->ActionMappings = Settings->ActionMappings;
+		MySettings->AxisMappings = Settings->AxisMappings;
 		MySettings->SaveConfig();
 	}
 }
@@ -65,18 +75,6 @@ void AUINavController::Possess(APawn * InPawn)
 void AUINavController::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-	float PosX, PosY;
-	GetMousePosition(PosX, PosY);
-	if (CurrentInputType != EInputType::Mouse)
-	{
-		if (PosX != PreviousX || PosY != PreviousY)
-		{
-			NotifyMouseInputType();
-		}
-	}
-	PreviousX = PosX;
-	PreviousY = PosY;
 
 	switch (CountdownPhase)
 	{
@@ -98,6 +96,18 @@ void AUINavController::Tick(float DeltaTime)
 			}
 			break;
 	}
+
+	float PosX, PosY;
+	GetMousePosition(PosX, PosY);
+	if (CurrentInputType != EInputType::Mouse)
+	{
+		if (PosX != PreviousX || PosY != PreviousY)
+		{
+			NotifyMouseInputType();
+		}
+	}
+	PreviousX = PosX;
+	PreviousY = PosY;
 }
 
 void AUINavController::TimerCallback()
@@ -125,6 +135,7 @@ void AUINavController::SetTimer(ENavigationDirection TimerDirection)
 	CallbackDirection = TimerDirection;
 	CountdownPhase = ECountdownPhase::First;
 }
+
 
 void AUINavController::ClearTimer()
 {
@@ -182,17 +193,9 @@ EInputType AUINavController::GetKeyInputType(FKey Key)
 
 EInputType AUINavController::GetActionInputType(FString Action)
 {
-	TArray<FString> Actions;
-	KeyMap.GenerateKeyArray(Actions);
-	for (FString action : Actions)
+	for (FKey key : KeyMap[Action])
 	{
-		for (FKey key : KeyMap[action])
-		{
-			if (WasInputKeyJustPressed(key))
-			{
-				return GetKeyInputType(key);
-			}
-		}
+		if (WasInputKeyJustPressed(key)) return GetKeyInputType(key);
 	}
 	return CurrentInputType;
 }
@@ -235,7 +238,10 @@ bool AUINavController::IsReturnKey(FKey PressedKey)
 
 void AUINavController::ExecuteActionByKey(FKey PressedKey, bool bPressed)
 {
-	ExecuteActionByName(FindActionByKey(PressedKey), bPressed);
+	FString ActionName = FindActionByKey(PressedKey);
+	if (ActionName.Equals(TEXT(""))) return;
+
+	ExecuteActionByName(ActionName, bPressed);
 }
 
 FString AUINavController::FindActionByKey(FKey ActionKey)
@@ -246,10 +252,7 @@ FString AUINavController::FindActionByKey(FKey ActionKey)
 	{
 		for (FKey key : KeyMap[action])
 		{
-			if (key == ActionKey)
-			{
-				return action;
-			}
+			if (key == ActionKey) return action;
 		}
 	}
 	return TEXT("");
@@ -281,77 +284,45 @@ void AUINavController::ExecuteActionByName(FString Action, bool bPressed)
 {
 	if (Action.Equals("MenuUp"))
 	{
-		if (bPressed)
-		{
-			StartMenuUp();
-		}
-		else
-		{
-			MenuUpRelease();
-		}
+		if (bPressed) StartMenuUp();
+		else MenuUpRelease();
 	}
 	else if (Action.Equals("MenuDown"))
 	{
-		if (bPressed)
-		{
-			StartMenuDown();
-		}
-		else
-		{
-			MenuDownRelease();
-		}
+		if (bPressed) StartMenuDown();
+		else MenuDownRelease();
 	}
 	else if (Action.Equals("MenuLeft"))
 	{
-		if (bPressed)
-		{
-			StartMenuLeft();
-		}
-		else
-		{
-			MenuLeftRelease();
-		}
+		if (bPressed) StartMenuLeft();
+		else MenuLeftRelease();
 	}
 	else if (Action.Equals("MenuRight"))
 	{
-		if (bPressed)
-		{
-			StartMenuRight();
-		}
-		else
-		{
-			MenuRightRelease();
-		}
+		if (bPressed) StartMenuRight();
+		else MenuRightRelease();
 	}
-	else if (Action.Equals("MenuSelect"))
+	else if (Action.Equals("MenuSelect") && bPressed)
 	{
-		if (bPressed)
-		{
-			MenuSelect();
-		}
+		MenuSelect();
 	}
-	else if (Action.Equals("MenuReturn"))
+	else if (Action.Equals("MenuReturn") && bPressed)
 	{
-		if (bPressed)
-		{
-			MenuReturn();
-		}
+		MenuReturn();
 	}
 }
 
 void AUINavController::NotifyMouseInputType()
 {
-	EInputType NewInputType = EInputType::Mouse;
-
-	if (NewInputType != CurrentInputType)
+	if (EInputType::Mouse != CurrentInputType)
 	{
-		NotifyInputTypeChange(NewInputType);
+		NotifyInputTypeChange(EInputType::Mouse);
 	}
 }
 
 void AUINavController::NotifyInputTypeChange(EInputType NewInputType)
 {
-	if (bReceiveInputChangeEvents) OnInputChanged(CurrentInputType, NewInputType);
+	OnInputChanged(CurrentInputType, NewInputType);
 
 	if (ActiveWidget != nullptr) ActiveWidget->OnInputChanged(CurrentInputType, NewInputType);
 
@@ -383,7 +354,7 @@ void AUINavController::OnReturn_Implementation()
 
 void AUINavController::MenuUp()
 {
-	if (bReceiveInputActionEvents) OnNavigated(ENavigationDirection::Up);
+	OnNavigated(ENavigationDirection::Up);
 	VerifyInputTypeChangeByAction(TEXT("MenuUp"));
 
 	if (ActiveWidget == nullptr ||
@@ -394,7 +365,7 @@ void AUINavController::MenuUp()
 
 void AUINavController::MenuDown()
 {
-	if (bReceiveInputActionEvents) OnNavigated(ENavigationDirection::Down);
+	OnNavigated(ENavigationDirection::Down);
 	VerifyInputTypeChangeByAction(TEXT("MenuDown"));
 
 	if (ActiveWidget == nullptr ||
@@ -405,7 +376,7 @@ void AUINavController::MenuDown()
 
 void AUINavController::MenuLeft()
 {
-	if (bReceiveInputActionEvents) OnNavigated(ENavigationDirection::Left);
+	OnNavigated(ENavigationDirection::Left);
 	VerifyInputTypeChangeByAction(TEXT("MenuLeft"));
 
 	if (ActiveWidget == nullptr ||
@@ -416,7 +387,7 @@ void AUINavController::MenuLeft()
 
 void AUINavController::MenuRight()
 {
-	if (bReceiveInputActionEvents) OnNavigated(ENavigationDirection::Right);
+	OnNavigated(ENavigationDirection::Right);
 	VerifyInputTypeChangeByAction(TEXT("MenuRight"));
 
 	if (ActiveWidget == nullptr ||
@@ -427,7 +398,7 @@ void AUINavController::MenuRight()
 
 void AUINavController::MenuSelect()
 {
-	if (bReceiveInputActionEvents) OnSelect();
+	OnSelect();
 	VerifyInputTypeChangeByAction(TEXT("MenuSelect"));
 
 	if (ActiveWidget == nullptr ||
@@ -439,7 +410,7 @@ void AUINavController::MenuSelect()
 
 void AUINavController::MenuReturn()
 {
-	if (bReceiveInputActionEvents) OnReturn();
+	OnReturn();
 	VerifyInputTypeChangeByAction(TEXT("MenuReturn"));
 
 	if (ActiveWidget == nullptr ||
@@ -504,9 +475,7 @@ void AUINavController::StartMenuUp()
 	MenuUp();
 	Direction = ENavigationDirection::Up;
 
-	if (!bChainNavigation) return;
-	if (ActiveWidget == nullptr || !ActiveWidget->IsInViewport())
-		if (!(bReceiveInputActionEvents || bReceiveInputChangeEvents)) return;
+	if (!bChainNavigation || ActiveWidget == nullptr || !ActiveWidget->IsInViewport()) return;
 
 	SetTimer(ENavigationDirection::Up);
 }
@@ -518,9 +487,7 @@ void AUINavController::StartMenuDown()
 	MenuDown();
 	Direction = ENavigationDirection::Down;
 
-	if (!bChainNavigation) return;
-	if (ActiveWidget == nullptr || !ActiveWidget->IsInViewport())
-		if (!(bReceiveInputActionEvents || bReceiveInputChangeEvents)) return;
+	if (!bChainNavigation || ActiveWidget == nullptr || !ActiveWidget->IsInViewport()) return;
 	
 	SetTimer(ENavigationDirection::Down);
 }
@@ -532,9 +499,7 @@ void AUINavController::StartMenuLeft()
 	MenuLeft();
 	Direction = ENavigationDirection::Left;
 
-	if (!bChainNavigation) return;
-	if (ActiveWidget == nullptr || !ActiveWidget->IsInViewport())
-		if (!(bReceiveInputActionEvents || bReceiveInputChangeEvents)) return;
+	if (!bChainNavigation || ActiveWidget == nullptr || !ActiveWidget->IsInViewport()) return;
 
 	SetTimer(ENavigationDirection::Left);
 }
@@ -546,9 +511,7 @@ void AUINavController::StartMenuRight()
 	MenuRight();
 	Direction = ENavigationDirection::Right;
 
-	if (!bChainNavigation) return;
-	if (ActiveWidget == nullptr || !ActiveWidget->IsInViewport())
-		if (!(bReceiveInputActionEvents || bReceiveInputChangeEvents)) return;
+	if (!bChainNavigation || ActiveWidget == nullptr || !ActiveWidget->IsInViewport()) return;
 
 	SetTimer(ENavigationDirection::Right);
 }

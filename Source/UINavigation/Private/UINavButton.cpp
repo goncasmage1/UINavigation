@@ -32,10 +32,5 @@ void UUINavButton::OnRelease()
 	CustomRelease.Broadcast(ButtonIndex);
 }
 
-void UUINavButton::SetButtonIndex(int NewIndex)
-{
-	ButtonIndex = NewIndex;
-}
-
 
 
