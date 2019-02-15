@@ -22,15 +22,13 @@ protected:
 
 	virtual void UpdateTextBlock() override;
 
-	void SetOptionText(FText NewText);
-
 public:
 
 	virtual void NativeConstruct() override;
 
 	/*If set to false, will use StringOptions, otherwise will use
 	all integers in designated range (from MinRange to MaxRange, inclusive)*/
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavOptionBox)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavOptionBox)
 		bool bUseNumberRange = false;
 
 	//The list of Names to display as options in this slider

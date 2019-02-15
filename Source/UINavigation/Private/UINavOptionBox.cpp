@@ -10,23 +10,20 @@ void UUINavOptionBox::NativeConstruct()
 
 	if (!bUseNumberRange)
 	{
-		//check(StringOptions.Num() > 1 && "StringOptions needs to have at least 2 options");
 		if (StringOptions.Num() <= 1)
 		{
 			DISPLAYERROR(TEXT("StringOptions needs to have at least 2 options"));
 		}
-		//check(DefaultOptionIndex <= (StringOptions.Num() - 1) && "DefaultOptionIndex isn't valid");
-		if (DefaultOptionIndex > (StringOptions.Num() - 1))
+		if (OptionIndex > (StringOptions.Num() - 1))
 		{
-			DISPLAYERROR(TEXT("DefaultOptionIndex isn't valid"));
+			DISPLAYERROR(TEXT("Invalid OptionIndex"));
 		}
 	}
 	else
 	{
-		//check(DefaultOptionIndex <= (MaxRange - MinRange) && "DefaultOptionIndex isn't valid");
-		if (DefaultOptionIndex > (MaxRange - MinRange))
+		if (OptionIndex > (MaxRange - MinRange))
 		{
-			DISPLAYERROR(TEXT("DefaultOptionIndex isn't valid"));
+			DISPLAYERROR(TEXT("Invalid OptionIndex"));
 		}
 	}
 
@@ -105,10 +102,4 @@ void UUINavOptionBox::UpdateTextBlock()
 		FText::FromString(FString::FromInt(MinRange + OptionIndex*Interval)) : 
 		FText::FromName(StringOptions[OptionIndex]));
 }
-
-void UUINavOptionBox::SetOptionText(FText NewText)
-{
-	NavText->SetText(NewText);
-}
-
 

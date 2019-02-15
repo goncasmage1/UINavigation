@@ -16,9 +16,6 @@ class UINAVIGATION_API UUINavComponentBox : public UUINavComponent
 	
 protected:
 
-	UPROPERTY(BlueprintReadOnly, Category = UINavComponentBox)
-		int OptionIndex = 0;
-
 	UPROPERTY(BlueprintReadWrite, Category = UINavComponentBox, meta = (BindWidget))
 		class UButton* LeftButton;
 	UPROPERTY(BlueprintReadWrite, Category = UINavComponentBox, meta = (BindWidget))
@@ -38,16 +35,16 @@ public:
 	void BaseConstruct();
 
 	//Indicates the option that should appear first in the slider
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavComponentBox)
-		int DefaultOptionIndex = 0;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavComponentBox)
+		int OptionIndex = 0;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavComponentBox)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavComponentBox, meta = (ClampMin="0"))
 		int MinRange = 0;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavComponentBox)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavComponentBox, meta = (ClampMin="0"))
 		int MaxRange = 1;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavComponentBox)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavComponentBox, meta = (ClampMin="1"))
 		int Interval = 1;
 
 	//If set to true, will disable buttons if the slider runs out of options on either side

@@ -8,10 +8,9 @@ void UUINavComponentBox::NativeConstruct()
 {
 	BaseConstruct();
 
-	//check(DefaultOptionIndex <= (MaxRange - MinRange) && "DefaultOptionIndex isn't valid");
-	if (DefaultOptionIndex > (MaxRange - MinRange))
+	if (OptionIndex > (MaxRange - MinRange))
 	{
-		DISPLAYERROR(TEXT("DefaultOptionIndex isn't valid"));
+		DISPLAYERROR(TEXT("Invalid OptionIndex"));
 	}
 
 	LeftButton->OnClicked.AddDynamic(this, &UUINavComponentBox::NavigateLeft);
@@ -22,34 +21,28 @@ void UUINavComponentBox::BaseConstruct()
 {
 	Super::NativeConstruct();
 
-	//check( && "MinRange has to be smaller that MaxRange");
 	if (MinRange >= MaxRange)
 	{
 		DISPLAYERROR(TEXT("MinRange has to be smaller that MaxRange"));
 	}
-	//check(Interval > 0 && "Interval must be at least 1");
 	if (Interval <= 0)
 	{
 		DISPLAYERROR(TEXT("Interval must be at least 1"));
 	}
 
-	//check(LeftButton != nullptr && "Couldn't find Button named LeftButton in UINavOptionBox");
 	if (LeftButton == nullptr)
 	{
 		DISPLAYERROR(TEXT("Couldn't find Button named LeftButton in UINavOptionBox"));
 	}
-	//check(RightButton != nullptr && "Couldn't find Button named RightButton in UINavOptionBox");
 	if (RightButton == nullptr)
 	{
 		DISPLAYERROR(TEXT("Couldn't find Button named RightButton in UINavOptionBox"));
 	}
-	//check(NavText != nullptr && "Couldn't find TextBlock named NavText in UINavOptionBox");
 	if (NavText == nullptr)
 	{
 		DISPLAYERROR(TEXT("Couldn't find TextBlock named NavText in UINavOptionBox"));
 	}
 
-	if (OptionIndex == 0) OptionIndex = DefaultOptionIndex;
 	UpdateTextBlock();
 	CheckLeftLimit();
 	CheckRightLimit();

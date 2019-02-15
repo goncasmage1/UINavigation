@@ -9,9 +9,9 @@ void UUINavSliderBox::NativeConstruct()
 	Super::BaseConstruct();
 
 	//check(DefaultOptionIndex <= (MaxRange - MinRange) && "DefaultOptionIndex isn't valid");
-	if (DefaultOptionIndex > (MaxRange - MinRange))
+	if (OptionIndex > (MaxRange - MinRange))
 	{
-		DISPLAYERROR(TEXT("DefaultOptionIndex isn't valid"));
+		DISPLAYERROR(TEXT("Invalid OptionIndex"));
 	}
 
 	LeftButton->OnClicked.AddDynamic(this, &UUINavSliderBox::NavigateLeft);
