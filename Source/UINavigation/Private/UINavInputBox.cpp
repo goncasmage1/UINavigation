@@ -24,50 +24,66 @@ void UUINavInputBox::BuildKeyMappings()
 {
 	const UInputSettings* Settings = GetDefault<UInputSettings>();
 	TArray<FInputActionKeyMapping> TempActions;
+	TArray<FInputAxisKeyMapping> TempAxes;
 
-	ActionText->SetText(FText::FromString(ActionName));
+	InputButtons = {
+		InputButton1,
+		InputButton2,
+		InputButton3
+	};
 
-	Settings->GetActionMappingByName(FName(*ActionName), TempActions);
+	InputText->SetText(FText::FromName(InputName));
+
+	if (bIsAxis) Settings->GetAxisMappingByName(InputName, TempAxes);
+	else Settings->GetActionMappingByName(InputName, TempActions);
 
 	AUINavController* PC = Cast<AUINavController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
 
-	if (TempActions.Num() == 0)
+	if ((bIsAxis && TempAxes.Num() == 0) || !bIsAxis && TempActions.Num() == 0)
 	{
-		DISPLAYERROR(TEXT("Couldn't find Action with given name."));
+		DISPLAYERROR(TEXT("Couldn't find Input with given name."));
 		return;
 	}
 
-	for (int i = 0; i < 3; i++)
+	for (int j = 0; j < 3; j++)
 	{
-		UUINavInputComponent* NewInputButton = i == 0 ? InputButton1 : (i == 1 ? InputButton2 : InputButton3);
-		InputButtons.Add(NewInputButton);
+		UUINavInputComponent* NewInputButton = InputButtons[j];
 
-		if (i < InputsPerAction)
+		for (int i = 0; i < 3; i++)
 		{
-			if (i < TempActions.Num())
-			{
-				FInputActionKeyMapping NewAction = TempActions[TempActions.Num() - 1 - i];
-				Keys.Add(NewAction.Key);
+			if (j + 1 <= Keys.Num()) break;
 
-				if (UpdateKeyIconForKey(i))
+			if (i < KeysPerInput)
+			{
+				if ((bIsAxis && i < TempAxes.Num()) || (!bIsAxis && i < TempActions.Num()))
 				{
-					bUsingKeyImage[i] = true;
-					NewInputButton->InputImage->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
-					NewInputButton->NavText->SetVisibility(ESlateVisibility::Collapsed);
+					FKey NewKey = bIsAxis ? TempAxes[i].Key : TempActions[i].Key;
+
+					if (Keys.Contains(NewKey) || !ShouldRegisterKey(NewKey, j)) continue;
+
+					Keys.Add(NewKey);
+
+					if (UpdateKeyIconForKey(j))
+					{
+						bUsingKeyImage[j] = true;
+						NewInputButton->InputImage->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+						NewInputButton->NavText->SetVisibility(ESlateVisibility::Collapsed);
+					}
+					NewInputButton->NavText->SetText(GetKeyName(j));
 				}
-				NewInputButton->NavText->SetText(GetKeyName(i));
 			}
 			else
 			{
-				NewInputButton->NavText->SetText(FText::FromName(FName(TEXT("Unbound"))));
-				NewInputButton->InputImage->SetVisibility(ESlateVisibility::Collapsed);
-				NewInputButton->NavText->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
-				Keys.Add(FKey());
+				NewInputButton->SetVisibility(ESlateVisibility::Hidden);
 			}
 		}
-		else
+
+		if (Keys.Num() - 1 < j)
 		{
-			NewInputButton->SetVisibility(ESlateVisibility::Hidden);
+			NewInputButton->NavText->SetText(FText::FromName(Container->EmptyKeyName));
+			NewInputButton->InputImage->SetVisibility(ESlateVisibility::Collapsed);
+			NewInputButton->NavText->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+			Keys.Add(FKey());
 		}
 	}
 }
@@ -76,12 +92,13 @@ void UUINavInputBox::ResetKeyMappings()
 {
 	Keys.Empty();
 	bUsingKeyImage = { false, false, false };
+	InputButtons.Empty();
 	BuildKeyMappings();
 }
 
-void UUINavInputBox::UpdateActionKey(FInputActionKeyMapping NewAction, int Index)
+void UUINavInputBox::UpdateInputKey(FKey NewKey, int Index)
 {
-	if (!ShouldRegisterKey(NewAction.Key, Index))
+	if (!ShouldRegisterKey(NewKey, Index))
 	{
 		RevertToActionText(Index);
 		return;
@@ -89,17 +106,20 @@ void UUINavInputBox::UpdateActionKey(FInputActionKeyMapping NewAction, int Index
 
 	UInputSettings* Settings = const_cast<UInputSettings*>(GetDefault<UInputSettings>());
 	TArray<FInputActionKeyMapping>& Actions = Settings->ActionMappings;
+	TArray<FInputAxisKeyMapping>& Axes = Settings->AxisMappings;
 
 	int Found = 0;
 	bool bFound = false;
-	for (int i = 0; i < Actions.Num(); i++)
+	int Iterations = bIsAxis ? Axes.Num() : Actions.Num();
+	for (int i = 0; i < Iterations; i++)
 	{
-		if (Actions[i].ActionName.IsEqual(FName(*ActionName)))
+		if ((bIsAxis && Axes[i].AxisName.IsEqual(InputName)) || (!bIsAxis && Actions[i].ActionName.IsEqual(InputName)))
 		{
-			if (Found == Index && Container->RespectsRestriction(NewAction.Key, Index))
+			if (Found == Index && Container->RespectsRestriction(NewKey, Index))
 			{
-				Actions[i].Key = NewAction.Key;
-				Keys[Index] = NewAction.Key;
+				if (bIsAxis) Axes[i].Key = NewKey;
+				else Actions[i].Key = NewKey;
+				Keys[Index] = NewKey;
 				InputButtons[Index]->NavText->SetText(GetKeyName(Index));
 				bFound = true;
 				break;
@@ -109,11 +129,24 @@ void UUINavInputBox::UpdateActionKey(FInputActionKeyMapping NewAction, int Index
 	}
 	if (!bFound)
 	{
-		FInputActionKeyMapping Action = NewAction;
-		Action.ActionName = FName(*ActionName);
-		Settings->AddActionMapping(Action, true);
-		Keys[Index] = NewAction.Key;
-		InputButtons[Index]->NavText->SetText(GetKeyName(Index));
+		if (bIsAxis)
+		{
+			FInputAxisKeyMapping Axis;
+			Axis.Key = NewKey;
+			Axis.AxisName = InputName;
+			Settings->AddAxisMapping(Axis, true);
+			Keys[Index] = NewKey;
+			InputButtons[Index]->NavText->SetText(GetKeyName(Index));
+		}
+		else
+		{
+			FInputActionKeyMapping Action = FInputActionKeyMapping();
+			Action.ActionName = InputName;
+			Action.Key = NewKey;
+			Settings->AddActionMapping(Action, true);
+			Keys[Index] = NewKey;
+			InputButtons[Index]->NavText->SetText(GetKeyName(Index));
+		}
 	}
 
 	AUINavController* UINavPC = Cast<AUINavController>(GetOwningPlayer());
@@ -199,14 +232,14 @@ void UUINavInputBox::CheckKeyIcon(int Index)
 void UUINavInputBox::RevertToActionText(int Index)
 { 
 	FText OldName;
-	if (Index < InputsPerAction && !(Keys[Index].GetFName().IsEqual(FName("None"))))
+	if (Index < KeysPerInput && !(Keys[Index].GetFName().IsEqual(FName("None"))))
 	{
 		OldName = GetKeyName(Index);
 		CheckKeyIcon(Index);
 	}
 	else
 	{
-		OldName = FText::FromName(FName(TEXT("Unbound")));
+		OldName = FText::FromName(Container->EmptyKeyName);
 	}
 
 	InputButtons[Index]->NavText->SetText(OldName);

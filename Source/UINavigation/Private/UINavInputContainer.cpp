@@ -17,7 +17,7 @@
 #include "IImageWrapper.h"
 #include "IImageWrapperModule.h"
 
-void UUINavInputContainer::SetParentWidget(UUINavWidget * NewParent)
+void UUINavInputContainer::Init(UUINavWidget * NewParent)
 {
 	ParentWidget = NewParent;
 
@@ -25,7 +25,7 @@ void UUINavInputContainer::SetParentWidget(UUINavWidget * NewParent)
 
 	if (InputRestrictions.Num() == 0) InputRestrictions.Add(EInputRestriction::None);
 	else if (InputRestrictions.Num() > 3) InputRestrictions.SetNum(3);
-	InputsPerAction = InputRestrictions.Num();
+	KeysPerInput = InputRestrictions.Num();
 
 	CreateInputBoxes();
 }
@@ -40,64 +40,14 @@ void UUINavInputContainer::CreateInputBoxes()
 {
 	if (InputBox_BP == nullptr) return;
 
-	Panel->ClearChildren();
-
-	AUINavController* PC = Cast<AUINavController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
-
-	UInputSettings* Settings = const_cast<UInputSettings*>(GetDefault<UInputSettings>());
-	TArray<FInputActionKeyMapping>& Actions = Settings->ActionMappings;
-	TArray<FKey> ActionKeys;
-	TArray<FName> FoundActions;
-
 	FirstButtonIndex = ParentWidget->UINavButtons.Num();
-	int StartingInputComponentIndex = ParentWidget->UINavComponents.Num();
 
-	bool bUseActionNames = ActionNames.Num() > 0;
-	int Iterations = bUseActionNames ? ActionNames.Num() : Actions.Num();
-	
-	ParentWidget->InputBoxStartIndex = ParentWidget->UINavButtons.Num();
-	for (int i = 0; i < Iterations; ++i)
-	{
-		if (!bUseActionNames)
-		{
-			if (FoundActions.Contains(Actions[i].ActionName)) continue;
-			else FoundActions.Add(Actions[i].ActionName);
-		}
-		for (int k = 0; k < InputsPerAction; k++)
-		{
-			ParentWidget->UINavButtons.Add(nullptr);
-			ParentWidget->UINavComponents.Add(nullptr);
-		}
-		ActionKeys.Add(Actions[i].Key);
-		UUINavInputBox* NewInputBox = CreateWidget<UUINavInputBox>(PC, InputBox_BP);
-		if (NewInputBox == nullptr) continue;
+	CreateActionBoxes();
+	CreateAxisBoxes();
 
-		NewInputBox->Container = this;
-		NewInputBox->InputsPerAction = InputsPerAction;
-		NewInputBox->ActionName = bUseActionNames ? ActionNames[i].ToString() : Actions[i].ActionName.ToString();
-		Panel->AddChild(NewInputBox);
+	LastButtonIndex = ParentWidget->UINavButtons.Num() != FirstButtonIndex ? ParentWidget->UINavButtons.Num() - 1 : FirstButtonIndex;
 
-		ParentWidget->UINavInputBoxes.Add(NewInputBox);
-		NumberOfActions++;
-
-		for (int j = 0; j < InputsPerAction; j++)
-		{
-			int NewButtonIndex = FirstButtonIndex + (bUseActionNames ? i : FoundActions.Num() - 1) * InputsPerAction + j;
-			int NewComponentIndex = StartingInputComponentIndex + (bUseActionNames ? i : FoundActions.Num() - 1) * InputsPerAction + j;
-			ParentWidget->UINavButtons[NewButtonIndex] = NewInputBox->InputButtons[j]->NavButton;
-			ParentWidget->UINavComponents[NewComponentIndex] = NewInputBox->InputButtons[j];
-			ParentWidget->UINavComponentsIndices.Add(NewButtonIndex);
-			if (!ParentWidget->bOverrideButtonIndices)
-			{
-				NewInputBox->InputButtons[j]->NavButton->ButtonIndex = FirstButtonIndex + (bUseActionNames ? i : (FoundActions.Num() - 1)) * InputsPerAction + j;
-			}
-			ParentWidget->SetupUINavButtonDelegates(NewInputBox->InputButtons[j]->NavButton);
-		}
-	} 
-
-	LastButtonIndex = ParentWidget->UINavButtons.Num() - 1;
-
-	switch (InputsPerAction)
+	switch (KeysPerInput)
 	{
 		case 2:
 			TopButtonIndex = FirstButtonIndex + (TargetColumn == ETargetColumn::Right);
@@ -108,6 +58,94 @@ void UUINavInputContainer::CreateInputBoxes()
 			BottomButtonIndex = LastButtonIndex - (2 - (int)TargetColumn);
 			break;
 	}
+}
+
+void UUINavInputContainer::CreateActionBoxes()
+{
+	AUINavController* PC = Cast<AUINavController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
+
+	UInputSettings* Settings = const_cast<UInputSettings*>(GetDefault<UInputSettings>());
+	TArray<FInputActionKeyMapping>& Actions = Settings->ActionMappings;
+
+	if (Actions.Num() == 0) return;
+
+	int TempFirstButtonIndex = ParentWidget->UINavButtons.Num();
+	int StartingInputComponentIndex = ParentWidget->UINavComponents.Num();
+
+	int Iterations = ActionNames.Num();
+
+	for (int i = 0; i < Iterations; ++i)
+	{
+		UUINavInputBox* NewInputBox = CreateWidget<UUINavInputBox>(PC, InputBox_BP);
+		if (NewInputBox == nullptr) continue;
+		NewInputBox->Container = this;
+		NewInputBox->bIsAxis = false;
+		NewInputBox->KeysPerInput = KeysPerInput;
+		NewInputBox->InputName = ActionNames[i];
+
+		ActionPanel->AddChild(NewInputBox);
+
+		ParentWidget->UINavInputBoxes.Add(NewInputBox);
+		NumberOfInputs++;
+
+		for (int j = 0; j < KeysPerInput; j++)
+		{
+			ParentWidget->UINavButtons.Add(nullptr);
+			ParentWidget->UINavComponents.Add(nullptr);
+
+			int NewButtonIndex = TempFirstButtonIndex + i * KeysPerInput + j;
+			int NewComponentIndex = StartingInputComponentIndex + i * KeysPerInput + j;
+			ParentWidget->UINavButtons[NewButtonIndex] = NewInputBox->InputButtons[j]->NavButton;
+			ParentWidget->UINavComponents[NewComponentIndex] = NewInputBox->InputButtons[j];
+			ParentWidget->UINavComponentsIndices.Add(NewButtonIndex);
+			NewInputBox->InputButtons[j]->NavButton->ButtonIndex = TempFirstButtonIndex + i * KeysPerInput + j;
+			ParentWidget->SetupUINavButtonDelegates(NewInputBox->InputButtons[j]->NavButton);
+		}
+	} 
+}
+
+void UUINavInputContainer::CreateAxisBoxes()
+{
+	AUINavController* PC = Cast<AUINavController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
+
+	UInputSettings* Settings = const_cast<UInputSettings*>(GetDefault<UInputSettings>());
+	TArray<FInputAxisKeyMapping>& Axes = Settings->AxisMappings;
+
+	if (Axes.Num() == 0) return;
+
+	int TempFirstButtonIndex = ParentWidget->UINavButtons.Num();
+	int StartingInputComponentIndex = ParentWidget->UINavComponents.Num();
+
+	int Iterations = AxisNames.Num();
+
+	for (int i = 0; i < Iterations; ++i)
+	{
+		UUINavInputBox* NewInputBox = CreateWidget<UUINavInputBox>(PC, InputBox_BP);
+		if (NewInputBox == nullptr) continue;
+		NewInputBox->Container = this;
+		NewInputBox->bIsAxis = true;
+		NewInputBox->KeysPerInput = KeysPerInput;
+		NewInputBox->InputName = AxisNames[i];
+
+		AxisPanel->AddChild(NewInputBox);
+
+		ParentWidget->UINavInputBoxes.Add(NewInputBox);
+		NumberOfInputs++;
+
+		for (int j = 0; j < KeysPerInput; j++)
+		{
+			ParentWidget->UINavButtons.Add(nullptr);
+			ParentWidget->UINavComponents.Add(nullptr);
+
+			int NewButtonIndex = TempFirstButtonIndex + i * KeysPerInput + j;
+			int NewComponentIndex = StartingInputComponentIndex + i * KeysPerInput + j;
+			ParentWidget->UINavButtons[NewButtonIndex] = NewInputBox->InputButtons[j]->NavButton;
+			ParentWidget->UINavComponents[NewComponentIndex] = NewInputBox->InputButtons[j];
+			ParentWidget->UINavComponentsIndices.Add(NewButtonIndex);
+			NewInputBox->InputButtons[j]->NavButton->ButtonIndex = TempFirstButtonIndex + i * KeysPerInput + j;
+			ParentWidget->SetupUINavButtonDelegates(NewInputBox->InputButtons[j]->NavButton);
+		}
+	} 
 }
 
 bool UUINavInputContainer::IsKeyBeingUsed(FKey CompareKey) const
@@ -148,55 +186,9 @@ bool UUINavInputContainer::RespectsRestriction(FKey CompareKey, int Index)
 	return false;
 }
 
-UTexture2D* UUINavInputContainer::LoadTexture2D(const FString& FullFilePath, bool& IsValid, int32& Width, int32& Height)
-{
-	IsValid = false;
-	UTexture2D* LoadedT2D = nullptr;
-
-	FString ActualPath = FullFilePath + TEXT(".png");
-
-	IImageWrapperModule& ImageWrapperModule = FModuleManager::LoadModuleChecked<IImageWrapperModule>(FName("ImageWrapper"));
-	TSharedPtr<IImageWrapper> ImageWrapper = ImageWrapperModule.CreateImageWrapper(EImageFormat::PNG);
-
-	//Load From File
-	TArray<uint8> RawFileData;
-	if (!FFileHelper::LoadFileToArray(RawFileData, *ActualPath)) return nullptr;
-	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-	//Create T2D!
-	if (ImageWrapper.IsValid() && ImageWrapper->SetCompressed(RawFileData.GetData(), RawFileData.Num()))
-	{
-		const TArray<uint8>* UncompressedBGRA = nullptr;
-		if (ImageWrapper->GetRaw(ERGBFormat::BGRA, 8, UncompressedBGRA))
-		{
-			LoadedT2D = UTexture2D::CreateTransient(ImageWrapper->GetWidth(), ImageWrapper->GetHeight(), PF_B8G8R8A8);
-
-			//Valid?
-			if (!LoadedT2D) return nullptr;
-			//~~~~~~~~~~~~~~
-
-			//Out!
-			Width = ImageWrapper->GetWidth();
-			Height = ImageWrapper->GetHeight();
-
-			//Copy!
-			void* TextureData = LoadedT2D->PlatformData->Mips[0].BulkData.Lock(LOCK_READ_WRITE);
-			FMemory::Memcpy(TextureData, UncompressedBGRA->GetData(), UncompressedBGRA->Num());
-			LoadedT2D->PlatformData->Mips[0].BulkData.Unlock();
-
-			//Update!
-			LoadedT2D->UpdateResource();
-		}
-	}
-
-	// Success!
-	IsValid = true;
-	return LoadedT2D;
-}
-
 int UUINavInputContainer::GetOffsetFromTargetColumn(bool bTop)
 {
-	switch (InputsPerAction)
+	switch (KeysPerInput)
 	{
 		case 2:
 			if (bTop) return (TargetColumn == ETargetColumn::Right);
@@ -208,4 +200,73 @@ int UUINavInputContainer::GetOffsetFromTargetColumn(bool bTop)
 			break;
 	}
 	return 0;
+}
+
+FKey UUINavInputContainer::GetAxisKeyFromActionKey(FKey ActionKey)
+{
+	FString KeyName = ActionKey.GetFName().ToString();
+	int KeyIndex = PossibleAxisNames.Find(KeyName);
+	if (KeyIndex == INDEX_NONE) return FKey();
+
+	switch (KeyIndex)
+	{
+		case 0:
+			return FKey(FName("Gamepad_LeftTriggerAxis"));
+			break;
+		case 1:
+			return FKey(FName("Gamepad_RightTriggerAxis"));
+			break;
+		case 2:
+		case 3:
+			return FKey(FName("Gamepad_LeftY"));
+			break;
+		case 4:
+		case 5:
+			return FKey(FName("Gamepad_LeftX"));
+			break;
+		case 6:
+		case 7:
+			return FKey(FName("Gamepad_RightY"));
+			break;
+		case 8:
+		case 9:
+			return FKey(FName("Gamepad_RightX"));
+			break;
+		case 10:
+		case 11:
+			return FKey(FName("MotionController_Left_Thumbstick_Y"));
+			break;
+		case 12:
+		case 13:
+			return FKey(FName("MotionController_Left_Thumbstick_X"));
+			break;
+		case 14:
+		case 15:
+			return FKey(FName("MotionController_Right_Thumbstick_Y"));
+			break;
+		case 16:
+		case 17:
+			return FKey(FName("MotionController_Right_Thumbstick_X"));
+			break;
+		case 18:
+			return FKey(FName("MotionController_Left_TriggerAxis"));
+			break;
+		case 19:
+			return FKey(FName("MotionController_Left_Grip1Axis"));
+			break;
+		case 20:
+			return FKey(FName("MotionController_Left_Grip2Axis"));
+			break;
+		case 21:
+			return FKey(FName("MotionController_Right_TriggerAxis"));
+			break;
+		case 22:
+			return FKey(FName("MotionController_Right_Grip1Axis"));
+			break;
+		case 23:
+			return FKey(FName("MotionController_Right_Grip2Axis"));
+			break;
+	}
+
+	return FKey();
 }

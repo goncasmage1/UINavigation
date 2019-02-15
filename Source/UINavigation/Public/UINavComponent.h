@@ -19,10 +19,6 @@ public:
 	virtual void NativeConstruct() override;
 
 	UFUNCTION(BlueprintNativeEvent, Category = UINavComponent)
-		void OverrideButtonIndex();
-	virtual void OverrideButtonIndex_Implementation();
-
-	UFUNCTION(BlueprintNativeEvent, Category = UINavComponent)
 		void OnNavigatedTo();
 	virtual void OnNavigatedTo_Implementation();
 

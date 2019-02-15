@@ -54,27 +54,56 @@ class UINAVIGATION_API UUINavInputContainer : public UUserWidget
 protected:
 
 	void CreateInputBoxes();
+	void CreateActionBoxes();
+	void CreateAxisBoxes();
 
 	//-----------------------------------------------------------------------
+
+	TArray<FString> PossibleAxisNames = {
+		TEXT("Gamepad_LeftTrigger"),
+		TEXT("Gamepad_RightTrigger"),
+		TEXT("Gamepad_LeftStick_Up"),
+		TEXT("Gamepad_LeftStick_Down"),
+		TEXT("Gamepad_LeftStick_Right"),
+		TEXT("Gamepad_LeftStick_Left"),
+		TEXT("Gamepad_RightStick_Up"),
+		TEXT("Gamepad_RightStick_Down"),
+		TEXT("Gamepad_RightStick_Right"),
+		TEXT("Gamepad_RightStick_Left"),
+		TEXT("MotionController_Left_Thumbstick_Up"),
+		TEXT("MotionController_Left_Thumbstick_Down"),
+		TEXT("MotionController_Left_Thumbstick_Left"),
+		TEXT("MotionController_Left_Thumbstick_Right"),
+		TEXT("MotionController_Right_Thumbstick_Up"),
+		TEXT("MotionController_Right_Thumbstick_Down"),
+		TEXT("MotionController_Right_Thumbstick_Left"),
+		TEXT("MotionController_Right_Thumbstick_Right"),
+		TEXT("MotionController_Left_Trigger"),
+		TEXT("MotionController_Left_Grip1"),
+		TEXT("MotionController_Left_Grip2"),
+		TEXT("MotionController_Right_Trigger"),
+		TEXT("MotionController_Right_Grip1"),
+		TEXT("MotionController_Right_Grip2"),
+	};
 
 	//Indicates which column to navigate to when navigating to this Input Container
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Input")
 		ETargetColumn TargetColumn = ETargetColumn::Left;
 
-	/*
-	The desired InputBox widget blueprint
-	*/
 	UPROPERTY(EditDefaultsOnly, Category = "UINav Input")
 		TSubclassOf<class UUINavInputBox> InputBox_BP;
 
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget), Category = "UINav Input")
-		class UPanelWidget* Panel;
+		class UPanelWidget* ActionPanel;
+
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget), Category = "UINav Input")
+		class UPanelWidget* AxisPanel;
 	
 	class UUINavWidget* ParentWidget;
 
 public:
 
-	void SetParentWidget(class UUINavWidget* NewParent);
+	void Init(class UUINavWidget* NewParent);
 
 	UFUNCTION(BlueprintCallable, Category = "UINav Input")
 		void ResetKeyMappings();
@@ -85,10 +114,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "UINav Input")
 		bool RespectsRestriction(FKey CompareKey, int Index);
 
-	class UTexture2D* LoadTexture2D(const FString& FullFilePath, bool& IsValid, int32& Width, int32& Height);
-
 	//Fetches the index offset from the TargetColumn variable for both the top and bottom of the Input Container
 	int GetOffsetFromTargetColumn(bool bTop);
+
+	FKey GetAxisKeyFromActionKey(FKey ActionKey);
 
 	UFUNCTION(BlueprintCallable, Category = "UINav Input")
 		FORCEINLINE ETargetColumn GetTargetColumn() const { return TargetColumn; }
@@ -103,7 +132,7 @@ public:
 		int LastButtonIndex = -1;
 
 	UPROPERTY(BlueprintReadOnly, Category = "UINav Input")
-		int NumberOfActions = -1;
+		int NumberOfInputs = -1;
 
 	/*The index of the button at the top of the grid that should be navigated to
 	when entering this grid*/
@@ -115,7 +144,7 @@ public:
 		int BottomButtonIndex = -1;
 
 	UPROPERTY(BlueprintReadOnly, Category = "UINav Input")
-		int InputsPerAction = 0;
+		int KeysPerInput = 0;
 
 	/*
 	Indicates whether the player can cancel changing the keybind for an action
@@ -125,10 +154,19 @@ public:
 
 	/*
 	The names of the desired actions to allow for rebinding
-	Can be left empty if all actions are to be rebindable
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Input")
 		TArray<FName> ActionNames;
+
+	/*
+	The names of the desired axes to allow for rebinding
+	*/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Input")
+		TArray<FName> AxisNames;
+
+	//The name used for empty key buttons
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Input")
+		FName EmptyKeyName = FName("Unbound");
 
 	/*
 	The restrictions for the type of input associated with each column

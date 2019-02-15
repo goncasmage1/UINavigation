@@ -33,17 +33,14 @@ public:
 
 	void BuildKeyMappings();
 	void ResetKeyMappings();
-	void UpdateActionKey(FInputActionKeyMapping NewAction, int Index);
+	void UpdateInputKey(FKey NewKey, int Index);
 	void RevertToActionText(int Index);
 
 	void NotifySelected(int Index);
 
 	bool ContainsKey(FKey CompareKey) const;
 
-	UPROPERTY(EditDefaultsOnly, Category = "UINav Input")
-		TSubclassOf<class UUINavInputComponent> InputButton_BP;
-
-	TArray<class UUINavInputComponent*> InputButtons;
+	bool bIsAxis = false;
 
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget), Category = "UINav Input")
 		class UUINavInputComponent* InputButton1;
@@ -52,15 +49,14 @@ public:
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget), Category = "UINav Input")
 		class UUINavInputComponent* InputButton3;
 
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget), Category = "UINav Input")
-		class UTextBlock* ActionText;
+	TArray<class UUINavInputComponent*> InputButtons;
 
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget), Category = "UINav Input")
-		class UHorizontalBox* HorizontalBox;
+		class UTextBlock* InputText;
 
 	class UUINavInputContainer* Container;
 
-	FString ActionName;
+	FName InputName;
 
-	int InputsPerAction = 2;
+	int KeysPerInput = 2;
 };

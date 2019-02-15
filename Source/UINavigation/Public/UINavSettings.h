@@ -18,6 +18,9 @@ public:
 
 	UPROPERTY(config, EditAnywhere, Category = "Bindings")
 		TArray<struct FInputActionKeyMapping> ActionMappings;
+
+	UPROPERTY(config, EditAnywhere, Category = "Bindings")
+		TArray<struct FInputAxisKeyMapping> AxisMappings;
 	
 	
 };
