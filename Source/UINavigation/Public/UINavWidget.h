@@ -439,6 +439,15 @@ public:
 	virtual void OnReturn_Implementation();
 
 	/**
+	*	Notifies that the player navigated in the specified direction
+	*
+	*	@param	Direction  The direction of navigation
+	*/
+	UFUNCTION(BlueprintNativeEvent, Category = UINavWidget)
+		void OnNavigatedDirection(ENavigationDirection Direction);
+	virtual void OnNavigatedDirection_Implementation(ENavigationDirection Direction);
+
+	/**
 	*	Called when the input type changed
 	*/
 	UFUNCTION(BlueprintNativeEvent, Category = UINavWidget)

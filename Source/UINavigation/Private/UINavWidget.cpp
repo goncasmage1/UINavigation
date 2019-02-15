@@ -884,6 +884,10 @@ void UUINavWidget::OnReturn_Implementation()
 	ReturnToParent();
 }
 
+void UUINavWidget::OnNavigatedDirection_Implementation(ENavigationDirection Direction)
+{
+}
+
 void UUINavWidget::OnInputChanged_Implementation(EInputType From, EInputType To)
 {
 
@@ -1123,6 +1127,8 @@ void UUINavWidget::NavigateInDirection(ENavigationDirection Direction)
 		HaltedIndex = FindNextIndex(Direction);
 		return;
 	}
+
+	OnNavigatedDirection(Direction);
 
 	UUINavComponentBox* ComponentBox = GetUINavComponentBoxAtIndex(ButtonIndex);
 	if (ComponentBox != nullptr && (Direction == ENavigationDirection::Left || Direction == ENavigationDirection::Right))
