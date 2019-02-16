@@ -81,7 +81,7 @@ protected:
 	/*************************************************************************/
 
 	void TimerCallback();
-	void SetTimer(ENavigationDirection Direction);
+	void SetTimer(ENavigationDirection NavigationDirection);
 
 	void VerifyDefaultInputs();
 
@@ -235,7 +235,7 @@ public:
 	*/
 	UFUNCTION(BlueprintNativeEvent, Category = UINavController)
 		void OnNavigated(ENavigationDirection Direction);
-	void OnNavigated_Implementation(ENavigationDirection Direction);
+	void OnNavigated_Implementation(ENavigationDirection NavigationDirection);
 
 	UFUNCTION(BlueprintNativeEvent, Category = UINavController)
 		void OnSelect();
