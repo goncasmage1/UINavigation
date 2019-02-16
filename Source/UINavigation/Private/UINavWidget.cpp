@@ -451,19 +451,23 @@ void UUINavWidget::AppendVerticalNavigation(int Dimension, FButtonNavigation Edg
 		return;
 	}
 
-	TArray<FButtonNavigation> ButtonsNav = TArray<FButtonNavigation>();
 	FButtonNavigation NewNav;
 
 	int StartingIndex = ButtonNavigations.Num();
 	int ExtraButtons = 0;
 
-	if (InputContainerIndex != -1)
+	int GridDimension = Dimension;
+	FButtonNavigation GridEdge = EdgeNavigation;
+
+	if (InputContainerIndex >= StartingIndex && InputContainerIndex <= StartingIndex + Dimension - 1)
 	{
-		if (InputContainerIndex >= StartingIndex && InputContainerIndex <= StartingIndex + Dimension)
-		{
-			ExtraButtons = (UINavInputBoxes.Num() * UINavInputContainer->KeysPerInput) - 1;
-		}
+		ExtraButtons = (UINavInputBoxes.Num() * UINavInputContainer->KeysPerInput) - 1;
+		GridDimension = InputContainerIndex - StartingIndex;
+		GridEdge.DownButton = UINavInputContainer->TopButtonIndex;
 	}
+
+	if (GridDimension > 0) NavigationGrids.Add(FGrid(EGridType::Vertical, StartingIndex, GridDimension, GridEdge));
+
 	if (Dimension == UINavButtons.Num() && ExtraButtons > 0) Dimension -= (ExtraButtons);
 
 	bool bReachedInputContainer = false;
@@ -480,6 +484,11 @@ void UUINavWidget::AppendVerticalNavigation(int Dimension, FButtonNavigation Edg
 			InputEdgeNav.DownButton = i == Dimension - 1 ? (EdgeNavigation.DownButton != -1 ? EdgeNavigation.DownButton : (bWrap ? StartingIndex : -1)) : UINavInputContainer->LastButtonIndex + i + 1;
 			bReachedInputContainer = true;
 			AppendGridNavigation(UINavInputContainer->KeysPerInput, UINavInputBoxes.Num(), InputEdgeNav, false);
+			int Start = StartingIndex + i + UINavInputContainer->KeysPerInput * UINavInputBoxes.Num();
+			GridEdge = EdgeNavigation;
+			GridEdge.UpButton = UINavInputContainer->BottomButtonIndex;
+			GridDimension = Dimension - i - 1;
+			if (GridDimension > 0) NavigationGrids.Add(FGrid(EGridType::Vertical, Start, Dimension - i - 1, GridEdge));
 
 			if (i != 0) ButtonNavigations[UINavInputContainer->FirstButtonIndex + i - 1].DownButton = UINavInputContainer->TopButtonIndex;
 			ContainerUpIndex = UINavInputContainer->LastButtonIndex + i + 1;
@@ -521,16 +530,21 @@ void UUINavWidget::AppendHorizontalNavigation(int Dimension, FButtonNavigation E
 		return;
 	}
 
-	TArray<FButtonNavigation> ButtonsNav = TArray<FButtonNavigation>();
 	FButtonNavigation NewNav;
 
 	int StartingIndex = ButtonNavigations.Num();
 	int ExtraButtons = 0;
 
+	int GridDimension = Dimension;
+	FButtonNavigation GridEdge = EdgeNavigation;
 	if (InputContainerIndex >= StartingIndex && InputContainerIndex <= StartingIndex + Dimension)
 	{
 		ExtraButtons += (UINavInputContainer->ActionNames.Num() * 2) - 1;
+		GridDimension = InputContainerIndex - StartingIndex + 1;
+		GridEdge.DownButton = UINavInputContainer->TopButtonIndex;
 	}
+	
+	NavigationGrids.Add(FGrid(EGridType::Horizontal, StartingIndex, GridDimension, GridEdge));
 
 	if (Dimension == UINavButtons.Num() && ExtraButtons > 0) Dimension -= (ExtraButtons);
 
@@ -547,7 +561,11 @@ void UUINavWidget::AppendHorizontalNavigation(int Dimension, FButtonNavigation E
 			InputEdgeNav.RightButton = i == Dimension - 1 ? (EdgeNavigation.DownButton != -1 ? EdgeNavigation.DownButton : (bWrap ? StartingIndex : -1)) : UINavInputContainer->LastButtonIndex + i + 1;
 			bReachedInputContainer = true;
 			AppendGridNavigation(UINavInputContainer->KeysPerInput, UINavInputBoxes.Num(), InputEdgeNav, false);
-			
+			int Start = StartingIndex + i + UINavInputContainer->KeysPerInput * UINavInputBoxes.Num();
+			GridEdge = EdgeNavigation;
+			GridEdge.UpButton = UINavInputContainer->BottomButtonIndex;
+			NavigationGrids.Add(FGrid(EGridType::Horizontal, Start, Dimension - i - 1, GridEdge));
+
 			if (i != 0) ButtonNavigations[UINavInputContainer->FirstButtonIndex + i - 1].RightButton = UINavInputContainer->TopButtonIndex;
 			ContainerUpIndex = UINavInputContainer->LastButtonIndex + i + 1;
 			continue;
@@ -595,8 +613,10 @@ void UUINavWidget::AppendGridNavigation(int DimensionX, int DimensionY, FButtonN
 	FButtonNavigation NewNav;
 
 	int StartingIndex = ButtonNavigations.Num();
-
 	int Iterations = DimensionX * DimensionY;
+
+	NavigationGrids.Add(FGrid(EGridType::Grid2D, StartingIndex, Iterations, EdgeNavigation));
+
 	int i;
 	for (i = 0; i < Iterations; i++)
 	{

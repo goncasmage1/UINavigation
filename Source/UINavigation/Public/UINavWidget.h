@@ -24,6 +24,14 @@ enum class EReceiveInputType : uint8
 };
 
 UENUM(BlueprintType)
+enum class EGridType : uint8
+{
+	Horizontal UMETA(DisplayName = "Horizontal"),
+	Vertical UMETA(DisplayName = "Vertical"),
+	Grid2D UMETA(DisplayName = "Grid2D")
+};
+
+UENUM(BlueprintType)
 enum class ESelectorPosition : uint8
 {
 	Position_Center UMETA(DisplayName = "Center"),
@@ -63,6 +71,32 @@ struct FButtonNavigation
 		int LeftButton = -1;
 	UPROPERTY(BlueprintReadWrite, Category = ButtonNavigation)
 		int RightButton = -1;
+};
+
+USTRUCT(BlueprintType)
+struct FGrid
+{
+	GENERATED_BODY()
+
+	FGrid()
+	{
+
+	}
+
+	FGrid(EGridType NewGridType, int NewFirstIndex, int NewDimension, FButtonNavigation NewEdgeNavigation)
+	{
+		GridType = NewGridType;
+		FirstIndex = NewFirstIndex;
+		Dimension = NewDimension;
+		EdgeNavigation = NewEdgeNavigation;
+	}
+
+	EGridType GridType;
+
+	int FirstIndex;
+	int Dimension;
+	FButtonNavigation EdgeNavigation;
+
 };
 
 UCLASS()
@@ -140,6 +174,8 @@ public:
 	bool bWaitForInput = false;
 
 	EReceiveInputType ReceiveInputType = EReceiveInputType::None;
+
+	TArray<FGrid> NavigationGrids;
 
 	//The UserWidget object that will move along the Widget
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget, OptionalWidget = true), Category = UINavWidget)
@@ -421,6 +457,15 @@ public:
 	virtual void OnNavigate_Implementation(int From, int To);
 
 	/**
+	*	Notifies that the player navigated in the specified direction
+	*
+	*	@param	Direction  The direction of navigation
+	*/
+	UFUNCTION(BlueprintNativeEvent, Category = UINavWidget)
+		void OnNavigatedDirection(ENavigationDirection Direction);
+	virtual void OnNavigatedDirection_Implementation(ENavigationDirection Direction);
+
+	/**
 	*	Notifies that a button was selected, and indicates its index
 	*
 	*	@param	Index  The index of the button that was selected
@@ -437,15 +482,6 @@ public:
 	UFUNCTION(BlueprintNativeEvent, Category = UINavWidget)
 		void OnReturn();
 	virtual void OnReturn_Implementation();
-
-	/**
-	*	Notifies that the player navigated in the specified direction
-	*
-	*	@param	Direction  The direction of navigation
-	*/
-	UFUNCTION(BlueprintNativeEvent, Category = UINavWidget)
-		void OnNavigatedDirection(ENavigationDirection Direction);
-	virtual void OnNavigatedDirection_Implementation(ENavigationDirection Direction);
 
 	/**
 	*	Called when the input type changed
