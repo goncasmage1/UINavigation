@@ -83,18 +83,20 @@ struct FGrid
 
 	}
 
-	FGrid(EGridType NewGridType, int NewFirstIndex, int NewDimension, FButtonNavigation NewEdgeNavigation)
+	FGrid(EGridType NewGridType, int NewFirstIndex, int NewDimensionX, int NewDimensionY, FButtonNavigation NewEdgeNavigation)
 	{
 		GridType = NewGridType;
 		FirstIndex = NewFirstIndex;
-		Dimension = NewDimension;
+		DimensionX = NewDimensionX;
+		DimensionY = NewDimensionY;
 		EdgeNavigation = NewEdgeNavigation;
 	}
 
 	EGridType GridType;
 
 	int FirstIndex;
-	int Dimension;
+	int DimensionX;
+	int DimensionY;
 	FButtonNavigation EdgeNavigation;
 
 };
@@ -167,6 +169,11 @@ protected:
 
 	void BeginSelectorMovement(int Index);
 	void HandleSelectorMovement(float DeltaTime);
+
+	/**
+	*	Setup a new UINavButton added at runtime (must be added to viewport manually)
+	*/
+	void AddUINavButton(class UUINavButton* NewButton, FGrid& TargetGrid, int IndexInGrid = -1);
 
 
 public:
