@@ -46,34 +46,6 @@ enum class ESelectorPosition : uint8
 };
 
 USTRUCT(BlueprintType)
-struct FButtonNavigation
-{
-	GENERATED_BODY()
-
-	FButtonNavigation()
-	{
-
-	}
-
-	FButtonNavigation(int NewUp, int NewDown, int NewLeft, int NewRight)
-	{
-		UpButton = NewUp;
-		DownButton = NewDown;
-		LeftButton = NewLeft;
-		RightButton = NewRight;
-	}
-	
-	UPROPERTY(BlueprintReadWrite, Category = ButtonNavigation)
-		int UpButton = -1;
-	UPROPERTY(BlueprintReadWrite, Category = ButtonNavigation)
-		int DownButton = -1;
-	UPROPERTY(BlueprintReadWrite, Category = ButtonNavigation)
-		int LeftButton = -1;
-	UPROPERTY(BlueprintReadWrite, Category = ButtonNavigation)
-		int RightButton = -1;
-};
-
-USTRUCT(BlueprintType)
 struct FGrid
 {
 	GENERATED_BODY()
@@ -83,18 +55,19 @@ struct FGrid
 
 	}
 
-	FGrid(EGridType NewGridType, int NewFirstIndex, int NewDimensionX, int NewDimensionY, FButtonNavigation NewEdgeNavigation)
+	FGrid(EGridType NewGridType, class UUINavButton* NewFirstButton, int NewDimensionX, int NewDimensionY, FButtonNavigation NewEdgeNavigation)
 	{
 		GridType = NewGridType;
-		FirstIndex = NewFirstIndex;
+		FirstButton = NewFirstButton;
 		DimensionX = NewDimensionX;
 		DimensionY = NewDimensionY;
 		EdgeNavigation = NewEdgeNavigation;
 	}
 
-	EGridType GridType;
+	int GetDimension() const;
 
-	int FirstIndex;
+	EGridType GridType;
+	class UUINavButton* FirstButton;
 	int DimensionX;
 	int DimensionY;
 	FButtonNavigation EdgeNavigation;
@@ -170,27 +143,18 @@ protected:
 	void BeginSelectorMovement(int Index);
 	void HandleSelectorMovement(float DeltaTime);
 
-	/**
-	*	Setup a new UINavButton added at runtime (must be added to viewport manually)
-	*/
-	void AddUINavButton(class UUINavButton* NewButton, FGrid& TargetGrid, int IndexInGrid = -1);
-
-
 public:
 
 	bool bWaitForInput = false;
 
 	EReceiveInputType ReceiveInputType = EReceiveInputType::None;
 
-	TArray<FGrid> NavigationGrids;
+	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
+		TArray<FGrid> NavigationGrids;
 
 	//The UserWidget object that will move along the Widget
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget, OptionalWidget = true), Category = UINavWidget)
 		UUserWidget* TheSelector;
-
-	//Indicates the navigation possibilities of each button
-	UPROPERTY(BlueprintReadWrite, Category = UINavWidget)
-		TArray<FButtonNavigation> ButtonNavigations;
 
 	//All the UINavButtons in this Widget
 	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
@@ -237,6 +201,9 @@ public:
 	//The index of the button that was last navigated upon
 	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
 		int ButtonIndex = 0;
+
+	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
+		class UUINavButton* CurrentButton = nullptr;
 
 	//Reference to the parent widget that created this widget
 	UPROPERTY(BlueprintReadOnly, meta = (ExposeOnSpawn = true), Category = UINavWidget)
@@ -329,27 +296,15 @@ public:
 	FReply OnKeyReleased(FKey PressedKey);
 
 	/**
-	*	Appends a new array of FButtonNavigations to the already existing navigation graph with the given dimension
-	*	Used for vertical grids.
+	*	Appends a new navigation grid to the widget. Used for horizontal and vertical grids.
 	*
-	*	@param	Dimension  The amount of buttons in this vertical grid (If set to -1 will match number of UIUINavButtons)
-	*	@param	EdgeNavigation  The intended navigation at each of the four edges of the button grid
-	*	@param  bWrap  Indicates whether navigation wraps around the grid
-	*	@param	StartingButtonIndex The index of the button where the grid starts
-	*/
-	UFUNCTION(BlueprintCallable, Category = UINavWidget)
-		void AppendVerticalNavigation(int Dimension, FButtonNavigation EdgeNavigation, bool bWrap);
-
-	/**
-	*	Appends a new array of FButtonNavigations to the already existing navigation graph with the given dimension
-	*	Used for horizontal grids.
-	*
+	*	@param	GridType  The type of grid to be appended (horizontal or vertical)
 	*	@param	Dimension  The amount of buttons in this vertical grid (If set to -1 will match number of UIUINavButtons)
 	*	@param	EdgeNavigation  The intended navigation at each of the four edges of the button grid
 	*	@param  bWrap  Indicates whether navigation wraps around the grid
 	*/
 	UFUNCTION(BlueprintCallable, Category = UINavWidget)
-		void AppendHorizontalNavigation(int Dimension, FButtonNavigation EdgeNavigation, bool bWrap);
+		void AppendNavigationGrid1D(EGridType GridType, int Dimension, FButtonNavigation EdgeNavigation, bool bWrap);
 
 	/**
 	*	Appends a new array of FButtonNavigations to the already existing navigation graph with the given dimension
@@ -361,7 +316,7 @@ public:
 	*	@param  bWrap  Indicates whether navigation wraps around the grid
 	*/
 	UFUNCTION(BlueprintCallable, Category = UINavWidget)
-		void AppendGridNavigation(int DimensionX, int DimensionY, FButtonNavigation EdgeNavigation, bool bWrap);
+		void AppendNavigationGrid2D(int DimensionX, int DimensionY, FButtonNavigation EdgeNavigation, bool bWrap);
 
 	/**
 	*	Called manually to setup all the elements in the Widget
@@ -520,14 +475,14 @@ public:
 	*	@return int The index of the button that will be navigated to
 	*/
 	UFUNCTION(BlueprintCallable, Category = UINavWidget)
-		virtual int FindNextIndex(ENavigationDirection Direction);
+		virtual class UUINavButton* FindNextButton(ENavigationDirection Direction);
 
 	/**
-	*	Returns the index of the next button to navigate to
+	*	Returns the next button to navigate to
 	*
 	*	@param	Direction  Direction of navigation
 	*/
-	int FetchIndexByDirection(ENavigationDirection Direction, int Index);
+	class UUINavButton* FetchButtonByDirection(ENavigationDirection Direction, UUINavButton* CurrentButton);
 
 	/**
 	*	Adds given widget to screen (strongly recomended over manual alternative)
@@ -536,7 +491,19 @@ public:
 	*/
 	UFUNCTION(BlueprintCallable, Category = UINavWidget, meta = (AdvancedDisplay=2))
 		UWidget* GoToWidget(TSubclassOf<UUINavWidget> NewWidgetClass, bool bRemoveParent, int ZOrder = 0);
-	
+
+	/**
+	*	Setup a new UINavButton added at runtime (must be added to viewport manually)
+	*/
+	UFUNCTION(BlueprintCallable, Category = UINavWidget)
+		void AddUINavButton(class UUINavButton* NewButton, FGrid& TargetGrid, int IndexInGrid = -1);
+
+	/**
+	*	Setup a new UINavButton added at runtime (must be added to viewport manually)
+	*/
+	UFUNCTION(BlueprintCallable, Category = UINavWidget)
+		void AddUINavComponent(class UUINavComponent* NewButton, FGrid& TargetGrid, int IndexInGrid = -1);
+
 	/**
 	*	Adds this widget's parent to the viewport (if applicable)
 	*	and removes this widget from viewport

@@ -11,6 +11,35 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FCustomUnhoverDelegate, int, Index);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FCustomClickDelegate, int, Index);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FCustomReleaseDelegate, int, Index);
 
+
+USTRUCT(BlueprintType)
+struct FButtonNavigation
+{
+	GENERATED_BODY()
+
+		FButtonNavigation()
+	{
+
+	}
+
+	FButtonNavigation(class UUINavButton* NewUp, class UUINavButton* NewDown, class UUINavButton* NewLeft, class UUINavButton* NewRight)
+	{
+		UpButton = NewUp;
+		DownButton = NewDown;
+		LeftButton = NewLeft;
+		RightButton = NewRight;
+	}
+
+	UPROPERTY(BlueprintReadWrite, Category = ButtonNavigation)
+		class UUINavButton* UpButton = nullptr;
+	UPROPERTY(BlueprintReadWrite, Category = ButtonNavigation)
+		class UUINavButton* DownButton = nullptr;
+	UPROPERTY(BlueprintReadWrite, Category = ButtonNavigation)
+		class UUINavButton* LeftButton = nullptr;
+	UPROPERTY(BlueprintReadWrite, Category = ButtonNavigation)
+		class UUINavButton* RightButton = nullptr;
+};
+
 /**
  * 
  */
@@ -35,6 +64,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavButton)
 		int ButtonIndex = -1;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavButton)
+		FButtonNavigation ButtonNav;
 
 	UFUNCTION()
 		void OnHover();
