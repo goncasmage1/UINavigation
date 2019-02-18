@@ -523,8 +523,7 @@ void UUINavWidget::AppendNavigationGrid1D(EGridType GridType, int Dimension, FBu
 	}
 
 	FButtonNavigation NewNav;
-	FGrid LastGrid = NavigationGrids.Last();
-	int StartingIndex = LastGrid.FirstButton->ButtonIndex + LastGrid.GetDimension();
+	int StartingIndex = NavigationGrids.Num() > 0 ? NavigationGrids.Last().FirstButton->ButtonIndex + NavigationGrids.Last().GetDimension() : 0;
 	int GridDimension = Dimension;
 	FButtonNavigation GridEdge = EdgeNavigation;
 	int ExtraButtons = 0;
@@ -538,8 +537,6 @@ void UUINavWidget::AppendNavigationGrid1D(EGridType GridType, int Dimension, FBu
 
 	if (GridType == EGridType::Vertical && GridDimension > 0) NavigationGrids.Add(FGrid(EGridType::Vertical, UINavButtons[StartingIndex], 0, GridDimension, GridEdge));
 	if (GridType == EGridType::Horizontal && GridDimension > 0) NavigationGrids.Add(FGrid(EGridType::Horizontal, UINavButtons[StartingIndex], GridDimension, 0, GridEdge));
-
-	//if (Dimension == UINavButtons.Num() && ExtraButtons > 0) Dimension -= (ExtraButtons);
 
 	bool bReachedInputContainer = false;
 	int ContainerUpIndex = -1;
@@ -650,8 +647,7 @@ void UUINavWidget::AppendNavigationGrid2D(int DimensionX, int DimensionY, FButto
 	}
 
 	FButtonNavigation NewNav;
-	FGrid LastGrid = NavigationGrids.Last();
-	int StartingIndex = LastGrid.FirstButton->ButtonIndex + LastGrid.GetDimension();
+	int StartingIndex = NavigationGrids.Num() > 0 ? NavigationGrids.Last().FirstButton->ButtonIndex + NavigationGrids.Last().GetDimension() : 0;
 
 	NavigationGrids.Add(FGrid(EGridType::Grid2D, UINavButtons[StartingIndex], DimensionX, DimensionY, EdgeNavigation));
 
