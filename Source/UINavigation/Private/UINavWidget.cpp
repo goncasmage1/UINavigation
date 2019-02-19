@@ -456,43 +456,107 @@ void UUINavWidget::AddUINavButton(UUINavButton * NewButton, FGrid& TargetGrid, i
 	NewButton->ButtonIndex = TargetGrid.FirstButton->ButtonIndex + IndexInGrid;
 	SetupUINavButtonDelegates(NewButton);
 	UINavButtons.Insert(NewButton, NewButton->ButtonIndex);
-	for (int j = NewButton->ButtonIndex + 1; j < UINavButtons.Num(); j++) UINavButtons[j]->ButtonIndex = j;
 
-	FButtonNavigation NewButtonNav;
+	int i;
+	for (i = NewButton->ButtonIndex + 1; i < UINavButtons.Num(); i++) UINavButtons[i]->ButtonIndex = i;
 
+	for (i = 0; i < UINavComponentsIndices.Num(); i++)
+	{
+		if (UINavComponentsIndices[i] >= NewButton->ButtonIndex)
+		{
+			UINavComponents[i]->ComponentIndex++;
+			UINavComponentsIndices[i]++;
+		}
+	}
+
+	//Take into account UINavComponent, Containers, etc.
+	for (i = 0; i < NavigationGrids.Num(); i++)
+	{
+
+	}
+
+	if (UINavInputContainer != nullptr && NewButton->ButtonIndex <= UINavInputContainer->FirstButtonIndex)
+	{
+		for (i = 0; i < UINavInputBoxes.Num(); i++)
+		{
+
+		}
+	}
+
+	//Button can be first and last in a grid!!
+	if (IndexInGrid >= TargetGrid.DimensionX || IndexInGrid <= -1) IndexInGrid = -1;
+
+	//TODO: Check if dimension greater than 1
 	switch (TargetGrid.GridType)
 	{
 		case EGridType::Horizontal:
-			if (IndexInGrid >= TargetGrid.DimensionX) IndexInGrid = -1;
 
-			NewButtonNav.UpButton = TargetGrid.EdgeNavigation.UpButton;
-			NewButtonNav.DownButton = TargetGrid.EdgeNavigation.DownButton;
+			NewButton->ButtonNav.UpButton = TargetGrid.EdgeNavigation.UpButton;
+			NewButton->ButtonNav.DownButton = TargetGrid.EdgeNavigation.DownButton;
 
-			if (IndexInGrid == 0) NewButtonNav.LeftButton = TargetGrid.EdgeNavigation.LeftButton;
-			else NewButtonNav.LeftButton = UINavButtons[TargetGrid.FirstButton->ButtonIndex + (IndexInGrid - 1)];
+			if (IndexInGrid == 0)
+			{
+				UUINavButton* RightButton = UINavButtons[NewButton->ButtonIndex + 1];
+				NewButton->ButtonNav.LeftButton = TargetGrid.EdgeNavigation.LeftButton;
+				RightButton->ButtonNav.LeftButton = NewButton;
+			}
+			else
+			{
+				UUINavButton* LeftButton = UINavButtons[NewButton->ButtonIndex - 1];
+				NewButton->ButtonNav.LeftButton = LeftButton;
+				LeftButton->ButtonNav.RightButton = NewButton;
+			}
 
-			if (IndexInGrid == -1) NewButtonNav.RightButton = TargetGrid.EdgeNavigation.RightButton;
-			else NewButtonNav.RightButton = UINavButtons[TargetGrid.FirstButton->ButtonIndex + (IndexInGrid + 1)];
+			if (IndexInGrid == -1)
+			{
+				UUINavButton* LeftButton = UINavButtons[NewButton->ButtonIndex - 1];
+				NewButton->ButtonNav.RightButton = TargetGrid.EdgeNavigation.RightButton;
+				LeftButton->ButtonNav.RightButton = NewButton;
+			}
+			else
+			{
+				UUINavButton* RightButton = UINavButtons[NewButton->ButtonIndex + 1];
+				NewButton->ButtonNav.RightButton = RightButton;
+				RightButton->ButtonNav.LeftButton = NewButton;
+			}
 
 			TargetGrid.DimensionX++;
 
 			break;
 		case EGridType::Vertical:
-			if (IndexInGrid >= TargetGrid.DimensionY) IndexInGrid = -1;
 
-			NewButtonNav.LeftButton = TargetGrid.EdgeNavigation.LeftButton;
-			NewButtonNav.RightButton = TargetGrid.EdgeNavigation.RightButton;
+			NewButton->ButtonNav.LeftButton = TargetGrid.EdgeNavigation.LeftButton;
+			NewButton->ButtonNav.RightButton = TargetGrid.EdgeNavigation.RightButton;
 
-			if (IndexInGrid == 0) NewButtonNav.UpButton = TargetGrid.EdgeNavigation.UpButton;
-			else NewButtonNav.UpButton = UINavButtons[TargetGrid.FirstButton->ButtonIndex + (IndexInGrid - 1)];
+			if (IndexInGrid == 0)
+			{
+				UUINavButton* DownButton = UINavButtons[NewButton->ButtonIndex + 1];
+				NewButton->ButtonNav.UpButton = TargetGrid.EdgeNavigation.UpButton;
+				DownButton->ButtonNav.UpButton = NewButton;
+			}
+			else
+			{
+				UUINavButton* UpButton = UINavButtons[NewButton->ButtonIndex - 1];
+				NewButton->ButtonNav.UpButton = UpButton;
+				UpButton->ButtonNav.DownButton = NewButton;
+			}
 
-			if (IndexInGrid == -1) NewButtonNav.DownButton = TargetGrid.EdgeNavigation.DownButton;
-			else NewButtonNav.DownButton = UINavButtons[TargetGrid.FirstButton->ButtonIndex + (IndexInGrid + 1)];
+			if (IndexInGrid == -1)
+			{
+				UUINavButton* UpButton = UINavButtons[NewButton->ButtonIndex - 1];
+				NewButton->ButtonNav.DownButton = TargetGrid.EdgeNavigation.RightButton;
+				UpButton->ButtonNav.DownButton = NewButton;
+			}
+			else
+			{
+				UUINavButton* DownButton = UINavButtons[NewButton->ButtonIndex + 1];
+				NewButton->ButtonNav.DownButton = DownButton;
+				DownButton->ButtonNav.UpButton = NewButton;
+			}
 
 			TargetGrid.DimensionY++;
 			break;
 		case EGridType::Grid2D:
-			if (IndexInGrid >= (TargetGrid.DimensionX * TargetGrid.DimensionY)) IndexInGrid = -1;
 
 			//TODO: ???
 			TargetGrid.DimensionX++;
@@ -500,12 +564,6 @@ void UUINavWidget::AddUINavButton(UUINavButton * NewButton, FGrid& TargetGrid, i
 			break;
 	}
 
-
-	//Take into account UINavComponent, Containers, etc.
-	for (int i = 0; i < NavigationGrids.Num(); i++)
-	{
-
-	}
 }
 
 void UUINavWidget::AddUINavComponent(UUINavComponent * NewButton, FGrid & TargetGrid, int IndexInGrid)
@@ -518,7 +576,7 @@ void UUINavWidget::AppendNavigationGrid1D(EGridType GridType, int Dimension, FBu
 	if (Dimension < 0) Dimension = UINavButtons.Num();
 	if (GridType == EGridType::Grid2D)
 	{
-		DISPLAYERROR("Append 1D Navigation Grid Type shouldn't be 2D");
+		DISPLAYERROR("Append Navigation Grid 1D Type shouldn't be 2D");
 		return;
 	}
 
@@ -635,14 +693,9 @@ void UUINavWidget::AppendNavigationGrid1D(EGridType GridType, int Dimension, FBu
 
 void UUINavWidget::AppendNavigationGrid2D(int DimensionX, int DimensionY, FButtonNavigation EdgeNavigation, bool bWrap)
 {
-	if (DimensionX <= 0)
+	if (DimensionX <= 0 || DimensionY <= 0)
 	{
-		DISPLAYERROR("Append Navigation Dimension should be greater than 0");
-		return;
-	}
-	if (DimensionY <= 0)
-	{
-		DISPLAYERROR("Append Navigation Dimension should be greater than 0");
+		DISPLAYERROR("AppendNavigationGrid2D Dimension should be greater than 0");
 		return;
 	}
 
