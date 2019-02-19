@@ -12,6 +12,14 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FCustomClickDelegate, int, Index);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FCustomReleaseDelegate, int, Index);
 
 
+UENUM(BlueprintType)
+enum class EGridType : uint8
+{
+	Horizontal UMETA(DisplayName = "Horizontal"),
+	Vertical UMETA(DisplayName = "Vertical"),
+	Grid2D UMETA(DisplayName = "Grid2D")
+};
+
 USTRUCT(BlueprintType)
 struct FButtonNavigation
 {
@@ -40,6 +48,35 @@ struct FButtonNavigation
 		class UUINavButton* RightButton = nullptr;
 };
 
+USTRUCT(BlueprintType)
+struct FGrid
+{
+	GENERATED_BODY()
+
+		FGrid()
+	{
+
+	}
+
+	FGrid(EGridType NewGridType, class UUINavButton* NewFirstButton, int NewDimensionX, int NewDimensionY, FButtonNavigation NewEdgeNavigation)
+	{
+		GridType = NewGridType;
+		FirstButton = NewFirstButton;
+		DimensionX = NewDimensionX;
+		DimensionY = NewDimensionY;
+		EdgeNavigation = NewEdgeNavigation;
+	}
+
+	int GetDimension() const;
+
+	EGridType GridType;
+	class UUINavButton* FirstButton;
+	int DimensionX;
+	int DimensionY;
+	FButtonNavigation EdgeNavigation;
+
+};
+
 /**
  * 
  */
@@ -66,6 +103,13 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavButton)
 		FButtonNavigation ButtonNav;
+
+	//The index of the grid this button is in
+	UPROPERTY(BlueprintReadOnly, Category = UINavButton)
+		int GridIndex;
+	//This button's index in its associated grid
+	UPROPERTY(BlueprintReadOnly, Category = UINavButton)
+		int IndexInGrid;
 
 	UFUNCTION()
 		void OnHover();

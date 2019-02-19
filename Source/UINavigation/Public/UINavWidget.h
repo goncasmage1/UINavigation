@@ -24,14 +24,6 @@ enum class EReceiveInputType : uint8
 };
 
 UENUM(BlueprintType)
-enum class EGridType : uint8
-{
-	Horizontal UMETA(DisplayName = "Horizontal"),
-	Vertical UMETA(DisplayName = "Vertical"),
-	Grid2D UMETA(DisplayName = "Grid2D")
-};
-
-UENUM(BlueprintType)
 enum class ESelectorPosition : uint8
 {
 	Position_Center UMETA(DisplayName = "Center"),
@@ -43,35 +35,6 @@ enum class ESelectorPosition : uint8
 	Position_Top_Left UMETA(DisplayName = "Top Left"),
 	Position_Bottom_Right UMETA(DisplayName = "Bottom Right"),
 	Position_Bottom_Left UMETA(DisplayName = "Bottom Left")
-};
-
-USTRUCT(BlueprintType)
-struct FGrid
-{
-	GENERATED_BODY()
-
-	FGrid()
-	{
-
-	}
-
-	FGrid(EGridType NewGridType, class UUINavButton* NewFirstButton, int NewDimensionX, int NewDimensionY, FButtonNavigation NewEdgeNavigation)
-	{
-		GridType = NewGridType;
-		FirstButton = NewFirstButton;
-		DimensionX = NewDimensionX;
-		DimensionY = NewDimensionY;
-		EdgeNavigation = NewEdgeNavigation;
-	}
-
-	int GetDimension() const;
-
-	EGridType GridType;
-	class UUINavButton* FirstButton;
-	int DimensionX;
-	int DimensionY;
-	FButtonNavigation EdgeNavigation;
-
 };
 
 UCLASS()
