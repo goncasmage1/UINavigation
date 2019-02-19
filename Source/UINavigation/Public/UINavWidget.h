@@ -318,6 +318,14 @@ public:
 	UFUNCTION(BlueprintCallable, Category = UINavWidget)
 		void AppendNavigationGrid2D(int DimensionX, int DimensionY, FButtonNavigation EdgeNavigation, bool bWrap);
 
+	UFUNCTION(BlueprintCallable, Category = UINavWidget, meta = (DeprecatedFunction, DeprecationMessage="This function has been replaced by Append Navigation Grid 1D."))
+		void AppendHorizontalNavigation(int Dimension, FButtonNavigation EdgeNavigation, bool bWrap);
+
+	UFUNCTION(BlueprintCallable, Category = UINavWidget, meta = (DeprecatedFunction, DeprecationMessage="This function has been replaced by Append Navigation Grid 1D."))
+		void AppendVerticalNavigation(int Dimension, FButtonNavigation EdgeNavigation, bool bWrap);
+
+	UFUNCTION(BlueprintCallable, Category = UINavWidget, meta = (DeprecatedFunction, DeprecationMessage="This function has been replaced by Append Navigation Grid 2D."))
+		void AppendGridNavigation(int DimensionX, int DimensionY, FButtonNavigation EdgeNavigation, bool bWrap);
 	/**
 	*	Called manually to setup all the elements in the Widget
 	*/
@@ -495,13 +503,13 @@ public:
 	/**
 	*	Setup a new UINavButton added at runtime (must be added to viewport manually)
 	*/
-	UFUNCTION(BlueprintCallable, Category = UINavWidget)
+	//UFUNCTION(BlueprintCallable, Category = UINavWidget)
 		void AddUINavButton(class UUINavButton* NewButton, FGrid& TargetGrid, int IndexInGrid = -1);
 
 	/**
 	*	Setup a new UINavButton added at runtime (must be added to viewport manually)
 	*/
-	UFUNCTION(BlueprintCallable, Category = UINavWidget)
+	//UFUNCTION(BlueprintCallable, Category = UINavWidget)
 		void AddUINavComponent(class UUINavComponent* NewButton, FGrid& TargetGrid, int IndexInGrid = -1);
 
 	/**
