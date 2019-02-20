@@ -60,3 +60,20 @@ bool UUINavBlueprintFunctionLibrary::IsGamepadConnected()
 {
 	return FSlateApplication::Get().IsGamepadAttached();
 }
+
+int UUINavBlueprintFunctionLibrary::GetGridDimension(const FGrid Grid)
+{
+	switch (Grid.GridType)
+	{
+		case EGridType::Horizontal:
+			return Grid.DimensionX;
+			break;
+		case EGridType::Vertical:
+			return Grid.DimensionY;
+			break;
+		case EGridType::Grid2D:
+			return Grid.DimensionX * Grid.DimensionY;
+			break;
+	}
+	return 0;
+}

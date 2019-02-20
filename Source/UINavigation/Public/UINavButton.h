@@ -53,7 +53,7 @@ struct FGrid
 {
 	GENERATED_BODY()
 
-		FGrid()
+	FGrid()
 	{
 
 	}
@@ -69,11 +69,19 @@ struct FGrid
 
 	int GetDimension() const;
 
-	EGridType GridType;
-	class UUINavButton* FirstButton;
-	int DimensionX;
-	int DimensionY;
-	FButtonNavigation EdgeNavigation;
+	UPROPERTY(BlueprintReadOnly, Category = ButtonGrid)
+		EGridType GridType;
+
+	UPROPERTY(BlueprintReadOnly, Category = ButtonGrid)
+		class UUINavButton* FirstButton;
+
+	UPROPERTY(BlueprintReadWrite, Category = ButtonGrid)
+		FButtonNavigation EdgeNavigation;
+
+	UPROPERTY(BlueprintReadOnly, Category = ButtonGrid)
+		int DimensionX;
+	UPROPERTY(BlueprintReadOnly, Category = ButtonGrid)
+		int DimensionY;
 
 };
 
@@ -101,7 +109,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavButton)
 		int ButtonIndex = -1;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavButton)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavButton)
 		FButtonNavigation ButtonNav;
 
 	//The index of the grid this button is in

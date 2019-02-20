@@ -483,6 +483,15 @@ public:
 		void ReturnToParent();
 
 	/**
+	*	Returns the grid associated with the given button
+	*
+	*	@return ButtonGrid The button's associated grid
+	*	@return IsValid Whether the returned grid is valid
+	*/
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
+		void GetButtonGrid(class UUINavButton* Button, FGrid& ButtonGrid, bool &IsValid);
+
+	/**
 	*	Returns the UINavComponent with the specified index (null if that
 	*	index doesn't correspond to a UINavComponent)
 	*

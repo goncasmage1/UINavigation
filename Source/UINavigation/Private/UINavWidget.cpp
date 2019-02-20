@@ -18,23 +18,6 @@
 #include "Components/ScrollBox.h"
 #include "Components/CanvasPanelSlot.h"
 
-int FGrid::GetDimension() const
-{
-	switch (GridType)
-	{
-		case EGridType::Horizontal:
-			return DimensionX;
-			break;
-		case EGridType::Vertical:
-			return DimensionY;
-			break;
-		case EGridType::Grid2D:
-			return DimensionX * DimensionY;
-			break;
-	}
-	return 0;
-}
-
 void UUINavWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
@@ -581,7 +564,7 @@ void UUINavWidget::AppendNavigationGrid1D(EGridType GridType, int Dimension, FBu
 	}
 
 	FButtonNavigation NewNav;
-	int StartingIndex = NavigationGrids.Num() > 0 ? NavigationGrids.Last()->FirstButton->ButtonIndex + NavigationGrids.Last()->GetDimension() : 0;
+	int StartingIndex = NavigationGrids.Num() > 0 ? NavigationGrids.Last().FirstButton->ButtonIndex + NavigationGrids.Last().GetDimension() : 0;
 	int GridDimension = Dimension;
 	FButtonNavigation GridEdge = EdgeNavigation;
 	int ExtraButtons = 0;
@@ -703,7 +686,7 @@ void UUINavWidget::AppendNavigationGrid2D(int DimensionX, int DimensionY, FButto
 	}
 
 	FButtonNavigation NewNav;
-	int StartingIndex = NavigationGrids.Num() > 0 ? NavigationGrids.Last()->FirstButton->ButtonIndex + NavigationGrids.Last()->GetDimension() : 0;
+	int StartingIndex = NavigationGrids.Num() > 0 ? NavigationGrids.Last().FirstButton->ButtonIndex + NavigationGrids.Last().GetDimension() : 0;
 
 	NavigationGrids.Add(FGrid(EGridType::Grid2D, UINavButtons[StartingIndex], DimensionX, DimensionY, EdgeNavigation));
 
@@ -1122,6 +1105,21 @@ UUINavButton* UUINavWidget::FetchButtonByDirection(ENavigationDirection Directio
 	}
 
 	return NextButton;
+}
+
+void UUINavWidget::GetButtonGrid(UUINavButton * Button, FGrid& ButtonGrid, bool& IsValid)
+{
+	if (NavigationGrids.Num() > Button->GridIndex)
+	{
+		IsValid = true;
+		ButtonGrid = NavigationGrids[Button->GridIndex];
+		return;
+	}
+	else
+	{
+		IsValid = false;
+		return;
+	}
 }
 
 UUINavComponent * UUINavWidget::GetUINavComponentAtIndex(int Index)

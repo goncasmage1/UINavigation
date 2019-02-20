@@ -3,6 +3,23 @@
 #include "UINavButton.h"
 
 
+int FGrid::GetDimension() const
+{
+	switch (GridType)
+	{
+		case EGridType::Horizontal:
+			return DimensionX;
+			break;
+		case EGridType::Vertical:
+			return DimensionY;
+			break;
+		case EGridType::Grid2D:
+			return DimensionX * DimensionY;
+			break;
+	}
+	return 0;
+}
+
 UUINavButton::UUINavButton()
 {
 	IsFocusable = false;

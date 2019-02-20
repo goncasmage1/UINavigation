@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Engine.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
+#include "UINavButton.h"
 #include "UINavBlueprintFunctionLibrary.generated.h"
 
 /**
@@ -34,5 +35,9 @@ public:
 	// Checks whether a gamepad is connected
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavigationLibrary)
 		static bool IsGamepadConnected();
+
+	// Returns the desired grid's dimension
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
+		static int GetGridDimension(const FGrid Grid);
 	
 };
