@@ -453,7 +453,7 @@ public:
 	*
 	*	@param	Direction  Direction of navigation
 	*/
-	class UUINavButton* FetchButtonByDirection(ENavigationDirection Direction, UUINavButton* CurrentButton);
+	class UUINavButton* FetchButtonByDirection(ENavigationDirection Direction, UUINavButton* Button);
 
 	/**
 	*	Adds given widget to screen (strongly recomended over manual alternative)
