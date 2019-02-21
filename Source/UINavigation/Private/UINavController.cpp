@@ -264,9 +264,9 @@ FReply AUINavController::OnActionPressed(FString ActionName)
 	{
 		PressedActions.AddUnique(ActionName);
 		ExecuteActionByName(ActionName, true);
-		return FReply::Unhandled();
+		return FReply::Handled();
 	}
-	else return FReply::Handled();
+	else return FReply::Unhandled();
 }
 
 FReply AUINavController::OnActionReleased(FString ActionName)
@@ -275,9 +275,9 @@ FReply AUINavController::OnActionReleased(FString ActionName)
 	{
 		PressedActions.Remove(ActionName);
 		ExecuteActionByName(ActionName, false);
-		return FReply::Unhandled();
+		return FReply::Handled();
 	}
-	else return FReply::Handled();
+	else return FReply::Unhandled();
 }
 
 void AUINavController::ExecuteActionByName(FString Action, bool bPressed)
