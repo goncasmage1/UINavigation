@@ -234,8 +234,8 @@ public:
 	*	@param Direction The direction of navigation
 	*/
 	UFUNCTION(BlueprintNativeEvent, Category = UINavController)
-		void OnNavigated(ENavigationDirection Direction);
-	void OnNavigated_Implementation(ENavigationDirection Direction);
+		void OnNavigated(ENavigationDirection NavigationDirection);
+	void OnNavigated_Implementation(ENavigationDirection NavigationDirection);
 
 	UFUNCTION(BlueprintNativeEvent, Category = UINavController)
 		void OnSelect();

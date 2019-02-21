@@ -39,7 +39,7 @@ void UUINavInputBox::BuildKeyMappings()
 
 	AUINavController* PC = Cast<AUINavController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
 
-	if ((bIsAxis && TempAxes.Num() == 0) || !bIsAxis && TempActions.Num() == 0)
+	if ((bIsAxis && TempAxes.Num() == 0) || (!bIsAxis && TempActions.Num() == 0))
 	{
 		DISPLAYERROR(TEXT("Couldn't find Input with given name."));
 		return;
