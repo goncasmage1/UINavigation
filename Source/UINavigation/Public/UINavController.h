@@ -1,4 +1,4 @@
-// Copyright (C) 2018 Gonçalo Marques - All Rights Reserved
+// Copyright (C) 2018 Gonï¿½alo Marques - All Rights Reserved
 
 #pragma once
 
@@ -234,7 +234,7 @@ public:
 	*	@param Direction The direction of navigation
 	*/
 	UFUNCTION(BlueprintNativeEvent, Category = UINavController)
-		void OnNavigated(ENavigationDirection Direction);
+		void OnNavigated(ENavigationDirection NavigationDirection);
 	void OnNavigated_Implementation(ENavigationDirection NavigationDirection);
 
 	UFUNCTION(BlueprintNativeEvent, Category = UINavController)
