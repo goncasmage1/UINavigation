@@ -113,15 +113,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavButton)
 		int ButtonIndex = -1;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavButton)
-		FButtonNavigation ButtonNav;
-
 	//The index of the grid this button is in
 	UPROPERTY(BlueprintReadOnly, Category = UINavButton)
-		int GridIndex;
+		int GridIndex = - 1;
 	//This button's index in its associated grid
 	UPROPERTY(BlueprintReadOnly, Category = UINavButton)
-		int IndexInGrid;
+		int IndexInGrid = - 1;
 
 	UFUNCTION()
 		void OnHover();
