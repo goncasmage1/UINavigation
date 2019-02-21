@@ -70,13 +70,13 @@ struct FGrid
 
 	int GetDimension() const;
 
-	UPROPERTY(BlueprintReadOnly, Category = ButtonGrid)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = ButtonGrid)
 		EGridType GridType;
 
 	UPROPERTY(BlueprintReadOnly, Category = ButtonGrid)
 		class UUINavButton* FirstButton;
 
-	UPROPERTY(BlueprintReadWrite, Category = ButtonGrid)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = ButtonGrid)
 		FButtonNavigation EdgeNavigation;
 
 	UPROPERTY(BlueprintReadWrite, Category = ButtonGrid)
