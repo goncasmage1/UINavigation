@@ -132,7 +132,7 @@ public:
 		int LastButtonIndex = -1;
 
 	UPROPERTY(BlueprintReadOnly, Category = "UINav Input")
-		int NumberOfInputs = -1;
+		int NumberOfInputs = 0;
 
 	/*The index of the button at the top of the grid that should be navigated to
 	when entering this grid*/

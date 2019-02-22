@@ -58,6 +58,7 @@ protected:
 	int HaltedIndex = -1;
 
 	int InputBoxIndex = -1;
+	int NumberOfButtonsInGrids = 0;
 
 	float MovementCounter;
 	float MovementTime;
