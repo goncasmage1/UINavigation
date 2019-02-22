@@ -77,6 +77,11 @@ void UUINavComponentBox::UpdateTextToIndex(int NewIndex)
 	CheckRightLimit();
 }
 
+void UUINavComponentBox::ChangeText(FText NewText)
+{
+	NavText->SetText(NewText);
+}
+
 void UUINavComponentBox::NavigateLeft()
 {
 	//Make sure button still has options left to navigate

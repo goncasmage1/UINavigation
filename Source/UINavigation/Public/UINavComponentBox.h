@@ -25,8 +25,12 @@ protected:
 	virtual void CheckRightLimit();
 
 	virtual void UpdateTextBlock();
+	//Changes the text displayed to match the specified option index
 	UFUNCTION(BlueprintCallable, Category = UINavComponentBox)
 		virtual void UpdateTextToIndex(int NewIndex);
+	//Changes the text displayed in the NavText element
+	UFUNCTION(BlueprintCallable, Category = UINavComponentBox)
+		void ChangeText(FText NewText);
 
 public:
 
@@ -51,6 +55,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavComponentBox)
 		bool bDisableButtons = true;
 
+	//Returns the currently selected number resulting from the number range
 	UFUNCTION(BlueprintPure, BlueprintCallable, Category = UINavComponentBox)
 		FORCEINLINE int GetCurrentNumber() const { return (MinRange + OptionIndex * Interval); }
 	

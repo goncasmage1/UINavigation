@@ -308,7 +308,7 @@ public:
 	*	@param	Index  The index of the button that was hovered upon
 	*	@param	bHoverEvent  Was this triggered by a button hover event?
 	*/
-	UFUNCTION(BlueprintCallable, Category = UINavWidget)
+	UFUNCTION(BlueprintCallable, Category = UINavWidget, meta = (AdvancedDisplay=1))
 		void NavigateTo(int Index, bool bHoverEvent = false);
 
 	/**
