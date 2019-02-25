@@ -35,6 +35,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavOptionBox, meta = (EditCondition = "!bUseNumberRange"))
 		TArray<FName> StringOptions;
 
+	UFUNCTION(BlueprintCallable, Category = UINavOptionBox)
+		FORCEINLINE FName GetCurrentString() const { return StringOptions[OptionIndex]; }
+
 	virtual void NavigateRight() override;
 
 };
