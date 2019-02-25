@@ -192,10 +192,6 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = UINavWidget)
 		bool bUseButtonStates = false;
 
-	//If set to true, buttons will be navigated by changing the position of the selector
-	UPROPERTY(EditDefaultsOnly, Category = UINavWidget)
-		bool bUseSelector = true;
-
 	/*If set to true, buttons will be navigated by changing the text's color.
 	Immediate child of UINavButton must be TextBlock */
 	UPROPERTY(EditDefaultsOnly, Category = UINavWidget)
@@ -217,11 +213,11 @@ public:
 		UCurveFloat* MoveCurve;
 
 	//The position the selector will be in relative to the button
-	UPROPERTY(EditDefaultsOnly, Category = "UINavigation Selector", meta = (EditCondition = "bUseSelector"))
+	UPROPERTY(EditDefaultsOnly, Category = "UINavigation Selector")
 		ESelectorPosition SelectorPositioning = ESelectorPosition::Position_Center;
 
 	//The offset to apply when positioning the selector on a button
-	UPROPERTY(EditDefaultsOnly, Category = "UINavigation Selector", meta = (EditCondition = "bUseSelector"))
+	UPROPERTY(EditDefaultsOnly, Category = "UINavigation Selector")
 		FVector2D SelectorOffset;
 
 	UPROPERTY(EditDefaultsOnly, Category = "UINavigation Text", meta = (EditCondition = "bUseTextColor"))
@@ -491,6 +487,10 @@ public:
 	*/
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
 		void GetButtonGrid(class UUINavButton* Button, FGrid& ButtonGrid, bool &IsValid);
+
+	// Returns the button at the specified index of the given grid
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
+		class UUINavButton* GetButtonAtGridIndex(const FGrid ButtonGrid, const int Index);
 
 	/**
 	*	Returns the UINavComponent with the specified index (null if that

@@ -81,7 +81,7 @@ void UUINavWidget::InitialSetup()
 	if (bUseTextColor) ChangeTextColorToDefault();
 
 	//If this widget doesn't need to create the selector, skip to setup
-	if (!bUseSelector)
+	if (TheSelector == nullptr)
 	{
 		UINavSetup();
 		bShouldTick = false;
@@ -100,7 +100,7 @@ void UUINavWidget::ReconfigureSetup()
 	if (bUseTextColor) ChangeTextColorToDefault();
 
 	//If this widget doesn't need to create the selector, skip to setup
-	if (!bUseSelector)
+	if (TheSelector == nullptr || TheSelector->Visibility == ESlateVisibility::Hidden)
 	{
 		UINavSetup();
 		return;
@@ -133,11 +133,7 @@ void UUINavWidget::FetchButtonsInHierarchy()
 		DISPLAYERROR("Invalid FirstButton index, can't be greater than number of buttons.");
 		return;
 	}
-	if (FirstButtonIndex < 0)
-	{
-		DISPLAYERROR("Invalid FirstButton index, can't be less than 0.");
-		return;
-	}
+	if (FirstButtonIndex < 0) FirstButtonIndex = 0;
 
 	ButtonIndex = FirstButtonIndex;
 	CurrentButton = UINavButtons[FirstButtonIndex];
@@ -226,12 +222,6 @@ void UUINavWidget::ChangeTextColorToDefault()
 
 void UUINavWidget::SetupSelector()
 {
-	if (TheSelector == nullptr)
-	{
-		DISPLAYERROR("Couldn't find TheSelector");
-		return;
-	}
-
 	TheSelector->SetVisibility(ESlateVisibility::Hidden);
 
 	UCanvasPanelSlot* SelectorSlot = Cast<UCanvasPanelSlot>(TheSelector->Slot);
@@ -250,11 +240,7 @@ void UUINavWidget::UINavSetup()
 
 	if (CurrentPC != nullptr) CurrentPC->SetActiveWidget(this);
 
-	if (bUseSelector)
-	{
-		if (TheSelector == nullptr) return;
-		TheSelector->SetVisibility(ESlateVisibility::HitTestInvisible);
-	}
+	if (TheSelector != nullptr) TheSelector->SetVisibility(ESlateVisibility::HitTestInvisible);
 
 	bCompletedSetup = true;
 
@@ -274,7 +260,7 @@ void UUINavWidget::NativeTick(const FGeometry & MyGeometry, float DeltaTime)
 {
 	Super::NativeTick(MyGeometry, DeltaTime);
 
-	if (!bUseSelector || !bSetupStarted) return;
+	if (TheSelector == nullptr || !bSetupStarted) return;
 
 	if (bMovingSelector)
 	{
@@ -737,7 +723,7 @@ void UUINavWidget::NavigateTo(int Index, bool bHoverEvent)
 	
 	if (bUseButtonStates) UpdateButtonsStates(Index, bHoverEvent);
 
-	if (bUseSelector)
+	if (TheSelector != nullptr)
 	{
 		if (MoveCurve != nullptr) BeginSelectorMovement(Index);
 		else UpdateSelectorLocation(Index);
@@ -1041,6 +1027,16 @@ void UUINavWidget::GetButtonGrid(UUINavButton * Button, FGrid& ButtonGrid, bool&
 		IsValid = false;
 		return;
 	}
+}
+
+UUINavButton * UUINavWidget::GetButtonAtGridIndex(const FGrid ButtonGrid, const int Index)
+{
+	if (ButtonGrid.FirstButton == nullptr) return nullptr;
+	int NewIndex = ButtonGrid.FirstButton->ButtonIndex + Index;
+
+	if (NewIndex >= UINavButtons.Num()) return nullptr;
+
+	return UINavButtons[NewIndex];
 }
 
 UUINavComponent * UUINavWidget::GetUINavComponentAtIndex(int Index)

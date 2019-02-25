@@ -120,6 +120,9 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = UINavButton)
 		int IndexInGrid = - 1;
 
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
+		bool IsButtonValid();
+
 	UFUNCTION()
 		void OnHover();
 	UFUNCTION()

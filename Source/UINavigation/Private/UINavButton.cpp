@@ -29,6 +29,14 @@ UUINavButton::UUINavButton()
 	OnReleased.AddDynamic(this, &UUINavButton::OnRelease);
 }
 
+
+bool UUINavButton::IsButtonValid()
+{
+	return (Visibility != ESlateVisibility::Collapsed &&
+			Visibility != ESlateVisibility::Hidden &&
+			bIsEnabled);
+}
+
 void UUINavButton::OnHover()
 {
 	CustomHover.Broadcast(ButtonIndex);
