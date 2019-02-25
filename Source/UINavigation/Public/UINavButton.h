@@ -58,10 +58,11 @@ struct FGrid
 
 	}
 
-	FGrid(EGridType NewGridType, class UUINavButton* NewFirstButton, int NewDimensionX, int NewDimensionY, FButtonNavigation NewEdgeNavigation, bool bShouldWrap)
+	FGrid(EGridType NewGridType, class UUINavButton* NewFirstButton, int NewGridIndex, int NewDimensionX, int NewDimensionY, FButtonNavigation NewEdgeNavigation, bool bShouldWrap)
 	{
 		GridType = NewGridType;
 		FirstButton = NewFirstButton;
+		GridIndex = NewGridIndex;
 		DimensionX = NewDimensionX;
 		DimensionY = NewDimensionY;
 		EdgeNavigation = NewEdgeNavigation;
@@ -81,6 +82,9 @@ struct FGrid
 
 	UPROPERTY(BlueprintReadWrite, Category = ButtonGrid)
 		bool bWrap;
+
+	UPROPERTY(BlueprintReadOnly, Category = ButtonGrid)
+		int GridIndex;
 
 	UPROPERTY(BlueprintReadOnly, Category = ButtonGrid)
 		int DimensionX;

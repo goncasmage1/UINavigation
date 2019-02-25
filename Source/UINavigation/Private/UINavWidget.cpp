@@ -521,11 +521,11 @@ void UUINavWidget::AppendNavigationGrid1D(EGridType GridType, int Dimension, FBu
 
 	if (GridType == EGridType::Vertical)
 	{
-		NavigationGrids.Add(FGrid(EGridType::Vertical, UINavButtons[StartingIndex], 0, Dimension, EdgeNavigation, bWrap));
+		NavigationGrids.Add(FGrid(EGridType::Vertical, UINavButtons[StartingIndex], NavigationGrids.Num(), 0, Dimension, EdgeNavigation, bWrap));
 	}
 	else if (GridType == EGridType::Horizontal)
 	{
-		NavigationGrids.Add(FGrid(EGridType::Horizontal, UINavButtons[StartingIndex], Dimension, 0, EdgeNavigation, bWrap));
+		NavigationGrids.Add(FGrid(EGridType::Horizontal, UINavButtons[StartingIndex], NavigationGrids.Num(), Dimension, 0, EdgeNavigation, bWrap));
 	}
 
 	int GridIndex = NavigationGrids.Num() - 1;
@@ -549,7 +549,7 @@ void UUINavWidget::AppendNavigationGrid2D(int DimensionX, int DimensionY, FButto
 	FButtonNavigation NewNav;
 	int StartingIndex = NumberOfButtonsInGrids;
 
-	NavigationGrids.Add(FGrid(EGridType::Grid2D, UINavButtons[StartingIndex], DimensionX, DimensionY, EdgeNavigation, bWrap));
+	NavigationGrids.Add(FGrid(EGridType::Grid2D, UINavButtons[StartingIndex], NavigationGrids.Num(), DimensionX, DimensionY, EdgeNavigation, bWrap));
 
 	int GridIndex = NavigationGrids.Num() - 1;
 	int Iterations = DimensionX * DimensionY;
