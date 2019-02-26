@@ -424,9 +424,10 @@ void UUINavWidget::HandleSelectorMovement(float DeltaTime)
 	TheSelector->SetRenderTranslation(SelectorOrigin + Distance*MoveCurve->GetFloatValue(MovementCounter));
 }
 
+/*
+
 void UUINavWidget::AddUINavButton(UUINavButton * NewButton, FGrid& TargetGrid, int IndexInGrid)
 {
-	/*
 	NewButton->ButtonIndex = TargetGrid.FirstButton->ButtonIndex + IndexInGrid;
 	SetupUINavButtonDelegates(NewButton);
 	UINavButtons.Insert(NewButton, NewButton->ButtonIndex);
@@ -477,13 +478,14 @@ void UUINavWidget::AddUINavButton(UUINavButton * NewButton, FGrid& TargetGrid, i
 			TargetGrid.DimensionY++;
 			break;
 	}
-	*/
 }
 
 void UUINavWidget::AddUINavComponent(UUINavComponent * NewButton, FGrid& TargetGrid, int IndexInGrid)
 {
 
 }
+
+*/
 
 void UUINavWidget::AppendNavigationGrid1D(EGridType GridType, int Dimension, FButtonNavigation EdgeNavigation, bool bWrap)
 {

@@ -464,13 +464,13 @@ public:
 	*	Setup a new UINavButton added at runtime (must be added to viewport manually)
 	*/
 	//UFUNCTION(BlueprintCallable, Category = UINavWidget)
-		void AddUINavButton(class UUINavButton* NewButton, FGrid& TargetGrid, int IndexInGrid = -1);
+		//void AddUINavButton(class UUINavButton* NewButton, FGrid& TargetGrid, int IndexInGrid = -1);
 
 	/**
 	*	Setup a new UINavButton added at runtime (must be added to viewport manually)
 	*/
 	//UFUNCTION(BlueprintCallable, Category = UINavWidget)
-		void AddUINavComponent(class UUINavComponent* NewButton, FGrid& TargetGrid, int IndexInGrid = -1);
+		//void AddUINavComponent(class UUINavComponent* NewButton, FGrid& TargetGrid, int IndexInGrid = -1);
 
 	/**
 	*	Adds this widget's parent to the viewport (if applicable)
