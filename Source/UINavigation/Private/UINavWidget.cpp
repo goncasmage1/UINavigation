@@ -1029,6 +1029,19 @@ void UUINavWidget::GetButtonGrid(UUINavButton * Button, FGrid& ButtonGrid, bool&
 	}
 }
 
+bool UUINavWidget::IsButtonIndexInGrid(const int Index, const FGrid ButtonGrid)
+{
+	if (Index < ButtonGrid.FirstButton->ButtonIndex) return false;
+
+	return (Index >= ButtonGrid.FirstButton->ButtonIndex &&
+			Index <= ButtonGrid.FirstButton->ButtonIndex + ButtonGrid.GetDimension());
+}
+
+bool UUINavWidget::IsButtonInGrid(UUINavButton * Button, const FGrid ButtonGrid)
+{
+	return IsButtonIndexInGrid(Button->ButtonIndex, ButtonGrid);
+}
+
 UUINavButton * UUINavWidget::GetButtonAtGridIndex(const FGrid ButtonGrid, const int Index)
 {
 	if (ButtonGrid.FirstButton == nullptr) return nullptr;
