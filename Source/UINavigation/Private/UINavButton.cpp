@@ -30,7 +30,7 @@ UUINavButton::UUINavButton()
 }
 
 
-bool UUINavButton::IsButtonValid()
+bool UUINavButton::IsValid()
 {
 	return (Visibility != ESlateVisibility::Collapsed &&
 			Visibility != ESlateVisibility::Hidden &&

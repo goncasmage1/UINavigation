@@ -125,7 +125,7 @@ public:
 		int IndexInGrid = - 1;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
-		bool IsButtonValid();
+		bool IsValid();
 
 	UFUNCTION()
 		void OnHover();

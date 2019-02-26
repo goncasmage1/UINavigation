@@ -138,9 +138,7 @@ void UUINavWidget::FetchButtonsInHierarchy()
 	ButtonIndex = FirstButtonIndex;
 	CurrentButton = UINavButtons[FirstButtonIndex];
 
-	while (CurrentButton->Visibility == ESlateVisibility::Collapsed ||
-		   CurrentButton->Visibility == ESlateVisibility::Hidden ||
-		   !CurrentButton->bIsEnabled)
+	while (!CurrentButton->IsValid())
 	{
 		ButtonIndex++;
 		if (ButtonIndex >= UINavButtons.Num()) ButtonIndex = 0;
@@ -878,9 +876,7 @@ UUINavButton* UUINavWidget::FindNextButton(UUINavButton* Button, ENavigationDire
 	if (NewButton == nullptr) return nullptr;
 
 	//Check if the button is visible, if not, skip to next button
-	while (NewButton->Visibility == ESlateVisibility::Collapsed ||
-		   NewButton->Visibility == ESlateVisibility::Hidden ||
-		   !NewButton->bIsEnabled)
+	while (!NewButton->IsValid())
 	{
 		NewButton = FetchButtonByDirection(Direction, NewButton);
 		if (NewButton == nullptr || NewButton == UINavButtons[ButtonIndex]) return nullptr;

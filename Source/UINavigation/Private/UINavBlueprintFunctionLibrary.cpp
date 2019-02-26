@@ -77,3 +77,9 @@ int UUINavBlueprintFunctionLibrary::GetGridDimension(const FGrid Grid)
 	}
 	return 0;
 }
+
+bool UUINavBlueprintFunctionLibrary::IsButtonValid(UUINavButton * Button)
+{
+	if (Button == nullptr) return false;
+	return Button->IsValid();
+}

@@ -39,5 +39,9 @@ public:
 	// Returns the desired grid's dimension
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
 		static int GetGridDimension(const FGrid Grid);
+
+	// Returns the desired grid's dimension
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
+		static bool IsButtonValid(UUINavButton* Button);
 	
 };
