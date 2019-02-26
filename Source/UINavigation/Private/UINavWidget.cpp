@@ -867,14 +867,14 @@ void UUINavWidget::ReturnToParent()
 
 void UUINavWidget::MenuNavigate(ENavigationDirection Direction)
 {
-	UUINavButton* NewButton = FindNextButton(Direction);
+	UUINavButton* NewButton = FindNextButton(CurrentButton, Direction);
 	if (NewButton == nullptr) return;
 	NavigateTo(NewButton->ButtonIndex);
 }
 
-UUINavButton* UUINavWidget::FindNextButton(ENavigationDirection Direction)
+UUINavButton* UUINavWidget::FindNextButton(UUINavButton* Button, ENavigationDirection Direction)
 {
-	UUINavButton* NewButton = FetchButtonByDirection(Direction, CurrentButton);
+	UUINavButton* NewButton = FetchButtonByDirection(Direction, Button);
 	if (NewButton == nullptr) return nullptr;
 
 	//Check if the button is visible, if not, skip to next button
@@ -1179,7 +1179,7 @@ void UUINavWidget::NavigateInDirection(ENavigationDirection Direction)
 
 	if (!CurrentPC->bAllowNavigation)
 	{
-		UUINavButton* NextButton = FindNextButton(Direction);
+		UUINavButton* NextButton = FindNextButton(CurrentButton, Direction);
 		HaltedIndex = NextButton != nullptr ? NextButton->ButtonIndex : -1;
 		return;
 	}

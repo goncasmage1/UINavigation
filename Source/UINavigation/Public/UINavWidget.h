@@ -437,13 +437,13 @@ public:
 	virtual void MenuNavigate(ENavigationDirection Direction);
 
 	/**
-	*	Returns the index of the button that will be navigated to according to the given direction
+	*	Returns the index of the button that will be navigated to according to the given direction, starting at the given button
 	*
 	*	@param	Direction  Direction of navigation
 	*	@return int The index of the button that will be navigated to
 	*/
-	UFUNCTION(BlueprintCallable, Category = UINavWidget)
-		virtual class UUINavButton* FindNextButton(ENavigationDirection Direction);
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
+		virtual class UUINavButton* FindNextButton(class UUINavButton* Button, ENavigationDirection Direction);
 
 	/**
 	*	Returns the next button to navigate to
