@@ -100,7 +100,7 @@ void UUINavWidget::ReconfigureSetup()
 	if (bUseTextColor) ChangeTextColorToDefault();
 
 	//If this widget doesn't need to create the selector, skip to setup
-	if (TheSelector == nullptr || TheSelector->Visibility == ESlateVisibility::Hidden)
+	if (TheSelector == nullptr || TheSelector->Visibility == ESlateVisibility::Collapsed)
 	{
 		UINavSetup();
 		return;
@@ -1027,7 +1027,7 @@ void UUINavWidget::GetButtonGrid(UUINavButton * Button, FGrid& ButtonGrid, bool&
 	}
 }
 
-bool UUINavWidget::IsButtonIndexInGrid(const int Index, const FGrid ButtonGrid)
+bool UUINavWidget::IsButtonIndexInGrid(const FGrid ButtonGrid, const int Index)
 {
 	if (Index < ButtonGrid.FirstButton->ButtonIndex) return false;
 
@@ -1037,13 +1037,13 @@ bool UUINavWidget::IsButtonIndexInGrid(const int Index, const FGrid ButtonGrid)
 
 bool UUINavWidget::IsButtonInGrid(UUINavButton * Button, const FGrid ButtonGrid)
 {
-	return IsButtonIndexInGrid(Button->ButtonIndex, ButtonGrid);
+	return GetButtonAtGridIndex(ButtonGrid, Button->ButtonIndex) != nullptr;
 }
 
-UUINavButton * UUINavWidget::GetButtonAtGridIndex(const FGrid ButtonGrid, const int Index)
+UUINavButton * UUINavWidget::GetButtonAtGridIndex(const FGrid ButtonGrid, const int GridIndex)
 {
 	if (ButtonGrid.FirstButton == nullptr) return nullptr;
-	int NewIndex = ButtonGrid.FirstButton->ButtonIndex + Index;
+	int NewIndex = ButtonGrid.FirstButton->ButtonIndex + GridIndex;
 
 	if (NewIndex >= UINavButtons.Num()) return nullptr;
 

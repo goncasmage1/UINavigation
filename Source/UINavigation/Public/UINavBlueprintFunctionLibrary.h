@@ -40,7 +40,7 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
 		static int GetGridDimension(const FGrid Grid);
 
-	// Returns the desired grid's dimension
+	// Returns whether the given button is valid (isn't hidden, collaped or disabled)
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
 		static bool IsButtonValid(UUINavButton* Button);
 	

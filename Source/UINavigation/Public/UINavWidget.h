@@ -267,8 +267,7 @@ public:
 		void AppendNavigationGrid1D(EGridType GridType, int Dimension, FButtonNavigation EdgeNavigation, bool bWrap);
 
 	/**
-	*	Appends a new array of FButtonNavigations to the already existing navigation graph with the given dimension
-	*	Used for two-dimensional grids of buttons
+	*	Appends a new navigation grid to the widget. Used for 2-dimensional grids.
 	*	
 	*	@param	DimensionX  The horizontal dimension of the grid
 	*	@param	DimensionY  The vertical dimension of the grid
@@ -488,17 +487,17 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
 		void GetButtonGrid(class UUINavButton* Button, FGrid& ButtonGrid, bool &IsValid);
 
-	// Returns whether the button with the given index is inside the specified grid
+	// Checks whether the button with the given index is inside the specified grid
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
-		bool IsButtonIndexInGrid(const int Index, const FGrid ButtonGrid);
+		bool IsButtonIndexInGrid(const FGrid ButtonGrid, const int Index);
 
-	// Returns whether the given button is inside the specified grid
+	// Checks whether the given button is inside the specified grid
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
 		bool IsButtonInGrid(class UUINavButton* Button, const FGrid ButtonGrid);
 
 	// Returns the button at the specified index of the given grid
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
-		class UUINavButton* GetButtonAtGridIndex(const FGrid ButtonGrid, const int Index);
+		class UUINavButton* GetButtonAtGridIndex(const FGrid ButtonGrid, const int GridIndex);
 
 	/**
 	*	Returns the UINavComponent with the specified index (null if that
