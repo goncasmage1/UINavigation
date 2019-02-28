@@ -820,6 +820,14 @@ void UUINavWidget::OnSetupCompleted_Implementation()
 
 }
 
+void UUINavWidget::OnComponentBoxNavigateLeft_Implementation(int Index)
+{
+}
+
+void UUINavWidget::OnComponentBoxNavigateRight_Implementation(int Index)
+{
+}
+
 UWidget* UUINavWidget::GoToWidget(TSubclassOf<UUINavWidget> NewWidgetClass, bool bRemoveParent, int ZOrder)
 {
 	if (NewWidgetClass == nullptr)
@@ -1040,6 +1048,13 @@ bool UUINavWidget::IsButtonInGrid(UUINavButton * Button, const FGrid ButtonGrid)
 	return GetButtonAtGridIndex(ButtonGrid, Button->ButtonIndex) != nullptr;
 }
 
+UUINavButton * UUINavWidget::GetLastButtonInGrid(const FGrid Grid)
+{
+	int LastIndex = Grid.GetLastButtonIndex();
+
+	return UINavButtons.Num() > LastIndex ? UINavButtons[LastIndex] : nullptr;
+}
+
 UUINavButton * UUINavWidget::GetButtonAtGridIndex(const FGrid ButtonGrid, const int GridIndex)
 {
 	if (ButtonGrid.FirstButton == nullptr) return nullptr;
@@ -1187,8 +1202,16 @@ void UUINavWidget::NavigateInDirection(ENavigationDirection Direction)
 	UUINavComponentBox* ComponentBox = GetUINavComponentBoxAtIndex(ButtonIndex);
 	if (ComponentBox != nullptr && (Direction == ENavigationDirection::Left || Direction == ENavigationDirection::Right))
 	{
-		if (Direction == ENavigationDirection::Left) ComponentBox->NavigateLeft();
-		else if (Direction == ENavigationDirection::Right) ComponentBox->NavigateRight();
+		if (Direction == ENavigationDirection::Left)
+		{
+			ComponentBox->NavigateLeft();
+			OnComponentBoxNavigateLeft(ButtonIndex);
+		}
+		else if (Direction == ENavigationDirection::Right)
+		{
+			ComponentBox->NavigateRight();
+			OnComponentBoxNavigateRight(ButtonIndex);
+		}
 	}
 	else MenuNavigate(Direction);
 }

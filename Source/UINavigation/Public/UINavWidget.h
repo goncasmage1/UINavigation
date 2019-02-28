@@ -433,6 +433,20 @@ public:
 		void OnSetupCompleted();
 	virtual void OnSetupCompleted_Implementation();
 
+	/**
+	*	Called when the user navigates left on a UINavComponentBox
+	*/
+	UFUNCTION(BlueprintNativeEvent, Category = UINavWidget)
+		void OnComponentBoxNavigateLeft(int Index);
+	virtual void OnComponentBoxNavigateLeft_Implementation(int Index);
+
+	/**
+	*	Called when the user navigates right on a UINavComponentBox
+	*/
+	UFUNCTION(BlueprintNativeEvent, Category = UINavWidget)
+		void OnComponentBoxNavigateRight(int Index);
+	virtual void OnComponentBoxNavigateRight_Implementation(int Index);
+
 	virtual void MenuNavigate(ENavigationDirection Direction);
 
 	/**
@@ -494,6 +508,10 @@ public:
 	// Checks whether the given button is inside the specified grid
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
 		bool IsButtonInGrid(class UUINavButton* Button, const FGrid ButtonGrid);
+
+	// Returns the last button in the given grid
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
+		class UUINavButton* GetLastButtonInGrid(const FGrid Grid);
 
 	// Returns the button at the specified index of the given grid
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)

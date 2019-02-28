@@ -20,6 +20,11 @@ int FGrid::GetDimension() const
 	return 0;
 }
 
+int FGrid::GetLastButtonIndex() const
+{
+	return FirstButton->ButtonIndex + GetDimension() - 1;
+}
+
 UUINavButton::UUINavButton()
 {
 	IsFocusable = false;

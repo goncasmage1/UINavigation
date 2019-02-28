@@ -71,6 +71,8 @@ struct FGrid
 
 	int GetDimension() const;
 
+	int GetLastButtonIndex() const;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = ButtonGrid)
 		EGridType GridType;
 
