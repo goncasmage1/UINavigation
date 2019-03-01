@@ -902,7 +902,7 @@ UUINavButton* UUINavWidget::FetchButtonByDirection(ENavigationDirection Directio
 	bool bIsValid;
 	GetButtonGrid(Button, ButtonGrid, bIsValid);
 
-	if (!bIsValid || ButtonGrid.FirstButton != nullptr) return nullptr;
+	if (!bIsValid || ButtonGrid.FirstButton == nullptr) return nullptr;
 
 	switch (ButtonGrid.GridType)
 	{
@@ -1052,12 +1052,19 @@ UUINavButton * UUINavWidget::GetButtonAtGridIndex(const FGrid ButtonGrid, const 
 	return UINavButtons[NewIndex];
 }
 
+bool UUINavWidget::IsButtonInGrid(const FGrid ButtonGrid, UUINavButton * Button)
+{
+	return IsButtonIndexInGrid(ButtonGrid, Button->ButtonIndex);
+}
+
+bool UUINavWidget::IsButtonIndexInGrid(const FGrid ButtonGrid, const int Index)
+{
+	return (GetIndexInGridFromButtonIndex(ButtonGrid, Index) != -1);
+}
+
 int UUINavWidget::GetIndexInGridFromButton(const FGrid ButtonGrid, UUINavButton * Button)
 {
-	if (ButtonGrid.FirstButton == nullptr) return -1;
-	if (Button->ButtonIndex < ButtonGrid.FirstButton->ButtonIndex) return -1;
-	else if (Button->ButtonIndex > ButtonGrid.GetLastButtonIndex()) return -1;
-	return Button->ButtonIndex - ButtonGrid.FirstButton->ButtonIndex;
+	return GetIndexInGridFromButtonIndex(ButtonGrid, Button->ButtonIndex);
 }
 
 int UUINavWidget::GetIndexInGridFromButtonIndex(const FGrid ButtonGrid, const int Index)

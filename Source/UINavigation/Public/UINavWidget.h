@@ -509,6 +509,14 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
 		class UUINavButton* GetButtonAtGridIndex(const FGrid ButtonGrid, const int GridIndex);
 
+	// Checks whether the given button is in the specified grid
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
+		bool IsButtonInGrid(const FGrid ButtonGrid, class UUINavButton* Button);
+
+	// Checks whether the given button index is in the specified grid
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
+		bool IsButtonIndexInGrid(const FGrid ButtonGrid, const int Index);
+
 	// Returns the given button's index inside the specified grid (-1 if the button isn't inside the grid)
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
 		 int GetIndexInGridFromButton(const FGrid ButtonGrid, class UUINavButton* Button);
