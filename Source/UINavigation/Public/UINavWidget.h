@@ -501,14 +501,6 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
 		void GetButtonGrid(class UUINavButton* Button, FGrid& ButtonGrid, bool &IsValid);
 
-	// Checks whether the button with the given index is inside the specified grid
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
-		bool IsButtonIndexInGrid(const FGrid ButtonGrid, const int Index);
-
-	// Checks whether the given button is inside the specified grid
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
-		bool IsButtonInGrid(class UUINavButton* Button, const FGrid ButtonGrid);
-
 	// Returns the last button in the given grid
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
 		class UUINavButton* GetLastButtonInGrid(const FGrid Grid);
@@ -516,6 +508,14 @@ public:
 	// Returns the button at the specified index of the given grid
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
 		class UUINavButton* GetButtonAtGridIndex(const FGrid ButtonGrid, const int GridIndex);
+
+	// Returns the given button's index inside the specified grid (-1 if the button isn't inside the grid)
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
+		 int GetIndexInGridFromButton(const FGrid ButtonGrid, class UUINavButton* Button);
+
+	// Returns the given button's index inside the specified grid (-1 if the button isn't inside the grid)
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
+		int GetIndexInGridFromButtonIndex(const FGrid ButtonGrid, const int Index);
 
 	/**
 	*	Returns the UINavComponent with the specified index (null if that
