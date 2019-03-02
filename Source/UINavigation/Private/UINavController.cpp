@@ -51,6 +51,7 @@ void AUINavController::BeginPlay()
 	Super::BeginPlay();
 
 	VerifyDefaultInputs();
+	FetchUINavActionKeys();
 }
 
 void AUINavController::VerifyDefaultInputs()
@@ -63,13 +64,6 @@ void AUINavController::VerifyDefaultInputs()
 		MySettings->AxisMappings = Settings->AxisMappings;
 		MySettings->SaveConfig();
 	}
-}
-
-void AUINavController::Possess(APawn * InPawn)
-{
-	Super::Possess(InPawn);
-
-	FetchUINavActionKeys();
 }
 
 void AUINavController::Tick(float DeltaTime)

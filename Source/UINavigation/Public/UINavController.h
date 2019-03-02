@@ -129,7 +129,6 @@ protected:
 
 	virtual void SetupInputComponent() override;
 	virtual void BeginPlay() override;
-	virtual void Possess(APawn* InPawn) override;
 	virtual void Tick(float DeltaTime) override;
 
 public:
