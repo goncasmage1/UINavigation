@@ -128,15 +128,18 @@ void UUINavWidget::FetchButtonsInHierarchy()
 {
 	TraverseHierarquy();
 
-	if (FirstButtonIndex >= UINavButtons.Num())
+	int ButtonsNum = UINavButtons.Num();
+	if (FirstButtonIndex >= ButtonsNum && ButtonsNum > 0)
 	{
 		DISPLAYERROR("Invalid FirstButton index, can't be greater than number of buttons.");
 		return;
 	}
+
 	if (FirstButtonIndex < 0) FirstButtonIndex = 0;
 
 	ButtonIndex = FirstButtonIndex;
-	CurrentButton = UINavButtons[FirstButtonIndex];
+	if (ButtonsNum > 0) CurrentButton = UINavButtons[FirstButtonIndex];
+	else return;
 
 	while (!CurrentButton->IsValid())
 	{
@@ -1200,6 +1203,12 @@ void UUINavWidget::CancelRebind()
 void UUINavWidget::NavigateInDirection(ENavigationDirection Direction)
 {
 	if (Direction == ENavigationDirection::None) return;
+
+	if (UINavButtons.Num() == 0)
+	{
+		OnNavigatedDirection(Direction);
+		return;
+	}
 
 	if (!CurrentPC->bAllowNavigation)
 	{
