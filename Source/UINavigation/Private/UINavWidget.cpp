@@ -506,14 +506,7 @@ void UUINavWidget::AppendNavigationGrid1D(EGridType GridType, int Dimension, FBu
 		return;
 	}
 
-	if (GridType == EGridType::Vertical)
-	{
-		NavigationGrids.Add(FGrid(EGridType::Vertical, UINavButtons[NumberOfButtonsInGrids], NavigationGrids.Num(), 0, Dimension, EdgeNavigation, bWrap));
-	}
-	else if (GridType == EGridType::Horizontal)
-	{
-		NavigationGrids.Add(FGrid(EGridType::Horizontal, UINavButtons[NumberOfButtonsInGrids], NavigationGrids.Num(), Dimension, 0, EdgeNavigation, bWrap));
-	}
+	Add1DGrid(GridType, UINavButtons[NumberOfButtonsInGrids], NavigationGrids.Num(), Dimension, EdgeNavigation, bWrap);
 
 	int GridIndex = NavigationGrids.Num() - 1;
 	for (int i = 0; i < Dimension; i++)
@@ -561,6 +554,18 @@ void UUINavWidget::AppendVerticalNavigation(int Dimension, FButtonNavigation Edg
 void UUINavWidget::AppendGridNavigation(int DimensionX, int DimensionY, FButtonNavigation EdgeNavigation, bool bWrap)
 {
 	AppendNavigationGrid2D(DimensionX, DimensionY, EdgeNavigation, bWrap);
+}
+
+void UUINavWidget::Add1DGrid(EGridType GridType, UUINavButton * FirstButton, int StartingIndex, int Dimension, FButtonNavigation EdgeNavigation, bool bWrap)
+{
+	if (GridType == EGridType::Vertical)
+	{
+		NavigationGrids.Add(FGrid(EGridType::Vertical, FirstButton, StartingIndex, 0, Dimension, EdgeNavigation, bWrap));
+	}
+	else if (GridType == EGridType::Horizontal)
+	{
+		NavigationGrids.Add(FGrid(EGridType::Horizontal, FirstButton, StartingIndex, Dimension, 0, EdgeNavigation, bWrap));
+	}
 }
 
 void UUINavWidget::UpdateSelectorLocation(int Index)
