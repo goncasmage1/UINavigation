@@ -668,20 +668,21 @@ void UUINavWidget::SwitchTextColorTo(int Index, FLinearColor Color)
 
 void UUINavWidget::UpdateButtonsStates(int Index, bool bHovered)
 {
+	UUINavButton* ToButton = UINavButtons[Index];
 	//Update new button state
-	if (!(bHovered ^ bSwitchedStyle[Index]))
+	if (!(bHovered ^ ToButton->bSwitchedStyle))
 	{
 		SwitchButtonStyle(Index);
-		bSwitchedStyle[Index] = !bHovered;
+		ToButton->bSwitchedStyle = !bHovered;
 	}
 
 	if (ButtonIndex == Index) return;
 
 	//Update previous button state
-	if (!(bHovered ^ !bSwitchedStyle[Index]))
+	if (!(bHovered ^ !ToButton->bSwitchedStyle))
 	{
 		SwitchButtonStyle(ButtonIndex);
-		bSwitchedStyle[ButtonIndex] = false;
+		CurrentButton->bSwitchedStyle = false;
 	}
 }
 
@@ -1128,13 +1129,14 @@ void UUINavWidget::UnhoverEvent(int Index)
 		If the button didn't switch style, switch style to make sure it's still selected
 		Otherwise, if the button is the selected button, also switch style to make sure it's still selected
 		*/
-		if (!bSwitchedStyle[Index] || (bSwitchedStyle[Index] && ButtonIndex == Index))
+		UUINavButton* ToButton = UINavButtons[Index];
+		if (!ToButton->bSwitchedStyle || (ToButton->bSwitchedStyle && ButtonIndex == Index))
 		{
 			SwitchButtonStyle(Index);
-			bSwitchedStyle[Index] = ButtonIndex == Index;
+			ToButton->bSwitchedStyle = ButtonIndex == Index;
 		}
 
-		ButtonIndex = bSwitchedStyle[Index] ? Index : ButtonIndex;
+		ButtonIndex = ToButton->bSwitchedStyle ? Index : ButtonIndex;
 	}
 }
 
@@ -1168,7 +1170,6 @@ void UUINavWidget::SetupUINavButtonDelegates(UUINavButton * NewButton)
 	NewButton->CustomUnhover.AddDynamic(this, &UUINavWidget::UnhoverEvent);
 	NewButton->CustomClick.AddDynamic(this, &UUINavWidget::ClickEvent);
 	NewButton->CustomRelease.AddDynamic(this, &UUINavWidget::ReleaseEvent);
-	bSwitchedStyle.Add(false);
 }
 
 void UUINavWidget::ProcessNonMouseKeybind(FKey PressedKey)

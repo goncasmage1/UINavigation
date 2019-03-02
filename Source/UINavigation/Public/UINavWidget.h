@@ -159,9 +159,6 @@ public:
 	UPROPERTY(BlueprintReadWrite, Category = UINavWidget)
 		TArray<class UWidgetAnimation*> UINavAnimations;
 
-	//Indicates whether the Normal and Hovered style of a button were switched
-	TArray<bool> bSwitchedStyle;
-
 	//The index of the button that was last navigated upon
 	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
 		int ButtonIndex = 0;

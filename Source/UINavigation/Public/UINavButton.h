@@ -126,6 +126,8 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = UINavButton)
 		int IndexInGrid = - 1;
 
+	bool bSwitchedStyle = false;
+
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
 		bool IsValid();
 
