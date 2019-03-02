@@ -25,7 +25,7 @@ struct FButtonNavigation
 {
 	GENERATED_BODY()
 
-		FButtonNavigation()
+	FButtonNavigation()
 	{
 
 	}
@@ -74,24 +74,24 @@ struct FGrid
 	int GetLastButtonIndex() const;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = ButtonGrid)
-		EGridType GridType;
+		EGridType GridType = EGridType::Horizontal;
 
 	UPROPERTY(BlueprintReadOnly, Category = ButtonGrid)
-		class UUINavButton* FirstButton;
+		class UUINavButton* FirstButton = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = ButtonGrid)
 		FButtonNavigation EdgeNavigation;
 
 	UPROPERTY(BlueprintReadWrite, Category = ButtonGrid)
-		bool bWrap;
+		bool bWrap = false;
 
 	UPROPERTY(BlueprintReadOnly, Category = ButtonGrid)
-		int GridIndex;
+		int GridIndex = -1;
 
 	UPROPERTY(BlueprintReadOnly, Category = ButtonGrid)
-		int DimensionX;
+		int DimensionX = -1;
 	UPROPERTY(BlueprintReadOnly, Category = ButtonGrid)
-		int DimensionY;
+		int DimensionY = -1;
 
 };
 
