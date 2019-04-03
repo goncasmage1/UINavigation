@@ -164,6 +164,13 @@ void UUINavWidget::TraverseHierarquy()
 			ScrollBoxes.Add(Scroll);
 		}
 
+		UUINavWidget* uinavwidget = Cast<UUINavWidget>(widget);
+		if (Scroll != nullptr)
+		{
+			DISPLAYERROR("The plugin doesn't support nested UINavWidgets");
+			return;
+		}
+
 		UUINavInputContainer* InputContainer = Cast<UUINavInputContainer>(widget);
 		if (InputContainer != nullptr)
 		{

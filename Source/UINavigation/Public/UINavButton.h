@@ -116,6 +116,10 @@ public:
 	UPROPERTY()
 		FCustomReleaseDelegate CustomRelease;
 
+	/*
+	WARNING: Edit this index manually at your own risk. If the indices are
+	not correctly alligned with the automatically set indices several bugs may appear.
+	*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavButton)
 		int ButtonIndex = -1;
 
