@@ -18,6 +18,12 @@
 			"Name": "UINavigation",
 			"Type": "Runtime",
 			"LoadingPhase": "PreDefault",
+			"WhitelistPlatforms": [
+				"Win64",
+				"Win32",
+				"Linux",
+				"HTML5"
+			],
 			"BlacklistPlatforms": [
 				"IOS",
 				"Android"
