@@ -34,7 +34,6 @@ UUINavButton::UUINavButton()
 	OnReleased.AddDynamic(this, &UUINavButton::OnRelease);
 }
 
-
 bool UUINavButton::IsValid()
 {
 	return (Visibility != ESlateVisibility::Collapsed &&

@@ -141,13 +141,26 @@ void UUINavWidget::FetchButtonsInHierarchy()
 	if (ButtonsNum > 0) CurrentButton = UINavButtons[FirstButtonIndex];
 	else return;
 
-	while (!CurrentButton->IsValid())
+	bool bValid = CurrentButton->IsValid();
+
+	if (bValid)
+	{
+		UUINavComponent* UINavComp = GetUINavComponentAtIndex(ButtonIndex);
+		if (UINavComp != nullptr && !UINavComp->IsValid()) bValid = false;
+	}
+
+	while (!bValid)
 	{
 		ButtonIndex++;
 		if (ButtonIndex >= UINavButtons.Num()) ButtonIndex = 0;
 		
 		CurrentButton = UINavButtons[ButtonIndex];
 		if (ButtonIndex == FirstButtonIndex) break;
+
+		UUINavComponent* UINavComp = GetUINavComponentAtIndex(ButtonIndex);
+		if (UINavComp != nullptr && !UINavComp->IsValid()) continue;
+
+		bValid = CurrentButton->IsValid();
 	}
 }
 
@@ -433,8 +446,6 @@ void UUINavWidget::HandleSelectorMovement(float DeltaTime)
 	TheSelector->SetRenderTranslation(SelectorOrigin + Distance*MoveCurve->GetFloatValue(MovementCounter));
 }
 
-/*
-
 void UUINavWidget::AddUINavButton(UUINavButton * NewButton, FGrid& TargetGrid, int IndexInGrid)
 {
 	NewButton->ButtonIndex = TargetGrid.FirstButton->ButtonIndex + IndexInGrid;
@@ -493,8 +504,6 @@ void UUINavWidget::AddUINavComponent(UUINavComponent * NewButton, FGrid& TargetG
 {
 
 }
-
-*/
 
 void UUINavWidget::AppendNavigationGrid1D(EGridType GridType, int Dimension, FButtonNavigation EdgeNavigation, bool bWrap)
 {
@@ -898,10 +907,21 @@ UUINavButton* UUINavWidget::FindNextButton(UUINavButton* Button, ENavigationDire
 	if (NewButton == nullptr) return nullptr;
 
 	//Check if the button is visible, if not, skip to next button
-	while (!NewButton->IsValid())
+	bool bValid = NewButton->IsValid();
+	if (bValid)
 	{
+		UUINavComponent* UINavComp = GetUINavComponentAtIndex(NewButton->ButtonIndex);
+		if (UINavComp != nullptr && !UINavComp->IsValid()) bValid = false;
+	}
+	while (!bValid)
+	{
+		bValid = false;
 		NewButton = FetchButtonByDirection(Direction, NewButton);
+		UUINavComponent* UINavComp = GetUINavComponentAtIndex(NewButton->ButtonIndex);
+		if (UINavComp != nullptr && !UINavComp->IsValid()) continue;
 		if (NewButton == nullptr || NewButton == UINavButtons[ButtonIndex]) return nullptr;
+
+		bValid = NewButton->IsValid();
 	}
 	return NewButton;
 }

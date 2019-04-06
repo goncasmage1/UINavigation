@@ -132,7 +132,7 @@ public:
 
 	bool bSwitchedStyle = false;
 
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavButton)
 		bool IsValid();
 
 	UFUNCTION()
