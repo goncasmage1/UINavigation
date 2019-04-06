@@ -14,7 +14,7 @@ int FGrid::GetDimension() const
 			return DimensionY;
 			break;
 		case EGridType::Grid2D:
-			return DimensionX * DimensionY;
+			return NumGrid2DButtons;
 			break;
 	}
 	return 0;

@@ -271,8 +271,8 @@ public:
 	*	@param	EdgeNavigation  The intended navigation at each of the four edges of the grid
 	*	@param  bWrap  Indicates whether navigation wraps around the grid
 	*/
-	UFUNCTION(BlueprintCallable, Category = UINavWidget)
-		void AppendNavigationGrid2D(int DimensionX, int DimensionY, FButtonNavigation EdgeNavigation, bool bWrap);
+	UFUNCTION(BlueprintCallable, Category = UINavWidget, meta=(AdvancedDisplay=4))
+		void AppendNavigationGrid2D(int DimensionX, int DimensionY, FButtonNavigation EdgeNavigation, bool bWrap, int ButtonsInGrid = -1);
 
 	UFUNCTION(BlueprintCallable, Category = UINavWidget, meta = (DeprecatedFunction, DeprecationMessage="This function has been replaced by Append Navigation Grid 1D."))
 		void AppendHorizontalNavigation(int Dimension, FButtonNavigation EdgeNavigation, bool bWrap);
