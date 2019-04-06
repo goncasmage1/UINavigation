@@ -168,7 +168,6 @@ void UUINavWidget::TraverseHierarquy()
 		if (UINavWidget != nullptr)
 		{
 			DISPLAYERROR("The plugin doesn't support nested UINavWidgets");
-			return;
 		}
 
 		UUINavInputContainer* InputContainer = Cast<UUINavInputContainer>(widget);
