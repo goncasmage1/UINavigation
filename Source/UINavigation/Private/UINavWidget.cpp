@@ -446,17 +446,55 @@ void UUINavWidget::HandleSelectorMovement(float DeltaTime)
 	TheSelector->SetRenderTranslation(SelectorOrigin + Distance*MoveCurve->GetFloatValue(MovementCounter));
 }
 
-void UUINavWidget::AddUINavButton(UUINavButton * NewButton, FGrid& TargetGrid, int IndexInGrid, FName AnimationTarget)
+void UUINavWidget::AddUINavButton(UUINavButton * NewButton, FGrid& TargetGrid, int IndexInGrid)
 {
 	if (TargetGrid.GridIndex == -1)
 	{
 		DISPLAYERROR("Can't add a button to a grid with an invalid index. Make sure this function is being called at least during OnSetupCompleted event.");
 		return;
 	}
+	if (NewButton == nullptr) return;
+
 	if (IndexInGrid >= TargetGrid.DimensionX || IndexInGrid <= -1) IndexInGrid = TargetGrid.GetDimension();
 
 	if (IndexInGrid == 0) TargetGrid.FirstButton = NewButton;
+	IncrementGrid(TargetGrid);
 
+	NewButton->ButtonIndex = TargetGrid.FirstButton->ButtonIndex + IndexInGrid;
+	SetupUINavButtonDelegates(NewButton);
+	NewButton->GridIndex = TargetGrid.GridIndex;
+	NewButton->IndexInGrid = IndexInGrid;
+	UINavButtons.Insert(NewButton, NewButton->ButtonIndex);
+
+	UpdateUINavElementIndices(NewButton->ButtonIndex);
+}
+
+void UUINavWidget::AddUINavComponent(UUINavComponent * NewComponent, FGrid& TargetGrid, int IndexInGrid)
+{
+	if (TargetGrid.GridIndex == -1)
+	{
+		DISPLAYERROR("Can't add a button to a grid with an invalid index. Make sure this function is being called at least during OnSetupCompleted event.");
+		return;
+	}
+	if (NewComponent == nullptr) return;
+
+	if (IndexInGrid >= TargetGrid.DimensionX || IndexInGrid <= -1) IndexInGrid = TargetGrid.GetDimension();
+
+	if (IndexInGrid == 0) TargetGrid.FirstButton = NewComponent->NavButton;
+	IncrementGrid(TargetGrid);
+
+	NewComponent->NavButton->ButtonIndex = TargetGrid.FirstButton->ButtonIndex + IndexInGrid;
+	NewComponent->ComponentIndex = NewComponent->NavButton->ButtonIndex;
+	NewComponent->NavButton->GridIndex = TargetGrid.GridIndex;
+	NewComponent->NavButton->IndexInGrid = IndexInGrid;
+	SetupUINavButtonDelegates(NewComponent->NavButton);
+	UINavButtons.Insert(NewComponent->NavButton, NewComponent->ComponentIndex);
+
+	UpdateUINavElementIndices(NewComponent->ComponentIndex);
+}
+
+void UUINavWidget::IncrementGrid(FGrid & TargetGrid)
+{
 	if (TargetGrid.GridType == EGridType::Horizontal) TargetGrid.DimensionX++;
 	else if (TargetGrid.GridType == EGridType::Vertical) TargetGrid.DimensionY++;
 	else {
@@ -471,36 +509,21 @@ void UUINavWidget::AddUINavButton(UUINavButton * NewButton, FGrid& TargetGrid, i
 			TargetGrid.DimensionY++;
 		}
 	}
+}
 
-	NewButton->ButtonIndex = TargetGrid.FirstButton->ButtonIndex + IndexInGrid;
-	SetupUINavButtonDelegates(NewButton);
-	NewButton->GridIndex = TargetGrid.GridIndex;
-	NewButton->IndexInGrid = IndexInGrid;
-	UINavButtons.Insert(NewButton, NewButton->ButtonIndex);
-
-	if (!AnimationTarget.IsEqual(FName("None")))
-	{
-		UWidgetAnimation* anim = UINavAnimations[0];
-		UWidgetAnimation* newAnim = DuplicateObject<UWidgetAnimation>(anim, anim->GetOuter(), AnimationTarget);
-		UINavAnimations.Add(newAnim);
-	}
-
+void UUINavWidget::UpdateUINavElementIndices(int StartingIndex)
+{
 	int i;
-	for (i = NewButton->ButtonIndex + 1; i < UINavButtons.Num(); i++) UINavButtons[i]->ButtonIndex = i;
+	for (i = StartingIndex + 1; i < UINavButtons.Num(); i++) UINavButtons[i]->ButtonIndex = i;
 
 	for (i = 0; i < UINavComponentsIndices.Num(); i++)
 	{
-		if (UINavComponentsIndices[i] >= NewButton->ButtonIndex)
+		if (UINavComponentsIndices[i] >= StartingIndex)
 		{
 			UINavComponents[i]->ComponentIndex++;
 			UINavComponentsIndices[i]++;
 		}
 	}
-}
-
-void UUINavWidget::AddUINavComponent(UUINavComponent * NewButton, FGrid& TargetGrid, int IndexInGrid)
-{
-
 }
 
 void UUINavWidget::AppendNavigationGrid1D(EGridType GridType, int Dimension, FButtonNavigation EdgeNavigation, bool bWrap)
@@ -648,7 +671,7 @@ FVector2D UUINavWidget::GetButtonLocation(int Index)
 
 void UUINavWidget::ExecuteAnimations(int From, int To)
 {
-	if (From != -1)
+	if (From != -1 && UINavAnimations.Num() > From)
 	{
 		if (IsAnimationPlaying(UINavAnimations[From]))
 		{
@@ -660,6 +683,7 @@ void UUINavWidget::ExecuteAnimations(int From, int To)
 		}
 	}
 
+	if (UINavAnimations.Num() <= To) return;
 	if (IsAnimationPlaying(UINavAnimations[To]))
 	{
 		ReverseAnimation(UINavAnimations[To]);

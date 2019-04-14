@@ -478,18 +478,24 @@ public:
 	/**
 	*	Setup a new UINavButton added at runtime (must be added to viewport manually)
 	*	If you want this button to be added to the end of the grid, 
-	*	set this parameter to -1 or to a number greater than the dimension of the grid
-	*	If you're using animations to navigate the widget, send the desired object's DisplayName
-	*	so that the plugin can duplicate the first animation and change the target to the given object.
-	*/
-	UFUNCTION(BlueprintCallable, Category = UINavWidget, meta = (AdvancedDisplay = 3))
-		void AddUINavButton(class UUINavButton* NewButton, UPARAM(ref) FGrid& TargetGrid, int IndexInGrid = -1, FName AnimationTarget = FName("None"));
-
-	/**
-	*	Setup a new UINavButton added at runtime (must be added to viewport manually)
+	*	set IndexInGrid to -1 or to a number greater than the dimension of the grid.
+	*	Note: The plugin doesn't support adding buttons at runtime while navigating with animations!
 	*/
 	UFUNCTION(BlueprintCallable, Category = UINavWidget)
-		void AddUINavComponent(class UUINavComponent* NewButton, FGrid& TargetGrid, int IndexInGrid = -1);
+		void AddUINavButton(class UUINavButton* NewButton, UPARAM(ref) FGrid& TargetGrid, int IndexInGrid = -1);
+
+	/**
+	*	Setup a new UINavComponent added at runtime (must be added to viewport manually)
+	*	If you want this component to be added to the end of the grid,
+	*	set IndexInGrid to -1 or to a number greater than the dimension of the grid.
+	*	Note: The plugin doesn't support adding buttons at runtime while navigating with animations!
+	*/
+	UFUNCTION(BlueprintCallable, Category = UINavWidget)
+		void AddUINavComponent(class UUINavComponent* NewComponent, UPARAM(ref) FGrid& TargetGrid, int IndexInGrid = -1);
+
+	void IncrementGrid(FGrid& TargetGrid);
+	void DuplicateAnimation(FString AnimationTarget);
+	void UpdateUINavElementIndices(int StartingIndex);
 
 	/**
 	*	Adds this widget's parent to the viewport (if applicable)
