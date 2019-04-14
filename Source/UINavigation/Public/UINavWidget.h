@@ -493,9 +493,12 @@ public:
 	UFUNCTION(BlueprintCallable, Category = UINavWidget)
 		void AddUINavComponent(class UUINavComponent* NewComponent, UPARAM(ref) FGrid& TargetGrid, int IndexInGrid = -1);
 
-	void IncrementGrid(FGrid& TargetGrid);
-	void DuplicateAnimation(FString AnimationTarget);
+	void IncrementGrid(class UUINavButton* NewButton, FGrid& TargetGrid, int& IndexInGrid);
+	void DecrementGrid(FGrid& TargetGrid, int IndexInGrid = -1);
 	void UpdateUINavElementIndices(int StartingIndex);
+
+	UFUNCTION(BlueprintCallable, Category = UINavWidget)
+		void MoveButtonToGrid(class UUINavButton* Button, UPARAM(ref) FGrid& TargetGrid, int IndexInGrid = -1);
 
 	/**
 	*	Adds this widget's parent to the viewport (if applicable)
