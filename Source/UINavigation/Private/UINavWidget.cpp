@@ -446,21 +446,44 @@ void UUINavWidget::HandleSelectorMovement(float DeltaTime)
 	TheSelector->SetRenderTranslation(SelectorOrigin + Distance*MoveCurve->GetFloatValue(MovementCounter));
 }
 
-void UUINavWidget::AddUINavButton(UUINavButton * NewButton, FGrid& TargetGrid, int IndexInGrid)
+void UUINavWidget::AddUINavButton(UUINavButton * NewButton, FGrid& TargetGrid, int IndexInGrid, FName AnimationTarget)
 {
+	if (TargetGrid.GridIndex == -1)
+	{
+		DISPLAYERROR("Can't add a button to a grid with an invalid index. Make sure this function is being called at least during OnSetupCompleted event.");
+		return;
+	}
 	if (IndexInGrid >= TargetGrid.DimensionX || IndexInGrid <= -1) IndexInGrid = TargetGrid.GetDimension();
 
-	//TODO: Check if dimension greater than 1
+	if (IndexInGrid == 0) TargetGrid.FirstButton = NewButton;
+
 	if (TargetGrid.GridType == EGridType::Horizontal) TargetGrid.DimensionX++;
 	else if (TargetGrid.GridType == EGridType::Vertical) TargetGrid.DimensionY++;
 	else {
-		DISPLAYERROR("Adding buttons to a Grid2D at runtime is not supported.");
-		return;
+		TargetGrid.NumGrid2DButtons++;
+		if (TargetGrid.GetDimension() == 0)
+		{
+			TargetGrid.DimensionX = 1;
+			TargetGrid.DimensionY = 1;
+		}
+		else if (TargetGrid.NumGrid2DButtons > TargetGrid.GetDimension())
+		{
+			TargetGrid.DimensionY++;
+		}
 	}
 
 	NewButton->ButtonIndex = TargetGrid.FirstButton->ButtonIndex + IndexInGrid;
 	SetupUINavButtonDelegates(NewButton);
+	NewButton->GridIndex = TargetGrid.GridIndex;
+	NewButton->IndexInGrid = IndexInGrid;
 	UINavButtons.Insert(NewButton, NewButton->ButtonIndex);
+
+	if (!AnimationTarget.IsEqual(FName("None")))
+	{
+		UWidgetAnimation* anim = UINavAnimations[0];
+		UWidgetAnimation* newAnim = DuplicateObject<UWidgetAnimation>(anim, anim->GetOuter(), AnimationTarget);
+		UINavAnimations.Add(newAnim);
+	}
 
 	int i;
 	for (i = NewButton->ButtonIndex + 1; i < UINavButtons.Num(); i++) UINavButtons[i]->ButtonIndex = i;
@@ -482,6 +505,12 @@ void UUINavWidget::AddUINavComponent(UUINavComponent * NewButton, FGrid& TargetG
 
 void UUINavWidget::AppendNavigationGrid1D(EGridType GridType, int Dimension, FButtonNavigation EdgeNavigation, bool bWrap)
 {
+	if (UINavButtons.Num() == 0)
+	{
+		DISPLAYERROR("Make sure to call the Append Navigation functions only during the ReadyForSetup event!");
+		return;
+	}
+
 	if (Dimension < 0) Dimension = UINavButtons.Num();
 	if (GridType == EGridType::Grid2D)
 	{
@@ -515,8 +544,19 @@ void UUINavWidget::AppendNavigationGrid2D(int DimensionX, int DimensionY, FButto
 		DISPLAYERROR("AppendNavigationGrid2D Dimensions should be greater than 0");
 		return;
 	}
+	if (UINavButtons.Num() == 0)
+	{
+		DISPLAYERROR("Make sure to call the Append Navigation functions only during the ReadyForSetup event!");
+		return;
+	}
 
 	FButtonNavigation NewNav;
+
+	if (NumberOfButtonsInGrids >= UINavButtons.Num() || UINavButtons.Num() == 0)
+	{
+		DISPLAYERROR("Not enough UINavButtons to add specified navigation dimensions!");
+		return;
+	}
 
 	NavigationGrids.Add(FGrid(EGridType::Grid2D, UINavButtons[NumberOfButtonsInGrids], NavigationGrids.Num(), DimensionX, DimensionY, EdgeNavigation, bWrap, ButtonsInGrid));
 
@@ -878,6 +918,8 @@ void UUINavWidget::MenuNavigate(ENavigationDirection Direction)
 
 UUINavButton* UUINavWidget::FindNextButton(UUINavButton* Button, ENavigationDirection Direction)
 {
+	if (Button == nullptr) return nullptr;
+
 	UUINavButton* NewButton = FetchButtonByDirection(Direction, Button);
 	if (NewButton == nullptr) return nullptr;
 
