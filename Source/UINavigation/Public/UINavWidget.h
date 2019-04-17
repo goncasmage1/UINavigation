@@ -498,7 +498,10 @@ public:
 	void UpdateUINavElementIndices(int StartingIndex);
 
 	UFUNCTION(BlueprintCallable, Category = UINavWidget)
-		void MoveButtonToGrid(class UUINavButton* Button, UPARAM(ref) FGrid& TargetGrid, int IndexInGrid = -1);
+		void MoveUINavElement(int Index, UPARAM(ref) FGrid& TargetGrid, int IndexInGrid = -1);
+
+	void InsertNewComponent(class UUINavComponent* NewComponent, int ComponentIndex);
+	void SortArrays(int From, int To, int Start, int End);
 
 	/**
 	*	Adds this widget's parent to the viewport (if applicable)
