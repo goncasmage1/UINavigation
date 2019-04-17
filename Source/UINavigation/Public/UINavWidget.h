@@ -37,6 +37,20 @@ enum class ESelectorPosition : uint8
 	Position_Bottom_Left UMETA(DisplayName = "Bottom Left")
 };
 
+/*
+struct FSortByIndex
+{
+	explicit FSortByIndex()
+	{
+	}
+
+	bool operator()(const class UUINavComponent* A, const class UUINavComponent* B) const
+	{
+		return A->ComponentIndex > B->ComponentIndex;
+	}
+};
+*/
+
 UCLASS()
 class UINAVIGATION_API UUINavWidget : public UUserWidget
 {
@@ -124,17 +138,9 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
 		TArray<class UUINavButton*> UINavButtons;
 
-	//The indices of all the UINavComponents in this widget
-	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
-		TArray<int> UINavComponentsIndices;
-
 	//All the UINavComponents in this Widget
 	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
 		TArray<class UUINavComponent*> UINavComponents;
-
-	//The indices of all the UINavComponentBoxes in this widget
-	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
-		TArray<int> ComponentBoxIndices;
 
 	//All the UINavComponentBoxes in this Widget
 	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
@@ -451,6 +457,9 @@ public:
 
 	virtual void MenuNavigate(ENavigationDirection Direction);
 
+	int GetLocalComponentIndex(int Index);
+	int GetLocalComponentBoxIndex(int Index);
+
 	/**
 	*	Returns the index of the button that will be navigated to according to the given direction, starting at the given button
 	*
@@ -495,13 +504,16 @@ public:
 
 	void IncrementGrid(class UUINavButton* NewButton, FGrid& TargetGrid, int& IndexInGrid);
 	void DecrementGrid(FGrid& TargetGrid, int IndexInGrid = -1);
-	void UpdateUINavElementIndices(int StartingIndex);
+	void IncrementUINavButtonIndices(int StartingIndex);
+	void IncrementUINavComponentIndices(int StartingIndex);
 
 	UFUNCTION(BlueprintCallable, Category = UINavWidget)
 		void MoveUINavElement(int Index, UPARAM(ref) FGrid& TargetGrid, int IndexInGrid = -1);
 
 	void InsertNewComponent(class UUINavComponent* NewComponent, int ComponentIndex);
-	void SortArrays(int From, int To, int Start, int End);
+	void UpdateArrays(int From, int To);
+	void UpdateButtonArray(int From, int To);
+	void UpdateComponentArray(int From, int To);
 
 	/**
 	*	Adds this widget's parent to the viewport (if applicable)
