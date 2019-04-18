@@ -95,7 +95,7 @@ void AUINavController::Tick(float DeltaTime)
 	GetMousePosition(PosX, PosY);
 	if (CurrentInputType != EInputType::Mouse)
 	{
-		if (PosX != PreviousX || PosY != PreviousY)
+		if ((PosX != 0.f && PosX != PreviousX) || (PosY != 0.f && PosY != PreviousY))
 		{
 			NotifyMouseInputType();
 		}
