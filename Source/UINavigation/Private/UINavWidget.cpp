@@ -514,15 +514,35 @@ void UUINavWidget::IncrementGrid(UUINavButton* NewButton, FGrid & TargetGrid, in
 			TargetGrid.DimensionY++;
 		}
 	}
+
+	for (int i = IndexInGrid + 1; i < TargetGrid.GetDimension(); i++)
+	{
+		UINavButtons[TargetGrid.FirstButton->ButtonIndex + i]->IndexInGrid = i;
+	}
 }
 
 void UUINavWidget::DecrementGrid(FGrid & TargetGrid, int IndexInGrid)
 {
-	if (IndexInGrid == 0) TargetGrid.FirstButton = nullptr;
+	if (IndexInGrid == 0)
+	{
+		if (TargetGrid.GetDimension() > 1)
+		{
+			TargetGrid.FirstButton = UINavButtons[TargetGrid.FirstButton->ButtonIndex + 1];
+		}
+		else
+		{
+			TargetGrid.FirstButton = nullptr;
+		}
+	}
 
 	if (TargetGrid.GridType == EGridType::Horizontal) TargetGrid.DimensionX--;
 	else if (TargetGrid.GridType == EGridType::Vertical) TargetGrid.DimensionY--;
 	else TargetGrid.NumGrid2DButtons--;
+
+	for (int i = 0; i < TargetGrid.GetDimension(); i++)
+	{
+		UINavButtons[TargetGrid.FirstButton->ButtonIndex + i]->IndexInGrid = i;
+	}
 }
 
 void UUINavWidget::InsertNewComponent(UUINavComponent* NewComponent, int TargetIndex)
@@ -590,7 +610,7 @@ void UUINavWidget::MoveUINavElementToGrid(int Index, int TargetGridIndex, int In
 	if (IndexInGrid >= TargetGrid.GetDimension() || IndexInGrid <= -1) IndexInGrid = TargetGrid.GetDimension() - 1;
 	if (TargetGrid.GridIndex != Button->GridIndex)
 	{
-		DecrementGrid(TargetGrid, Button->IndexInGrid);
+		DecrementGrid(NavigationGrids[Button->GridIndex], Button->IndexInGrid);
 		IncrementGrid(Button, TargetGrid, IndexInGrid);
 	}
 	
@@ -679,6 +699,12 @@ void UUINavWidget::UpdateComponentArray(int From, int To)
 	{
 		if (TempComp != nullptr) Start = UINavComponents.Find(TempComp);
 
+		if (Start == End)
+		{
+			UINavComponents[Start]->ComponentIndex = UINavComponents[Start]->NavButton->ButtonIndex;
+			return;
+		}
+
 		if (UINavComponents[0]->ComponentIndex < From)
 		{
 			for (i = 0; i < UINavComponents.Num(); i++)
@@ -709,6 +735,13 @@ void UUINavWidget::UpdateComponentArray(int From, int To)
 	else
 	{
 		if (TempComp != nullptr) End = UINavComponents.Find(TempComp);
+
+		if (Start == End)
+		{
+			UINavComponents[Start]->ComponentIndex = UINavComponents[Start]->NavButton->ButtonIndex;
+			return;
+		}
+
 		if (UINavComponents[0]->ComponentIndex < To)
 		{
 			for (i = 0; i < UINavComponents.Num(); i++)
