@@ -130,7 +130,6 @@ void AUINavController::SetTimer(ENavigationDirection TimerDirection)
 	CountdownPhase = ECountdownPhase::First;
 }
 
-
 void AUINavController::ClearTimer()
 {
 	if (CallbackDirection == ENavigationDirection::None) return;

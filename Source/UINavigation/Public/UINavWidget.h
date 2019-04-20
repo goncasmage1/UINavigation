@@ -508,12 +508,17 @@ public:
 	void IncrementUINavComponentIndices(int StartingIndex);
 
 	UFUNCTION(BlueprintCallable, Category = UINavWidget)
-		void MoveUINavElement(int Index, UPARAM(ref) FGrid& TargetGrid, int IndexInGrid = -1);
+		void MoveUINavElementToGrid(int Index, int TargetGrid, int IndexInGrid = -1);
+
+	UFUNCTION(BlueprintCallable, Category = UINavWidget)
+		void MoveUINavElementToIndex(int Index, int TargetIndex);
 
 	void InsertNewComponent(class UUINavComponent* NewComponent, int ComponentIndex);
 	void UpdateArrays(int From, int To);
 	void UpdateButtonArray(int From, int To);
 	void UpdateComponentArray(int From, int To);
+
+	void UpdateCurrentButton(class UUINavButton* NewCurrentButton);
 
 	/**
 	*	Adds this widget's parent to the viewport (if applicable)
