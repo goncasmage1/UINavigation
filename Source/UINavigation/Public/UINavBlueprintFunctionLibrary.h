@@ -40,9 +40,14 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
 		static int GetGridDimension(const FGrid Grid);
 
-
 	// Returns whether the given button is valid (isn't hidden, collaped or disabled)
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
 		static bool IsButtonValid(UUINavButton* Button);
+
+	UFUNCTION(BlueprintPure, meta = (DisplayName = "UINavButton To Index", CompactNodeTitle = "->", BlueprintAutocast), Category = "UINavButton")
+		static int Conv_UINavButtonToInt(UUINavButton* Button);
+
+	UFUNCTION(BlueprintPure, meta = (DisplayName = "UINavComponent To Index", CompactNodeTitle = "->", BlueprintAutocast), Category = "UINavButton")
+		static int Conv_UINavComponentToInt(class UUINavComponent* Component);
 	
 };
