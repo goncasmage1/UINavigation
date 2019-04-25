@@ -725,6 +725,12 @@ void UUINavWidget::UpdateComponentArray(int From, int To)
 			}
 		}
 
+		if (Start == End)
+		{
+			UINavComponents[Start]->ComponentIndex = UINavComponents[Start]->NavButton->ButtonIndex;
+			return;
+		}
+
 		for (i = Start+1; i <= End; i++)
 		{
 			UINavComponents[i]->ComponentIndex = UINavComponents[i]->NavButton->ButtonIndex;
@@ -760,6 +766,12 @@ void UUINavWidget::UpdateComponentArray(int From, int To)
 					break;
 				}
 			}
+		}
+
+		if (Start == End)
+		{
+			UINavComponents[Start]->ComponentIndex = UINavComponents[Start]->NavButton->ButtonIndex;
+			return;
 		}
 
 		for (i = End-1; i >= Start; i--)
@@ -1240,7 +1252,7 @@ UUINavButton* UUINavWidget::FindNextButton(UUINavButton* Button, ENavigationDire
 	if (Button == nullptr) return nullptr;
 
 	UUINavButton* NewButton = FetchButtonByDirection(Direction, Button);
-	if (NewButton == nullptr) return nullptr;
+	if (NewButton == nullptr || NewButton == Button) return nullptr;
 
 	//Check if the button is visible, if not, skip to next button
 	bool bValid = NewButton->IsValid();
@@ -1289,7 +1301,7 @@ UUINavButton* UUINavWidget::FetchButtonByDirection(ENavigationDirection Directio
 					if (Button->IndexInGrid == 0)
 					{
 						if (ButtonGrid.EdgeNavigation.LeftButton != nullptr) NextButton = ButtonGrid.EdgeNavigation.LeftButton;
-						else if (ButtonGrid.bWrap) NextButton = UINavButtons[ButtonGrid.DimensionX - 1];
+						else if (ButtonGrid.bWrap) NextButton = UINavButtons[ButtonGrid.FirstButton->ButtonIndex + ButtonGrid.DimensionX - 1];
 						else NextButton = nullptr;
 					}
 					else
@@ -1315,7 +1327,7 @@ UUINavButton* UUINavWidget::FetchButtonByDirection(ENavigationDirection Directio
 					if (Button->IndexInGrid == 0)
 					{
 						if (ButtonGrid.EdgeNavigation.UpButton != nullptr) NextButton = ButtonGrid.EdgeNavigation.UpButton;
-						else if (ButtonGrid.bWrap) NextButton = UINavButtons[ButtonGrid.DimensionY - 1];
+						else if (ButtonGrid.bWrap) NextButton = UINavButtons[ButtonGrid.FirstButton->ButtonIndex + ButtonGrid.DimensionY - 1];
 						else NextButton = nullptr;
 					}
 					else
@@ -1349,7 +1361,7 @@ UUINavButton* UUINavWidget::FetchButtonByDirection(ENavigationDirection Directio
 					if (Button->IndexInGrid < ButtonGrid.DimensionX)
 					{
 						if (ButtonGrid.EdgeNavigation.UpButton != nullptr) NextButton = ButtonGrid.EdgeNavigation.UpButton;
-						else if (ButtonGrid.bWrap) NextButton = UINavButtons[ButtonGrid.DimensionX * (ButtonGrid.DimensionY - 1) + Button->IndexInGrid];
+						else if (ButtonGrid.bWrap) NextButton = UINavButtons[ButtonGrid.FirstButton->ButtonIndex + ButtonGrid.DimensionX * (ButtonGrid.DimensionY - 1) + Button->IndexInGrid];
 						else NextButton = nullptr;
 					}
 					else NextButton = UINavButtons[Button->ButtonIndex - ButtonGrid.DimensionX];
