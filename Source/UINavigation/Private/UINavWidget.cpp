@@ -600,6 +600,8 @@ void UUINavWidget::MoveUINavElementToGrid(int Index, int TargetGridIndex, int In
 	UUINavButton* Button = UINavButtons.Num() > Index ? UINavButtons[Index] : nullptr;
 	if (Button == nullptr || TargetGridIndex >= NavigationGrids.Num()) return;
 
+	bool isLast = IndexInGrid <= -1;
+
 	if (UINavAnimations.Num() > 0)
 	{
 		DISPLAYERROR("Runtime manipulation not supported with navigation using animations.");
@@ -614,6 +616,7 @@ void UUINavWidget::MoveUINavElementToGrid(int Index, int TargetGridIndex, int In
 	{
 		DecrementGrid(NavigationGrids[Button->GridIndex], Button->IndexInGrid);
 		IncrementGrid(Button, TargetGrid, IndexInGrid);
+		if (isLast) IndexInGrid++;
 	}
 	
 	int From = Index;
