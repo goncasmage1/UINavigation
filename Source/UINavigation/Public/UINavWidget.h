@@ -37,20 +37,6 @@ enum class ESelectorPosition : uint8
 	Position_Bottom_Left UMETA(DisplayName = "Bottom Left")
 };
 
-/*
-struct FSortByIndex
-{
-	explicit FSortByIndex()
-	{
-	}
-
-	bool operator()(const class UUINavComponent* A, const class UUINavComponent* B) const
-	{
-		return A->ComponentIndex > B->ComponentIndex;
-	}
-};
-*/
-
 UCLASS()
 class UINAVIGATION_API UUINavWidget : public UUserWidget
 {
@@ -517,6 +503,7 @@ public:
 	void UpdateArrays(int From, int To);
 	void UpdateButtonArray(int From, int To);
 	void UpdateComponentArray(int From, int To);
+	void ReplaceButtonInNavigationGrid(class UUINavButton* ButtonToReplace, int GridIndex, int IndexInGrid);
 
 	void UpdateCurrentButton(class UUINavButton* NewCurrentButton);
 

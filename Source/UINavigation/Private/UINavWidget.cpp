@@ -606,6 +606,8 @@ void UUINavWidget::MoveUINavElementToGrid(int Index, int TargetGridIndex, int In
 	}
 
 	FGrid& TargetGrid = NavigationGrids[TargetGridIndex];
+	int OldGridIndex = Button->GridIndex;
+	int OldIndexInGrid = Button->IndexInGrid;
 
 	if (IndexInGrid >= TargetGrid.GetDimension() || IndexInGrid <= -1) IndexInGrid = TargetGrid.GetDimension() - 1;
 	if (TargetGrid.GridIndex != Button->GridIndex)
@@ -627,6 +629,8 @@ void UUINavWidget::MoveUINavElementToGrid(int Index, int TargetGridIndex, int In
 	Button->IndexInGrid = IndexInGrid;
 	
 	UpdateArrays(From, To);
+
+	ReplaceButtonInNavigationGrid(Button, OldGridIndex, OldIndexInGrid);
 
 	if (Button == CurrentButton) UpdateCurrentButton(Button);
 }
@@ -768,6 +772,18 @@ void UUINavWidget::UpdateComponentArray(int From, int To)
 				UINavComponents[i]->ComponentIndex =  UINavComponents[i]->NavButton->ButtonIndex;
 			}
 		}
+	}
+}
+
+void UUINavWidget::ReplaceButtonInNavigationGrid(UUINavButton * ButtonToReplace, int GridIndex, int IndexInGrid)
+{
+	UUINavButton* NewButton = NavigationGrids[GridIndex].GetDimension() > IndexInGrid ? GetButtonAtGridIndex(NavigationGrids[GridIndex], IndexInGrid) : nullptr;
+	for (int i = 0; i < NavigationGrids.Num(); i++)
+	{
+		if (NavigationGrids[i].EdgeNavigation.DownButton == ButtonToReplace) NavigationGrids[i].EdgeNavigation.DownButton = NewButton;
+		if (NavigationGrids[i].EdgeNavigation.UpButton == ButtonToReplace) NavigationGrids[i].EdgeNavigation.UpButton = NewButton;
+		if (NavigationGrids[i].EdgeNavigation.LeftButton == ButtonToReplace) NavigationGrids[i].EdgeNavigation.LeftButton = NewButton;
+		if (NavigationGrids[i].EdgeNavigation.RightButton == ButtonToReplace) NavigationGrids[i].EdgeNavigation.RightButton = NewButton;
 	}
 }
 
