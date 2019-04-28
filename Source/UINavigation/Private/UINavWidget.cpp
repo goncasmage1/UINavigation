@@ -602,10 +602,7 @@ void UUINavWidget::MoveUINavElementToGrid(int Index, int TargetGridIndex, int In
 
 	bool isLast = IndexInGrid <= -1;
 
-	if (UINavAnimations.Num() > 0)
-	{
-		DISPLAYERROR("Runtime manipulation not supported with navigation using animations.");
-	}
+	if (UINavAnimations.Num() > 0) DISPLAYERROR("Runtime manipulation not supported with navigation using animations.");
 
 	FGrid& TargetGrid = NavigationGrids[TargetGridIndex];
 	int OldGridIndex = Button->GridIndex;
@@ -640,7 +637,44 @@ void UUINavWidget::MoveUINavElementToGrid(int Index, int TargetGridIndex, int In
 
 void UUINavWidget::MoveUINavElementToIndex(int Index, int TargetIndex)
 {
+	if (Index >= UINavButtons.Num() || TargetIndex >= UINavButtons.Num()) return;
 
+	UUINavButton* Button = UINavButtons[Index];
+	UUINavButton* ToButton = UINavButtons[TargetIndex];
+
+	FGrid& TargetGrid = NavigationGrids[ToButton->GridIndex];
+	int IndexInGrid = ToButton->IndexInGrid;
+	bool isLast = IndexInGrid >= TargetGrid.GetDimension();
+
+	if (UINavAnimations.Num() > 0) DISPLAYERROR("Runtime manipulation not supported with navigation using animations.");
+
+	int OldGridIndex = Button->GridIndex;
+	int OldIndexInGrid = Button->IndexInGrid;
+
+	if (TargetGrid.GridIndex != Button->GridIndex)
+	{
+		DecrementGrid(NavigationGrids[Button->GridIndex], Button->IndexInGrid);
+		IncrementGrid(Button, TargetGrid, IndexInGrid);
+		if (isLast) IndexInGrid++;
+	}
+
+	int From = Index;
+	int To = TargetGrid.FirstButton->ButtonIndex + IndexInGrid;
+
+	if (To >= TargetGrid.GetDimension()) To = TargetGrid.GetDimension() - 1;
+
+	if (From == To) return;
+
+	if (Button->IndexInGrid == 0) TargetGrid.FirstButton = UINavButtons[Button->ButtonIndex+1];
+	if (IndexInGrid == 0) TargetGrid.FirstButton = Button;
+
+	Button->IndexInGrid = IndexInGrid;
+
+	UpdateArrays(From, To);
+
+	ReplaceButtonInNavigationGrid(Button, OldGridIndex, OldIndexInGrid);
+
+	if (Button == CurrentButton) UpdateCurrentButton(Button);
 }
 
 void UUINavWidget::UpdateArrays(int From, int To)

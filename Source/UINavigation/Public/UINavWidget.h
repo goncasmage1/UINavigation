@@ -493,9 +493,16 @@ public:
 	void IncrementUINavButtonIndices(int StartingIndex);
 	void IncrementUINavComponentIndices(int StartingIndex);
 
+	/**
+	*	Moves a UINavButton or UINavComponent to the specified grid and its index.
+	*	Set the IndexInGrid to -1 if you want this element to be added to the end of the grid
+	*/
 	UFUNCTION(BlueprintCallable, Category = UINavWidget)
 		void MoveUINavElementToGrid(int Index, int TargetGrid, int IndexInGrid = -1);
 
+	/**
+	*	Moves a UINavButton or UINavComponent to the specified index.
+	*/
 	UFUNCTION(BlueprintCallable, Category = UINavWidget)
 		void MoveUINavElementToIndex(int Index, int TargetIndex);
 
