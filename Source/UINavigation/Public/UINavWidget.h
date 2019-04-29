@@ -369,6 +369,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = UINavWidget)
 		void SetSelectorVisibility(bool bVisible);
 
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
+		bool IsSelectorVisible();
+
 	/**
 	*	Called when the button with the specified index was navigated upon
 	*
@@ -540,19 +543,19 @@ public:
 
 	// Checks whether the given button is in the specified grid
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
-		bool IsButtonInGrid(const FGrid ButtonGrid, class UUINavButton* Button);
+		bool IsButtonInGrid(const int GridIndex, class UUINavButton* Button);
 
 	// Checks whether the given button index is in the specified grid
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
-		bool IsButtonIndexInGrid(const FGrid ButtonGrid, const int Index);
+		bool IsButtonIndexInGrid(const int GridIndex, const int Index);
 
 	// Returns the given button's index inside the specified grid (-1 if the button isn't inside the grid)
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
-		 int GetIndexInGridFromButton(const FGrid ButtonGrid, class UUINavButton* Button);
+		 int GetIndexInGridFromButton( class UUINavButton* Button);
 
 	// Returns the given button's index inside the specified grid (-1 if the button isn't inside the grid)
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
-		int GetIndexInGridFromButtonIndex(const FGrid ButtonGrid, const int Index);
+		int GetIndexInGridFromButtonIndex(const int Index);
 
 	/**
 	*	Returns the UINavComponent with the specified index (null if that

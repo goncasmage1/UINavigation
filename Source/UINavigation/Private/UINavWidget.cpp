@@ -1099,6 +1099,11 @@ void UUINavWidget::SetSelectorVisibility(bool bVisible)
 	TheSelector->SetVisibility(Vis);
 }
 
+bool UUINavWidget::IsSelectorVisible()
+{
+	return TheSelector->GetVisibility() == ESlateVisibility::HitTestInvisible;
+}
+
 void UUINavWidget::NavigateTo(int Index, bool bHoverEvent)
 {
 	if (Index >= UINavButtons.Num()) return;
@@ -1468,27 +1473,26 @@ UUINavButton * UUINavWidget::GetButtonAtGridIndex(const FGrid ButtonGrid, const 
 	return UINavButtons[NewIndex];
 }
 
-bool UUINavWidget::IsButtonInGrid(const FGrid ButtonGrid, UUINavButton * Button)
+bool UUINavWidget::IsButtonInGrid(const int GridIndex, UUINavButton * Button)
 {
-	return IsButtonIndexInGrid(ButtonGrid, Button->ButtonIndex);
+	return IsButtonIndexInGrid(GridIndex, Button->ButtonIndex);
 }
 
-bool UUINavWidget::IsButtonIndexInGrid(const FGrid ButtonGrid, const int Index)
+bool UUINavWidget::IsButtonIndexInGrid(const int GridIndex, const int Index)
 {
-	return (GetIndexInGridFromButtonIndex(ButtonGrid, Index) != -1);
+	if (Index >= UINavButtons.Num()) return false;
+	return UINavButtons[Index]->GridIndex == GridIndex;
 }
 
-int UUINavWidget::GetIndexInGridFromButton(const FGrid ButtonGrid, UUINavButton * Button)
+int UUINavWidget::GetIndexInGridFromButton(UUINavButton * Button)
 {
-	return GetIndexInGridFromButtonIndex(ButtonGrid, Button->ButtonIndex);
+	return GetIndexInGridFromButtonIndex(Button->ButtonIndex);
 }
 
-int UUINavWidget::GetIndexInGridFromButtonIndex(const FGrid ButtonGrid, const int Index)
+int UUINavWidget::GetIndexInGridFromButtonIndex(const int Index)
 {
-	if (ButtonGrid.FirstButton == nullptr) return -1;
-	if (Index < ButtonGrid.FirstButton->ButtonIndex) return -1;
-	else if (Index > ButtonGrid.GetLastButtonIndex()) return -1;
-	return Index - ButtonGrid.FirstButton->ButtonIndex;
+	if (Index >= UINavButtons.Num()) return -1;
+	return UINavButtons[Index]->IndexInGrid;
 }
 
 UUINavComponent * UUINavWidget::GetUINavComponentAtIndex(int Index)
