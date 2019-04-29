@@ -96,9 +96,10 @@ void UUINavOptionBox::UpdateTextBlock()
 		{
 			OptionIndex = StringOptions.Num() - 1;
 		}
-	}
 
-	if (OptionIndex >= StringOptions.Num()) return;
+		if (OptionIndex < 0) OptionIndex = 0;
+		if (OptionIndex >= StringOptions.Num()) OptionIndex = StringOptions.Num() - 1;
+	}
 
 	NavText->SetText(bUseNumberRange ? 
 		FText::FromString(FString::FromInt(MinRange + OptionIndex*Interval)) : 
