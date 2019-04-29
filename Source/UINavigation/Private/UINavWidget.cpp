@@ -495,6 +495,19 @@ void UUINavWidget::AddUINavComponent(UUINavComponent * NewComponent, FGrid& Targ
 	IncrementUINavButtonIndices(NewComponent->ComponentIndex);
 }
 
+void UUINavWidget::DeleteUINavElement(int Index)
+{
+	if (Index < 0 || Index >= UINavButtons.Num()) return;
+
+	UUINavButton* Button = UINavButtons[Index];
+	DecrementUINavButtonIndices(Index);
+	DecrementUINavComponentIndices(Index);
+
+	DecrementGrid(NavigationGrids[Button->GridIndex], Button->IndexInGrid);
+
+	Button->RemoveFromParent();
+}
+
 void UUINavWidget::IncrementGrid(UUINavButton* NewButton, FGrid & TargetGrid, int& IndexInGrid)
 {
 	if (IndexInGrid == 0) TargetGrid.FirstButton = NewButton;
@@ -592,6 +605,34 @@ void UUINavWidget::IncrementUINavComponentIndices(int StartingIndex)
 	for (int i = (ValidIndex != -1 ? ValidIndex + 1 : 0); i < UINavComponents.Num(); i++)
 	{
 		if (UINavComponents[i]->ComponentIndex > StartingIndex) UINavComponents[i]->ComponentIndex++;
+	}
+}
+
+void UUINavWidget::DecrementUINavButtonIndices(int StartingIndex)
+{
+	for (int i = StartingIndex; i < UINavButtons.Num()-1; i++)
+	{
+		UINavButtons[i] = UINavButtons[i + 1];
+		UINavButtons[i]->ButtonIndex = i;
+	}
+	UINavButtons.RemoveAt(UINavButtons.Num()-1, 1, true);
+}
+
+void UUINavWidget::DecrementUINavComponentIndices(int StartingIndex)
+{
+	int ValidIndex = GetLocalComponentIndex(StartingIndex);
+	UUINavComponent* Component = (ValidIndex != -1 ? UINavComponents[ValidIndex] : nullptr);
+
+	for (int i = (ValidIndex != -1 ? ValidIndex + 1 : 0); i < UINavComponents.Num() - (ValidIndex != -1 ? 1 : 0); i++)
+	{
+		if (ValidIndex != -1) UINavComponents[i] = UINavComponents[i + 1];
+		if (UINavComponents[i]->ComponentIndex > StartingIndex) UINavComponents[i]->ComponentIndex--;
+	}
+
+	if (Component != nullptr)
+	{
+		Component->RemoveFromParent();
+		UINavComponents.RemoveAt(UINavComponents.Num()-1, 1, true);
 	}
 }
 

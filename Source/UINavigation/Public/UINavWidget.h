@@ -491,10 +491,18 @@ public:
 	UFUNCTION(BlueprintCallable, Category = UINavWidget)
 		void AddUINavComponent(class UUINavComponent* NewComponent, UPARAM(ref) FGrid& TargetGrid, int IndexInGrid = -1);
 
+	/**
+	*	Removes the UINav element at the specified index from the widget
+	*/
+	UFUNCTION(BlueprintCallable, Category = UINavWidget)
+		void DeleteUINavElement(int Index);
+
 	void IncrementGrid(class UUINavButton* NewButton, FGrid& TargetGrid, int& IndexInGrid);
 	void DecrementGrid(FGrid& TargetGrid, int IndexInGrid = -1);
 	void IncrementUINavButtonIndices(int StartingIndex);
 	void IncrementUINavComponentIndices(int StartingIndex);
+	void DecrementUINavButtonIndices(int StartingIndex);
+	void DecrementUINavComponentIndices(int StartingIndex);
 
 	/**
 	*	Moves a UINavButton or UINavComponent to the specified grid and its index.
