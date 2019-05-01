@@ -1514,26 +1514,10 @@ UUINavButton * UUINavWidget::GetButtonAtGridIndex(const FGrid ButtonGrid, const 
 	return UINavButtons[NewIndex];
 }
 
-bool UUINavWidget::IsButtonInGrid(const int GridIndex, UUINavButton * Button)
+bool UUINavWidget::IsButtonInGrid(UUINavButton * Button, const FGrid Grid)
 {
-	return IsButtonIndexInGrid(GridIndex, Button->ButtonIndex);
-}
-
-bool UUINavWidget::IsButtonIndexInGrid(const int GridIndex, const int Index)
-{
-	if (Index >= UINavButtons.Num()) return false;
-	return UINavButtons[Index]->GridIndex == GridIndex;
-}
-
-int UUINavWidget::GetIndexInGridFromButton(UUINavButton * Button)
-{
-	return GetIndexInGridFromButtonIndex(Button->ButtonIndex);
-}
-
-int UUINavWidget::GetIndexInGridFromButtonIndex(const int Index)
-{
-	if (Index >= UINavButtons.Num()) return -1;
-	return UINavButtons[Index]->IndexInGrid;
+	if (Button == nullptr) return false;
+	return Button->GridIndex == Grid.GridIndex;
 }
 
 UUINavComponent * UUINavWidget::GetUINavComponentAtIndex(int Index)

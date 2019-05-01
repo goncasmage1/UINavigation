@@ -96,7 +96,7 @@ struct FGrid
 	UPROPERTY(BlueprintReadOnly, Category = ButtonGrid)
 		int DimensionY = -1;
 
-	UPROPERTY(BlueprintReadWrite, Category = ButtonGrid)
+	UPROPERTY(BlueprintReadOnly, Category = ButtonGrid)
 		int NumGrid2DButtons = -1;
 
 };
