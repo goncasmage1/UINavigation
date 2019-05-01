@@ -94,3 +94,8 @@ int UUINavBlueprintFunctionLibrary::Conv_UINavComponentToInt(UUINavComponent * C
 {
 	return Component->ComponentIndex;
 }
+
+int UUINavBlueprintFunctionLibrary::Conv_GridToInt(FGrid Grid)
+{
+	return Grid.GridIndex;
+}
