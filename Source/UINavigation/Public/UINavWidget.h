@@ -450,10 +450,10 @@ public:
 	int GetLocalComponentBoxIndex(int Index);
 
 	/**
-	*	Returns the index of the button that will be navigated to according to the given direction, starting at the given button
+	*	Returns the button that will be navigated to according to the given direction, starting at the given button
 	*
 	*	@param	Direction  Direction of navigation
-	*	@return int The index of the button that will be navigated to
+	*	@return UUINavButton* The button that will be navigated to
 	*/
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
 		virtual class UUINavButton* FindNextButton(class UUINavButton* Button, ENavigationDirection Direction);

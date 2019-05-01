@@ -73,7 +73,7 @@ int UUINavBlueprintFunctionLibrary::GetGridDimension(const FGrid Grid)
 			return Grid.DimensionY;
 			break;
 		case EGridType::Grid2D:
-			return Grid.DimensionX * Grid.DimensionY;
+			return Grid.NumGrid2DButtons;
 			break;
 	}
 	return 0;

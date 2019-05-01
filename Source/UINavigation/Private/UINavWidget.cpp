@@ -1332,7 +1332,7 @@ int UUINavWidget::GetLocalComponentBoxIndex(int Index)
 
 UUINavButton* UUINavWidget::FindNextButton(UUINavButton* Button, ENavigationDirection Direction)
 {
-	if (Button == nullptr) return nullptr;
+	if (Button == nullptr || Direction == ENavigationDirection::None) return nullptr;
 
 	UUINavButton* NewButton = FetchButtonByDirection(Direction, Button);
 	if (NewButton == nullptr || NewButton == Button) return nullptr;
