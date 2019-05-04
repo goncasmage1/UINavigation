@@ -480,7 +480,7 @@ public:
 	*	Note: The plugin doesn't support adding buttons at runtime while navigating with animations!
 	*/
 	UFUNCTION(BlueprintCallable, Category = UINavWidget)
-		void AddUINavButton(class UUINavButton* NewButton, UPARAM(ref) FGrid& TargetGrid, int IndexInGrid = -1);
+		void AddUINavButton(class UUINavButton* NewButton, int TargetGridIndex, int IndexInGrid = -1);
 
 	/**
 	*	Setup a new UINavComponent added at runtime (must be added to viewport manually)
@@ -489,7 +489,7 @@ public:
 	*	Note: The plugin doesn't support adding buttons at runtime while navigating with animations!
 	*/
 	UFUNCTION(BlueprintCallable, Category = UINavWidget)
-		void AddUINavComponent(class UUINavComponent* NewComponent, UPARAM(ref) FGrid& TargetGrid, int IndexInGrid = -1);
+		void AddUINavComponent(class UUINavComponent* NewComponent, int TargetGridIndex, int IndexInGrid = -1);
 
 	/**
 	*	Removes the UINav element at the specified index from the widget
@@ -540,6 +540,9 @@ public:
 	*/
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
 		void GetButtonGrid(class UUINavButton* Button, FGrid& ButtonGrid, bool &IsValid);
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
+		int GetGridStartingIndex(int GridIndex);
 
 	// Returns the last button in the given grid
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
