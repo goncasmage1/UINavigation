@@ -194,7 +194,10 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = UINavWidget)
 		bool bAllowRemoveIfRoot = false;
 
-	//The speed at which the given animations will play
+	UPROPERTY(EditDefaultsOnly, Category = UINavWidget)
+		bool bAnimateScrollBoxes = false;
+
+	//UINavAnimations Playback Speed
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = UINavWidget)
 		float AnimationPlaybackSpeed = 1.f;
 

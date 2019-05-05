@@ -913,6 +913,11 @@ void UUINavWidget::AppendNavigationGrid1D(EGridType GridType, int Dimension, FBu
 		DISPLAYERROR("Make sure to call the Append Navigation functions only during the ReadyForSetup event!");
 		return;
 	}
+	else if (NumberOfButtonsInGrids >= UINavButtons.Num())
+	{
+		DISPLAYERROR("Not enough UINavButtons to append this navigation grid!");
+		return;
+	}
 
 	if (Dimension < 0) Dimension = UINavButtons.Num();
 	if (GridType == EGridType::Grid2D)
@@ -933,6 +938,8 @@ void UUINavWidget::AppendNavigationGrid1D(EGridType GridType, int Dimension, FBu
 	int GridIndex = NavigationGrids.Num() - 1;
 	for (int i = 0; i < Dimension; i++)
 	{
+		if (NumberOfButtonsInGrids + i >= UINavButtons.Num()) break;
+
 		UINavButtons[NumberOfButtonsInGrids + i]->GridIndex = GridIndex;
 		UINavButtons[NumberOfButtonsInGrids + i]->IndexInGrid = i;
 	}
@@ -952,6 +959,11 @@ void UUINavWidget::AppendNavigationGrid2D(int DimensionX, int DimensionY, FButto
 		DISPLAYERROR("Make sure to call the Append Navigation functions only during the ReadyForSetup event!");
 		return;
 	}
+	else if (NumberOfButtonsInGrids >= UINavButtons.Num())
+	{
+		DISPLAYERROR("Not enough UINavButtons to append this navigation grid!");
+		return;
+	}
 
 	FButtonNavigation NewNav;
 
@@ -968,6 +980,8 @@ void UUINavWidget::AppendNavigationGrid2D(int DimensionX, int DimensionY, FButto
 	int Iterations = NewGrid.NumGrid2DButtons;
 	for (int i = 0; i < Iterations; i++)
 	{
+		if (NumberOfButtonsInGrids + i >= UINavButtons.Num()) break;
+
 		UINavButtons[NumberOfButtonsInGrids + i]->GridIndex = GridIndex;
 		UINavButtons[NumberOfButtonsInGrids + i]->IndexInGrid = i;
 	}
@@ -1165,6 +1179,12 @@ void UUINavWidget::NavigateTo(int Index, bool bHoverEvent)
 {
 	if (Index >= UINavButtons.Num()) return;
 
+	//Update all the possible scroll boxes in the widget
+	for (int i = 0; i < ScrollBoxes.Num(); ++i)
+	{
+		ScrollBoxes[i]->ScrollWidgetIntoView(UINavButtons[Index], bAnimateScrollBoxes);
+	}
+
 	bool bShouldNotify = Index != ButtonIndex;
 	
 	if (bUseButtonStates) UpdateButtonsStates(Index, bHoverEvent);
@@ -1187,12 +1207,6 @@ void UUINavWidget::NavigateTo(int Index, bool bHoverEvent)
 		if (ToComponent != nullptr) ToComponent->OnNavigatedTo();
 
 		if (UINavAnimations.Num() > 0) ExecuteAnimations(ButtonIndex, Index);
-	}
-
-	//Update all the possible scroll boxes in the widget
-	for (int i = 0; i < ScrollBoxes.Num(); ++i)
-	{
-		ScrollBoxes[i]->ScrollWidgetIntoView(UINavButtons[Index]);
 	}
 
 	ButtonIndex = Index;
