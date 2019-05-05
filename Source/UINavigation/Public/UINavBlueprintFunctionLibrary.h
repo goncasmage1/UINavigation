@@ -50,6 +50,9 @@ public:
 	UFUNCTION(BlueprintPure, meta = (DisplayName = "UINavComponent To Index", CompactNodeTitle = "->", BlueprintAutocast), Category = "UINavComponent")
 		static int Conv_UINavComponentToInt(class UUINavComponent* Component);
 
+	UFUNCTION(BlueprintPure, meta = (DisplayName = "UINavComponent To UINavButton", CompactNodeTitle = "->", BlueprintAutocast), Category = "UINavComponent")
+		static UUINavButton* Conv_UINavComponentToUINavButton(class UUINavComponent* Component);
+
 	UFUNCTION(BlueprintPure, meta = (DisplayName = "Grid To Index", CompactNodeTitle = "->", BlueprintAutocast), Category = "Navigation Grid")
 		static int Conv_GridToInt(FGrid Grid);
 	

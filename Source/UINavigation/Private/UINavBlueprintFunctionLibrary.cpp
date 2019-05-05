@@ -95,6 +95,11 @@ int UUINavBlueprintFunctionLibrary::Conv_UINavComponentToInt(UUINavComponent * C
 	return Component->ComponentIndex;
 }
 
+UUINavButton* UUINavBlueprintFunctionLibrary::Conv_UINavComponentToUINavButton(UUINavComponent * Component)
+{
+	return Component->NavButton;
+}
+
 int UUINavBlueprintFunctionLibrary::Conv_GridToInt(FGrid Grid)
 {
 	return Grid.GridIndex;
