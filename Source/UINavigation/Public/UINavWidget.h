@@ -308,7 +308,8 @@ public:
 	*
 	*	@param	Index  The new button's index in the Button's array
 	*/
-	void UpdateSelectorLocation(int Index);
+	UFUNCTION(BlueprintNativeEvent, Category = UINavWidget)
+		void UpdateSelectorLocation(int Index);
 
 	/**
 	*	Changes the color of the text with the specified index to the specified color
