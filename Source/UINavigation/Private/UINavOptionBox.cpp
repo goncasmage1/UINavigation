@@ -33,8 +33,6 @@ void UUINavOptionBox::NativeConstruct()
 
 void UUINavOptionBox::NavigateRight()
 {
-	Super::NavigateRight();
-
 	//Make sure button still has options left to navigate
 	if (bUseNumberRange)
 	{
@@ -53,11 +51,17 @@ void UUINavOptionBox::NavigateRight()
 
 	UpdateTextBlock();
 
-	if (!bDisableButtons) return;
+	if (!bDisableButtons)
+	{
+		Super::NavigateRight();
+		return;
+	}
 
 	CheckRightLimit();
 	//Enable button if previously disabled
 	if (!LeftButton->bIsEnabled) LeftButton->SetIsEnabled(true);
+
+	Super::NavigateRight();
 }
 
 void UUINavOptionBox::CheckRightLimit()

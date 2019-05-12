@@ -43,8 +43,6 @@ void UUINavSliderBox::UpdateTextBlock()
 
 void UUINavSliderBox::NavigateRight()
 {
-	Super::NavigateRight();
-
 	if (MinRange + OptionIndex*Interval < MaxRange)
 	{
 		OptionIndex++;
@@ -52,11 +50,17 @@ void UUINavSliderBox::NavigateRight()
 
 	UpdateTextBlock();
 
-	if (!bDisableButtons) return;
+	if (!bDisableButtons)
+	{
+		Super::NavigateRight();
+		return;
+	}
 
 	CheckRightLimit();
 	//Enable button if previously disabled
 	if (!LeftButton->bIsEnabled) LeftButton->SetIsEnabled(true);
+
+	Super::NavigateRight();
 }
 
 float UUINavSliderBox::GetSliderPercent() const
