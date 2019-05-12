@@ -308,7 +308,7 @@ public:
 	*
 	*	@param	Index  The new button's index in the Button's array
 	*/
-	UFUNCTION(BlueprintNativeEvent, Category = UINavWidget)
+	UFUNCTION(BlueprintCallable, Category = UINavWidget)
 		void UpdateSelectorLocation(int Index);
 
 	/**
