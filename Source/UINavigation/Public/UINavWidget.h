@@ -497,17 +497,23 @@ public:
 
 	/**
 	*	Removes the UINav element at the specified index from the widget
+	*	AutoNavigate indicates whether the plugin will try to find the
+	*	next button to be navigated to automatically if the deleted button
+	*	is being navigated upon
 	*/
-	UFUNCTION(BlueprintCallable, Category = UINavWidget)
-		void DeleteUINavElement(int Index);
+	UFUNCTION(BlueprintCallable, Category = UINavWidget, meta=(AdvancedDisplay=1))
+		void DeleteUINavElement(int Index, bool bAutoNavigate = true);
 
 	/**
 	*	Removes the UINav element at the index in the specified grid
 	*	Set IndexInGrid to -1 or to a number greater than the dimension of the grid to
 	*	delete the element at the end of the grid.
+	*	AutoNavigate indicates whether the plugin will try to find the
+	*	next button to be navigated to automatically if the deleted button
+	*	is being navigated upon
 	*/
-	UFUNCTION(BlueprintCallable, Category = UINavWidget)
-		void DeleteUINavElementFromGrid(int GridIndex, int IndexInGrid);
+	UFUNCTION(BlueprintCallable, Category = UINavWidget, meta=(AdvancedDisplay=2))
+		void DeleteUINavElementFromGrid(int GridIndex, int IndexInGrid, bool bAutoNavigate = true);
 
 	void IncrementGrid(class UUINavButton* NewButton, FGrid& TargetGrid, int& IndexInGrid);
 	void DecrementGrid(FGrid& TargetGrid, int IndexInGrid = -1);
