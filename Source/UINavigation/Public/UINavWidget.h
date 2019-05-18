@@ -479,8 +479,8 @@ public:
 
 	/**
 	*	Setup a new UINavButton added at runtime (must be added to viewport manually)
-	*	If you want this button to be added to the end of the grid, 
-	*	set IndexInGrid to -1 or to a number greater than the dimension of the grid.
+	*	Set IndexInGrid to -1 or to a number greater than the dimension of the grid to
+	*	add the button to the end of the grid.
 	*	Note: The plugin doesn't support adding buttons at runtime while navigating with animations!
 	*/
 	UFUNCTION(BlueprintCallable, Category = UINavWidget)
@@ -488,8 +488,8 @@ public:
 
 	/**
 	*	Setup a new UINavComponent added at runtime (must be added to viewport manually)
-	*	If you want this component to be added to the end of the grid,
-	*	set IndexInGrid to -1 or to a number greater than the dimension of the grid.
+	*	Set IndexInGrid to -1 or to a number greater than the dimension of the grid to
+	*	add the component to the end of the grid.
 	*	Note: The plugin doesn't support adding buttons at runtime while navigating with animations!
 	*/
 	UFUNCTION(BlueprintCallable, Category = UINavWidget)
@@ -501,6 +501,14 @@ public:
 	UFUNCTION(BlueprintCallable, Category = UINavWidget)
 		void DeleteUINavElement(int Index);
 
+	/**
+	*	Removes the UINav element at the index in the specified grid
+	*	Set IndexInGrid to -1 or to a number greater than the dimension of the grid to
+	*	delete the element at the end of the grid.
+	*/
+	UFUNCTION(BlueprintCallable, Category = UINavWidget)
+		void DeleteUINavElementFromGrid(int GridIndex, int IndexInGrid);
+
 	void IncrementGrid(class UUINavButton* NewButton, FGrid& TargetGrid, int& IndexInGrid);
 	void DecrementGrid(FGrid& TargetGrid, int IndexInGrid = -1);
 	void IncrementUINavButtonIndices(int StartingIndex);
@@ -510,10 +518,11 @@ public:
 
 	/**
 	*	Moves a UINavButton or UINavComponent to the specified grid and its index.
-	*	Set the IndexInGrid to -1 if you want this element to be added to the end of the grid
+	*	Set IndexInGrid to -1 or to a number greater than the dimension of the grid to
+	*	move the element to the end of the grid.
 	*/
 	UFUNCTION(BlueprintCallable, Category = UINavWidget)
-		void MoveUINavElementToGrid(int Index, int TargetGrid, int IndexInGrid = -1);
+		void MoveUINavElementToGrid(int Index, int TargetGridIndex, int IndexInGrid = -1);
 
 	/**
 	*	Moves a UINavButton or UINavComponent to the specified index.

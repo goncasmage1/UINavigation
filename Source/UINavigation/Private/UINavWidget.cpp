@@ -512,6 +512,19 @@ void UUINavWidget::DeleteUINavElement(int Index)
 	DecrementGrid(NavigationGrids[Button->GridIndex], Button->IndexInGrid);
 }
 
+void UUINavWidget::DeleteUINavElementFromGrid(int GridIndex, int IndexInGrid)
+{
+	if (GridIndex < 0 || GridIndex > NavigationGrids.Num())
+	{
+		DISPLAYERROR("Invalid GridIndex");
+		return;
+	}
+	FGrid TargetGrid = NavigationGrids[GridIndex];
+	IndexInGrid = IndexInGrid >= 0 && IndexInGrid < TargetGrid.GetDimension() ? IndexInGrid : TargetGrid.GetDimension() - 1;
+
+	DeleteUINavElement(TargetGrid.FirstButton->ButtonIndex + IndexInGrid);
+}
+
 void UUINavWidget::IncrementGrid(UUINavButton* NewButton, FGrid & TargetGrid, int& IndexInGrid)
 {
 	if (IndexInGrid == 0)
@@ -650,18 +663,23 @@ void UUINavWidget::DecrementUINavComponentIndices(int StartingIndex)
 
 void UUINavWidget::MoveUINavElementToGrid(int Index, int TargetGridIndex, int IndexInGrid)
 {
+	if (Index < 0 || TargetGridIndex < 0)
+	{
+		DISPLAYERROR("All received indices must be greater than 0");
+		return;
+	}
 	UUINavButton* Button = UINavButtons.Num() > Index ? UINavButtons[Index] : nullptr;
 	if (Button == nullptr || TargetGridIndex >= NavigationGrids.Num()) return;
 
-	bool isLast = IndexInGrid <= -1;
+	FGrid& TargetGrid = NavigationGrids[TargetGridIndex];
+	bool isLast = IndexInGrid <= -1 || IndexInGrid >= TargetGrid.GetDimension();
 
 	if (UINavAnimations.Num() > 0) DISPLAYERROR("Runtime manipulation not supported with navigation using animations.");
 
-	FGrid& TargetGrid = NavigationGrids[TargetGridIndex];
 	int OldGridIndex = Button->GridIndex;
 	int OldIndexInGrid = Button->IndexInGrid;
 
-	if (IndexInGrid >= TargetGrid.GetDimension() || IndexInGrid <= -1) IndexInGrid = TargetGrid.GetDimension() - 1;
+	if (TargetGrid.GetDimension() || IndexInGrid <= -1) IndexInGrid = TargetGrid.GetDimension() - 1;
 	if (TargetGrid.GridIndex != Button->GridIndex)
 	{
 		DecrementGrid(NavigationGrids[Button->GridIndex], Button->IndexInGrid);
@@ -690,7 +708,7 @@ void UUINavWidget::MoveUINavElementToGrid(int Index, int TargetGridIndex, int In
 
 void UUINavWidget::MoveUINavElementToIndex(int Index, int TargetIndex)
 {
-	if (Index >= UINavButtons.Num() || TargetIndex >= UINavButtons.Num()) return;
+	if (Index >= UINavButtons.Num() || TargetIndex >= UINavButtons.Num() || Index < 0 || TargetIndex < 0) return;
 
 	UUINavButton* Button = UINavButtons[Index];
 	UUINavButton* ToButton = UINavButtons[TargetIndex];
