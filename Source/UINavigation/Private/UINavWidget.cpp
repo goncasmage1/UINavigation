@@ -510,8 +510,6 @@ void UUINavWidget::DeleteUINavElement(int Index)
 	DecrementUINavComponentIndices(Index);
 
 	DecrementGrid(NavigationGrids[Button->GridIndex], Button->IndexInGrid);
-
-	Button->RemoveFromParent();
 }
 
 void UUINavWidget::IncrementGrid(UUINavButton* NewButton, FGrid & TargetGrid, int& IndexInGrid)
@@ -543,7 +541,7 @@ void UUINavWidget::IncrementGrid(UUINavButton* NewButton, FGrid & TargetGrid, in
 	{
 		if (TargetGrid.FirstButton->ButtonIndex + i >= UINavButtons.Num()) break;
 
-		UINavButtons[TargetGrid.FirstButton->ButtonIndex + (i - 1)]->IndexInGrid = i;
+		UINavButtons[TargetGrid.FirstButton->ButtonIndex + i]->IndexInGrid++;
 	}
 }
 
