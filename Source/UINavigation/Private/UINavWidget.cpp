@@ -501,9 +501,32 @@ void UUINavWidget::AddUINavComponent(UUINavComponent * NewComponent, int TargetG
 	IncrementUINavButtonIndices(NewComponent->ComponentIndex);
 }
 
-void UUINavWidget::DeleteUINavElement(int Index)
+void UUINavWidget::DeleteUINavElement(int Index, bool bAutoNavigate)
 {
 	if (Index < 0 || Index >= UINavButtons.Num()) return;
+
+	if (Index == ButtonIndex && bAutoNavigate)
+	{
+		bool bValid = false;
+
+		while (!bValid)
+		{
+			int NewIndex = CurrentButton->ButtonIndex + 1;
+			if (NewIndex >= UINavButtons.Num()) NewIndex = 0;
+
+			CurrentButton = UINavButtons[NewIndex];
+			if (NewIndex == FirstButtonIndex) break;
+
+			UUINavComponent* UINavComp = GetUINavComponentAtIndex(NewIndex);
+			if (UINavComp != nullptr && !UINavComp->IsValid()) continue;
+
+			bValid = CurrentButton->IsValid();
+		}
+
+		if (CurrentButton == nullptr) return;
+		NavigateTo(CurrentButton->ButtonIndex);
+		ButtonIndex--;
+	}
 
 	UUINavButton* Button = UINavButtons[Index];
 	DecrementUINavButtonIndices(Index);
@@ -512,7 +535,7 @@ void UUINavWidget::DeleteUINavElement(int Index)
 	DecrementGrid(NavigationGrids[Button->GridIndex], Button->IndexInGrid);
 }
 
-void UUINavWidget::DeleteUINavElementFromGrid(int GridIndex, int IndexInGrid)
+void UUINavWidget::DeleteUINavElementFromGrid(int GridIndex, int IndexInGrid, bool bAutoNavigate)
 {
 	if (GridIndex < 0 || GridIndex > NavigationGrids.Num())
 	{
@@ -522,7 +545,7 @@ void UUINavWidget::DeleteUINavElementFromGrid(int GridIndex, int IndexInGrid)
 	FGrid TargetGrid = NavigationGrids[GridIndex];
 	IndexInGrid = IndexInGrid >= 0 && IndexInGrid < TargetGrid.GetDimension() ? IndexInGrid : TargetGrid.GetDimension() - 1;
 
-	DeleteUINavElement(TargetGrid.FirstButton->ButtonIndex + IndexInGrid);
+	DeleteUINavElement(TargetGrid.FirstButton->ButtonIndex + IndexInGrid, bAutoNavigate);
 }
 
 void UUINavWidget::IncrementGrid(UUINavButton* NewButton, FGrid & TargetGrid, int& IndexInGrid)
@@ -656,7 +679,6 @@ void UUINavWidget::DecrementUINavComponentIndices(int StartingIndex)
 
 	if (Component != nullptr)
 	{
-		Component->RemoveFromParent();
 		UINavComponents.RemoveAt(UINavComponents.Num()-1, 1, true);
 	}
 }
