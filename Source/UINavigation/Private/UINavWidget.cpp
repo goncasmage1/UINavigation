@@ -701,7 +701,7 @@ void UUINavWidget::MoveUINavElementToGrid(int Index, int TargetGridIndex, int In
 	int OldGridIndex = Button->GridIndex;
 	int OldIndexInGrid = Button->IndexInGrid;
 
-	if (TargetGrid.GetDimension() || IndexInGrid <= -1) IndexInGrid = TargetGrid.GetDimension() - 1;
+	if (IndexInGrid >= TargetGrid.GetDimension() || IndexInGrid <= -1) IndexInGrid = TargetGrid.GetDimension() - 1;
 	if (TargetGrid.GridIndex != Button->GridIndex)
 	{
 		DecrementGrid(NavigationGrids[Button->GridIndex], Button->IndexInGrid);
@@ -726,48 +726,15 @@ void UUINavWidget::MoveUINavElementToGrid(int Index, int TargetGridIndex, int In
 	ReplaceButtonInNavigationGrid(Button, OldGridIndex, OldIndexInGrid);
 
 	if (Button == CurrentButton) UpdateCurrentButton(Button);
+	ButtonIndex = CurrentButton->ButtonIndex;
 }
 
 void UUINavWidget::MoveUINavElementToIndex(int Index, int TargetIndex)
 {
 	if (Index >= UINavButtons.Num() || TargetIndex >= UINavButtons.Num() || Index < 0 || TargetIndex < 0) return;
 
-	UUINavButton* Button = UINavButtons[Index];
 	UUINavButton* ToButton = UINavButtons[TargetIndex];
-
-	FGrid& TargetGrid = NavigationGrids[ToButton->GridIndex];
-	int IndexInGrid = ToButton->IndexInGrid;
-	bool isLast = IndexInGrid >= TargetGrid.GetDimension();
-
-	if (UINavAnimations.Num() > 0) DISPLAYERROR("Runtime manipulation not supported with navigation using animations.");
-
-	int OldGridIndex = Button->GridIndex;
-	int OldIndexInGrid = Button->IndexInGrid;
-
-	if (TargetGrid.GridIndex != Button->GridIndex)
-	{
-		DecrementGrid(NavigationGrids[Button->GridIndex], Button->IndexInGrid);
-		IncrementGrid(Button, TargetGrid, IndexInGrid);
-		if (isLast) IndexInGrid++;
-	}
-
-	int From = Index;
-	int To = TargetGrid.FirstButton->ButtonIndex + IndexInGrid;
-
-	if (To >= TargetGrid.GetDimension()) To = TargetGrid.GetDimension() - 1;
-
-	if (From == To) return;
-
-	if (Button->IndexInGrid == 0) TargetGrid.FirstButton = UINavButtons[Button->ButtonIndex+1];
-	if (IndexInGrid == 0) TargetGrid.FirstButton = Button;
-
-	Button->IndexInGrid = IndexInGrid;
-
-	UpdateArrays(From, To);
-
-	ReplaceButtonInNavigationGrid(Button, OldGridIndex, OldIndexInGrid);
-
-	if (Button == CurrentButton) UpdateCurrentButton(Button);
+	MoveUINavElementToGrid(Index, ToButton->GridIndex, ToButton->IndexInGrid);
 }
 
 void UUINavWidget::UpdateArrays(int From, int To)
