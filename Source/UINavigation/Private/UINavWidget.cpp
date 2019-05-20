@@ -509,22 +509,23 @@ void UUINavWidget::DeleteUINavElement(int Index, bool bAutoNavigate)
 	{
 		bool bValid = false;
 
+		UUINavButton* Temp = CurrentButton;
 		while (!bValid)
 		{
-			int NewIndex = CurrentButton->ButtonIndex + 1;
+			int NewIndex = Temp->ButtonIndex + 1;
 			if (NewIndex >= UINavButtons.Num()) NewIndex = 0;
 
-			CurrentButton = UINavButtons[NewIndex];
+			Temp = UINavButtons[NewIndex];
 			if (NewIndex == FirstButtonIndex) break;
 
 			UUINavComponent* UINavComp = GetUINavComponentAtIndex(NewIndex);
 			if (UINavComp != nullptr && !UINavComp->IsValid()) continue;
 
-			bValid = CurrentButton->IsValid();
+			bValid = Temp->IsValid();
 		}
 
-		if (CurrentButton == nullptr) return;
-		NavigateTo(CurrentButton->ButtonIndex);
+		if (Temp == nullptr) return;
+		NavigateTo(Temp->ButtonIndex);
 		ButtonIndex--;
 	}
 
@@ -552,9 +553,9 @@ void UUINavWidget::IncrementGrid(UUINavButton* NewButton, FGrid & TargetGrid, in
 {
 	if (IndexInGrid == 0)
 	{
-		int FirstButtonIndex = 0; TargetGrid.FirstButton != nullptr ? TargetGrid.FirstButton->ButtonIndex : GetGridStartingIndex(TargetGrid.GridIndex);
+		int FirstIndex = 0; TargetGrid.FirstButton != nullptr ? TargetGrid.FirstButton->ButtonIndex : GetGridStartingIndex(TargetGrid.GridIndex);
 		TargetGrid.FirstButton = NewButton;
-		NewButton->ButtonIndex = FirstButtonIndex;
+		NewButton->ButtonIndex = FirstIndex;
 	}
 	NewButton->GridIndex = TargetGrid.GridIndex;
 
@@ -585,14 +586,7 @@ void UUINavWidget::DecrementGrid(FGrid & TargetGrid, int IndexInGrid)
 {
 	if (IndexInGrid == 0)
 	{
-		if (TargetGrid.GetDimension() > 1)
-		{
-			TargetGrid.FirstButton = UINavButtons[TargetGrid.FirstButton->ButtonIndex + 1];
-		}
-		else
-		{
-			TargetGrid.FirstButton = nullptr;
-		}
+		TargetGrid.FirstButton = TargetGrid.GetDimension() > 1 ? UINavButtons[TargetGrid.FirstButton->ButtonIndex] : nullptr;
 	}
 
 	if (TargetGrid.GridType == EGridType::Horizontal) TargetGrid.DimensionX--;
