@@ -124,17 +124,9 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
 		TArray<class UUINavButton*> UINavButtons;
 
-	//The indices of all the UINavComponents in this widget
-	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
-		TArray<int> UINavComponentsIndices;
-
 	//All the UINavComponents in this Widget
 	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
 		TArray<class UUINavComponent*> UINavComponents;
-
-	//The indices of all the UINavComponentBoxes in this widget
-	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
-		TArray<int> ComponentBoxIndices;
 
 	//All the UINavComponentBoxes in this Widget
 	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
@@ -202,7 +194,10 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = UINavWidget)
 		bool bAllowRemoveIfRoot = false;
 
-	//The speed at which the given animations will play
+	UPROPERTY(EditDefaultsOnly, Category = UINavWidget)
+		bool bAnimateScrollBoxes = false;
+
+	//UINavAnimations Playback Speed
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = UINavWidget)
 		float AnimationPlaybackSpeed = 1.f;
 
@@ -271,8 +266,8 @@ public:
 	*	@param	EdgeNavigation  The intended navigation at each of the four edges of the grid
 	*	@param  bWrap  Indicates whether navigation wraps around the grid
 	*/
-	UFUNCTION(BlueprintCallable, Category = UINavWidget)
-		void AppendNavigationGrid2D(int DimensionX, int DimensionY, FButtonNavigation EdgeNavigation, bool bWrap);
+	UFUNCTION(BlueprintCallable, Category = UINavWidget, meta=(AdvancedDisplay=4))
+		void AppendNavigationGrid2D(int DimensionX, int DimensionY, FButtonNavigation EdgeNavigation, bool bWrap, int ButtonsInGrid = -1);
 
 	UFUNCTION(BlueprintCallable, Category = UINavWidget, meta = (DeprecatedFunction, DeprecationMessage="This function has been replaced by Append Navigation Grid 1D."))
 		void AppendHorizontalNavigation(int Dimension, FButtonNavigation EdgeNavigation, bool bWrap);
@@ -313,7 +308,8 @@ public:
 	*
 	*	@param	Index  The new button's index in the Button's array
 	*/
-	void UpdateSelectorLocation(int Index);
+	UFUNCTION(BlueprintCallable, Category = UINavWidget)
+		void UpdateSelectorLocation(int Index);
 
 	/**
 	*	Changes the color of the text with the specified index to the specified color
@@ -376,6 +372,9 @@ public:
 	*/
 	UFUNCTION(BlueprintCallable, Category = UINavWidget)
 		void SetSelectorVisibility(bool bVisible);
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
+		bool IsSelectorVisible();
 
 	/**
 	*	Called when the button with the specified index was navigated upon
@@ -451,11 +450,14 @@ public:
 
 	virtual void MenuNavigate(ENavigationDirection Direction);
 
+	int GetLocalComponentIndex(int Index);
+	int GetLocalComponentBoxIndex(int Index);
+
 	/**
-	*	Returns the index of the button that will be navigated to according to the given direction, starting at the given button
+	*	Returns the button that will be navigated to according to the given direction, starting at the given button
 	*
 	*	@param	Direction  Direction of navigation
-	*	@return int The index of the button that will be navigated to
+	*	@return UUINavButton* The button that will be navigated to
 	*/
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
 		virtual class UUINavButton* FindNextButton(class UUINavButton* Button, ENavigationDirection Direction);
@@ -477,15 +479,70 @@ public:
 
 	/**
 	*	Setup a new UINavButton added at runtime (must be added to viewport manually)
+	*	Set IndexInGrid to -1 or to a number greater than the dimension of the grid to
+	*	add the button to the end of the grid.
+	*	Note: The plugin doesn't support adding buttons at runtime while navigating with animations!
 	*/
-	//UFUNCTION(BlueprintCallable, Category = UINavWidget)
-		//void AddUINavButton(class UUINavButton* NewButton, FGrid& TargetGrid, int IndexInGrid = -1);
+	UFUNCTION(BlueprintCallable, Category = UINavWidget)
+		void AddUINavButton(class UUINavButton* NewButton, int TargetGridIndex, int IndexInGrid = -1);
 
 	/**
-	*	Setup a new UINavButton added at runtime (must be added to viewport manually)
+	*	Setup a new UINavComponent added at runtime (must be added to viewport manually)
+	*	Set IndexInGrid to -1 or to a number greater than the dimension of the grid to
+	*	add the component to the end of the grid.
+	*	Note: The plugin doesn't support adding buttons at runtime while navigating with animations!
 	*/
-	//UFUNCTION(BlueprintCallable, Category = UINavWidget)
-		//void AddUINavComponent(class UUINavComponent* NewButton, FGrid& TargetGrid, int IndexInGrid = -1);
+	UFUNCTION(BlueprintCallable, Category = UINavWidget)
+		void AddUINavComponent(class UUINavComponent* NewComponent, int TargetGridIndex, int IndexInGrid = -1);
+
+	/**
+	*	Removes the UINav element at the specified index from the widget
+	*	AutoNavigate indicates whether the plugin will try to find the
+	*	next button to be navigated to automatically if the deleted button
+	*	is being navigated upon
+	*/
+	UFUNCTION(BlueprintCallable, Category = UINavWidget, meta=(AdvancedDisplay=1))
+		void DeleteUINavElement(int Index, bool bAutoNavigate = true);
+
+	/**
+	*	Removes the UINav element at the index in the specified grid
+	*	Set IndexInGrid to -1 or to a number greater than the dimension of the grid to
+	*	delete the element at the end of the grid.
+	*	AutoNavigate indicates whether the plugin will try to find the
+	*	next button to be navigated to automatically if the deleted button
+	*	is being navigated upon
+	*/
+	UFUNCTION(BlueprintCallable, Category = UINavWidget, meta=(AdvancedDisplay=2))
+		void DeleteUINavElementFromGrid(int GridIndex, int IndexInGrid, bool bAutoNavigate = true);
+
+	void IncrementGrid(class UUINavButton* NewButton, FGrid& TargetGrid, int& IndexInGrid);
+	void DecrementGrid(FGrid& TargetGrid, int IndexInGrid = -1);
+	void IncrementUINavButtonIndices(int StartingIndex);
+	void IncrementUINavComponentIndices(int StartingIndex);
+	void DecrementUINavButtonIndices(int StartingIndex);
+	void DecrementUINavComponentIndices(int StartingIndex);
+
+	/**
+	*	Moves a UINavButton or UINavComponent to the specified grid and its index.
+	*	Set IndexInGrid to -1 or to a number greater than the dimension of the grid to
+	*	move the element to the end of the grid.
+	*/
+	UFUNCTION(BlueprintCallable, Category = UINavWidget)
+		void MoveUINavElementToGrid(int Index, int TargetGridIndex, int IndexInGrid = -1);
+
+	/**
+	*	Moves a UINavButton or UINavComponent to the specified index.
+	*/
+	UFUNCTION(BlueprintCallable, Category = UINavWidget)
+		void MoveUINavElementToIndex(int Index, int TargetIndex);
+
+	void InsertNewComponent(class UUINavComponent* NewComponent, int ComponentIndex);
+	void UpdateArrays(int From, int To);
+	void UpdateButtonArray(int From, int To);
+	void UpdateComponentArray(int From, int To);
+	void ReplaceButtonInNavigationGrid(class UUINavButton* ButtonToReplace, int GridIndex, int IndexInGrid);
+
+	void UpdateCurrentButton(class UUINavButton* NewCurrentButton);
 
 	/**
 	*	Adds this widget's parent to the viewport (if applicable)
@@ -503,6 +560,9 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
 		void GetButtonGrid(class UUINavButton* Button, FGrid& ButtonGrid, bool &IsValid);
 
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
+		int GetGridStartingIndex(int GridIndex);
+
 	// Returns the last button in the given grid
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
 		class UUINavButton* GetLastButtonInGrid(const FGrid Grid);
@@ -513,19 +573,7 @@ public:
 
 	// Checks whether the given button is in the specified grid
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
-		bool IsButtonInGrid(const FGrid ButtonGrid, class UUINavButton* Button);
-
-	// Checks whether the given button index is in the specified grid
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
-		bool IsButtonIndexInGrid(const FGrid ButtonGrid, const int Index);
-
-	// Returns the given button's index inside the specified grid (-1 if the button isn't inside the grid)
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
-		 int GetIndexInGridFromButton(const FGrid ButtonGrid, class UUINavButton* Button);
-
-	// Returns the given button's index inside the specified grid (-1 if the button isn't inside the grid)
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
-		int GetIndexInGridFromButtonIndex(const FGrid ButtonGrid, const int Index);
+		bool IsButtonInGrid(class UUINavButton* Button, const FGrid Grid);
 
 	/**
 	*	Returns the UINavComponent with the specified index (null if that

@@ -58,13 +58,16 @@ struct FGrid
 
 	}
 
-	FGrid(EGridType NewGridType, class UUINavButton* NewFirstButton, int NewGridIndex, int NewDimensionX, int NewDimensionY, FButtonNavigation NewEdgeNavigation, bool bShouldWrap)
+	FGrid(EGridType NewGridType, class UUINavButton* NewFirstButton, int NewGridIndex, int NewDimensionX, int NewDimensionY, FButtonNavigation NewEdgeNavigation, bool bShouldWrap, int NewNum2DButtons = -1)
 	{
 		GridType = NewGridType;
 		FirstButton = NewFirstButton;
 		GridIndex = NewGridIndex;
 		DimensionX = NewDimensionX;
 		DimensionY = NewDimensionY;
+		if (NewNum2DButtons < 0 || NewNum2DButtons > DimensionX * DimensionY)
+			NumGrid2DButtons = DimensionX * DimensionY;
+		else NumGrid2DButtons = NewNum2DButtons;
 		EdgeNavigation = NewEdgeNavigation;
 		bWrap = bShouldWrap;
 	}
@@ -92,6 +95,9 @@ struct FGrid
 		int DimensionX = -1;
 	UPROPERTY(BlueprintReadOnly, Category = ButtonGrid)
 		int DimensionY = -1;
+
+	UPROPERTY(BlueprintReadOnly, Category = ButtonGrid)
+		int NumGrid2DButtons = -1;
 
 };
 
@@ -132,7 +138,7 @@ public:
 
 	bool bSwitchedStyle = false;
 
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavButton)
 		bool IsValid();
 
 	UFUNCTION()
