@@ -91,13 +91,19 @@ void UUINavComponentBox::NavigateLeft()
 	}
 
 	UpdateTextBlock();
-	OnNavigateLeft();
+	
 
-	if (!bDisableButtons) return;
+	if (!bDisableButtons)
+	{
+		OnNavigateLeft();
+		return;
+	}
 
 	CheckLeftLimit();
 	//Enable button if previously disabled
 	if (!RightButton->bIsEnabled) RightButton->SetIsEnabled(true);
+
+	OnNavigateLeft();
 }
 
 void UUINavComponentBox::NavigateRight()

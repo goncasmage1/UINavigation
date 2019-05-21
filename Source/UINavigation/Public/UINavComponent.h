@@ -26,6 +26,9 @@ public:
 		void OnNavigatedFrom();
 	virtual void OnNavigatedFrom_Implementation();
 
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavComponent)
+		bool IsValid();
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavComponent)
 		int ComponentIndex = -1;
 

@@ -4,6 +4,7 @@
 #include "Sound/SoundClass.h"
 #include "GameFramework/GameUserSettings.h"
 #include "UINavSettings.h"
+#include "UINavComponent.h"
 
 void UUINavBlueprintFunctionLibrary::SetSoundClassVolume(USoundClass * TargetClass, float NewVolume)
 {
@@ -72,7 +73,7 @@ int UUINavBlueprintFunctionLibrary::GetGridDimension(const FGrid Grid)
 			return Grid.DimensionY;
 			break;
 		case EGridType::Grid2D:
-			return Grid.DimensionX * Grid.DimensionY;
+			return Grid.NumGrid2DButtons;
 			break;
 	}
 	return 0;
@@ -82,4 +83,24 @@ bool UUINavBlueprintFunctionLibrary::IsButtonValid(UUINavButton * Button)
 {
 	if (Button == nullptr) return false;
 	return Button->IsValid();
+}
+
+int UUINavBlueprintFunctionLibrary::Conv_UINavButtonToInt(UUINavButton * Button)
+{
+	return Button->ButtonIndex;
+}
+
+int UUINavBlueprintFunctionLibrary::Conv_UINavComponentToInt(UUINavComponent * Component)
+{
+	return Component->ComponentIndex;
+}
+
+UUINavButton* UUINavBlueprintFunctionLibrary::Conv_UINavComponentToUINavButton(UUINavComponent * Component)
+{
+	return Component->NavButton;
+}
+
+int UUINavBlueprintFunctionLibrary::Conv_GridToInt(FGrid Grid)
+{
+	return Grid.GridIndex;
 }

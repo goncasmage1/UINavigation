@@ -23,3 +23,10 @@ void UUINavComponent::OnNavigatedFrom_Implementation()
 {
 
 }
+
+bool UUINavComponent::IsValid()
+{
+	return (Visibility != ESlateVisibility::Collapsed &&
+			Visibility != ESlateVisibility::Hidden &&
+			bIsEnabled);
+}

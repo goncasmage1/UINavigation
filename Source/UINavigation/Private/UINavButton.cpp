@@ -14,7 +14,7 @@ int FGrid::GetDimension() const
 			return DimensionY;
 			break;
 		case EGridType::Grid2D:
-			return DimensionX * DimensionY;
+			return NumGrid2DButtons;
 			break;
 	}
 	return 0;
@@ -33,7 +33,6 @@ UUINavButton::UUINavButton()
 	OnClicked.AddDynamic(this, &UUINavButton::OnClick);
 	OnReleased.AddDynamic(this, &UUINavButton::OnRelease);
 }
-
 
 bool UUINavButton::IsValid()
 {
