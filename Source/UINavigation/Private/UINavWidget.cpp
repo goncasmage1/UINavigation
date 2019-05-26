@@ -1377,6 +1377,7 @@ UUINavButton* UUINavWidget::FindNextButton(UUINavButton* Button, ENavigationDire
 	{
 		bValid = false;
 		NewButton = FetchButtonByDirection(Direction, NewButton);
+		if (NewButton == nullptr) return nullptr;
 		UUINavComponent* UINavComp = GetUINavComponentAtIndex(NewButton->ButtonIndex);
 		if (UINavComp != nullptr && !UINavComp->IsValid()) continue;
 		if (NewButton == nullptr || NewButton == UINavButtons[ButtonIndex]) return nullptr;
