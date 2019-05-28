@@ -266,6 +266,8 @@ void UUINavWidget::UINavSetup()
 
 	NavigateTo(ButtonIndex);
 	OnNavigate(-1, ButtonIndex);
+	UUINavComponent* ToComponent = GetUINavComponentAtIndex(ButtonIndex);
+	if (ToComponent != nullptr) ToComponent->OnNavigatedTo();
 	if (UINavAnimations.Num() > 0) ExecuteAnimations(-1, ButtonIndex);
 
 	OnSetupCompleted();
