@@ -1,6 +1,7 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Copyright (C) 2019 Gonçalo Marques - All Rights Reserved
 
 #pragma once
+#include "InputRestriction.generated.h"
 
 UENUM(BlueprintType)
 enum class EInputRestriction : uint8

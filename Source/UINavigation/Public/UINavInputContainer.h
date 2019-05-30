@@ -2,37 +2,10 @@
 
 #pragma once
 
-#include "Engine/StreamableManager.h"
 #include "InputRestriction.h"
+#include "Data/TargetColumn.h"
 #include "Blueprint/UserWidget.h"
 #include "UINavInputContainer.generated.h"
-
-
-UENUM(BlueprintType)
-enum class ETargetColumn : uint8
-{
-	Left UMETA(DisplayName = "Left"),
-	Middle UMETA(DisplayName = "Middle"),
-	Right UMETA(DisplayName = "Right"),
-};
-
-USTRUCT(Blueprintable, BlueprintType)
-struct FInputIconMapping : public FTableRowBase
-{
-	GENERATED_BODY()
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UINav Input")
-		TAssetPtr<class UTexture2D> InputIcon;
-};
-
-USTRUCT(Blueprintable, BlueprintType)
-struct FInputNameMapping : public FTableRowBase
-{
-	GENERATED_BODY()
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UINav Input")
-		FString InputName;
-};
 
 /**
 * This class contains the logic for aggregating several input boxes
@@ -167,7 +140,5 @@ public:
 		TArray<EInputRestriction> InputRestrictions;
 
 	class AUINavController* UINavPC = nullptr;
-
-	FStreamableManager AssetLoader;
 
 };

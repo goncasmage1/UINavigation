@@ -3,6 +3,8 @@
 #pragma once
 
 #include "Blueprint/UserWidget.h"
+#include "Data/InputIconMapping.h"
+#include "Data/InputNameMapping.h"
 #include "UINavInputBox.generated.h"
 
 #define DISPLAYERROR(Text) GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, FString::Printf(TEXT("%s"), *(FString(TEXT("Error in ")).Append(GetName()).Append(TEXT(": ")).Append(Text))));

@@ -1,4 +1,4 @@
-// Copyright (C) 2018 Gon�alo Marques - All Rights Reserved
+// Copyright (C) 2019 Gon�alo Marques - All Rights Reserved
 
 #include "UINavWidget.h"
 #include "UINavButton.h"
