@@ -2,20 +2,11 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
-#include "Engine/DataTable.h"
+#include "Engine/StreamableManager.h"
+#include "InputRestriction.h"
 #include "Blueprint/UserWidget.h"
 #include "UINavInputContainer.generated.h"
 
-UENUM(BlueprintType)
-enum class EInputRestriction : uint8
-{
-	None UMETA(DisplayName = "None"),
-	Keyboard UMETA(DisplayName = "Keyboard"),
-	Mouse UMETA(DisplayName = "Mouse"),
-	Keyboard_Mouse UMETA(DisplayName = "Keyboard and Mouse"),
-	Gamepad UMETA(DisplayName = "Gamepad"),
-};
 
 UENUM(BlueprintType)
 enum class ETargetColumn : uint8
@@ -124,15 +115,18 @@ public:
 
 	//-----------------------------------------------------------------------
 
+	UPROPERTY(BlueprintReadOnly, Category = "UINav Input")
+		int NumberOfInputs = 0;
+
+	UPROPERTY(BlueprintReadOnly, Category = "UINav Input")
+		int KeysPerInput = 0;
+
 	//The index of the button in the top left corner of the grid
 	UPROPERTY(BlueprintReadOnly, Category = "UINav Input")
 		int FirstButtonIndex = -1;
 	//The index of the button in the bottom right corner of the grid
 	UPROPERTY(BlueprintReadOnly, Category = "UINav Input")
 		int LastButtonIndex = -1;
-
-	UPROPERTY(BlueprintReadOnly, Category = "UINav Input")
-		int NumberOfInputs = 0;
 
 	/*The index of the button at the top of the grid that should be navigated to
 	when entering this grid*/
@@ -142,9 +136,6 @@ public:
 	when entering this grid*/
 	UPROPERTY(BlueprintReadOnly, Category = "UINav Input")
 		int BottomButtonIndex = -1;
-
-	UPROPERTY(BlueprintReadOnly, Category = "UINav Input")
-		int KeysPerInput = 0;
 
 	/*
 	Indicates whether the player can cancel changing the keybind for an action
@@ -175,27 +166,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Input")
 		TArray<EInputRestriction> InputRestrictions;
 
-	/*
-	Holds the key icons for gamepad
-	*/
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Input")
-		UDataTable* GamepadKeyIconData;
-	/*
-	Holds the key icons for mouse and keyboard
-	*/
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Input")
-		UDataTable* KeyboardMouseKeyIconData;
-
-	/*
-	Holds the key names for gamepad
-	*/
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Input")
-		UDataTable* GamepadKeyNameData;
-	/*
-	Holds the key names for mouse and keyboard
-	*/
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Input")
-		UDataTable* KeyboardMouseKeyNameData;
+	class AUINavController* UINavPC = nullptr;
 
 	FStreamableManager AssetLoader;
 

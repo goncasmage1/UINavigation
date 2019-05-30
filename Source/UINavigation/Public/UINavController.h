@@ -2,9 +2,10 @@
 
 #pragma once
 
-#include "Engine.h"
 #include "GameFramework/PlayerController.h"
+#include "Engine/DataTable.h"
 #include "NavigationDirection.h"
+#include "InputRestriction.h"
 #include "UINavController.generated.h"
 
 UENUM(BlueprintType)
@@ -139,6 +140,28 @@ public:
 
 	TArray<FString> PressedActions;
 
+	/*
+	Holds the key icons for gamepad
+	*/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Controller")
+		UDataTable* GamepadKeyIconData;
+	/*
+	Holds the key icons for mouse and keyboard
+	*/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Controller")
+		UDataTable* KeyboardMouseKeyIconData;
+
+	/*
+	Holds the key names for gamepad
+	*/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Controller")
+		UDataTable* GamepadKeyNameData;
+	/*
+	Holds the key names for mouse and keyboard
+	*/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Controller")
+		UDataTable* KeyboardMouseKeyNameData;
+
 	/**
 	*	Notifies the controller that a mouse is being used
 	*/
@@ -209,6 +232,9 @@ public:
 	*/
 	UFUNCTION(BlueprintCallable, Category = UINavController)
 		void SetActiveWidget(class UUINavWidget* NewWidget);
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
+		class UImage* GetMenuActionIcon(FString ActionName, EInputRestriction InputRestriction);
 
 	/**
 	*	Called when the root UINavWidget is removed from the viewport

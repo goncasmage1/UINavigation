@@ -3,6 +3,7 @@
 #include "UINavBlueprintFunctionLibrary.h"
 #include "Sound/SoundClass.h"
 #include "GameFramework/GameUserSettings.h"
+#include "GameFramework/InputSettings.h"
 #include "UINavSettings.h"
 #include "UINavComponent.h"
 

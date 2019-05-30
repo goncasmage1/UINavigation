@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Engine.h"
-
 UENUM(BlueprintType)
 enum class ENavigationDirection : uint8
 {

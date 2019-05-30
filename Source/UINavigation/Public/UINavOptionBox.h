@@ -2,7 +2,6 @@
 
 #pragma once
 
-#include "Engine.h"
 #include "UINavComponentBox.h"
 #include "UINavOptionBox.generated.h"
 

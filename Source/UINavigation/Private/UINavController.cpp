@@ -3,7 +3,7 @@
 #include "UINavController.h"
 #include "UINavWidget.h"
 #include "UINavSettings.h"
-
+#include "Image.h"
 
 void AUINavController::SetupInputComponent()
 {
@@ -159,11 +159,65 @@ void AUINavController::FetchUINavActionKeys()
 			KeyArray->Add(Action.Key);
 		}
 	}
+
+	TArray<FString> keys;
+	KeyMap.GetKeys(keys);
+	if (keys.Num() != 6)
+	{
+		DISPLAYERROR("Not all Menu Inputs have been setup!");
+	}
 }
 
 void AUINavController::SetActiveWidget(UUINavWidget* NewWidget)
 {
 	ActiveWidget = NewWidget;
+}
+
+UImage* AUINavController::GetMenuActionIcon(FString ActionName, EInputRestriction InputRestriction)
+{
+	FKey FinalKey = FKey("None");
+	if (!KeyMap.Contains(ActionName)) return nullptr;
+
+	TArray<FKey> keys = KeyMap[ActionName];
+	if (keys.Num() == 0) return nullptr;
+
+	switch (InputRestriction)
+	{
+		case EInputRestriction::None:
+			FinalKey = keys[0];
+			break;
+		case EInputRestriction::Keyboard:
+			for (FKey key : keys)
+			{
+				if (key.IsGamepadKey() || key.IsMouseButton()) continue;
+				FinalKey = key;
+			}
+			break;
+		case EInputRestriction::Mouse:
+			for (FKey key : keys)
+			{
+				if (!key.IsMouseButton()) continue;
+				FinalKey = key;
+			}
+			break;
+		case EInputRestriction::Keyboard_Mouse:
+			for (FKey key : keys)
+			{
+				if (key.IsGamepadKey()) continue;
+				FinalKey = key;
+			}
+			break;
+		case EInputRestriction::Gamepad:
+			for (FKey key : keys)
+			{
+				if (!key.IsGamepadKey()) continue;
+				FinalKey = key;
+			}
+			break;
+	}
+	if (FinalKey.GetFName().IsEqual(FName("None"))) return nullptr;
+
+	return nullptr;
 }
 
 EInputType AUINavController::GetKeyInputType(FKey Key)

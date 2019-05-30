@@ -2,8 +2,6 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
-#include "Engine.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "UINavButton.h"
 #include "UINavBlueprintFunctionLibrary.generated.h"

@@ -9,6 +9,7 @@
 #include "Components/HorizontalBox.h"
 #include "Components/Image.h"
 #include "Engine/DataTable.h"
+#include "GameFramework/InputSettings.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
 
 void UUINavInputBox::NativeConstruct()
@@ -149,8 +150,7 @@ void UUINavInputBox::UpdateInputKey(FKey NewKey, int Index)
 		}
 	}
 
-	AUINavController* UINavPC = Cast<AUINavController>(GetOwningPlayer());
-	if (UINavPC != nullptr) UINavPC->PressedActions.Empty();
+	if (Container->UINavPC != nullptr) Container->UINavPC->PressedActions.Empty();
 
 	CheckKeyIcon(Index);
 
@@ -171,16 +171,16 @@ bool UUINavInputBox::UpdateKeyIconForKey(int Index)
 
 	if (Key.IsGamepadKey())
 	{
-		if (Container->GamepadKeyIconData != nullptr && Container->GamepadKeyIconData->GetRowMap().Contains(Key.GetFName()))
+		if (Container->UINavPC->GamepadKeyIconData != nullptr && Container->UINavPC->GamepadKeyIconData->GetRowMap().Contains(Key.GetFName()))
 		{
-			KeyIcon = (FInputIconMapping*)Container->GamepadKeyIconData->GetRowMap()[Key.GetFName()];
+			KeyIcon = (FInputIconMapping*)Container->UINavPC->GamepadKeyIconData->GetRowMap()[Key.GetFName()];
 		}
 	}
 	else
 	{
-		if (Container->KeyboardMouseKeyIconData != nullptr && Container->KeyboardMouseKeyIconData->GetRowMap().Contains(Key.GetFName()))
+		if (Container->UINavPC->KeyboardMouseKeyIconData != nullptr && Container->UINavPC->KeyboardMouseKeyIconData->GetRowMap().Contains(Key.GetFName()))
 		{
-			KeyIcon = (FInputIconMapping*)Container->KeyboardMouseKeyIconData->GetRowMap()[Key.GetFName()];
+			KeyIcon = (FInputIconMapping*)Container->UINavPC->KeyboardMouseKeyIconData->GetRowMap()[Key.GetFName()];
 		}
 	}
 	if (KeyIcon == nullptr) return false;
@@ -201,17 +201,17 @@ FText UUINavInputBox::GetKeyName(int Index)
 
 	if (Key.IsGamepadKey())
 	{
-		if (Container->GamepadKeyNameData != nullptr && Container->GamepadKeyNameData->GetRowMap().Contains(Key.GetFName()))
+		if (Container->UINavPC->GamepadKeyNameData != nullptr && Container->UINavPC->GamepadKeyNameData->GetRowMap().Contains(Key.GetFName()))
 		{
-			KeyName = (FInputNameMapping*)Container->GamepadKeyNameData->GetRowMap()[Key.GetFName()];
+			KeyName = (FInputNameMapping*)Container->UINavPC->GamepadKeyNameData->GetRowMap()[Key.GetFName()];
 			return FText::FromString(KeyName->InputName);
 		}
 	}
 	else
 	{
-		if (Container->KeyboardMouseKeyNameData != nullptr && Container->KeyboardMouseKeyNameData->GetRowMap().Contains(Key.GetFName()))
+		if (Container->UINavPC->KeyboardMouseKeyNameData != nullptr && Container->UINavPC->KeyboardMouseKeyNameData->GetRowMap().Contains(Key.GetFName()))
 		{
-			KeyName = (FInputNameMapping*)Container->KeyboardMouseKeyNameData->GetRowMap()[Key.GetFName()];
+			KeyName = (FInputNameMapping*)Container->UINavPC->KeyboardMouseKeyNameData->GetRowMap()[Key.GetFName()];
 			return FText::FromString(KeyName->InputName);
 		}
 	}
