@@ -3,8 +3,8 @@
 #include "UINavController.h"
 #include "UINavWidget.h"
 #include "UINavSettings.h"
-#include "InputIconMapping.h"
-#include "InputNameMapping.h"
+#include "Data/InputIconMapping.h"
+#include "Data/InputNameMapping.h"
 
 void AUINavController::SetupInputComponent()
 {

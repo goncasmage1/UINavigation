@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "InputRestriction.h"
+#include "Data/InputRestriction.h"
 #include "Data/TargetColumn.h"
 #include "Blueprint/UserWidget.h"
 #include "UINavInputContainer.generated.h"
