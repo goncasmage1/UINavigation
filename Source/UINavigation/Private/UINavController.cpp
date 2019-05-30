@@ -272,7 +272,7 @@ FString AUINavController::GetMenuActionName(FString ActionName, EInputRestrictio
 		}
 	}
 
-	if (KeyMapping == nullptr) return TEXT("");
+	if (KeyMapping == nullptr) return Key.GetDisplayName().ToString();
 
 	return KeyMapping->InputName;
 }
