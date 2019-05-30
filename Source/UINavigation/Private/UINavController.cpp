@@ -1,9 +1,10 @@
-// Copyright (C) 2018 Gon�alo Marques - All Rights Reserved
+// Copyright (C) 2019 Gon�alo Marques - All Rights Reserved
 
 #include "UINavController.h"
 #include "UINavWidget.h"
 #include "UINavSettings.h"
-
+#include "InputIconMapping.h"
+#include "InputNameMapping.h"
 
 void AUINavController::SetupInputComponent()
 {
@@ -159,11 +160,121 @@ void AUINavController::FetchUINavActionKeys()
 			KeyArray->Add(Action.Key);
 		}
 	}
+
+	TArray<FString> keys;
+	KeyMap.GetKeys(keys);
+	if (keys.Num() != 6)
+	{
+		DISPLAYERROR("Not all Menu Inputs have been setup!");
+	}
 }
 
 void AUINavController::SetActiveWidget(UUINavWidget* NewWidget)
 {
 	ActiveWidget = NewWidget;
+}
+
+FKey AUINavController::GetMenuActionKey(FString ActionName, EInputRestriction InputRestriction)
+{
+	FKey FinalKey = FKey("None");
+	if (!KeyMap.Contains(ActionName)) return FinalKey;
+
+	TArray<FKey> keys = KeyMap[ActionName];
+	if (keys.Num() == 0) return FinalKey;
+
+	switch (InputRestriction)
+	{
+		case EInputRestriction::None:
+			FinalKey = keys[0];
+			break;
+		case EInputRestriction::Keyboard:
+			for (FKey key : keys)
+			{
+				if (key.IsGamepadKey() || key.IsMouseButton()) continue;
+				FinalKey = key;
+			}
+			break;
+		case EInputRestriction::Mouse:
+			for (FKey key : keys)
+			{
+				if (!key.IsMouseButton()) continue;
+				FinalKey = key;
+			}
+			break;
+		case EInputRestriction::Keyboard_Mouse:
+			for (FKey key : keys)
+			{
+				if (key.IsGamepadKey()) continue;
+				FinalKey = key;
+			}
+			break;
+		case EInputRestriction::Gamepad:
+			for (FKey key : keys)
+			{
+				if (!key.IsGamepadKey()) continue;
+				FinalKey = key;
+			}
+			break;
+	}
+	
+	return FinalKey;
+}
+
+UTexture2D * AUINavController::GetMenuActionIcon(FString ActionName, EInputRestriction InputRestriction)
+{
+	FKey Key = GetMenuActionKey(ActionName, InputRestriction);
+	FName KeyName = Key.GetFName();
+	if (KeyName.IsEqual(FName("None"))) return nullptr;
+
+	FInputIconMapping* KeyIcon = nullptr;
+
+	if (Key.IsGamepadKey())
+	{
+		if (GamepadKeyIconData != nullptr && GamepadKeyIconData->GetRowMap().Contains(Key.GetFName()))
+		{
+			KeyIcon = (FInputIconMapping*)GamepadKeyIconData->GetRowMap()[Key.GetFName()];
+		}
+	}
+	else
+	{
+		if (KeyboardMouseKeyIconData != nullptr && KeyboardMouseKeyIconData->GetRowMap().Contains(Key.GetFName()))
+		{
+			KeyIcon = (FInputIconMapping*)KeyboardMouseKeyIconData->GetRowMap()[Key.GetFName()];
+		}
+	}
+
+	if (KeyIcon == nullptr) return nullptr;
+
+	UTexture2D* NewTexture = KeyIcon->InputIcon.LoadSynchronous();
+	return NewTexture;
+}
+
+FString AUINavController::GetMenuActionName(FString ActionName, EInputRestriction InputRestriction)
+{
+	FKey Key = GetMenuActionKey(ActionName, InputRestriction);
+	FName KeyName = Key.GetFName();
+	if (KeyName.IsEqual(FName("None"))) return TEXT("");
+
+	FInputNameMapping* KeyMapping = nullptr;
+
+	if (Key.IsGamepadKey())
+	{
+		if (GamepadKeyNameData != nullptr && GamepadKeyNameData->GetRowMap().Contains(Key.GetFName()))
+		{
+			KeyMapping = (FInputNameMapping*)GamepadKeyNameData->GetRowMap()[Key.GetFName()];
+		}
+	}
+	else
+	{
+		if (KeyboardMouseKeyNameData != nullptr && KeyboardMouseKeyNameData->GetRowMap().Contains(Key.GetFName()))
+		{
+			KeyMapping = (FInputNameMapping*)KeyboardMouseKeyNameData->GetRowMap()[Key.GetFName()];
+		}
+	}
+
+	if (KeyMapping == nullptr) return TEXT("");
+
+	return KeyMapping->InputName;
 }
 
 EInputType AUINavController::GetKeyInputType(FKey Key)

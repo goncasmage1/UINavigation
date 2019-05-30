@@ -1,8 +1,9 @@
-﻿// Copyright (C) 2018 Gonçalo Marques - All Rights Reserved
+﻿// Copyright (C) 2019 Gonçalo Marques - All Rights Reserved
 
 #include "UINavBlueprintFunctionLibrary.h"
 #include "Sound/SoundClass.h"
 #include "GameFramework/GameUserSettings.h"
+#include "GameFramework/InputSettings.h"
 #include "UINavSettings.h"
 #include "UINavComponent.h"
 

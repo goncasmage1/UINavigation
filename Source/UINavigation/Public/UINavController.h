@@ -1,28 +1,15 @@
-// Copyright (C) 2018 Gon�alo Marques - All Rights Reserved
+// Copyright (C) 2019 Gon�alo Marques - All Rights Reserved
 
 #pragma once
 
-#include "Engine.h"
 #include "GameFramework/PlayerController.h"
-#include "NavigationDirection.h"
+#include "Engine/DataTable.h"
+#include "Data/CountdownPhase.h"
+#include "Data/InputRestriction.h"
+#include "Data/InputType.h"
+#include "Data/NavigationDirection.h"
 #include "UINavController.generated.h"
 
-UENUM(BlueprintType)
-enum class EInputType : uint8
-{
-	None UMETA(DisplayName = "None"),
-	Keyboard UMETA(DisplayName = "Keyboard"),
-	Mouse UMETA(DisplayName = "Mouse"),
-	Gamepad UMETA(DisplayName = "Gamepad")
-};
-
-UENUM(BlueprintType)
-enum class ECountdownPhase : uint8
-{
-	None UMETA(DisplayName = "None"),
-	First UMETA(DisplayName = "First"),
-	Looping UMETA(DisplayName = "Looping")
-};
 
 /**
  * This class contains the logic for input-related actions with UINavWidgets
@@ -139,6 +126,28 @@ public:
 
 	TArray<FString> PressedActions;
 
+	/*
+	Holds the key icons for gamepad
+	*/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Controller")
+		UDataTable* GamepadKeyIconData;
+	/*
+	Holds the key icons for mouse and keyboard
+	*/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Controller")
+		UDataTable* KeyboardMouseKeyIconData;
+
+	/*
+	Holds the key names for gamepad
+	*/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Controller")
+		UDataTable* GamepadKeyNameData;
+	/*
+	Holds the key names for mouse and keyboard
+	*/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Controller")
+		UDataTable* KeyboardMouseKeyNameData;
+
 	/**
 	*	Notifies the controller that a mouse is being used
 	*/
@@ -209,6 +218,15 @@ public:
 	*/
 	UFUNCTION(BlueprintCallable, Category = UINavController)
 		void SetActiveWidget(class UUINavWidget* NewWidget);
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
+		FKey GetMenuActionKey(FString ActionName, EInputRestriction InputRestriction);
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
+		class UTexture2D* GetMenuActionIcon(FString ActionName, EInputRestriction InputRestriction);
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
+		FString GetMenuActionName(FString ActionName, EInputRestriction InputRestriction);
 
 	/**
 	*	Called when the root UINavWidget is removed from the viewport

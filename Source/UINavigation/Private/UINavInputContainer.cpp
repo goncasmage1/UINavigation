@@ -20,6 +20,7 @@
 void UUINavInputContainer::Init(UUINavWidget * NewParent)
 {
 	ParentWidget = NewParent;
+	UINavPC = NewParent->CurrentPC;
 
 	bIsFocusable = false;
 
@@ -62,8 +63,6 @@ void UUINavInputContainer::CreateInputBoxes()
 
 void UUINavInputContainer::CreateActionBoxes()
 {
-	AUINavController* PC = Cast<AUINavController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
-
 	UInputSettings* Settings = const_cast<UInputSettings*>(GetDefault<UInputSettings>());
 	TArray<FInputActionKeyMapping>& Actions = Settings->ActionMappings;
 
@@ -76,7 +75,7 @@ void UUINavInputContainer::CreateActionBoxes()
 
 	for (int i = 0; i < Iterations; ++i)
 	{
-		UUINavInputBox* NewInputBox = CreateWidget<UUINavInputBox>(PC, InputBox_BP);
+		UUINavInputBox* NewInputBox = CreateWidget<UUINavInputBox>(UINavPC, InputBox_BP);
 		if (NewInputBox == nullptr) continue;
 		NewInputBox->Container = this;
 		NewInputBox->bIsAxis = false;
@@ -106,7 +105,6 @@ void UUINavInputContainer::CreateActionBoxes()
 
 void UUINavInputContainer::CreateAxisBoxes()
 {
-	AUINavController* PC = Cast<AUINavController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
 
 	UInputSettings* Settings = const_cast<UInputSettings*>(GetDefault<UInputSettings>());
 	TArray<FInputAxisKeyMapping>& Axes = Settings->AxisMappings;
@@ -120,7 +118,7 @@ void UUINavInputContainer::CreateAxisBoxes()
 
 	for (int i = 0; i < Iterations; ++i)
 	{
-		UUINavInputBox* NewInputBox = CreateWidget<UUINavInputBox>(PC, InputBox_BP);
+		UUINavInputBox* NewInputBox = CreateWidget<UUINavInputBox>(UINavPC, InputBox_BP);
 		if (NewInputBox == nullptr) continue;
 		NewInputBox->Container = this;
 		NewInputBox->bIsAxis = true;
