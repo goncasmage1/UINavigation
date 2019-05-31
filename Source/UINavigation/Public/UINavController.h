@@ -27,8 +27,6 @@ protected:
 	UPROPERTY(BlueprintReadWrite, Category = UINavComponent)
 		EInputType CurrentInputType = EInputType::Keyboard;
 
-	TMap<FString, TArray<FKey>> KeyMap = TMap<FString, TArray<FKey>>();
-
 	ENavigationDirection Direction = ENavigationDirection::None;
 
 	float PreviousX = -1.f;
@@ -123,6 +121,8 @@ public:
 	//Indicates whether the player can navigate the widget
 	UPROPERTY(BlueprintReadWrite, Category = UINavWidget)
 		bool bAllowNavigation = true;
+
+	TMap<FString, TArray<FKey>> KeyMap = TMap<FString, TArray<FKey>>();
 
 	TArray<FString> PressedActions;
 

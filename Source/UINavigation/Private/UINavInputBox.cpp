@@ -97,6 +97,11 @@ void UUINavInputBox::ResetKeyMappings()
 	bUsingKeyImage = { false, false, false };
 	InputButtons.Empty();
 	BuildKeyMappings();
+
+	if (Container->UINavPC != nullptr && Container->UINavPC->KeyMap.Contains(InputName.ToString()))
+	{
+		Container->UINavPC->KeyMap.Add(InputName.ToString(), Keys);
+	}
 }
 
 void UUINavInputBox::UpdateInputKey(FKey NewKey, int Index)
@@ -152,7 +157,14 @@ void UUINavInputBox::UpdateInputKey(FKey NewKey, int Index)
 		}
 	}
 
-	if (Container->UINavPC != nullptr) Container->UINavPC->PressedActions.Empty();
+	if (Container->UINavPC != nullptr)
+	{
+		Container->UINavPC->PressedActions.Empty();
+		if (Container->UINavPC->KeyMap.Contains(InputName.ToString()))
+		{
+			Container->UINavPC->KeyMap.Add(InputName.ToString(), Keys);
+		}
+	}
 
 	CheckKeyIcon(Index);
 
