@@ -1570,6 +1570,28 @@ bool UUINavWidget::IsButtonInGrid(UUINavButton * Button, const FGrid Grid)
 	return Button->GridIndex == Grid.GridIndex;
 }
 
+void UUINavWidget::GetCoordinatesInGrid2D_FromIndex(const int Index, int & XCoord, int & YCoord)
+{
+	XCoord = -1;
+	YCoord = -1;
+	if (ButtonIndex < 0 || ButtonIndex > UINavButtons.Num()) return;
+
+	GetCoordinatesInGrid2D_FromButton(UINavButtons[ButtonIndex], XCoord, YCoord);
+}
+
+void UUINavWidget::GetCoordinatesInGrid2D_FromButton(UUINavButton * Button, int & XCoord, int & YCoord)
+{
+	XCoord = -1;
+	YCoord = -1;
+	if (Button == nullptr) return;
+
+	FGrid Grid = NavigationGrids[Button->GridIndex];
+	if (Grid.GridType != EGridType::Grid2D) return;
+
+	YCoord = Button->IndexInGrid / Grid.DimensionX;
+	XCoord = Button->IndexInGrid - (YCoord * Grid.DimensionX);
+}
+
 UUINavComponent * UUINavWidget::GetUINavComponentAtIndex(int Index)
 {
 	int ValidIndex = GetLocalComponentIndex(Index);

@@ -555,6 +555,14 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
 		bool IsButtonInGrid(class UUINavButton* Button, const FGrid Grid);
 
+	// Returns the button's coordinates in a 2D grid
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
+		void GetCoordinatesInGrid2D_FromIndex(const int Index, int& XCoord, int& YCoord);
+
+	// Returns the button's coordinates in a 2D grid
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
+		void GetCoordinatesInGrid2D_FromButton(class UUINavButton* Button, int& XCoord, int& YCoord);
+
 	/**
 	*	Returns the UINavComponent with the specified index (null if that
 	*	index doesn't correspond to a UINavComponent)
