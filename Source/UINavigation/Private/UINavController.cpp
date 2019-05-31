@@ -277,6 +277,37 @@ FString AUINavController::GetMenuActionName(FString ActionName, EInputRestrictio
 	return KeyMapping->InputName;
 }
 
+TArray<FKey> AUINavController::GetInputKeysFromName(FName InputName)
+{
+	TArray<FKey> KeyArray = TArray<FKey>();
+
+	const UInputSettings* Settings = GetDefault<UInputSettings>();
+
+	TArray<FInputActionKeyMapping> ActionMappings;
+	Settings->GetActionMappingByName(InputName, ActionMappings);
+
+	if (ActionMappings.Num() > 0)
+	{
+		for (FInputActionKeyMapping mapping : ActionMappings)
+		{
+			KeyArray.Add(mapping.Key);
+		}
+	}
+	else
+	{
+		TArray<FInputAxisKeyMapping> AxisMappings;
+		Settings->GetAxisMappingByName(InputName, AxisMappings);
+		if (AxisMappings.Num() > 0)
+		{
+			for (FInputAxisKeyMapping mapping : AxisMappings)
+			{
+				KeyArray.Add(mapping.Key);
+			}
+		}
+	}
+	return KeyArray;
+}
+
 EInputType AUINavController::GetKeyInputType(FKey Key)
 {
 	if (Key.IsGamepadKey())

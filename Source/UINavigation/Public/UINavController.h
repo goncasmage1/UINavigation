@@ -24,7 +24,7 @@ protected:
 	UPROPERTY(BlueprintReadOnly, Category = UINavComponent)
 		class UUINavWidget* ActiveWidget;
 
-	UPROPERTY(BlueprintReadOnly, Category = UINavComponent)
+	UPROPERTY(BlueprintReadWrite, Category = UINavComponent)
 		EInputType CurrentInputType = EInputType::Keyboard;
 
 	TMap<FString, TArray<FKey>> KeyMap = TMap<FString, TArray<FKey>>();
@@ -219,14 +219,21 @@ public:
 	UFUNCTION(BlueprintCallable, Category = UINavController)
 		void SetActiveWidget(class UUINavWidget* NewWidget);
 
+	//Get first found key associated with the Menu Action with the given name
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
 		FKey GetMenuActionKey(FString ActionName, EInputRestriction InputRestriction);
 
+	//Get first found Icon associated with the Menu Action with the given name
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
 		class UTexture2D* GetMenuActionIcon(FString ActionName, EInputRestriction InputRestriction);
 
+	//Get first found name associated with the Menu Action with the given name
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
 		FString GetMenuActionName(FString ActionName, EInputRestriction InputRestriction);
+
+	//Get all keys associated with the input with the given name
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
+		TArray<FKey> GetInputKeysFromName(FName InputName);
 
 	/**
 	*	Called when the root UINavWidget is removed from the viewport

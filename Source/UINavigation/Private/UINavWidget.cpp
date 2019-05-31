@@ -1592,6 +1592,15 @@ void UUINavWidget::GetCoordinatesInGrid2D_FromButton(UUINavButton * Button, int 
 	XCoord = Button->IndexInGrid - (YCoord * Grid.DimensionX);
 }
 
+TArray<FKey> UUINavWidget::GetInputKeysFromName(FName InputName)
+{
+	TArray<FKey> KeyArray = TArray<FKey>();
+
+	if (CurrentPC == nullptr) return KeyArray;
+
+	return CurrentPC->GetInputKeysFromName(InputName);
+}
+
 UUINavComponent * UUINavWidget::GetUINavComponentAtIndex(int Index)
 {
 	int ValidIndex = GetLocalComponentIndex(Index);

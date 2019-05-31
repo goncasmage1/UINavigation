@@ -563,6 +563,10 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
 		void GetCoordinatesInGrid2D_FromButton(class UUINavButton* Button, int& XCoord, int& YCoord);
 
+	//Get all keys associated with the input with the given name
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
+		TArray<FKey> GetInputKeysFromName(FName InputName);
+
 	/**
 	*	Returns the UINavComponent with the specified index (null if that
 	*	index doesn't correspond to a UINavComponent)
