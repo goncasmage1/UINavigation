@@ -42,7 +42,9 @@ void UUINavInputBox::BuildKeyMappings()
 
 	if ((bIsAxis && TempAxes.Num() == 0) || (!bIsAxis && TempActions.Num() == 0))
 	{
-		DISPLAYERROR(TEXT("Couldn't find Input with given name."));
+		FString Message = TEXT("Couldn't find Input with name ");
+		Message.Append(*InputName.ToString());
+		DISPLAYERROR(Message);
 		return;
 	}
 
