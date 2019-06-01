@@ -10,13 +10,6 @@
 #include "Data/NavigationDirection.h"
 #include "UINavPCComponent.generated.h"
 
-DECLARE_DYNAMIC_DELEGATE(FMenuUpDelegate);
-DECLARE_DYNAMIC_DELEGATE(FMenuDownDelegate);
-DECLARE_DYNAMIC_DELEGATE(FMenuLeftDelegate);
-DECLARE_DYNAMIC_DELEGATE(FMenuRightDelegate);
-DECLARE_DYNAMIC_DELEGATE(FMenuSelectDelegate);
-DECLARE_DYNAMIC_DELEGATE(FMenuReturnDelegate);
-
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class UINAVIGATION_API UUINavPCComponent : public UActorComponent
 {
@@ -94,24 +87,11 @@ public:
 
 	UUINavPCComponent();
 
-	UPROPERTY()
-		FMenuUpDelegate MenuUpDelegate;
-	UPROPERTY()
-		FMenuDownDelegate MenuDownDelegate;
-	UPROPERTY()
-		FMenuLeftDelegate MenuLeftDelegate;
-	UPROPERTY()
-		FMenuRightDelegate MenuRightDelegate;
-	UPROPERTY()
-		FMenuSelectDelegate MenuSelectDelegate;
-	UPROPERTY()
-		FMenuDownDelegate MenuReturnDelegate;
-
 	//Indicates whether the player can navigate the widget
 	UPROPERTY(BlueprintReadWrite, Category = UINavWidget)
 		bool bAllowNavigation = true;
 
-	UPROPERTY(BlueprintReadOnly, Category = UINavComponent)
+	UPROPERTY(BlueprintReadWrite, Category = UINavComponent)
 		class UUINavWidget* ActiveWidget;
 
 	UPROPERTY(BlueprintReadWrite, Category = UINavComponent)
@@ -231,14 +211,6 @@ public:
 	*	@param ActionName The name of the action
 	*/
 	FReply OnActionReleased(FString ActionName);
-
-	/**
-	*	Changes the widget this PC will communicate with
-	*
-	*	@param NewWidget The new active widget
-	*/
-	UFUNCTION(BlueprintCallable, Category = UINavController)
-		void SetActiveWidget(class UUINavWidget* NewWidget);
 
 	//Get first found key associated with the Menu Action with the given name
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)

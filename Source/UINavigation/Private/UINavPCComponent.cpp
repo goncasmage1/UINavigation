@@ -188,11 +188,6 @@ void UUINavPCComponent::FetchUINavActionKeys()
 	}
 }
 
-void UUINavPCComponent::SetActiveWidget(UUINavWidget* NewWidget)
-{
-	ActiveWidget = NewWidget;
-}
-
 FKey UUINavPCComponent::GetMenuActionKey(FString ActionName, EInputRestriction InputRestriction)
 {
 	FKey FinalKey = FKey("None");

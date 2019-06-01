@@ -265,7 +265,7 @@ void UUINavWidget::UINavSetup()
 		button->SetIsEnabled(true);
 	}
 
-	if (UINavPC != nullptr) UINavPC->SetActiveWidget(this);
+	if (UINavPC != nullptr) UINavPC->ActiveWidget = this;
 
 	if (TheSelector != nullptr) TheSelector->SetVisibility(ESlateVisibility::HitTestInvisible);
 
@@ -1338,7 +1338,7 @@ void UUINavWidget::ReturnToParent()
 	}
 	else
 	{
-		UINavPC->SetActiveWidget(ParentWidget);
+		UINavPC->ActiveWidget = ParentWidget;
 		ParentWidget->ReconfigureSetup();
 	}
 	RemoveFromParent();
