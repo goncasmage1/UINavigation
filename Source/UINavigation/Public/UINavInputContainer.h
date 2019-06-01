@@ -139,6 +139,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Input")
 		TArray<EInputRestriction> InputRestrictions;
 
-	class AUINavController* UINavPC = nullptr;
+	class UUINavPCComponent* UINavPC = nullptr;
 
 };

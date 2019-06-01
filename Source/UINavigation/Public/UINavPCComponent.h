@@ -22,20 +22,9 @@ class UINAVIGATION_API UUINavPCComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
-	class APlayerController* PC;
+protected:
 
-	UPROPERTY()
-		FMenuUpDelegate MenuUpDelegate;
-	UPROPERTY()
-		FMenuDownDelegate MenuDownDelegate;
-	UPROPERTY()
-		FMenuLeftDelegate MenuLeftDelegate;
-	UPROPERTY()
-		FMenuRightDelegate MenuRightDelegate;
-	UPROPERTY()
-		FMenuSelectDelegate MenuSelectDelegate;
-	UPROPERTY()
-		FMenuDownDelegate MenuReturnDelegate;
+	class APlayerController* PC;
 
 	ENavigationDirection Direction = ENavigationDirection::None;
 
@@ -104,6 +93,19 @@ class UINAVIGATION_API UUINavPCComponent : public UActorComponent
 public:
 
 	UUINavPCComponent();
+
+	UPROPERTY()
+		FMenuUpDelegate MenuUpDelegate;
+	UPROPERTY()
+		FMenuDownDelegate MenuDownDelegate;
+	UPROPERTY()
+		FMenuLeftDelegate MenuLeftDelegate;
+	UPROPERTY()
+		FMenuRightDelegate MenuRightDelegate;
+	UPROPERTY()
+		FMenuSelectDelegate MenuSelectDelegate;
+	UPROPERTY()
+		FMenuDownDelegate MenuReturnDelegate;
 
 	//Indicates whether the player can navigate the widget
 	UPROPERTY(BlueprintReadWrite, Category = UINavWidget)

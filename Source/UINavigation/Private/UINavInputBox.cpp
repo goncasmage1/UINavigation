@@ -258,8 +258,7 @@ void UUINavInputBox::RevertToActionText(int Index)
 
 	InputButtons[Index]->NavText->SetText(OldName);
 
-	AUINavController* UINavPC = Cast<AUINavController>(GetOwningPlayer());
-	if (UINavPC != nullptr) UINavPC->PressedActions.Empty();
+	if (Container->UINavPC != nullptr) Container->UINavPC->PressedActions.Empty();
 }
 
 void UUINavInputBox::NotifySelected(int Index)

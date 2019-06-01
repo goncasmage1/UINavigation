@@ -147,7 +147,7 @@ public:
 
 	//Current player controller
 	UPROPERTY(BlueprintReadWrite, Category = UINavWidget)
-		class AUINavController* CurrentPC;
+		class UUINavPCComponent* UINavPC;
 
 	//Widget that created this widget (if returned from a child)
 	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
