@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Copyright (C) 2019 Gon�alo Marques - All Rights Reserved
 
 
 #include "UINavPCComponent.h"
@@ -22,6 +22,11 @@ void UUINavPCComponent::Activate(bool bReset)
 	if (PC == nullptr)
 	{
 		DISPLAYERROR(TEXT("UINavPCComponent Owner isn't a Player Controller!"));
+	}
+
+	if (!PC->GetClass()->ImplementsInterface(UUINavPCReceiver::StaticClass()))
+	{
+		DISPLAYERROR(TEXT("Player Controller doesn't implement UINavPCReceiver interface!"));
 	}
 }
 
@@ -471,39 +476,16 @@ void UUINavPCComponent::NotifyMouseInputType()
 
 void UUINavPCComponent::NotifyInputTypeChange(EInputType NewInputType)
 {
-	OnInputChanged(CurrentInputType, NewInputType);
+	IUINavPCReceiver::Execute_OnInputChanged(GetOwner(), CurrentInputType, NewInputType);
 
 	if (ActiveWidget != nullptr) ActiveWidget->OnInputChanged(CurrentInputType, NewInputType);
 
 	CurrentInputType = NewInputType;
 }
 
-void UUINavPCComponent::OnRootWidgetRemoved_Implementation()
-{
-
-}
-
-void UUINavPCComponent::OnInputChanged_Implementation(EInputType From, EInputType To)
-{
-
-}
-
-void UUINavPCComponent::OnNavigated_Implementation(ENavigationDirection NewDirection)
-{
-
-}
-
-void UUINavPCComponent::OnSelect_Implementation()
-{
-}
-
-void UUINavPCComponent::OnReturn_Implementation()
-{
-}
-
 void UUINavPCComponent::MenuUp()
 {
-	OnNavigated(ENavigationDirection::Up);
+	IUINavPCReceiver::Execute_OnNavigated(GetOwner(), ENavigationDirection::Up);
 	VerifyInputTypeChangeByAction(TEXT("MenuUp"));
 
 	if (ActiveWidget == nullptr ||
@@ -514,7 +496,7 @@ void UUINavPCComponent::MenuUp()
 
 void UUINavPCComponent::MenuDown()
 {
-	OnNavigated(ENavigationDirection::Down);
+	IUINavPCReceiver::Execute_OnNavigated(GetOwner(), ENavigationDirection::Down);
 	VerifyInputTypeChangeByAction(TEXT("MenuDown"));
 
 	if (ActiveWidget == nullptr ||
@@ -525,7 +507,7 @@ void UUINavPCComponent::MenuDown()
 
 void UUINavPCComponent::MenuLeft()
 {
-	OnNavigated(ENavigationDirection::Left);
+	IUINavPCReceiver::Execute_OnNavigated(GetOwner(), ENavigationDirection::Left);
 	VerifyInputTypeChangeByAction(TEXT("MenuLeft"));
 
 	if (ActiveWidget == nullptr ||
@@ -536,7 +518,7 @@ void UUINavPCComponent::MenuLeft()
 
 void UUINavPCComponent::MenuRight()
 {
-	OnNavigated(ENavigationDirection::Right);
+	IUINavPCReceiver::Execute_OnNavigated(GetOwner(), ENavigationDirection::Right);
 	VerifyInputTypeChangeByAction(TEXT("MenuRight"));
 
 	if (ActiveWidget == nullptr ||
@@ -547,7 +529,7 @@ void UUINavPCComponent::MenuRight()
 
 void UUINavPCComponent::MenuSelect()
 {
-	OnSelect();
+	IUINavPCReceiver::Execute_OnSelect(GetOwner());
 	VerifyInputTypeChangeByAction(TEXT("MenuSelect"));
 
 	if (ActiveWidget == nullptr ||
@@ -559,7 +541,7 @@ void UUINavPCComponent::MenuSelect()
 
 void UUINavPCComponent::MenuReturn()
 {
-	OnReturn();
+	IUINavPCReceiver::Execute_OnReturn(GetOwner());
 	VerifyInputTypeChangeByAction(TEXT("MenuReturn"));
 
 	if (ActiveWidget == nullptr ||

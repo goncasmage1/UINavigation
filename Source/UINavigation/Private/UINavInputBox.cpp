@@ -1,7 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "UINavInputBox.h"
-#include "UINavController.h"
 #include "UINavInputComponent.h"
 #include "UINavInputContainer.h"
 #include "UINavSettings.h"

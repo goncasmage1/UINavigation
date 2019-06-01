@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Copyright (C) 2019 Gon�alo Marques - All Rights Reserved
 
 #pragma once
 
@@ -227,40 +227,6 @@ public:
 	//Get all keys associated with the input with the given name
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
 		TArray<FKey> GetInputKeysFromName(FName InputName);
-
-	/**
-	*	Called when the root UINavWidget is removed from the viewport
-	*/
-	UFUNCTION(BlueprintNativeEvent, Category = UINavController)
-		void OnRootWidgetRemoved();
-	void OnRootWidgetRemoved_Implementation();
-
-	/**
-	*	Called when the input type changes
-	*
-	*	@param From The input type being used before
-	*	@param To The input type being used now
-	*/
-	UFUNCTION(BlueprintNativeEvent, Category = UINavController)
-		void OnInputChanged(EInputType From, EInputType To);
-	virtual void OnInputChanged_Implementation(EInputType From, EInputType To);
-
-	/**
-	*	Called when the player navigates in a certain direction
-	*
-	*	@param Direction The direction of navigation
-	*/
-	UFUNCTION(BlueprintNativeEvent, Category = UINavController)
-		void OnNavigated(ENavigationDirection NavigationDirection);
-	void OnNavigated_Implementation(ENavigationDirection NavigationDirection);
-
-	UFUNCTION(BlueprintNativeEvent, Category = UINavController)
-		void OnSelect();
-	void OnSelect_Implementation();
-
-	UFUNCTION(BlueprintNativeEvent, Category = UINavController)
-		void OnReturn();
-	void OnReturn_Implementation();
 
 	void MenuUp();
 	void MenuDown();

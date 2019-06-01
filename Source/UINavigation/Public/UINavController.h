@@ -3,6 +3,7 @@
 #pragma once
 
 #include "GameFramework/PlayerController.h"
+#include "UINavPCReceiver.h"
 #include "Engine/DataTable.h"
 #include "Data/CountdownPhase.h"
 #include "Data/InputRestriction.h"
@@ -15,7 +16,7 @@
  * This class contains the logic for input-related actions with UINavWidgets
  */
 UCLASS()
-class UINAVIGATION_API AUINavController : public APlayerController
+class UINAVIGATION_API AUINavController : public APlayerController, public IUINavPCReceiver
 {
 	GENERATED_BODY()
 	

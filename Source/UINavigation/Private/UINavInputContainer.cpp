@@ -4,7 +4,6 @@
 #include "UINavWidget.h"
 #include "UINavButton.h"
 #include "UINavInputBox.h"
-#include "UINavController.h"
 #include "UINavComponent.h"
 #include "UINavInputComponent.h"
 #include "UINavBlueprintFunctionLibrary.h"

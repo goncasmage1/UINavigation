@@ -62,8 +62,8 @@ void UUINavWidget::InitialSetup()
 			DISPLAYERROR("Player Controller is Null!");
 			return;
 		}
-		UUINavPCComponent* Comp = Cast<UUINavPCComponent>(PC->GetComponentByClass(UUINavPCComponent::StaticClass()));
-		if (Comp == nullptr)
+		UINavPC = Cast<UUINavPCComponent>(PC->GetComponentByClass(UUINavPCComponent::StaticClass()));
+		if (UINavPC == nullptr)
 		{
 			DISPLAYERROR("Player Controller doesn't have a UINavPCComponent!");
 			return;
@@ -439,7 +439,7 @@ void UUINavWidget::HandleSelectorMovement(float DeltaTime)
 	{
 		MovementCounter = 0.f;
 		bMovingSelector = false;
-		UINavPC->bAllowNavigation = true;
+		if (UINavPC != nullptr) UINavPC->bAllowNavigation = true;
 		TheSelector->SetRenderTranslation(SelectorDestination);
 		if (HaltedIndex != -1)
 		{
@@ -1234,7 +1234,7 @@ void UUINavWidget::BeginSelectorMovement(int Index)
 	MovementTime = MaxTime - MinTime;
 
 	bMovingSelector = true;
-	UINavPC->bAllowNavigation = false;
+	if (UINavPC != nullptr) UINavPC->bAllowNavigation = false;
 }
 
 void UUINavWidget::OnNavigate_Implementation(int From, int To)
@@ -1321,7 +1321,7 @@ void UUINavWidget::ReturnToParent()
 	{
 		if (bAllowRemoveIfRoot)
 		{
-			UINavPC->OnRootWidgetRemoved();
+			IUINavPCReceiver::Execute_OnSelect(UINavPC->GetOwner());
 			RemoveFromParent();
 		}
 		return;
