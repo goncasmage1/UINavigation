@@ -88,13 +88,13 @@ public:
 	UUINavPCComponent();
 
 	//Indicates whether the player can navigate the widget
-	UPROPERTY(BlueprintReadWrite, Category = UINavWidget)
+	UPROPERTY(BlueprintReadWrite, Category = UINavController)
 		bool bAllowNavigation = true;
 
-	UPROPERTY(BlueprintReadWrite, Category = UINavComponent)
+	UPROPERTY(BlueprintReadWrite, Category = UINavController)
 		class UUINavWidget* ActiveWidget;
 
-	UPROPERTY(BlueprintReadWrite, Category = UINavComponent)
+	UPROPERTY(BlueprintReadWrite, Category = UINavController)
 		EInputType CurrentInputType = EInputType::Keyboard;
 
 	/*
@@ -130,23 +130,23 @@ public:
 	/*
 	Holds the key icons for gamepad
 	*/
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Controller")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavController)
 		UDataTable* GamepadKeyIconData;
 	/*
 	Holds the key icons for mouse and keyboard
 	*/
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Controller")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavController)
 		UDataTable* KeyboardMouseKeyIconData;
 
 	/*
 	Holds the key names for gamepad
 	*/
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Controller")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavController)
 		UDataTable* GamepadKeyNameData;
 	/*
 	Holds the key names for mouse and keyboard
 	*/
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Controller")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavController)
 		UDataTable* KeyboardMouseKeyNameData;
 
 	/**
