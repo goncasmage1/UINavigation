@@ -22,11 +22,13 @@ void UUINavPCComponent::Activate(bool bReset)
 	if (PC == nullptr)
 	{
 		DISPLAYERROR(TEXT("UINavPCComponent Owner isn't a Player Controller!"));
+		return;
 	}
 
 	if (!PC->GetClass()->ImplementsInterface(UUINavPCReceiver::StaticClass()))
 	{
 		DISPLAYERROR(TEXT("Player Controller doesn't implement UINavPCReceiver interface!"));
+		return;
 	}
 }
 
@@ -34,6 +36,7 @@ void UUINavPCComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
+	SetupInput();
 	VerifyDefaultInputs();
 	FetchUINavActionKeys();
 }
