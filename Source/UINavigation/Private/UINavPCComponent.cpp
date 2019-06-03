@@ -10,10 +10,10 @@
 UUINavPCComponent::UUINavPCComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
+	PrimaryComponentTick.bTickEvenWhenPaused = true;
 
 	bAutoActivate = true;
 	bCanEverAffectNavigation = false;
-
 }
 
 void UUINavPCComponent::Activate(bool bReset)
