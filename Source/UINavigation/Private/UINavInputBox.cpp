@@ -1,7 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "UINavInputBox.h"
-#include "UINavController.h"
 #include "UINavInputComponent.h"
 #include "UINavInputContainer.h"
 #include "UINavSettings.h"
@@ -258,8 +257,7 @@ void UUINavInputBox::RevertToActionText(int Index)
 
 	InputButtons[Index]->NavText->SetText(OldName);
 
-	AUINavController* UINavPC = Cast<AUINavController>(GetOwningPlayer());
-	if (UINavPC != nullptr) UINavPC->PressedActions.Empty();
+	if (Container->UINavPC != nullptr) Container->UINavPC->PressedActions.Empty();
 }
 
 void UUINavInputBox::NotifySelected(int Index)
