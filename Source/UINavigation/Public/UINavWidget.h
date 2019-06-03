@@ -147,7 +147,7 @@ public:
 
 	//Current player controller
 	UPROPERTY(BlueprintReadWrite, Category = UINavWidget)
-		class AUINavController* CurrentPC;
+		class UUINavPCComponent* UINavPC;
 
 	//Widget that created this widget (if returned from a child)
 	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
@@ -554,6 +554,18 @@ public:
 	// Checks whether the given button is in the specified grid
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
 		bool IsButtonInGrid(class UUINavButton* Button, const FGrid Grid);
+
+	// Returns the button's coordinates in a 2D grid
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
+		void GetCoordinatesInGrid2D_FromIndex(const int Index, int& XCoord, int& YCoord);
+
+	// Returns the button's coordinates in a 2D grid
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
+		void GetCoordinatesInGrid2D_FromButton(class UUINavButton* Button, int& XCoord, int& YCoord);
+
+	//Get all keys associated with the input with the given name
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
+		TArray<FKey> GetInputKeysFromName(FName InputName);
 
 	/**
 	*	Returns the UINavComponent with the specified index (null if that

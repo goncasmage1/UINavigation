@@ -6,7 +6,7 @@
 #include "UINavComponent.h"
 #include "UINavInputBox.h"
 #include "UINavInputContainer.h"
-#include "UINavController.h"
+#include "UINavPCComponent.h"
 #include "Animation/WidgetAnimation.h"
 #include "Blueprint/UserWidget.h"
 #include "Blueprint/WidgetTree.h"
@@ -17,6 +17,7 @@
 #include "Components/TextBlock.h"
 #include "Components/ScrollBox.h"
 #include "Components/CanvasPanelSlot.h"
+#include "Components/ActorComponent.h"
 
 void UUINavWidget::NativeConstruct()
 {
@@ -53,12 +54,18 @@ void UUINavWidget::InitialSetup()
 	bSetupStarted = true;
 	bIsFocusable = true;
 	WidgetClass = GetClass();
-	if (CurrentPC == nullptr)
+	if (UINavPC == nullptr)
 	{
-		CurrentPC = Cast<AUINavController>(GetOwningPlayer());
-		if (CurrentPC == nullptr)
+		APlayerController* PC = Cast<APlayerController>(GetOwningPlayer());
+		if (PC == nullptr)
 		{
-			DISPLAYERROR("PlayerController isn't a UINavController");
+			DISPLAYERROR("Player Controller is Null!");
+			return;
+		}
+		UINavPC = Cast<UUINavPCComponent>(PC->GetComponentByClass(UUINavPCComponent::StaticClass()));
+		if (UINavPC == nullptr)
+		{
+			DISPLAYERROR("Player Controller doesn't have a UINavPCComponent!");
 			return;
 		}
 	}
@@ -258,7 +265,7 @@ void UUINavWidget::UINavSetup()
 		button->SetIsEnabled(true);
 	}
 
-	if (CurrentPC != nullptr) CurrentPC->SetActiveWidget(this);
+	if (UINavPC != nullptr) UINavPC->ActiveWidget = this;
 
 	if (TheSelector != nullptr) TheSelector->SetVisibility(ESlateVisibility::HitTestInvisible);
 
@@ -311,7 +318,7 @@ FReply UUINavWidget::NativeOnKeyDown(const FGeometry & InGeometry, const FKeyEve
 	{
 		FKey PressedKey = InKeyEvent.GetKey();
 
-		if ((UINavInputContainer->bCanCancelKeybind && CurrentPC->IsReturnKey(PressedKey)))
+		if ((UINavInputContainer->bCanCancelKeybind && UINavPC->IsReturnKey(PressedKey)))
 		{
 			CancelRebind();
 			return FReply::Handled();
@@ -361,9 +368,9 @@ FReply UUINavWidget::NativeOnMouseWheel(const FGeometry & InGeometry, const FPoi
 	}
 	else
 	{
-		if (CurrentPC->GetCurrentInputType() != EInputType::Mouse)
+		if (UINavPC->GetCurrentInputType() != EInputType::Mouse)
 		{
-			CurrentPC->NotifyMouseInputType();
+			UINavPC->NotifyMouseInputType();
 		}
 	}
 	return FReply::Handled();
@@ -407,18 +414,18 @@ FReply UUINavWidget::NativeOnMouseButtonUp(const FGeometry & InGeometry, const F
 
 FReply UUINavWidget::OnKeyPressed(FKey PressedKey)
 {
-	FString ActionName = CurrentPC->FindActionByKey(PressedKey);
+	FString ActionName = UINavPC->FindActionByKey(PressedKey);
 	if (ActionName.Equals(TEXT(""))) return FReply::Handled();
 
-	return CurrentPC->OnActionPressed(ActionName);
+	return UINavPC->OnActionPressed(ActionName);
 }
 
 FReply UUINavWidget::OnKeyReleased(FKey PressedKey)
 {
-	FString ActionName = CurrentPC->FindActionByKey(PressedKey);
+	FString ActionName = UINavPC->FindActionByKey(PressedKey);
 	if (ActionName.Equals(TEXT(""))) return FReply::Handled();
 
-	return CurrentPC->OnActionReleased(ActionName);
+	return UINavPC->OnActionReleased(ActionName);
 }
 
 void UUINavWidget::HandleSelectorMovement(float DeltaTime)
@@ -432,7 +439,7 @@ void UUINavWidget::HandleSelectorMovement(float DeltaTime)
 	{
 		MovementCounter = 0.f;
 		bMovingSelector = false;
-		CurrentPC->bAllowNavigation = true;
+		if (UINavPC != nullptr) UINavPC->bAllowNavigation = true;
 		TheSelector->SetRenderTranslation(SelectorDestination);
 		if (HaltedIndex != -1)
 		{
@@ -1227,7 +1234,7 @@ void UUINavWidget::BeginSelectorMovement(int Index)
 	MovementTime = MaxTime - MinTime;
 
 	bMovingSelector = true;
-	CurrentPC->bAllowNavigation = false;
+	if (UINavPC != nullptr) UINavPC->bAllowNavigation = false;
 }
 
 void UUINavWidget::OnNavigate_Implementation(int From, int To)
@@ -1248,7 +1255,7 @@ void UUINavWidget::OnPreSelect(int Index)
 		int KeysPerInput = UINavInputContainer->KeysPerInput;
 		UINavInputBoxes[InputBoxIndex / KeysPerInput]->NotifySelected(InputBoxIndex % KeysPerInput);
 		ReceiveInputType = UINavInputBoxes[InputBoxIndex / KeysPerInput]->bIsAxis ? EReceiveInputType::Axis : EReceiveInputType::Action;
-		SetUserFocus(CurrentPC);
+		SetUserFocus(Cast<APlayerController>(UINavPC->GetOwner()));
 		bWaitForInput = true;
 	}
 	else
@@ -1297,10 +1304,12 @@ UWidget* UUINavWidget::GoToWidget(TSubclassOf<UUINavWidget> NewWidgetClass, bool
 		return nullptr;
 	}
 
-	UUINavWidget* NewWidget = CreateWidget<UUINavWidget>(CurrentPC, NewWidgetClass);
+	APlayerController* PC = Cast<APlayerController>(UINavPC->GetOwner());
+	UUINavWidget* NewWidget = CreateWidget<UUINavWidget>(PC, NewWidgetClass);
 	NewWidget->ParentWidget = this;
 	NewWidget->bParentRemoved = bRemoveParent;
-	if (HasUserFocus(CurrentPC)) NewWidget->SetUserFocus(CurrentPC);
+	if (HasUserFocus(PC))
+		NewWidget->SetUserFocus(PC);
 	NewWidget->AddToViewport(ZOrder);
 	CleanSetup();
 	return NewWidget;
@@ -1312,13 +1321,14 @@ void UUINavWidget::ReturnToParent()
 	{
 		if (bAllowRemoveIfRoot)
 		{
-			CurrentPC->OnRootWidgetRemoved();
+			IUINavPCReceiver::Execute_OnSelect(UINavPC->GetOwner());
 			RemoveFromParent();
 		}
 		return;
 	}
 
-	if (HasUserFocus(CurrentPC)) ParentWidget->SetUserFocus(CurrentPC);
+	if (HasUserFocus(Cast<APlayerController>(UINavPC->GetOwner())))
+		ParentWidget->SetUserFocus(Cast<APlayerController>(UINavPC->GetOwner()));
 
 	//If parent was removed, add it to viewport
 	if (bParentRemoved)
@@ -1328,7 +1338,7 @@ void UUINavWidget::ReturnToParent()
 	}
 	else
 	{
-		CurrentPC->SetActiveWidget(ParentWidget);
+		UINavPC->ActiveWidget = ParentWidget;
 		ParentWidget->ReconfigureSetup();
 	}
 	RemoveFromParent();
@@ -1570,6 +1580,37 @@ bool UUINavWidget::IsButtonInGrid(UUINavButton * Button, const FGrid Grid)
 	return Button->GridIndex == Grid.GridIndex;
 }
 
+void UUINavWidget::GetCoordinatesInGrid2D_FromIndex(const int Index, int & XCoord, int & YCoord)
+{
+	XCoord = -1;
+	YCoord = -1;
+	if (ButtonIndex < 0 || ButtonIndex > UINavButtons.Num()) return;
+
+	GetCoordinatesInGrid2D_FromButton(UINavButtons[ButtonIndex], XCoord, YCoord);
+}
+
+void UUINavWidget::GetCoordinatesInGrid2D_FromButton(UUINavButton * Button, int & XCoord, int & YCoord)
+{
+	XCoord = -1;
+	YCoord = -1;
+	if (Button == nullptr) return;
+
+	FGrid Grid = NavigationGrids[Button->GridIndex];
+	if (Grid.GridType != EGridType::Grid2D) return;
+
+	YCoord = Button->IndexInGrid / Grid.DimensionX;
+	XCoord = Button->IndexInGrid - (YCoord * Grid.DimensionX);
+}
+
+TArray<FKey> UUINavWidget::GetInputKeysFromName(FName InputName)
+{
+	TArray<FKey> KeyArray = TArray<FKey>();
+
+	if (UINavPC == nullptr) return KeyArray;
+
+	return UINavPC->GetInputKeysFromName(InputName);
+}
+
 UUINavComponent * UUINavWidget::GetUINavComponentAtIndex(int Index)
 {
 	int ValidIndex = GetLocalComponentIndex(Index);
@@ -1593,19 +1634,19 @@ void UUINavWidget::HoverEvent(int Index)
 		bWaitForInput = false;
 		UINavInputBoxes[InputBoxIndex / UINavInputContainer->KeysPerInput]->RevertToActionText(InputBoxIndex % UINavInputContainer->KeysPerInput);
 	}
-	if (CurrentPC->GetCurrentInputType() != EInputType::Mouse)
+	if (UINavPC->GetCurrentInputType() != EInputType::Mouse)
 	{
 		if (bUseButtonStates) SwitchButtonStyle(Index);
 		return;
 	}
 
-	if (!CurrentPC->bAllowNavigation)
+	if (!UINavPC->bAllowNavigation)
 	{
 		HaltedIndex = Index;
 		return;
 	}
 
-	CurrentPC->ClearTimer();
+	UINavPC->ClearTimer();
 	NavigateTo(Index, true);
 }
 
@@ -1643,9 +1684,9 @@ void UUINavWidget::ClickEvent(int Index)
 	}
 	else
 	{
-		CurrentPC->NotifyMouseInputType();
+		UINavPC->NotifyMouseInputType();
 
-		if (!CurrentPC->bAllowNavigation) return;
+		if (!UINavPC->bAllowNavigation) return;
 
 		OnPreSelect(Index);
 
@@ -1701,7 +1742,7 @@ void UUINavWidget::NavigateInDirection(ENavigationDirection Direction)
 		return;
 	}
 
-	if (!CurrentPC->bAllowNavigation)
+	if (!UINavPC->bAllowNavigation)
 	{
 		UUINavButton* NextButton = FindNextButton(CurrentButton, Direction);
 		HaltedIndex = NextButton != nullptr ? NextButton->ButtonIndex : -1;
@@ -1729,22 +1770,22 @@ void UUINavWidget::NavigateInDirection(ENavigationDirection Direction)
 
 void UUINavWidget::MenuSelect()
 {
-	if (!CurrentPC->bAllowNavigation)
+	if (!UINavPC->bAllowNavigation)
 	{
 		HaltedIndex = SELECT_INDEX;
 		return;
 	}
-	CurrentPC->ClearTimer();
+	UINavPC->ClearTimer();
 	OnPreSelect(ButtonIndex);
 }
 
 void UUINavWidget::MenuReturn()
 {
-	if (!CurrentPC->bAllowNavigation)
+	if (!UINavPC->bAllowNavigation)
 	{
 		HaltedIndex = RETURN_INDEX;
 		return;
 	}
-	CurrentPC->ClearTimer();
+	UINavPC->ClearTimer();
 	OnReturn();
 }

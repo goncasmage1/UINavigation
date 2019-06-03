@@ -15,6 +15,8 @@ void UUINavComponentBox::NativeConstruct()
 
 	LeftButton->OnClicked.AddDynamic(this, &UUINavComponentBox::NavigateLeft);
 	RightButton->OnClicked.AddDynamic(this, &UUINavComponentBox::NavigateRight);
+	LeftButton->IsFocusable = false;
+	RightButton->IsFocusable = false;
 }
 
 void UUINavComponentBox::BaseConstruct()

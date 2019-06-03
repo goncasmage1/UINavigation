@@ -4,7 +4,6 @@
 #include "UINavWidget.h"
 #include "UINavButton.h"
 #include "UINavInputBox.h"
-#include "UINavController.h"
 #include "UINavComponent.h"
 #include "UINavInputComponent.h"
 #include "UINavBlueprintFunctionLibrary.h"
@@ -20,7 +19,7 @@
 void UUINavInputContainer::Init(UUINavWidget * NewParent)
 {
 	ParentWidget = NewParent;
-	UINavPC = NewParent->CurrentPC;
+	UINavPC = NewParent->UINavPC;
 
 	bIsFocusable = false;
 
@@ -73,9 +72,10 @@ void UUINavInputContainer::CreateActionBoxes()
 
 	int Iterations = ActionNames.Num();
 
+	APlayerController* PC = Cast<APlayerController>(UINavPC->GetOwner());
 	for (int i = 0; i < Iterations; ++i)
 	{
-		UUINavInputBox* NewInputBox = CreateWidget<UUINavInputBox>(UINavPC, InputBox_BP);
+		UUINavInputBox* NewInputBox = CreateWidget<UUINavInputBox>(PC, InputBox_BP);
 		if (NewInputBox == nullptr) continue;
 		NewInputBox->Container = this;
 		NewInputBox->bIsAxis = false;
@@ -116,9 +116,10 @@ void UUINavInputContainer::CreateAxisBoxes()
 
 	int Iterations = AxisNames.Num();
 
+	APlayerController* PC = Cast<APlayerController>(UINavPC->GetOwner());
 	for (int i = 0; i < Iterations; ++i)
 	{
-		UUINavInputBox* NewInputBox = CreateWidget<UUINavInputBox>(UINavPC, InputBox_BP);
+		UUINavInputBox* NewInputBox = CreateWidget<UUINavInputBox>(PC, InputBox_BP);
 		if (NewInputBox == nullptr) continue;
 		NewInputBox->Container = this;
 		NewInputBox->bIsAxis = true;

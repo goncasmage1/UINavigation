@@ -1,7 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "UINavInputBox.h"
-#include "UINavController.h"
 #include "UINavInputComponent.h"
 #include "UINavInputContainer.h"
 #include "UINavSettings.h"
@@ -42,7 +41,9 @@ void UUINavInputBox::BuildKeyMappings()
 
 	if ((bIsAxis && TempAxes.Num() == 0) || (!bIsAxis && TempActions.Num() == 0))
 	{
-		DISPLAYERROR(TEXT("Couldn't find Input with given name."));
+		FString Message = TEXT("Couldn't find Input with name ");
+		Message.Append(*InputName.ToString());
+		DISPLAYERROR(Message);
 		return;
 	}
 
@@ -95,6 +96,11 @@ void UUINavInputBox::ResetKeyMappings()
 	bUsingKeyImage = { false, false, false };
 	InputButtons.Empty();
 	BuildKeyMappings();
+
+	if (Container->UINavPC != nullptr && Container->UINavPC->KeyMap.Contains(InputName.ToString()))
+	{
+		Container->UINavPC->KeyMap.Add(InputName.ToString(), Keys);
+	}
 }
 
 void UUINavInputBox::UpdateInputKey(FKey NewKey, int Index)
@@ -150,7 +156,14 @@ void UUINavInputBox::UpdateInputKey(FKey NewKey, int Index)
 		}
 	}
 
-	if (Container->UINavPC != nullptr) Container->UINavPC->PressedActions.Empty();
+	if (Container->UINavPC != nullptr)
+	{
+		Container->UINavPC->PressedActions.Empty();
+		if (Container->UINavPC->KeyMap.Contains(InputName.ToString()))
+		{
+			Container->UINavPC->KeyMap.Add(InputName.ToString(), Keys);
+		}
+	}
 
 	CheckKeyIcon(Index);
 
@@ -244,8 +257,7 @@ void UUINavInputBox::RevertToActionText(int Index)
 
 	InputButtons[Index]->NavText->SetText(OldName);
 
-	AUINavController* UINavPC = Cast<AUINavController>(GetOwningPlayer());
-	if (UINavPC != nullptr) UINavPC->PressedActions.Empty();
+	if (Container->UINavPC != nullptr) Container->UINavPC->PressedActions.Empty();
 }
 
 void UUINavInputBox::NotifySelected(int Index)
