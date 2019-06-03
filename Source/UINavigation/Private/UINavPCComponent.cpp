@@ -196,55 +196,59 @@ void UUINavPCComponent::FetchUINavActionKeys()
 	}
 }
 
-FKey UUINavPCComponent::GetMenuActionKey(FString ActionName, EInputRestriction InputRestriction)
+FKey UUINavPCComponent::GetInputKey(FName ActionName, EInputRestriction InputRestriction)
 {
 	FKey FinalKey = FKey("None");
-	if (!KeyMap.Contains(ActionName)) return FinalKey;
+	TArray<FKey> KeyArray = TArray<FKey>();
 
-	TArray<FKey> keys = KeyMap[ActionName];
-	if (keys.Num() == 0) return FinalKey;
+	const UInputSettings* Settings = GetDefault<UInputSettings>();
 
-	switch (InputRestriction)
+	TArray<FInputActionKeyMapping> ActionMappings;
+	Settings->GetActionMappingByName(ActionName, ActionMappings);
+
+	if (ActionMappings.Num() > 0)
 	{
-		case EInputRestriction::None:
-			FinalKey = keys[0];
-			break;
-		case EInputRestriction::Keyboard:
-			for (FKey key : keys)
-			{
-				if (key.IsGamepadKey() || key.IsMouseButton()) continue;
-				FinalKey = key;
-			}
-			break;
-		case EInputRestriction::Mouse:
-			for (FKey key : keys)
-			{
-				if (!key.IsMouseButton()) continue;
-				FinalKey = key;
-			}
-			break;
-		case EInputRestriction::Keyboard_Mouse:
-			for (FKey key : keys)
-			{
-				if (key.IsGamepadKey()) continue;
-				FinalKey = key;
-			}
-			break;
-		case EInputRestriction::Gamepad:
-			for (FKey key : keys)
-			{
-				if (!key.IsGamepadKey()) continue;
-				FinalKey = key;
-			}
-			break;
+		switch (InputRestriction)
+		{
+			case EInputRestriction::None:
+				FinalKey = ActionMappings[0].Key;
+				break;
+			case EInputRestriction::Keyboard:
+				for (FInputActionKeyMapping mapping : ActionMappings)
+				{
+					if (mapping.Key.IsGamepadKey() || mapping.Key.IsMouseButton()) continue;
+					FinalKey = mapping.Key;
+				}
+				break;
+			case EInputRestriction::Mouse:
+				for (FInputActionKeyMapping mapping : ActionMappings)
+				{
+					if (!mapping.Key.IsMouseButton()) continue;
+					FinalKey = mapping.Key;
+				}
+				break;
+			case EInputRestriction::Keyboard_Mouse:
+				for (FInputActionKeyMapping mapping : ActionMappings)
+				{
+					if (mapping.Key.IsGamepadKey()) continue;
+					FinalKey = mapping.Key;
+				}
+				break;
+			case EInputRestriction::Gamepad:
+				for (FInputActionKeyMapping mapping : ActionMappings)
+				{
+					if (!mapping.Key.IsGamepadKey()) continue;
+					FinalKey = mapping.Key;
+				}
+				break;
+		}
 	}
-
 	return FinalKey;
 }
 
-UTexture2D * UUINavPCComponent::GetMenuActionIcon(FString ActionName, EInputRestriction InputRestriction)
+UTexture2D * UUINavPCComponent::GetInputIcon(FName ActionName, EInputRestriction InputRestriction)
 {
-	FKey Key = GetMenuActionKey(ActionName, InputRestriction);
+	FKey Key = GetInputKey(ActionName, InputRestriction);
 	FName KeyName = Key.GetFName();
 	if (KeyName.IsEqual(FName("None"))) return nullptr;
 
@@ -271,9 +275,9 @@ UTexture2D * UUINavPCComponent::GetMenuActionIcon(FString ActionName, EInputRest
 	return NewTexture;
 }
 
-FString UUINavPCComponent::GetMenuActionName(FString ActionName, EInputRestriction InputRestriction)
+FString UUINavPCComponent::GetInputName(FName ActionName, EInputRestriction InputRestriction)
 {
-	FKey Key = GetMenuActionKey(ActionName, InputRestriction);
+	FKey Key = GetInputKey(ActionName, InputRestriction);
 	FName KeyName = Key.GetFName();
 	if (KeyName.IsEqual(FName("None"))) return TEXT("");
 

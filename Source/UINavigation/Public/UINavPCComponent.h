@@ -212,17 +212,19 @@ public:
 	*/
 	FReply OnActionReleased(FString ActionName);
 
-	//Get first found key associated with the Menu Action with the given name
+	//Get first found key associated with the given input name
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
-		FKey GetMenuActionKey(FString ActionName, EInputRestriction InputRestriction);
+		FKey GetInputKey(FName ActionName, EInputRestriction InputRestriction);
 
-	//Get first found Icon associated with the Menu Action with the given name
+	//Get first found Icon associated with the given input name
+	//Will search the icon table
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
-		class UTexture2D* GetMenuActionIcon(FString ActionName, EInputRestriction InputRestriction);
+		class UTexture2D* GetInputIcon(FName ActionName, EInputRestriction InputRestriction);
 
-	//Get first found name associated with the Menu Action with the given name
+	//Get first found name associated with the given input name
+	//Will search the name table, if name can't be found will return the key's display name
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
-		FString GetMenuActionName(FString ActionName, EInputRestriction InputRestriction);
+		FString GetInputName(FName ActionName, EInputRestriction InputRestriction);
 
 	//Get all keys associated with the input with the given name
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
