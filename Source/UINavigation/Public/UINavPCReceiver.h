@@ -3,8 +3,8 @@
 #pragma once
 
 #include "UObject/Interface.h"
-#include "InputType.h"
-#include "NavigationDirection.h"
+#include "Data/InputType.h"
+#include "Data/NavigationDirection.h"
 #include "UINavPCReceiver.generated.h"
 
 UINTERFACE(MinimalAPI)
