@@ -419,18 +419,19 @@ FString UUINavPCComponent::FindActionByKey(FKey ActionKey)
 	return TEXT("");
 }
 
-FReply UUINavPCComponent::OnActionPressed(FString ActionName)
+FReply UUINavPCComponent::OnActionPressed(FString ActionName, FKey Key)
 {
 	if (!PressedActions.Contains(ActionName))
 	{
 		PressedActions.AddUnique(ActionName);
 		ExecuteActionByName(ActionName, true);
+		VerifyInputTypeChangeByKey(Key);
 		return FReply::Handled();
 	}
 	else return FReply::Unhandled();
 }
 
-FReply UUINavPCComponent::OnActionReleased(FString ActionName)
+FReply UUINavPCComponent::OnActionReleased(FString ActionName, FKey Key)
 {
 	if (PressedActions.Contains(ActionName))
 	{

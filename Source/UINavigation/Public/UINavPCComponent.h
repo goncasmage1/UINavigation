@@ -59,14 +59,6 @@ protected:
 	/**
 	*	Verifies if a new input type is being used
 	*
-	*	@param Key The specified key
-	*	@param PressedKey The pressed key
-	*/
-	void VerifyInputTypeChangeByKey(FKey Key);
-
-	/**
-	*	Verifies if a new input type is being used
-	*
 	*	@param Action The specified action
 	*/
 	void VerifyInputTypeChangeByAction(FString Action);
@@ -150,6 +142,14 @@ public:
 		UDataTable* KeyboardMouseKeyNameData;
 
 	/**
+	*	Verifies if a new input type is being used
+	*
+	*	@param Key The specified key
+	*	@param PressedKey The pressed key
+	*/
+	void VerifyInputTypeChangeByKey(FKey Key);
+
+	/**
 	*	Notifies the controller that a mouse is being used
 	*/
 	void NotifyMouseInputType();
@@ -203,14 +203,14 @@ public:
 	*
 	*	@param ActionName The name of the action
 	*/
-	FReply OnActionPressed(FString ActionName);
+	FReply OnActionPressed(FString ActionName, FKey Key);
 
 	/**
 	*	Called when an action key is released
 	*
 	*	@param ActionName The name of the action
 	*/
-	FReply OnActionReleased(FString ActionName);
+	FReply OnActionReleased(FString ActionName, FKey Key);
 
 	//Get first found key associated with the given input name
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)

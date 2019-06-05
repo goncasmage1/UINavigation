@@ -283,6 +283,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = UINavWidget, meta = (AdvancedDisplay=1))
 		void NavigateTo(int Index, bool bHoverEvent = false);
 
+	void DispatchNavigation(int Index, bool bHoverEvent = false);
+
 	/**
 	*	Changes the selector's location to that of the button with the given index in the Button's array
 	*
