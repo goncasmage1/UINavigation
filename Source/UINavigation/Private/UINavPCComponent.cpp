@@ -493,7 +493,6 @@ void UUINavPCComponent::NotifyInputTypeChange(EInputType NewInputType)
 void UUINavPCComponent::MenuUp()
 {
 	IUINavPCReceiver::Execute_OnNavigated(GetOwner(), ENavigationDirection::Up);
-	VerifyInputTypeChangeByAction(TEXT("MenuUp"));
 
 	if (ActiveWidget == nullptr ||
 		!ActiveWidget->IsInViewport()) return;
@@ -504,7 +503,6 @@ void UUINavPCComponent::MenuUp()
 void UUINavPCComponent::MenuDown()
 {
 	IUINavPCReceiver::Execute_OnNavigated(GetOwner(), ENavigationDirection::Down);
-	VerifyInputTypeChangeByAction(TEXT("MenuDown"));
 
 	if (ActiveWidget == nullptr ||
 		!ActiveWidget->IsInViewport()) return;
@@ -515,7 +513,6 @@ void UUINavPCComponent::MenuDown()
 void UUINavPCComponent::MenuLeft()
 {
 	IUINavPCReceiver::Execute_OnNavigated(GetOwner(), ENavigationDirection::Left);
-	VerifyInputTypeChangeByAction(TEXT("MenuLeft"));
 
 	if (ActiveWidget == nullptr ||
 		!ActiveWidget->IsInViewport()) return;
@@ -526,7 +523,6 @@ void UUINavPCComponent::MenuLeft()
 void UUINavPCComponent::MenuRight()
 {
 	IUINavPCReceiver::Execute_OnNavigated(GetOwner(), ENavigationDirection::Right);
-	VerifyInputTypeChangeByAction(TEXT("MenuRight"));
 
 	if (ActiveWidget == nullptr ||
 		!ActiveWidget->IsInViewport()) return;
@@ -611,6 +607,7 @@ void UUINavPCComponent::StartMenuUp()
 	if (Direction == ENavigationDirection::Up) return;
 
 	MenuUp();
+	VerifyInputTypeChangeByAction(TEXT("MenuUp"));
 	Direction = ENavigationDirection::Up;
 
 	if (!bChainNavigation || ActiveWidget == nullptr || !ActiveWidget->IsInViewport()) return;
@@ -623,6 +620,7 @@ void UUINavPCComponent::StartMenuDown()
 	if (Direction == ENavigationDirection::Down) return;
 
 	MenuDown();
+	VerifyInputTypeChangeByAction(TEXT("MenuDown"));
 	Direction = ENavigationDirection::Down;
 
 	if (!bChainNavigation || ActiveWidget == nullptr || !ActiveWidget->IsInViewport()) return;
@@ -635,6 +633,7 @@ void UUINavPCComponent::StartMenuLeft()
 	if (Direction == ENavigationDirection::Left) return;
 
 	MenuLeft();
+	VerifyInputTypeChangeByAction(TEXT("MenuLeft"));
 	Direction = ENavigationDirection::Left;
 
 	if (!bChainNavigation || ActiveWidget == nullptr || !ActiveWidget->IsInViewport()) return;
@@ -647,6 +646,7 @@ void UUINavPCComponent::StartMenuRight()
 	if (Direction == ENavigationDirection::Right) return;
 
 	MenuRight();
+	VerifyInputTypeChangeByAction(TEXT("MenuRight"));
 	Direction = ENavigationDirection::Right;
 
 	if (!bChainNavigation || ActiveWidget == nullptr || !ActiveWidget->IsInViewport()) return;
