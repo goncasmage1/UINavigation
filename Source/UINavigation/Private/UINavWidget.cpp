@@ -271,11 +271,8 @@ void UUINavWidget::UINavSetup()
 
 	bCompletedSetup = true;
 
-	NavigateTo(ButtonIndex);
+	DispatchNavigation(ButtonIndex);
 	OnNavigate(-1, ButtonIndex);
-	UUINavComponent* ToComponent = GetUINavComponentAtIndex(ButtonIndex);
-	if (ToComponent != nullptr) ToComponent->OnNavigatedTo();
-	if (UINavAnimations.Num() > 0) ExecuteAnimations(-1, ButtonIndex);
 
 	OnSetupCompleted();
 }
@@ -415,9 +412,13 @@ FReply UUINavWidget::NativeOnMouseButtonUp(const FGeometry & InGeometry, const F
 FReply UUINavWidget::OnKeyPressed(FKey PressedKey)
 {
 	FString ActionName = UINavPC->FindActionByKey(PressedKey);
-	if (ActionName.Equals(TEXT(""))) return FReply::Handled();
+	if (ActionName.Equals(TEXT("")))
+	{
+		UINavPC->VerifyInputTypeChangeByKey(PressedKey);
+		return FReply::Handled();
+	}
 
-	return UINavPC->OnActionPressed(ActionName);
+	return UINavPC->OnActionPressed(ActionName, PressedKey);
 }
 
 FReply UUINavWidget::OnKeyReleased(FKey PressedKey)
@@ -425,7 +426,7 @@ FReply UUINavWidget::OnKeyReleased(FKey PressedKey)
 	FString ActionName = UINavPC->FindActionByKey(PressedKey);
 	if (ActionName.Equals(TEXT(""))) return FReply::Handled();
 
-	return UINavPC->OnActionReleased(ActionName);
+	return UINavPC->OnActionReleased(ActionName, PressedKey);
 }
 
 void UUINavWidget::HandleSelectorMovement(float DeltaTime)
@@ -1185,16 +1186,23 @@ bool UUINavWidget::IsSelectorVisible()
 
 void UUINavWidget::NavigateTo(int Index, bool bHoverEvent)
 {
-	if (Index >= UINavButtons.Num()) return;
+	if (Index >= UINavButtons.Num() || Index == ButtonIndex) return;
 
+	DispatchNavigation(Index, bHoverEvent);
+	OnNavigate(ButtonIndex, Index);
+
+	ButtonIndex = Index;
+	CurrentButton = UINavButtons[ButtonIndex];
+}
+
+void UUINavWidget::DispatchNavigation(int Index, bool bHoverEvent)
+{
 	//Update all the possible scroll boxes in the widget
 	for (int i = 0; i < ScrollBoxes.Num(); ++i)
 	{
 		ScrollBoxes[i]->ScrollWidgetIntoView(UINavButtons[Index], bAnimateScrollBoxes);
 	}
 
-	bool bShouldNotify = Index != ButtonIndex;
-	
 	if (bUseButtonStates) UpdateButtonsStates(Index, bHoverEvent);
 
 	if (TheSelector != nullptr)
@@ -1205,20 +1213,12 @@ void UUINavWidget::NavigateTo(int Index, bool bHoverEvent)
 
 	if (bUseTextColor) UpdateTextColor(Index);
 
-	if (bShouldNotify)
-	{
-		OnNavigate(ButtonIndex, Index);
+	UUINavComponent* FromComponent = GetUINavComponentAtIndex(ButtonIndex);
+	UUINavComponent* ToComponent = GetUINavComponentAtIndex(Index);
+	if (FromComponent != nullptr) FromComponent->OnNavigatedFrom();
+	if (ToComponent != nullptr) ToComponent->OnNavigatedTo();
 
-		UUINavComponent* FromComponent = GetUINavComponentAtIndex(ButtonIndex);
-		UUINavComponent* ToComponent = GetUINavComponentAtIndex(Index);
-		if (FromComponent != nullptr) FromComponent->OnNavigatedFrom();
-		if (ToComponent != nullptr) ToComponent->OnNavigatedTo();
-
-		if (UINavAnimations.Num() > 0) ExecuteAnimations(ButtonIndex, Index);
-	}
-
-	ButtonIndex = Index;
-	CurrentButton = UINavButtons[ButtonIndex];
+	if (UINavAnimations.Num() > 0) ExecuteAnimations(ButtonIndex, Index);
 }
 
 void UUINavWidget::BeginSelectorMovement(int Index)
