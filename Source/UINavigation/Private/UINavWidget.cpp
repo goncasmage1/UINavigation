@@ -1634,7 +1634,8 @@ void UUINavWidget::HoverEvent(int Index)
 		bWaitForInput = false;
 		UINavInputBoxes[InputBoxIndex / UINavInputContainer->KeysPerInput]->RevertToActionText(InputBoxIndex % UINavInputContainer->KeysPerInput);
 	}
-	if (UINavPC->GetCurrentInputType() != EInputType::Mouse)
+
+	if (UINavPC->GetCurrentInputType() != EInputType::Mouse || Index == ButtonIndex)
 	{
 		if (bUseButtonStates) SwitchButtonStyle(Index);
 		return;
