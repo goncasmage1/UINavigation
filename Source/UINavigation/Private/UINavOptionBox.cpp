@@ -85,7 +85,6 @@ void UUINavOptionBox::CheckRightLimit()
 
 void UUINavOptionBox::UpdateTextBlock()
 {
-	//Correct OptionIndex to fit appropriate range
 	if (bUseNumberRange)
 	{
 		int Difference = (MaxRange - MinRange) / Interval;
@@ -96,11 +95,6 @@ void UUINavOptionBox::UpdateTextBlock()
 	}
 	else
 	{
-		if (OptionIndex > (StringOptions.Num() - 1))
-		{
-			OptionIndex = StringOptions.Num() - 1;
-		}
-
 		if (OptionIndex < 0) OptionIndex = 0;
 		if (OptionIndex >= StringOptions.Num()) OptionIndex = StringOptions.Num() - 1;
 	}

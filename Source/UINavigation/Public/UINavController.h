@@ -22,7 +22,7 @@ class UINAVIGATION_API AUINavController : public APlayerController, public IUINa
 	
 protected:
 
-	UPROPERTY(EditAnywhere, Category = UINavController)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavController)
 		class UUINavPCComponent* UINavPCComp;
 
 public:
