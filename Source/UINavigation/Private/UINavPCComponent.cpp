@@ -115,9 +115,6 @@ void UUINavPCComponent::SetupInput()
 	Action4_2.bExecuteWhenPaused = true;
 	Action4_2.bConsumeInput = false;
 
-	FInputKeyBinding& Action1_3 = InputComponent->BindKey(EKeys::AnyKey, IE_Pressed, this, &UUINavPCComponent::MouseInputWorkaround);
-	Action1_3.bExecuteWhenPaused = true;
-	Action1_3.bConsumeInput = false;
 }
 
 void UUINavPCComponent::VerifyDefaultInputs()
@@ -129,6 +126,29 @@ void UUINavPCComponent::VerifyDefaultInputs()
 		MySettings->ActionMappings = Settings->ActionMappings;
 		MySettings->AxisMappings = Settings->AxisMappings;
 		MySettings->SaveConfig();
+	}
+}
+
+void UUINavPCComponent::BindMouseWorkaround()
+{
+	UInputComponent* InputComponent = PC->InputComponent;
+
+	FInputKeyBinding& Action = InputComponent->BindKey(EKeys::AnyKey, IE_Pressed, this, &UUINavPCComponent::MouseInputWorkaround);
+	Action.bExecuteWhenPaused = true;
+	Action.bConsumeInput = false;
+}
+
+void UUINavPCComponent::UnbindMouseWorkaround()
+{
+	UInputComponent* InputComponent = PC->InputComponent;
+
+	for (int i = 0; i < InputComponent->KeyBindings.Num(); i++)
+	{
+		if (InputComponent->KeyBindings[i].KeyDelegate.IsBoundToObject(this))
+		{
+			InputComponent->KeyBindings.RemoveAt(i);
+			break;
+		}
 	}
 }
 
@@ -589,6 +609,7 @@ void UUINavPCComponent::MenuRightRelease()
 
 void UUINavPCComponent::MouseInputWorkaround()
 {
+	GEngine->AddOnScreenDebugMessage(-2, 2.f, FColor::Red, TEXT("Workaround!!"));
 	if (ActiveWidget != nullptr && ActiveWidget->bWaitForInput)
 	{
 		if (PC->WasInputKeyJustPressed(EKeys::LeftMouseButton)) ActiveWidget->ProcessMouseKeybind(FKey(EKeys::LeftMouseButton));

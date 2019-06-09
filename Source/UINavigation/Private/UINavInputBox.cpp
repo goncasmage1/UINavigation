@@ -163,6 +163,7 @@ void UUINavInputBox::UpdateInputKey(FKey NewKey, int Index)
 		{
 			Container->UINavPC->KeyMap.Add(InputName.ToString(), Keys);
 		}
+		Container->UINavPC->UnbindMouseWorkaround();
 	}
 
 	CheckKeyIcon(Index);
@@ -257,7 +258,11 @@ void UUINavInputBox::RevertToActionText(int Index)
 
 	InputButtons[Index]->NavText->SetText(OldName);
 
-	if (Container->UINavPC != nullptr) Container->UINavPC->PressedActions.Empty();
+	if (Container->UINavPC != nullptr)
+	{
+		Container->UINavPC->PressedActions.Empty();
+		Container->UINavPC->UnbindMouseWorkaround();
+	}
 }
 
 void UUINavInputBox::NotifySelected(int Index)
@@ -265,6 +270,8 @@ void UUINavInputBox::NotifySelected(int Index)
 	FName NewName = FName("Press Any Key");
 
 	InputButtons[Index]->NavText->SetText(FText::FromName(NewName));
+
+	if (Container->UINavPC != nullptr) Container->UINavPC->BindMouseWorkaround();
 
 	if (bUsingKeyImage[Index])
 	{
