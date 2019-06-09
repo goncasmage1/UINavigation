@@ -100,6 +100,10 @@ public:
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget, OptionalWidget = true), Category = UINavWidget)
 		UUserWidget* TheSelector;
 
+	//All the scrollboxes in this widget
+	UPROPERTY(BlueprintReadWrite, Category = UINavWidget)
+		TArray<class UWidgetAnimation*> UINavAnimations;
+
 	//All the UINavButtons in this Widget
 	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
 		TArray<class UUINavButton*> UINavButtons;
@@ -123,13 +127,15 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
 		TArray<class UUINavInputBox*> UINavInputBoxes;
 
+	//All the UINavCollections in this widget
+	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
+		TArray<class UUINavCollection*> UINavCollections;
+
+	int CollectionIndex = 0;
+
 	//All the scrollboxes in this widget
 	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
 		TArray<class UScrollBox*> ScrollBoxes;
-
-	//All the scrollboxes in this widget
-	UPROPERTY(BlueprintReadWrite, Category = UINavWidget)
-		TArray<class UWidgetAnimation*> UINavAnimations;
 
 	//The index of the button that was last navigated upon
 	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
@@ -248,6 +254,12 @@ public:
 	*/
 	UFUNCTION(BlueprintCallable, Category = UINavWidget, meta=(AdvancedDisplay=4))
 		void AppendNavigationGrid2D(int DimensionX, int DimensionY, FButtonNavigation EdgeNavigation, bool bWrap, int ButtonsInGrid = -1);
+
+	/**
+	*	Appends a new navigation grid to the widget. Used to setup UINavCollections.
+	*/
+	UFUNCTION(BlueprintCallable, Category = UINavWidget)
+		void AppendCollection(const TArray<FButtonNavigation>& EdgeNavigations);
 
 	UFUNCTION(BlueprintCallable, Category = UINavWidget, meta = (DeprecatedFunction, DeprecationMessage="This function has been replaced by Append Navigation Grid 1D."))
 		void AppendHorizontalNavigation(int Dimension, FButtonNavigation EdgeNavigation, bool bWrap);

@@ -1,6 +1,7 @@
 // Copyright (C) 2019 Gon�alo Marques - All Rights Reserved
 
 #include "UINavWidget.h"
+#include "UINavCollection.h"
 #include "UINavButton.h"
 #include "UINavComponentBox.h"
 #include "UINavComponent.h"
@@ -188,6 +189,14 @@ void UUINavWidget::TraverseHierarquy()
 		if (UINavWidget != nullptr)
 		{
 			DISPLAYERROR("The plugin doesn't support nested UINavWidgets");
+		}
+
+		UUINavCollection* Collection = Cast<UUINavCollection>(widget);
+		if (Collection != nullptr)
+		{
+			Collection->ParentWidget = this;
+			Collection->Init(UINavButtons.Num());
+			UINavCollections.Add(Collection);
 		}
 
 		UUINavInputContainer* InputContainer = Cast<UUINavInputContainer>(widget);
@@ -996,6 +1005,19 @@ void UUINavWidget::AppendNavigationGrid2D(int DimensionX, int DimensionY, FButto
 	}
 
 	NumberOfButtonsInGrids = NumberOfButtonsInGrids + Iterations;
+}
+
+void UUINavWidget::AppendCollection(const TArray<FButtonNavigation>& EdgeNavigations)
+{
+	if (CollectionIndex >= UINavCollections.Num())
+	{
+		DISPLAYERROR("Can't append UINavCollection to navigation, no remaining UINavCollection found!");
+		return;
+	}
+
+	UINavCollections[CollectionIndex]->SetupNavigation(EdgeNavigations);
+
+	CollectionIndex++;
 }
 
 void UUINavWidget::AppendHorizontalNavigation(int Dimension, FButtonNavigation EdgeNavigation, bool bWrap)
