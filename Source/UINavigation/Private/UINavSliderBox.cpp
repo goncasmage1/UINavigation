@@ -43,14 +43,12 @@ void UUINavSliderBox::UpdateTextBlock()
 
 void UUINavSliderBox::NavigateRight()
 {
-	if (MinRange + OptionIndex*Interval < MaxRange)
-	{
-		OptionIndex++;
-	}
+	if (MinRange + OptionIndex*Interval < MaxRange) OptionIndex++;
+	else OptionIndex = 0;
 
 	UpdateTextBlock();
 
-	if (!bDisableButtons)
+	if (!bDisableButtons || bLoopOptions)
 	{
 		Super::NavigateRight();
 		return;
