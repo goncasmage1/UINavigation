@@ -506,9 +506,10 @@ void UUINavPCComponent::NotifyInputTypeChange(EInputType NewInputType)
 {
 	IUINavPCReceiver::Execute_OnInputChanged(GetOwner(), CurrentInputType, NewInputType);
 
-	if (ActiveWidget != nullptr) ActiveWidget->OnInputChanged(CurrentInputType, NewInputType);
-
+	EInputType OldInputType = CurrentInputType;
 	CurrentInputType = NewInputType;
+	if (ActiveWidget != nullptr) ActiveWidget->OnInputChanged(OldInputType, CurrentInputType);
+
 }
 
 void UUINavPCComponent::MenuUp()
