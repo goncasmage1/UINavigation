@@ -123,11 +123,13 @@ void UUINavCollection::TraverseHierarquy(int StartIndex)
 void UUINavCollection::AppendNavigationGrid1D(EGridType GridType, int Dimension, FButtonNavigation EdgeNavigation, bool bWrap)
 {
 	ParentWidget->AppendNavigationGrid1D(GridType, Dimension, EdgeNavigation, bWrap);
+	IncrementGrids();
 }
 
 void UUINavCollection::AppendNavigationGrid2D(int DimensionX, int DimensionY, FButtonNavigation EdgeNavigation, bool bWrap, int ButtonsInGrid)
 {
 	ParentWidget->AppendNavigationGrid2D(DimensionX, DimensionY, EdgeNavigation, bWrap, ButtonsInGrid);
+	IncrementGrids();
 }
 
 void UUINavCollection::AppendCollection(TArray<FButtonNavigation> EdgeNavigations)
@@ -138,8 +140,25 @@ void UUINavCollection::AppendCollection(TArray<FButtonNavigation> EdgeNavigation
 		return;
 	}
 
+	UINavCollections[CollectionIndex]->FirstGridIndex = FirstGridIndex + GridCount;
 	UINavCollections[CollectionIndex]->SetupNavigation(EdgeNavigations);
 
 	CollectionIndex++;
+}
+
+void UUINavCollection::IncrementGrids()
+{
+	GridCount++;
+	if (ParentCollection != nullptr) ParentCollection->IncrementGrids();
+}
+
+void UUINavCollection::GetGridAtIndex(int GridIndex, FGrid& Grid, bool& bIsValid)
+{
+	bIsValid = false;
+
+	if (ParentWidget == nullptr || ParentWidget->NavigationGrids.Num() <= GridIndex || GridIndex < 0) return;
+
+	bIsValid = true;
+	Grid = ParentWidget->NavigationGrids[GridIndex];
 }
 

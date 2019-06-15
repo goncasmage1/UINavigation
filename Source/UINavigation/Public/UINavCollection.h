@@ -24,14 +24,19 @@ public:
 
 	void TraverseHierarquy(int StartIndex);
 
+	//The index of the first grid in this Collection
+	UPROPERTY(BlueprintReadOnly, Category = UINavCollection)
+		int FirstGridIndex = -1;
+
+	//The number of grids in this Collection
+	UPROPERTY(BlueprintReadOnly, Category = UINavCollection)
+		int GridCount = 0;
+
 	UPROPERTY(BlueprintReadOnly, Category = UINavCollection)
 		class UUINavCollection* ParentCollection;
 
 	UPROPERTY(BlueprintReadOnly, Category = UINavCollection)
 		class UUINavWidget* ParentWidget;
-
-	UPROPERTY(BlueprintReadOnly, Category = UINavCollection)
-		TArray<FGrid> NavigationGrids;
 
 	UPROPERTY(BlueprintReadOnly, Category = UINavCollection)
 		TArray<class UUINavButton*> UINavButtons;
@@ -61,5 +66,11 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = UINavCollection)
 		void AppendCollection(TArray<FButtonNavigation> EdgeNavigations);
+
+	void IncrementGrids();
+
+	//Returns a reference to the grid in this collection at the specified index
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavCollection)
+		void GetGridAtIndex(int GridIndex, FGrid& Grid, bool& bIsValid);
 	
 };
