@@ -1344,7 +1344,7 @@ void UUINavWidget::ReturnToParent()
 	{
 		if (bAllowRemoveIfRoot)
 		{
-			IUINavPCReceiver::Execute_OnSelect(UINavPC->GetOwner());
+			IUINavPCReceiver::Execute_OnRootWidgetRemoved(UINavPC->GetOwner());
 			RemoveFromParent();
 		}
 		return;
