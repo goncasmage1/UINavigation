@@ -138,10 +138,11 @@ void UUINavCollection::IncrementGrids()
 void UUINavCollection::GetGridAtIndex(int GridIndex, FGrid& Grid, bool& bIsValid)
 {
 	bIsValid = false;
+	int ActualIndex = FirstGridIndex + GridIndex;
 
-	if (ParentWidget == nullptr || ParentWidget->NavigationGrids.Num() <= GridIndex || GridIndex < 0) return;
+	if (ParentWidget == nullptr || ParentWidget->NavigationGrids.Num() <= ActualIndex || ActualIndex < 0) return;
 
 	bIsValid = true;
-	Grid = ParentWidget->NavigationGrids[GridIndex];
+	Grid = ParentWidget->NavigationGrids[ActualIndex];
 }
 
