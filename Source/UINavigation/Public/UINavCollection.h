@@ -33,25 +33,19 @@ public:
 		int GridCount = 0;
 
 	UPROPERTY(BlueprintReadOnly, Category = UINavCollection)
-		class UUINavCollection* ParentCollection;
-
-	UPROPERTY(BlueprintReadOnly, Category = UINavCollection)
 		class UUINavWidget* ParentWidget;
 
 	UPROPERTY(BlueprintReadOnly, Category = UINavCollection)
-		TArray<class UUINavButton*> UINavButtons;
+		class UUINavCollection* ParentCollection;
 
-	UPROPERTY(BlueprintReadWrite, Category = UINavCollection)
-		TArray<class UWidgetAnimation*> UINavAnimations;
+	UPROPERTY(BlueprintReadOnly, Category = UINavCollection)
+		TArray<class UUINavButton*> UINavButtons;
 
 	UPROPERTY(BlueprintReadOnly, Category = UINavCollection)
 		TArray<class UUINavComponent*> UINavComponents;
 
 	UPROPERTY(BlueprintReadOnly, Category = UINavCollection)
 		TArray<class UUINavComponentBox*> UINavComponentBoxes;
-
-	UPROPERTY(BlueprintReadOnly, Category = UINavCollection)
-		TArray<class UUINavInputBox*> UINavInputBoxes;
 
 	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
 		TArray<class UUINavCollection*> UINavCollections;

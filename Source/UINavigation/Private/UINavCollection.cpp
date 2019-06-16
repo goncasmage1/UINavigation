@@ -17,27 +17,15 @@ void UUINavCollection::Init(int StartIndex)
 {
 	TraverseHierarquy(StartIndex);
 
-	if (ParentCollection != nullptr)
-	{
-		ParentCollection->UINavButtons.Append(UINavButtons);
-		ParentCollection->UINavAnimations.Append(UINavAnimations);
-		ParentCollection->UINavComponents.Append(UINavComponents);
-		ParentCollection->UINavComponentBoxes.Append(UINavComponentBoxes);
-		ParentCollection->UINavInputBoxes.Append(UINavInputBoxes);
-	}
-	else if (ParentWidget != nullptr)
+	if (ParentWidget != nullptr)
 	{
 		ParentWidget->UINavButtons.Append(UINavButtons);
-		ParentWidget->UINavAnimations.Append(UINavAnimations);
+		UINavButtons.Empty();
 		ParentWidget->UINavComponents.Append(UINavComponents);
+		UINavComponents.Empty();
 		ParentWidget->UINavComponentBoxes.Append(UINavComponentBoxes);
-		ParentWidget->UINavInputBoxes.Append(UINavInputBoxes);
+		UINavComponentBoxes.Empty();
 	}
-	UINavButtons.Empty();
-	UINavAnimations.Empty();
-	UINavComponents.Empty();
-	UINavComponentBoxes.Empty();
-	UINavInputBoxes.Empty();
 }
 
 void UUINavCollection::TraverseHierarquy(int StartIndex)
@@ -56,7 +44,7 @@ void UUINavCollection::TraverseHierarquy(int StartIndex)
 		UUINavWidget* UINavWidget = Cast<UUINavWidget>(widget);
 		if (UINavWidget != nullptr)
 		{
-			DISPLAYERROR("The plugin doesn't support nested UINavWidgets");
+			DISPLAYERROR("The plugin doesn't support nested UINavWidgets. Use UINavCollections for this effect!");
 		}
 
 		UUINavCollection* Collection = Cast<UUINavCollection>(widget);
@@ -64,7 +52,7 @@ void UUINavCollection::TraverseHierarquy(int StartIndex)
 		{
 			Collection->ParentWidget = ParentWidget;
 			Collection->ParentCollection = this;
-			Collection->Init(UINavButtons.Num() + StartIndex);
+			Collection->Init(ParentWidget->UINavButtons.Num() + UINavButtons.Num());
 			UINavCollections.Add(Collection);
 		}
 
@@ -73,11 +61,11 @@ void UUINavCollection::TraverseHierarquy(int StartIndex)
 		{
 			if (ParentWidget->UINavInputContainer != nullptr)
 			{
-				DISPLAYERROR("Found more than 1 UINavInputContainer!");
+				DISPLAYERROR("You should only have 1 UINavInputContainer!");
 				return;
 			}
 
-			ParentWidget->InputContainerIndex = UINavButtons.Num() + StartIndex;
+			ParentWidget->InputContainerIndex = ParentWidget->UINavButtons.Num() + UINavButtons.Num();
 			ParentWidget->UINavInputContainer = InputContainer;
 
 			InputContainer->Init(ParentWidget);
@@ -92,7 +80,7 @@ void UUINavCollection::TraverseHierarquy(int StartIndex)
 			{
 				NewNavButton = Cast<UUINavButton>(UIComp->NavButton);
 
-				if (UIComp->ComponentIndex == -1) UIComp->ComponentIndex = UINavButtons.Num() + StartIndex;
+				if (UIComp->ComponentIndex == -1) UIComp->ComponentIndex = ParentWidget->UINavButtons.Num() + UINavButtons.Num();
 				NewNavButton->ButtonIndex = UIComp->ComponentIndex;
 
 				UINavComponents.Add(UIComp);
@@ -107,17 +95,12 @@ void UUINavCollection::TraverseHierarquy(int StartIndex)
 
 		if (NewNavButton == nullptr) continue;
 
-		if (NewNavButton->ButtonIndex == -1) NewNavButton->ButtonIndex = UINavButtons.Num() + StartIndex;
+		if (NewNavButton->ButtonIndex == -1) NewNavButton->ButtonIndex = ParentWidget->UINavButtons.Num() + UINavButtons.Num();
 
 		ParentWidget->SetupUINavButtonDelegates(NewNavButton);
 
 		UINavButtons.Add(NewNavButton);
 	}
-
-	UINavButtons.HeapSort([](const UUINavButton& Wid1, const UUINavButton& Wid2)
-	{
-		return Wid1.ButtonIndex < Wid2.ButtonIndex;
-	});
 }
 
 void UUINavCollection::AppendNavigationGrid1D(EGridType GridType, int Dimension, FButtonNavigation EdgeNavigation, bool bWrap)
