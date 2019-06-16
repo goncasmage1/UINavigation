@@ -344,14 +344,6 @@ public:
 	void SwitchButtonStyle(int Index);
 
 	/**
-	*	Sets this widget's selector
-	*
-	*	@param	NewSelector  The new selector
-	*/
-	UFUNCTION(BlueprintCallable, Category = UINavWidget)
-		void SetSelector(class UUserWidget* NewSelector);
-
-	/**
 	*	Changes the selector's scale to the scale given
 	*
 	*	@param	NewScale  The selector's new scale
@@ -446,6 +438,9 @@ public:
 
 	int GetLocalComponentIndex(int Index);
 	int GetLocalComponentBoxIndex(int Index);
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
+		bool IsSelectorValid();
 
 	/**
 	*	Returns the button that will be navigated to according to the given direction, starting at the given button
@@ -576,6 +571,14 @@ public:
 	// Returns the button's coordinates in a 2D grid
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
 		void GetCoordinatesInGrid2D_FromButton(class UUINavButton* Button, int& XCoord, int& YCoord);
+
+	// Returns the button's coordinates in a 2D grid
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
+		class UUINavButton* GetButtonFromCoordinatesInGrid2D(const FGrid Grid, int XCoord, int YCoord);
+
+	// Returns the button's coordinates in a 2D grid
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
+		int GetButtonIndexFromCoordinatesInGrid2D(const FGrid Grid, int XCoord, int YCoord);
 
 	//Get all keys associated with the input with the given name
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
