@@ -1392,9 +1392,7 @@ int UUINavWidget::GetLocalComponentBoxIndex(int Index)
 bool UUINavWidget::IsSelectorValid()
 {
 	return  TheSelector != nullptr &&
-			TheSelector->bIsEnabled &&
-			TheSelector->Visibility != ESlateVisibility::Collapsed &&
-			TheSelector->Visibility != ESlateVisibility::Hidden;
+			TheSelector->bIsEnabled;
 }
 
 UUINavButton* UUINavWidget::FindNextButton(UUINavButton* Button, ENavigationDirection Direction)
