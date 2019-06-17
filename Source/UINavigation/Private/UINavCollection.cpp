@@ -5,7 +5,7 @@
 #include "UINavWidget.h"
 #include "UINavButton.h"
 #include "UINavComponent.h"
-#include "WidgetTree.h"
+#include "Blueprint/WidgetTree.h"
 #include "UINavInputContainer.h"
 
 
