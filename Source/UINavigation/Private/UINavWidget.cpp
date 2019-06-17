@@ -1154,8 +1154,6 @@ void UUINavWidget::SwitchTextColorTo(int Index, FLinearColor Color)
 
 void UUINavWidget::UpdateButtonsStates(int Index, bool bHovered)
 {
-	if (ButtonIndex == Index) return;
-
 	UUINavButton* ToButton = UINavButtons[Index];
 	//Update new button state
 	if (!(bHovered ^ ToButton->bSwitchedStyle))
@@ -1163,6 +1161,8 @@ void UUINavWidget::UpdateButtonsStates(int Index, bool bHovered)
 		SwitchButtonStyle(Index);
 		ToButton->bSwitchedStyle = !bHovered;
 	}
+
+	if (ButtonIndex == Index) return;
 
 	//Update previous button state
 	if (!(bHovered ^ !ToButton->bSwitchedStyle))
