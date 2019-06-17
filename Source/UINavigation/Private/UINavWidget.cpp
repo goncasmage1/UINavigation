@@ -1646,7 +1646,7 @@ int UUINavWidget::GetButtonIndexFromCoordinatesInGrid2D(const FGrid Grid, int XC
 		XCoord * YCoord + XCoord > Grid.NumGrid2DButtons)
 		return -1;
 
-	int Index = Grid.FirstButton->ButtonIndex + XCoord * YCoord + XCoord;
+	int Index = Grid.FirstButton->ButtonIndex + YCoord * Grid.DimensionX + XCoord;
 	if (Index >= UINavButtons.Num()) return -1;
 
 	return Index;
