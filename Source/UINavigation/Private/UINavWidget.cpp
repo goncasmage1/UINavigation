@@ -1243,13 +1243,14 @@ void UUINavWidget::BeginSelectorMovement(int Index)
 {
 	if (MoveCurve == nullptr) return;
 
-	SelectorOrigin = GetButtonLocation(ButtonIndex);
+	SelectorOrigin = bMovingSelector ? TheSelector->RenderTransform.Translation : GetButtonLocation(ButtonIndex);
 	SelectorDestination = GetButtonLocation(Index);
 	Distance = SelectorDestination - SelectorOrigin;
 
 	float MinTime, MaxTime;
 	MoveCurve->GetTimeRange(MinTime, MaxTime);
 	MovementTime = MaxTime - MinTime;
+	MovementCounter = 0.0f;
 
 	bMovingSelector = true;
 	if (UINavPC != nullptr) UINavPC->bAllowNavigation = false;
@@ -1628,10 +1629,10 @@ void UUINavWidget::GetCoordinatesInGrid2D_FromButton(UUINavButton * Button, int 
 
 UUINavButton * UUINavWidget::GetButtonFromCoordinatesInGrid2D(const FGrid Grid, int XCoord, int YCoord)
 {
-	int ButtonIndex = GetButtonIndexFromCoordinatesInGrid2D(Grid, XCoord, YCoord);
-	if (ButtonIndex == -1) return nullptr;
+	int Index = GetButtonIndexFromCoordinatesInGrid2D(Grid, XCoord, YCoord);
+	if (Index == -1) return nullptr;
 
-	return UINavButtons[ButtonIndex];
+	return UINavButtons[Index];
 }
 
 int UUINavWidget::GetButtonIndexFromCoordinatesInGrid2D(const FGrid Grid, int XCoord, int YCoord)
@@ -1645,10 +1646,10 @@ int UUINavWidget::GetButtonIndexFromCoordinatesInGrid2D(const FGrid Grid, int XC
 		XCoord * YCoord + XCoord > Grid.NumGrid2DButtons)
 		return -1;
 
-	int ButtonIndex = Grid.FirstButton->ButtonIndex + XCoord * YCoord + XCoord;
-	if (ButtonIndex >= UINavButtons.Num()) return -1;
+	int Index = Grid.FirstButton->ButtonIndex + XCoord * YCoord + XCoord;
+	if (Index >= UINavButtons.Num()) return -1;
 
-	return ButtonIndex;
+	return Index;
 }
 
 TArray<FKey> UUINavWidget::GetInputKeysFromName(FName InputName)
