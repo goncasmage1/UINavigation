@@ -141,6 +141,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavController)
 		UDataTable* KeyboardMouseKeyNameData;
 
+	void BindMouseWorkaround();
+	void UnbindMouseWorkaround();
+
 	/**
 	*	Verifies if a new input type is being used
 	*

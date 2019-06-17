@@ -35,6 +35,8 @@ public:
 
 	virtual void NativeConstruct() override;
 
+	virtual int GetLastOptionIndex();
+
 	void BaseConstruct();
 
 	//Indicates the option that should appear first in the slider
@@ -53,6 +55,10 @@ public:
 	//If set to true, will disable buttons if the slider runs out of options on either side
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavComponentBox)
 		bool bDisableButtons = true;
+
+	//If set to true, will loop between options (won't disable buttons, even if DisableButtons is set to true)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavComponentBox)
+		bool bLoopOptions = false;
 
 	//Returns the currently selected number resulting from the number range
 	UFUNCTION(BlueprintPure, BlueprintCallable, Category = UINavComponentBox)

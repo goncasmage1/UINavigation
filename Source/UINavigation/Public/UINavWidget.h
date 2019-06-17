@@ -100,6 +100,10 @@ public:
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget, OptionalWidget = true), Category = UINavWidget)
 		UUserWidget* TheSelector;
 
+	//All the scrollboxes in this widget
+	UPROPERTY(BlueprintReadWrite, Category = UINavWidget)
+		TArray<class UWidgetAnimation*> UINavAnimations;
+
 	//All the UINavButtons in this Widget
 	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
 		TArray<class UUINavButton*> UINavButtons;
@@ -123,13 +127,15 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
 		TArray<class UUINavInputBox*> UINavInputBoxes;
 
+	//All the UINavCollections in this widget
+	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
+		TArray<class UUINavCollection*> UINavCollections;
+
+	int CollectionIndex = 0;
+
 	//All the scrollboxes in this widget
 	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
 		TArray<class UScrollBox*> ScrollBoxes;
-
-	//All the scrollboxes in this widget
-	UPROPERTY(BlueprintReadWrite, Category = UINavWidget)
-		TArray<class UWidgetAnimation*> UINavAnimations;
 
 	//The index of the button that was last navigated upon
 	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
@@ -249,6 +255,12 @@ public:
 	UFUNCTION(BlueprintCallable, Category = UINavWidget, meta=(AdvancedDisplay=4))
 		void AppendNavigationGrid2D(int DimensionX, int DimensionY, FButtonNavigation EdgeNavigation, bool bWrap, int ButtonsInGrid = -1);
 
+	/**
+	*	Appends a new navigation grid to the widget. Used to setup UINavCollections.
+	*/
+	UFUNCTION(BlueprintCallable, Category = UINavWidget)
+		void AppendCollection(const TArray<FButtonNavigation>& EdgeNavigations);
+
 	UFUNCTION(BlueprintCallable, Category = UINavWidget, meta = (DeprecatedFunction, DeprecationMessage="This function has been replaced by Append Navigation Grid 1D."))
 		void AppendHorizontalNavigation(int Dimension, FButtonNavigation EdgeNavigation, bool bWrap);
 
@@ -330,14 +342,6 @@ public:
 	*	@param Index The button's index in the Button's array
 	*/
 	void SwitchButtonStyle(int Index);
-
-	/**
-	*	Sets this widget's selector
-	*
-	*	@param	NewSelector  The new selector
-	*/
-	UFUNCTION(BlueprintCallable, Category = UINavWidget)
-		void SetSelector(class UUserWidget* NewSelector);
 
 	/**
 	*	Changes the selector's scale to the scale given
@@ -434,6 +438,9 @@ public:
 
 	int GetLocalComponentIndex(int Index);
 	int GetLocalComponentBoxIndex(int Index);
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
+		bool IsSelectorValid();
 
 	/**
 	*	Returns the button that will be navigated to according to the given direction, starting at the given button
@@ -564,6 +571,14 @@ public:
 	// Returns the button's coordinates in a 2D grid
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
 		void GetCoordinatesInGrid2D_FromButton(class UUINavButton* Button, int& XCoord, int& YCoord);
+
+	// Returns the button's coordinates in a 2D grid
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
+		class UUINavButton* GetButtonFromCoordinatesInGrid2D(const FGrid Grid, int XCoord, int YCoord);
+
+	// Returns the button's coordinates in a 2D grid
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
+		int GetButtonIndexFromCoordinatesInGrid2D(const FGrid Grid, int XCoord, int YCoord);
 
 	//Get all keys associated with the input with the given name
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)

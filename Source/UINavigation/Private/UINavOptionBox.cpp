@@ -31,27 +31,30 @@ void UUINavOptionBox::NativeConstruct()
 	RightButton->OnClicked.AddDynamic(this, &UUINavOptionBox::NavigateRight);
 }
 
+
+int UUINavOptionBox::GetLastOptionIndex()
+{
+	if (bUseNumberRange) return Super::GetLastOptionIndex();
+	else return StringOptions.Num() -1;
+}
+
 void UUINavOptionBox::NavigateRight()
 {
 	//Make sure button still has options left to navigate
 	if (bUseNumberRange)
 	{
-		if (MinRange + OptionIndex*Interval < MaxRange)
-		{
-			OptionIndex++;
-		}
+		if (MinRange + OptionIndex*Interval < MaxRange) OptionIndex++;
+		else OptionIndex = 0;
 	}
 	else
 	{
-		if (OptionIndex < StringOptions.Num() - 1)
-		{
-			OptionIndex++;
-		}
+		if (OptionIndex < StringOptions.Num() - 1) OptionIndex++;
+		else OptionIndex = 0;
 	}
 
 	UpdateTextBlock();
 
-	if (!bDisableButtons)
+	if (!bDisableButtons || bLoopOptions)
 	{
 		Super::NavigateRight();
 		return;
@@ -66,6 +69,7 @@ void UUINavOptionBox::NavigateRight()
 
 void UUINavOptionBox::CheckRightLimit()
 {
+	if (bLoopOptions) return;
 	if (bUseNumberRange)
 	{
 		int Difference = (MaxRange - MinRange) / Interval;

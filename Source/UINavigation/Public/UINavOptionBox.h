@@ -25,6 +25,8 @@ public:
 
 	virtual void NativeConstruct() override;
 
+	virtual int GetLastOptionIndex() override;
+
 	/*If set to false, will use StringOptions, otherwise will use
 	all integers in designated range (from MinRange to MaxRange, inclusive)*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavOptionBox)
