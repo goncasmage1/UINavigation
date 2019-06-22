@@ -467,6 +467,14 @@ public:
 		UWidget* GoToWidget(TSubclassOf<UUINavWidget> NewWidgetClass, bool bRemoveParent, int ZOrder = 0);
 
 	/**
+	*	Adds given widget to screen (strongly recomended over manual alternative)
+	*
+	*	@param	Widget  Object instance of the UINavWidget to add to the screen
+	*/
+	UFUNCTION(BlueprintCallable, Category = UINavWidget, meta = (AdvancedDisplay=2))
+		UWidget* GoToBuiltWidget(UUINavWidget* NewWidget, bool bRemoveParent, int ZOrder = 0);
+
+	/**
 	*	Setup a new UINavButton added at runtime (must be added to viewport manually)
 	*	Set IndexInGrid to -1 or to a number greater than the dimension of the grid to
 	*	add the button to the end of the grid.
