@@ -1325,6 +1325,13 @@ UWidget* UUINavWidget::GoToWidget(TSubclassOf<UUINavWidget> NewWidgetClass, bool
 
 	APlayerController* PC = Cast<APlayerController>(UINavPC->GetOwner());
 	UUINavWidget* NewWidget = CreateWidget<UUINavWidget>(PC, NewWidgetClass);
+	return GoToBuiltWidget(NewWidget, bRemoveParent, ZOrder);
+}
+
+UWidget * UUINavWidget::GoToBuiltWidget(UUINavWidget* NewWidget, bool bRemoveParent, int ZOrder)
+{
+	if (NewWidget == nullptr) return nullptr;
+	APlayerController* PC = Cast<APlayerController>(UINavPC->GetOwner());
 	NewWidget->ParentWidget = this;
 	NewWidget->bParentRemoved = bRemoveParent;
 	if (HasUserFocus(PC))
