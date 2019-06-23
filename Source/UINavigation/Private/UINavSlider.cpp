@@ -26,7 +26,7 @@ void UUINavSlider::NativeConstruct()
 		DISPLAYERROR(TEXT("MinDecimalDigits shouldn't be greater than MaxDecimalDigits"));
 	}
 
-	MaxOption = (MaxValue - MinValue) / Interval - 1;
+	MaxOption = ((MaxValue - MinValue) / Interval);
 }
 
 void UUINavSlider::Update()
