@@ -19,7 +19,7 @@ protected:
 
 	virtual void CheckRightLimit() override;
 
-	virtual void UpdateTextBlock() override;
+	virtual void Update() override;
 
 public:
 

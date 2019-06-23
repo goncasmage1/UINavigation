@@ -2,14 +2,14 @@
 
 #pragma once
 
-#include "UINavComponent.h"
+#include "UINavHorizontalComponent.h"
 #include "UINavComponentBox.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class UINAVIGATION_API UUINavComponentBox : public UUINavComponent
+class UINAVIGATION_API UUINavComponentBox : public UUINavHorizontalComponent
 {
 	GENERATED_BODY()
 	
@@ -23,7 +23,7 @@ protected:
 	virtual void CheckLeftLimit();
 	virtual void CheckRightLimit();
 
-	virtual void UpdateTextBlock();
+	virtual void Update() override;
 	//Changes the text displayed to match the specified option index
 	UFUNCTION(BlueprintCallable, Category = UINavComponentBox)
 		virtual void UpdateTextToIndex(int NewIndex);
@@ -39,10 +39,6 @@ public:
 
 	void BaseConstruct();
 
-	//Indicates the option that should appear first in the slider
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavComponentBox)
-		int OptionIndex = 0;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavComponentBox, meta = (ClampMin="0"))
 		int MinRange = 0;
 
@@ -56,24 +52,11 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavComponentBox)
 		bool bDisableButtons = true;
 
-	//If set to true, will loop between options (won't disable buttons, even if DisableButtons is set to true)
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavComponentBox)
-		bool bLoopOptions = false;
-
 	//Returns the currently selected number resulting from the number range
 	UFUNCTION(BlueprintPure, BlueprintCallable, Category = UINavComponentBox)
 		FORCEINLINE int GetCurrentNumber() const { return (MinRange + OptionIndex * Interval); }
-	
-	UFUNCTION(BlueprintCallable, Category = UINavComponentBox)
-		virtual void NavigateLeft();
-	UFUNCTION(BlueprintCallable, Category = UINavComponentBox)
-		virtual void NavigateRight();
 
-	UFUNCTION(BlueprintNativeEvent, Category = UINavComponentBox)
-		void OnNavigateLeft();
-	void OnNavigateLeft_Implementation();
-	UFUNCTION(BlueprintNativeEvent, Category = UINavComponentBox)
-		void OnNavigateRight();
-	void OnNavigateRight_Implementation();
-	
+	virtual void NavigateLeft() override;
+	virtual void NavigateRight() override;
+
 };

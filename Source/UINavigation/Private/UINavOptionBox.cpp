@@ -44,7 +44,11 @@ void UUINavOptionBox::NavigateRight()
 	if (bUseNumberRange)
 	{
 		if (MinRange + OptionIndex*Interval < MaxRange) OptionIndex++;
-		else OptionIndex = 0;
+		else
+		{
+			if (bLoopOptions) OptionIndex = 0;
+			else return;
+		}
 	}
 	else
 	{
@@ -52,7 +56,7 @@ void UUINavOptionBox::NavigateRight()
 		else OptionIndex = 0;
 	}
 
-	UpdateTextBlock();
+	Update();
 
 	if (!bDisableButtons || bLoopOptions)
 	{
@@ -87,7 +91,7 @@ void UUINavOptionBox::CheckRightLimit()
 	}
 }
 
-void UUINavOptionBox::UpdateTextBlock()
+void UUINavOptionBox::Update()
 {
 	if (bUseNumberRange)
 	{
