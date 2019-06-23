@@ -9,7 +9,7 @@ void UUINavSlider::NativeConstruct()
 
 	bIsFocusable = false;
 
-	Slider->OnValueChanged.AddDynamic(this, &UUINavSlider::HandleOnValueChanged);
+	if (!Slider->OnValueChanged.IsBound()) Slider->OnValueChanged.AddDynamic(this, &UUINavSlider::HandleOnValueChanged);
 	Slider->StepSize = Interval / (MaxValue - MinValue);
 
 	if (MinValue >= MaxValue)
@@ -26,7 +26,7 @@ void UUINavSlider::NativeConstruct()
 
 void UUINavSlider::Update()
 {
-	Slider->Value = OptionIndex / (OptionCount - 1);
+	Slider->SetValue((float)OptionIndex / (float)(OptionCount - 1));
 }
 
 void UUINavSlider::NavigateLeft()
@@ -43,7 +43,7 @@ void UUINavSlider::NavigateLeft()
 
 void UUINavSlider::NavigateRight()
 {
-	if (OptionIndex < OptionCount)
+	if (OptionIndex < (OptionCount - 1))
 	{
 		OptionIndex++;
 	}
@@ -61,6 +61,7 @@ void UUINavSlider::NavigateRight()
 void UUINavSlider::HandleOnValueChanged(float InValue)
 {
 	OptionIndex = IndexFromPercent(InValue);
+	//UE_LOG(LogTemp, Warning, TEXT("%i"), OptionIndex);
 	Update();
 }
 
