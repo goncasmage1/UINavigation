@@ -18,6 +18,18 @@ void UUINavHorizontalComponent::Update()
 {
 }
 
+
+void UUINavHorizontalComponent::UpdateTextToIndex(int NewIndex)
+{
+	OptionIndex = NewIndex;
+	Update();
+}
+
+void UUINavHorizontalComponent::ChangeText(FText NewText)
+{
+	NavText->SetText(NewText);
+}
+
 void UUINavHorizontalComponent::OnNavigateLeft_Implementation()
 {
 }

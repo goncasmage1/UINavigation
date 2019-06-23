@@ -29,6 +29,13 @@ public:
 	UFUNCTION(BlueprintCallable, Category = UINavHorizontalComponent)
 		virtual void Update();
 
+	//Changes the text displayed to match the specified option index
+	UFUNCTION(BlueprintCallable, Category = UINavComponentBox)
+		virtual void UpdateTextToIndex(int NewIndex);
+	//Changes the text displayed in the NavText element
+	UFUNCTION(BlueprintCallable, Category = UINavComponentBox)
+		void ChangeText(FText NewText);
+
 	UFUNCTION(BlueprintCallable, Category = UINavHorizontalComponent)
 		virtual void NavigateLeft();
 	UFUNCTION(BlueprintCallable, Category = UINavHorizontalComponent)

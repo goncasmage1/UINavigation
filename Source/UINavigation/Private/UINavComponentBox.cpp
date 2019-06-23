@@ -69,14 +69,9 @@ void UUINavComponentBox::CheckRightLimit()
 
 }
 
-void UUINavComponentBox::Update()
-{
-}
-
 void UUINavComponentBox::UpdateTextToIndex(int NewIndex)
 {
-	OptionIndex = NewIndex;
-	Update();
+	Super::UpdateTextToIndex(NewIndex);
 
 	if (!bDisableButtons || bLoopOptions) return;
 	if (!RightButton->bIsEnabled) RightButton->SetIsEnabled(true);
@@ -85,10 +80,6 @@ void UUINavComponentBox::UpdateTextToIndex(int NewIndex)
 	CheckRightLimit();
 }
 
-void UUINavComponentBox::ChangeText(FText NewText)
-{
-	NavText->SetText(NewText);
-}
 
 void UUINavComponentBox::NavigateLeft()
 {

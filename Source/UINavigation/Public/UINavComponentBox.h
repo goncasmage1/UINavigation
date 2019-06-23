@@ -23,13 +23,7 @@ protected:
 	virtual void CheckLeftLimit();
 	virtual void CheckRightLimit();
 
-	virtual void Update() override;
-	//Changes the text displayed to match the specified option index
-	UFUNCTION(BlueprintCallable, Category = UINavComponentBox)
-		virtual void UpdateTextToIndex(int NewIndex);
-	//Changes the text displayed in the NavText element
-	UFUNCTION(BlueprintCallable, Category = UINavComponentBox)
-		void ChangeText(FText NewText);
+	virtual void UpdateTextToIndex(int NewIndex) override;
 
 public:
 

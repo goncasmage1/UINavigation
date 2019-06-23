@@ -2,6 +2,7 @@
 
 #include "UINavSlider.h"
 #include "Slider.h"
+#include "TextBlock.h"
 
 void UUINavSlider::NativeConstruct()
 {
@@ -20,13 +21,23 @@ void UUINavSlider::NativeConstruct()
 	{
 		DISPLAYERROR(TEXT("Interval shouldn't be greater than difference between MaxValue and MinValue"));
 	}
+	if (MinDecimalDigits > MaxDecimalDigits)
+	{
+		DISPLAYERROR(TEXT("MinDecimalDigits shouldn't be greater than MaxDecimalDigits"));
+	}
 
-	OptionCount = (MaxValue - MinValue) / Interval;
+	MaxOption = (MaxValue - MinValue) / Interval - 1;
 }
 
 void UUINavSlider::Update()
 {
-	Slider->SetValue((float)OptionIndex / (float)(OptionCount - 1));
+	Slider->SetValue((float)OptionIndex / (float)MaxOption);
+	FNumberFormattingOptions FormatOptions;
+	FormatOptions.MaximumFractionalDigits = MaxDecimalDigits;
+	FormatOptions.MinimumFractionalDigits = MinDecimalDigits;
+	FText NumberText = FText::AsNumber(Slider->Value, &FormatOptions);
+	if (!bUseComma) NumberText = FText::FromString(NumberText.ToString().Replace(TEXT(","),TEXT(".")));
+	if (NavText != nullptr) NavText->SetText(NumberText);
 }
 
 void UUINavSlider::NavigateLeft()
@@ -43,7 +54,7 @@ void UUINavSlider::NavigateLeft()
 
 void UUINavSlider::NavigateRight()
 {
-	if (OptionIndex < (OptionCount - 1))
+	if (OptionIndex < MaxOption)
 	{
 		OptionIndex++;
 	}
@@ -61,13 +72,15 @@ void UUINavSlider::NavigateRight()
 void UUINavSlider::HandleOnValueChanged(float InValue)
 {
 	OptionIndex = IndexFromPercent(InValue);
-	//UE_LOG(LogTemp, Warning, TEXT("%i"), OptionIndex);
 	Update();
 }
 
 float UUINavSlider::IndexFromPercent(float Value)
 {
 	float Div = Value / Slider->StepSize;
-	float Decimal = Div - (int)Div;
-	return Decimal < 0.5 ? (int)Div : (int)Div + 1;
+	if (Div > MaxOption) Div = MaxOption;
+
+	int FlatDiv = (int)Div;
+	float Decimal = Div - FlatDiv;
+	return Decimal < 0.5 ? FlatDiv : (FlatDiv + 1 <= MaxOption ? FlatDiv + 1 : MaxOption);
 }
