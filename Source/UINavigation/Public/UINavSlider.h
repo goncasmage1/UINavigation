@@ -17,11 +17,17 @@ protected:
 
 	UPROPERTY(BlueprintReadWrite, Category = UINavSlider, meta = (BindWidget))
 		class USlider* Slider;
+
+	UPROPERTY(BlueprintReadWrite, Category = UINavSlider, meta = (BindWidget, OptionalWidget = true))
+		class USpinBox* NavSpinBox;
 	
 	UFUNCTION()
-		void HandleOnValueChanged(float InValue);
+		void HandleOnSliderValueChanged(float InValue);
+	UFUNCTION()
+		void HandleOnSpinBoxValueChanged(float InValue, ETextCommit::Type CommitMethod);
 
 	float IndexFromPercent(float Value);
+	float IndexFromValue(float Value);
 
 public:
 

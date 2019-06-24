@@ -3,15 +3,13 @@
 #include "UINavSlider.h"
 #include "Slider.h"
 #include "TextBlock.h"
+#include "SpinBox.h"
 
 void UUINavSlider::NativeConstruct()
 {
 	Super::NativeConstruct();
 
 	bIsFocusable = false;
-
-	if (!Slider->OnValueChanged.IsBound()) Slider->OnValueChanged.AddDynamic(this, &UUINavSlider::HandleOnValueChanged);
-	Slider->StepSize = Interval / (MaxValue - MinValue);
 
 	if (MinValue >= MaxValue)
 	{
@@ -26,9 +24,23 @@ void UUINavSlider::NativeConstruct()
 		DISPLAYERROR(TEXT("MinDecimalDigits shouldn't be greater than MaxDecimalDigits"));
 	}
 
+	if (NavSpinBox != nullptr)
+	{
+		NavSpinBox->SetMinSliderValue(MinValue);
+		NavSpinBox->SetMinValue(MinValue);
+		NavSpinBox->SetMaxSliderValue(MaxValue);
+		NavSpinBox->SetMaxValue(MaxValue);
+		if (!NavSpinBox->OnValueChanged.IsBound())
+			NavSpinBox->OnValueCommitted.AddDynamic(this, &UUINavSlider::HandleOnSpinBoxValueChanged);
+	}
+
+	if (!Slider->OnValueChanged.IsBound()) Slider->OnValueChanged.AddDynamic(this, &UUINavSlider::HandleOnSliderValueChanged);
+	Slider->StepSize = Interval / (MaxValue - MinValue);
+
 	MaxOption = ((MaxValue - MinValue) / Interval);
 	HandleDefaultColor = Slider->SliderHandleColor;
 	BarDefaultColor = Slider->SliderBarColor;
+
 	Update();
 }
 
@@ -38,9 +50,11 @@ void UUINavSlider::Update()
 	FNumberFormattingOptions FormatOptions;
 	FormatOptions.MaximumFractionalDigits = MaxDecimalDigits;
 	FormatOptions.MinimumFractionalDigits = MinDecimalDigits;
-	FText NumberText = FText::AsNumber(Slider->Value, &FormatOptions);
-	if (!bUseComma) NumberText = FText::FromString(NumberText.ToString().Replace(TEXT(","),TEXT(".")));
-	if (NavText != nullptr) NavText->SetText(NumberText);
+	float Value = MinValue + Slider->Value * MaxValue;
+	FText ValueText = FText::AsNumber(Value, &FormatOptions);
+	if (!bUseComma) ValueText = FText::FromString(ValueText.ToString().Replace(TEXT(","),TEXT(".")));
+	if (NavText != nullptr) NavText->SetText(ValueText);
+	if (NavSpinBox != nullptr) NavSpinBox->SetValue(Value);
 }
 
 void UUINavSlider::OnNavigatedTo_Implementation()
@@ -84,15 +98,31 @@ void UUINavSlider::NavigateRight()
 	OnNavigateRight();
 }
 
-void UUINavSlider::HandleOnValueChanged(float InValue)
+void UUINavSlider::HandleOnSliderValueChanged(float InValue)
 {
 	OptionIndex = IndexFromPercent(InValue);
+	Update();
+}
+
+void UUINavSlider::HandleOnSpinBoxValueChanged(float InValue, ETextCommit::Type CommitMethod)
+{
+	OptionIndex = IndexFromValue(InValue);
 	Update();
 }
 
 float UUINavSlider::IndexFromPercent(float Value)
 {
 	float Div = Value / Slider->StepSize;
+	if (Div > MaxOption) Div = MaxOption;
+
+	int FlatDiv = (int)Div;
+	float Decimal = Div - FlatDiv;
+	return Decimal < 0.5 ? FlatDiv : (FlatDiv + 1 <= MaxOption ? FlatDiv + 1 : MaxOption);
+}
+
+float UUINavSlider::IndexFromValue(float Value)
+{
+	float Div = ((Value - MinValue) / MaxValue) / Slider->StepSize;
 	if (Div > MaxOption) Div = MaxOption;
 
 	int FlatDiv = (int)Div;
