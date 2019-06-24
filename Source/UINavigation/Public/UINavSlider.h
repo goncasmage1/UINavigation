@@ -39,9 +39,19 @@ public:
 		bool bUseComma = false;
 	int MaxOption = 0;
 
+	FLinearColor HandleDefaultColor;
+	FLinearColor BarDefaultColor;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavSlider, meta = (ClampMin = "0"))
+		FLinearColor HandleHoverColor;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavSlider, meta = (ClampMin = "0"))
+		FLinearColor BarHoverColor;
+
 	virtual void NativeConstruct() override;
 
 	virtual void Update() override;
+
+	virtual void OnNavigatedTo_Implementation() override;
+	virtual void OnNavigatedFrom_Implementation() override;
 
 	UFUNCTION(BlueprintPure, BlueprintCallable, Category = UINavSlider)
 		FORCEINLINE float GetCurrentValue() const { return (MinValue + OptionIndex * Interval); }

@@ -27,6 +27,9 @@ void UUINavSlider::NativeConstruct()
 	}
 
 	MaxOption = ((MaxValue - MinValue) / Interval);
+	HandleDefaultColor = Slider->SliderHandleColor;
+	BarDefaultColor = Slider->SliderBarColor;
+	Update();
 }
 
 void UUINavSlider::Update()
@@ -38,6 +41,18 @@ void UUINavSlider::Update()
 	FText NumberText = FText::AsNumber(Slider->Value, &FormatOptions);
 	if (!bUseComma) NumberText = FText::FromString(NumberText.ToString().Replace(TEXT(","),TEXT(".")));
 	if (NavText != nullptr) NavText->SetText(NumberText);
+}
+
+void UUINavSlider::OnNavigatedTo_Implementation()
+{
+	Slider->SetSliderHandleColor(HandleHoverColor);
+	Slider->SetSliderBarColor(BarHoverColor);
+}
+
+void UUINavSlider::OnNavigatedFrom_Implementation()
+{
+	Slider->SetSliderHandleColor(HandleDefaultColor);
+	Slider->SetSliderBarColor(BarDefaultColor);
 }
 
 void UUINavSlider::NavigateLeft()
