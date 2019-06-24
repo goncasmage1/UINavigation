@@ -122,10 +122,5 @@ float UUINavSlider::IndexFromPercent(float Value)
 
 float UUINavSlider::IndexFromValue(float Value)
 {
-	float Div = ((Value - MinValue) / MaxValue) / Slider->StepSize;
-	if (Div > MaxOption) Div = MaxOption;
-
-	int FlatDiv = (int)Div;
-	float Decimal = Div - FlatDiv;
-	return Decimal < 0.5 ? FlatDiv : (FlatDiv + 1 <= MaxOption ? FlatDiv + 1 : MaxOption);
+	return IndexFromPercent((Value - MinValue) / MaxValue);
 }
