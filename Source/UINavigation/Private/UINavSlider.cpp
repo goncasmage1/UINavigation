@@ -1,9 +1,9 @@
 // Copyright (C) 2019 Gonçalo Marques - All Rights Reserved
 
 #include "UINavSlider.h"
-#include "Slider.h"
-#include "TextBlock.h"
-#include "SpinBox.h"
+#include "Components/Slider.h"
+#include "Components/TextBlock.h"
+#include "Components/SpinBox.h"
 
 void UUINavSlider::NativeConstruct()
 {
