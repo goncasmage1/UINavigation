@@ -5,6 +5,7 @@
 #include "UINavWidget.h"
 #include "UINavButton.h"
 #include "UINavComponent.h"
+#include "UINavHorizontalComponent.h"
 #include "Blueprint/WidgetTree.h"
 #include "UINavInputContainer.h"
 
@@ -23,8 +24,8 @@ void UUINavCollection::Init(int StartIndex)
 		UINavButtons.Empty();
 		ParentWidget->UINavComponents.Append(UINavComponents);
 		UINavComponents.Empty();
-		ParentWidget->UINavComponentBoxes.Append(UINavComponentBoxes);
-		UINavComponentBoxes.Empty();
+		ParentWidget->UINavHorizontalComps.Append(UINavHorizontalComps);
+		UINavHorizontalComps.Empty();
 	}
 }
 
@@ -85,10 +86,10 @@ void UUINavCollection::TraverseHierarquy(int StartIndex)
 
 				UINavComponents.Add(UIComp);
 
-				UUINavComponentBox* UICompBox = Cast<UUINavComponentBox>(widget);
-				if (UICompBox != nullptr)
+				UUINavHorizontalComponent* HorizComp = Cast<UUINavHorizontalComponent>(widget);
+				if (HorizComp != nullptr)
 				{
-					UINavComponentBoxes.Add(UICompBox);
+					UINavHorizontalComps.Add(HorizComp);
 				}
 			}
 		}

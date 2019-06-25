@@ -114,7 +114,7 @@ public:
 
 	//All the UINavComponentBoxes in this Widget
 	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
-		TArray<class UUINavComponentBox*> UINavComponentBoxes;
+		TArray<class UUINavHorizontalComponent*> UINavHorizontalComps;
 
 	//The index of the UINavInputContainer found
 	int InputContainerIndex = -1;
@@ -424,20 +424,20 @@ public:
 	*	Called when the user navigates left on a UINavComponentBox
 	*/
 	UFUNCTION(BlueprintNativeEvent, Category = UINavWidget)
-		void OnComponentBoxNavigateLeft(int Index);
-	virtual void OnComponentBoxNavigateLeft_Implementation(int Index);
+		void OnHorizCompNavigateLeft(int Index);
+	virtual void OnHorizCompNavigateLeft_Implementation(int Index);
 
 	/**
 	*	Called when the user navigates right on a UINavComponentBox
 	*/
 	UFUNCTION(BlueprintNativeEvent, Category = UINavWidget)
-		void OnComponentBoxNavigateRight(int Index);
-	virtual void OnComponentBoxNavigateRight_Implementation(int Index);
+		void OnHorizCompNavigateRight(int Index);
+	virtual void OnHorizCompNavigateRight_Implementation(int Index);
 
 	virtual void MenuNavigate(ENavigationDirection Direction);
 
 	int GetLocalComponentIndex(int Index);
-	int GetLocalComponentBoxIndex(int Index);
+	int GetLocalHorizontalCompIndex(int Index);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
 		bool IsSelectorValid();
@@ -588,10 +588,6 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
 		int GetButtonIndexFromCoordinatesInGrid2D(const FGrid Grid, int XCoord, int YCoord);
 
-	//Get all keys associated with the input with the given name
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
-		TArray<FKey> GetInputKeysFromName(FName InputName);
-
 	/**
 	*	Returns the UINavComponent with the specified index (null if that
 	*	index doesn't correspond to a UINavComponent)
@@ -608,7 +604,7 @@ public:
 	*	@return  UINavComponentBox  The UINavComponentBox with the specified index
 	*/
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
-		UUINavComponentBox* GetUINavComponentBoxAtIndex(int Index);
+		UUINavHorizontalComponent* GetUINavHorizontalCompAtIndex(int Index);
 
 	/**
 	*	Button Hover event

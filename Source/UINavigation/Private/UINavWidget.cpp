@@ -3,7 +3,7 @@
 #include "UINavWidget.h"
 #include "UINavCollection.h"
 #include "UINavButton.h"
-#include "UINavComponentBox.h"
+#include "UINavHorizontalComponent.h"
 #include "UINavComponent.h"
 #include "UINavInputBox.h"
 #include "UINavInputContainer.h"
@@ -228,10 +228,10 @@ void UUINavWidget::TraverseHierarquy()
 
 				UINavComponents.Add(UIComp);
 
-				UUINavComponentBox* UICompBox = Cast<UUINavComponentBox>(widget);
-				if (UICompBox != nullptr)
+				UUINavHorizontalComponent* HorizComp = Cast<UUINavHorizontalComponent>(widget);
+				if (HorizComp != nullptr)
 				{
-					UINavComponentBoxes.Add(UICompBox);
+					UINavHorizontalComps.Add(HorizComp);
 				}
 			}
 		}
@@ -1307,11 +1307,11 @@ void UUINavWidget::OnSetupCompleted_Implementation()
 
 }
 
-void UUINavWidget::OnComponentBoxNavigateLeft_Implementation(int Index)
+void UUINavWidget::OnHorizCompNavigateLeft_Implementation(int Index)
 {
 }
 
-void UUINavWidget::OnComponentBoxNavigateRight_Implementation(int Index)
+void UUINavWidget::OnHorizCompNavigateRight_Implementation(int Index)
 {
 }
 
@@ -1387,12 +1387,12 @@ int UUINavWidget::GetLocalComponentIndex(int Index)
 	return -1;
 }
 
-int UUINavWidget::GetLocalComponentBoxIndex(int Index)
+int UUINavWidget::GetLocalHorizontalCompIndex(int Index)
 {
-	for (int i = 0; i < UINavComponentBoxes.Num(); i++)
+	for (int i = 0; i < UINavHorizontalComps.Num(); i++)
 	{
-		if (UINavComponentBoxes[i]->ComponentIndex == Index) return i;
-		if (UINavComponentBoxes[i]->ComponentIndex > Index) return -1;
+		if (UINavHorizontalComps[i]->ComponentIndex == Index) return i;
+		if (UINavHorizontalComps[i]->ComponentIndex > Index) return -1;
 	}
 	return -1;
 }
@@ -1659,15 +1659,6 @@ int UUINavWidget::GetButtonIndexFromCoordinatesInGrid2D(const FGrid Grid, int XC
 	return Index;
 }
 
-TArray<FKey> UUINavWidget::GetInputKeysFromName(FName InputName)
-{
-	TArray<FKey> KeyArray = TArray<FKey>();
-
-	if (UINavPC == nullptr) return KeyArray;
-
-	return UINavPC->GetInputKeysFromName(InputName);
-}
-
 UUINavComponent * UUINavWidget::GetUINavComponentAtIndex(int Index)
 {
 	int ValidIndex = GetLocalComponentIndex(Index);
@@ -1676,12 +1667,12 @@ UUINavComponent * UUINavWidget::GetUINavComponentAtIndex(int Index)
 	return UINavComponents[ValidIndex];
 }
 
-UUINavComponentBox * UUINavWidget::GetUINavComponentBoxAtIndex(int Index)
+UUINavHorizontalComponent * UUINavWidget::GetUINavHorizontalCompAtIndex(int Index)
 {
-	int ValidIndex = GetLocalComponentBoxIndex(Index);
+	int ValidIndex = GetLocalHorizontalCompIndex(Index);
 	if (ValidIndex == -1) return nullptr;
 	
-	return UINavComponentBoxes[ValidIndex];
+	return UINavHorizontalComps[ValidIndex];
 }
 
 void UUINavWidget::HoverEvent(int Index)
@@ -1803,18 +1794,18 @@ void UUINavWidget::NavigateInDirection(ENavigationDirection Direction)
 
 	OnNavigatedDirection(Direction);
 
-	UUINavComponentBox* ComponentBox = GetUINavComponentBoxAtIndex(ButtonIndex);
-	if (ComponentBox != nullptr && (Direction == ENavigationDirection::Left || Direction == ENavigationDirection::Right))
+	UUINavHorizontalComponent* HorizComp = GetUINavHorizontalCompAtIndex(ButtonIndex);
+	if (HorizComp != nullptr && (Direction == ENavigationDirection::Left || Direction == ENavigationDirection::Right))
 	{
 		if (Direction == ENavigationDirection::Left)
 		{
-			ComponentBox->NavigateLeft();
-			OnComponentBoxNavigateLeft(ButtonIndex);
+			HorizComp->NavigateLeft();
+			OnHorizCompNavigateLeft(ButtonIndex);
 		}
 		else if (Direction == ENavigationDirection::Right)
 		{
-			ComponentBox->NavigateRight();
-			OnComponentBoxNavigateRight(ButtonIndex);
+			HorizComp->NavigateRight();
+			OnHorizCompNavigateRight(ButtonIndex);
 		}
 	}
 	else MenuNavigate(Direction);

@@ -45,7 +45,7 @@ public:
 		TArray<class UUINavComponent*> UINavComponents;
 
 	UPROPERTY(BlueprintReadOnly, Category = UINavCollection)
-		TArray<class UUINavComponentBox*> UINavComponentBoxes;
+		TArray<class UUINavHorizontalComponent*> UINavHorizontalComps;
 
 	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
 		TArray<class UUINavCollection*> UINavCollections;

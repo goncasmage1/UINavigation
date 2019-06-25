@@ -45,7 +45,7 @@ void UUINavComponentBox::BaseConstruct()
 		DISPLAYERROR(TEXT("Couldn't find TextBlock named NavText in UINavOptionBox"));
 	}
 
-	UpdateTextBlock();
+	Update();
 	CheckLeftLimit();
 	CheckRightLimit();
 }
@@ -69,14 +69,9 @@ void UUINavComponentBox::CheckRightLimit()
 
 }
 
-void UUINavComponentBox::UpdateTextBlock()
-{
-}
-
 void UUINavComponentBox::UpdateTextToIndex(int NewIndex)
 {
-	OptionIndex = NewIndex;
-	UpdateTextBlock();
+	Super::UpdateTextToIndex(NewIndex);
 
 	if (!bDisableButtons || bLoopOptions) return;
 	if (!RightButton->bIsEnabled) RightButton->SetIsEnabled(true);
@@ -85,10 +80,6 @@ void UUINavComponentBox::UpdateTextToIndex(int NewIndex)
 	CheckRightLimit();
 }
 
-void UUINavComponentBox::ChangeText(FText NewText)
-{
-	NavText->SetText(NewText);
-}
 
 void UUINavComponentBox::NavigateLeft()
 {
@@ -102,7 +93,7 @@ void UUINavComponentBox::NavigateLeft()
 		OptionIndex = GetLastOptionIndex();
 	}
 
-	UpdateTextBlock();
+	Update();
 	
 
 	if (!bDisableButtons || bLoopOptions)
@@ -121,12 +112,4 @@ void UUINavComponentBox::NavigateLeft()
 void UUINavComponentBox::NavigateRight()
 {
 	OnNavigateRight();
-}
-
-void UUINavComponentBox::OnNavigateLeft_Implementation()
-{
-}
-
-void UUINavComponentBox::OnNavigateRight_Implementation()
-{
 }
