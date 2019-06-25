@@ -27,7 +27,7 @@ void UUINavSliderBox::CheckRightLimit()
 	}
 }
 
-void UUINavSliderBox::UpdateTextBlock()
+void UUINavSliderBox::Update()
 {
 	int Difference = (MaxRange - MinRange) / Interval;
 	if (OptionIndex > (Difference))
@@ -44,9 +44,13 @@ void UUINavSliderBox::UpdateTextBlock()
 void UUINavSliderBox::NavigateRight()
 {
 	if (MinRange + OptionIndex*Interval < MaxRange) OptionIndex++;
-	else OptionIndex = 0;
+	else
+	{
+		if (bLoopOptions) OptionIndex = 0;
+		else return;
+	}
 
-	UpdateTextBlock();
+	Update();
 
 	if (!bDisableButtons || bLoopOptions)
 	{
