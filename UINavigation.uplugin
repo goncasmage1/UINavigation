@@ -22,7 +22,11 @@
 				"Win64",
 				"Win32",
 				"Linux",
-				"HTML5"
+				"HTML5",
+				"MacOS",
+				"PS4",
+				"XboxOne",
+				"Switch"
 			],
 			"BlacklistPlatforms": [
 				"IOS",
