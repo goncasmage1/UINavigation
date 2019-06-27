@@ -8,20 +8,20 @@ void UUINavOptionBox::NativeConstruct()
 {
 	Super::BaseConstruct();
 
-	if (!bUseNumberRange)
+	if (bUseNumberRange)
 	{
-		if (StringOptions.Num() <= 1)
-		{
-			DISPLAYERROR(TEXT("StringOptions needs to have at least 2 options"));
-		}
-		if (OptionIndex > (StringOptions.Num() - 1))
+		if (OptionIndex > (MaxRange - MinRange))
 		{
 			DISPLAYERROR(TEXT("Invalid OptionIndex"));
 		}
 	}
 	else
 	{
-		if (OptionIndex > (MaxRange - MinRange))
+		if (StringOptions.Num() <= 1)
+		{
+			DISPLAYERROR(TEXT("StringOptions needs to have at least 2 options"));
+		}
+		if (OptionIndex > (StringOptions.Num() - 1))
 		{
 			DISPLAYERROR(TEXT("Invalid OptionIndex"));
 		}
@@ -53,7 +53,11 @@ void UUINavOptionBox::NavigateRight()
 	else
 	{
 		if (OptionIndex < StringOptions.Num() - 1) OptionIndex++;
-		else OptionIndex = 0;
+		else
+		{
+			if (bLoopOptions) OptionIndex = 0;
+			else return;
+		}
 	}
 
 	Update();
