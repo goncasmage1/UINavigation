@@ -46,6 +46,9 @@ void UUINavComponentBox::BaseConstruct()
 	}
 
 	Update();
+
+	if (!bDisableButtons || bLoopOptions) return;
+
 	CheckLeftLimit();
 	CheckRightLimit();
 }
