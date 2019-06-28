@@ -43,13 +43,15 @@ public:
 		int MinDecimalDigits = 0;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavSlider, meta = (ClampMin="0"))
 		bool bUseComma = false;
-	int MaxOption = 0;
 
-	FLinearColor HandleDefaultColor;
-	FLinearColor BarDefaultColor;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavSlider, meta = (ClampMin = "0"))
+	int MaxOptionIndex = 0;
+	float Difference = 0.0f;
+
+	FLinearColor HandleDefaultColor = FColor::Black;
+	FLinearColor BarDefaultColor = FColor::Black;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavSlider, meta = (ClampMin = "0"))
 		FLinearColor HandleHoverColor;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavSlider, meta = (ClampMin = "0"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavSlider, meta = (ClampMin = "0"))
 		FLinearColor BarHoverColor;
 
 	virtual void NativeConstruct() override;
