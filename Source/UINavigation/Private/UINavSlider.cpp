@@ -35,9 +35,11 @@ void UUINavSlider::NativeConstruct()
 	}
 
 	if (!Slider->OnValueChanged.IsBound()) Slider->OnValueChanged.AddDynamic(this, &UUINavSlider::HandleOnSliderValueChanged);
-	Slider->StepSize = Interval / (MaxValue - MinValue);
 
-	MaxOption = ((MaxValue - MinValue) / Interval);
+	Difference = MaxValue - MinValue;
+	Slider->StepSize = Interval / Difference;
+
+	MaxOptionIndex = (Difference / Interval);
 	HandleDefaultColor = Slider->SliderHandleColor;
 	BarDefaultColor = Slider->SliderBarColor;
 
@@ -46,13 +48,15 @@ void UUINavSlider::NativeConstruct()
 
 void UUINavSlider::Update()
 {
-	Slider->SetValue((float)OptionIndex / (float)MaxOption);
+	Slider->SetValue((float)OptionIndex / (float)MaxOptionIndex);
 	FNumberFormattingOptions FormatOptions;
 	FormatOptions.MaximumFractionalDigits = MaxDecimalDigits;
 	FormatOptions.MinimumFractionalDigits = MinDecimalDigits;
-	float Value = MinValue + Slider->Value * MaxValue;
+
+	float Value = MinValue + Slider->Value * Difference;
 	FText ValueText = FText::AsNumber(Value, &FormatOptions);
 	if (!bUseComma) ValueText = FText::FromString(ValueText.ToString().Replace(TEXT(","),TEXT(".")));
+
 	if (NavText != nullptr) NavText->SetText(ValueText);
 	if (NavSpinBox != nullptr) NavSpinBox->SetValue(Value);
 }
@@ -75,6 +79,7 @@ void UUINavSlider::NavigateLeft()
 	{
 		OptionIndex--;
 	}
+	else if (bLoopOptions) OptionIndex = MaxOptionIndex;
 
 	Update();
 
@@ -83,15 +88,11 @@ void UUINavSlider::NavigateLeft()
 
 void UUINavSlider::NavigateRight()
 {
-	if (OptionIndex < MaxOption)
+	if (OptionIndex < MaxOptionIndex)
 	{
 		OptionIndex++;
 	}
-	else
-	{
-		OnNavigateRight();
-		return;
-	}
+	else if (bLoopOptions) OptionIndex = 0;
 
 	Update();
 
@@ -113,11 +114,11 @@ void UUINavSlider::HandleOnSpinBoxValueChanged(float InValue, ETextCommit::Type 
 float UUINavSlider::IndexFromPercent(float Value)
 {
 	float Div = Value / Slider->StepSize;
-	if (Div > MaxOption) Div = MaxOption;
+	if (Div > MaxOptionIndex) Div = MaxOptionIndex;
 
 	int FlatDiv = (int)Div;
 	float Decimal = Div - FlatDiv;
-	return Decimal < 0.5 ? FlatDiv : (FlatDiv + 1 <= MaxOption ? FlatDiv + 1 : MaxOption);
+	return Decimal < 0.5 ? FlatDiv : (FlatDiv + 1 <= MaxOptionIndex ? FlatDiv + 1 : MaxOptionIndex);
 }
 
 float UUINavSlider::IndexFromValue(float Value)
