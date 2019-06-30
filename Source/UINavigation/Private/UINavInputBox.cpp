@@ -37,8 +37,6 @@ void UUINavInputBox::BuildKeyMappings()
 	if (bIsAxis) Settings->GetAxisMappingByName(InputName, TempAxes);
 	else Settings->GetActionMappingByName(InputName, TempActions);
 
-	AUINavController* PC = Cast<AUINavController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
-
 	if ((bIsAxis && TempAxes.Num() == 0) || (!bIsAxis && TempActions.Num() == 0))
 	{
 		FString Message = TEXT("Couldn't find Input with name ");
