@@ -49,36 +49,45 @@ void UUINavInputBox::BuildKeyMappings()
 	{
 		UUINavInputComponent* NewInputButton = InputButtons[j];
 
-		for (int i = 0; i < 3; i++)
+		bool bAddedKey = false;
+		if (j < KeysPerInput)
 		{
-			if (j + 1 <= Keys.Num()) break;
-
-			if (i < KeysPerInput)
+			for (int i = 0; i < 3; i++)
 			{
-				if ((bIsAxis && i < TempAxes.Num()) || (!bIsAxis && i < TempActions.Num()))
+				if (j + 1 <= Keys.Num()) break;
+
+				if (i < KeysPerInput)
 				{
-					FKey NewKey = bIsAxis ? TempAxes[i].Key : TempActions[i].Key;
-
-					if (Keys.Contains(NewKey) || !ShouldRegisterKey(NewKey, j)) continue;
-
-					Keys.Add(NewKey);
-
-					if (UpdateKeyIconForKey(j))
+					if ((bIsAxis && i < TempAxes.Num()) || (!bIsAxis && i < TempActions.Num()))
 					{
-						bUsingKeyImage[j] = true;
-						NewInputButton->InputImage->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
-						NewInputButton->NavText->SetVisibility(ESlateVisibility::Collapsed);
+						FKey NewKey = bIsAxis ? TempAxes[i].Key : TempActions[i].Key;
+
+						if (Keys.Contains(NewKey) || !ShouldRegisterKey(NewKey, j)) continue;
+
+						Keys.Add(NewKey);
+						bAddedKey = true;
+
+						if (UpdateKeyIconForKey(j))
+						{
+							bUsingKeyImage[j] = true;
+							NewInputButton->InputImage->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+							NewInputButton->NavText->SetVisibility(ESlateVisibility::Collapsed);
+						}
+						NewInputButton->NavText->SetText(GetKeyName(j));
 					}
-					NewInputButton->NavText->SetText(GetKeyName(j));
+				}
+				else if (Keys.Num() >= KeysPerInput)
+				{
+					NewInputButton->SetVisibility(ESlateVisibility::Hidden);
 				}
 			}
-			else
-			{
-				NewInputButton->SetVisibility(ESlateVisibility::Hidden);
-			}
+		}
+		else
+		{
+			NewInputButton->SetVisibility(ESlateVisibility::Hidden);
 		}
 
-		if (Keys.Num() - 1 < j)
+		if (Keys.Num() - 1 < j || (!bAddedKey && Keys.Num() < KeysPerInput))
 		{
 			NewInputButton->NavText->SetText(FText::FromName(Container->EmptyKeyName));
 			NewInputButton->InputImage->SetVisibility(ESlateVisibility::Collapsed);
