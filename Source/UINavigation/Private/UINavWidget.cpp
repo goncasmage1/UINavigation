@@ -280,8 +280,11 @@ void UUINavWidget::UINavSetup()
 
 	bCompletedSetup = true;
 
-	DispatchNavigation(ButtonIndex);
-	OnNavigate(-1, ButtonIndex);
+	if (UINavButtons.Num() > 0)
+	{
+		DispatchNavigation(ButtonIndex);
+		OnNavigate(-1, ButtonIndex);
+	}
 
 	OnSetupCompleted();
 }
