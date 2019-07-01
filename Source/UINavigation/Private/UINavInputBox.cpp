@@ -49,7 +49,6 @@ void UUINavInputBox::BuildKeyMappings()
 	{
 		UUINavInputComponent* NewInputButton = InputButtons[j];
 
-		bool bAddedKey = false;
 		if (j < KeysPerInput)
 		{
 			for (int i = 0; i < 3; i++)
@@ -65,7 +64,6 @@ void UUINavInputBox::BuildKeyMappings()
 						if (Keys.Contains(NewKey) || !ShouldRegisterKey(NewKey, j)) continue;
 
 						Keys.Add(NewKey);
-						bAddedKey = true;
 
 						if (UpdateKeyIconForKey(j))
 						{
@@ -87,7 +85,7 @@ void UUINavInputBox::BuildKeyMappings()
 			NewInputButton->SetVisibility(ESlateVisibility::Hidden);
 		}
 
-		if (Keys.Num() - 1 < j || (!bAddedKey && Keys.Num() < KeysPerInput))
+		if (Keys.Num() - 1 < j)
 		{
 			NewInputButton->NavText->SetText(FText::FromName(Container->EmptyKeyName));
 			NewInputButton->InputImage->SetVisibility(ESlateVisibility::Collapsed);
