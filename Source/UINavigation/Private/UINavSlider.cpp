@@ -123,5 +123,5 @@ float UUINavSlider::IndexFromPercent(float Value)
 
 float UUINavSlider::IndexFromValue(float Value)
 {
-	return IndexFromPercent((Value - MinValue) / MaxValue);
+	return IndexFromPercent((Value - MinValue) / Difference);
 }
