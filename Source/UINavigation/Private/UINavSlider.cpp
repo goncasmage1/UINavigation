@@ -1,4 +1,4 @@
-// Copyright (C) 2019 Gonçalo Marques - All Rights Reserved
+// Copyright (C) 2019 Gonï¿½alo Marques - All Rights Reserved
 
 #include "UINavSlider.h"
 #include "Components/Slider.h"
@@ -30,6 +30,7 @@ void UUINavSlider::NativeConstruct()
 		NavSpinBox->SetMinValue(MinValue);
 		NavSpinBox->SetMaxSliderValue(MaxValue);
 		NavSpinBox->SetMaxValue(MaxValue);
+		NavSpinBox->ClearKeyboardFocusOnCommit = true;
 		if (!NavSpinBox->OnValueChanged.IsBound())
 			NavSpinBox->OnValueCommitted.AddDynamic(this, &UUINavSlider::HandleOnSpinBoxValueChanged);
 	}
@@ -71,6 +72,11 @@ void UUINavSlider::OnNavigatedFrom_Implementation()
 {
 	Slider->SetSliderHandleColor(HandleDefaultColor);
 	Slider->SetSliderBarColor(BarDefaultColor);
+}
+
+float UUINavSlider::GetSliderValue() const
+{
+	return (Slider->GetValue());
 }
 
 void UUINavSlider::NavigateLeft()
