@@ -1024,21 +1024,6 @@ void UUINavWidget::AppendCollection(const TArray<FButtonNavigation>& EdgeNavigat
 	CollectionIndex++;
 }
 
-void UUINavWidget::AppendHorizontalNavigation(int Dimension, FButtonNavigation EdgeNavigation, bool bWrap)
-{
-	AppendNavigationGrid1D(EGridType::Horizontal, Dimension, EdgeNavigation, bWrap);
-}
-
-void UUINavWidget::AppendVerticalNavigation(int Dimension, FButtonNavigation EdgeNavigation, bool bWrap)
-{
-	AppendNavigationGrid1D(EGridType::Vertical, Dimension, EdgeNavigation, bWrap);
-}
-
-void UUINavWidget::AppendGridNavigation(int DimensionX, int DimensionY, FButtonNavigation EdgeNavigation, bool bWrap)
-{
-	AppendNavigationGrid2D(DimensionX, DimensionY, EdgeNavigation, bWrap);
-}
-
 void UUINavWidget::Add1DGrid(EGridType GridType, UUINavButton * FirstButton, int StartingIndex, int Dimension, FButtonNavigation EdgeNavigation, bool bWrap)
 {
 	if (GridType == EGridType::Vertical)

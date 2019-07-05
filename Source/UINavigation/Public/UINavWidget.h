@@ -262,15 +262,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category = UINavWidget)
 		void AppendCollection(const TArray<FButtonNavigation>& EdgeNavigations);
 
-	UFUNCTION(BlueprintCallable, Category = UINavWidget, meta = (DeprecatedFunction, DeprecationMessage="This function has been replaced by Append Navigation Grid 1D."))
-		void AppendHorizontalNavigation(int Dimension, FButtonNavigation EdgeNavigation, bool bWrap);
-
-	UFUNCTION(BlueprintCallable, Category = UINavWidget, meta = (DeprecatedFunction, DeprecationMessage="This function has been replaced by Append Navigation Grid 1D."))
-		void AppendVerticalNavigation(int Dimension, FButtonNavigation EdgeNavigation, bool bWrap);
-
-	UFUNCTION(BlueprintCallable, Category = UINavWidget, meta = (DeprecatedFunction, DeprecationMessage="This function has been replaced by Append Navigation Grid 2D."))
-		void AppendGridNavigation(int DimensionX, int DimensionY, FButtonNavigation EdgeNavigation, bool bWrap);
-
 	//Helper function to add a new 1D grid
 	UFUNCTION(BlueprintCallable, Category = UINavWidget)
 		void Add1DGrid(EGridType GridType, UUINavButton* FirstButton, int StartingIndex, int Dimension, FButtonNavigation EdgeNavigation, bool bWrap);
