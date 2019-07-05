@@ -492,6 +492,14 @@ void UUINavWidget::AddUINavButton(UUINavButton * NewButton, int TargetGridIndex,
 
 	IncrementUINavButtonIndices(NewButton->ButtonIndex);
 	IncrementUINavComponentIndices(NewButton->ButtonIndex);
+
+	if (UINavButtons.Num() == 1)
+	{
+		ButtonIndex = 0;
+		CurrentButton = UINavButtons[0];
+		DispatchNavigation(ButtonIndex);
+		OnNavigate(-1, ButtonIndex);
+	}
 }
 
 void UUINavWidget::AddUINavComponent(UUINavComponent * NewComponent, int TargetGridIndex, int IndexInGrid)
@@ -521,6 +529,14 @@ void UUINavWidget::AddUINavComponent(UUINavComponent * NewComponent, int TargetG
 	InsertNewComponent(NewComponent, TargetIndex);
 
 	IncrementUINavButtonIndices(NewComponent->ComponentIndex);
+
+	if (UINavButtons.Num() == 1)
+	{
+		ButtonIndex = 0;
+		CurrentButton = UINavButtons[0];
+		DispatchNavigation(ButtonIndex);
+		OnNavigate(-1, ButtonIndex);
+	}
 }
 
 void UUINavWidget::DeleteUINavElement(int Index, bool bAutoNavigate)
@@ -929,12 +945,7 @@ void UUINavWidget::UpdateCurrentButton(UUINavButton * NewCurrentButton)
 
 void UUINavWidget::AppendNavigationGrid1D(EGridType GridType, int Dimension, FButtonNavigation EdgeNavigation, bool bWrap)
 {
-	if (UINavButtons.Num() == 0)
-	{
-		DISPLAYERROR("Make sure to call the Append Navigation functions only during the ReadyForSetup event!");
-		return;
-	}
-	else if (NumberOfButtonsInGrids >= UINavButtons.Num())
+	if (NumberOfButtonsInGrids + Dimension > UINavButtons.Num())
 	{
 		DISPLAYERROR("Not enough UINavButtons to append this navigation grid!");
 		return;
@@ -954,7 +965,12 @@ void UUINavWidget::AppendNavigationGrid1D(EGridType GridType, int Dimension, FBu
 		return;
 	}
 
-	Add1DGrid(GridType, UINavButtons[NumberOfButtonsInGrids], NavigationGrids.Num(), Dimension, EdgeNavigation, bWrap);
+	Add1DGrid(GridType,
+			  UINavButtons.Num() > 0 ? UINavButtons[NumberOfButtonsInGrids] : nullptr,
+			  NavigationGrids.Num(),
+			  Dimension,
+			  EdgeNavigation,
+			  bWrap);
 
 	int GridIndex = NavigationGrids.Num() - 1;
 	for (int i = 0; i < Dimension; i++)
@@ -975,12 +991,8 @@ void UUINavWidget::AppendNavigationGrid2D(int DimensionX, int DimensionY, FButto
 		DISPLAYERROR("AppendNavigationGrid2D Dimensions should be greater than 0");
 		return;
 	}
-	if (UINavButtons.Num() == 0)
-	{
-		DISPLAYERROR("Make sure to call the Append Navigation functions only during the ReadyForSetup event!");
-		return;
-	}
-	else if (NumberOfButtonsInGrids >= UINavButtons.Num())
+
+	if (NumberOfButtonsInGrids + (DimensionX * DimensionY) > UINavButtons.Num())
 	{
 		DISPLAYERROR("Not enough UINavButtons to append this navigation grid!");
 		return;
