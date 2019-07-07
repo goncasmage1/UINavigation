@@ -74,6 +74,12 @@ void UUINavSlider::OnNavigatedFrom_Implementation()
 	Slider->SetSliderBarColor(BarDefaultColor);
 }
 
+void UUINavSlider::SetValueClamped(float Value)
+{
+	OptionIndex = IndexFromValue(Value);
+	Update();
+}
+
 float UUINavSlider::GetSliderValue() const
 {
 	return (Slider->GetValue());
