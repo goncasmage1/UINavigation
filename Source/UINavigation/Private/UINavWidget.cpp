@@ -591,7 +591,7 @@ void UUINavWidget::IncrementGrid(UUINavButton* NewButton, FGrid & TargetGrid, in
 {
 	if (IndexInGrid == 0)
 	{
-		int FirstIndex = 0; TargetGrid.FirstButton != nullptr ? TargetGrid.FirstButton->ButtonIndex : GetGridStartingIndex(TargetGrid.GridIndex);
+		int FirstIndex = TargetGrid.FirstButton != nullptr ? TargetGrid.FirstButton->ButtonIndex : GetGridStartingIndex(TargetGrid.GridIndex);
 		TargetGrid.FirstButton = NewButton;
 		NewButton->ButtonIndex = FirstIndex;
 	}
@@ -733,18 +733,17 @@ void UUINavWidget::MoveUINavElementToGrid(int Index, int TargetGridIndex, int In
 	int OldGridIndex = Button->GridIndex;
 	int OldIndexInGrid = Button->IndexInGrid;
 
-	if (IndexInGrid >= TargetGrid.GetDimension() || IndexInGrid <= -1) IndexInGrid = TargetGrid.GetDimension() - 1;
+	//TODO: Stop if index and target index are the same
+
+	if (isLast) IndexInGrid = TargetGrid.GetDimension();
 	if (TargetGrid.GridIndex != Button->GridIndex)
 	{
 		DecrementGrid(NavigationGrids[Button->GridIndex], Button->IndexInGrid);
 		IncrementGrid(Button, TargetGrid, IndexInGrid);
-		if (isLast) IndexInGrid++;
 	}
 	
 	int From = Index;
-	int To = TargetGrid.FirstButton->ButtonIndex + IndexInGrid;
-
-	if (To >= TargetGrid.GetDimension()) To = TargetGrid.GetDimension() - 1;
+	int To = GetGridStartingIndex(TargetGridIndex) + IndexInGrid;
 
 	if (From == To) return;
 
@@ -783,9 +782,12 @@ void UUINavWidget::UpdateButtonArray(int From, int To)
 	{
 		for (int i = From + 1; i <= To; i++)
 		{
+			if (UINavButtons[i]->GridIndex != TempButton->GridIndex)
+			{
+				UINavButtons[i]->IndexInGrid--;
+			}
 			UINavButtons[i]->ButtonIndex--;
-			UINavButtons[i]->IndexInGrid--;
-			UINavButtons[i-1] = UINavButtons[i];
+			UINavButtons[i - 1] = UINavButtons[i];
 			if (i == To)
 			{
 				UINavButtons[i] = TempButton;
@@ -798,9 +800,13 @@ void UUINavWidget::UpdateButtonArray(int From, int To)
 	{
 		for (int i = From - 1; i >= To; i--)
 		{
+			if (UINavButtons[i]->GridIndex == TempButton->GridIndex)
+			{
+				UINavButtons[i]->IndexInGrid++;
+			}
 			UINavButtons[i]->ButtonIndex++;
-			UINavButtons[i]->IndexInGrid++;
 			UINavButtons[i+1] = UINavButtons[i];
+
 			if (i == To)
 			{
 				UINavButtons[i] = TempButton;
@@ -1586,7 +1592,17 @@ int UUINavWidget::GetGridStartingIndex(int GridIndex)
 	if (GridIndex < 0 || GridIndex >= NavigationGrids.Num()) return -1;
 
 	if (GridIndex == 0) return 0;
-	else return (NavigationGrids[GridIndex - 1].GetLastButtonIndex() + 1);
+	else
+	{
+		for (int i = GridIndex - 1; i >= 0; i--)
+		{
+			if (NavigationGrids[i].FirstButton != nullptr)
+			{
+				return (NavigationGrids[i].GetLastButtonIndex() + 1);
+			}
+		}
+	}
+	return 0;
 }
 
 UUINavButton * UUINavWidget::GetLastButtonInGrid(const FGrid Grid)
