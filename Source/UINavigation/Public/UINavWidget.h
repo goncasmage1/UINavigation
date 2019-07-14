@@ -504,7 +504,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = UINavWidget, meta=(AdvancedDisplay=2))
 		void DeleteUINavElementFromGrid(int GridIndex, int IndexInGrid, bool bAutoNavigate = true);
 
-	void IncrementGrid(class UUINavButton* NewButton, FGrid& TargetGrid, int& IndexInGrid);
+	void IncrementGrid(class UUINavButton* NewButton, FGrid& TargetGrid, int& IndexInGrid, bool bMoved);
 	void DecrementGrid(FGrid& TargetGrid, int IndexInGrid = -1);
 	void IncrementUINavButtonIndices(int StartingIndex);
 	void IncrementUINavComponentIndices(int StartingIndex);

@@ -482,7 +482,7 @@ void UUINavWidget::AddUINavButton(UUINavButton * NewButton, int TargetGridIndex,
 
 	if (IndexInGrid >= TargetGrid.GetDimension() || IndexInGrid <= -1) IndexInGrid = TargetGrid.GetDimension();
 
-	IncrementGrid(NewButton, TargetGrid, IndexInGrid);
+	IncrementGrid(NewButton, TargetGrid, IndexInGrid, false);
 
 	NewButton->ButtonIndex = TargetGrid.FirstButton->ButtonIndex + IndexInGrid;
 	NewButton->GridIndex = TargetGrid.GridIndex;
@@ -516,7 +516,7 @@ void UUINavWidget::AddUINavComponent(UUINavComponent * NewComponent, int TargetG
 
 	if (IndexInGrid >= TargetGrid.GetDimension() || IndexInGrid <= -1) IndexInGrid = TargetGrid.GetDimension();
 
-	IncrementGrid(NewComponent->NavButton, TargetGrid, IndexInGrid);
+	IncrementGrid(NewComponent->NavButton, TargetGrid, IndexInGrid, false);
 
 	NewComponent->NavButton->ButtonIndex = GetGridStartingIndex(TargetGridIndex) + IndexInGrid;
 	NewComponent->ComponentIndex = NewComponent->NavButton->ButtonIndex;
@@ -587,7 +587,7 @@ void UUINavWidget::DeleteUINavElementFromGrid(int GridIndex, int IndexInGrid, bo
 	DeleteUINavElement(TargetGrid.FirstButton->ButtonIndex + IndexInGrid, bAutoNavigate);
 }
 
-void UUINavWidget::IncrementGrid(UUINavButton* NewButton, FGrid & TargetGrid, int& IndexInGrid)
+void UUINavWidget::IncrementGrid(UUINavButton* NewButton, FGrid & TargetGrid, int& IndexInGrid, bool bMoved)
 {
 	int FirstIndex = -1;
 	if (IndexInGrid == 0)
@@ -615,6 +615,8 @@ void UUINavWidget::IncrementGrid(UUINavButton* NewButton, FGrid & TargetGrid, in
 		}
 	}
 
+	if (bMoved) return;
+
 	for (int i = IndexInGrid + 1; i < TargetGrid.GetDimension(); i++)
 	{
 		if (FirstIndex + i >= UINavButtons.Num()) break;
@@ -627,7 +629,7 @@ void UUINavWidget::DecrementGrid(FGrid & TargetGrid, int IndexInGrid)
 {
 	if (IndexInGrid == 0)
 	{
-		TargetGrid.FirstButton = TargetGrid.GetDimension() > 1 ? UINavButtons[TargetGrid.FirstButton->ButtonIndex] : nullptr;
+		TargetGrid.FirstButton = TargetGrid.GetDimension() > 1 ? UINavButtons[TargetGrid.FirstButton->ButtonIndex + 1] : nullptr;
 	}
 
 	if (TargetGrid.GridType == EGridType::Horizontal) TargetGrid.DimensionX--;
@@ -742,7 +744,7 @@ void UUINavWidget::MoveUINavElementToGrid(int Index, int TargetGridIndex, int In
 	if (TargetGrid.GridIndex != Button->GridIndex)
 	{
 		DecrementGrid(NavigationGrids[Button->GridIndex], Button->IndexInGrid);
-		IncrementGrid(Button, TargetGrid, IndexInGrid);
+		IncrementGrid(Button, TargetGrid, IndexInGrid, true);
 	}
 	
 	int From = Index;
@@ -750,6 +752,7 @@ void UUINavWidget::MoveUINavElementToGrid(int Index, int TargetGridIndex, int In
 
 	if (From == To) return;
 
+	//TODO: Repeated!
 	if (IndexInGrid == 0) TargetGrid.FirstButton = Button;
 
 	Button->IndexInGrid = IndexInGrid;
@@ -825,7 +828,7 @@ void UUINavWidget::UpdateButtonArray(int From, int To, int OldGridIndex)
 				UINavButtons[i]->ButtonIndex = i;
 			}
 		}
-		int TargetGridDimension = NavigationGrids[ToButton->GridIndex].GetDimension();
+		/*int TargetGridDimension = NavigationGrids[ToButton->GridIndex].GetDimension();
 		if (OldGridIndex != ToButton->GridIndex &&
 			ToButton->IndexInGrid + 1 < TargetGridDimension)
 		{
@@ -833,7 +836,7 @@ void UUINavWidget::UpdateButtonArray(int From, int To, int OldGridIndex)
 			{
 				UINavButtons[ToButton->ButtonIndex + j]->IndexInGrid--;
 			}
-		}
+		}*/
 	}
 }
 
