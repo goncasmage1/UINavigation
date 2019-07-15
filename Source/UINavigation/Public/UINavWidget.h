@@ -262,15 +262,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category = UINavWidget)
 		void AppendCollection(const TArray<FButtonNavigation>& EdgeNavigations);
 
-	UFUNCTION(BlueprintCallable, Category = UINavWidget, meta = (DeprecatedFunction, DeprecationMessage="This function has been replaced by Append Navigation Grid 1D."))
-		void AppendHorizontalNavigation(int Dimension, FButtonNavigation EdgeNavigation, bool bWrap);
-
-	UFUNCTION(BlueprintCallable, Category = UINavWidget, meta = (DeprecatedFunction, DeprecationMessage="This function has been replaced by Append Navigation Grid 1D."))
-		void AppendVerticalNavigation(int Dimension, FButtonNavigation EdgeNavigation, bool bWrap);
-
-	UFUNCTION(BlueprintCallable, Category = UINavWidget, meta = (DeprecatedFunction, DeprecationMessage="This function has been replaced by Append Navigation Grid 2D."))
-		void AppendGridNavigation(int DimensionX, int DimensionY, FButtonNavigation EdgeNavigation, bool bWrap);
-
 	//Helper function to add a new 1D grid
 	UFUNCTION(BlueprintCallable, Category = UINavWidget)
 		void Add1DGrid(EGridType GridType, UUINavButton* FirstButton, int StartingIndex, int Dimension, FButtonNavigation EdgeNavigation, bool bWrap);
@@ -513,7 +504,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = UINavWidget, meta=(AdvancedDisplay=2))
 		void DeleteUINavElementFromGrid(int GridIndex, int IndexInGrid, bool bAutoNavigate = true);
 
-	void IncrementGrid(class UUINavButton* NewButton, FGrid& TargetGrid, int& IndexInGrid);
+	void IncrementGrid(class UUINavButton* NewButton, FGrid& TargetGrid, int& IndexInGrid, bool bMoved);
 	void DecrementGrid(FGrid& TargetGrid, int IndexInGrid = -1);
 	void IncrementUINavButtonIndices(int StartingIndex);
 	void IncrementUINavComponentIndices(int StartingIndex);
@@ -535,8 +526,8 @@ public:
 		void MoveUINavElementToIndex(int Index, int TargetIndex);
 
 	void InsertNewComponent(class UUINavComponent* NewComponent, int ComponentIndex);
-	void UpdateArrays(int From, int To);
-	void UpdateButtonArray(int From, int To);
+	void UpdateArrays(int From, int To, int OldGridIndex);
+	void UpdateButtonArray(int From, int To, int OldGridIndex);
 	void UpdateComponentArray(int From, int To);
 	void ReplaceButtonInNavigationGrid(class UUINavButton* ButtonToReplace, int GridIndex, int IndexInGrid);
 

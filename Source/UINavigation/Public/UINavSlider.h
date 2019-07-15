@@ -61,8 +61,16 @@ public:
 	virtual void OnNavigatedTo_Implementation() override;
 	virtual void OnNavigatedFrom_Implementation() override;
 
+	//Get Current Value inserted in the specified number range (not 0 to 1)
 	UFUNCTION(BlueprintPure, BlueprintCallable, Category = UINavSlider)
 		FORCEINLINE float GetCurrentValue() const { return (MinValue + OptionIndex * Interval); }
+
+	UFUNCTION(BlueprintCallable, Category = UINavSlider)
+		void SetValueClamped(float Value);
+
+	//Get Current Slider value (0 to 1)
+	UFUNCTION(BlueprintPure, BlueprintCallable, Category = UINavSlider)
+		float GetSliderValue() const;
 
 	virtual void NavigateLeft() override;
 	virtual void NavigateRight() override;
