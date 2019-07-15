@@ -739,6 +739,9 @@ void UUINavWidget::MoveUINavElementToGrid(int Index, int TargetGridIndex, int In
 	int OldIndexInGrid = Button->IndexInGrid;
 
 	//TODO: Stop if index and target index are the same
+	
+	int From = Index;
+	int To = GetGridStartingIndex(TargetGridIndex) + IndexInGrid;
 
 	if (isLast) IndexInGrid = TargetGrid.GetDimension();
 	if (TargetGrid.GridIndex != Button->GridIndex)
@@ -746,9 +749,23 @@ void UUINavWidget::MoveUINavElementToGrid(int Index, int TargetGridIndex, int In
 		DecrementGrid(NavigationGrids[Button->GridIndex], Button->IndexInGrid);
 		IncrementGrid(Button, TargetGrid, IndexInGrid, true);
 	}
-	
-	int From = Index;
-	int To = GetGridStartingIndex(TargetGridIndex) + IndexInGrid;
+	else
+	{
+		if (From < To)
+		{
+			for (int i = From + 1; i <= To; i++)
+			{
+				UINavButtons[i]->IndexInGrid--;
+			}
+		}
+		else if (From > To)
+		{
+			for (int i = To; i <= From - 1; i++)
+			{
+				UINavButtons[i]->IndexInGrid--;
+			}
+		}
+	}
 
 	if (From == To) return;
 
@@ -782,16 +799,11 @@ void UUINavWidget::UpdateArrays(int From, int To, int OldGridIndex)
 void UUINavWidget::UpdateButtonArray(int From, int To, int OldGridIndex)
 {
 	UUINavButton* TempButton = UINavButtons[From];
-	UUINavButton* ToButton = UINavButtons[To];
 
 	if (From < To)
 	{
 		for (int i = From + 1; i <= To; i++)
 		{
-			if (UINavButtons[i]->GridIndex != TempButton->GridIndex)
-			{
-				UINavButtons[i]->IndexInGrid--;
-			}
 			UINavButtons[i]->ButtonIndex--;
 			UINavButtons[i - 1] = UINavButtons[i];
 			if (i == To)
@@ -815,10 +827,6 @@ void UUINavWidget::UpdateButtonArray(int From, int To, int OldGridIndex)
 	{
 		for (int i = From - 1; i >= To; i--)
 		{
-			if (UINavButtons[i]->GridIndex == TempButton->GridIndex)
-			{
-				UINavButtons[i]->IndexInGrid++;
-			}
 			UINavButtons[i]->ButtonIndex++;
 			UINavButtons[i+1] = UINavButtons[i];
 
@@ -828,15 +836,6 @@ void UUINavWidget::UpdateButtonArray(int From, int To, int OldGridIndex)
 				UINavButtons[i]->ButtonIndex = i;
 			}
 		}
-		/*int TargetGridDimension = NavigationGrids[ToButton->GridIndex].GetDimension();
-		if (OldGridIndex != ToButton->GridIndex &&
-			ToButton->IndexInGrid + 1 < TargetGridDimension)
-		{
-			for (int j = ToButton->IndexInGrid + 1; j < TargetGridDimension; j++)
-			{
-				UINavButtons[ToButton->ButtonIndex + j]->IndexInGrid--;
-			}
-		}*/
 	}
 }
 
