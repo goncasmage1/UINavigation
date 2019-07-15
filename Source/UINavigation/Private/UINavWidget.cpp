@@ -766,7 +766,6 @@ void UUINavWidget::MoveUINavElementToGrid(int Index, int TargetGridIndex, int In
 
 	if (From == To) return;
 
-	//TODO: Repeated!
 	if (IndexInGrid == 0) TargetGrid.FirstButton = Button;
 
 	Button->IndexInGrid = IndexInGrid;
