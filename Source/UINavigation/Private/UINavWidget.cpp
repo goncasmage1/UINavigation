@@ -731,19 +731,16 @@ void UUINavWidget::MoveUINavElementToGrid(int Index, int TargetGridIndex, int In
 	if (Button == nullptr || TargetGridIndex >= NavigationGrids.Num()) return;
 
 	FGrid& TargetGrid = NavigationGrids[TargetGridIndex];
-	bool isLast = IndexInGrid <= -1 || IndexInGrid >= TargetGrid.GetDimension();
+	if (IndexInGrid <= -1 || IndexInGrid >= TargetGrid.GetDimension())
+		IndexInGrid = TargetGrid.GetDimension();
 
 	if (UINavAnimations.Num() > 0) DISPLAYERROR("Runtime manipulation not supported with navigation using animations.");
 
 	int OldGridIndex = Button->GridIndex;
 	int OldIndexInGrid = Button->IndexInGrid;
 
-	//TODO: Stop if index and target index are the same
-	
 	int From = Index;
 	int To = GetGridStartingIndex(TargetGridIndex) + IndexInGrid;
-
-	if (isLast) IndexInGrid = TargetGrid.GetDimension();
 	if (TargetGrid.GridIndex != Button->GridIndex)
 	{
 		DecrementGrid(NavigationGrids[Button->GridIndex], Button->IndexInGrid);
@@ -799,6 +796,7 @@ void UUINavWidget::UpdateArrays(int From, int To, int OldGridIndex)
 void UUINavWidget::UpdateButtonArray(int From, int To, int OldGridIndex)
 {
 	UUINavButton* TempButton = UINavButtons[From];
+	if (To >= UINavButtons.Num()) To = UINavButtons.Num() - 1;
 
 	if (From < To)
 	{
