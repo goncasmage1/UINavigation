@@ -90,7 +90,8 @@ protected:
 
 public:
 
-	bool bWaitForInput = false;
+	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
+		bool bWaitForInput = false;
 
 	EReceiveInputType ReceiveInputType = EReceiveInputType::None;
 
