@@ -1160,20 +1160,12 @@ void UUINavWidget::SwitchTextColorTo(int Index, FLinearColor Color)
 	if (NewComponentIndex != -1)
 	{
 		NewText = UINavComponents[NewComponentIndex]->NavText;
-		if (NewText == nullptr)
-		{
-			DISPLAYERROR("When UseTextColor is true, UINavComponent should have a valid TextBlock called NavText.");
-			return;
-		}
+		if (NewText == nullptr) return;
 	}
 	else
 	{
 		NewText = Cast<UTextBlock>(UINavButtons[Index]->GetChildAt(0));
-		if (NewText == nullptr)
-		{
-			DISPLAYERROR("When UseTextColor is true, UINavButton should have a TextBlock as its child.");
-			return;
-		}
+		if (NewText == nullptr) return;
 	}
 	NewText->SetColorAndOpacity(Color);
 }
