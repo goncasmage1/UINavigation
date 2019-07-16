@@ -1018,7 +1018,7 @@ void UUINavWidget::AppendNavigationGrid2D(int DimensionX, int DimensionY, FButto
 		return;
 	}
 
-	if (NumberOfButtonsInGrids + (DimensionX * DimensionY) > UINavButtons.Num())
+	if (NumberOfButtonsInGrids + (ButtonsInGrid == -1 ? (DimensionX * DimensionY) : ButtonsInGrid) > UINavButtons.Num())
 	{
 		DISPLAYERROR("Not enough UINavButtons to append this navigation grid!");
 		return;
