@@ -38,6 +38,7 @@ void UUINavSlider::NativeConstruct()
 	if (!Slider->OnValueChanged.IsBound()) Slider->OnValueChanged.AddDynamic(this, &UUINavSlider::HandleOnSliderValueChanged);
 
 	Difference = MaxValue - MinValue;
+	Slider->IsFocusable = false;
 	Slider->StepSize = Interval / Difference;
 
 	MaxOptionIndex = (Difference / Interval);
