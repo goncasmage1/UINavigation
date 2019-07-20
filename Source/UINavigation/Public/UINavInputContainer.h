@@ -117,6 +117,12 @@ public:
 		bool bCanCancelKeybind = true;
 
 	/*
+	Indicates whether the input boxes will hide or collapse unused InputBoxes
+	*/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Input")
+		bool bCollapseInputBox = false;
+
+	/*
 	The names of the desired actions to allow for rebinding
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Input")

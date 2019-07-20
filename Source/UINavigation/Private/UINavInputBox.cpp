@@ -76,13 +76,13 @@ void UUINavInputBox::BuildKeyMappings()
 				}
 				else if (Keys.Num() >= KeysPerInput)
 				{
-					NewInputButton->SetVisibility(ESlateVisibility::Hidden);
+					NewInputButton->SetVisibility(Container->bCollapseInputBox ? ESlateVisibility::Collapsed : ESlateVisibility::Hidden);
 				}
 			}
 		}
 		else
 		{
-			NewInputButton->SetVisibility(ESlateVisibility::Hidden);
+			NewInputButton->SetVisibility(Container->bCollapseInputBox ? ESlateVisibility::Collapsed : ESlateVisibility::Hidden);
 		}
 
 		if (Keys.Num() - 1 < j)
