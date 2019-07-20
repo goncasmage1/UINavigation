@@ -30,6 +30,10 @@ void UUINavInputContainer::Init(UUINavWidget * NewParent)
 	CreateInputBoxes();
 }
 
+void UUINavInputContainer::OnSetupCompleted_Implementation()
+{
+}
+
 void UUINavInputContainer::ResetKeyMappings()
 {
 	UUINavBlueprintFunctionLibrary::ResetInputSettings();
@@ -58,6 +62,8 @@ void UUINavInputContainer::CreateInputBoxes()
 			BottomButtonIndex = LastButtonIndex - (2 - (int)TargetColumn);
 			break;
 	}
+
+	OnSetupCompleted();
 }
 
 void UUINavInputContainer::CreateActionBoxes()

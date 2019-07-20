@@ -69,6 +69,13 @@ public:
 
 	void Init(class UUINavWidget* NewParent);
 
+	/**
+	*	Called when this widget completed setting up InputBoxes
+	*/
+	UFUNCTION(BlueprintNativeEvent, Category = UINavWidget)
+		void OnSetupCompleted();
+	virtual void OnSetupCompleted_Implementation();
+
 	UFUNCTION(BlueprintCallable, Category = "UINav Input")
 		void ResetKeyMappings();
 
