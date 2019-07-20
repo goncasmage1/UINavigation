@@ -54,7 +54,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Input")
 		ETargetColumn TargetColumn = ETargetColumn::Left;
 
-	UPROPERTY(EditDefaultsOnly, Category = "UINav Input")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UINav Input")
 		TSubclassOf<class UUINavInputBox> InputBox_BP;
 
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget), Category = "UINav Input")
