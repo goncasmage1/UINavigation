@@ -63,7 +63,8 @@ protected:
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget), Category = "UINav Input")
 		class UPanelWidget* AxisPanel;
 	
-	class UUINavWidget* ParentWidget;
+	UPROPERTY(BlueprintReadOnly, Category = "UINav Input")
+		class UUINavWidget* ParentWidget;
 
 public:
 
