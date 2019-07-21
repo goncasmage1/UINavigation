@@ -54,7 +54,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Input")
 		ETargetColumn TargetColumn = ETargetColumn::Left;
 
-	UPROPERTY(EditDefaultsOnly, Category = "UINav Input")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UINav Input")
 		TSubclassOf<class UUINavInputBox> InputBox_BP;
 
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget), Category = "UINav Input")
@@ -63,11 +63,19 @@ protected:
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget), Category = "UINav Input")
 		class UPanelWidget* AxisPanel;
 	
-	class UUINavWidget* ParentWidget;
+	UPROPERTY(BlueprintReadOnly, Category = "UINav Input")
+		class UUINavWidget* ParentWidget;
 
 public:
 
 	void Init(class UUINavWidget* NewParent);
+
+	/**
+	*	Called when this widget completed setting up InputBoxes
+	*/
+	UFUNCTION(BlueprintNativeEvent, Category = UINavWidget)
+		void OnSetupCompleted();
+	virtual void OnSetupCompleted_Implementation();
 
 	UFUNCTION(BlueprintCallable, Category = "UINav Input")
 		void ResetKeyMappings();
@@ -115,6 +123,12 @@ public:
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Input")
 		bool bCanCancelKeybind = true;
+
+	/*
+	Indicates whether the input boxes will hide or collapse unused InputBoxes
+	*/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Input")
+		bool bCollapseInputBox = false;
 
 	/*
 	The names of the desired actions to allow for rebinding
