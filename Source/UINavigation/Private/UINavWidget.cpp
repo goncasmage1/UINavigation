@@ -680,7 +680,11 @@ void UUINavWidget::InsertNewComponent(UUINavComponent* NewComponent, int TargetI
 
 void UUINavWidget::IncrementUINavButtonIndices(int StartingIndex)
 {
-	for (int i = StartingIndex + 1; i < UINavButtons.Num(); i++) UINavButtons[i]->ButtonIndex = i;
+	for (int i = StartingIndex + 1; i < UINavButtons.Num(); i++)
+	{
+		UINavButtons[i]->ButtonIndex = i;
+		UINavButtons[i]->IndexInGrid++;
+	}
 	if (StartingIndex <= ButtonIndex) ButtonIndex++;
 }
 
