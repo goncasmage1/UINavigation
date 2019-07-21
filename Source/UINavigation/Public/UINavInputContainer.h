@@ -131,6 +131,12 @@ public:
 		bool bCollapseInputBox = false;
 
 	/*
+	The preffered names of the given input names
+	*/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Input")
+		class UDataTable* InputNameTable;
+
+	/*
 	The names of the desired actions to allow for rebinding
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Input")

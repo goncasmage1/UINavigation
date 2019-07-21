@@ -32,7 +32,13 @@ void UUINavInputBox::BuildKeyMappings()
 		InputButton3
 	};
 
-	InputText->SetText(FText::FromName(InputName));
+	FName Input = InputName;
+	if (Container->InputNameTable != nullptr && Container->InputNameTable->GetRowMap().Contains(Input))
+	{
+		FInputNameMapping* NewInputName = (FInputNameMapping*)Container->InputNameTable->GetRowMap()[Input];
+		Input = FName(*NewInputName->InputName);
+	}
+	InputText->SetText(FText::FromName(Input));
 
 	if (bIsAxis) Settings->GetAxisMappingByName(InputName, TempAxes);
 	else Settings->GetActionMappingByName(InputName, TempActions);
