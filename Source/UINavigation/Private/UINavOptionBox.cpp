@@ -107,6 +107,8 @@ void UUINavOptionBox::Update()
 	}
 	else
 	{
+		if (StringOptions.Num() == 0) return;
+
 		if (OptionIndex < 0) OptionIndex = 0;
 		if (OptionIndex >= StringOptions.Num()) OptionIndex = StringOptions.Num() - 1;
 	}
