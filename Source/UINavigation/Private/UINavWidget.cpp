@@ -1073,7 +1073,7 @@ void UUINavWidget::Add1DGrid(EGridType GridType, UUINavButton * FirstButton, int
 
 void UUINavWidget::UpdateSelectorLocation(int Index)
 {
-	if (TheSelector == nullptr) return;
+	if (TheSelector == nullptr || UINavButtons.Num() == 0) return;
 	TheSelector->SetRenderTranslation(GetButtonLocation(Index));
 }
 
