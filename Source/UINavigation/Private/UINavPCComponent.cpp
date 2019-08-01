@@ -36,9 +36,12 @@ void UUINavPCComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	SetupInput();
-	VerifyDefaultInputs();
-	FetchUINavActionKeys();
+	if (PC != nullptr && PC->IsLocalPlayerController())
+	{
+		SetupInput();
+		VerifyDefaultInputs();
+		FetchUINavActionKeys();
+	}
 }
 
 void UUINavPCComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
