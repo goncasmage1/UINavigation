@@ -8,6 +8,7 @@
 #include "UINavInputBox.h"
 #include "UINavInputContainer.h"
 #include "UINavPCComponent.h"
+#include "UINavWidgetComponent.h"
 #include "Animation/WidgetAnimation.h"
 #include "Blueprint/UserWidget.h"
 #include "Blueprint/WidgetTree.h"
@@ -1349,9 +1350,16 @@ UWidget * UUINavWidget::GoToBuiltWidget(UUINavWidget* NewWidget, bool bRemovePar
 	APlayerController* PC = Cast<APlayerController>(UINavPC->GetOwner());
 	NewWidget->ParentWidget = this;
 	NewWidget->bParentRemoved = bRemoveParent;
-	if (HasUserFocus(PC))
-		NewWidget->SetUserFocus(PC);
-	NewWidget->AddToViewport(ZOrder);
+	if (WidgetComp != nullptr)
+	{
+		WidgetComp->SetWidget(NewWidget);
+	}
+	else
+	{
+		if (HasUserFocus(PC))
+			NewWidget->SetUserFocus(PC);
+		NewWidget->AddToViewport(ZOrder);
+	}
 	CleanSetup();
 	return NewWidget;
 }
