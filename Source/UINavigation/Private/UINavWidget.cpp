@@ -37,7 +37,7 @@ void UUINavWidget::NativeConstruct()
 	//If this widget was added through a child widget, destroy it
 	if (ReturnedFromWidget != nullptr)
 	{
-		ReturnedFromWidget->Destruct();
+		if (WidgetComp == nullptr) ReturnedFromWidget->Destruct();
 		ReturnedFromWidget = nullptr;
 	}
 
