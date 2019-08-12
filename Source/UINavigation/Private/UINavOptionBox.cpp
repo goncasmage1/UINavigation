@@ -2,7 +2,7 @@
 
 #include "UINavOptionBox.h"
 #include "Blueprint/WidgetTree.h"
-
+#include "Components/Button.h"
 
 void UUINavOptionBox::NativeConstruct()
 {
@@ -27,8 +27,10 @@ void UUINavOptionBox::NativeConstruct()
 		}
 	}
 
-	LeftButton->OnClicked.AddDynamic(this, &UUINavOptionBox::NavigateLeft);
-	RightButton->OnClicked.AddDynamic(this, &UUINavOptionBox::NavigateRight);
+	if (!LeftButton->OnClicked.IsBound())
+		LeftButton->OnClicked.AddDynamic(this, &UUINavOptionBox::NavigateLeft);
+	if (!RightButton->OnClicked.IsBound())
+		RightButton->OnClicked.AddDynamic(this, &UUINavOptionBox::NavigateRight);
 }
 
 
