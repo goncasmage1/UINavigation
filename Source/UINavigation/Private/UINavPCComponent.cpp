@@ -86,6 +86,8 @@ void UUINavPCComponent::SetupInput()
 {
 	UInputComponent* InputComponent = PC->InputComponent;
 
+	if (InputComponent == nullptr) return;
+
 	FInputActionBinding& Action1_1 = InputComponent->BindAction("MenuUp", IE_Pressed, this, &UUINavPCComponent::StartMenuUp);
 	Action1_1.bExecuteWhenPaused = true;
 	Action1_1.bConsumeInput = false;
