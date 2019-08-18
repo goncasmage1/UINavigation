@@ -1197,6 +1197,15 @@ void UUINavWidget::SwitchButtonStyle(int Index)
 	NewStile.Hovered = NewStile.Normal;
 	NewStile.Normal = TempState;
 	TheButton->SetStyle(NewStile);
+
+	if (Index != ButtonIndex)
+	{
+		USoundBase* HoverSound = Cast<USoundBase>(NewStile.HoveredSlateSound.GetResourceObject());
+		if (HoverSound != nullptr)
+		{
+			PlaySound(HoverSound);
+		}
+	}
 }
 
 void UUINavWidget::SetSelectorScale(FVector2D NewScale)
@@ -1295,6 +1304,11 @@ void UUINavWidget::OnPreSelect(int Index)
 	}
 	else
 	{
+		USoundBase* PressSound = Cast<USoundBase>(CurrentButton->WidgetStyle.PressedSlateSound.GetResourceObject());
+		if (PressSound != nullptr)
+		{
+			PlaySound(PressSound);
+		}
 		OnSelect(Index);
 	}
 }
