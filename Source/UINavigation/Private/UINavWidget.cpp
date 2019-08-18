@@ -1791,6 +1791,25 @@ void UUINavWidget::UnhoverEvent(int Index)
 
 void UUINavWidget::ClickEvent(int Index)
 {
+	/*if (bWaitForInput)
+	{
+		if (ReceiveInputType == EReceiveInputType::Axis) CancelRebind();
+		else ProcessMouseKeybind(FKey(EKeys::LeftMouseButton));
+	}
+	else
+	{
+		UINavPC->NotifyMouseInputType();
+
+		if (!UINavPC->bAllowNavigation) return;
+
+		OnPreSelect(Index);
+
+		if (Index != ButtonIndex) NavigateTo(Index);
+	}*/
+}
+
+void UUINavWidget::PressEvent(int Index)
+{
 	if (bWaitForInput)
 	{
 		if (ReceiveInputType == EReceiveInputType::Axis) CancelRebind();
@@ -1818,6 +1837,7 @@ void UUINavWidget::SetupUINavButtonDelegates(UUINavButton * NewButton)
 	NewButton->CustomHover.AddDynamic(this, &UUINavWidget::HoverEvent);
 	NewButton->CustomUnhover.AddDynamic(this, &UUINavWidget::UnhoverEvent);
 	NewButton->CustomClick.AddDynamic(this, &UUINavWidget::ClickEvent);
+	NewButton->CustomPress.AddDynamic(this, &UUINavWidget::PressEvent);
 	NewButton->CustomRelease.AddDynamic(this, &UUINavWidget::ReleaseEvent);
 }
 

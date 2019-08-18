@@ -8,6 +8,7 @@
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FCustomHoverDelegate, int, Index);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FCustomUnhoverDelegate, int, Index);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FCustomClickDelegate, int, Index);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FCustomPressDelegate, int, Index);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FCustomReleaseDelegate, int, Index);
 
 /**
@@ -28,6 +29,8 @@ public:
 		FCustomUnhoverDelegate CustomUnhover;
 	UPROPERTY()
 		FCustomUnhoverDelegate CustomClick;
+	UPROPERTY()
+		FCustomPressDelegate CustomPress;
 	UPROPERTY()
 		FCustomReleaseDelegate CustomRelease;
 
@@ -56,6 +59,8 @@ public:
 		void OnUnhover();
 	UFUNCTION()
 		void OnClick();
+	UFUNCTION()
+		void OnPress();
 	UFUNCTION()
 		void OnRelease();
 	

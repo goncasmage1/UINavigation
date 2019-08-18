@@ -623,6 +623,13 @@ public:
 	UFUNCTION(Category = UINavWidget)
 		void ClickEvent(int Index);
 	/**
+	*	Button Press event
+	*
+	*	@param	Index  The index of the button that was pressed
+	*/
+	UFUNCTION(Category = UINavWidget)
+		void PressEvent(int Index);
+	/**
 	*	Button Release event
 	*
 	*	@param	Index  The index of the button that was released
