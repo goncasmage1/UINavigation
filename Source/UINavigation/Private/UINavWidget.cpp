@@ -573,6 +573,8 @@ void UUINavWidget::DeleteUINavElement(int Index, bool bAutoNavigate)
 
 	DecrementUINavButtonIndices(Index, Button->GridIndex);
 	DecrementUINavComponentIndices(Index);
+
+	ButtonIndex = CurrentButton->ButtonIndex;
 }
 
 void UUINavWidget::DeleteUINavElementFromGrid(int GridIndex, int IndexInGrid, bool bAutoNavigate)
@@ -621,7 +623,10 @@ void UUINavWidget::DecrementGrid(FGrid & TargetGrid, int IndexInGrid)
 {
 	if (IndexInGrid == 0)
 	{
-		TargetGrid.FirstButton = TargetGrid.GetDimension() > 1 ? UINavButtons[TargetGrid.FirstButton->ButtonIndex + 1] : nullptr;
+		TargetGrid.FirstButton =
+			(TargetGrid.GetDimension() > 1 && TargetGrid.FirstButton->ButtonIndex + 1 < UINavButtons.Num())
+			? UINavButtons[TargetGrid.FirstButton->ButtonIndex + 1] 
+			: nullptr;
 	}
 
 	if (TargetGrid.GridType == EGridType::Horizontal) TargetGrid.DimensionX--;
@@ -647,14 +652,20 @@ void UUINavWidget::InsertNewComponent(UUINavComponent* NewComponent, int TargetI
 			}
 			else
 			{
+				bool bAdded = false;
 				for (int i = 0; i < UINavComponents.Num(); i++)
 				{
 					if (UINavComponents[i]->ComponentIndex > TargetIndex)
 					{
 						UINavComponents.Insert(NewComponent, i);
 						IncrementUINavComponentIndices(NewComponent->ComponentIndex);
+						bAdded = true;
 						break;
 					}
+				}
+				if (!bAdded)
+				{
+					UINavComponents.Add(NewComponent);
 				}
 			}
 		}
@@ -706,7 +717,7 @@ void UUINavWidget::DecrementUINavComponentIndices(int StartingIndex)
 	int ValidIndex = GetLocalComponentIndex(StartingIndex);
 	UUINavComponent* Component = (ValidIndex != -1 ? UINavComponents[ValidIndex] : nullptr);
 
-	for (int i = (ValidIndex != -1 ? ValidIndex + 1 : 0); i < UINavComponents.Num() - (ValidIndex != -1 ? 1 : 0); i++)
+	for (int i = (ValidIndex != -1 ? ValidIndex : 0); i < UINavComponents.Num() - 1; i++)
 	{
 		if (ValidIndex != -1) UINavComponents[i] = UINavComponents[i + 1];
 		if (UINavComponents[i]->ComponentIndex > StartingIndex) UINavComponents[i]->ComponentIndex--;
@@ -714,7 +725,7 @@ void UUINavWidget::DecrementUINavComponentIndices(int StartingIndex)
 
 	if (Component != nullptr)
 	{
-		UINavComponents.RemoveAt(UINavComponents.Num()-1, 1, true);
+		UINavComponents.RemoveAt(UINavComponents.Num()-1);
 	}
 }
 
@@ -744,31 +755,13 @@ void UUINavWidget::MoveUINavElementToGrid(int Index, int TargetGridIndex, int In
 		DecrementGrid(NavigationGrids[Button->GridIndex], Button->IndexInGrid);
 		IncrementGrid(Button, TargetGrid, IndexInGrid);
 	}
-	else
-	{
-		if (From < To)
-		{
-			for (int i = From + 1; i <= To; i++)
-			{
-				UINavButtons[i]->IndexInGrid--;
-			}
-		}
-		else if (From > To)
-		{
-			for (int i = To; i <= From - 1; i++)
-			{
-				UINavButtons[i]->IndexInGrid--;
-			}
-		}
-	}
-
-	if (From == To) return;
 
 	if (IndexInGrid == 0) TargetGrid.FirstButton = Button;
-
 	Button->IndexInGrid = IndexInGrid;
+
+	if (From == To) return;
 	
-	UpdateArrays(From, To, OldGridIndex);
+	UpdateArrays(From, To, OldGridIndex, OldIndexInGrid);
 
 	ReplaceButtonInNavigationGrid(Button, OldGridIndex, OldIndexInGrid);
 
@@ -784,13 +777,13 @@ void UUINavWidget::MoveUINavElementToIndex(int Index, int TargetIndex)
 	MoveUINavElementToGrid(Index, ToButton->GridIndex, ToButton->IndexInGrid);
 }
 
-void UUINavWidget::UpdateArrays(int From, int To, int OldGridIndex)
+void UUINavWidget::UpdateArrays(int From, int To, int OldGridIndex, int OldIndexInGrid)
 {
-	UpdateButtonArray(From, To, OldGridIndex);
+	UpdateButtonArray(From, To, OldGridIndex, OldIndexInGrid);
 	UpdateComponentArray(From, To);
 }
 
-void UUINavWidget::UpdateButtonArray(int From, int To, int OldGridIndex)
+void UUINavWidget::UpdateButtonArray(int From, int To, int OldGridIndex, int OldIndexInGrid)
 {
 	UUINavButton* TempButton = UINavButtons[From];
 	if (To >= UINavButtons.Num()) To = UINavButtons.Num() - 1;
@@ -801,6 +794,14 @@ void UUINavWidget::UpdateButtonArray(int From, int To, int OldGridIndex)
 		{
 			UINavButtons[i]->ButtonIndex--;
 			UINavButtons[i - 1] = UINavButtons[i];
+			if (UINavButtons[i]->GridIndex == OldGridIndex)
+			{
+				UINavButtons[i]->IndexInGrid--;
+			}
+			else if (UINavButtons[i]->GridIndex == TempButton->GridIndex)
+			{
+				UINavButtons[i]->IndexInGrid++;
+			}
 			if (i == To)
 			{
 				UINavButtons[i] = TempButton;
@@ -824,6 +825,14 @@ void UUINavWidget::UpdateButtonArray(int From, int To, int OldGridIndex)
 		{
 			UINavButtons[i]->ButtonIndex++;
 			UINavButtons[i+1] = UINavButtons[i];
+			if (UINavButtons[i]->GridIndex == OldGridIndex)
+			{
+				UINavButtons[i]->IndexInGrid--;
+			}
+			else if (UINavButtons[i]->GridIndex == TempButton->GridIndex)
+			{
+				UINavButtons[i]->IndexInGrid++;
+			}
 
 			if (i == To)
 			{
@@ -831,7 +840,17 @@ void UUINavWidget::UpdateButtonArray(int From, int To, int OldGridIndex)
 				UINavButtons[i]->ButtonIndex = i;
 			}
 		}
-	}
+
+		int TargetGridDimension = NavigationGrids[OldGridIndex].GetDimension();
+		if (OldGridIndex != TempButton->GridIndex &&
+			OldIndexInGrid < TargetGridDimension)
+		{
+			for (int j = OldIndexInGrid; j < TargetGridDimension; j++)
+			{
+				UINavButtons[From + j + 1]->IndexInGrid--;
+			}
+		}
+	}	
 }
 
 void UUINavWidget::UpdateComponentArray(int From, int To)
@@ -844,23 +863,15 @@ void UUINavWidget::UpdateComponentArray(int From, int To)
 	int Start = 0;
 	int End = UINavComponents.Num()-1;
 
-	bool isLess = From < To;
-
 	if (Start == End)
 	{
 		UINavComponents[Start]->ComponentIndex = UINavComponents[Start]->NavButton->ButtonIndex;
 		return;
 	}
 
-	if (isLess)
+	if (From < To)
 	{
 		if (TempComp != nullptr) Start = UINavComponents.Find(TempComp);
-
-		if (Start == End)
-		{
-			UINavComponents[Start]->ComponentIndex = UINavComponents[Start]->NavButton->ButtonIndex;
-			return;
-		}
 
 		if (UINavComponents[0]->ComponentIndex < From)
 		{
@@ -898,12 +909,6 @@ void UUINavWidget::UpdateComponentArray(int From, int To)
 	else
 	{
 		if (TempComp != nullptr) End = UINavComponents.Find(TempComp);
-
-		if (Start == End)
-		{
-			UINavComponents[Start]->ComponentIndex = UINavComponents[Start]->NavButton->ButtonIndex;
-			return;
-		}
 
 		if (UINavComponents[0]->ComponentIndex < To)
 		{

@@ -529,8 +529,8 @@ public:
 		void MoveUINavElementToIndex(int Index, int TargetIndex);
 
 	void InsertNewComponent(class UUINavComponent* NewComponent, int ComponentIndex);
-	void UpdateArrays(int From, int To, int OldGridIndex);
-	void UpdateButtonArray(int From, int To, int OldGridIndex);
+	void UpdateArrays(int From, int To, int OldGridIndex, int OldIndexInGrid);
+	void UpdateButtonArray(int From, int To, int OldGridIndex, int OldIndexInGrid);
 	void UpdateComponentArray(int From, int To);
 	void ReplaceButtonInNavigationGrid(class UUINavButton* ButtonToReplace, int GridIndex, int IndexInGrid);
 
