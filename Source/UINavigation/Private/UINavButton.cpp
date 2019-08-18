@@ -31,7 +31,7 @@ UUINavButton::UUINavButton()
 	OnHovered.AddDynamic(this, &UUINavButton::OnHover);
 	OnUnhovered.AddDynamic(this, &UUINavButton::OnUnhover);
 	OnClicked.AddDynamic(this, &UUINavButton::OnClick);
-	//OnPressed.AddDynamic(this, &UUINavButton::OnClick);
+	OnPressed.AddDynamic(this, &UUINavButton::OnPress);
 	OnReleased.AddDynamic(this, &UUINavButton::OnRelease);
 }
 
@@ -55,6 +55,11 @@ void UUINavButton::OnUnhover()
 void UUINavButton::OnClick()
 {
 	CustomClick.Broadcast(ButtonIndex);
+}
+
+void UUINavButton::OnPress()
+{
+	CustomPress.Broadcast(ButtonIndex);
 }
 
 void UUINavButton::OnRelease()

@@ -161,9 +161,11 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
 		UUINavWidget* ReturnedFromWidget;
 
+	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
+		class UUINavWidgetComponent* WidgetComp;
+
 	//Should this widget remove its parent from the viewport when created?
 	bool bParentRemoved = true;
-
 
 	//If set to true, buttons will be navigated by switching button states (Normal and Hovered)
 	UPROPERTY(EditDefaultsOnly, Category = UINavWidget)
@@ -527,8 +529,8 @@ public:
 		void MoveUINavElementToIndex(int Index, int TargetIndex);
 
 	void InsertNewComponent(class UUINavComponent* NewComponent, int ComponentIndex);
-	void UpdateArrays(int From, int To, int OldGridIndex);
-	void UpdateButtonArray(int From, int To, int OldGridIndex);
+	void UpdateArrays(int From, int To, int OldGridIndex, int OldIndexInGrid);
+	void UpdateButtonArray(int From, int To, int OldGridIndex, int OldIndexInGrid);
 	void UpdateComponentArray(int From, int To);
 	void ReplaceButtonInNavigationGrid(class UUINavButton* ButtonToReplace, int GridIndex, int IndexInGrid);
 
@@ -620,6 +622,13 @@ public:
 	*/
 	UFUNCTION(Category = UINavWidget)
 		void ClickEvent(int Index);
+	/**
+	*	Button Press event
+	*
+	*	@param	Index  The index of the button that was pressed
+	*/
+	UFUNCTION(Category = UINavWidget)
+		void PressEvent(int Index);
 	/**
 	*	Button Release event
 	*

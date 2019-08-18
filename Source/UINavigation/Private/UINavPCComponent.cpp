@@ -86,6 +86,8 @@ void UUINavPCComponent::SetupInput()
 {
 	UInputComponent* InputComponent = PC->InputComponent;
 
+	if (InputComponent == nullptr) return;
+
 	FInputActionBinding& Action1_1 = InputComponent->BindAction("MenuUp", IE_Pressed, this, &UUINavPCComponent::StartMenuUp);
 	Action1_1.bExecuteWhenPaused = true;
 	Action1_1.bConsumeInput = false;
@@ -519,8 +521,7 @@ void UUINavPCComponent::MenuUp()
 {
 	IUINavPCReceiver::Execute_OnNavigated(GetOwner(), ENavigationDirection::Up);
 
-	if (ActiveWidget == nullptr ||
-		!ActiveWidget->IsInViewport()) return;
+	if (ActiveWidget == nullptr) return;
 
 	ActiveWidget->NavigateInDirection(ENavigationDirection::Up);
 }
@@ -529,8 +530,7 @@ void UUINavPCComponent::MenuDown()
 {
 	IUINavPCReceiver::Execute_OnNavigated(GetOwner(), ENavigationDirection::Down);
 
-	if (ActiveWidget == nullptr ||
-		!ActiveWidget->IsInViewport()) return;
+	if (ActiveWidget == nullptr) return;
 
 	ActiveWidget->NavigateInDirection(ENavigationDirection::Down);
 }
@@ -539,8 +539,7 @@ void UUINavPCComponent::MenuLeft()
 {
 	IUINavPCReceiver::Execute_OnNavigated(GetOwner(), ENavigationDirection::Left);
 
-	if (ActiveWidget == nullptr ||
-		!ActiveWidget->IsInViewport()) return;
+	if (ActiveWidget == nullptr) return;
 
 	ActiveWidget->NavigateInDirection(ENavigationDirection::Left);
 }
@@ -549,8 +548,7 @@ void UUINavPCComponent::MenuRight()
 {
 	IUINavPCReceiver::Execute_OnNavigated(GetOwner(), ENavigationDirection::Right);
 
-	if (ActiveWidget == nullptr ||
-		!ActiveWidget->IsInViewport()) return;
+	if (ActiveWidget == nullptr) return;
 
 	ActiveWidget->NavigateInDirection(ENavigationDirection::Right);
 }
@@ -560,8 +558,7 @@ void UUINavPCComponent::MenuSelect()
 	IUINavPCReceiver::Execute_OnSelect(GetOwner());
 	VerifyInputTypeChangeByAction(TEXT("MenuSelect"));
 
-	if (ActiveWidget == nullptr ||
-		!ActiveWidget->IsInViewport()) return;
+	if (ActiveWidget == nullptr) return;
 
 	ClearTimer();
 	ActiveWidget->MenuSelect();
@@ -572,8 +569,7 @@ void UUINavPCComponent::MenuReturn()
 	IUINavPCReceiver::Execute_OnReturn(GetOwner());
 	VerifyInputTypeChangeByAction(TEXT("MenuReturn"));
 
-	if (ActiveWidget == nullptr ||
-		!ActiveWidget->IsInViewport()) return;
+	if (ActiveWidget == nullptr) return;
 
 	ClearTimer();
 	ActiveWidget->MenuReturn();
@@ -636,7 +632,7 @@ void UUINavPCComponent::StartMenuUp()
 	VerifyInputTypeChangeByAction(TEXT("MenuUp"));
 	Direction = ENavigationDirection::Up;
 
-	if (!bChainNavigation || ActiveWidget == nullptr || !ActiveWidget->IsInViewport()) return;
+	if (!bChainNavigation) return;
 
 	SetTimer(ENavigationDirection::Up);
 }
@@ -649,7 +645,7 @@ void UUINavPCComponent::StartMenuDown()
 	VerifyInputTypeChangeByAction(TEXT("MenuDown"));
 	Direction = ENavigationDirection::Down;
 
-	if (!bChainNavigation || ActiveWidget == nullptr || !ActiveWidget->IsInViewport()) return;
+	if (!bChainNavigation) return;
 
 	SetTimer(ENavigationDirection::Down);
 }
@@ -662,7 +658,7 @@ void UUINavPCComponent::StartMenuLeft()
 	VerifyInputTypeChangeByAction(TEXT("MenuLeft"));
 	Direction = ENavigationDirection::Left;
 
-	if (!bChainNavigation || ActiveWidget == nullptr || !ActiveWidget->IsInViewport()) return;
+	if (!bChainNavigation) return;
 
 	SetTimer(ENavigationDirection::Left);
 }
@@ -675,7 +671,7 @@ void UUINavPCComponent::StartMenuRight()
 	VerifyInputTypeChangeByAction(TEXT("MenuRight"));
 	Direction = ENavigationDirection::Right;
 
-	if (!bChainNavigation || ActiveWidget == nullptr || !ActiveWidget->IsInViewport()) return;
+	if (!bChainNavigation) return;
 
 	SetTimer(ENavigationDirection::Right);
 }
