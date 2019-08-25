@@ -1667,10 +1667,10 @@ UUINavButton * UUINavWidget::GetLastButtonInGrid(const FGrid Grid)
 	return UINavButtons.Num() > LastIndex ? UINavButtons[LastIndex] : nullptr;
 }
 
-UUINavButton * UUINavWidget::GetButtonAtGridIndex(const FGrid ButtonGrid, const int GridIndex)
+UUINavButton * UUINavWidget::GetButtonAtGridIndex(const FGrid ButtonGrid, const int IndexInGrid)
 {
 	if (ButtonGrid.FirstButton == nullptr || GridIndex < 0) return nullptr;
-	int NewIndex = ButtonGrid.FirstButton->ButtonIndex + GridIndex;
+	int NewIndex = ButtonGrid.FirstButton->ButtonIndex + IndexInGrid;
 
 	if (NewIndex >= UINavButtons.Num()) return nullptr;
 

@@ -561,7 +561,7 @@ public:
 
 	// Returns the button at the specified index of the given grid
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
-		class UUINavButton* GetButtonAtGridIndex(const FGrid ButtonGrid, const int GridIndex);
+		class UUINavButton* GetButtonAtGridIndex(const FGrid ButtonGrid, const int IndexInGrid);
 
 	// Checks whether the given button is in the specified grid
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
