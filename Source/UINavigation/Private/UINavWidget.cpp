@@ -770,7 +770,7 @@ void UUINavWidget::MoveUINavElementToGrid(int Index, int TargetGridIndex, int In
 	ButtonIndex = CurrentButton->ButtonIndex;
 }
 
-void UUINavWidget::MoveUINavElementToGrid2(int FromGridIndex, int FromIndexInGrid, int TargetGridIndex, int IndexInGrid)
+void UUINavWidget::MoveUINavElementToGrid2(int FromGridIndex, int FromIndexInGrid, int TargetGridIndex, int TargetIndexInGrid)
 {
 	if (FromGridIndex < 0 || FromGridIndex >= NavigationGrids.Num()) return;
 
@@ -782,7 +782,7 @@ void UUINavWidget::MoveUINavElementToGrid2(int FromGridIndex, int FromIndexInGri
 		FromIndexInGrid = TargetGrid.GetDimension() - 1;
 	}
 
-	MoveUINavElementToGrid(TargetGrid.FirstButton->ButtonIndex + FromIndexInGrid, TargetGridIndex, IndexInGrid);
+	MoveUINavElementToGrid(TargetGrid.FirstButton->ButtonIndex + FromIndexInGrid, TargetGridIndex, TargetIndexInGrid);
 }
 
 void UUINavWidget::UpdateArrays(int From, int To, int OldGridIndex, int OldIndexInGrid)

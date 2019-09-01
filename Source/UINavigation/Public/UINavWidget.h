@@ -528,7 +528,7 @@ public:
 	*	move the element to the end of the grid.
 	*/
 	UFUNCTION(BlueprintCallable, Category = UINavWidget)
-		void MoveUINavElementToGrid2(int FromGridIndex, int FromIndexInGrid, int TargetGridIndex, int IndexInGrid = -1);
+		void MoveUINavElementToGrid2(int FromGridIndex, int FromIndexInGrid, int TargetGridIndex, int TargetIndexInGrid = -1);
 
 	void InsertNewComponent(class UUINavComponent* NewComponent, int ComponentIndex);
 	void UpdateArrays(int From, int To, int OldGridIndex, int OldIndexInGrid);
