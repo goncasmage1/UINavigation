@@ -1398,6 +1398,7 @@ void UUINavWidget::ReturnToParent()
 		if (bAllowRemoveIfRoot)
 		{
 			IUINavPCReceiver::Execute_OnRootWidgetRemoved(UINavPC->GetOwner());
+			UINavPC->ActiveWidget = nullptr;
 
 			if (WidgetComp != nullptr) WidgetComp->SetWidget(nullptr);
 			else RemoveFromParent();

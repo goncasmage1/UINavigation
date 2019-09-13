@@ -215,7 +215,7 @@ void UUINavPCComponent::FetchUINavActionKeys()
 
 	TArray<FString> keys;
 	KeyMap.GetKeys(keys);
-	if (keys.Num() != 6)
+	if (keys.Num() < 6)
 	{
 		DISPLAYERROR("Not all Menu Inputs have been setup!");
 	}
