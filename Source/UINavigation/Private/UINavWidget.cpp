@@ -42,6 +42,7 @@ void UUINavWidget::NativeConstruct()
 	}
 
 	PreSetup();
+	InitialSetup();
 }
 
 void UUINavWidget::InitialSetup()
@@ -769,12 +770,19 @@ void UUINavWidget::MoveUINavElementToGrid(int Index, int TargetGridIndex, int In
 	ButtonIndex = CurrentButton->ButtonIndex;
 }
 
-void UUINavWidget::MoveUINavElementToIndex(int Index, int TargetIndex)
+void UUINavWidget::MoveUINavElementToGrid2(int FromGridIndex, int FromIndexInGrid, int TargetGridIndex, int TargetIndexInGrid)
 {
-	if (Index >= UINavButtons.Num() || TargetIndex >= UINavButtons.Num() || Index < 0 || TargetIndex < 0) return;
+	if (FromGridIndex < 0 || FromGridIndex >= NavigationGrids.Num()) return;
 
-	UUINavButton* ToButton = UINavButtons[TargetIndex];
-	MoveUINavElementToGrid(Index, ToButton->GridIndex, ToButton->IndexInGrid);
+	FGrid TargetGrid = NavigationGrids[FromGridIndex];
+	if (TargetGrid.FirstButton == nullptr) return;
+
+	if (FromIndexInGrid <= -1 || FromIndexInGrid >= TargetGrid.GetDimension())
+	{
+		FromIndexInGrid = TargetGrid.GetDimension() - 1;
+	}
+
+	MoveUINavElementToGrid(TargetGrid.FirstButton->ButtonIndex + FromIndexInGrid, TargetGridIndex, TargetIndexInGrid);
 }
 
 void UUINavWidget::UpdateArrays(int From, int To, int OldGridIndex, int OldIndexInGrid)
@@ -1334,7 +1342,6 @@ void UUINavWidget::OnInputChanged_Implementation(EInputType From, EInputType To)
 
 void UUINavWidget::PreSetup_Implementation()
 {
-	InitialSetup();
 }
 
 void UUINavWidget::OnSetupCompleted_Implementation()
@@ -1391,6 +1398,7 @@ void UUINavWidget::ReturnToParent()
 		if (bAllowRemoveIfRoot)
 		{
 			IUINavPCReceiver::Execute_OnRootWidgetRemoved(UINavPC->GetOwner());
+			UINavPC->ActiveWidget = nullptr;
 
 			if (WidgetComp != nullptr) WidgetComp->SetWidget(nullptr);
 			else RemoveFromParent();
@@ -1667,10 +1675,10 @@ UUINavButton * UUINavWidget::GetLastButtonInGrid(const FGrid Grid)
 	return UINavButtons.Num() > LastIndex ? UINavButtons[LastIndex] : nullptr;
 }
 
-UUINavButton * UUINavWidget::GetButtonAtGridIndex(const FGrid ButtonGrid, const int GridIndex)
+UUINavButton * UUINavWidget::GetButtonAtGridIndex(const FGrid ButtonGrid, const int IndexInGrid)
 {
-	if (ButtonGrid.FirstButton == nullptr || GridIndex < 0) return nullptr;
-	int NewIndex = ButtonGrid.FirstButton->ButtonIndex + GridIndex;
+	if (ButtonGrid.FirstButton == nullptr || IndexInGrid < 0) return nullptr;
+	int NewIndex = ButtonGrid.FirstButton->ButtonIndex + IndexInGrid;
 
 	if (NewIndex >= UINavButtons.Num()) return nullptr;
 

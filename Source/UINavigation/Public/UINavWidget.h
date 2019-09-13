@@ -523,10 +523,12 @@ public:
 		void MoveUINavElementToGrid(int Index, int TargetGridIndex, int IndexInGrid = -1);
 
 	/**
-	*	Moves a UINavButton or UINavComponent to the specified index.
+	*	Moves a UINavButton or UINavComponent to the specified grid and its index.
+	*	Set IndexInGrid to -1 or to a number greater than the dimension of the grid to
+	*	move the element to the end of the grid.
 	*/
 	UFUNCTION(BlueprintCallable, Category = UINavWidget)
-		void MoveUINavElementToIndex(int Index, int TargetIndex);
+		void MoveUINavElementToGrid2(int FromGridIndex, int FromIndexInGrid, int TargetGridIndex, int TargetIndexInGrid = -1);
 
 	void InsertNewComponent(class UUINavComponent* NewComponent, int ComponentIndex);
 	void UpdateArrays(int From, int To, int OldGridIndex, int OldIndexInGrid);
@@ -561,7 +563,7 @@ public:
 
 	// Returns the button at the specified index of the given grid
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
-		class UUINavButton* GetButtonAtGridIndex(const FGrid ButtonGrid, const int GridIndex);
+		class UUINavButton* GetButtonAtGridIndex(const FGrid ButtonGrid, const int IndexInGrid);
 
 	// Checks whether the given button is in the specified grid
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)

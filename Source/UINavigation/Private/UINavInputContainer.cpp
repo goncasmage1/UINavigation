@@ -70,7 +70,7 @@ void UUINavInputContainer::CreateInputBoxes()
 void UUINavInputContainer::CreateActionBoxes()
 {
 	UInputSettings* Settings = const_cast<UInputSettings*>(GetDefault<UInputSettings>());
-	TArray<FInputActionKeyMapping>& Actions = Settings->ActionMappings;
+	TArray<FInputActionKeyMapping> Actions = Settings->GetActionMappings();
 
 	if (Actions.Num() == 0) return;
 
@@ -114,7 +114,7 @@ void UUINavInputContainer::CreateAxisBoxes()
 {
 
 	UInputSettings* Settings = const_cast<UInputSettings*>(GetDefault<UInputSettings>());
-	TArray<FInputAxisKeyMapping>& Axes = Settings->AxisMappings;
+	TArray<FInputAxisKeyMapping> Axes = Settings->GetAxisMappings();
 
 	if (Axes.Num() == 0) return;
 
