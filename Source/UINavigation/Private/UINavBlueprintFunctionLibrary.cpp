@@ -65,6 +65,7 @@ void UUINavBlueprintFunctionLibrary::ResetInputSettings()
 		Settings->RemoveAxisMapping(Mapping, false);
 	}
 
+	//Add new ones
 	for (FInputActionKeyMapping Mapping : MySettings->ActionMappings)
 	{
 		Settings->AddActionMapping(Mapping, false);
