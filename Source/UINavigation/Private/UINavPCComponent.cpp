@@ -128,8 +128,8 @@ void UUINavPCComponent::VerifyDefaultInputs()
 	if (MySettings->ActionMappings.Num() == 0 && MySettings->AxisMappings.Num() == 0)
 	{
 		UInputSettings* Settings = const_cast<UInputSettings*>(GetDefault<UInputSettings>());
-		MySettings->ActionMappings = Settings->ActionMappings;
-		MySettings->AxisMappings = Settings->AxisMappings;
+		MySettings->ActionMappings = Settings->GetActionMappings();
+		MySettings->AxisMappings = Settings->GetAxisMappings();
 		MySettings->SaveConfig();
 	}
 }
@@ -195,7 +195,7 @@ void UUINavPCComponent::ClearTimer()
 void UUINavPCComponent::FetchUINavActionKeys()
 {
 	const UInputSettings* Settings = GetDefault<UInputSettings>();
-	const TArray<FInputActionKeyMapping>& Actions = Settings->ActionMappings;
+	const TArray<FInputActionKeyMapping> Actions = Settings->GetActionMappings();
 	for (FInputActionKeyMapping Action : Actions)
 	{
 		FString NewName = Action.ActionName.ToString();
