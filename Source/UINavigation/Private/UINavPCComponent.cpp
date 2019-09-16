@@ -196,11 +196,20 @@ void UUINavPCComponent::FetchUINavActionKeys()
 {
 	const UInputSettings* Settings = GetDefault<UInputSettings>();
 	const TArray<FInputActionKeyMapping>& Actions = Settings->ActionMappings;
+
+	const TArray<FString> MenuInputs = {
+		TEXT("MenuUp"),
+		TEXT("MenuDown"),
+		TEXT("MenuLeft"),
+		TEXT("MenuRight"),
+		TEXT("MenuSelect"),
+		TEXT("MenuReturn")
+	};
+
 	for (FInputActionKeyMapping Action : Actions)
 	{
 		FString NewName = Action.ActionName.ToString();
-		if (NewName.Left(4).Compare(TEXT("Menu")) != 0)
-			continue;
+		if (!MenuInputs.Contains(NewName)) continue;
 
 		TArray<FKey>* KeyArray = KeyMap.Find(NewName);
 		if (KeyArray == nullptr)
@@ -215,7 +224,7 @@ void UUINavPCComponent::FetchUINavActionKeys()
 
 	TArray<FString> keys;
 	KeyMap.GetKeys(keys);
-	if (keys.Num() < 6)
+	if (keys.Num() != 6)
 	{
 		DISPLAYERROR("Not all Menu Inputs have been setup!");
 	}
