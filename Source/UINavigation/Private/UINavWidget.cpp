@@ -996,6 +996,88 @@ void UUINavWidget::UpdateCurrentButton(UUINavButton * NewCurrentButton)
 	}
 }
 
+void UUINavWidget::ClearGrid(int GridIndex)
+{
+	if (GridIndex < 0 || GridIndex >= NavigationGrids.Num()) return;
+
+	FGrid& Grid = NavigationGrids[GridIndex];
+	if (Grid.FirstButton == nullptr) return;
+
+	int FirstIndex = Grid.FirstButton->ButtonIndex;
+	int LastIndex = FirstIndex + Grid.GetDimension() - 1;
+	int Difference = LastIndex - FirstIndex + 1;
+
+	bool bDeletedFromEnd = true;
+	int NumButtons = UINavButtons.Num();
+	for (int i = FirstIndex; i < NumButtons; ++i)
+	{
+		if (i <= LastIndex)
+		{
+			UINavButtons.RemoveAt(FirstIndex);
+			UUINavComponent* Component = GetUINavComponentAtIndex(i);
+			if (Component != nullptr)
+			{
+				UINavComponents.Remove(Component);
+			}
+		}
+		else
+		{
+			bDeletedFromEnd = false;
+			UUINavButton* Button = UINavButtons[i];
+			Button->ButtonIndex -= Difference;
+			Button->GridIndex--;
+		}
+	}
+
+	if (!bDeletedFromEnd)
+	{
+		UpdateComponentArray(FirstIndex, UINavButtons.Num() - 1);
+	}
+
+	Grid.FirstButton = nullptr;
+	if (Grid.GridType != EGridType::Grid2D)	Grid.DimensionX = 0;
+	Grid.DimensionY = 0;
+	Grid.NumGrid2DButtons = 0;
+
+	if (ButtonIndex >= FirstIndex && ButtonIndex <= ButtonIndex)
+	{
+		if (!bDeletedFromEnd || FirstIndex > 0)
+		{
+			bool bValid = false;
+
+			UUINavButton* Temp = CurrentButton;
+			while (!bValid)
+			{
+				int NewIndex = Temp->ButtonIndex + 1;
+				if (NewIndex >= UINavButtons.Num()) NewIndex = 0;
+
+				Temp = UINavButtons[NewIndex];
+				if (NewIndex == FirstButtonIndex) break;
+
+				UUINavComponent* UINavComp = GetUINavComponentAtIndex(NewIndex);
+				if (UINavComp != nullptr && !UINavComp->IsValid()) continue;
+
+				bValid = Temp->IsValid();
+			}
+
+			if (!bValid)
+			{
+				CurrentButton = nullptr;
+				ButtonIndex = 0;
+			}
+			else if (Temp != nullptr)
+			{
+				NavigateTo(Temp->ButtonIndex);
+			}
+		}
+		else
+		{
+			CurrentButton = nullptr;
+			ButtonIndex = 0;
+		}
+	}
+}
+
 void UUINavWidget::AppendNavigationGrid1D(EGridType GridType, int Dimension, FButtonNavigation EdgeNavigation, bool bWrap)
 {
 	if (NumberOfButtonsInGrids + Dimension > UINavButtons.Num())
