@@ -545,7 +545,7 @@ void UUINavWidget::DeleteUINavElement(int Index, bool bAutoNavigate)
 {
 	if (Index < 0 || Index >= UINavButtons.Num()) return;
 
-	if (Index == ButtonIndex && bAutoNavigate)
+	if (Index == ButtonIndex)
 	{
 		bool bValid = false;
 
@@ -564,9 +564,19 @@ void UUINavWidget::DeleteUINavElement(int Index, bool bAutoNavigate)
 			bValid = Temp->IsValid();
 		}
 
-		if (Temp == nullptr) return;
-		NavigateTo(Temp->ButtonIndex);
-		ButtonIndex--;
+		if (!bValid)
+		{
+			CurrentButton = nullptr;
+			ButtonIndex = 0;
+		}
+		else if (Temp != nullptr && bAutoNavigate)
+		{
+			NavigateTo(Temp->ButtonIndex);
+		}
+	}
+	else
+	{
+		ButtonIndex = CurrentButton->ButtonIndex;
 	}
 
 	UUINavButton* Button = UINavButtons[Index];
@@ -575,7 +585,6 @@ void UUINavWidget::DeleteUINavElement(int Index, bool bAutoNavigate)
 	DecrementUINavButtonIndices(Index, Button->GridIndex);
 	DecrementUINavComponentIndices(Index);
 
-	ButtonIndex = CurrentButton->ButtonIndex;
 }
 
 void UUINavWidget::DeleteUINavElementFromGrid(int GridIndex, int IndexInGrid, bool bAutoNavigate)
@@ -632,7 +641,14 @@ void UUINavWidget::DecrementGrid(FGrid & TargetGrid, int IndexInGrid)
 
 	if (TargetGrid.GridType == EGridType::Horizontal) TargetGrid.DimensionX--;
 	else if (TargetGrid.GridType == EGridType::Vertical) TargetGrid.DimensionY--;
-	else TargetGrid.NumGrid2DButtons--;
+	else
+	{
+		TargetGrid.NumGrid2DButtons--;
+		if (TargetGrid.NumGrid2DButtons <= (TargetGrid.DimensionX * (TargetGrid.DimensionY - 1)))
+		{
+			TargetGrid.DimensionY--;
+		}
+	}
 }
 
 void UUINavWidget::InsertNewComponent(UUINavComponent* NewComponent, int TargetIndex)
@@ -1799,21 +1815,7 @@ void UUINavWidget::UnhoverEvent(int Index)
 
 void UUINavWidget::ClickEvent(int Index)
 {
-	/*if (bWaitForInput)
-	{
-		if (ReceiveInputType == EReceiveInputType::Axis) CancelRebind();
-		else ProcessMouseKeybind(FKey(EKeys::LeftMouseButton));
-	}
-	else
-	{
-		UINavPC->NotifyMouseInputType();
-
-		if (!UINavPC->bAllowNavigation) return;
-
-		OnPreSelect(Index);
-
-		if (Index != ButtonIndex) NavigateTo(Index);
-	}*/
+	
 }
 
 void UUINavWidget::PressEvent(int Index)
@@ -1876,7 +1878,7 @@ void UUINavWidget::CancelRebind()
 
 void UUINavWidget::NavigateInDirection(ENavigationDirection Direction)
 {
-	if (Direction == ENavigationDirection::None) return;
+	if (Direction == ENavigationDirection::None || UINavButtons.Num() == 0) return;
 
 	if (NumberOfButtonsInGrids == 0)
 	{
