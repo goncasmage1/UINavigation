@@ -1141,6 +1141,20 @@ void UUINavWidget::AppendNavigationGrid2D(int DimensionX, int DimensionY, FButto
 		return;
 	}
 
+	if (ButtonsInGrid < -1)
+	{
+		DISPLAYERROR("Invalid ButtonsInGrid value!");
+		return;
+	}
+	else if (ButtonsInGrid >= 0)
+	{
+		int DesiredY = (ButtonsInGrid / DimensionX) + 1;
+		if (DimensionY > DesiredY)
+		{
+			DimensionY = DesiredY;
+		}
+	}
+
 	FGrid NewGrid = FGrid(EGridType::Grid2D, UINavButtons[NumberOfButtonsInGrids], NavigationGrids.Num(), DimensionX, DimensionY, EdgeNavigation, bWrap, ButtonsInGrid);
 	NavigationGrids.Add(NewGrid);
 
