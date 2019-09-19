@@ -585,6 +585,7 @@ void UUINavWidget::DeleteUINavElement(int Index, bool bAutoNavigate)
 	DecrementUINavButtonIndices(Index, Button->GridIndex);
 	DecrementUINavComponentIndices(Index);
 
+	DeleteButtonEdgeNavigationRefs(Button);
 }
 
 void UUINavWidget::DeleteUINavElementFromGrid(int GridIndex, int IndexInGrid, bool bAutoNavigate)
@@ -996,7 +997,7 @@ void UUINavWidget::UpdateCurrentButton(UUINavButton * NewCurrentButton)
 	}
 }
 
-void UUINavWidget::ClearGrid(int GridIndex)
+void UUINavWidget::ClearGrid(int GridIndex, bool bAutoNavigate)
 {
 	if (GridIndex < 0 || GridIndex >= NavigationGrids.Num()) return;
 
@@ -1006,6 +1007,40 @@ void UUINavWidget::ClearGrid(int GridIndex)
 	int FirstIndex = Grid.FirstButton->ButtonIndex;
 	int LastIndex = FirstIndex + Grid.GetDimension() - 1;
 	int Difference = LastIndex - FirstIndex + 1;
+
+	bool bShouldNavigate = bAutoNavigate && ButtonIndex >= FirstIndex && ButtonIndex <= ButtonIndex;
+	if (bShouldNavigate)
+	{
+		bool bValid = false;
+
+		UUINavButton* NextButton = UINavButtons[LastIndex];
+		UUINavButton* FirstButton = NextButton;
+		while (!bValid)
+		{
+			int NewIndex = NextButton->ButtonIndex + 1;
+			if (NewIndex >= UINavButtons.Num()) NewIndex = 0;
+
+			NextButton = UINavButtons[NewIndex];
+			if (NextButton == FirstButton) break;
+
+			if (NewIndex >= FirstIndex && NewIndex <= ButtonIndex) continue;
+
+			UUINavComponent* UINavComp = GetUINavComponentAtIndex(NewIndex);
+			if (UINavComp != nullptr && !UINavComp->IsValid()) continue;
+
+			bValid = NextButton->IsValid();
+		}
+
+		if (bValid)
+		{
+			NavigateTo(NextButton->ButtonIndex);
+		}
+		else
+		{
+			CurrentButton = nullptr;
+			ButtonIndex = 0;
+		}
+	}
 
 	bool bDeletedFromEnd = true;
 	int NumButtons = UINavButtons.Num();
@@ -1023,15 +1058,15 @@ void UUINavWidget::ClearGrid(int GridIndex)
 		else
 		{
 			bDeletedFromEnd = false;
-			UUINavButton* Button = UINavButtons[i];
+			UUINavButton* Button = UINavButtons[i - Difference];
 			Button->ButtonIndex -= Difference;
-			Button->GridIndex--;
-		}
-	}
 
-	if (!bDeletedFromEnd)
-	{
-		UpdateComponentArray(FirstIndex, UINavButtons.Num() - 1);
+			UUINavComponent* Component = GetUINavComponentAtIndex(i);
+			if (Component != nullptr)
+			{
+				Component->ComponentIndex = Component->NavButton->ButtonIndex;
+			}
+		}
 	}
 
 	Grid.FirstButton = nullptr;
@@ -1039,42 +1074,29 @@ void UUINavWidget::ClearGrid(int GridIndex)
 	Grid.DimensionY = 0;
 	Grid.NumGrid2DButtons = 0;
 
-	if (ButtonIndex >= FirstIndex && ButtonIndex <= ButtonIndex)
+	if (bShouldNavigate)
 	{
-		if (!bDeletedFromEnd || FirstIndex > 0)
-		{
-			bool bValid = false;
+		ButtonIndex = CurrentButton->ButtonIndex;
+	}
 
-			UUINavButton* Temp = CurrentButton;
-			while (!bValid)
-			{
-				int NewIndex = Temp->ButtonIndex + 1;
-				if (NewIndex >= UINavButtons.Num()) NewIndex = 0;
+	DeleteGridEdgeNavigationRefs(GridIndex);
+}
 
-				Temp = UINavButtons[NewIndex];
-				if (NewIndex == FirstButtonIndex) break;
+void UUINavWidget::DeleteButtonEdgeNavigationRefs(UUINavButton * Button)
+{
+	for (FGrid& Grid : NavigationGrids)
+	{
+		Grid.RemoveButtonFromEdgeNavigation(Button);
+	}
+}
 
-				UUINavComponent* UINavComp = GetUINavComponentAtIndex(NewIndex);
-				if (UINavComp != nullptr && !UINavComp->IsValid()) continue;
+void UUINavWidget::DeleteGridEdgeNavigationRefs(int GridIndex)
+{
+	for (FGrid& Grid : NavigationGrids)
+	{
+		if (Grid.GridIndex == GridIndex) continue;
 
-				bValid = Temp->IsValid();
-			}
-
-			if (!bValid)
-			{
-				CurrentButton = nullptr;
-				ButtonIndex = 0;
-			}
-			else if (Temp != nullptr)
-			{
-				NavigateTo(Temp->ButtonIndex);
-			}
-		}
-		else
-		{
-			CurrentButton = nullptr;
-			ButtonIndex = 0;
-		}
+		Grid.RemoveGridFromEdgeNavigation(GridIndex);
 	}
 }
 
@@ -1141,7 +1163,7 @@ void UUINavWidget::AppendNavigationGrid2D(int DimensionX, int DimensionY, FButto
 		return;
 	}
 
-	if (ButtonsInGrid < -1)
+	if (ButtonsInGrid < -1 || ButtonsInGrid > (DimensionX * DimensionY))
 	{
 		DISPLAYERROR("Invalid ButtonsInGrid value!");
 		return;

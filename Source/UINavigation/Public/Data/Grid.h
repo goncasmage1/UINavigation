@@ -3,6 +3,7 @@
 #pragma once
 #include "GridType.h"
 #include "ButtonNavigation.h"
+#include "UINavButton.h"
 #include "Grid.generated.h"
 
 USTRUCT(BlueprintType)
@@ -15,7 +16,7 @@ struct FGrid
 
 	}
 
-	FGrid(EGridType NewGridType, class UUINavButton* NewFirstButton, int NewGridIndex, int NewDimensionX, int NewDimensionY, FButtonNavigation NewEdgeNavigation, bool bShouldWrap, int NewNum2DButtons = -1)
+	FGrid(EGridType NewGridType, UUINavButton* NewFirstButton, int NewGridIndex, int NewDimensionX, int NewDimensionY, FButtonNavigation NewEdgeNavigation, bool bShouldWrap, int NewNum2DButtons = -1)
 	{
 		GridType = NewGridType;
 		FirstButton = NewFirstButton;
@@ -33,11 +34,45 @@ struct FGrid
 
 	int GetLastButtonIndex() const;
 
+	void RemoveButtonFromEdgeNavigation(UUINavButton* OldButton)
+	{
+		if (EdgeNavigation.LeftButton == OldButton)
+			EdgeNavigation.LeftButton = nullptr;
+
+		if (EdgeNavigation.RightButton == OldButton)
+			EdgeNavigation.RightButton = nullptr;
+
+		if (EdgeNavigation.UpButton == OldButton)
+			EdgeNavigation.UpButton = nullptr;
+
+		if (EdgeNavigation.DownButton == OldButton)
+			EdgeNavigation.DownButton = nullptr;
+	}
+
+	void RemoveGridFromEdgeNavigation(int InGridIndex)
+	{
+		if (EdgeNavigation.LeftButton != nullptr &&
+			EdgeNavigation.LeftButton->GridIndex == InGridIndex)
+			EdgeNavigation.LeftButton = nullptr;
+
+		if (EdgeNavigation.RightButton != nullptr &&
+			EdgeNavigation.RightButton->GridIndex == InGridIndex)
+			EdgeNavigation.RightButton = nullptr;
+
+		if (EdgeNavigation.UpButton != nullptr &&
+			EdgeNavigation.UpButton->GridIndex == InGridIndex)
+			EdgeNavigation.UpButton = nullptr;
+
+		if (EdgeNavigation.DownButton != nullptr &&
+			EdgeNavigation.DownButton->GridIndex == InGridIndex)
+			EdgeNavigation.DownButton = nullptr;
+	}
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = ButtonGrid)
 		EGridType GridType = EGridType::Horizontal;
 
 	UPROPERTY(BlueprintReadOnly, Category = ButtonGrid)
-		class UUINavButton* FirstButton = nullptr;
+		UUINavButton* FirstButton = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = ButtonGrid)
 		FButtonNavigation EdgeNavigation;
