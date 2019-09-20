@@ -20,6 +20,8 @@ protected:
 
 	UPROPERTY(BlueprintReadWrite, Category = UINavSlider, meta = (BindWidget, OptionalWidget = true))
 		class USpinBox* NavSpinBox;
+
+	bool bIgnoreSpinBoxCommit = false;
 	
 	UFUNCTION()
 		void HandleOnSliderValueChanged(float InValue);
