@@ -555,7 +555,7 @@ public:
 	*	and removes this widget from viewport
 	*/
 	UFUNCTION(BlueprintCallable, Category = UINavWidget)
-		void ReturnToParent();
+		virtual void ReturnToParent();
 
 	/**
 	*	Returns the grid associated with the given button
