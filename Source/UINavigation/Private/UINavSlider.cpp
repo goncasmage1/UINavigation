@@ -51,7 +51,7 @@ void UUINavSlider::NativeConstruct()
 void UUINavSlider::Update()
 {
 	Slider->SetValue((float)OptionIndex / (float)MaxOptionIndex);
-	FNumberFormattingOptions FormatOptions;
+	FNumberFormattingOptions FormatOptions = FNumberFormattingOptions();
 	FormatOptions.MaximumFractionalDigits = MaxDecimalDigits;
 	FormatOptions.MinimumFractionalDigits = MinDecimalDigits;
 
@@ -60,7 +60,11 @@ void UUINavSlider::Update()
 	if (!bUseComma) ValueText = FText::FromString(ValueText.ToString().Replace(TEXT(","),TEXT(".")));
 
 	if (NavText != nullptr) NavText->SetText(ValueText);
-	if (NavSpinBox != nullptr) NavSpinBox->SetValue(Value);
+	if (NavSpinBox != nullptr)
+	{
+		bIgnoreSpinBoxCommit = true;
+		NavSpinBox->SetValue(Value);
+	}
 }
 
 void UUINavSlider::OnNavigatedTo_Implementation()
@@ -120,6 +124,11 @@ void UUINavSlider::HandleOnSliderValueChanged(float InValue)
 
 void UUINavSlider::HandleOnSpinBoxValueChanged(float InValue, ETextCommit::Type CommitMethod)
 {
+	if (bIgnoreSpinBoxCommit)
+	{
+		bIgnoreSpinBoxCommit = false;
+		return;
+	}
 	OptionIndex = IndexFromValue(InValue);
 	Update();
 }

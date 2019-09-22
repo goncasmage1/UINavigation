@@ -539,6 +539,17 @@ public:
 	void UpdateCurrentButton(class UUINavButton* NewCurrentButton);
 
 	/**
+	*	Deletes the UINavElements in the grid at the specified index
+	*	NOTE: You must remove the UINavButtons and UINavComponents manually
+	*/
+	UFUNCTION(BlueprintCallable, Category = UINavWidget, meta = (AdvancedDisplay = 1))
+		void ClearGrid(int GridIndex, bool bAutoNavigate = true);
+
+	void DeleteButtonEdgeNavigationRefs(class UUINavButton* Button);
+
+	void DeleteGridEdgeNavigationRefs(int GridIndex);
+
+	/**
 	*	Adds this widget's parent to the viewport (if applicable)
 	*	and removes this widget from viewport
 	*/
