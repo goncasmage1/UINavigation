@@ -1149,7 +1149,7 @@ void UUINavWidget::AppendNavigationGrid2D(int DimensionX, int DimensionY, FButto
 		return;
 	}
 
-	if (NumberOfButtonsInGrids + (ButtonsInGrid == -1 ? (DimensionX * DimensionY) : ButtonsInGrid) > UINavButtons.Num())
+	if (NumberOfButtonsInGrids + (ButtonsInGrid == -1 ? (DimensionX * DimensionY) : ButtonsInGrid) > UINavButtons.Num() && ButtonsInGrid != 0)
 	{
 		DISPLAYERROR("Not enough UINavButtons to append this navigation grid!");
 		return;
@@ -1157,7 +1157,7 @@ void UUINavWidget::AppendNavigationGrid2D(int DimensionX, int DimensionY, FButto
 
 	FButtonNavigation NewNav;
 
-	if (NumberOfButtonsInGrids >= UINavButtons.Num() || UINavButtons.Num() == 0)
+	if ((NumberOfButtonsInGrids >= UINavButtons.Num() || UINavButtons.Num() == 0) && ButtonsInGrid != 0)
 	{
 		DISPLAYERROR("Not enough UINavButtons to add specified navigation dimensions!");
 		return;
@@ -1177,7 +1177,15 @@ void UUINavWidget::AppendNavigationGrid2D(int DimensionX, int DimensionY, FButto
 		}
 	}
 
-	FGrid NewGrid = FGrid(EGridType::Grid2D, UINavButtons[NumberOfButtonsInGrids], NavigationGrids.Num(), DimensionX, DimensionY, EdgeNavigation, bWrap, ButtonsInGrid);
+	FGrid NewGrid = FGrid(EGridType::Grid2D, 
+						  ButtonsInGrid != 0 ? UINavButtons[NumberOfButtonsInGrids] : nullptr,
+						  NavigationGrids.Num(), 
+						  DimensionX, 
+						  DimensionY, 
+						  EdgeNavigation, 
+						  bWrap,
+						  ButtonsInGrid);
+
 	NavigationGrids.Add(NewGrid);
 
 	int GridIndex = NavigationGrids.Num() - 1;

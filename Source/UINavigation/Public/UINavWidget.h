@@ -165,7 +165,8 @@ public:
 		class UUINavWidgetComponent* WidgetComp;
 
 	//Should this widget remove its parent from the viewport when created?
-	bool bParentRemoved = true;
+	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
+		bool bParentRemoved = true;
 
 	//If set to true, buttons will be navigated by switching button states (Normal and Hovered)
 	UPROPERTY(EditDefaultsOnly, Category = UINavWidget)
@@ -554,7 +555,7 @@ public:
 	*	and removes this widget from viewport
 	*/
 	UFUNCTION(BlueprintCallable, Category = UINavWidget)
-		void ReturnToParent();
+		virtual void ReturnToParent();
 
 	/**
 	*	Returns the grid associated with the given button
