@@ -14,8 +14,14 @@ void UUINavCollection::SetupNavigation_Implementation(const TArray<FButtonNaviga
 {
 }
 
+void UUINavCollection::PreSetup_Implementation()
+{
+}
+
 void UUINavCollection::Init(int StartIndex)
 {
+	PreSetup();
+
 	TraverseHierarquy(StartIndex);
 
 	if (ParentWidget != nullptr)
