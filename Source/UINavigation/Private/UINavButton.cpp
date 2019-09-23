@@ -1,7 +1,7 @@
 // Copyright (C) 2019 Gonçalo Marques - All Rights Reserved
 
 #include "UINavButton.h"
-
+#include "Data/Grid.h"
 
 int FGrid::GetDimension() const
 {

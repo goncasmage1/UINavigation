@@ -1,7 +1,10 @@
 // Copyright (C) 2019 Gonçalo Marques - All Rights Reserved
 
 #include "UINavSliderBox.h"
+#include "UINavWidget.h"
+#include "UINavButton.h"
 #include "Components/ProgressBar.h"
+#include "Components/TextBlock.h"
 #include "Kismet/KismetMathLibrary.h"
 
 void UUINavSliderBox::NativeConstruct()

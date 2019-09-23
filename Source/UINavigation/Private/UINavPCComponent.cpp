@@ -4,6 +4,7 @@
 #include "UINavPCComponent.h"
 #include "UINavWidget.h"
 #include "UINavSettings.h"
+#include "UINavPCReceiver.h"
 #include "Data/InputIconMapping.h"
 #include "Data/InputNameMapping.h"
 

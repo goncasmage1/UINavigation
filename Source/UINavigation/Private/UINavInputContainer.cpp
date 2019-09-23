@@ -2,6 +2,7 @@
 
 #include "UINavInputContainer.h"
 #include "UINavWidget.h"
+#include "UINavPCComponent.h"
 #include "UINavButton.h"
 #include "UINavInputBox.h"
 #include "UINavComponent.h"

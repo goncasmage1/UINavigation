@@ -17,7 +17,6 @@
 #include "Components/Image.h"
 #include "Components/Border.h"
 #include "Components/TextBlock.h"
-#include "Components/ScrollBox.h"
 #include "Components/CanvasPanelSlot.h"
 #include "Components/ActorComponent.h"
 

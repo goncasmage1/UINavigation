@@ -8,6 +8,7 @@
 #include "Data/ReceiveInputType.h"
 #include "Data/SelectorPosition.h"
 #include "Data/Grid.h"
+#include "Components/ScrollBox.h"
 #include "UINavWidget.generated.h"
 
 #define DISPLAYERROR(Text) GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, FString::Printf(TEXT("%s"), *(FString(TEXT("Error in ")).Append(GetName()).Append(TEXT(": ")).Append(Text))));
