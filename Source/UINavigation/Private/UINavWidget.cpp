@@ -281,7 +281,7 @@ void UUINavWidget::UINavSetup()
 		button->SetIsEnabled(true);
 	}
 
-	if (UINavPC != nullptr) UINavPC->ActiveWidget = this;
+	if (UINavPC != nullptr) UINavPC->SetActiveWidget(this);
 
 	if (IsSelectorValid()) TheSelector->SetVisibility(ESlateVisibility::HitTestInvisible);
 
@@ -1546,7 +1546,7 @@ void UUINavWidget::ReturnToParent()
 		if (bAllowRemoveIfRoot)
 		{
 			IUINavPCReceiver::Execute_OnRootWidgetRemoved(UINavPC->GetOwner());
-			UINavPC->ActiveWidget = nullptr;
+			UINavPC->SetActiveWidget(nullptr);
 
 			if (WidgetComp != nullptr) WidgetComp->SetWidget(nullptr);
 			else RemoveFromParent();
@@ -1562,7 +1562,7 @@ void UUINavWidget::ReturnToParent()
 		}
 		else
 		{
-			UINavPC->ActiveWidget = ParentWidget;
+			UINavPC->SetActiveWidget(ParentWidget);
 			ParentWidget->ReconfigureSetup();
 		}
 		WidgetComp->SetWidget(ParentWidget);
@@ -1580,7 +1580,7 @@ void UUINavWidget::ReturnToParent()
 		}
 		else
 		{
-			UINavPC->ActiveWidget = ParentWidget;
+			UINavPC->SetActiveWidget(ParentWidget);
 			ParentWidget->ReconfigureSetup();
 		}
 		RemoveFromParent();

@@ -39,7 +39,6 @@ void UUINavPCComponent::BeginPlay()
 
 	if (PC != nullptr && PC->IsLocalPlayerController())
 	{
-		SetupInput();
 		VerifyDefaultInputs();
 		FetchUINavActionKeys();
 	}
@@ -83,10 +82,9 @@ void UUINavPCComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAct
 	PreviousY = PosY;
 }
 
-void UUINavPCComponent::SetupInput()
+void UUINavPCComponent::BindMenuInputs()
 {
 	UInputComponent* InputComponent = PC->InputComponent;
-
 	if (InputComponent == nullptr) return;
 
 	FInputActionBinding& Action1_1 = InputComponent->BindAction("MenuUp", IE_Pressed, this, &UUINavPCComponent::StartMenuUp);
@@ -123,6 +121,21 @@ void UUINavPCComponent::SetupInput()
 
 }
 
+void UUINavPCComponent::UnbindMenuInputs()
+{
+	UInputComponent* InputComponent = PC->InputComponent;
+	if (InputComponent == nullptr) return;
+
+	int NumActionBindings = InputComponent->GetNumActionBindings();
+	for (int i = NumActionBindings - 1; i >= 0; i--)
+	{
+		if (InputComponent->GetActionBinding(i).ActionDelegate.IsBoundToObject(this))
+		{
+			InputComponent->RemoveActionBinding(i);
+		}
+	}
+}
+
 void UUINavPCComponent::VerifyDefaultInputs()
 {
 	UUINavSettings *MySettings = GetMutableDefault<UUINavSettings>();
@@ -138,6 +151,8 @@ void UUINavPCComponent::VerifyDefaultInputs()
 void UUINavPCComponent::BindMouseWorkaround()
 {
 	UInputComponent* InputComponent = PC->InputComponent;
+	if (InputComponent == nullptr) return;
+
 
 	FInputKeyBinding& Action = InputComponent->BindKey(EKeys::AnyKey, IE_Pressed, this, &UUINavPCComponent::MouseInputWorkaround);
 	Action.bExecuteWhenPaused = true;
@@ -147,6 +162,8 @@ void UUINavPCComponent::BindMouseWorkaround()
 void UUINavPCComponent::UnbindMouseWorkaround()
 {
 	UInputComponent* InputComponent = PC->InputComponent;
+	if (InputComponent == nullptr) return;
+
 
 	for (int i = 0; i < InputComponent->KeyBindings.Num(); i++)
 	{
@@ -156,6 +173,20 @@ void UUINavPCComponent::UnbindMouseWorkaround()
 			break;
 		}
 	}
+}
+
+void UUINavPCComponent::SetActiveWidget(UUINavWidget * NewActiveWidget)
+{
+	if (ActiveWidget != nullptr && NewActiveWidget == nullptr)
+	{
+		UnbindMenuInputs();
+		PressedActions.Empty();
+	}
+	else if (ActiveWidget == nullptr && NewActiveWidget != nullptr)
+	{
+		BindMenuInputs();
+	}
+	ActiveWidget = NewActiveWidget;
 }
 
 void UUINavPCComponent::TimerCallback()
@@ -565,6 +596,7 @@ void UUINavPCComponent::MenuRight()
 
 void UUINavPCComponent::MenuSelect()
 {
+	UE_LOG(LogTemp, Warning, TEXT("MenuSelect"));
 	IUINavPCReceiver::Execute_OnSelect(GetOwner());
 	VerifyInputTypeChangeByAction(TEXT("MenuSelect"));
 
@@ -576,6 +608,7 @@ void UUINavPCComponent::MenuSelect()
 
 void UUINavPCComponent::MenuReturn()
 {
+	UE_LOG(LogTemp, Warning, TEXT("MenuReturn"));
 	IUINavPCReceiver::Execute_OnReturn(GetOwner());
 	VerifyInputTypeChangeByAction(TEXT("MenuReturn"));
 
@@ -638,6 +671,8 @@ void UUINavPCComponent::StartMenuUp()
 {
 	if (Direction == ENavigationDirection::Up) return;
 
+	UE_LOG(LogTemp, Warning, TEXT("MenuUp"));
+
 	MenuUp();
 	VerifyInputTypeChangeByAction(TEXT("MenuUp"));
 	Direction = ENavigationDirection::Up;
@@ -650,6 +685,8 @@ void UUINavPCComponent::StartMenuUp()
 void UUINavPCComponent::StartMenuDown()
 {
 	if (Direction == ENavigationDirection::Down) return;
+
+	UE_LOG(LogTemp, Warning, TEXT("MenuDown"));
 
 	MenuDown();
 	VerifyInputTypeChangeByAction(TEXT("MenuDown"));
@@ -664,6 +701,8 @@ void UUINavPCComponent::StartMenuLeft()
 {
 	if (Direction == ENavigationDirection::Left) return;
 
+	UE_LOG(LogTemp, Warning, TEXT("MenuLeft"));
+
 	MenuLeft();
 	VerifyInputTypeChangeByAction(TEXT("MenuLeft"));
 	Direction = ENavigationDirection::Left;
@@ -676,6 +715,8 @@ void UUINavPCComponent::StartMenuLeft()
 void UUINavPCComponent::StartMenuRight()
 {
 	if (Direction == ENavigationDirection::Right) return;
+
+	UE_LOG(LogTemp, Warning, TEXT("MenuRight"));
 
 	MenuRight();
 	VerifyInputTypeChangeByAction(TEXT("MenuRight"));
