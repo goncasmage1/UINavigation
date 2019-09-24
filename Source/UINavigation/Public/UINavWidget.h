@@ -169,6 +169,10 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
 		bool bParentRemoved = true;
 
+	//Did this widget destroy its parent?
+	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
+		bool bParentDestroyed = true;
+
 	//If set to true, buttons will be navigated by switching button states (Normal and Hovered)
 	UPROPERTY(EditDefaultsOnly, Category = UINavWidget)
 		bool bUseButtonStates = false;
@@ -184,7 +188,7 @@ public:
 
 	//If set to true, this widget will be removed if it has no ParentWidget and is returned from
 	UPROPERTY(EditDefaultsOnly, Category = UINavWidget)
-		bool bAllowRemoveIfRoot = false;
+		bool bAllowRemoveIfRoot = true;
 
 	UPROPERTY(EditDefaultsOnly, Category = UINavWidget)
 		bool bAnimateScrollBoxes = false;

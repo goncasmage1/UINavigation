@@ -31,6 +31,12 @@ void UUINavWidget::NativeConstruct()
 	if (ParentWidget != nullptr && ParentWidget->IsInViewport() && bParentRemoved)
 	{
 		ParentWidget->RemoveFromParent();
+
+		if (bParentDestroyed)
+		{
+			ParentWidget->Destruct();
+			ParentWidget = nullptr;
+		}
 	}
 
 	//If this widget was added through a child widget, destroy it
@@ -1498,7 +1504,7 @@ void UUINavWidget::OnHorizCompNavigateRight_Implementation(int Index)
 {
 }
 
-UWidget* UUINavWidget::GoToWidget(TSubclassOf<UUINavWidget> NewWidgetClass, bool bRemoveParent, int ZOrder)
+UWidget* UUINavWidget::GoToWidget(TSubclassOf<UUINavWidget> NewWidgetClass, bool bRemoveParent, bool bDestroyParent, int ZOrder)
 {
 	if (NewWidgetClass == nullptr)
 	{
@@ -1508,15 +1514,16 @@ UWidget* UUINavWidget::GoToWidget(TSubclassOf<UUINavWidget> NewWidgetClass, bool
 
 	APlayerController* PC = Cast<APlayerController>(UINavPC->GetOwner());
 	UUINavWidget* NewWidget = CreateWidget<UUINavWidget>(PC, NewWidgetClass);
-	return GoToBuiltWidget(NewWidget, bRemoveParent, ZOrder);
+	return GoToBuiltWidget(NewWidget, bRemoveParent, bDestroyParent, ZOrder);
 }
 
-UWidget * UUINavWidget::GoToBuiltWidget(UUINavWidget* NewWidget, bool bRemoveParent, int ZOrder)
+UWidget * UUINavWidget::GoToBuiltWidget(UUINavWidget* NewWidget, bool bRemoveParent, bool bDestroyParent, int ZOrder)
 {
 	if (NewWidget == nullptr) return nullptr;
 	APlayerController* PC = Cast<APlayerController>(UINavPC->GetOwner());
 	NewWidget->ParentWidget = this;
 	NewWidget->bParentRemoved = bRemoveParent;
+	NewWidget->bParentDestroyed = bDestroyParent;
 	NewWidget->WidgetComp = WidgetComp;
 	if (WidgetComp != nullptr)
 	{
@@ -1549,7 +1556,7 @@ void UUINavWidget::ReturnToParent()
 
 	if (WidgetComp != nullptr)
 	{
-		if (bParentRemoved)
+		if (bParentDestroyed || bParentRemoved)
 		{
 			ParentWidget->ReturnedFromWidget = this;
 		}
