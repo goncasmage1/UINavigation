@@ -1783,6 +1783,28 @@ UUINavButton* UUINavWidget::FetchButtonByDirection(ENavigationDirection Directio
 	return NextButton;
 }
 
+UUINavButton * UUINavWidget::GetButtonAtIndex(int InButtonIndex)
+{
+	if (InButtonIndex < 0 || InButtonIndex >= UINavButtons.Num())
+	{
+		return nullptr;
+	}
+	else return UINavButtons[InButtonIndex];
+}
+
+void UUINavWidget::GetGridAtIndex(int GridIndex, FGrid & Grid, bool & IsValid)
+{
+	if (GridIndex < 0 || GridIndex >= NavigationGrids.Num())
+	{
+		IsValid = false;
+	}
+	else
+	{
+		IsValid = true;
+		Grid = NavigationGrids[GridIndex];
+	}
+}
+
 void UUINavWidget::GetButtonGrid(UUINavButton * Button, FGrid& ButtonGrid, bool& IsValid)
 {
 	if (NavigationGrids.Num() > Button->GridIndex)
@@ -1798,11 +1820,50 @@ void UUINavWidget::GetButtonGrid(UUINavButton * Button, FGrid& ButtonGrid, bool&
 	}
 }
 
+void UUINavWidget::GetButtonGridFromIndex(int InButtonIndex, FGrid & ButtonGrid, bool & IsValid)
+{
+	if (InButtonIndex < 0 || InButtonIndex >= UINavButtons.Num())
+	{
+		IsValid = false;
+	}
+	else
+	{
+		GetButtonGrid(UINavButtons[InButtonIndex], ButtonGrid, IsValid);
+	}
+}
+
+int UUINavWidget::GetIndexInGridFromButtonIndex(int InButtonIndex)
+{
+	if (InButtonIndex < 0 || InButtonIndex >= UINavButtons.Num())
+	{
+		return -1;
+	}
+	else
+	{
+		return UINavButtons[ButtonIndex]->IndexInGrid;
+	}
+}
+
+int UUINavWidget::GetGridIndexFromButtonIndex(int InButtonIndex)
+{
+	if (InButtonIndex < 0 || InButtonIndex >= UINavButtons.Num())
+	{
+		return -1;
+	}
+	else
+	{
+		return UINavButtons[ButtonIndex]->GridIndex;
+	}
+}
+
 int UUINavWidget::GetGridStartingIndex(int GridIndex)
 {
 	if (GridIndex < 0 || GridIndex >= NavigationGrids.Num()) return -1;
 
-	if (GridIndex == 0) return 0;
+	if (NavigationGrids[GridIndex].FirstButton != nullptr)
+	{
+		return NavigationGrids[GridIndex].FirstButton->ButtonIndex;
+	}
 	else
 	{
 		for (int i = GridIndex - 1; i >= 0; i--)
@@ -1813,7 +1874,7 @@ int UUINavWidget::GetGridStartingIndex(int GridIndex)
 			}
 		}
 	}
-	return 0;
+	return -1;
 }
 
 UUINavButton * UUINavWidget::GetLastButtonInGrid(const FGrid Grid)

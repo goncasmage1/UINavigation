@@ -463,17 +463,21 @@ public:
 	*	Adds given widget to screen (strongly recomended over manual alternative)
 	*
 	*	@param	WidgetClass  The class of the widget to add to the screen
+	*	@param	RemoveParent  Whether to remove the parent widget (this widget) from the viewport
+	*	@param  DestroyParent  Whether to destruct the parent widget (this widget)
 	*/
 	UFUNCTION(BlueprintCallable, Category = UINavWidget, meta = (AdvancedDisplay=2))
-		UWidget* GoToWidget(TSubclassOf<UUINavWidget> NewWidgetClass, bool bRemoveParent, int ZOrder = 0);
+		UWidget* GoToWidget(TSubclassOf<UUINavWidget> NewWidgetClass, bool bRemoveParent, bool bDestroyParent = false, int ZOrder = 0);
 
 	/**
 	*	Adds given widget to screen (strongly recomended over manual alternative)
 	*
 	*	@param	Widget  Object instance of the UINavWidget to add to the screen
+	*	@param	RemoveParent  Whether to remove the parent widget (this widget) from the viewport
+	*	@param  DestroyParent  Whether to destruct the parent widget (this widget)
 	*/
 	UFUNCTION(BlueprintCallable, Category = UINavWidget, meta = (AdvancedDisplay=2))
-		UWidget* GoToBuiltWidget(UUINavWidget* NewWidget, bool bRemoveParent, int ZOrder = 0);
+		UWidget* GoToBuiltWidget(UUINavWidget* NewWidget, bool bRemoveParent, bool bDestroyParent = false, int ZOrder = 0);
 
 	/**
 	*	Setup a new UINavButton added at runtime (must be added to viewport manually)
@@ -562,6 +566,12 @@ public:
 	UFUNCTION(BlueprintCallable, Category = UINavWidget)
 		virtual void ReturnToParent();
 
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
+		class UUINavButton* GetButtonAtIndex(int InButtonIndex);
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
+		void GetGridAtIndex(int GridIndex, FGrid& Grid, bool& IsValid);
+
 	/**
 	*	Returns the grid associated with the given button
 	*
@@ -571,6 +581,36 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
 		void GetButtonGrid(class UUINavButton* Button, FGrid& ButtonGrid, bool &IsValid);
 
+	/**
+	*	Returns the grid associated with the given button
+	*
+	*	@return ButtonGrid The button's associated grid
+	*	@return IsValid Whether the returned grid is valid
+	*/
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
+		void GetButtonGridFromIndex(int InButtonIndex, FGrid& ButtonGrid, bool &IsValid);
+
+	/**
+	*	Returns the given button's index in its grid
+	*	-1 if the index is invalid
+	*/
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
+		int GetIndexInGridFromButtonIndex(int InButtonIndex);
+
+	/**
+	*	Returns the index of the grid associated with the given button
+	*	-1 if the index is invalid
+	*/
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
+		int GetGridIndexFromButtonIndex(int InButtonIndex);
+
+	/**
+	*	Returns the index of the first button in this grid.
+	*	-1 if the index is invalid for some reason.
+	*
+	*	@return ButtonGrid The button's associated grid
+	*	@return IsValid Whether the returned grid is valid
+	*/
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
 		int GetGridStartingIndex(int GridIndex);
 
