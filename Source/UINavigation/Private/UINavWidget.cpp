@@ -32,7 +32,7 @@ void UUINavWidget::NativeConstruct()
 	{
 		ParentWidget->RemoveFromParent();
 
-		if (bParentDestroyed)
+		if (bShouldDestroyParent)
 		{
 			ParentWidget->Destruct();
 			ParentWidget = nullptr;
@@ -1528,7 +1528,7 @@ UWidget * UUINavWidget::GoToBuiltWidget(UUINavWidget* NewWidget, bool bRemovePar
 	APlayerController* PC = Cast<APlayerController>(UINavPC->GetOwner());
 	NewWidget->ParentWidget = this;
 	NewWidget->bParentRemoved = bRemoveParent;
-	NewWidget->bParentDestroyed = bDestroyParent;
+	NewWidget->bShouldDestroyParent = bDestroyParent;
 	NewWidget->WidgetComp = WidgetComp;
 	if (WidgetComp != nullptr)
 	{
@@ -1544,7 +1544,7 @@ UWidget * UUINavWidget::GoToBuiltWidget(UUINavWidget* NewWidget, bool bRemovePar
 	return NewWidget;
 }
 
-void UUINavWidget::ReturnToParent()
+void UUINavWidget::ReturnToParent(bool bRemoveAllParents)
 {
 	if (ParentWidget == nullptr)
 	{
@@ -1561,35 +1561,61 @@ void UUINavWidget::ReturnToParent()
 
 	if (WidgetComp != nullptr)
 	{
-		if (bParentDestroyed || bParentRemoved)
+		if (bRemoveAllParents)
 		{
-			ParentWidget->ReturnedFromWidget = this;
+			WidgetComp->SetWidget(nullptr);
 		}
 		else
 		{
-			UINavPC->SetActiveWidget(ParentWidget);
-			ParentWidget->ReconfigureSetup();
+			if (bParentRemoved)
+			{
+				ParentWidget->ReturnedFromWidget = this;
+			}
+			else
+			{
+				UINavPC->SetActiveWidget(ParentWidget);
+				ParentWidget->ReconfigureSetup();
+			}
+			WidgetComp->SetWidget(ParentWidget);
+
 		}
-		WidgetComp->SetWidget(ParentWidget);
 	}
 	else
 	{
-		if (HasUserFocus(Cast<APlayerController>(UINavPC->GetOwner())))
-			ParentWidget->SetUserFocus(Cast<APlayerController>(UINavPC->GetOwner()));
-
-		//If parent was removed, add it to viewport
-		if (bParentRemoved)
+		if (bRemoveAllParents)
 		{
-			ParentWidget->ReturnedFromWidget = this;
-			ParentWidget->AddToViewport();
+			IUINavPCReceiver::Execute_OnRootWidgetRemoved(UINavPC->GetOwner());
+			UINavPC->SetActiveWidget(nullptr);
+			ParentWidget->RemoveAllParents();
+			RemoveFromParent();
+			Destruct();
 		}
 		else
 		{
-			UINavPC->SetActiveWidget(ParentWidget);
-			ParentWidget->ReconfigureSetup();
+			//If parent was removed, add it to viewport
+			if (bParentRemoved)
+			{
+				ParentWidget->ReturnedFromWidget = this;
+				ParentWidget->AddToViewport();
+			}
+			else
+			{
+				UINavPC->SetActiveWidget(ParentWidget);
+				ParentWidget->ReconfigureSetup();
+			}
+			RemoveFromParent();
 		}
-		RemoveFromParent();
 	}
+}
+
+void UUINavWidget::RemoveAllParents()
+{
+	if (ParentWidget != nullptr)
+	{
+		ParentWidget->RemoveAllParents();
+	}
+	RemoveFromParent();
+	Destruct();
 }
 
 void UUINavWidget::MenuNavigate(ENavigationDirection Direction)

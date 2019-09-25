@@ -169,9 +169,10 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
 		bool bParentRemoved = true;
 
-	//Did this widget destroy its parent?
+	//Should this widget destroy its parent
 	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
-		bool bParentDestroyed = true;
+		bool bShouldDestroyParent = true;
+
 
 	//If set to true, buttons will be navigated by switching button states (Normal and Hovered)
 	UPROPERTY(EditDefaultsOnly, Category = UINavWidget)
@@ -564,7 +565,10 @@ public:
 	*	and removes this widget from viewport
 	*/
 	UFUNCTION(BlueprintCallable, Category = UINavWidget)
-		virtual void ReturnToParent();
+		virtual void ReturnToParent(bool bRemoveAllParents = false);
+
+	void RemoveAllParents();
+
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
 		class UUINavButton* GetButtonAtIndex(int InButtonIndex);
