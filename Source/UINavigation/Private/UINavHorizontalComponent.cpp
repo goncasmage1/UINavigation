@@ -2,6 +2,7 @@
 
 
 #include "UINavHorizontalComponent.h"
+#include "Components/TextBlock.h"
 
 
 void UUINavHorizontalComponent::NavigateLeft()

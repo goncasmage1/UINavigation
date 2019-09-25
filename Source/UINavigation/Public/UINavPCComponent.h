@@ -17,6 +17,9 @@ class UINAVIGATION_API UUINavPCComponent : public UActorComponent
 
 protected:
 
+	UPROPERTY(BlueprintReadOnly, Category = UINavController)
+		class UUINavWidget* ActiveWidget;
+
 	class APlayerController* PC;
 
 	ENavigationDirection Direction = ENavigationDirection::None;
@@ -71,7 +74,8 @@ protected:
 	void NotifyInputTypeChange(EInputType NewInputType);
 
 	virtual void Activate(bool bReset) override;
-	void SetupInput();
+	void BindMenuInputs();
+	void UnbindMenuInputs();
 	virtual void BeginPlay() override;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
@@ -82,9 +86,6 @@ public:
 	//Indicates whether the player can navigate the widget
 	UPROPERTY(BlueprintReadWrite, Category = UINavController)
 		bool bAllowNavigation = true;
-
-	UPROPERTY(BlueprintReadWrite, Category = UINavController)
-		class UUINavWidget* ActiveWidget;
 
 	UPROPERTY(BlueprintReadWrite, Category = UINavController)
 		EInputType CurrentInputType = EInputType::Keyboard;
@@ -233,6 +234,9 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
 		TArray<FKey> GetInputKeysFromName(FName InputName);
 
+	UFUNCTION(BlueprintCallable, Category = UINavController)
+		void SetActiveWidget(class UUINavWidget* NewActiveWidget);
+
 	void MenuUp();
 	void MenuDown();
 	void MenuLeft();
@@ -254,9 +258,11 @@ public:
 	void StartMenuRight();
 	void MenuRightRelease();
 
-	FORCEINLINE EInputType GetCurrentInputType() const { return CurrentInputType; }
+	UFUNCTION(BlueprintCallable, Category = UINavController)
+		FORCEINLINE EInputType GetCurrentInputType() const { return CurrentInputType; }
 
-	FORCEINLINE UUINavWidget* GetActiveWidget() const { return ActiveWidget; }
+	UFUNCTION(BlueprintCallable, Category = UINavController)
+		FORCEINLINE UUINavWidget* GetActiveWidget() const { return ActiveWidget; }
 
 		
 };

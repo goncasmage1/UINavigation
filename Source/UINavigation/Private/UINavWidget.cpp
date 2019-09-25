@@ -17,7 +17,6 @@
 #include "Components/Image.h"
 #include "Components/Border.h"
 #include "Components/TextBlock.h"
-#include "Components/ScrollBox.h"
 #include "Components/CanvasPanelSlot.h"
 #include "Components/ActorComponent.h"
 
@@ -32,6 +31,12 @@ void UUINavWidget::NativeConstruct()
 	if (ParentWidget != nullptr && ParentWidget->IsInViewport() && bParentRemoved)
 	{
 		ParentWidget->RemoveFromParent();
+
+		if (bShouldDestroyParent)
+		{
+			ParentWidget->Destruct();
+			ParentWidget = nullptr;
+		}
 	}
 
 	//If this widget was added through a child widget, destroy it
@@ -39,6 +44,10 @@ void UUINavWidget::NativeConstruct()
 	{
 		if (WidgetComp == nullptr) ReturnedFromWidget->Destruct();
 		ReturnedFromWidget = nullptr;
+
+		APlayerController* PC = Cast<APlayerController>(UINavPC->GetOwner());
+		SetUserFocus(PC);
+		SetKeyboardFocus();
 	}
 
 	PreSetup();
@@ -276,7 +285,7 @@ void UUINavWidget::UINavSetup()
 		button->SetIsEnabled(true);
 	}
 
-	if (UINavPC != nullptr) UINavPC->ActiveWidget = this;
+	if (UINavPC != nullptr) UINavPC->SetActiveWidget(this);
 
 	if (IsSelectorValid()) TheSelector->SetVisibility(ESlateVisibility::HitTestInvisible);
 
@@ -1455,6 +1464,7 @@ void UUINavWidget::OnPreSelect(int Index)
 		UINavInputBoxes[InputBoxIndex / KeysPerInput]->NotifySelected(InputBoxIndex % KeysPerInput);
 		ReceiveInputType = UINavInputBoxes[InputBoxIndex / KeysPerInput]->bIsAxis ? EReceiveInputType::Axis : EReceiveInputType::Action;
 		SetUserFocus(Cast<APlayerController>(UINavPC->GetOwner()));
+		SetKeyboardFocus();
 		bWaitForInput = true;
 	}
 	else
@@ -1499,7 +1509,7 @@ void UUINavWidget::OnHorizCompNavigateRight_Implementation(int Index)
 {
 }
 
-UWidget* UUINavWidget::GoToWidget(TSubclassOf<UUINavWidget> NewWidgetClass, bool bRemoveParent, int ZOrder)
+UWidget* UUINavWidget::GoToWidget(TSubclassOf<UUINavWidget> NewWidgetClass, bool bRemoveParent, bool bDestroyParent, int ZOrder)
 {
 	if (NewWidgetClass == nullptr)
 	{
@@ -1509,15 +1519,16 @@ UWidget* UUINavWidget::GoToWidget(TSubclassOf<UUINavWidget> NewWidgetClass, bool
 
 	APlayerController* PC = Cast<APlayerController>(UINavPC->GetOwner());
 	UUINavWidget* NewWidget = CreateWidget<UUINavWidget>(PC, NewWidgetClass);
-	return GoToBuiltWidget(NewWidget, bRemoveParent, ZOrder);
+	return GoToBuiltWidget(NewWidget, bRemoveParent, bDestroyParent, ZOrder);
 }
 
-UWidget * UUINavWidget::GoToBuiltWidget(UUINavWidget* NewWidget, bool bRemoveParent, int ZOrder)
+UWidget * UUINavWidget::GoToBuiltWidget(UUINavWidget* NewWidget, bool bRemoveParent, bool bDestroyParent, int ZOrder)
 {
 	if (NewWidget == nullptr) return nullptr;
 	APlayerController* PC = Cast<APlayerController>(UINavPC->GetOwner());
 	NewWidget->ParentWidget = this;
 	NewWidget->bParentRemoved = bRemoveParent;
+	NewWidget->bShouldDestroyParent = bDestroyParent;
 	NewWidget->WidgetComp = WidgetComp;
 	if (WidgetComp != nullptr)
 	{
@@ -1525,22 +1536,22 @@ UWidget * UUINavWidget::GoToBuiltWidget(UUINavWidget* NewWidget, bool bRemovePar
 	}
 	else
 	{
-		if (HasUserFocus(PC))
-			NewWidget->SetUserFocus(PC);
 		NewWidget->AddToViewport(ZOrder);
+		NewWidget->SetUserFocus(PC);
+		NewWidget->SetKeyboardFocus();
 	}
 	CleanSetup();
 	return NewWidget;
 }
 
-void UUINavWidget::ReturnToParent()
+void UUINavWidget::ReturnToParent(bool bRemoveAllParents)
 {
 	if (ParentWidget == nullptr)
 	{
 		if (bAllowRemoveIfRoot)
 		{
 			IUINavPCReceiver::Execute_OnRootWidgetRemoved(UINavPC->GetOwner());
-			UINavPC->ActiveWidget = nullptr;
+			UINavPC->SetActiveWidget(nullptr);
 
 			if (WidgetComp != nullptr) WidgetComp->SetWidget(nullptr);
 			else RemoveFromParent();
@@ -1550,35 +1561,61 @@ void UUINavWidget::ReturnToParent()
 
 	if (WidgetComp != nullptr)
 	{
-		if (bParentRemoved)
+		if (bRemoveAllParents)
 		{
-			ParentWidget->ReturnedFromWidget = this;
+			WidgetComp->SetWidget(nullptr);
 		}
 		else
 		{
-			UINavPC->ActiveWidget = ParentWidget;
-			ParentWidget->ReconfigureSetup();
+			if (bParentRemoved)
+			{
+				ParentWidget->ReturnedFromWidget = this;
+			}
+			else
+			{
+				UINavPC->SetActiveWidget(ParentWidget);
+				ParentWidget->ReconfigureSetup();
+			}
+			WidgetComp->SetWidget(ParentWidget);
+
 		}
-		WidgetComp->SetWidget(ParentWidget);
 	}
 	else
 	{
-		if (HasUserFocus(Cast<APlayerController>(UINavPC->GetOwner())))
-			ParentWidget->SetUserFocus(Cast<APlayerController>(UINavPC->GetOwner()));
-
-		//If parent was removed, add it to viewport
-		if (bParentRemoved)
+		if (bRemoveAllParents)
 		{
-			ParentWidget->ReturnedFromWidget = this;
-			ParentWidget->AddToViewport();
+			IUINavPCReceiver::Execute_OnRootWidgetRemoved(UINavPC->GetOwner());
+			UINavPC->SetActiveWidget(nullptr);
+			ParentWidget->RemoveAllParents();
+			RemoveFromParent();
+			Destruct();
 		}
 		else
 		{
-			UINavPC->ActiveWidget = ParentWidget;
-			ParentWidget->ReconfigureSetup();
+			//If parent was removed, add it to viewport
+			if (bParentRemoved)
+			{
+				ParentWidget->ReturnedFromWidget = this;
+				ParentWidget->AddToViewport();
+			}
+			else
+			{
+				UINavPC->SetActiveWidget(ParentWidget);
+				ParentWidget->ReconfigureSetup();
+			}
+			RemoveFromParent();
 		}
-		RemoveFromParent();
 	}
+}
+
+void UUINavWidget::RemoveAllParents()
+{
+	if (ParentWidget != nullptr)
+	{
+		ParentWidget->RemoveAllParents();
+	}
+	RemoveFromParent();
+	Destruct();
 }
 
 void UUINavWidget::MenuNavigate(ENavigationDirection Direction)
@@ -1777,6 +1814,28 @@ UUINavButton* UUINavWidget::FetchButtonByDirection(ENavigationDirection Directio
 	return NextButton;
 }
 
+UUINavButton * UUINavWidget::GetButtonAtIndex(int InButtonIndex)
+{
+	if (InButtonIndex < 0 || InButtonIndex >= UINavButtons.Num())
+	{
+		return nullptr;
+	}
+	else return UINavButtons[InButtonIndex];
+}
+
+void UUINavWidget::GetGridAtIndex(int GridIndex, FGrid & Grid, bool & IsValid)
+{
+	if (GridIndex < 0 || GridIndex >= NavigationGrids.Num())
+	{
+		IsValid = false;
+	}
+	else
+	{
+		IsValid = true;
+		Grid = NavigationGrids[GridIndex];
+	}
+}
+
 void UUINavWidget::GetButtonGrid(UUINavButton * Button, FGrid& ButtonGrid, bool& IsValid)
 {
 	if (NavigationGrids.Num() > Button->GridIndex)
@@ -1792,11 +1851,50 @@ void UUINavWidget::GetButtonGrid(UUINavButton * Button, FGrid& ButtonGrid, bool&
 	}
 }
 
+void UUINavWidget::GetButtonGridFromIndex(int InButtonIndex, FGrid & ButtonGrid, bool & IsValid)
+{
+	if (InButtonIndex < 0 || InButtonIndex >= UINavButtons.Num())
+	{
+		IsValid = false;
+	}
+	else
+	{
+		GetButtonGrid(UINavButtons[InButtonIndex], ButtonGrid, IsValid);
+	}
+}
+
+int UUINavWidget::GetIndexInGridFromButtonIndex(int InButtonIndex)
+{
+	if (InButtonIndex < 0 || InButtonIndex >= UINavButtons.Num())
+	{
+		return -1;
+	}
+	else
+	{
+		return UINavButtons[ButtonIndex]->IndexInGrid;
+	}
+}
+
+int UUINavWidget::GetGridIndexFromButtonIndex(int InButtonIndex)
+{
+	if (InButtonIndex < 0 || InButtonIndex >= UINavButtons.Num())
+	{
+		return -1;
+	}
+	else
+	{
+		return UINavButtons[ButtonIndex]->GridIndex;
+	}
+}
+
 int UUINavWidget::GetGridStartingIndex(int GridIndex)
 {
 	if (GridIndex < 0 || GridIndex >= NavigationGrids.Num()) return -1;
 
-	if (GridIndex == 0) return 0;
+	if (NavigationGrids[GridIndex].FirstButton != nullptr)
+	{
+		return NavigationGrids[GridIndex].FirstButton->ButtonIndex;
+	}
 	else
 	{
 		for (int i = GridIndex - 1; i >= 0; i--)
@@ -1807,7 +1905,7 @@ int UUINavWidget::GetGridStartingIndex(int GridIndex)
 			}
 		}
 	}
-	return 0;
+	return -1;
 }
 
 UUINavButton * UUINavWidget::GetLastButtonInGrid(const FGrid Grid)

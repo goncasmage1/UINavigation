@@ -1,6 +1,7 @@
 // Copyright (C) 2019 Gonçalo Marques - All Rights Reserved
 
 #include "UINavComponentBox.h"
+#include "UINavWidget.h"
 #include "UINavButton.h"
 #include "Components/TextBlock.h"
 
