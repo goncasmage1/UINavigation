@@ -3,6 +3,7 @@
 #pragma once
 
 #include "UObject/NoExportTypes.h"
+#include "GameFramework/PlayerInput.h"
 #include "UINavSettings.generated.h"
 
 /**

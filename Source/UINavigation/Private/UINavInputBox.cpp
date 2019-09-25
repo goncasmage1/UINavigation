@@ -4,6 +4,7 @@
 #include "UINavInputComponent.h"
 #include "UINavInputContainer.h"
 #include "UINavSettings.h"
+#include "UINavPCComponent.h"
 #include "Components/TextBlock.h"
 #include "Components/HorizontalBox.h"
 #include "Components/Image.h"
@@ -208,7 +209,7 @@ bool UUINavInputBox::UpdateKeyIconForKey(int Index)
 			KeyIcon = (FInputIconMapping*)Container->UINavPC->KeyboardMouseKeyIconData->GetRowMap()[Key.GetFName()];
 		}
 	}
-	if (KeyIcon == nullptr) return false;
+	if (KeyIcon == nullptr || KeyIcon->InputIcon == nullptr) return false;
 
 	UTexture2D* NewTexture = KeyIcon->InputIcon.LoadSynchronous();
 	if (NewTexture != nullptr)

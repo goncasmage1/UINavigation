@@ -20,6 +20,10 @@ public:
 		void SetupNavigation(const TArray<FButtonNavigation>& EdgeNavigations);
 	virtual void SetupNavigation_Implementation(const TArray<FButtonNavigation>& EdgeNavigations);
 
+	UFUNCTION(BlueprintNativeEvent, Category = UINavCollection)
+		void PreSetup();
+	virtual void PreSetup_Implementation();
+
 	void Init(int StartIndex);
 
 	void TraverseHierarquy(int StartIndex);
