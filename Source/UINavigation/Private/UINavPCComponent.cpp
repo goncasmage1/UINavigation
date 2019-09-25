@@ -596,7 +596,6 @@ void UUINavPCComponent::MenuRight()
 
 void UUINavPCComponent::MenuSelect()
 {
-	UE_LOG(LogTemp, Warning, TEXT("MenuSelect"));
 	IUINavPCReceiver::Execute_OnSelect(GetOwner());
 	VerifyInputTypeChangeByAction(TEXT("MenuSelect"));
 
@@ -608,7 +607,6 @@ void UUINavPCComponent::MenuSelect()
 
 void UUINavPCComponent::MenuReturn()
 {
-	UE_LOG(LogTemp, Warning, TEXT("MenuReturn"));
 	IUINavPCReceiver::Execute_OnReturn(GetOwner());
 	VerifyInputTypeChangeByAction(TEXT("MenuReturn"));
 
@@ -671,8 +669,6 @@ void UUINavPCComponent::StartMenuUp()
 {
 	if (Direction == ENavigationDirection::Up) return;
 
-	UE_LOG(LogTemp, Warning, TEXT("MenuUp"));
-
 	MenuUp();
 	VerifyInputTypeChangeByAction(TEXT("MenuUp"));
 	Direction = ENavigationDirection::Up;
@@ -685,8 +681,6 @@ void UUINavPCComponent::StartMenuUp()
 void UUINavPCComponent::StartMenuDown()
 {
 	if (Direction == ENavigationDirection::Down) return;
-
-	UE_LOG(LogTemp, Warning, TEXT("MenuDown"));
 
 	MenuDown();
 	VerifyInputTypeChangeByAction(TEXT("MenuDown"));
@@ -701,8 +695,6 @@ void UUINavPCComponent::StartMenuLeft()
 {
 	if (Direction == ENavigationDirection::Left) return;
 
-	UE_LOG(LogTemp, Warning, TEXT("MenuLeft"));
-
 	MenuLeft();
 	VerifyInputTypeChangeByAction(TEXT("MenuLeft"));
 	Direction = ENavigationDirection::Left;
@@ -715,8 +707,6 @@ void UUINavPCComponent::StartMenuLeft()
 void UUINavPCComponent::StartMenuRight()
 {
 	if (Direction == ENavigationDirection::Right) return;
-
-	UE_LOG(LogTemp, Warning, TEXT("MenuRight"));
 
 	MenuRight();
 	VerifyInputTypeChangeByAction(TEXT("MenuRight"));
