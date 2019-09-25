@@ -44,6 +44,10 @@ void UUINavWidget::NativeConstruct()
 	{
 		if (WidgetComp == nullptr) ReturnedFromWidget->Destruct();
 		ReturnedFromWidget = nullptr;
+
+		APlayerController* PC = Cast<APlayerController>(UINavPC->GetOwner());
+		SetUserFocus(PC);
+		SetKeyboardFocus();
 	}
 
 	PreSetup();
@@ -1460,6 +1464,7 @@ void UUINavWidget::OnPreSelect(int Index)
 		UINavInputBoxes[InputBoxIndex / KeysPerInput]->NotifySelected(InputBoxIndex % KeysPerInput);
 		ReceiveInputType = UINavInputBoxes[InputBoxIndex / KeysPerInput]->bIsAxis ? EReceiveInputType::Axis : EReceiveInputType::Action;
 		SetUserFocus(Cast<APlayerController>(UINavPC->GetOwner()));
+		SetKeyboardFocus();
 		bWaitForInput = true;
 	}
 	else
@@ -1531,9 +1536,9 @@ UWidget * UUINavWidget::GoToBuiltWidget(UUINavWidget* NewWidget, bool bRemovePar
 	}
 	else
 	{
-		if (HasUserFocus(PC))
-			NewWidget->SetUserFocus(PC);
 		NewWidget->AddToViewport(ZOrder);
+		NewWidget->SetUserFocus(PC);
+		NewWidget->SetKeyboardFocus();
 	}
 	CleanSetup();
 	return NewWidget;
