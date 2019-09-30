@@ -508,6 +508,32 @@ FReply UUINavPCComponent::OnActionReleased(FString ActionName, FKey Key)
 	else return FReply::Unhandled();
 }
 
+EInputMode UUINavPCComponent::GetInputMode()
+{
+	if (PC != nullptr)
+	{
+		UGameViewportClient* GameViewportClient = PC->GetWorld()->GetGameViewport();
+		ULocalPlayer* LocalPlayer = PC->GetLocalPlayer();
+
+		bool ignore = GameViewportClient->IgnoreInput();
+		EMouseCaptureMode capt = GameViewportClient->CaptureMouseOnClick();
+
+		if (ignore == false && capt == EMouseCaptureMode::CaptureDuringMouseDown)
+		{
+			return EInputMode::GameUI;
+		}
+		else if (ignore == true && capt == EMouseCaptureMode::NoCapture)
+		{
+			return EInputMode::UI;
+		}
+		else
+		{
+			return EInputMode::Game;
+		}
+	}
+	return EInputMode::None;
+}
+
 void UUINavPCComponent::ExecuteActionByName(FString Action, bool bPressed)
 {
 	if (Action.Equals("MenuUp"))

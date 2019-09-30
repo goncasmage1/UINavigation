@@ -47,7 +47,10 @@ void UUINavWidget::NativeConstruct()
 
 		APlayerController* PC = Cast<APlayerController>(UINavPC->GetOwner());
 		SetUserFocus(PC);
-		SetKeyboardFocus();
+		if (UINavPC->GetInputMode() == EInputMode::UI)
+		{
+			SetKeyboardFocus();
+		}
 	}
 
 	PreSetup();
@@ -285,7 +288,15 @@ void UUINavWidget::UINavSetup()
 		button->SetIsEnabled(true);
 	}
 
-	if (UINavPC != nullptr) UINavPC->SetActiveWidget(this);
+	if (UINavPC != nullptr)
+	{
+		UINavPC->SetActiveWidget(this);
+		if (UINavPC->GetInputMode() == EInputMode::UI)
+		{
+			SetUserFocus(UINavPC->GetPC());
+			SetKeyboardFocus();
+		}
+	}
 
 	if (IsSelectorValid()) TheSelector->SetVisibility(ESlateVisibility::HitTestInvisible);
 
@@ -1481,8 +1492,12 @@ void UUINavWidget::OnPreSelect(int Index)
 		int KeysPerInput = UINavInputContainer->KeysPerInput;
 		UINavInputBoxes[InputBoxIndex / KeysPerInput]->NotifySelected(InputBoxIndex % KeysPerInput);
 		ReceiveInputType = UINavInputBoxes[InputBoxIndex / KeysPerInput]->bIsAxis ? EReceiveInputType::Axis : EReceiveInputType::Action;
-		SetUserFocus(Cast<APlayerController>(UINavPC->GetOwner()));
-		SetKeyboardFocus();
+		APlayerController* PC = Cast<APlayerController>(UINavPC->GetOwner());
+		SetUserFocus(PC);
+		if (UINavPC->GetInputMode() == EInputMode::UI)
+		{
+			SetKeyboardFocus();
+		}
 		bWaitForInput = true;
 	}
 	else
@@ -1556,7 +1571,10 @@ UWidget * UUINavWidget::GoToBuiltWidget(UUINavWidget* NewWidget, bool bRemovePar
 	{
 		NewWidget->AddToViewport(ZOrder);
 		NewWidget->SetUserFocus(PC);
-		NewWidget->SetKeyboardFocus();
+		if (UINavPC->GetInputMode() == EInputMode::UI)
+		{
+			NewWidget->SetKeyboardFocus();
+		}
 	}
 	CleanSetup();
 	return NewWidget;

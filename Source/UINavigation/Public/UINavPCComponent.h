@@ -6,6 +6,7 @@
 #include "Engine/DataTable.h"
 #include "Data/CountdownPhase.h"
 #include "Data/InputRestriction.h"
+#include "Data/InputMode.h"
 #include "Data/InputType.h"
 #include "Data/NavigationDirection.h"
 #include "UINavPCComponent.generated.h"
@@ -216,6 +217,10 @@ public:
 	*/
 	FReply OnActionReleased(FString ActionName, FKey Key);
 
+	//Returns the currently used input mode
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavigationLibrary)
+		EInputMode GetInputMode();
+
 	//Get first found key associated with the given input name
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
 		FKey GetInputKey(FName ActionName, EInputRestriction InputRestriction);
@@ -257,6 +262,10 @@ public:
 	void StartMenuLeft();
 	void StartMenuRight();
 	void MenuRightRelease();
+
+
+	UFUNCTION(BlueprintCallable, Category = UINavController)
+		FORCEINLINE APlayerController* GetPC() const { return PC; }
 
 	UFUNCTION(BlueprintCallable, Category = UINavController)
 		FORCEINLINE EInputType GetCurrentInputType() const { return CurrentInputType; }
