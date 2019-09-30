@@ -34,6 +34,31 @@ struct FGrid
 
 	int GetLastButtonIndex() const;
 
+	void SetEdgeNavigation(FButtonNavigation NewEdgeNavigation)
+	{
+		EdgeNavigation = NewEdgeNavigation;
+	}
+
+	void SetEdgeNavigationByButton(FButtonNavigation NewEdgeNavigation)
+	{
+		if (NewEdgeNavigation.LeftButton != nullptr)
+		{
+			EdgeNavigation.LeftButton = NewEdgeNavigation.LeftButton;
+		}
+		if (NewEdgeNavigation.RightButton != nullptr)
+		{
+			EdgeNavigation.RightButton = NewEdgeNavigation.RightButton;
+		}
+		if (NewEdgeNavigation.UpButton != nullptr)
+		{
+			EdgeNavigation.UpButton = NewEdgeNavigation.UpButton;
+		}
+		if (NewEdgeNavigation.DownButton != nullptr)
+		{
+			EdgeNavigation.DownButton = NewEdgeNavigation.DownButton;
+		}
+	}
+
 	void RemoveButtonFromEdgeNavigation(UUINavButton* OldButton)
 	{
 		if (EdgeNavigation.LeftButton == OldButton)

@@ -1224,6 +1224,24 @@ void UUINavWidget::AppendCollection(const TArray<FButtonNavigation>& EdgeNavigat
 	CollectionIndex++;
 }
 
+void UUINavWidget::SetEdgeNavigation(int GridIndex, FButtonNavigation NewEdgeNavigation)
+{
+	if (GridIndex < 0 || GridIndex >= NavigationGrids.Num())
+	{
+		return;
+	}
+	NavigationGrids[GridIndex].SetEdgeNavigation(NewEdgeNavigation);
+}
+
+void UUINavWidget::SetEdgeNavigationByButton(int GridIndex, FButtonNavigation NewEdgeNavigation)
+{
+	if (GridIndex < 0 || GridIndex >= NavigationGrids.Num())
+	{
+		return;
+	}
+	NavigationGrids[GridIndex].SetEdgeNavigationByButton(NewEdgeNavigation);
+}
+
 void UUINavWidget::Add1DGrid(EGridType GridType, UUINavButton * FirstButton, int StartingIndex, int Dimension, FButtonNavigation EdgeNavigation, bool bWrap)
 {
 	if (GridType == EGridType::Vertical)

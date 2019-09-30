@@ -272,6 +272,18 @@ public:
 	UFUNCTION(BlueprintCallable, Category = UINavWidget)
 		void AppendCollection(const TArray<FButtonNavigation>& EdgeNavigations);
 
+	/**
+	*	Replaces the edge navigation of the grid at the specified index with the given edge navigation
+	*/
+	UFUNCTION(BlueprintCallable, Category = UINavWidget)
+		void SetEdgeNavigation(int GridIndex, FButtonNavigation NewEdgeNavigation);
+
+	/**
+	*	Replaces the edge navigation of the grid at the specified index with the non null buttons of the given edge navigation
+	*/
+	UFUNCTION(BlueprintCallable, Category = UINavWidget)
+		void SetEdgeNavigationByButton(int GridIndex, FButtonNavigation NewEdgeNavigation);
+
 	//Helper function to add a new 1D grid
 	UFUNCTION(BlueprintCallable, Category = UINavWidget)
 		void Add1DGrid(EGridType GridType, UUINavButton* FirstButton, int StartingIndex, int Dimension, FButtonNavigation EdgeNavigation, bool bWrap);
