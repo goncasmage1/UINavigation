@@ -721,7 +721,7 @@ void UUINavPCComponent::StartMenuUp()
 	VerifyInputTypeChangeByAction(TEXT("MenuUp"));
 	Direction = ENavigationDirection::Up;
 
-	if (!bChainNavigation) return;
+	if (!bChainNavigation || !bAllowDirectionalInput) return;
 
 	SetTimer(ENavigationDirection::Up);
 }
@@ -734,7 +734,7 @@ void UUINavPCComponent::StartMenuDown()
 	VerifyInputTypeChangeByAction(TEXT("MenuDown"));
 	Direction = ENavigationDirection::Down;
 
-	if (!bChainNavigation) return;
+	if (!bChainNavigation || !bAllowDirectionalInput) return;
 
 	SetTimer(ENavigationDirection::Down);
 }
@@ -747,7 +747,7 @@ void UUINavPCComponent::StartMenuLeft()
 	VerifyInputTypeChangeByAction(TEXT("MenuLeft"));
 	Direction = ENavigationDirection::Left;
 
-	if (!bChainNavigation) return;
+	if (!bChainNavigation || !bAllowDirectionalInput) return;
 
 	SetTimer(ENavigationDirection::Left);
 }
@@ -760,7 +760,7 @@ void UUINavPCComponent::StartMenuRight()
 	VerifyInputTypeChangeByAction(TEXT("MenuRight"));
 	Direction = ENavigationDirection::Right;
 
-	if (!bChainNavigation) return;
+	if (!bChainNavigation || !bAllowDirectionalInput) return;
 
 	SetTimer(ENavigationDirection::Right);
 }
