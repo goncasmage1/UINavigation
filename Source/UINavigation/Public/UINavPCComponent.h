@@ -21,6 +21,13 @@ protected:
 	UPROPERTY(BlueprintReadOnly, Category = UINavController)
 		class UUINavWidget* ActiveWidget;
 
+	//Indicates whether the player can navigate the widget
+	bool bAllowDirectionalInput = true;
+	//Indicates whether the player can select options in this widget
+	bool bAllowSelectInput = true;
+	//Indicates whether the player can return to this widget's parent
+	bool bAllowReturnInput = true;
+
 	class APlayerController* PC;
 
 	ENavigationDirection Direction = ENavigationDirection::None;
@@ -84,10 +91,6 @@ public:
 
 	UUINavPCComponent();
 
-	//Indicates whether the player can navigate the widget
-	UPROPERTY(BlueprintReadWrite, Category = UINavController)
-		bool bAllowNavigation = true;
-
 	UPROPERTY(BlueprintReadWrite, Category = UINavController)
 		EInputType CurrentInputType = EInputType::Keyboard;
 
@@ -142,6 +145,30 @@ public:
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavController)
 		UDataTable* KeyboardMouseKeyNameData;
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
+		FORCEINLINE bool AllowsAllMenuInput() const { return bAllowDirectionalInput && bAllowSelectInput && bAllowReturnInput; }
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
+		FORCEINLINE bool AllowsDirectionalInput() const { return bAllowDirectionalInput; }
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
+		FORCEINLINE bool AllowsSelectInput() const { return bAllowSelectInput; }
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
+		FORCEINLINE bool AllowsReturnInput() const { return bAllowReturnInput; }
+
+	UFUNCTION(BlueprintCallable, Category = UINavController)
+		void SetAllowAllMenuInput(bool bAllowInput);
+
+	UFUNCTION(BlueprintCallable, Category = UINavController)
+		void SetAllowDirectionalInput(bool bAllowInput);
+
+	UFUNCTION(BlueprintCallable, Category = UINavController)
+		void SetAllowSelectInput(bool bAllowInput);
+
+	UFUNCTION(BlueprintCallable, Category = UINavController)
+		void SetAllowReturnInput(bool bAllowInput);
 
 	void BindMouseWorkaround();
 	void UnbindMouseWorkaround();
@@ -218,7 +245,7 @@ public:
 	FReply OnActionReleased(FString ActionName, FKey Key);
 
 	//Returns the currently used input mode
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavigationLibrary)
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
 		EInputMode GetInputMode();
 
 	//Get first found key associated with the given input name

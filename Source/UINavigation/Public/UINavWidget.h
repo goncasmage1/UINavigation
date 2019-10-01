@@ -155,7 +155,7 @@ public:
 	TSubclassOf<UUINavWidget> WidgetClass;
 
 	//Current player controller
-	UPROPERTY(BlueprintReadWrite, Category = UINavWidget)
+	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
 		class UUINavPCComponent* UINavPC;
 
 	//Widget that created this widget (if returned from a child)
@@ -690,13 +690,6 @@ public:
 	*/
 	UFUNCTION(Category = UINavWidget)
 		void UnhoverEvent(int Index);
-	/**
-	*	Button Click event
-	*
-	*	@param	Index  The index of the button that was clicked upon
-	*/
-	UFUNCTION(Category = UINavWidget)
-		void ClickEvent(int Index);
 	/**
 	*	Button Press event
 	*

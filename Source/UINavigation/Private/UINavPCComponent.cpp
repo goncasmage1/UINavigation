@@ -189,6 +189,28 @@ void UUINavPCComponent::SetActiveWidget(UUINavWidget * NewActiveWidget)
 	ActiveWidget = NewActiveWidget;
 }
 
+void UUINavPCComponent::SetAllowAllMenuInput(bool bAllowInput)
+{
+	bAllowDirectionalInput = bAllowInput;
+	bAllowSelectInput = bAllowInput;
+	bAllowReturnInput = bAllowInput;
+}
+
+void UUINavPCComponent::SetAllowDirectionalInput(bool bAllowInput)
+{
+	bAllowDirectionalInput = bAllowInput;
+}
+
+void UUINavPCComponent::SetAllowSelectInput(bool bAllowInput)
+{
+	bAllowSelectInput = bAllowInput;
+}
+
+void UUINavPCComponent::SetAllowReturnInput(bool bAllowInput)
+{
+	bAllowReturnInput = bAllowInput;
+}
+
 void UUINavPCComponent::TimerCallback()
 {
 	switch (CallbackDirection)

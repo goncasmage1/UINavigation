@@ -8,6 +8,7 @@
 #include "UINavInputBox.h"
 #include "UINavInputContainer.h"
 #include "UINavPCComponent.h"
+#include "UINavPCReceiver.h"
 #include "UINavWidgetComponent.h"
 #include "Animation/WidgetAnimation.h"
 #include "Blueprint/UserWidget.h"
@@ -474,7 +475,6 @@ void UUINavWidget::HandleSelectorMovement(float DeltaTime)
 	{
 		MovementCounter = 0.f;
 		bMovingSelector = false;
-		if (UINavPC != nullptr) UINavPC->bAllowNavigation = true;
 		TheSelector->SetRenderTranslation(SelectorDestination);
 		if (HaltedIndex != -1)
 		{
@@ -1471,7 +1471,6 @@ void UUINavWidget::BeginSelectorMovement(int Index)
 	MovementCounter = 0.0f;
 
 	bMovingSelector = true;
-	if (UINavPC != nullptr) UINavPC->bAllowNavigation = false;
 }
 
 void UUINavWidget::OnNavigate_Implementation(int From, int To)
@@ -1494,10 +1493,7 @@ void UUINavWidget::OnPreSelect(int Index)
 		ReceiveInputType = UINavInputBoxes[InputBoxIndex / KeysPerInput]->bIsAxis ? EReceiveInputType::Axis : EReceiveInputType::Action;
 		APlayerController* PC = Cast<APlayerController>(UINavPC->GetOwner());
 		SetUserFocus(PC);
-		if (UINavPC->GetInputMode() == EInputMode::UI)
-		{
-			SetKeyboardFocus();
-		}
+		SetKeyboardFocus();
 		bWaitForInput = true;
 	}
 	else
@@ -2038,6 +2034,11 @@ void UUINavWidget::HoverEvent(int Index)
 		UINavInputBoxes[InputBoxIndex / UINavInputContainer->KeysPerInput]->RevertToActionText(InputBoxIndex % UINavInputContainer->KeysPerInput);
 	}
 
+	if (!UINavPC->AllowsDirectionalInput())
+	{
+		return;
+	}
+
 	if (UINavPC->GetCurrentInputType() != EInputType::Mouse || Index == ButtonIndex)
 	{
 		if (bUseButtonStates) SwitchButtonStyle(Index);
@@ -2073,11 +2074,6 @@ void UUINavWidget::UnhoverEvent(int Index)
 	}
 }
 
-void UUINavWidget::ClickEvent(int Index)
-{
-	
-}
-
 void UUINavWidget::PressEvent(int Index)
 {
 	if (bWaitForInput)
@@ -2089,7 +2085,7 @@ void UUINavWidget::PressEvent(int Index)
 	{
 		UINavPC->NotifyMouseInputType();
 
-		if (!UINavPC->bAllowNavigation) return;
+		if (!UINavPC->AllowsSelectInput()) return;
 
 		OnPreSelect(Index);
 
@@ -2106,7 +2102,6 @@ void UUINavWidget::SetupUINavButtonDelegates(UUINavButton * NewButton)
 {
 	NewButton->CustomHover.AddDynamic(this, &UUINavWidget::HoverEvent);
 	NewButton->CustomUnhover.AddDynamic(this, &UUINavWidget::UnhoverEvent);
-	NewButton->CustomClick.AddDynamic(this, &UUINavWidget::ClickEvent);
 	NewButton->CustomPress.AddDynamic(this, &UUINavWidget::PressEvent);
 	NewButton->CustomRelease.AddDynamic(this, &UUINavWidget::ReleaseEvent);
 }
@@ -2146,10 +2141,14 @@ void UUINavWidget::NavigateInDirection(ENavigationDirection Direction)
 		return;
 	}
 
-	if (!UINavPC->bAllowNavigation)
+	if (bMovingSelector)
 	{
 		UUINavButton* NextButton = FindNextButton(CurrentButton, Direction);
 		HaltedIndex = NextButton != nullptr ? NextButton->ButtonIndex : -1;
+		return;
+	}
+	else if (!UINavPC->AllowsDirectionalInput())
+	{
 		return;
 	}
 
@@ -2174,7 +2173,7 @@ void UUINavWidget::NavigateInDirection(ENavigationDirection Direction)
 
 void UUINavWidget::MenuSelect()
 {
-	if (!UINavPC->bAllowNavigation)
+	if (!UINavPC->AllowsSelectInput())
 	{
 		HaltedIndex = SELECT_INDEX;
 		return;
@@ -2185,7 +2184,7 @@ void UUINavWidget::MenuSelect()
 
 void UUINavWidget::MenuReturn()
 {
-	if (!UINavPC->bAllowNavigation)
+	if (!UINavPC->AllowsReturnInput())
 	{
 		HaltedIndex = RETURN_INDEX;
 		return;
