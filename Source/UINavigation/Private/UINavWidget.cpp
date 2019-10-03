@@ -1925,7 +1925,15 @@ int UUINavWidget::GetGridStartingIndex(int GridIndex)
 
 	if (NavigationGrids[GridIndex].FirstButton != nullptr)
 	{
-		return NavigationGrids[GridIndex].FirstButton->ButtonIndex;
+		if (NavigationGrids[GridIndex].FirstButton->ButtonIndex < 0)
+		{
+			if (GridIndex > 0) return (GetGridStartingIndex(GridIndex - 1) + 1);
+			else return 0;
+		}
+		else
+		{
+			return NavigationGrids[GridIndex].FirstButton->ButtonIndex;
+		}
 	}
 	else
 	{
