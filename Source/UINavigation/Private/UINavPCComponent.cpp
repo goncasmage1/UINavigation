@@ -153,10 +153,25 @@ void UUINavPCComponent::BindMouseWorkaround()
 	UInputComponent* InputComponent = PC->InputComponent;
 	if (InputComponent == nullptr) return;
 
+	TArray<FKey> MouseKeys =
+	{
+		EKeys::LeftMouseButton,
+		EKeys::RightMouseButton,
+		EKeys::MiddleMouseButton,
+		EKeys::MouseScrollUp,
+		EKeys::MouseScrollDown,
+		EKeys::ThumbMouseButton,
+		EKeys::ThumbMouseButton2
+	};
 
-	FInputKeyBinding& Action = InputComponent->BindKey(EKeys::AnyKey, IE_Pressed, this, &UUINavPCComponent::MouseInputWorkaround);
-	Action.bExecuteWhenPaused = true;
-	Action.bConsumeInput = false;
+	for (FKey MouseKey : MouseKeys)
+	{
+		FInputKeyBinding NewKey;
+		NewKey.KeyDelegate.BindDelegate<FMouseKeyDelegate>(this, &UUINavPCComponent::MouseKeyPressed, EKeys::AnyKey);
+		NewKey.bConsumeInput = true;
+		NewKey.bExecuteWhenPaused = true;
+		InputComponent->KeyBindings.Add(NewKey);
+	}
 }
 
 void UUINavPCComponent::UnbindMouseWorkaround()
@@ -164,13 +179,12 @@ void UUINavPCComponent::UnbindMouseWorkaround()
 	UInputComponent* InputComponent = PC->InputComponent;
 	if (InputComponent == nullptr) return;
 
-
-	for (int i = 0; i < InputComponent->KeyBindings.Num(); i++)
+	int KeyBindingsNum = InputComponent->KeyBindings.Num();
+	for (int i = KeyBindingsNum - 1; i >= 0; i--)
 	{
 		if (InputComponent->KeyBindings[i].KeyDelegate.IsBoundToObject(this))
 		{
 			InputComponent->KeyBindings.RemoveAt(i);
-			break;
 		}
 	}
 }
@@ -696,20 +710,11 @@ void UUINavPCComponent::MenuRightRelease()
 	ClearTimer();
 }
 
-void UUINavPCComponent::MouseInputWorkaround()
+void UUINavPCComponent::MouseKeyPressed(FKey MouseKey)
 {
-	GEngine->AddOnScreenDebugMessage(-2, 2.f, FColor::Red, TEXT("Workaround!!"));
 	if (ActiveWidget != nullptr && ActiveWidget->bWaitForInput)
 	{
-		if (PC->WasInputKeyJustPressed(EKeys::LeftMouseButton)) ActiveWidget->ProcessMouseKeybind(FKey(EKeys::LeftMouseButton));
-		else if (PC->WasInputKeyJustPressed(EKeys::RightMouseButton)) ActiveWidget->ProcessMouseKeybind(FKey(EKeys::RightMouseButton));
-		else if (PC->WasInputKeyJustPressed(EKeys::MiddleMouseButton)) ActiveWidget->ProcessMouseKeybind(FKey(EKeys::MiddleMouseButton));
-		else if (PC->WasInputKeyJustPressed(EKeys::MouseScrollUp)) ActiveWidget->ProcessMouseKeybind(FKey(EKeys::MouseScrollUp));
-		else if (PC->WasInputKeyJustPressed(EKeys::MouseScrollDown)) ActiveWidget->ProcessMouseKeybind(FKey(EKeys::MouseScrollDown));
-		else if (PC->WasInputKeyJustPressed(EKeys::ThumbMouseButton)) ActiveWidget->ProcessMouseKeybind(FKey(EKeys::ThumbMouseButton));
-		else if (PC->WasInputKeyJustPressed(EKeys::ThumbMouseButton2)) ActiveWidget->ProcessMouseKeybind(FKey(EKeys::ThumbMouseButton2));
-		else if (PC->WasInputKeyJustPressed(EKeys::MouseScrollDown)) ActiveWidget->ProcessMouseKeybind(FKey(EKeys::MouseScrollDown));
-		else if (PC->WasInputKeyJustPressed(EKeys::MouseScrollUp)) ActiveWidget->ProcessMouseKeybind(FKey(EKeys::MouseScrollUp));
+		ActiveWidget->ProcessMouseKeybind(MouseKey);
 	}
 }
 

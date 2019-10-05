@@ -11,6 +11,8 @@
 #include "Data/NavigationDirection.h"
 #include "UINavPCComponent.generated.h"
 
+DECLARE_DELEGATE_OneParam(FMouseKeyDelegate, FKey);
+
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class UINAVIGATION_API UUINavPCComponent : public UActorComponent
 {
@@ -280,7 +282,7 @@ public:
 	void MenuDownRelease();
 	void MenuLeftRelease();
 
-	void MouseInputWorkaround();
+	void MouseKeyPressed(FKey MouseKey);
 
 	void ClearTimer();
 
