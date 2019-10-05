@@ -2141,6 +2141,12 @@ void UUINavWidget::CancelRebind()
 
 void UUINavWidget::NavigateInDirection(ENavigationDirection Direction)
 {
+	if (bWaitForInput)
+	{
+		CancelRebind();
+		return;
+	}
+
 	if (Direction == ENavigationDirection::None || UINavButtons.Num() == 0) return;
 
 	if (NumberOfButtonsInGrids == 0)
@@ -2181,6 +2187,12 @@ void UUINavWidget::NavigateInDirection(ENavigationDirection Direction)
 
 void UUINavWidget::MenuSelect()
 {
+	if (bWaitForInput)
+	{
+		CancelRebind();
+		return;
+	}
+
 	if (!UINavPC->AllowsSelectInput())
 	{
 		HaltedIndex = SELECT_INDEX;
@@ -2192,6 +2204,12 @@ void UUINavWidget::MenuSelect()
 
 void UUINavWidget::MenuReturn()
 {
+	if (bWaitForInput)
+	{
+		CancelRebind();
+		return;
+	}
+
 	if (!UINavPC->AllowsReturnInput())
 	{
 		HaltedIndex = RETURN_INDEX;
