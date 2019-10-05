@@ -155,7 +155,7 @@ public:
 	TSubclassOf<UUINavWidget> WidgetClass;
 
 	//Current player controller
-	UPROPERTY(BlueprintReadWrite, Category = UINavWidget)
+	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
 		class UUINavPCComponent* UINavPC;
 
 	//Widget that created this widget (if returned from a child)
@@ -271,6 +271,18 @@ public:
 	*/
 	UFUNCTION(BlueprintCallable, Category = UINavWidget)
 		void AppendCollection(const TArray<FButtonNavigation>& EdgeNavigations);
+
+	/**
+	*	Replaces the edge navigation of the grid at the specified index with the given edge navigation
+	*/
+	UFUNCTION(BlueprintCallable, Category = UINavWidget)
+		void SetEdgeNavigation(int GridIndex, FButtonNavigation NewEdgeNavigation);
+
+	/**
+	*	Replaces the edge navigation of the grid at the specified index with the non null buttons of the given edge navigation
+	*/
+	UFUNCTION(BlueprintCallable, Category = UINavWidget)
+		void SetEdgeNavigationByButton(int GridIndex, FButtonNavigation NewEdgeNavigation);
 
 	//Helper function to add a new 1D grid
 	UFUNCTION(BlueprintCallable, Category = UINavWidget)
@@ -678,13 +690,6 @@ public:
 	*/
 	UFUNCTION(Category = UINavWidget)
 		void UnhoverEvent(int Index);
-	/**
-	*	Button Click event
-	*
-	*	@param	Index  The index of the button that was clicked upon
-	*/
-	UFUNCTION(Category = UINavWidget)
-		void ClickEvent(int Index);
 	/**
 	*	Button Press event
 	*

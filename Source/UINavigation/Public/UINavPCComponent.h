@@ -6,9 +6,12 @@
 #include "Engine/DataTable.h"
 #include "Data/CountdownPhase.h"
 #include "Data/InputRestriction.h"
+#include "Data/InputMode.h"
 #include "Data/InputType.h"
 #include "Data/NavigationDirection.h"
 #include "UINavPCComponent.generated.h"
+
+DECLARE_DELEGATE_OneParam(FMouseKeyDelegate, FKey);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class UINAVIGATION_API UUINavPCComponent : public UActorComponent
@@ -19,6 +22,13 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly, Category = UINavController)
 		class UUINavWidget* ActiveWidget;
+
+	//Indicates whether the player can navigate the widget
+	bool bAllowDirectionalInput = true;
+	//Indicates whether the player can select options in this widget
+	bool bAllowSelectInput = true;
+	//Indicates whether the player can return to this widget's parent
+	bool bAllowReturnInput = true;
 
 	class APlayerController* PC;
 
@@ -83,10 +93,6 @@ public:
 
 	UUINavPCComponent();
 
-	//Indicates whether the player can navigate the widget
-	UPROPERTY(BlueprintReadWrite, Category = UINavController)
-		bool bAllowNavigation = true;
-
 	UPROPERTY(BlueprintReadWrite, Category = UINavController)
 		EInputType CurrentInputType = EInputType::Keyboard;
 
@@ -141,6 +147,30 @@ public:
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavController)
 		UDataTable* KeyboardMouseKeyNameData;
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
+		FORCEINLINE bool AllowsAllMenuInput() const { return bAllowDirectionalInput && bAllowSelectInput && bAllowReturnInput; }
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
+		FORCEINLINE bool AllowsDirectionalInput() const { return bAllowDirectionalInput; }
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
+		FORCEINLINE bool AllowsSelectInput() const { return bAllowSelectInput; }
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
+		FORCEINLINE bool AllowsReturnInput() const { return bAllowReturnInput; }
+
+	UFUNCTION(BlueprintCallable, Category = UINavController)
+		void SetAllowAllMenuInput(bool bAllowInput);
+
+	UFUNCTION(BlueprintCallable, Category = UINavController)
+		void SetAllowDirectionalInput(bool bAllowInput);
+
+	UFUNCTION(BlueprintCallable, Category = UINavController)
+		void SetAllowSelectInput(bool bAllowInput);
+
+	UFUNCTION(BlueprintCallable, Category = UINavController)
+		void SetAllowReturnInput(bool bAllowInput);
 
 	void BindMouseWorkaround();
 	void UnbindMouseWorkaround();
@@ -216,6 +246,10 @@ public:
 	*/
 	FReply OnActionReleased(FString ActionName, FKey Key);
 
+	//Returns the currently used input mode
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
+		EInputMode GetInputMode();
+
 	//Get first found key associated with the given input name
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
 		FKey GetInputKey(FName ActionName, EInputRestriction InputRestriction);
@@ -248,7 +282,7 @@ public:
 	void MenuDownRelease();
 	void MenuLeftRelease();
 
-	void MouseInputWorkaround();
+	void MouseKeyPressed(FKey MouseKey);
 
 	void ClearTimer();
 
@@ -257,6 +291,10 @@ public:
 	void StartMenuLeft();
 	void StartMenuRight();
 	void MenuRightRelease();
+
+
+	UFUNCTION(BlueprintCallable, Category = UINavController)
+		FORCEINLINE APlayerController* GetPC() const { return PC; }
 
 	UFUNCTION(BlueprintCallable, Category = UINavController)
 		FORCEINLINE EInputType GetCurrentInputType() const { return CurrentInputType; }
