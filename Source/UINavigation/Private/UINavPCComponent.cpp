@@ -153,10 +153,25 @@ void UUINavPCComponent::BindMouseWorkaround()
 	UInputComponent* InputComponent = PC->InputComponent;
 	if (InputComponent == nullptr) return;
 
+	TArray<FKey> MouseKeys =
+	{
+		EKeys::LeftMouseButton,
+		EKeys::RightMouseButton,
+		EKeys::MiddleMouseButton,
+		EKeys::MouseScrollUp,
+		EKeys::MouseScrollDown,
+		EKeys::ThumbMouseButton,
+		EKeys::ThumbMouseButton2
+	};
 
-	FInputKeyBinding& Action = InputComponent->BindKey(EKeys::AnyKey, IE_Pressed, this, &UUINavPCComponent::MouseInputWorkaround);
-	Action.bExecuteWhenPaused = true;
-	Action.bConsumeInput = false;
+	for (FKey MouseKey : MouseKeys)
+	{
+		FInputKeyBinding NewKey;
+		NewKey.KeyDelegate.BindDelegate<FMouseKeyDelegate>(this, &UUINavPCComponent::MouseKeyPressed, EKeys::AnyKey);
+		NewKey.bConsumeInput = true;
+		NewKey.bExecuteWhenPaused = true;
+		InputComponent->KeyBindings.Add(NewKey);
+	}
 }
 
 void UUINavPCComponent::UnbindMouseWorkaround()
@@ -164,13 +179,12 @@ void UUINavPCComponent::UnbindMouseWorkaround()
 	UInputComponent* InputComponent = PC->InputComponent;
 	if (InputComponent == nullptr) return;
 
-
-	for (int i = 0; i < InputComponent->KeyBindings.Num(); i++)
+	int KeyBindingsNum = InputComponent->KeyBindings.Num();
+	for (int i = KeyBindingsNum - 1; i >= 0; i--)
 	{
 		if (InputComponent->KeyBindings[i].KeyDelegate.IsBoundToObject(this))
 		{
 			InputComponent->KeyBindings.RemoveAt(i);
-			break;
 		}
 	}
 }
@@ -187,6 +201,28 @@ void UUINavPCComponent::SetActiveWidget(UUINavWidget * NewActiveWidget)
 		BindMenuInputs();
 	}
 	ActiveWidget = NewActiveWidget;
+}
+
+void UUINavPCComponent::SetAllowAllMenuInput(bool bAllowInput)
+{
+	bAllowDirectionalInput = bAllowInput;
+	bAllowSelectInput = bAllowInput;
+	bAllowReturnInput = bAllowInput;
+}
+
+void UUINavPCComponent::SetAllowDirectionalInput(bool bAllowInput)
+{
+	bAllowDirectionalInput = bAllowInput;
+}
+
+void UUINavPCComponent::SetAllowSelectInput(bool bAllowInput)
+{
+	bAllowSelectInput = bAllowInput;
+}
+
+void UUINavPCComponent::SetAllowReturnInput(bool bAllowInput)
+{
+	bAllowReturnInput = bAllowInput;
 }
 
 void UUINavPCComponent::TimerCallback()
@@ -499,6 +535,32 @@ FReply UUINavPCComponent::OnActionReleased(FString ActionName, FKey Key)
 	else return FReply::Unhandled();
 }
 
+EInputMode UUINavPCComponent::GetInputMode()
+{
+	if (PC != nullptr)
+	{
+		UGameViewportClient* GameViewportClient = PC->GetWorld()->GetGameViewport();
+		ULocalPlayer* LocalPlayer = PC->GetLocalPlayer();
+
+		bool ignore = GameViewportClient->IgnoreInput();
+		EMouseCaptureMode capt = GameViewportClient->CaptureMouseOnClick();
+
+		if (ignore == false && capt == EMouseCaptureMode::CaptureDuringMouseDown)
+		{
+			return EInputMode::GameUI;
+		}
+		else if (ignore == true && capt == EMouseCaptureMode::NoCapture)
+		{
+			return EInputMode::UI;
+		}
+		else
+		{
+			return EInputMode::Game;
+		}
+	}
+	return EInputMode::None;
+}
+
 void UUINavPCComponent::ExecuteActionByName(FString Action, bool bPressed)
 {
 	if (Action.Equals("MenuUp"))
@@ -639,20 +701,11 @@ void UUINavPCComponent::MenuRightRelease()
 	ClearTimer();
 }
 
-void UUINavPCComponent::MouseInputWorkaround()
+void UUINavPCComponent::MouseKeyPressed(FKey MouseKey)
 {
-	GEngine->AddOnScreenDebugMessage(-2, 2.f, FColor::Red, TEXT("Workaround!!"));
 	if (ActiveWidget != nullptr && ActiveWidget->bWaitForInput)
 	{
-		if (PC->WasInputKeyJustPressed(EKeys::LeftMouseButton)) ActiveWidget->ProcessMouseKeybind(FKey(EKeys::LeftMouseButton));
-		else if (PC->WasInputKeyJustPressed(EKeys::RightMouseButton)) ActiveWidget->ProcessMouseKeybind(FKey(EKeys::RightMouseButton));
-		else if (PC->WasInputKeyJustPressed(EKeys::MiddleMouseButton)) ActiveWidget->ProcessMouseKeybind(FKey(EKeys::MiddleMouseButton));
-		else if (PC->WasInputKeyJustPressed(EKeys::MouseScrollUp)) ActiveWidget->ProcessMouseKeybind(FKey(EKeys::MouseScrollUp));
-		else if (PC->WasInputKeyJustPressed(EKeys::MouseScrollDown)) ActiveWidget->ProcessMouseKeybind(FKey(EKeys::MouseScrollDown));
-		else if (PC->WasInputKeyJustPressed(EKeys::ThumbMouseButton)) ActiveWidget->ProcessMouseKeybind(FKey(EKeys::ThumbMouseButton));
-		else if (PC->WasInputKeyJustPressed(EKeys::ThumbMouseButton2)) ActiveWidget->ProcessMouseKeybind(FKey(EKeys::ThumbMouseButton2));
-		else if (PC->WasInputKeyJustPressed(EKeys::MouseScrollDown)) ActiveWidget->ProcessMouseKeybind(FKey(EKeys::MouseScrollDown));
-		else if (PC->WasInputKeyJustPressed(EKeys::MouseScrollUp)) ActiveWidget->ProcessMouseKeybind(FKey(EKeys::MouseScrollUp));
+		ActiveWidget->ProcessMouseKeybind(MouseKey);
 	}
 }
 
@@ -664,7 +717,7 @@ void UUINavPCComponent::StartMenuUp()
 	VerifyInputTypeChangeByAction(TEXT("MenuUp"));
 	Direction = ENavigationDirection::Up;
 
-	if (!bChainNavigation) return;
+	if (!bChainNavigation || !bAllowDirectionalInput) return;
 
 	SetTimer(ENavigationDirection::Up);
 }
@@ -677,7 +730,7 @@ void UUINavPCComponent::StartMenuDown()
 	VerifyInputTypeChangeByAction(TEXT("MenuDown"));
 	Direction = ENavigationDirection::Down;
 
-	if (!bChainNavigation) return;
+	if (!bChainNavigation || !bAllowDirectionalInput) return;
 
 	SetTimer(ENavigationDirection::Down);
 }
@@ -690,7 +743,7 @@ void UUINavPCComponent::StartMenuLeft()
 	VerifyInputTypeChangeByAction(TEXT("MenuLeft"));
 	Direction = ENavigationDirection::Left;
 
-	if (!bChainNavigation) return;
+	if (!bChainNavigation || !bAllowDirectionalInput) return;
 
 	SetTimer(ENavigationDirection::Left);
 }
@@ -703,7 +756,7 @@ void UUINavPCComponent::StartMenuRight()
 	VerifyInputTypeChangeByAction(TEXT("MenuRight"));
 	Direction = ENavigationDirection::Right;
 
-	if (!bChainNavigation) return;
+	if (!bChainNavigation || !bAllowDirectionalInput) return;
 
 	SetTimer(ENavigationDirection::Right);
 }
