@@ -274,10 +274,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = UINavController)
 		void SetActiveWidget(class UUINavWidget* NewActiveWidget);
 
-	void MenuUp();
-	void MenuDown();
-	void MenuLeft();
-	void MenuRight();
+	void MenuInput(ENavigationDirection Direction);
 	void MenuSelect();
 	void MenuReturn();
 

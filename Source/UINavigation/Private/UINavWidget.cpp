@@ -2161,15 +2161,11 @@ void UUINavWidget::NavigateInDirection(ENavigationDirection Direction)
 		HaltedIndex = NextButton != nullptr ? NextButton->ButtonIndex : -1;
 		return;
 	}
-	else if (!UINavPC->AllowsDirectionalInput())
-	{
-		return;
-	}
 
 	OnNavigatedDirection(Direction);
 
 	UUINavHorizontalComponent* HorizComp = GetUINavHorizontalCompAtIndex(ButtonIndex);
-	if (HorizComp != nullptr && (Direction == ENavigationDirection::Left || Direction == ENavigationDirection::Right))
+	if (HorizComp != nullptr)
 	{
 		if (Direction == ENavigationDirection::Left)
 		{
@@ -2193,12 +2189,11 @@ void UUINavWidget::MenuSelect()
 		return;
 	}
 
-	if (!UINavPC->AllowsSelectInput())
+	if (bMovingSelector)
 	{
 		HaltedIndex = SELECT_INDEX;
 		return;
 	}
-	UINavPC->ClearTimer();
 	OnPreSelect(ButtonIndex);
 }
 
@@ -2210,11 +2205,10 @@ void UUINavWidget::MenuReturn()
 		return;
 	}
 
-	if (!UINavPC->AllowsReturnInput())
+	if (bMovingSelector)
 	{
 		HaltedIndex = RETURN_INDEX;
 		return;
 	}
-	UINavPC->ClearTimer();
 	OnReturn();
 }
