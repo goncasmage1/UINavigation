@@ -1485,6 +1485,10 @@ void UUINavWidget::OnSelect_Implementation(int Index)
 
 void UUINavWidget::OnPreSelect(int Index)
 {
+	if (CurrentButton == nullptr)
+	{
+		return;
+	}
 	if (UINavInputContainer != nullptr && Index >= UINavInputContainer->FirstButtonIndex && Index <= UINavInputContainer->LastButtonIndex)
 	{
 		InputBoxIndex = Index - UINavInputContainer->FirstButtonIndex;
@@ -1496,7 +1500,7 @@ void UUINavWidget::OnPreSelect(int Index)
 		SetKeyboardFocus();
 		bWaitForInput = true;
 	}
-	else if (CurrentButton != nullptr)
+	else
 	{
 		USoundBase* PressSound = Cast<USoundBase>(CurrentButton->WidgetStyle.PressedSlateSound.GetResourceObject());
 		if (PressSound != nullptr)
