@@ -1496,7 +1496,7 @@ void UUINavWidget::OnPreSelect(int Index)
 		SetKeyboardFocus();
 		bWaitForInput = true;
 	}
-	else
+	else if (CurrentButton != nullptr)
 	{
 		USoundBase* PressSound = Cast<USoundBase>(CurrentButton->WidgetStyle.PressedSlateSound.GetResourceObject());
 		if (PressSound != nullptr)
