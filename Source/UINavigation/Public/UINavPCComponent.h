@@ -84,10 +84,13 @@ protected:
 	void NotifyInputTypeChange(EInputType NewInputType);
 
 	virtual void Activate(bool bReset) override;
-	void BindMenuInputs();
-	void UnbindMenuInputs();
 	virtual void BeginPlay() override;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+
+	UFUNCTION(BlueprintCallable, Category = UINavController)
+	void BindMenuInputs(); 
+	UFUNCTION(BlueprintCallable, Category = UINavController)
+	void UnbindMenuInputs();
 
 public:
 
@@ -271,10 +274,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = UINavController)
 		void SetActiveWidget(class UUINavWidget* NewActiveWidget);
 
-	void MenuUp();
-	void MenuDown();
-	void MenuLeft();
-	void MenuRight();
+	void MenuInput(ENavigationDirection Direction);
 	void MenuSelect();
 	void MenuReturn();
 
