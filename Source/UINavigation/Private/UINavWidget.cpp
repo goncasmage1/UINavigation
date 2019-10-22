@@ -2169,14 +2169,16 @@ void UUINavWidget::NavigateInDirection(ENavigationDirection Direction)
 	OnNavigatedDirection(Direction);
 
 	UUINavHorizontalComponent* HorizComp = GetUINavHorizontalCompAtIndex(ButtonIndex);
-	if (HorizComp != nullptr)
+	if (HorizComp != nullptr && 
+		(Direction == ENavigationDirection::Left || 
+		 Direction == ENavigationDirection::Right))
 	{
 		if (Direction == ENavigationDirection::Left)
 		{
 			HorizComp->NavigateLeft();
 			OnHorizCompNavigateLeft(ButtonIndex);
 		}
-		else if (Direction == ENavigationDirection::Right)
+		else
 		{
 			HorizComp->NavigateRight();
 			OnHorizCompNavigateRight(ButtonIndex);
