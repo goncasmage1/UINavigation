@@ -142,7 +142,12 @@ void UUINavWidget::CleanSetup()
 	//Disable all buttons (bug fix)
 	for (UUINavButton* button : UINavButtons)
 	{
-		button->SetIsEnabled(false);
+		button->bAutoCollapse = button->bIsEnabled;
+		if (button->bIsEnabled)
+		{
+			button->SetIsEnabled(false);
+		}
+
 	}
 	bSetupStarted = false;
 }
@@ -257,6 +262,7 @@ void UUINavWidget::TraverseHierarquy()
 
 		SetupUINavButtonDelegates(NewNavButton);
 
+		NewNavButton->bAutoCollapse = NewNavButton->bIsEnabled;
 		UINavButtons.Add(NewNavButton);
 	}
 
@@ -286,7 +292,10 @@ void UUINavWidget::UINavSetup()
 	//Re-enable all buttons (bug fix)
 	for (UUINavButton* button : UINavButtons)
 	{
-		button->SetIsEnabled(true);
+		if (button->bAutoCollapse)
+		{
+			button->SetIsEnabled(true);
+		}
 	}
 
 	if (UINavPC != nullptr)
