@@ -50,6 +50,8 @@ public:
 
 	bool bSwitchedStyle = false;
 
+	bool bAutoCollapse = false;
+
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavButton)
 		bool IsValid();
 
