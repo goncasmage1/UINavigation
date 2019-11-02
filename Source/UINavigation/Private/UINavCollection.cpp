@@ -18,8 +18,60 @@ void UUINavCollection::PreSetup_Implementation()
 {
 }
 
+void UUINavCollection::NotifyOnNavigate(int From, int To, int LocalFrom, int LocalTo)
+{
+	bool bFoundFrom = false;
+	bool bFoundTo = false;
+	for (UUINavCollection* Collection : UINavCollections)
+	{
+		int CollectionFromIndex = ParentWidget->GetCollectionButtonIndex(Collection, From);
+		int CollectionToIndex = ParentWidget->GetCollectionButtonIndex(Collection, To);
+
+		bool bValidFrom = CollectionFromIndex != -1;
+		bool bValidTo = CollectionToIndex != -1;
+		if (bValidFrom || bValidTo)
+		{
+			if (!bFoundFrom) bFoundFrom = bValidFrom;
+			if (!bFoundTo) bFoundTo = bValidTo;
+
+			Collection->NotifyOnNavigate(From, To, CollectionFromIndex, CollectionToIndex);
+		}
+
+		if (bFoundFrom && bFoundTo) break;
+	}
+
+	if (!bFoundFrom || !bFoundTo)
+	{
+		OnNavigate(From, To, LocalFrom, LocalTo);
+	}
+}
+
+void UUINavCollection::OnNavigate_Implementation(int From, int To, int LocalFrom, int LocalTo)
+{
+}
+
+void UUINavCollection::OnSelect_Implementation(int Index, int LocalIndex)
+{
+}
+
+void UUINavCollection::NotifyOnSelect(int Index, int LocalIndex)
+{
+	for (UUINavCollection* Collection : UINavCollections)
+	{
+		int CollectionButtonIndex = ParentWidget->GetCollectionButtonIndex(Collection, Index);
+		if (CollectionButtonIndex != -1)
+		{
+			Collection->OnSelect(Index, CollectionButtonIndex);
+			break;
+		}
+	}
+	OnSelect(Index, LocalIndex);
+}
+
 void UUINavCollection::Init(int StartIndex)
 {
+	FirstButtonIndex = StartIndex;
+	LastButtonIndex = StartIndex;
 	PreSetup();
 
 	TraverseHierarquy(StartIndex);
@@ -113,13 +165,13 @@ void UUINavCollection::TraverseHierarquy(int StartIndex)
 void UUINavCollection::AppendNavigationGrid1D(EGridType GridType, int Dimension, FButtonNavigation EdgeNavigation, bool bWrap)
 {
 	ParentWidget->AppendNavigationGrid1D(GridType, Dimension, EdgeNavigation, bWrap);
-	IncrementGrids();
+	IncrementGrids(Dimension);
 }
 
 void UUINavCollection::AppendNavigationGrid2D(int DimensionX, int DimensionY, FButtonNavigation EdgeNavigation, bool bWrap, int ButtonsInGrid)
 {
 	ParentWidget->AppendNavigationGrid2D(DimensionX, DimensionY, EdgeNavigation, bWrap, ButtonsInGrid);
-	IncrementGrids();
+	IncrementGrids((ButtonsInGrid == -1 ? (DimensionX * DimensionY) : ButtonsInGrid));
 }
 
 void UUINavCollection::AppendCollection(TArray<FButtonNavigation> EdgeNavigations)
@@ -136,10 +188,16 @@ void UUINavCollection::AppendCollection(TArray<FButtonNavigation> EdgeNavigation
 	CollectionIndex++;
 }
 
-void UUINavCollection::IncrementGrids()
+void UUINavCollection::IncrementGrids(int Dimension)
 {
 	GridCount++;
-	if (ParentCollection != nullptr) ParentCollection->IncrementGrids();
+	LastButtonIndex += (Dimension - 1);
+	if (ParentCollection != nullptr) ParentCollection->IncrementGrids(Dimension);
+}
+
+int UUINavCollection::GetGlobalGridIndex(int GridIndex)
+{
+	return FirstGridIndex + GridIndex;
 }
 
 void UUINavCollection::GetGridAtIndex(int GridIndex, FGrid& Grid, bool& bIsValid)

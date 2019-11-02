@@ -24,9 +24,27 @@ public:
 		void PreSetup();
 	virtual void PreSetup_Implementation();
 
+	void NotifyOnNavigate(int From, int To, int LocalFrom, int LocalTo);
+
+	UFUNCTION(BlueprintNativeEvent, Category = UINavCollection)
+		void OnNavigate(int From, int To, int LocalFrom, int LocalTo);
+	virtual void OnNavigate_Implementation(int From, int To, int LocalFrom, int LocalTo);
+
+	UFUNCTION(BlueprintNativeEvent, Category = UINavCollection)
+		void OnSelect(int Index, int LocalIndex);
+	virtual void OnSelect_Implementation(int Index, int LocalIndex);
+
+	void NotifyOnSelect(int Index, int LocalIndex);
+
 	void Init(int StartIndex);
 
 	void TraverseHierarquy(int StartIndex);
+
+	UPROPERTY(BlueprintReadOnly, Category = UINavCollection)
+		int FirstButtonIndex = -1;
+
+	UPROPERTY(BlueprintReadOnly, Category = UINavCollection)
+		int LastButtonIndex = -1;
 
 	//The index of the first grid in this Collection
 	UPROPERTY(BlueprintReadOnly, Category = UINavCollection)
@@ -51,7 +69,7 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = UINavCollection)
 		TArray<class UUINavHorizontalComponent*> UINavHorizontalComps;
 
-	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
+	UPROPERTY(BlueprintReadOnly, Category = UINavCollection)
 		TArray<class UUINavCollection*> UINavCollections;
 
 	int CollectionIndex = 0;
@@ -65,7 +83,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = UINavCollection)
 		void AppendCollection(TArray<FButtonNavigation> EdgeNavigations);
 
-	void IncrementGrids();
+	void IncrementGrids(int Dimension);
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavCollection)
+		int GetGlobalGridIndex(int GridIndex);
 
 	//Returns a reference to the grid in this collection at the specified index
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavCollection)
