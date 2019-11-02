@@ -26,10 +26,24 @@ public:
 
 	void NotifyOnNavigate(int From, int To, int LocalFrom, int LocalTo);
 
+	/**
+	*	Called when the button with the specified index was navigated upon
+	*
+	*	@param	From  The global index of the button that was navigated from
+	*	@param	To  The global index of the button that was navigated to
+	*	@param	From  The local index of the button that was navigated from
+	*	@param	To  The local index of the button that was navigated to
+	*/
 	UFUNCTION(BlueprintNativeEvent, Category = UINavCollection)
 		void OnNavigate(int From, int To, int LocalFrom, int LocalTo);
 	virtual void OnNavigate_Implementation(int From, int To, int LocalFrom, int LocalTo);
 
+	/**
+	*	Notifies that a button was selected, and indicates its index
+	*
+	*	@param	Index  The global index of the button that was selected
+	*	@param	Index  The local index of the button that was selected
+	*/
 	UFUNCTION(BlueprintNativeEvent, Category = UINavCollection)
 		void OnSelect(int Index, int LocalIndex);
 	virtual void OnSelect_Implementation(int Index, int LocalIndex);
