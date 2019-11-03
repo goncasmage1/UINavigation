@@ -1435,9 +1435,33 @@ void UUINavWidget::NavigateTo(int Index, bool bHoverEvent)
 
 	DispatchNavigation(Index, bHoverEvent);
 	OnNavigate(ButtonIndex, Index);
+	CollectionNavigateTo(Index);
 
 	ButtonIndex = Index;
 	CurrentButton = UINavButtons[ButtonIndex];
+}
+
+void UUINavWidget::CollectionNavigateTo(int Index)
+{
+	bool bFoundFrom = false;
+	bool bFoundTo = false;
+	for (UUINavCollection* Collection : UINavCollections)
+	{
+		int CollectionFromIndex = GetCollectionButtonIndex(Collection, ButtonIndex);
+		int CollectionToIndex = GetCollectionButtonIndex(Collection, Index);
+
+		bool bValidFrom = CollectionFromIndex != -1;
+		bool bValidTo = CollectionToIndex != -1;
+		if (bValidFrom || bValidTo)
+		{
+			if (!bFoundFrom) bFoundFrom = bValidFrom;
+			if (!bFoundTo) bFoundTo = bValidTo;
+
+			Collection->NotifyOnNavigate(ButtonIndex, Index, CollectionFromIndex, CollectionToIndex);
+		}
+
+		if (bFoundFrom && bFoundTo) break;
+	}
 }
 
 void UUINavWidget::DispatchNavigation(int Index, bool bHoverEvent)
@@ -1492,6 +1516,19 @@ void UUINavWidget::OnSelect_Implementation(int Index)
 
 }
 
+void UUINavWidget::CollectionOnSelect(int Index)
+{
+	for (UUINavCollection* Collection : UINavCollections)
+	{
+		int CollectionButtonIndex = GetCollectionButtonIndex(Collection, Index);
+		if (CollectionButtonIndex != -1)
+		{
+			Collection->NotifyOnSelect(Index, CollectionButtonIndex);
+			break;
+		}
+	}
+}
+
 void UUINavWidget::OnPreSelect(int Index)
 {
 	if (CurrentButton == nullptr)
@@ -1517,6 +1554,7 @@ void UUINavWidget::OnPreSelect(int Index)
 			PlaySound(PressSound);
 		}
 		OnSelect(Index);
+		CollectionOnSelect(Index);
 	}
 }
 
@@ -2029,6 +2067,20 @@ int UUINavWidget::GetButtonIndexFromCoordinatesInGrid2D(const FGrid Grid, int XC
 	if (Index >= UINavButtons.Num()) return -1;
 
 	return Index;
+}
+
+int UUINavWidget::GetCollectionButtonIndex(UUINavCollection * Collection, int Index)
+{
+	if (Collection == nullptr) return -1;
+
+	if (Collection->FirstButtonIndex <= Index &&
+		Collection->LastButtonIndex >= Index &&
+		Collection->FirstButtonIndex < Collection->LastButtonIndex)
+	{
+		return Index - Collection->FirstButtonIndex;
+	}
+
+	return -1;
 }
 
 UUINavComponent * UUINavWidget::GetUINavComponentAtIndex(int Index)

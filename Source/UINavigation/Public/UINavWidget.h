@@ -309,6 +309,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = UINavWidget, meta = (AdvancedDisplay=1))
 		void NavigateTo(int Index, bool bHoverEvent = false);
 
+	void CollectionNavigateTo(int Index);
+
 	void DispatchNavigation(int Index, bool bHoverEvent = false);
 
 	/**
@@ -403,6 +405,8 @@ public:
 	UFUNCTION(BlueprintNativeEvent, Category = UINavWidget)
 		void OnSelect(int Index);
 	virtual void OnSelect_Implementation(int Index);
+
+	void CollectionOnSelect(int Index);
 
 	void OnPreSelect(int Index);
 
@@ -657,6 +661,8 @@ public:
 	// Returns the button's coordinates in a 2D grid
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
 		int GetButtonIndexFromCoordinatesInGrid2D(const FGrid Grid, int XCoord, int YCoord);
+
+	int GetCollectionButtonIndex(UUINavCollection* Collection, int Index);
 
 	/**
 	*	Returns the UINavComponent with the specified index (null if that
