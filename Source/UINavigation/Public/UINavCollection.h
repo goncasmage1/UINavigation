@@ -28,6 +28,8 @@ public:
 
 	/**
 	*	Called when the button with the specified index was navigated upon
+	*	If the LocalTo or LocalFrom index don't belong to this collection,
+	*	they will be -1.
 	*
 	*	@param	From  The global index of the button that was navigated from
 	*	@param	To  The global index of the button that was navigated to
