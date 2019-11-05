@@ -23,31 +23,31 @@ protected:
 
 	//-----------------------------------------------------------------------
 
-	TArray<FString> PossibleAxisNames = {
-		TEXT("Gamepad_LeftTrigger"),
-		TEXT("Gamepad_RightTrigger"),
-		TEXT("Gamepad_LeftStick_Up"),
-		TEXT("Gamepad_LeftStick_Down"),
-		TEXT("Gamepad_LeftStick_Right"),
-		TEXT("Gamepad_LeftStick_Left"),
-		TEXT("Gamepad_RightStick_Up"),
-		TEXT("Gamepad_RightStick_Down"),
-		TEXT("Gamepad_RightStick_Right"),
-		TEXT("Gamepad_RightStick_Left"),
-		TEXT("MotionController_Left_Thumbstick_Up"),
-		TEXT("MotionController_Left_Thumbstick_Down"),
-		TEXT("MotionController_Left_Thumbstick_Left"),
-		TEXT("MotionController_Left_Thumbstick_Right"),
-		TEXT("MotionController_Right_Thumbstick_Up"),
-		TEXT("MotionController_Right_Thumbstick_Down"),
-		TEXT("MotionController_Right_Thumbstick_Left"),
-		TEXT("MotionController_Right_Thumbstick_Right"),
-		TEXT("MotionController_Left_Trigger"),
-		TEXT("MotionController_Left_Grip1"),
-		TEXT("MotionController_Left_Grip2"),
-		TEXT("MotionController_Right_Trigger"),
-		TEXT("MotionController_Right_Grip1"),
-		TEXT("MotionController_Right_Grip2"),
+	TMap<FKey, FKey> KeyToAxisMap = {
+		{EKeys::Gamepad_LeftTrigger, EKeys::Gamepad_LeftTriggerAxis},
+		{EKeys::Gamepad_RightTrigger, EKeys::Gamepad_RightTriggerAxis},
+		{EKeys::Gamepad_LeftStick_Up, EKeys::Gamepad_LeftY},
+		{EKeys::Gamepad_LeftStick_Down, EKeys::Gamepad_LeftY},
+		{EKeys::Gamepad_LeftStick_Left, EKeys::Gamepad_LeftX},
+		{EKeys::Gamepad_LeftStick_Right, EKeys::Gamepad_LeftX},
+		{EKeys::Gamepad_RightStick_Up, EKeys::Gamepad_RightY},
+		{EKeys::Gamepad_RightStick_Down, EKeys::Gamepad_RightY},
+		{EKeys::Gamepad_RightStick_Left, EKeys::Gamepad_RightX},
+		{EKeys::Gamepad_RightStick_Right, EKeys::Gamepad_RightX},
+		{EKeys::MotionController_Left_Trigger, EKeys::MotionController_Left_TriggerAxis},
+		{EKeys::MotionController_Left_Grip1, EKeys::MotionController_Left_Grip1Axis},
+		{EKeys::MotionController_Left_Grip2, EKeys::MotionController_Left_Grip2Axis},
+		{EKeys::MotionController_Right_Trigger, EKeys::MotionController_Right_TriggerAxis},
+		{EKeys::MotionController_Right_Grip1, EKeys::MotionController_Right_Grip1Axis},
+		{EKeys::MotionController_Right_Grip2, EKeys::MotionController_Right_Grip2Axis},
+		{EKeys::MotionController_Left_Thumbstick_Up, EKeys::MotionController_Left_Thumbstick_Y},
+		{EKeys::MotionController_Left_Thumbstick_Down, EKeys::MotionController_Left_Thumbstick_Y},
+		{EKeys::MotionController_Left_Thumbstick_Left, EKeys::MotionController_Left_Thumbstick_X},
+		{EKeys::MotionController_Left_Thumbstick_Right, EKeys::MotionController_Left_Thumbstick_X},
+		{EKeys::MotionController_Right_Thumbstick_Up, EKeys::MotionController_Right_Thumbstick_Y},
+		{EKeys::MotionController_Right_Thumbstick_Down, EKeys::MotionController_Right_Thumbstick_Y},
+		{EKeys::MotionController_Right_Thumbstick_Left, EKeys::MotionController_Right_Thumbstick_X},
+		{EKeys::MotionController_Right_Thumbstick_Right, EKeys::MotionController_Right_Thumbstick_X},
 	};
 
 	//Indicates which column to navigate to when navigating to this Input Container
@@ -77,6 +77,13 @@ public:
 		void OnSetupCompleted();
 	virtual void OnSetupCompleted_Implementation();
 
+	/**
+	*	Called when a new input box is added
+	*/
+	UFUNCTION(BlueprintNativeEvent, Category = UINavWidget)
+		void OnInputBoxAdded(class UUINavInputBox* NewInputBox);
+	virtual void OnInputBoxAdded_Implementation(class UUINavInputBox* NewInputBox);
+
 	UFUNCTION(BlueprintCallable, Category = "UINav Input")
 		void ResetKeyMappings();
 
@@ -89,7 +96,7 @@ public:
 	//Fetches the index offset from the TargetColumn variable for both the top and bottom of the Input Container
 	int GetOffsetFromTargetColumn(bool bTop);
 
-	FKey GetAxisKeyFromActionKey(FKey ActionKey);
+	FKey GetAxisFromKey(FKey Key);
 
 	UFUNCTION(BlueprintCallable, Category = "UINav Input")
 		FORCEINLINE ETargetColumn GetTargetColumn() const { return TargetColumn; }
@@ -137,16 +144,26 @@ public:
 		class UDataTable* InputNameTable;
 
 	/*
-	The names of the desired actions to allow for rebinding
+	The names of the desired actions to allow for rebinding,
+	in the input settings and with their desirable name respectively.
+	Leave desirable name as empty if similar to input settings.
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Input")
-		TArray<FName> ActionNames;
+		TMap<FName, FText> ActionNames;
 
 	/*
-	The names of the desired axes to allow for rebinding
+	The names of the desired axes to allow for rebinding,
+	in the input settings and with their desirable name respectively
+	Leave desirable name as empty if similar to input settings.
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Input")
-		TArray<FName> AxisNames;
+		TMap<FName, FText> AxisNames;
+
+	/*
+	A list of the keys that the player shouldn't be able to use as rebinds
+	*/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Input")
+		TArray<FKey> Blacklist;
 
 	//The name used for empty key buttons
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Input")

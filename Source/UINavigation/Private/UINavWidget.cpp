@@ -367,7 +367,7 @@ FReply UUINavWidget::NativeOnKeyDown(const FGeometry & InGeometry, const FKeyEve
 
 		if (ReceiveInputType == EReceiveInputType::Axis)
 		{
-			FKey AxisKey = UINavInputContainer->GetAxisKeyFromActionKey(PressedKey);
+			FKey AxisKey = UINavInputContainer->GetAxisFromKey(PressedKey);
 			if (AxisKey.GetFName().IsEqual(FName("None")))
 			{
 				CancelRebind();

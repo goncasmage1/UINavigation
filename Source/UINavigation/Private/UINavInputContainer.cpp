@@ -36,6 +36,10 @@ void UUINavInputContainer::OnSetupCompleted_Implementation()
 {
 }
 
+void UUINavInputContainer::OnInputBoxAdded_Implementation(class UUINavInputBox* NewInputBox)
+{
+}
+
 void UUINavInputContainer::ResetKeyMappings()
 {
 	UUINavBlueprintFunctionLibrary::ResetInputSettings();
@@ -78,7 +82,9 @@ void UUINavInputContainer::CreateActionBoxes()
 	int TempFirstButtonIndex = ParentWidget->UINavButtons.Num();
 	int StartingInputComponentIndex = ParentWidget->UINavComponents.Num();
 
-	int Iterations = ActionNames.Num();
+	TArray<FName> ActionNameKeys;
+	ActionNames.GetKeys(ActionNameKeys);
+	int Iterations = ActionNameKeys.Num();
 
 	APlayerController* PC = Cast<APlayerController>(UINavPC->GetOwner());
 	for (int i = 0; i < Iterations; ++i)
@@ -88,7 +94,7 @@ void UUINavInputContainer::CreateActionBoxes()
 		NewInputBox->Container = this;
 		NewInputBox->bIsAxis = false;
 		NewInputBox->KeysPerInput = KeysPerInput;
-		NewInputBox->InputName = ActionNames[i];
+		NewInputBox->InputNameTuple = TPair<FName,FText>(ActionNameKeys[i] , ActionNames[ActionNameKeys[i]]);
 
 		ActionPanel->AddChild(NewInputBox);
 
@@ -108,6 +114,8 @@ void UUINavInputContainer::CreateActionBoxes()
 			NewInputBox->InputButtons[j]->ComponentIndex = NewButtonIndex;
 			ParentWidget->SetupUINavButtonDelegates(NewInputBox->InputButtons[j]->NavButton);
 		}
+
+		OnInputBoxAdded(NewInputBox);
 	} 
 }
 
@@ -122,7 +130,9 @@ void UUINavInputContainer::CreateAxisBoxes()
 	int TempFirstButtonIndex = ParentWidget->UINavButtons.Num();
 	int StartingInputComponentIndex = ParentWidget->UINavComponents.Num();
 
-	int Iterations = AxisNames.Num();
+	TArray<FName> AxisNameKeys;
+	AxisNames.GetKeys(AxisNameKeys);
+	int Iterations = AxisNameKeys.Num();
 
 	APlayerController* PC = Cast<APlayerController>(UINavPC->GetOwner());
 	for (int i = 0; i < Iterations; ++i)
@@ -132,7 +142,7 @@ void UUINavInputContainer::CreateAxisBoxes()
 		NewInputBox->Container = this;
 		NewInputBox->bIsAxis = true;
 		NewInputBox->KeysPerInput = KeysPerInput;
-		NewInputBox->InputName = AxisNames[i];
+		NewInputBox->InputNameTuple = TPair<FName, FText>(AxisNameKeys[i], AxisNames[AxisNameKeys[i]]);
 
 		AxisPanel->AddChild(NewInputBox);
 
@@ -152,6 +162,8 @@ void UUINavInputContainer::CreateAxisBoxes()
 			NewInputBox->InputButtons[j]->ComponentIndex = NewButtonIndex;
 			ParentWidget->SetupUINavButtonDelegates(NewInputBox->InputButtons[j]->NavButton);
 		}
+
+		OnInputBoxAdded(NewInputBox);
 	} 
 }
 
@@ -209,71 +221,10 @@ int UUINavInputContainer::GetOffsetFromTargetColumn(bool bTop)
 	return 0;
 }
 
-FKey UUINavInputContainer::GetAxisKeyFromActionKey(FKey ActionKey)
+FKey UUINavInputContainer::GetAxisFromKey(FKey Key)
 {
-	FString KeyName = ActionKey.GetFName().ToString();
-	int KeyIndex = PossibleAxisNames.Find(KeyName);
-	if (KeyIndex == INDEX_NONE) return FKey();
+	FKey* AxisKey = KeyToAxisMap.Find(Key);
+	if (AxisKey == nullptr) return FKey();
 
-	switch (KeyIndex)
-	{
-		case 0:
-			return FKey(FName("Gamepad_LeftTriggerAxis"));
-			break;
-		case 1:
-			return FKey(FName("Gamepad_RightTriggerAxis"));
-			break;
-		case 2:
-		case 3:
-			return FKey(FName("Gamepad_LeftY"));
-			break;
-		case 4:
-		case 5:
-			return FKey(FName("Gamepad_LeftX"));
-			break;
-		case 6:
-		case 7:
-			return FKey(FName("Gamepad_RightY"));
-			break;
-		case 8:
-		case 9:
-			return FKey(FName("Gamepad_RightX"));
-			break;
-		case 10:
-		case 11:
-			return FKey(FName("MotionController_Left_Thumbstick_Y"));
-			break;
-		case 12:
-		case 13:
-			return FKey(FName("MotionController_Left_Thumbstick_X"));
-			break;
-		case 14:
-		case 15:
-			return FKey(FName("MotionController_Right_Thumbstick_Y"));
-			break;
-		case 16:
-		case 17:
-			return FKey(FName("MotionController_Right_Thumbstick_X"));
-			break;
-		case 18:
-			return FKey(FName("MotionController_Left_TriggerAxis"));
-			break;
-		case 19:
-			return FKey(FName("MotionController_Left_Grip1Axis"));
-			break;
-		case 20:
-			return FKey(FName("MotionController_Left_Grip2Axis"));
-			break;
-		case 21:
-			return FKey(FName("MotionController_Right_TriggerAxis"));
-			break;
-		case 22:
-			return FKey(FName("MotionController_Right_Grip1Axis"));
-			break;
-		case 23:
-			return FKey(FName("MotionController_Right_Grip2Axis"));
-			break;
-	}
-
-	return FKey();
+	return *AxisKey;
 }

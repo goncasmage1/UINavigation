@@ -33,21 +33,19 @@ void UUINavInputBox::BuildKeyMappings()
 		InputButton3
 	};
 
-	FName Input = InputName;
-	if (Container->InputNameTable != nullptr && Container->InputNameTable->GetRowMap().Contains(Input))
+	if (InputNameTuple.Value.ToString().IsEmpty())
 	{
-		FInputNameMapping* NewInputName = (FInputNameMapping*)Container->InputNameTable->GetRowMap()[Input];
-		Input = FName(*NewInputName->InputName);
+		InputNameTuple.Value = FText::FromName(InputNameTuple.Key);
 	}
-	InputText->SetText(FText::FromName(Input));
+	InputText->SetText(InputNameTuple.Value);
 
-	if (bIsAxis) Settings->GetAxisMappingByName(InputName, TempAxes);
-	else Settings->GetActionMappingByName(InputName, TempActions);
+	if (bIsAxis) Settings->GetAxisMappingByName(InputNameTuple.Key, TempAxes);
+	else Settings->GetActionMappingByName(InputNameTuple.Key, TempActions);
 
 	if ((bIsAxis && TempAxes.Num() == 0) || (!bIsAxis && TempActions.Num() == 0))
 	{
 		FString Message = TEXT("Couldn't find Input with name ");
-		Message.Append(*InputName.ToString());
+		Message.Append(*InputNameTuple.Key.ToString());
 		DISPLAYERROR(Message);
 		return;
 	}
@@ -109,9 +107,9 @@ void UUINavInputBox::ResetKeyMappings()
 	InputButtons.Empty();
 	BuildKeyMappings();
 
-	if (Container->UINavPC != nullptr && Container->UINavPC->KeyMap.Contains(InputName.ToString()))
+	if (Container->UINavPC != nullptr && Container->UINavPC->KeyMap.Contains(InputNameTuple.Key.ToString()))
 	{
-		Container->UINavPC->KeyMap.Add(InputName.ToString(), Keys);
+		Container->UINavPC->KeyMap.Add(InputNameTuple.Key.ToString(), Keys);
 	}
 }
 
@@ -132,7 +130,7 @@ void UUINavInputBox::UpdateInputKey(FKey NewKey, int Index)
 	int Iterations = bIsAxis ? Axes.Num() : Actions.Num();
 	for (int i = 0; i < Iterations; i++)
 	{
-		if ((bIsAxis && Axes[i].AxisName.IsEqual(InputName)) || (!bIsAxis && Actions[i].ActionName.IsEqual(InputName)))
+		if ((bIsAxis && Axes[i].AxisName.IsEqual(InputNameTuple.Key)) || (!bIsAxis && Actions[i].ActionName.IsEqual(InputNameTuple.Key)))
 		{
 			if (Found == Index && Container->RespectsRestriction(NewKey, Index))
 			{
@@ -152,7 +150,7 @@ void UUINavInputBox::UpdateInputKey(FKey NewKey, int Index)
 		{
 			FInputAxisKeyMapping Axis;
 			Axis.Key = NewKey;
-			Axis.AxisName = InputName;
+			Axis.AxisName = InputNameTuple.Key;
 			Settings->AddAxisMapping(Axis, true);
 			Keys[Index] = NewKey;
 			InputButtons[Index]->NavText->SetText(GetKeyName(Index));
@@ -160,7 +158,7 @@ void UUINavInputBox::UpdateInputKey(FKey NewKey, int Index)
 		else
 		{
 			FInputActionKeyMapping Action = FInputActionKeyMapping();
-			Action.ActionName = InputName;
+			Action.ActionName = InputNameTuple.Key;
 			Action.Key = NewKey;
 			Settings->AddActionMapping(Action, true);
 			Keys[Index] = NewKey;
@@ -171,9 +169,9 @@ void UUINavInputBox::UpdateInputKey(FKey NewKey, int Index)
 	if (Container->UINavPC != nullptr)
 	{
 		Container->UINavPC->PressedActions.Empty();
-		if (Container->UINavPC->KeyMap.Contains(InputName.ToString()))
+		if (Container->UINavPC->KeyMap.Contains(InputNameTuple.Key.ToString()))
 		{
-			Container->UINavPC->KeyMap.Add(InputName.ToString(), Keys);
+			Container->UINavPC->KeyMap.Add(InputNameTuple.Key.ToString(), Keys);
 		}
 		Container->UINavPC->UnbindMouseWorkaround();
 	}
@@ -186,7 +184,11 @@ void UUINavInputBox::UpdateInputKey(FKey NewKey, int Index)
 
 bool UUINavInputBox::ShouldRegisterKey(FKey NewKey, int Index) const
 {
-	if (Container->IsKeyBeingUsed(NewKey)) return false;
+	if (Container->IsKeyBeingUsed(NewKey) ||
+		Container->Blacklist.Contains(NewKey))
+	{
+		return false;
+	}
 	else return Container->RespectsRestriction(NewKey, Index);
 }
 

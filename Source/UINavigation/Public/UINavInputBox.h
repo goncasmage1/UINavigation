@@ -57,7 +57,7 @@ public:
 
 	class UUINavInputContainer* Container;
 
-	FName InputName;
+	TPair<FName, FText> InputNameTuple;
 
 	int KeysPerInput = 2;
 };
