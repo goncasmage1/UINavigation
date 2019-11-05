@@ -11,6 +11,9 @@
 #define DISPLAYERROR(Text) GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, FString::Printf(TEXT("%s"), *(FString(TEXT("Error in ")).Append(GetName()).Append(TEXT(": ")).Append(Text))));
 
 #define IS_AXIS (AxisType != EAxisType::None)
+#define IS_POSITIVE_AXIS (AxisType == EAxisType::Positive)
+#define IS_NEGATIVE_AXIS (AxisType == EAxisType::Negative)
+#define IS_SCALE_CORRECT(AxisMapping) ((TempAxes[i].Scale > 0.0f && IS_POSITIVE_AXIS) || (TempAxes[i].Scale < 0.0f && IS_NEGATIVE_AXIS))
 
 /**
 * This class contains the logic for rebinding input keys to their respective actions

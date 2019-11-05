@@ -79,7 +79,10 @@ void UUINavInputBox::BuildKeyMappings()
 
 				if (i < KeysPerInput)
 				{
-					if ((IS_AXIS && i < TempAxes.Num()) || (!IS_AXIS && i < TempActions.Num()))
+					if ((IS_AXIS && i < TempAxes.Num() &&
+						((TempAxes[i].Scale > 0.0f && IS_POSITIVE_AXIS) ||
+						 (TempAxes[i].Scale < 0.0f && IS_NEGATIVE_AXIS))) ||
+						(!IS_AXIS && i < TempActions.Num()))
 					{
 						FKey NewKey = IS_AXIS ? TempAxes[i].Key : TempActions[i].Key;
 
@@ -94,6 +97,10 @@ void UUINavInputBox::BuildKeyMappings()
 							NewInputButton->NavText->SetVisibility(ESlateVisibility::Collapsed);
 						}
 						NewInputButton->NavText->SetText(GetKeyName(j));
+					}
+					else if (IS_AXIS)
+					{
+
 					}
 				}
 				else if (Keys.Num() >= KeysPerInput)
