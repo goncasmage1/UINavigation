@@ -8,6 +8,7 @@
 #include "Components/TextBlock.h"
 #include "Components/HorizontalBox.h"
 #include "Components/Image.h"
+#include "Data/RevertRebindReason.h"
 #include "Engine/DataTable.h"
 #include "GameFramework/InputSettings.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
@@ -33,16 +34,32 @@ void UUINavInputBox::BuildKeyMappings()
 		InputButton3
 	};
 
+	FString LastNameChar = InputNameTuple.Key.ToString().Right(1);
+	if (LastNameChar.Equals(TEXT("+")))
+	{
+		AxisType = EAxisType::Positive;
+		FString NewName = InputNameTuple.Key.ToString();
+		NewName.RemoveAt(NewName.Len() - 1);
+		InputNameTuple.Key = FName(*NewName);
+	}
+	else if (LastNameChar.Equals(TEXT("-")))
+	{
+		AxisType = EAxisType::Negative;
+		FString NewName = InputNameTuple.Key.ToString();
+		NewName.RemoveAt(NewName.Len() - 1);
+		InputNameTuple.Key = FName(*NewName);
+	}
+
 	if (InputNameTuple.Value.ToString().IsEmpty())
 	{
 		InputNameTuple.Value = FText::FromName(InputNameTuple.Key);
 	}
 	InputText->SetText(InputNameTuple.Value);
 
-	if (bIsAxis) Settings->GetAxisMappingByName(InputNameTuple.Key, TempAxes);
+	if (IS_AXIS) Settings->GetAxisMappingByName(InputNameTuple.Key, TempAxes);
 	else Settings->GetActionMappingByName(InputNameTuple.Key, TempActions);
 
-	if ((bIsAxis && TempAxes.Num() == 0) || (!bIsAxis && TempActions.Num() == 0))
+	if ((IS_AXIS && TempAxes.Num() == 0) || (!IS_AXIS && TempActions.Num() == 0))
 	{
 		FString Message = TEXT("Couldn't find Input with name ");
 		Message.Append(*InputNameTuple.Key.ToString());
@@ -62,9 +79,9 @@ void UUINavInputBox::BuildKeyMappings()
 
 				if (i < KeysPerInput)
 				{
-					if ((bIsAxis && i < TempAxes.Num()) || (!bIsAxis && i < TempActions.Num()))
+					if ((IS_AXIS && i < TempAxes.Num()) || (!IS_AXIS && i < TempActions.Num()))
 					{
-						FKey NewKey = bIsAxis ? TempAxes[i].Key : TempActions[i].Key;
+						FKey NewKey = IS_AXIS ? TempAxes[i].Key : TempActions[i].Key;
 
 						if (Keys.Contains(NewKey) || !ShouldRegisterKey(NewKey, j)) continue;
 
@@ -127,14 +144,14 @@ void UUINavInputBox::UpdateInputKey(FKey NewKey, int Index)
 
 	int Found = 0;
 	bool bFound = false;
-	int Iterations = bIsAxis ? Axes.Num() : Actions.Num();
+	int Iterations = IS_AXIS ? Axes.Num() : Actions.Num();
 	for (int i = 0; i < Iterations; i++)
 	{
-		if ((bIsAxis && Axes[i].AxisName.IsEqual(InputNameTuple.Key)) || (!bIsAxis && Actions[i].ActionName.IsEqual(InputNameTuple.Key)))
+		if ((IS_AXIS && Axes[i].AxisName.IsEqual(InputNameTuple.Key)) || (!IS_AXIS && Actions[i].ActionName.IsEqual(InputNameTuple.Key)))
 		{
 			if (Found == Index && Container->RespectsRestriction(NewKey, Index))
 			{
-				if (bIsAxis) Axes[i].Key = NewKey;
+				if (IS_AXIS) Axes[i].Key = NewKey;
 				else Actions[i].Key = NewKey;
 				Keys[Index] = NewKey;
 				InputButtons[Index]->NavText->SetText(GetKeyName(Index));
@@ -146,7 +163,7 @@ void UUINavInputBox::UpdateInputKey(FKey NewKey, int Index)
 	}
 	if (!bFound)
 	{
-		if (bIsAxis)
+		if (IS_AXIS)
 		{
 			FInputAxisKeyMapping Axis;
 			Axis.Key = NewKey;
@@ -184,12 +201,25 @@ void UUINavInputBox::UpdateInputKey(FKey NewKey, int Index)
 
 bool UUINavInputBox::ShouldRegisterKey(FKey NewKey, int Index) const
 {
-	if (Container->IsKeyBeingUsed(NewKey) ||
-		Container->Blacklist.Contains(NewKey))
+	ERevertRebindReason RevertReason = ERevertRebindReason::UsedBySameActionGroup;
+	if (Container->IsKeyBeingUsed(NewKey))
 	{
-		return false;
 	}
-	else return Container->RespectsRestriction(NewKey, Index);
+	else if (Container->Blacklist.Contains(NewKey))
+	{
+		RevertReason = ERevertRebindReason::BlacklistedKey;
+	}
+	else if (Container->RespectsRestriction(NewKey, Index))
+	{
+		RevertReason = ERevertRebindReason::RestrictionMismatch;
+	}
+	else
+	{
+		return true;
+	}
+	
+	Container->OnRebindCancelled(RevertReason, NewKey);
+	return false;
 }
 
 bool UUINavInputBox::UpdateKeyIconForKey(int Index)
@@ -258,7 +288,7 @@ void UUINavInputBox::CheckKeyIcon(int Index)
 }
 
 void UUINavInputBox::RevertToActionText(int Index)
-{ 
+{
 	FText OldName;
 	if (Index < KeysPerInput && !(Keys[Index].GetFName().IsEqual(FName("None"))))
 	{

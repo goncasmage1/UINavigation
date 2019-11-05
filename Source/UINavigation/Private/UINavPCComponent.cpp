@@ -673,7 +673,7 @@ void UUINavPCComponent::MouseKeyPressed(FKey MouseKey)
 {
 	if (ActiveWidget != nullptr && ActiveWidget->bWaitForInput)
 	{
-		ActiveWidget->ProcessMouseKeybind(MouseKey);
+		ActiveWidget->ProcessKeybind(MouseKey);
 	}
 }
 

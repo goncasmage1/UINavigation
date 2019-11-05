@@ -5,9 +5,12 @@
 #include "Blueprint/UserWidget.h"
 #include "Data/InputIconMapping.h"
 #include "Data/InputNameMapping.h"
+#include "Data/AxisType.h"
 #include "UINavInputBox.generated.h"
 
 #define DISPLAYERROR(Text) GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, FString::Printf(TEXT("%s"), *(FString(TEXT("Error in ")).Append(GetName()).Append(TEXT(": ")).Append(Text))));
+
+#define IS_AXIS (AxisType != EAxisType::None)
 
 /**
 * This class contains the logic for rebinding input keys to their respective actions
@@ -40,8 +43,9 @@ public:
 	void NotifySelected(int Index);
 
 	bool ContainsKey(FKey CompareKey) const;
+	FORCEINLINE bool IsAxis() const { return IS_AXIS; }
 
-	bool bIsAxis = false;
+	EAxisType AxisType = EAxisType::None;
 
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget), Category = "UINav Input")
 		class UUINavInputComponent* InputButton1;

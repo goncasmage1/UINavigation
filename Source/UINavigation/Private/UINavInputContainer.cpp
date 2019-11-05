@@ -40,6 +40,10 @@ void UUINavInputContainer::OnInputBoxAdded_Implementation(class UUINavInputBox* 
 {
 }
 
+void UUINavInputContainer::OnRebindCancelled_Implementation(ERevertRebindReason RevertReason, FKey PressedKey)
+{
+}
+
 void UUINavInputContainer::ResetKeyMappings()
 {
 	UUINavBlueprintFunctionLibrary::ResetInputSettings();
@@ -74,11 +78,6 @@ void UUINavInputContainer::CreateInputBoxes()
 
 void UUINavInputContainer::CreateActionBoxes()
 {
-	UInputSettings* Settings = const_cast<UInputSettings*>(GetDefault<UInputSettings>());
-	TArray<FInputActionKeyMapping>& Actions = Settings->ActionMappings;
-
-	if (Actions.Num() == 0) return;
-
 	int TempFirstButtonIndex = ParentWidget->UINavButtons.Num();
 	int StartingInputComponentIndex = ParentWidget->UINavComponents.Num();
 
@@ -92,7 +91,6 @@ void UUINavInputContainer::CreateActionBoxes()
 		UUINavInputBox* NewInputBox = CreateWidget<UUINavInputBox>(PC, InputBox_BP);
 		if (NewInputBox == nullptr) continue;
 		NewInputBox->Container = this;
-		NewInputBox->bIsAxis = false;
 		NewInputBox->KeysPerInput = KeysPerInput;
 		NewInputBox->InputNameTuple = TPair<FName,FText>(ActionNameKeys[i] , ActionNames[ActionNameKeys[i]]);
 
@@ -121,12 +119,6 @@ void UUINavInputContainer::CreateActionBoxes()
 
 void UUINavInputContainer::CreateAxisBoxes()
 {
-
-	UInputSettings* Settings = const_cast<UInputSettings*>(GetDefault<UInputSettings>());
-	TArray<FInputAxisKeyMapping>& Axes = Settings->AxisMappings;
-
-	if (Axes.Num() == 0) return;
-
 	int TempFirstButtonIndex = ParentWidget->UINavButtons.Num();
 	int StartingInputComponentIndex = ParentWidget->UINavComponents.Num();
 
@@ -140,7 +132,6 @@ void UUINavInputContainer::CreateAxisBoxes()
 		UUINavInputBox* NewInputBox = CreateWidget<UUINavInputBox>(PC, InputBox_BP);
 		if (NewInputBox == nullptr) continue;
 		NewInputBox->Container = this;
-		NewInputBox->bIsAxis = true;
 		NewInputBox->KeysPerInput = KeysPerInput;
 		NewInputBox->InputNameTuple = TPair<FName, FText>(AxisNameKeys[i], AxisNames[AxisNameKeys[i]]);
 

@@ -376,7 +376,7 @@ FReply UUINavWidget::NativeOnKeyDown(const FGeometry & InGeometry, const FKeyEve
 			PressedKey = AxisKey;
 		}
 
-		ProcessNonMouseKeybind(PressedKey);
+		ProcessKeybind(PressedKey);
 		return FReply::Handled();
 	}
 	else
@@ -405,7 +405,9 @@ FReply UUINavWidget::NativeOnMouseWheel(const FGeometry & InGeometry, const FPoi
 {
 	if (bWaitForInput)
 	{
-		ProcessMouseKeybind(InMouseEvent.GetWheelDelta() > 0.f ? FKey(EKeys::MouseScrollUp) : FKey(EKeys::MouseScrollDown));
+		FKey PressedMouseKey = InMouseEvent.GetWheelDelta() > 0.f ? EKeys::MouseScrollUp : EKeys::MouseScrollDown;
+		if (ReceiveInputType == EReceiveInputType::Axis) PressedMouseKey = EKeys::MouseWheelAxis;
+		ProcessKeybind(PressedMouseKey);
 	}
 	else
 	{
@@ -428,7 +430,7 @@ FReply UUINavWidget::NativeOnMouseButtonDown(const FGeometry & InGeometry, const
 			CancelRebind();
 			return FReply::Handled();
 		}
-		ProcessMouseKeybind(InMouseEvent.GetEffectingButton());
+		ProcessKeybind(InMouseEvent.GetEffectingButton());
 		return FReply::Handled();
 	}
 	else
@@ -1540,7 +1542,7 @@ void UUINavWidget::OnPreSelect(int Index)
 		InputBoxIndex = Index - UINavInputContainer->FirstButtonIndex;
 		int KeysPerInput = UINavInputContainer->KeysPerInput;
 		UINavInputBoxes[InputBoxIndex / KeysPerInput]->NotifySelected(InputBoxIndex % KeysPerInput);
-		ReceiveInputType = UINavInputBoxes[InputBoxIndex / KeysPerInput]->bIsAxis ? EReceiveInputType::Axis : EReceiveInputType::Action;
+		ReceiveInputType = UINavInputBoxes[InputBoxIndex / KeysPerInput]->IsAxis() ? EReceiveInputType::Axis : EReceiveInputType::Action;
 		APlayerController* PC = Cast<APlayerController>(UINavPC->GetOwner());
 		SetUserFocus(PC);
 		SetKeyboardFocus();
@@ -2152,7 +2154,7 @@ void UUINavWidget::PressEvent(int Index)
 	if (bWaitForInput)
 	{
 		if (ReceiveInputType == EReceiveInputType::Axis) CancelRebind();
-		else ProcessMouseKeybind(FKey(EKeys::LeftMouseButton));
+		else ProcessKeybind(EKeys::LeftMouseButton);
 	}
 	else
 	{
@@ -2179,19 +2181,10 @@ void UUINavWidget::SetupUINavButtonDelegates(UUINavButton * NewButton)
 	NewButton->CustomRelease.AddDynamic(this, &UUINavWidget::ReleaseEvent);
 }
 
-void UUINavWidget::ProcessNonMouseKeybind(FKey PressedKey)
+void UUINavWidget::ProcessKeybind(FKey PressedKey)
 {
 	int KeysPerInput = UINavInputContainer->KeysPerInput;
 	UINavInputBoxes[InputBoxIndex / KeysPerInput]->UpdateInputKey(PressedKey, InputBoxIndex % KeysPerInput);
-	bWaitForInput = false;
-	ReceiveInputType = EReceiveInputType::None;
-}
-
-void UUINavWidget::ProcessMouseKeybind(FKey PressedMouseKey)
-{
-	int KeysPerInput = UINavInputContainer->KeysPerInput;
-	if (ReceiveInputType == EReceiveInputType::Axis) PressedMouseKey = FKey(FName("MouseWheelAxis"));
-	UINavInputBoxes[InputBoxIndex / KeysPerInput]->UpdateInputKey(PressedMouseKey, InputBoxIndex % KeysPerInput);
 	bWaitForInput = false;
 	ReceiveInputType = EReceiveInputType::None;
 }

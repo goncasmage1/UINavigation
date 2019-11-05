@@ -3,6 +3,7 @@
 #pragma once
 
 #include "Data/InputRestriction.h"
+#include "Data/RevertRebindReason.h"
 #include "Data/TargetColumn.h"
 #include "Blueprint/UserWidget.h"
 #include "UINavInputContainer.generated.h"
@@ -22,6 +23,17 @@ protected:
 	void CreateAxisBoxes();
 
 	//-----------------------------------------------------------------------
+
+	TArray<FKey> FullRangeAxes = {
+		EKeys::Gamepad_LeftX,
+		EKeys::Gamepad_LeftY,
+		EKeys::Gamepad_RightX,
+		EKeys::Gamepad_RightY,
+		EKeys::MotionController_Left_Thumbstick_X,
+		EKeys::MotionController_Left_Thumbstick_Y,
+		EKeys::MotionController_Right_Thumbstick_X,
+		EKeys::MotionController_Right_Thumbstick_Y,
+	};
 
 	TMap<FKey, FKey> KeyToAxisMap = {
 		{EKeys::Gamepad_LeftTrigger, EKeys::Gamepad_LeftTriggerAxis},
@@ -84,13 +96,20 @@ public:
 		void OnInputBoxAdded(class UUINavInputBox* NewInputBox);
 	virtual void OnInputBoxAdded_Implementation(class UUINavInputBox* NewInputBox);
 
+	/*
+	*	Called when a rebind was cancelled, specifying the reason for the revert.
+	*/
+	UFUNCTION(BlueprintNativeEvent, Category = UINavWidget)
+		void OnRebindCancelled(ERevertRebindReason RevertReason, FKey PressedKey);
+	virtual void OnRebindCancelled_Implementation(ERevertRebindReason RevertReason, FKey PressedKey);
+
 	UFUNCTION(BlueprintCallable, Category = "UINav Input")
 		void ResetKeyMappings();
 
-	UFUNCTION(BlueprintCallable, Category = "UINav Input")
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "UINav Input")
 		bool IsKeyBeingUsed(FKey CompareKey) const;
 
-	UFUNCTION(BlueprintCallable, Category = "UINav Input")
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "UINav Input")
 		bool RespectsRestriction(FKey CompareKey, int Index);
 
 	//Fetches the index offset from the TargetColumn variable for both the top and bottom of the Input Container

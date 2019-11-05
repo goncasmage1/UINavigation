@@ -712,8 +712,7 @@ public:
 		void ReleaseEvent(int Index);
 
 	void SetupUINavButtonDelegates(class UUINavButton* NewButton);
-	void ProcessNonMouseKeybind(FKey PressedMouseKey);
-	void ProcessMouseKeybind(FKey PressedMouseKey);
+	void ProcessKeybind(FKey PressedMouseKey);
 	void CancelRebind();
 
 	/**
