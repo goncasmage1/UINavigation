@@ -39,6 +39,7 @@ public:
 	virtual void NativeConstruct() override;
 
 	void BuildKeyMappings();
+	bool SetupNewKey(FKey NewKey, int KeyIndex, class UUINavInputComponent* NewInputButton);
 	void ResetKeyMappings();
 	void UpdateInputKey(FKey NewKey, int Index);
 	void RevertToActionText(int Index);

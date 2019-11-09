@@ -13,6 +13,8 @@
 #include "GameFramework/InputSettings.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
 
+#define GET_AXIS_KEY(Key, AxisType) Container->GetKeyFromAxis(Key, AxisType == EAxisType::Positive)
+
 void UUINavInputBox::NativeConstruct()
 {
 	Super::NativeConstruct();
@@ -25,8 +27,8 @@ void UUINavInputBox::NativeConstruct()
 void UUINavInputBox::BuildKeyMappings()
 {
 	const UInputSettings* Settings = GetDefault<UInputSettings>();
-	TArray<FInputActionKeyMapping> TempActions;
-	TArray<FInputAxisKeyMapping> TempAxes;
+	TArray<FInputActionKeyMapping> Actions;
+	TArray<FInputAxisKeyMapping> Axes;
 
 	InputButtons = {
 		InputButton1,
@@ -56,10 +58,11 @@ void UUINavInputBox::BuildKeyMappings()
 	}
 	InputText->SetText(InputNameTuple.Value);
 
-	if (IS_AXIS) Settings->GetAxisMappingByName(InputNameTuple.Key, TempAxes);
-	else Settings->GetActionMappingByName(InputNameTuple.Key, TempActions);
+	if (IS_AXIS) Settings->GetAxisMappingByName(InputNameTuple.Key, Axes);
+	else Settings->GetActionMappingByName(InputNameTuple.Key, Actions);
 
-	if ((IS_AXIS && TempAxes.Num() == 0) || (!IS_AXIS && TempActions.Num() == 0))
+	if ((IS_AXIS && Axes.Num() == 0) || 
+		(!IS_AXIS && Actions.Num() == 0))
 	{
 		FString Message = TEXT("Couldn't find Input with name ");
 		Message.Append(*InputNameTuple.Key.ToString());
@@ -70,6 +73,7 @@ void UUINavInputBox::BuildKeyMappings()
 	for (int j = 0; j < 3; j++)
 	{
 		UUINavInputComponent* NewInputButton = InputButtons[j];
+		FKey PotentialAxisKey;
 
 		if (j < KeysPerInput)
 		{
@@ -79,34 +83,36 @@ void UUINavInputBox::BuildKeyMappings()
 
 				if (i < KeysPerInput)
 				{
-					if ((IS_AXIS && i < TempAxes.Num() &&
-						((TempAxes[i].Scale > 0.0f && IS_POSITIVE_AXIS) ||
-						 (TempAxes[i].Scale < 0.0f && IS_NEGATIVE_AXIS))) ||
-						(!IS_AXIS && i < TempActions.Num()))
+					if ((IS_AXIS && i < Axes.Num() &&
+						((Axes[i].Scale > 0.0f && IS_POSITIVE_AXIS) ||
+						 (Axes[i].Scale < 0.0f && IS_NEGATIVE_AXIS))) ||
+						(!IS_AXIS && i < Actions.Num()))
 					{
-						FKey NewKey = IS_AXIS ? TempAxes[i].Key : TempActions[i].Key;
-
-						if (Keys.Contains(NewKey) || !ShouldRegisterKey(NewKey, j)) continue;
-
-						Keys.Add(NewKey);
-
-						if (UpdateKeyIconForKey(j))
+						FKey NewKey = IS_AXIS ? Axes[i].Key : Actions[i].Key;
+						if (IS_AXIS && !Axes[i].Key.IsValid())
 						{
-							bUsingKeyImage[j] = true;
-							NewInputButton->InputImage->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
-							NewInputButton->NavText->SetVisibility(ESlateVisibility::Collapsed);
+							NewKey = Axes[i].Key;
 						}
-						NewInputButton->NavText->SetText(GetKeyName(j));
+						
+						if (!SetupNewKey(NewKey, j, NewInputButton))
+						{
+							continue;
+						}
 					}
 					else if (IS_AXIS)
 					{
-
+						PotentialAxisKey = GET_AXIS_KEY(Axes[i].Key,
+														(AxisType == EAxisType::Positive ? EAxisType::Negative : EAxisType::Positive));
 					}
 				}
 				else if (Keys.Num() >= KeysPerInput)
 				{
 					NewInputButton->SetVisibility(Container->bCollapseInputBox ? ESlateVisibility::Collapsed : ESlateVisibility::Hidden);
 				}
+			}
+			if (PotentialAxisKey.IsValid())
+			{
+				SetupNewKey(PotentialAxisKey, j, NewInputButton);
 			}
 		}
 		else
@@ -122,6 +128,23 @@ void UUINavInputBox::BuildKeyMappings()
 			Keys.Add(FKey());
 		}
 	}
+}
+
+bool UUINavInputBox::SetupNewKey(FKey NewKey, int KeyIndex, UUINavInputComponent* NewInputButton)
+{
+	if (!NewKey.IsValid() || Keys.Contains(NewKey) || !ShouldRegisterKey(NewKey, KeyIndex)) return false;
+
+	Keys.Add(NewKey);
+
+	if (UpdateKeyIconForKey(KeyIndex))
+	{
+		bUsingKeyImage[KeyIndex] = true;
+		NewInputButton->InputImage->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+		NewInputButton->NavText->SetVisibility(ESlateVisibility::Collapsed);
+	}
+	NewInputButton->NavText->SetText(GetKeyName(KeyIndex));
+
+	return true;
 }
 
 void UUINavInputBox::ResetKeyMappings()
@@ -154,7 +177,8 @@ void UUINavInputBox::UpdateInputKey(FKey NewKey, int Index)
 	int Iterations = IS_AXIS ? Axes.Num() : Actions.Num();
 	for (int i = 0; i < Iterations; i++)
 	{
-		if ((IS_AXIS && Axes[i].AxisName.IsEqual(InputNameTuple.Key)) || (!IS_AXIS && Actions[i].ActionName.IsEqual(InputNameTuple.Key)))
+		if ((IS_AXIS && Axes[i].AxisName.IsEqual(InputNameTuple.Key)) || 
+			(!IS_AXIS && Actions[i].ActionName.IsEqual(InputNameTuple.Key)))
 		{
 			if (Found == Index && Container->RespectsRestriction(NewKey, Index))
 			{

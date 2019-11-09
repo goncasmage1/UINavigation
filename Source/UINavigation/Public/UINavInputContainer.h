@@ -11,6 +11,27 @@
 /**
 * This class contains the logic for aggregating several input boxes
 */
+
+USTRUCT(BlueprintType)
+struct FAxis2D_Keys
+{
+	GENERATED_BODY()
+
+	FAxis2D_Keys()
+	{
+
+	}
+
+	FAxis2D_Keys(FKey InPositiveKey, FKey InNegativeKey)
+	{
+		PositiveKey = InPositiveKey;
+		NegativeKey = InNegativeKey;
+	}
+
+	FKey PositiveKey;
+	FKey NegativeKey;
+};
+
 UCLASS()
 class UINAVIGATION_API UUINavInputContainer : public UUserWidget
 {
@@ -24,15 +45,15 @@ protected:
 
 	//-----------------------------------------------------------------------
 
-	TArray<FKey> FullRangeAxes = {
-		EKeys::Gamepad_LeftX,
-		EKeys::Gamepad_LeftY,
-		EKeys::Gamepad_RightX,
-		EKeys::Gamepad_RightY,
-		EKeys::MotionController_Left_Thumbstick_X,
-		EKeys::MotionController_Left_Thumbstick_Y,
-		EKeys::MotionController_Right_Thumbstick_X,
-		EKeys::MotionController_Right_Thumbstick_Y,
+	TMap<FKey, FAxis2D_Keys> Axis2DToKeyMap = {
+		{EKeys::Gamepad_LeftX, {EKeys::Gamepad_LeftStick_Right, EKeys::Gamepad_LeftStick_Left}},
+		{EKeys::Gamepad_LeftY, {EKeys::Gamepad_LeftStick_Up, EKeys::Gamepad_LeftStick_Down}},
+		{EKeys::Gamepad_RightX, {EKeys::Gamepad_RightStick_Right, EKeys::Gamepad_RightStick_Left}},
+		{EKeys::Gamepad_RightY, {EKeys::Gamepad_RightStick_Up, EKeys::Gamepad_RightStick_Down}},
+		{EKeys::MotionController_Left_Thumbstick_X, {EKeys::MotionController_Left_Thumbstick_Right, EKeys::MotionController_Left_Thumbstick_Left}},
+		{EKeys::MotionController_Left_Thumbstick_Y, {EKeys::MotionController_Left_Thumbstick_Up, EKeys::MotionController_Left_Thumbstick_Down}},
+		{EKeys::MotionController_Right_Thumbstick_X, {EKeys::MotionController_Right_Thumbstick_Right, EKeys::MotionController_Right_Thumbstick_Left}},
+		{EKeys::MotionController_Right_Thumbstick_Y, {EKeys::MotionController_Right_Thumbstick_Up, EKeys::MotionController_Right_Thumbstick_Down}},
 	};
 
 	TMap<FKey, FKey> KeyToAxisMap = {
@@ -115,9 +136,12 @@ public:
 	//Fetches the index offset from the TargetColumn variable for both the top and bottom of the Input Container
 	int GetOffsetFromTargetColumn(bool bTop);
 
-	FKey GetAxisFromKey(FKey Key);
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "UINav Input")
+		FKey GetAxisFromKey(FKey Key);
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "UINav Input")
+		FKey GetKeyFromAxis(FKey Key, bool bPositive);
 
-	UFUNCTION(BlueprintCallable, Category = "UINav Input")
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "UINav Input")
 		FORCEINLINE ETargetColumn GetTargetColumn() const { return TargetColumn; }
 
 	//-----------------------------------------------------------------------

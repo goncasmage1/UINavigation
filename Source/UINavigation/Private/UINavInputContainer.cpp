@@ -196,6 +196,22 @@ bool UUINavInputContainer::RespectsRestriction(FKey CompareKey, int Index)
 	return false;
 }
 
+FKey UUINavInputContainer::GetAxisFromKey(FKey Key)
+{
+	FKey* AxisKey = KeyToAxisMap.Find(Key);
+	if (AxisKey == nullptr) return FKey();
+
+	return *AxisKey;
+}
+
+FKey UUINavInputContainer::GetKeyFromAxis(FKey Key, bool bPositive)
+{
+	FAxis2D_Keys* Axis2DKeys = Axis2DToKeyMap.Find(Key);
+	if (Axis2DKeys == nullptr) return FKey();
+	
+	return bPositive ? Axis2DKeys->PositiveKey : Axis2DKeys->NegativeKey;
+}
+
 int UUINavInputContainer::GetOffsetFromTargetColumn(bool bTop)
 {
 	switch (KeysPerInput)
@@ -210,12 +226,4 @@ int UUINavInputContainer::GetOffsetFromTargetColumn(bool bTop)
 			break;
 	}
 	return 0;
-}
-
-FKey UUINavInputContainer::GetAxisFromKey(FKey Key)
-{
-	FKey* AxisKey = KeyToAxisMap.Find(Key);
-	if (AxisKey == nullptr) return FKey();
-
-	return *AxisKey;
 }
