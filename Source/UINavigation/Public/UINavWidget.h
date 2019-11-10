@@ -418,6 +418,20 @@ public:
 	virtual void OnReturn_Implementation();
 
 	/**
+	*	Called when player navigates to the next section
+	*/
+	UFUNCTION(BlueprintNativeEvent, Category = UINavWidget)
+		void OnNext();
+	virtual void OnNext_Implementation();
+
+	/**
+	*	Called when player navigates to the previous section
+	*/
+	UFUNCTION(BlueprintNativeEvent, Category = UINavWidget)
+		void OnPrevious();
+	virtual void OnPrevious_Implementation();
+
+	/**
 	*	Called when the input type changed
 	*/
 	UFUNCTION(BlueprintNativeEvent, Category = UINavWidget)

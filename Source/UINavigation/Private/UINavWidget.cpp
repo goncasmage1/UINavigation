@@ -1569,6 +1569,14 @@ void UUINavWidget::OnReturn_Implementation()
 	ReturnToParent();
 }
 
+void UUINavWidget::OnNext_Implementation()
+{
+}
+
+void UUINavWidget::OnPrevious_Implementation()
+{
+}
+
 void UUINavWidget::OnNavigatedDirection_Implementation(ENavigationDirection Direction)
 {
 }
