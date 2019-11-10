@@ -381,6 +381,12 @@ FReply UUINavWidget::NativeOnKeyDown(const FGeometry & InGeometry, const FKeyEve
 	}
 	else
 	{
+		//Allow fullscreen by pressing F11 or Alt+Enter
+		if (GEngine->GameViewport->TryToggleFullscreenOnInputKey(InKeyEvent.GetKey(), IE_Pressed))
+		{
+			return FReply::Handled();
+		}
+
 		FReply reply = OnKeyPressed(InKeyEvent.GetKey());
 		if (reply.IsEventHandled()) return FReply::Handled();
 	}
