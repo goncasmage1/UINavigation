@@ -493,7 +493,7 @@ void UUINavWidget::HandleSelectorMovement(float DeltaTime)
 		TheSelector->SetRenderTranslation(SelectorDestination);
 		if (HaltedIndex != -1)
 		{
-			if (HaltedIndex == SELECT_INDEX) OnSelect(ButtonIndex);
+			if (HaltedIndex == SELECT_INDEX) OnPreSelect(ButtonIndex);
 			else if (HaltedIndex == RETURN_INDEX) OnReturn();
 			else NavigateTo(HaltedIndex);
 
@@ -1535,7 +1535,7 @@ void UUINavWidget::CollectionOnSelect(int Index)
 	}
 }
 
-void UUINavWidget::OnPreSelect(int Index)
+void UUINavWidget::OnPreSelect(int Index, bool bMouseClick)
 {
 	if (CurrentButton == nullptr)
 	{
@@ -1554,10 +1554,10 @@ void UUINavWidget::OnPreSelect(int Index)
 	}
 	else
 	{
-		USoundBase* PressSound = Cast<USoundBase>(CurrentButton->WidgetStyle.PressedSlateSound.GetResourceObject());
-		if (PressSound != nullptr)
+		if (!bMouseClick)
 		{
-			PlaySound(PressSound);
+			USoundBase* PressSound = Cast<USoundBase>(CurrentButton->WidgetStyle.PressedSlateSound.GetResourceObject());
+			if (PressSound != nullptr) PlaySound(PressSound);
 		}
 		OnSelect(Index);
 		CollectionOnSelect(Index);
@@ -2166,7 +2166,7 @@ void UUINavWidget::PressEvent(int Index)
 
 		if (!UINavPC->AllowsSelectInput()) return;
 
-		OnPreSelect(Index);
+		OnPreSelect(Index, true);
 
 		if (Index != ButtonIndex) NavigateTo(Index);
 	}

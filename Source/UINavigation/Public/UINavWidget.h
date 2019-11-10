@@ -408,7 +408,7 @@ public:
 
 	void CollectionOnSelect(int Index);
 
-	void OnPreSelect(int Index);
+	void OnPreSelect(int Index, bool bMouseClick = false);
 
 	/**
 	*	Called when ReturnToParent is called (i.e. the player wants to exit the menu)
