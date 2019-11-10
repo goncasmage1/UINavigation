@@ -292,10 +292,14 @@ void UUINavPCComponent::FetchUINavActionKeys()
 
 	TArray<FString> keys;
 	KeyMap.GetKeys(keys);
-	if (keys.Num() != MenuInputs.Num())
+	if (keys.Num() < 6)
 	{
-		DISPLAYERROR("Keep in mind that the MenuNext and MenuPrevious inputs have been added recently. You can add them from the UINavInput.ini file.");
-		DISPLAYERROR("Not all Menu Inputs have been setup! ");
+		DISPLAYERROR("Not all Menu Inputs have been setup!");
+	}
+	else if (keys.Num() < 8)
+	{
+		DISPLAYWARNING("You can add them from the UINavInput.ini file in the plugin's Content folder to your project's DefaultInput.ini file.");
+		DISPLAYWARNING("Keep in mind that the MenuNext and MenuPrevious inputs have been added recently.");
 	}
 }
 

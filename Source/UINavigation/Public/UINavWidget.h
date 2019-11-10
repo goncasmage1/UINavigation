@@ -12,6 +12,7 @@
 #include "UINavWidget.generated.h"
 
 #define DISPLAYERROR(Text) GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, FString::Printf(TEXT("%s"), *(FString(TEXT("Error in ")).Append(GetName()).Append(TEXT(": ")).Append(Text))));
+#define DISPLAYWARNING(Text) GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Orange, FString::Printf(TEXT("%s"), *(FString(TEXT("Warning in ")).Append(GetName()).Append(TEXT(": ")).Append(Text))));
 #define SELECT_INDEX -101
 #define RETURN_INDEX -202
 
