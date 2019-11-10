@@ -1037,7 +1037,7 @@ void UUINavWidget::ClearGrid(int GridIndex, bool bAutoNavigate)
 	int LastIndex = FirstIndex + Grid.GetDimension() - 1;
 	int Difference = LastIndex - FirstIndex + 1;
 
-	bool bShouldNavigate = bAutoNavigate && ButtonIndex >= FirstIndex && ButtonIndex <= ButtonIndex;
+	bool bShouldNavigate = bAutoNavigate && ButtonIndex >= FirstIndex && ButtonIndex <= LastIndex;
 	if (bShouldNavigate)
 	{
 		bool bValid = false;
