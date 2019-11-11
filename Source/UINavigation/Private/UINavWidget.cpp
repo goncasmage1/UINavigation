@@ -316,6 +316,7 @@ void UUINavWidget::UINavSetup()
 	{
 		DispatchNavigation(ButtonIndex);
 		OnNavigate(-1, ButtonIndex);
+		CollectionNavigateTo(ButtonIndex);
 	}
 
 	OnSetupCompleted();
@@ -1453,7 +1454,7 @@ void UUINavWidget::CollectionNavigateTo(int Index)
 	bool bFoundTo = false;
 	for (UUINavCollection* Collection : UINavCollections)
 	{
-		int CollectionFromIndex = GetCollectionButtonIndex(Collection, ButtonIndex);
+		int CollectionFromIndex = Index != ButtonIndex ? GetCollectionButtonIndex(Collection, ButtonIndex) : -1;
 		int CollectionToIndex = GetCollectionButtonIndex(Collection, Index);
 
 		bool bValidFrom = CollectionFromIndex != -1;
@@ -1463,7 +1464,7 @@ void UUINavWidget::CollectionNavigateTo(int Index)
 			if (!bFoundFrom) bFoundFrom = bValidFrom;
 			if (!bFoundTo) bFoundTo = bValidTo;
 
-			Collection->NotifyOnNavigate(ButtonIndex, Index, CollectionFromIndex, CollectionToIndex);
+			Collection->NotifyOnNavigate(Index != ButtonIndex ? ButtonIndex : -1, Index, CollectionFromIndex, CollectionToIndex);
 		}
 
 		if (bFoundFrom && bFoundTo) break;
@@ -2085,7 +2086,7 @@ int UUINavWidget::GetButtonIndexFromCoordinatesInGrid2D(const FGrid Grid, int XC
 
 int UUINavWidget::GetCollectionButtonIndex(UUINavCollection * Collection, int Index)
 {
-	if (Collection == nullptr) return -1;
+	if (Collection == nullptr || Index == -1) return -1;
 
 	if (Collection->FirstButtonIndex <= Index &&
 		Collection->LastButtonIndex >= Index &&
