@@ -48,12 +48,32 @@ public:
 		void OnNavigated(ENavigationDirection NavigationDirection);
 	virtual void OnNavigated_Implementation(ENavigationDirection NavigationDirection);
 
+	/**
+	*	Called when the player selects the current option
+	*/
 	UFUNCTION(BlueprintNativeEvent, Category = UINavController)
 		void OnSelect();
 	virtual void OnSelect_Implementation();
 
+	/**
+	*	Called when the player returns to the previous widget
+	*/
 	UFUNCTION(BlueprintNativeEvent, Category = UINavController)
 		void OnReturn();
 	virtual void OnReturn_Implementation();
+
+	/**
+	*	Called when the player navigates to the next section
+	*/
+	UFUNCTION(BlueprintNativeEvent, Category = UINavController)
+		void OnNext();
+	virtual void OnNext_Implementation();
+
+	/**
+	*	Called when the player navigates to the previous section
+	*/
+	UFUNCTION(BlueprintNativeEvent, Category = UINavController)
+		void OnPrevious();
+	virtual void OnPrevious_Implementation();
 
 };
