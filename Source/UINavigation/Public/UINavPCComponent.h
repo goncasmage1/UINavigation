@@ -29,6 +29,8 @@ protected:
 	bool bAllowSelectInput = true;
 	//Indicates whether the player can return to this widget's parent
 	bool bAllowReturnInput = true;
+	//Indicates whether the player can switch sections using the MenuNext and MenuPrevious actions
+	bool bAllowSectionInput = true;
 
 	class APlayerController* PC;
 
@@ -152,7 +154,7 @@ public:
 		UDataTable* KeyboardMouseKeyNameData;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
-		FORCEINLINE bool AllowsAllMenuInput() const { return bAllowDirectionalInput && bAllowSelectInput && bAllowReturnInput; }
+		FORCEINLINE bool AllowsAllMenuInput() const { return bAllowDirectionalInput && bAllowSelectInput && bAllowReturnInput && bAllowSectionInput; }
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
 		FORCEINLINE bool AllowsDirectionalInput() const { return bAllowDirectionalInput; }
@@ -162,6 +164,10 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
 		FORCEINLINE bool AllowsReturnInput() const { return bAllowReturnInput; }
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
+		FORCEINLINE bool AllowsSectionInput() const { return bAllowSectionInput; }
+	
 
 	UFUNCTION(BlueprintCallable, Category = UINavController)
 		void SetAllowAllMenuInput(bool bAllowInput);
@@ -174,6 +180,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = UINavController)
 		void SetAllowReturnInput(bool bAllowInput);
+
+	UFUNCTION(BlueprintCallable, Category = UINavController)
+		void SetAllowSectionInput(bool bAllowInput);
 
 	void BindMouseWorkaround();
 	void UnbindMouseWorkaround();
@@ -277,6 +286,8 @@ public:
 	void MenuInput(ENavigationDirection Direction);
 	void MenuSelect();
 	void MenuReturn();
+	void MenuNext();
+	void MenuPrevious();
 
 	void MenuUpRelease();
 	void MenuDownRelease();

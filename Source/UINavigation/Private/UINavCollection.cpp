@@ -40,10 +40,7 @@ void UUINavCollection::NotifyOnNavigate(int From, int To, int LocalFrom, int Loc
 		if (bFoundFrom && bFoundTo) break;
 	}
 
-	if (!bFoundFrom || !bFoundTo)
-	{
-		OnNavigate(From, To, LocalFrom, LocalTo);
-	}
+	OnNavigate(From, To, LocalFrom, LocalTo);
 }
 
 void UUINavCollection::OnNavigate_Implementation(int From, int To, int LocalFrom, int LocalTo)

@@ -22,3 +22,11 @@ void IUINavPCReceiver::OnSelect_Implementation()
 void IUINavPCReceiver::OnReturn_Implementation()
 {
 }
+
+void IUINavPCReceiver::OnNext_Implementation()
+{
+}
+
+void IUINavPCReceiver::OnPrevious_Implementation()
+{
+}
