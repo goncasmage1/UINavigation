@@ -12,6 +12,7 @@
 #include "UINavWidget.generated.h"
 
 #define DISPLAYERROR(Text) GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, FString::Printf(TEXT("%s"), *(FString(TEXT("Error in ")).Append(GetName()).Append(TEXT(": ")).Append(Text))));
+#define DISPLAYWARNING(Text) GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Orange, FString::Printf(TEXT("%s"), *(FString(TEXT("Warning in ")).Append(GetName()).Append(TEXT(": ")).Append(Text))));
 #define SELECT_INDEX -101
 #define RETURN_INDEX -202
 
@@ -408,7 +409,7 @@ public:
 
 	void CollectionOnSelect(int Index);
 
-	void OnPreSelect(int Index);
+	void OnPreSelect(int Index, bool bMouseClick = false);
 
 	/**
 	*	Called when ReturnToParent is called (i.e. the player wants to exit the menu)
@@ -416,6 +417,20 @@ public:
 	UFUNCTION(BlueprintNativeEvent, Category = UINavWidget)
 		void OnReturn();
 	virtual void OnReturn_Implementation();
+
+	/**
+	*	Called when player navigates to the next section
+	*/
+	UFUNCTION(BlueprintNativeEvent, Category = UINavWidget)
+		void OnNext();
+	virtual void OnNext_Implementation();
+
+	/**
+	*	Called when player navigates to the previous section
+	*/
+	UFUNCTION(BlueprintNativeEvent, Category = UINavWidget)
+		void OnPrevious();
+	virtual void OnPrevious_Implementation();
 
 	/**
 	*	Called when the input type changed

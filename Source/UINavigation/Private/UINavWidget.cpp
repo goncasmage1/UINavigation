@@ -316,6 +316,7 @@ void UUINavWidget::UINavSetup()
 	{
 		DispatchNavigation(ButtonIndex);
 		OnNavigate(-1, ButtonIndex);
+		CollectionNavigateTo(ButtonIndex);
 	}
 
 	OnSetupCompleted();
@@ -381,6 +382,12 @@ FReply UUINavWidget::NativeOnKeyDown(const FGeometry & InGeometry, const FKeyEve
 	}
 	else
 	{
+		//Allow fullscreen by pressing F11 or Alt+Enter
+		if (GEngine->GameViewport->TryToggleFullscreenOnInputKey(InKeyEvent.GetKey(), IE_Pressed))
+		{
+			return FReply::Handled();
+		}
+
 		FReply reply = OnKeyPressed(InKeyEvent.GetKey());
 		if (reply.IsEventHandled()) return FReply::Handled();
 	}
@@ -489,7 +496,7 @@ void UUINavWidget::HandleSelectorMovement(float DeltaTime)
 		TheSelector->SetRenderTranslation(SelectorDestination);
 		if (HaltedIndex != -1)
 		{
-			if (HaltedIndex == SELECT_INDEX) OnSelect(ButtonIndex);
+			if (HaltedIndex == SELECT_INDEX) OnPreSelect(ButtonIndex);
 			else if (HaltedIndex == RETURN_INDEX) OnReturn();
 			else NavigateTo(HaltedIndex);
 
@@ -1039,7 +1046,7 @@ void UUINavWidget::ClearGrid(int GridIndex, bool bAutoNavigate)
 	int LastIndex = FirstIndex + Grid.GetDimension() - 1;
 	int Difference = LastIndex - FirstIndex + 1;
 
-	bool bShouldNavigate = bAutoNavigate && ButtonIndex >= FirstIndex && ButtonIndex <= ButtonIndex;
+	bool bShouldNavigate = bAutoNavigate && ButtonIndex >= FirstIndex && ButtonIndex <= LastIndex;
 	if (bShouldNavigate)
 	{
 		bool bValid = false;
@@ -1449,7 +1456,7 @@ void UUINavWidget::CollectionNavigateTo(int Index)
 	bool bFoundTo = false;
 	for (UUINavCollection* Collection : UINavCollections)
 	{
-		int CollectionFromIndex = GetCollectionButtonIndex(Collection, ButtonIndex);
+		int CollectionFromIndex = Index != ButtonIndex ? GetCollectionButtonIndex(Collection, ButtonIndex) : -1;
 		int CollectionToIndex = GetCollectionButtonIndex(Collection, Index);
 
 		bool bValidFrom = CollectionFromIndex != -1;
@@ -1459,7 +1466,7 @@ void UUINavWidget::CollectionNavigateTo(int Index)
 			if (!bFoundFrom) bFoundFrom = bValidFrom;
 			if (!bFoundTo) bFoundTo = bValidTo;
 
-			Collection->NotifyOnNavigate(ButtonIndex, Index, CollectionFromIndex, CollectionToIndex);
+			Collection->NotifyOnNavigate(Index != ButtonIndex ? ButtonIndex : -1, Index, CollectionFromIndex, CollectionToIndex);
 		}
 
 		if (bFoundFrom && bFoundTo) break;
@@ -1531,7 +1538,7 @@ void UUINavWidget::CollectionOnSelect(int Index)
 	}
 }
 
-void UUINavWidget::OnPreSelect(int Index)
+void UUINavWidget::OnPreSelect(int Index, bool bMouseClick)
 {
 	if (CurrentButton == nullptr)
 	{
@@ -1550,10 +1557,10 @@ void UUINavWidget::OnPreSelect(int Index)
 	}
 	else
 	{
-		USoundBase* PressSound = Cast<USoundBase>(CurrentButton->WidgetStyle.PressedSlateSound.GetResourceObject());
-		if (PressSound != nullptr)
+		if (!bMouseClick)
 		{
-			PlaySound(PressSound);
+			USoundBase* PressSound = Cast<USoundBase>(CurrentButton->WidgetStyle.PressedSlateSound.GetResourceObject());
+			if (PressSound != nullptr) PlaySound(PressSound);
 		}
 		OnSelect(Index);
 		CollectionOnSelect(Index);
@@ -1563,6 +1570,14 @@ void UUINavWidget::OnPreSelect(int Index)
 void UUINavWidget::OnReturn_Implementation()
 {
 	ReturnToParent();
+}
+
+void UUINavWidget::OnNext_Implementation()
+{
+}
+
+void UUINavWidget::OnPrevious_Implementation()
+{
 }
 
 void UUINavWidget::OnNavigatedDirection_Implementation(ENavigationDirection Direction)
@@ -2073,7 +2088,7 @@ int UUINavWidget::GetButtonIndexFromCoordinatesInGrid2D(const FGrid Grid, int XC
 
 int UUINavWidget::GetCollectionButtonIndex(UUINavCollection * Collection, int Index)
 {
-	if (Collection == nullptr) return -1;
+	if (Collection == nullptr || Index == -1) return -1;
 
 	if (Collection->FirstButtonIndex <= Index &&
 		Collection->LastButtonIndex >= Index &&
@@ -2162,7 +2177,7 @@ void UUINavWidget::PressEvent(int Index)
 
 		if (!UINavPC->AllowsSelectInput()) return;
 
-		OnPreSelect(Index);
+		OnPreSelect(Index, true);
 
 		if (Index != ButtonIndex) NavigateTo(Index);
 	}

@@ -105,6 +105,12 @@ void UUINavPCComponent::BindMenuInputs()
 	FInputActionBinding& Action6_1 = InputComponent->BindAction("MenuReturn", IE_Pressed, this, &UUINavPCComponent::MenuReturn);
 	Action6_1.bExecuteWhenPaused = true;
 	Action6_1.bConsumeInput = false;
+	FInputActionBinding& Action7_1 = InputComponent->BindAction("MenuNext", IE_Pressed, this, &UUINavPCComponent::MenuNext);
+	Action7_1.bExecuteWhenPaused = true;
+	Action7_1.bConsumeInput = false;
+	FInputActionBinding& Action8_1 = InputComponent->BindAction("MenuPrevious", IE_Pressed, this, &UUINavPCComponent::MenuPrevious);
+	Action8_1.bExecuteWhenPaused = true;
+	Action8_1.bConsumeInput = false;
 
 	FInputActionBinding& Action1_2 = InputComponent->BindAction("MenuUp", IE_Released, this, &UUINavPCComponent::MenuUpRelease);
 	Action1_2.bExecuteWhenPaused = true;
@@ -208,6 +214,7 @@ void UUINavPCComponent::SetAllowAllMenuInput(bool bAllowInput)
 	bAllowDirectionalInput = bAllowInput;
 	bAllowSelectInput = bAllowInput;
 	bAllowReturnInput = bAllowInput;
+	bAllowSectionInput = bAllowInput;
 }
 
 void UUINavPCComponent::SetAllowDirectionalInput(bool bAllowInput)
@@ -223,6 +230,11 @@ void UUINavPCComponent::SetAllowSelectInput(bool bAllowInput)
 void UUINavPCComponent::SetAllowReturnInput(bool bAllowInput)
 {
 	bAllowReturnInput = bAllowInput;
+}
+
+void UUINavPCComponent::SetAllowSectionInput(bool bAllowInput)
+{
+	bAllowSectionInput = bAllowInput;
 }
 
 void UUINavPCComponent::TimerCallback()
@@ -257,7 +269,9 @@ void UUINavPCComponent::FetchUINavActionKeys()
 		TEXT("MenuLeft"),
 		TEXT("MenuRight"),
 		TEXT("MenuSelect"),
-		TEXT("MenuReturn")
+		TEXT("MenuReturn"),
+		TEXT("MenuNext"),
+		TEXT("MenuPrevious")
 	};
 
 	for (FInputActionKeyMapping Action : Actions)
@@ -278,9 +292,14 @@ void UUINavPCComponent::FetchUINavActionKeys()
 
 	TArray<FString> keys;
 	KeyMap.GetKeys(keys);
-	if (keys.Num() != 6)
+	if (keys.Num() < 6)
 	{
 		DISPLAYERROR("Not all Menu Inputs have been setup!");
+	}
+	else if (keys.Num() < 8)
+	{
+		DISPLAYWARNING("You can add them from the UINavInput.ini file in the plugin's Content folder to your project's DefaultInput.ini file.");
+		DISPLAYWARNING("Keep in mind that the MenuNext and MenuPrevious inputs have been added recently.");
 	}
 }
 
@@ -586,6 +605,14 @@ void UUINavPCComponent::ExecuteActionByName(FString Action, bool bPressed)
 	{
 		MenuReturn();
 	}
+	else if (Action.Equals("MenuNext") && bPressed)
+	{
+		MenuNext();
+	}
+	else if (Action.Equals("MenuPrevious") && bPressed)
+	{
+		MenuPrevious();
+	}
 }
 
 void UUINavPCComponent::NotifyMouseInputType()
@@ -635,6 +662,28 @@ void UUINavPCComponent::MenuReturn()
 
 	ClearTimer();
 	ActiveWidget->MenuReturn();
+}
+
+void UUINavPCComponent::MenuNext()
+{
+	IUINavPCReceiver::Execute_OnNext(GetOwner());
+	VerifyInputTypeChangeByAction(TEXT("MenuNext"));
+
+	if (ActiveWidget == nullptr || !bAllowSectionInput) return;
+
+	ClearTimer();
+	ActiveWidget->OnNext();
+}
+
+void UUINavPCComponent::MenuPrevious()
+{
+	IUINavPCReceiver::Execute_OnPrevious(GetOwner());
+	VerifyInputTypeChangeByAction(TEXT("MenuPrevious"));
+
+	if (ActiveWidget == nullptr || !bAllowSectionInput) return;
+
+	ClearTimer();
+	ActiveWidget->OnPrevious();
 }
 
 void UUINavPCComponent::MenuUpRelease()
