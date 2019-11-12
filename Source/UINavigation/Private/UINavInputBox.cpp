@@ -209,7 +209,7 @@ bool UUINavInputBox::UpdateKeyIconForKey(int Index)
 			KeyIcon = (FInputIconMapping*)Container->UINavPC->KeyboardMouseKeyIconData->GetRowMap()[Key.GetFName()];
 		}
 	}
-	if (KeyIcon == nullptr || KeyIcon->InputIcon == nullptr) return false;
+	if (KeyIcon == nullptr) return false;
 
 	UTexture2D* NewTexture = KeyIcon->InputIcon.LoadSynchronous();
 	if (NewTexture != nullptr)
