@@ -25,6 +25,10 @@ public:
 		void OnNavigatedFrom();
 	virtual void OnNavigatedFrom_Implementation();
 
+	UFUNCTION(BlueprintNativeEvent, Category = UINavComponent)
+		void OnSelected();
+	virtual void OnSelected_Implementation();
+
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavComponent)
 		bool IsValid();
 
