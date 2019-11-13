@@ -16,12 +16,14 @@ void UUINavComponent::NativeConstruct()
 
 void UUINavComponent::OnNavigatedTo_Implementation()
 {
-
 }
 
 void UUINavComponent::OnNavigatedFrom_Implementation()
 {
+}
 
+void UUINavComponent::OnSelected_Implementation()
+{
 }
 
 bool UUINavComponent::IsValid()

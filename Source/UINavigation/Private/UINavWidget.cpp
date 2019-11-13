@@ -1542,6 +1542,13 @@ void UUINavWidget::OnPreSelect(int Index, bool bMouseClick)
 	{
 		return;
 	}
+
+	UUINavComponent* CurrentUINavComp = GetUINavComponentAtIndex(Index);
+	if (CurrentUINavComp != nullptr)
+	{
+		CurrentUINavComp->OnSelected();
+	}
+
 	if (UINavInputContainer != nullptr && Index >= UINavInputContainer->FirstButtonIndex && Index <= UINavInputContainer->LastButtonIndex)
 	{
 		InputBoxIndex = Index - UINavInputContainer->FirstButtonIndex;
