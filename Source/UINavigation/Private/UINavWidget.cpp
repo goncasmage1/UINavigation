@@ -388,8 +388,7 @@ FReply UUINavWidget::NativeOnKeyDown(const FGeometry & InGeometry, const FKeyEve
 			return FReply::Handled();
 		}
 
-		FReply reply = OnKeyPressed(InKeyEvent.GetKey());
-		if (reply.IsEventHandled()) return FReply::Handled();
+		OnKeyPressed(InKeyEvent.GetKey());
 	}
 
 	return FReply::Unhandled();
@@ -401,8 +400,7 @@ FReply UUINavWidget::NativeOnKeyUp(const FGeometry & InGeometry, const FKeyEvent
 
 	if (!bWaitForInput)
 	{
-		FReply reply = OnKeyReleased(InKeyEvent.GetKey());
-		if (reply.IsEventHandled()) return FReply::Handled();
+		OnKeyReleased(InKeyEvent.GetKey());
 	}
 
 	return FReply::Unhandled();
@@ -415,6 +413,7 @@ FReply UUINavWidget::NativeOnMouseWheel(const FGeometry & InGeometry, const FPoi
 		FKey PressedMouseKey = InMouseEvent.GetWheelDelta() > 0.f ? EKeys::MouseScrollUp : EKeys::MouseScrollDown;
 		if (ReceiveInputType == EReceiveInputType::Axis) PressedMouseKey = EKeys::MouseWheelAxis;
 		ProcessKeybind(PressedMouseKey);
+		return FReply::Handled();
 	}
 	else
 	{
@@ -423,7 +422,7 @@ FReply UUINavWidget::NativeOnMouseWheel(const FGeometry & InGeometry, const FPoi
 			UINavPC->NotifyMouseInputType();
 		}
 	}
-	return FReply::Handled();
+	return FReply::Unhandled();
 }
 
 FReply UUINavWidget::NativeOnMouseButtonDown(const FGeometry & InGeometry, const FPointerEvent & InMouseEvent)
@@ -442,8 +441,7 @@ FReply UUINavWidget::NativeOnMouseButtonDown(const FGeometry & InGeometry, const
 	}
 	else
 	{
-		FReply reply = OnKeyPressed(InMouseEvent.GetEffectingButton());
-		if (reply.IsEventHandled()) return FReply::Handled();
+		OnKeyPressed(InMouseEvent.GetEffectingButton());
 	}
 
 	return FReply::Unhandled();
@@ -455,8 +453,7 @@ FReply UUINavWidget::NativeOnMouseButtonUp(const FGeometry & InGeometry, const F
 
 	if (!bWaitForInput && InMouseEvent.GetEffectingButton().IsMouseButton())
 	{
-		FReply reply = OnKeyReleased(InMouseEvent.GetEffectingButton());
-		if (reply.IsEventHandled()) return FReply::Handled();
+		OnKeyReleased(InMouseEvent.GetEffectingButton());
 	}
 
 	return FReply::Unhandled();
