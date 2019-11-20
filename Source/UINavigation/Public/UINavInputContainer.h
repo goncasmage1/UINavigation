@@ -12,26 +12,6 @@
 * This class contains the logic for aggregating several input boxes
 */
 
-USTRUCT(BlueprintType)
-struct FAxis2D_Keys
-{
-	GENERATED_BODY()
-
-	FAxis2D_Keys()
-	{
-
-	}
-
-	FAxis2D_Keys(FKey InPositiveKey, FKey InNegativeKey)
-	{
-		PositiveKey = InPositiveKey;
-		NegativeKey = InNegativeKey;
-	}
-
-	FKey PositiveKey;
-	FKey NegativeKey;
-};
-
 UCLASS()
 class UINAVIGATION_API UUINavInputContainer : public UUserWidget
 {
@@ -39,62 +19,27 @@ class UINAVIGATION_API UUINavInputContainer : public UUserWidget
 	
 protected:
 
+	void SetupInputBoxes();
 	void CreateInputBoxes();
-	void CreateActionBoxes();
-	void CreateAxisBoxes();
 
 	//-----------------------------------------------------------------------
-
-	TMap<FKey, FAxis2D_Keys> Axis2DToKeyMap = {
-		{EKeys::Gamepad_LeftX, {EKeys::Gamepad_LeftStick_Right, EKeys::Gamepad_LeftStick_Left}},
-		{EKeys::Gamepad_LeftY, {EKeys::Gamepad_LeftStick_Up, EKeys::Gamepad_LeftStick_Down}},
-		{EKeys::Gamepad_RightX, {EKeys::Gamepad_RightStick_Right, EKeys::Gamepad_RightStick_Left}},
-		{EKeys::Gamepad_RightY, {EKeys::Gamepad_RightStick_Up, EKeys::Gamepad_RightStick_Down}},
-		{EKeys::MotionController_Left_Thumbstick_X, {EKeys::MotionController_Left_Thumbstick_Right, EKeys::MotionController_Left_Thumbstick_Left}},
-		{EKeys::MotionController_Left_Thumbstick_Y, {EKeys::MotionController_Left_Thumbstick_Up, EKeys::MotionController_Left_Thumbstick_Down}},
-		{EKeys::MotionController_Right_Thumbstick_X, {EKeys::MotionController_Right_Thumbstick_Right, EKeys::MotionController_Right_Thumbstick_Left}},
-		{EKeys::MotionController_Right_Thumbstick_Y, {EKeys::MotionController_Right_Thumbstick_Up, EKeys::MotionController_Right_Thumbstick_Down}},
-	};
 
 	TMap<FKey, FKey> KeyToAxisMap = {
 		{EKeys::Gamepad_LeftTrigger, EKeys::Gamepad_LeftTriggerAxis},
 		{EKeys::Gamepad_RightTrigger, EKeys::Gamepad_RightTriggerAxis},
-		{EKeys::Gamepad_LeftStick_Up, EKeys::Gamepad_LeftY},
-		{EKeys::Gamepad_LeftStick_Down, EKeys::Gamepad_LeftY},
-		{EKeys::Gamepad_LeftStick_Left, EKeys::Gamepad_LeftX},
-		{EKeys::Gamepad_LeftStick_Right, EKeys::Gamepad_LeftX},
-		{EKeys::Gamepad_RightStick_Up, EKeys::Gamepad_RightY},
-		{EKeys::Gamepad_RightStick_Down, EKeys::Gamepad_RightY},
-		{EKeys::Gamepad_RightStick_Left, EKeys::Gamepad_RightX},
-		{EKeys::Gamepad_RightStick_Right, EKeys::Gamepad_RightX},
 		{EKeys::MotionController_Left_Trigger, EKeys::MotionController_Left_TriggerAxis},
 		{EKeys::MotionController_Left_Grip1, EKeys::MotionController_Left_Grip1Axis},
 		{EKeys::MotionController_Left_Grip2, EKeys::MotionController_Left_Grip2Axis},
 		{EKeys::MotionController_Right_Trigger, EKeys::MotionController_Right_TriggerAxis},
 		{EKeys::MotionController_Right_Grip1, EKeys::MotionController_Right_Grip1Axis},
 		{EKeys::MotionController_Right_Grip2, EKeys::MotionController_Right_Grip2Axis},
-		{EKeys::MotionController_Left_Thumbstick_Up, EKeys::MotionController_Left_Thumbstick_Y},
-		{EKeys::MotionController_Left_Thumbstick_Down, EKeys::MotionController_Left_Thumbstick_Y},
-		{EKeys::MotionController_Left_Thumbstick_Left, EKeys::MotionController_Left_Thumbstick_X},
-		{EKeys::MotionController_Left_Thumbstick_Right, EKeys::MotionController_Left_Thumbstick_X},
-		{EKeys::MotionController_Right_Thumbstick_Up, EKeys::MotionController_Right_Thumbstick_Y},
-		{EKeys::MotionController_Right_Thumbstick_Down, EKeys::MotionController_Right_Thumbstick_Y},
-		{EKeys::MotionController_Right_Thumbstick_Left, EKeys::MotionController_Right_Thumbstick_X},
-		{EKeys::MotionController_Right_Thumbstick_Right, EKeys::MotionController_Right_Thumbstick_X},
 	};
-
-	//Indicates which column to navigate to when navigating to this Input Container
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Input")
-		ETargetColumn TargetColumn = ETargetColumn::Left;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UINav Input")
 		TSubclassOf<class UUINavInputBox> InputBox_BP;
 
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget), Category = "UINav Input")
-		class UPanelWidget* ActionPanel;
-
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget), Category = "UINav Input")
-		class UPanelWidget* AxisPanel;
+		class UPanelWidget* InputBoxesPanel;
 	
 	UPROPERTY(BlueprintReadOnly, Category = "UINav Input")
 		class UUINavWidget* ParentWidget;
@@ -114,8 +59,8 @@ public:
 	*	Called when a new input box is added
 	*/
 	UFUNCTION(BlueprintNativeEvent, Category = UINavWidget)
-		void OnInputBoxAdded(class UUINavInputBox* NewInputBox);
-	virtual void OnInputBoxAdded_Implementation(class UUINavInputBox* NewInputBox);
+		void OnAddInputBox(class UUINavInputBox* NewInputBox);
+	virtual void OnAddInputBox_Implementation(class UUINavInputBox* NewInputBox);
 
 	/*
 	*	Called when a rebind was cancelled, specifying the reason for the revert.
@@ -138,13 +83,13 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "UINav Input")
 		FKey GetAxisFromKey(FKey Key);
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "UINav Input")
-		FKey GetKeyFromAxis(FKey Key, bool bPositive);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "UINav Input")
 		FORCEINLINE ETargetColumn GetTargetColumn() const { return TargetColumn; }
 
 	//-----------------------------------------------------------------------
+
+	class UUINavPCComponent* UINavPC = nullptr;
 
 	UPROPERTY(BlueprintReadOnly, Category = "UINav Input")
 		int NumberOfInputs = 0;
@@ -169,48 +114,13 @@ public:
 		int BottomButtonIndex = -1;
 
 	/*
-	Indicates whether the player can cancel changing the keybind for an action
+	The names of the desired actions and axes to allow for rebinding.
+	If you want to rebind axes, you have to specify whether they're
+	the positive or negative axis by suffixing the axis name with
+	either "+" or "-"
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Input")
-		bool bCanCancelKeybind = true;
-
-	/*
-	Indicates whether the input boxes will hide or collapse unused InputBoxes
-	*/
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Input")
-		bool bCollapseInputBox = false;
-
-	/*
-	The preffered names of the given input names
-	*/
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Input")
-		class UDataTable* InputNameTable;
-
-	/*
-	The names of the desired actions to allow for rebinding,
-	in the input settings and with their desirable name respectively.
-	Leave desirable name as empty if similar to input settings.
-	*/
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Input")
-		TMap<FName, FText> ActionNames;
-
-	/*
-	The names of the desired axes to allow for rebinding,
-	in the input settings and with their desirable name respectively
-	Leave desirable name as empty if similar to input settings.
-	*/
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Input")
-		TMap<FName, FText> AxisNames;
-
-	/*
-	A list of the keys that the player shouldn't be able to use as rebinds
-	*/
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Input")
-		TArray<FKey> Blacklist;
-
-	//The name used for empty key buttons
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Input")
-		FName EmptyKeyName = FName("Unbound");
+		TArray<FName> InputNames;
 
 	/*
 	The restrictions for the type of input associated with each column
@@ -219,6 +129,33 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Input")
 		TArray<EInputRestriction> InputRestrictions;
 
-	class UUINavPCComponent* UINavPC = nullptr;
+	/*
+	A list of the keys that the player shouldn't be able to use for the inputs
+	*/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Input")
+		TArray<FKey> Blacklist =
+		{
+			EKeys::Escape,
+			EKeys::LeftCommand,
+			EKeys::RightCommand,
+		};
+
+	/*
+	Indicates whether unused input boxes will hidden or collapsed
+	*/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Input")
+		bool bCollapseInputBoxes = false;
+
+	//Indicates which column to navigate to when navigating to this Input Container
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Input")
+		ETargetColumn TargetColumn = ETargetColumn::Left;
+
+	//The text used for empty key buttons
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Input")
+		FText EmptyKeyText = FText::FromString(TEXT("Unbound"));
+
+	//The text used for notifying the player to press a key
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Input")
+		FText PressKeyText = FText::FromString(TEXT("Press Any Key"));
 
 };

@@ -360,21 +360,9 @@ FReply UUINavWidget::NativeOnKeyDown(const FGeometry & InGeometry, const FKeyEve
 	{
 		FKey PressedKey = InKeyEvent.GetKey();
 
-		if ((UINavInputContainer->bCanCancelKeybind && UINavPC->IsReturnKey(PressedKey)))
-		{
-			CancelRebind();
-			return FReply::Handled();
-		}
-
 		if (ReceiveInputType == EReceiveInputType::Axis)
 		{
-			FKey AxisKey = UINavInputContainer->GetAxisFromKey(PressedKey);
-			if (AxisKey.GetFName().IsEqual(FName("None")))
-			{
-				CancelRebind();
-				return FReply::Handled();
-			}
-			PressedKey = AxisKey;
+			PressedKey = UINavInputContainer->GetAxisFromKey(PressedKey);
 		}
 
 		ProcessKeybind(PressedKey);
@@ -2124,8 +2112,7 @@ void UUINavWidget::HoverEvent(int Index)
 {
 	if (bWaitForInput)
 	{
-		bWaitForInput = false;
-		UINavInputBoxes[InputBoxIndex / UINavInputContainer->KeysPerInput]->RevertToActionText(InputBoxIndex % UINavInputContainer->KeysPerInput);
+		CancelRebind();
 	}
 
 	if (!UINavPC->AllowsDirectionalInput())
@@ -2147,8 +2134,7 @@ void UUINavWidget::UnhoverEvent(int Index)
 {
 	if (bWaitForInput)
 	{
-		bWaitForInput = false;
-		UINavInputBoxes[InputBoxIndex / UINavInputContainer->KeysPerInput]->RevertToActionText(InputBoxIndex % UINavInputContainer->KeysPerInput);
+		CancelRebind();
 	}
 
 	if (bUseButtonStates)
@@ -2212,7 +2198,7 @@ void UUINavWidget::CancelRebind()
 {
 	bWaitForInput = false;
 	int KeysPerInput = UINavInputContainer->KeysPerInput;
-	UINavInputBoxes[InputBoxIndex / KeysPerInput]->RevertToActionText(InputBoxIndex % KeysPerInput);
+	UINavInputBoxes[InputBoxIndex / KeysPerInput]->RevertToKeyText(InputBoxIndex % KeysPerInput);
 	ReceiveInputType = EReceiveInputType::None;
 }
 

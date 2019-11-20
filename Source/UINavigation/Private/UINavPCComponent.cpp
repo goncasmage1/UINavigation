@@ -5,8 +5,10 @@
 #include "UINavWidget.h"
 #include "UINavSettings.h"
 #include "UINavPCReceiver.h"
+#include "Data/AxisType.h"
 #include "Data/InputIconMapping.h"
 #include "Data/InputNameMapping.h"
+#include "UINavBlueprintFunctionLibrary.h"
 
 UUINavPCComponent::UUINavPCComponent()
 {
@@ -303,62 +305,60 @@ void UUINavPCComponent::FetchUINavActionKeys()
 	}
 }
 
-FKey UUINavPCComponent::GetInputKey(FName ActionName, EInputRestriction InputRestriction)
+FKey UUINavPCComponent::GetInputKey(FName InputName, EInputRestriction InputRestriction)
 {
-	FKey FinalKey = FKey("None");
-	TArray<FKey> KeyArray = TArray<FKey>();
-
+	FString InputString = InputName.ToString();
+	FString AxisScale = InputString.Right(1);
+	EAxisType AxisType = EAxisType::None;
+	if (AxisScale.Equals(TEXT("+"))) AxisType = EAxisType::Positive;
+	else if (AxisScale.Equals(TEXT("-"))) AxisType = EAxisType::Negative;
+	
 	const UInputSettings* Settings = GetDefault<UInputSettings>();
 
-	TArray<FInputActionKeyMapping> ActionMappings;
-	Settings->GetActionMappingByName(ActionName, ActionMappings);
-
-	if (ActionMappings.Num() > 0)
+	if (AxisType == EAxisType::None)
 	{
-		switch (InputRestriction)
+		TArray<FInputActionKeyMapping> ActionMappings;
+		Settings->GetActionMappingByName(InputName, ActionMappings);
+
+		for (FInputActionKeyMapping Mapping : ActionMappings)
 		{
-			case EInputRestriction::None:
-				FinalKey = ActionMappings[0].Key;
-				break;
-			case EInputRestriction::Keyboard:
-				for (FInputActionKeyMapping mapping : ActionMappings)
-				{
-					if (mapping.Key.IsGamepadKey() || mapping.Key.IsMouseButton()) continue;
-					FinalKey = mapping.Key;
-				}
-				break;
-			case EInputRestriction::Mouse:
-				for (FInputActionKeyMapping mapping : ActionMappings)
-				{
-					if (!mapping.Key.IsMouseButton()) continue;
-					FinalKey = mapping.Key;
-				}
-				break;
-			case EInputRestriction::Keyboard_Mouse:
-				for (FInputActionKeyMapping mapping : ActionMappings)
-				{
-					if (mapping.Key.IsGamepadKey()) continue;
-					FinalKey = mapping.Key;
-				}
-				break;
-			case EInputRestriction::Gamepad:
-				for (FInputActionKeyMapping mapping : ActionMappings)
-				{
-					if (!mapping.Key.IsGamepadKey()) continue;
-					FinalKey = mapping.Key;
-				}
-				break;
+			if (UUINavBlueprintFunctionLibrary::RespectsRestriction(Mapping.Key, InputRestriction))
+				return Mapping.Key;
 		}
+		return FKey();
 	}
-	return FinalKey;
+	else
+	{
+		InputName = FName(*InputString.Left(InputString.Len() - 1));
+		TArray<FInputAxisKeyMapping> AxisMappings;
+		Settings->GetAxisMappingByName(InputName, AxisMappings);
+
+		FKey PotentialAxisKey;
+		for (FInputAxisKeyMapping Mapping : AxisMappings)
+		{
+			if (UUINavBlueprintFunctionLibrary::RespectsRestriction(Mapping.Key, InputRestriction))
+			{
+				if (Mapping.Scale > 0.0f && AxisType == EAxisType::Positive ||
+					Mapping.Scale < 0.0f && AxisType == EAxisType::Negative)
+				{
+					return Mapping.Key;
+				}
+				else
+				{
+					PotentialAxisKey = GetKeyFromAxis(Mapping.Key, AxisType == EAxisType::Positive);
+					if (PotentialAxisKey.IsValid())
+					{
+						return PotentialAxisKey;
+					}
+				}
+			}
+		}
+		return FKey();
+	}
 }
 
-UTexture2D * UUINavPCComponent::GetInputIcon(FName ActionName, EInputRestriction InputRestriction)
+UTexture2D * UUINavPCComponent::GetKeyIcon(FKey Key)
 {
-	FKey Key = GetInputKey(ActionName, InputRestriction);
-	FName KeyName = Key.GetFName();
-	if (KeyName.IsEqual(FName("None"))) return nullptr;
-
 	FInputIconMapping* KeyIcon = nullptr;
 
 	if (Key.IsGamepadKey())
@@ -382,32 +382,60 @@ UTexture2D * UUINavPCComponent::GetInputIcon(FName ActionName, EInputRestriction
 	return NewTexture;
 }
 
-FString UUINavPCComponent::GetInputName(FName ActionName, EInputRestriction InputRestriction)
+UTexture2D * UUINavPCComponent::GetInputIcon(FName ActionName, EInputRestriction InputRestriction)
 {
 	FKey Key = GetInputKey(ActionName, InputRestriction);
-	FName KeyName = Key.GetFName();
-	if (KeyName.IsEqual(FName("None"))) return TEXT("");
+	return GetKeyIcon(Key);
+}
 
-	FInputNameMapping* KeyMapping = nullptr;
+FText UUINavPCComponent::GetKeyText(FKey Key)
+{
+	if (!Key.IsValid()) return FText();
+
+	FInputNameMapping* Keyname = nullptr;
 
 	if (Key.IsGamepadKey())
 	{
 		if (GamepadKeyNameData != nullptr && GamepadKeyNameData->GetRowMap().Contains(Key.GetFName()))
 		{
-			KeyMapping = (FInputNameMapping*)GamepadKeyNameData->GetRowMap()[Key.GetFName()];
+			Keyname = (FInputNameMapping*)GamepadKeyNameData->GetRowMap()[Key.GetFName()];
 		}
 	}
 	else
 	{
 		if (KeyboardMouseKeyNameData != nullptr && KeyboardMouseKeyNameData->GetRowMap().Contains(Key.GetFName()))
 		{
-			KeyMapping = (FInputNameMapping*)KeyboardMouseKeyNameData->GetRowMap()[Key.GetFName()];
+			Keyname = (FInputNameMapping*)KeyboardMouseKeyNameData->GetRowMap()[Key.GetFName()];
 		}
 	}
 
-	if (KeyMapping == nullptr) return Key.GetDisplayName().ToString();
+	if (Keyname == nullptr) return Key.GetDisplayName();
 
-	return KeyMapping->InputName;
+	return Keyname->InputText;
+}
+
+void UUINavPCComponent::GetInputRebindData(FName InputName, FInputRebindData& OutData, bool& bSuccess)
+{
+	FInputRebindData* InputRebindData;
+	if (InputRebindDataTable != nullptr && InputRebindDataTable->GetRowMap().Contains(InputName))
+	{
+		InputRebindData = (FInputRebindData*)InputRebindDataTable->GetRowMap()[InputName];
+		if (InputRebindData != nullptr)
+		{
+			OutData = *InputRebindData;
+			bSuccess = true;
+		}
+	}
+	bSuccess = false;
+}
+
+FText UUINavPCComponent::GetInputText(FName InputName)
+{
+	FInputRebindData InputRebindData;
+	bool bSuccess = false;
+	GetInputRebindData(InputName, InputRebindData, bSuccess);
+
+	return bSuccess ? InputRebindData.InputText : FText();
 }
 
 TArray<FKey> UUINavPCComponent::GetInputKeysFromName(FName InputName)
@@ -441,6 +469,53 @@ TArray<FKey> UUINavPCComponent::GetInputKeysFromName(FName InputName)
 	return KeyArray;
 }
 
+void UUINavPCComponent::GetInputKeys(FName InputName, TArray<FKey>& OutKeys)
+{
+	OutKeys.Empty();
+	FString InputString = InputName.ToString();
+	FString AxisScale = InputString.Right(1);
+	EAxisType AxisType = EAxisType::None;
+	if (AxisScale.Equals(TEXT("+"))) AxisType = EAxisType::Positive;
+	else if (AxisScale.Equals(TEXT("-"))) AxisType = EAxisType::Negative;
+
+	const UInputSettings* Settings = GetDefault<UInputSettings>();
+
+	if (AxisType == EAxisType::None)
+	{
+		TArray<FInputActionKeyMapping> ActionMappings;
+		Settings->GetActionMappingByName(InputName, ActionMappings);
+
+		for (FInputActionKeyMapping Mapping : ActionMappings)
+		{
+			OutKeys.Add(Mapping.Key);
+		}
+	}
+	else
+	{
+		InputName = FName(*InputString.Left(InputString.Len() - 1));
+		TArray<FInputAxisKeyMapping> AxisMappings;
+		Settings->GetAxisMappingByName(InputName, AxisMappings);
+
+		FKey PotentialAxisKey;
+		for (FInputAxisKeyMapping Mapping : AxisMappings)
+		{
+			if (Mapping.Scale > 0.0f && AxisType == EAxisType::Positive ||
+				Mapping.Scale < 0.0f && AxisType == EAxisType::Negative)
+			{
+				OutKeys.Add(Mapping.Key);
+			}
+			else
+			{
+				PotentialAxisKey = GetKeyFromAxis(Mapping.Key, AxisType == EAxisType::Positive);
+				if (PotentialAxisKey.IsValid())
+				{
+					OutKeys.Add(PotentialAxisKey);
+				}
+			}
+		}
+	}
+}
+
 EInputType UUINavPCComponent::GetKeyInputType(FKey Key)
 {
 	if (Key.IsGamepadKey())
@@ -455,17 +530,23 @@ EInputType UUINavPCComponent::GetKeyInputType(FKey Key)
 	{
 		return EInputType::Keyboard;
 	}
-
-	return CurrentInputType;
 }
 
-EInputType UUINavPCComponent::GetActionInputType(FString Action)
+EInputType UUINavPCComponent::GetMenuActionInputType(FString Action)
 {
 	for (FKey key : KeyMap[Action])
 	{
 		if (PC->WasInputKeyJustPressed(key)) return GetKeyInputType(key);
 	}
 	return CurrentInputType;
+}
+
+FKey UUINavPCComponent::GetKeyFromAxis(FKey Key, bool bPositive)
+{
+	FAxis2D_Keys* Axis2DKeys = Axis2DToKeyMap.Find(Key);
+	if (Axis2DKeys == nullptr) return FKey();
+
+	return bPositive ? Axis2DKeys->PositiveKey : Axis2DKeys->NegativeKey;
 }
 
 void UUINavPCComponent::VerifyInputTypeChangeByKey(FKey Key)
@@ -480,7 +561,7 @@ void UUINavPCComponent::VerifyInputTypeChangeByKey(FKey Key)
 
 void UUINavPCComponent::VerifyInputTypeChangeByAction(FString Action)
 {
-	EInputType NewInputType = GetActionInputType(Action);
+	EInputType NewInputType = GetMenuActionInputType(Action);
 
 	if (NewInputType != CurrentInputType)
 	{
@@ -496,12 +577,6 @@ void UUINavPCComponent::NotifyKeyPressed(FKey PressedKey)
 void UUINavPCComponent::NotifyKeyReleased(FKey ReleasedKey)
 {
 	ExecuteActionByKey(ReleasedKey, false);
-}
-
-bool UUINavPCComponent::IsReturnKey(FKey PressedKey)
-{
-	for (FKey key : KeyMap[TEXT("MenuReturn")]) if (key == PressedKey) return true;
-	return false;
 }
 
 void UUINavPCComponent::ExecuteActionByKey(FKey PressedKey, bool bPressed)

@@ -5,6 +5,7 @@
 #include "Blueprint/UserWidget.h"
 #include "Data/InputIconMapping.h"
 #include "Data/InputNameMapping.h"
+#include "Data/InputRebindData.h"
 #include "Data/AxisType.h"
 #include "UINavInputBox.generated.h"
 
@@ -29,20 +30,22 @@ protected:
 
 	TArray<bool> bUsingKeyImage = { false, false, false };
 
-	bool ShouldRegisterKey(FKey NewKey, int Index) const;
+	ERevertRebindReason CanRegisterKey(FKey NewKey, int Index) const;
 	bool UpdateKeyIconForKey(int Index);
-	FText GetKeyName(int Index);
-	void CheckKeyIcon(int Index);
+	FText GetKeyText(int Index);
+	void UpdateKeyDisplay(int Index);
+	FKey GetKeyFromAxis(FKey AxisKey);
+	void ProcessInputName();
 
 public:
 
 	virtual void NativeConstruct() override;
 
-	void BuildKeyMappings();
+	void CreateKeyWidgets();
 	bool SetupNewKey(FKey NewKey, int KeyIndex, class UUINavInputComponent* NewInputButton);
-	void ResetKeyMappings();
+	void ResetKeyWidgets();
 	void UpdateInputKey(FKey NewKey, int Index);
-	void RevertToActionText(int Index);
+	void RevertToKeyText(int Index);
 
 	void NotifySelected(int Index);
 
@@ -65,7 +68,8 @@ public:
 
 	class UUINavInputContainer* Container;
 
-	TPair<FName, FText> InputNameTuple;
+	FName InputName;
+	FInputRebindData InputData = FInputRebindData();
 
 	int KeysPerInput = 2;
 };
