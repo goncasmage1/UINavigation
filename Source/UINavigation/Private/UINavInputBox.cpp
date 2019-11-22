@@ -55,38 +55,40 @@ void UUINavInputBox::CreateKeyWidgets()
 
 		if (j < KeysPerInput)
 		{
-			for (int i = 0; i < 3; i++)
+			int Iterations = IS_AXIS ? Axes.Num() : Actions.Num();
+			FKey PotentialAxisKey;
+			for (int i = Iterations - 1; i >= 0; --i)
 			{
-				FKey PotentialAxisKey;
-
-				if (j + 1 <= Keys.Num()) break;
-
-				if (i < KeysPerInput)
+				if ((IS_AXIS && !PotentialAxisKey.IsValid() &&
+					((Axes[i].Scale > 0.0f && IS_POSITIVE_AXIS) ||
+					 (Axes[i].Scale < 0.0f && IS_NEGATIVE_AXIS))) ||
+					(!IS_AXIS))
 				{
-					if ((IS_AXIS && i < Axes.Num() &&
-						((Axes[i].Scale > 0.0f && IS_POSITIVE_AXIS) ||
-						 (Axes[i].Scale < 0.0f && IS_NEGATIVE_AXIS))) ||
-						(!IS_AXIS && i < Actions.Num()))
+					FKey NewKey = IS_AXIS ? GetKeyFromAxis(Axes[i].Key) : Actions[i].Key;
+					if (!Container->RespectsRestriction(NewKey, j))
 					{
-						FKey NewKey = IS_AXIS ? GetKeyFromAxis(Axes[i].Key) : Actions[i].Key;
-						if (SetupNewKey(NewKey, j, NewInputButton))
-						{
-							break;
-						}
+						continue;
 					}
-					else if (IS_AXIS)
+
+					if (TrySetupNewKey(NewKey, j, NewInputButton))
 					{
-						PotentialAxisKey = Container->UINavPC->GetKeyFromAxis(Axes[i].Key, AxisType == EAxisType::Positive);
-						if (SetupNewKey(PotentialAxisKey, j, NewInputButton))
-						{
-							break;
-						}
+						break;
 					}
 				}
-				else if (Keys.Num() >= KeysPerInput)
+				else if (IS_AXIS &&
+						 !PotentialAxisKey.IsValid() &&
+						 Container->RespectsRestriction(Axes[i].Key, j))
 				{
-					NewInputButton->SetVisibility(Container->bCollapseInputBoxes ? ESlateVisibility::Collapsed : ESlateVisibility::Hidden);
+					FKey NewPotentialKey = Container->UINavPC->GetKeyFromAxis(Axes[i].Key, AxisType == EAxisType::Positive);
+					if (!Keys.Contains(NewPotentialKey))
+					{
+						PotentialAxisKey = NewPotentialKey;
+					}
 				}
+			}
+			if (PotentialAxisKey.IsValid())
+			{
+				TrySetupNewKey(PotentialAxisKey, j, NewInputButton);
 			}
 		}
 		else
@@ -104,9 +106,9 @@ void UUINavInputBox::CreateKeyWidgets()
 	}
 }
 
-bool UUINavInputBox::SetupNewKey(FKey NewKey, int KeyIndex, UUINavInputComponent* NewInputButton)
+bool UUINavInputBox::TrySetupNewKey(FKey NewKey, int KeyIndex, UUINavInputComponent* NewInputButton)
 {
-	if (!NewKey.IsValid() || Keys.Contains(NewKey) || CAN_REGISTER_KEY(NewKey, KeyIndex)) return false;
+	if (!NewKey.IsValid() || Keys.IsValidIndex(KeyIndex) || Keys.Contains(NewKey) || CAN_REGISTER_KEY(NewKey, KeyIndex)) return false;
 
 	Keys.Add(NewKey);
 
@@ -148,6 +150,7 @@ void UUINavInputBox::UpdateInputKey(FKey NewKey, int Index)
 	TArray<FInputActionKeyMapping>& Actions = Settings->ActionMappings;
 	TArray<FInputAxisKeyMapping>& Axes = Settings->AxisMappings;
 
+	FKey NewAxisKey;
 	bool bFound = false;
 	int Iterations = IS_AXIS ? Axes.Num() : Actions.Num();
 	for (int i = Iterations - 1; i >= 0; --i)
@@ -159,7 +162,15 @@ void UUINavInputBox::UpdateInputKey(FKey NewKey, int Index)
 			if (InputKey == Keys[Index] &&
 				Container->RespectsRestriction(NewKey, Index))
 			{
-				if (IS_AXIS) Axes[i].Key = NewKey;
+				if (IS_AXIS)
+				{
+					if (InputKey != (IS_AXIS ? Axes[i].Key : Actions[i].Key))
+					{
+						NewAxisKey = NewKey;
+						break;
+					}
+					Axes[i].Key = NewKey;
+				}
 				else Actions[i].Key = NewKey;
 				Keys[Index] = NewKey;
 				InputButtons[Index]->NavText->SetText(GetKeyText(Index));
@@ -172,11 +183,13 @@ void UUINavInputBox::UpdateInputKey(FKey NewKey, int Index)
 	{
 		if (IS_AXIS)
 		{
+			FKey AxisKey = NewAxisKey.IsValid() ? NewAxisKey : NewKey;
 			FInputAxisKeyMapping Axis;
-			Axis.Key = NewKey;
+			Axis.Key = AxisKey;
 			Axis.AxisName = InputName;
+			Axis.Scale = AxisType == EAxisType::Positive ? 1.0f : -1.0f;
 			Settings->AddAxisMapping(Axis, true);
-			Keys[Index] = NewKey;
+			Keys[Index] = AxisKey;
 			InputButtons[Index]->NavText->SetText(GetKeyText(Index));
 		}
 		else
@@ -242,11 +255,11 @@ void UUINavInputBox::ProcessInputName()
 
 ERevertRebindReason UUINavInputBox::CanRegisterKey(FKey NewKey, int Index) const
 {
-	if (Container->IsKeyBeingUsed(NewKey))
+	if (!Container->CanUseKey(this, NewKey))
 	{
 		return ERevertRebindReason::UsedBySameActionGroup;
 	}
-	else if (Container->Blacklist.Contains(NewKey) || !NewKey.IsValid())
+	else if (Container->KeyBlacklist.Contains(NewKey) || !NewKey.IsValid())
 	{
 		ERevertRebindReason::BlacklistedKey;
 	}

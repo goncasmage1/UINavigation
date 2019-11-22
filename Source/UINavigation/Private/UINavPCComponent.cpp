@@ -302,6 +302,7 @@ void UUINavPCComponent::FetchUINavActionKeys()
 	{
 		DISPLAYWARNING("You can add them from the UINavInput.ini file in the plugin's Content folder to your project's DefaultInput.ini file.");
 		DISPLAYWARNING("Keep in mind that the MenuNext and MenuPrevious inputs have been added recently.");
+		DISPLAYWARNING("Not all Menu Inputs have been setup!");
 	}
 }
 

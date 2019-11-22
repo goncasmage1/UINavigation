@@ -73,7 +73,7 @@ public:
 		void ResetKeyMappings();
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "UINav Input")
-		bool IsKeyBeingUsed(FKey CompareKey) const;
+		bool CanUseKey(const class UUINavInputBox* InputBox, FKey CompareKey) const;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "UINav Input")
 		bool RespectsRestriction(FKey CompareKey, int Index);
@@ -133,7 +133,7 @@ public:
 	A list of the keys that the player shouldn't be able to use for the inputs
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Input")
-		TArray<FKey> Blacklist =
+		TArray<FKey> KeyBlacklist =
 		{
 			EKeys::Escape,
 			EKeys::LeftCommand,

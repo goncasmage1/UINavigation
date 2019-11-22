@@ -376,7 +376,10 @@ FReply UUINavWidget::NativeOnKeyDown(const FGeometry & InGeometry, const FKeyEve
 			return FReply::Handled();
 		}
 
-		OnKeyPressed(InKeyEvent.GetKey());
+		if (OnKeyPressed(InKeyEvent.GetKey()).IsEventHandled())
+		{
+			return FReply::Handled();
+		}
 	}
 
 	return FReply::Unhandled();
@@ -388,7 +391,10 @@ FReply UUINavWidget::NativeOnKeyUp(const FGeometry & InGeometry, const FKeyEvent
 
 	if (!bWaitForInput)
 	{
-		OnKeyReleased(InKeyEvent.GetKey());
+		if (OnKeyReleased(InKeyEvent.GetKey()).IsEventHandled())
+		{
+			return FReply::Handled();
+		}
 	}
 
 	return FReply::Unhandled();
@@ -429,7 +435,10 @@ FReply UUINavWidget::NativeOnMouseButtonDown(const FGeometry & InGeometry, const
 	}
 	else
 	{
-		OnKeyPressed(InMouseEvent.GetEffectingButton());
+		if (OnKeyPressed(InMouseEvent.GetEffectingButton()).IsEventHandled())
+		{
+			return FReply::Handled();
+		}
 	}
 
 	return FReply::Unhandled();
@@ -453,7 +462,7 @@ FReply UUINavWidget::OnKeyPressed(FKey PressedKey)
 	if (ActionName.Equals(TEXT("")))
 	{
 		UINavPC->VerifyInputTypeChangeByKey(PressedKey);
-		return FReply::Handled();
+		return FReply::Unhandled();
 	}
 
 	return UINavPC->OnActionPressed(ActionName, PressedKey);

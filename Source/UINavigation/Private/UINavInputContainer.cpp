@@ -122,14 +122,31 @@ void UUINavInputContainer::CreateInputBoxes()
 	}
 }
 
-bool UUINavInputContainer::IsKeyBeingUsed(FKey CompareKey) const
+bool UUINavInputContainer::CanUseKey(const UUINavInputBox* InputBox, FKey CompareKey) const
 {
+	TArray<int> InputGroups = InputBox->InputData.InputGroups;
+	if (InputGroups.Num() == 0) InputGroups.Add(-1);
+
 	for (UUINavInputBox* box : ParentWidget->UINavInputBoxes)
 	{
-		if (box->ContainsKey(CompareKey)) return true;
+		if (InputBox == box) continue;
+
+		if (box->ContainsKey(CompareKey))
+		{
+			if (InputGroups.Contains(-1) ||
+				box->InputData.InputGroups.Contains(-1)) return false;
+
+			TArray<int> CollidingInputGroups = box->InputData.InputGroups;
+			if (CollidingInputGroups.Contains(-1)) return false;
+
+			for (int InputGroup : InputGroups)
+			{
+				if (CollidingInputGroups.Contains(InputGroup)) return false;
+			}
+		}
 	}
 
-	return false;
+	return true;
 }
 
 bool UUINavInputContainer::RespectsRestriction(FKey CompareKey, int Index)

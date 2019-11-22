@@ -42,7 +42,7 @@ public:
 	virtual void NativeConstruct() override;
 
 	void CreateKeyWidgets();
-	bool SetupNewKey(FKey NewKey, int KeyIndex, class UUINavInputComponent* NewInputButton);
+	bool TrySetupNewKey(FKey NewKey, int KeyIndex, class UUINavInputComponent* NewInputButton);
 	void ResetKeyWidgets();
 	void UpdateInputKey(FKey NewKey, int Index);
 	void RevertToKeyText(int Index);

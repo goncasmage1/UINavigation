@@ -179,7 +179,7 @@ public:
 	/*
 	Holds all the data for each rebindable input
 	*/
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Input")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavController)
 		UDataTable* InputRebindDataTable;
 
 	TMap<FKey, FAxis2D_Keys> Axis2DToKeyMap = {
