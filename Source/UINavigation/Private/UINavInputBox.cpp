@@ -14,6 +14,7 @@
 #include "Blueprint/WidgetBlueprintLibrary.h"
 
 #define CAN_REGISTER_KEY(NewKey, KeyIndex) CanRegisterKey(NewKey, KeyIndex) != ERevertRebindReason::None
+#define IS_RIGHT_SCALE(Axis) ((Axis.Scale > 0.0f && IS_POSITIVE_AXIS) || (Axis.Scale < 0.0f && IS_NEGATIVE_AXIS))
 
 void UUINavInputBox::NativeConstruct()
 {
@@ -59,9 +60,7 @@ void UUINavInputBox::CreateKeyWidgets()
 			FKey PotentialAxisKey;
 			for (int i = Iterations - 1; i >= 0; --i)
 			{
-				if ((IS_AXIS && !PotentialAxisKey.IsValid() &&
-					((Axes[i].Scale > 0.0f && IS_POSITIVE_AXIS) ||
-					 (Axes[i].Scale < 0.0f && IS_NEGATIVE_AXIS))) ||
+				if ((IS_AXIS && !PotentialAxisKey.IsValid() && IS_RIGHT_SCALE(Axes[i])) ||
 					(!IS_AXIS))
 				{
 					FKey NewKey = IS_AXIS ? GetKeyFromAxis(Axes[i].Key) : Actions[i].Key;
@@ -164,7 +163,8 @@ void UUINavInputBox::UpdateInputKey(FKey NewKey, int Index)
 			{
 				if (IS_AXIS)
 				{
-					if (InputKey != (IS_AXIS ? Axes[i].Key : Actions[i].Key))
+					if (InputKey != (IS_AXIS ? Axes[i].Key : Actions[i].Key) &&
+						(!IS_AXIS || (IS_AXIS && !IS_RIGHT_SCALE(Axes[i]))))
 					{
 						NewAxisKey = NewKey;
 						break;
