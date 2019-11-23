@@ -298,6 +298,9 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
 		FKey GetKeyFromAxis(FKey Key, bool bPositive);
 
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
+		bool Is2DAxis(FKey Key);
+
 	//Receives the name of the action, or axis with a + or - suffix, and returns
 	//the first key that respects the given restriction.
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)

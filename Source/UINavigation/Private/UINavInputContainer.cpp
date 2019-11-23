@@ -156,6 +156,19 @@ bool UUINavInputContainer::RespectsRestriction(FKey CompareKey, int Index)
 	return UUINavBlueprintFunctionLibrary::RespectsRestriction(CompareKey, Restriction);
 }
 
+void UUINavInputContainer::ResetInputBox(FName InputName, EAxisType AxisType)
+{
+	for (UUINavInputBox* InputBox : ParentWidget->UINavInputBoxes)
+	{
+		if (InputBox->InputName.IsEqual(InputName) &&
+			InputBox->AxisType == AxisType)
+		{
+			InputBox->ResetKeyWidgets();
+			break;
+		}
+	}
+}
+
 FKey UUINavInputContainer::GetAxisFromKey(FKey Key)
 {
 	FKey* AxisKey = KeyToAxisMap.Find(Key);

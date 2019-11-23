@@ -15,6 +15,7 @@
 
 #define CAN_REGISTER_KEY(NewKey, KeyIndex) CanRegisterKey(NewKey, KeyIndex) != ERevertRebindReason::None
 #define IS_RIGHT_SCALE(Axis) ((Axis.Scale > 0.0f && IS_POSITIVE_AXIS) || (Axis.Scale < 0.0f && IS_NEGATIVE_AXIS))
+#define GET_REVERSE_AXIS (AxisType == EAxisType::Positive ? EAxisType::Negative : EAxisType::Positive)
 
 void UUINavInputBox::NativeConstruct()
 {
@@ -151,6 +152,7 @@ void UUINavInputBox::UpdateInputKey(FKey NewKey, int Index)
 
 	FKey NewAxisKey;
 	bool bFound = false;
+	bool bRemoved2DAxis = false;
 	int Iterations = IS_AXIS ? Axes.Num() : Actions.Num();
 	for (int i = Iterations - 1; i >= 0; --i)
 	{
@@ -163,12 +165,19 @@ void UUINavInputBox::UpdateInputKey(FKey NewKey, int Index)
 			{
 				if (IS_AXIS)
 				{
-					if (InputKey != (IS_AXIS ? Axes[i].Key : Actions[i].Key) &&
-						(!IS_AXIS || (IS_AXIS && !IS_RIGHT_SCALE(Axes[i]))))
+					if (InputKey != Axes[i].Key &&
+						!IS_RIGHT_SCALE(Axes[i]))
 					{
 						NewAxisKey = NewKey;
 						break;
 					}
+
+					//Remove indirect axis in opposite scale input
+					if (Container->UINavPC->Is2DAxis(Axes[i].Key))
+					{
+						bRemoved2DAxis = true;
+					}
+
 					Axes[i].Key = NewKey;
 				}
 				else Actions[i].Key = NewKey;
@@ -217,6 +226,11 @@ void UUINavInputBox::UpdateInputKey(FKey NewKey, int Index)
 
 	Settings->SaveConfig();
 	Settings->ForceRebuildKeymaps();
+
+	if (bRemoved2DAxis)
+	{
+		Container->ResetInputBox(InputName, GET_REVERSE_AXIS);
+	}
 }
 
 FKey UUINavInputBox::GetKeyFromAxis(FKey AxisKey)

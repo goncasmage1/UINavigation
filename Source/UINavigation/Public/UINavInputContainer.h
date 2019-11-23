@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include "Data/AxisType.h"
 #include "Data/InputRestriction.h"
 #include "Data/RevertRebindReason.h"
 #include "Data/TargetColumn.h"
@@ -77,6 +78,8 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "UINav Input")
 		bool RespectsRestriction(FKey CompareKey, int Index);
+
+	void ResetInputBox(FName InputName, EAxisType AxisType);
 
 	//Fetches the index offset from the TargetColumn variable for both the top and bottom of the Input Container
 	int GetOffsetFromTargetColumn(bool bTop);

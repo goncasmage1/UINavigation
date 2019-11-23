@@ -550,6 +550,11 @@ FKey UUINavPCComponent::GetKeyFromAxis(FKey Key, bool bPositive)
 	return bPositive ? Axis2DKeys->PositiveKey : Axis2DKeys->NegativeKey;
 }
 
+bool UUINavPCComponent::Is2DAxis(FKey Key)
+{
+	return Axis2DToKeyMap.Contains(Key);
+}
+
 void UUINavPCComponent::VerifyInputTypeChangeByKey(FKey Key)
 {
 	EInputType NewInputType = GetKeyInputType(Key);
