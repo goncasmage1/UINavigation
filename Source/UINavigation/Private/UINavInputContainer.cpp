@@ -103,6 +103,7 @@ void UUINavInputContainer::CreateInputBoxes()
 		if (bSuccess) NewInputBox->InputData = InputRebindData;
 
 		OnAddInputBox(NewInputBox);
+		NewInputBox->CreateKeyWidgets();
 
 		ParentWidget->UINavInputBoxes.Add(NewInputBox);
 

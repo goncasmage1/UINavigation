@@ -13,7 +13,6 @@
 #include "GameFramework/InputSettings.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
 
-#define CAN_REGISTER_KEY(NewKey, KeyIndex) CanRegisterKey(NewKey, KeyIndex) != ERevertRebindReason::None
 #define IS_RIGHT_SCALE(Axis) ((Axis.Scale > 0.0f && IS_POSITIVE_AXIS) || (Axis.Scale < 0.0f && IS_NEGATIVE_AXIS))
 #define GET_REVERSE_AXIS (AxisType == EAxisType::Positive ? EAxisType::Negative : EAxisType::Positive)
 
@@ -22,7 +21,6 @@ void UUINavInputBox::NativeConstruct()
 	Super::NativeConstruct();
 
 	bIsFocusable = false;
-	CreateKeyWidgets();
 }
 
 void UUINavInputBox::CreateKeyWidgets()
@@ -108,7 +106,7 @@ void UUINavInputBox::CreateKeyWidgets()
 
 bool UUINavInputBox::TrySetupNewKey(FKey NewKey, int KeyIndex, UUINavInputComponent* NewInputButton)
 {
-	if (!NewKey.IsValid() || Keys.IsValidIndex(KeyIndex) || Keys.Contains(NewKey) || CAN_REGISTER_KEY(NewKey, KeyIndex)) return false;
+	if (!NewKey.IsValid() || Keys.IsValidIndex(KeyIndex) || Keys.Contains(NewKey)) return false;
 
 	Keys.Add(NewKey);
 

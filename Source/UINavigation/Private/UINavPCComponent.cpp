@@ -425,6 +425,7 @@ void UUINavPCComponent::GetInputRebindData(FName InputName, FInputRebindData& Ou
 		{
 			OutData = *InputRebindData;
 			bSuccess = true;
+			return;
 		}
 	}
 	bSuccess = false;
