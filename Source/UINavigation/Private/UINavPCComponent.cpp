@@ -321,10 +321,11 @@ FKey UUINavPCComponent::GetInputKey(FName InputName, EInputRestriction InputRest
 		TArray<FInputActionKeyMapping> ActionMappings;
 		Settings->GetActionMappingByName(InputName, ActionMappings);
 
-		for (FInputActionKeyMapping Mapping : ActionMappings)
+		int Iterations = ActionMappings.Num();
+		for (int i = Iterations - 1; i >= 0; --i)
 		{
-			if (UUINavBlueprintFunctionLibrary::RespectsRestriction(Mapping.Key, InputRestriction))
-				return Mapping.Key;
+			if (UUINavBlueprintFunctionLibrary::RespectsRestriction(ActionMappings[i].Key, InputRestriction))
+				return ActionMappings[i].Key;
 		}
 		return FKey();
 	}
@@ -335,18 +336,19 @@ FKey UUINavPCComponent::GetInputKey(FName InputName, EInputRestriction InputRest
 		Settings->GetAxisMappingByName(InputName, AxisMappings);
 
 		FKey PotentialAxisKey;
-		for (FInputAxisKeyMapping Mapping : AxisMappings)
+		int Iterations = AxisMappings.Num();
+		for (int i = Iterations - 1; i >= 0; --i)
 		{
-			if (UUINavBlueprintFunctionLibrary::RespectsRestriction(Mapping.Key, InputRestriction))
+			if (UUINavBlueprintFunctionLibrary::RespectsRestriction(AxisMappings[i].Key, InputRestriction))
 			{
-				if (Mapping.Scale > 0.0f && AxisType == EAxisType::Positive ||
-					Mapping.Scale < 0.0f && AxisType == EAxisType::Negative)
+				if (AxisMappings[i].Scale > 0.0f && AxisType == EAxisType::Positive ||
+					AxisMappings[i].Scale < 0.0f && AxisType == EAxisType::Negative)
 				{
-					return Mapping.Key;
+					return AxisMappings[i].Key;
 				}
 				else
 				{
-					PotentialAxisKey = GetKeyFromAxis(Mapping.Key, AxisType == EAxisType::Positive);
+					PotentialAxisKey = GetKeyFromAxis(AxisMappings[i].Key, AxisType == EAxisType::Positive);
 					if (PotentialAxisKey.IsValid())
 					{
 						return PotentialAxisKey;
@@ -487,9 +489,10 @@ void UUINavPCComponent::GetInputKeys(FName InputName, TArray<FKey>& OutKeys)
 		TArray<FInputActionKeyMapping> ActionMappings;
 		Settings->GetActionMappingByName(InputName, ActionMappings);
 
-		for (FInputActionKeyMapping Mapping : ActionMappings)
+		int Iterations = ActionMappings.Num();
+		for (int i = Iterations - 1; i >= 0; --i)
 		{
-			OutKeys.Add(Mapping.Key);
+			OutKeys.Add(ActionMappings[i].Key);
 		}
 	}
 	else
@@ -499,16 +502,17 @@ void UUINavPCComponent::GetInputKeys(FName InputName, TArray<FKey>& OutKeys)
 		Settings->GetAxisMappingByName(InputName, AxisMappings);
 
 		FKey PotentialAxisKey;
-		for (FInputAxisKeyMapping Mapping : AxisMappings)
+		int Iterations = AxisMappings.Num();
+		for (int i = Iterations - 1; i >= 0; --i)
 		{
-			if (Mapping.Scale > 0.0f && AxisType == EAxisType::Positive ||
-				Mapping.Scale < 0.0f && AxisType == EAxisType::Negative)
+			if (AxisMappings[i].Scale > 0.0f && AxisType == EAxisType::Positive ||
+				AxisMappings[i].Scale < 0.0f && AxisType == EAxisType::Negative)
 			{
-				OutKeys.Add(Mapping.Key);
+				OutKeys.Add(AxisMappings[i].Key);
 			}
 			else
 			{
-				PotentialAxisKey = GetKeyFromAxis(Mapping.Key, AxisType == EAxisType::Positive);
+				PotentialAxisKey = GetKeyFromAxis(AxisMappings[i].Key, AxisType == EAxisType::Positive);
 				if (PotentialAxisKey.IsValid())
 				{
 					OutKeys.Add(PotentialAxisKey);
