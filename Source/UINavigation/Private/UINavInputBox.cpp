@@ -136,7 +136,7 @@ void UUINavInputBox::ResetKeyWidgets()
 
 void UUINavInputBox::UpdateInputKey(FKey NewKey, int Index)
 {
-	ERevertRebindReason RevertReason = CanRegisterKey(NewKey, Index);
+	ERevertRebindReason RevertReason = Container->CanRegisterKey(this, NewKey, Index);
 	if (RevertReason != ERevertRebindReason::None)
 	{
 		Container->OnRebindCancelled(RevertReason, NewKey);

@@ -123,6 +123,24 @@ void UUINavInputContainer::CreateInputBoxes()
 	}
 }
 
+ERevertRebindReason UUINavInputContainer::CanRegisterKey(const UUINavInputBox * InputBox, FKey NewKey, int Index) const
+{
+	if (!CanUseKey(InputBox, NewKey))
+	{
+		return ERevertRebindReason::UsedBySameActionGroup;
+	}
+	else if (KeyBlacklist.Contains(NewKey) || !NewKey.IsValid())
+	{
+		ERevertRebindReason::BlacklistedKey;
+	}
+	else if (!RespectsRestriction(NewKey, Index))
+	{
+		ERevertRebindReason::RestrictionMismatch;
+	}
+
+	return ERevertRebindReason::None;
+}
+
 bool UUINavInputContainer::CanUseKey(const UUINavInputBox* InputBox, FKey CompareKey) const
 {
 	TArray<int> InputGroups = InputBox->InputData.InputGroups;

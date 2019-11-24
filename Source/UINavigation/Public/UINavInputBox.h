@@ -30,7 +30,6 @@ protected:
 
 	TArray<bool> bUsingKeyImage = { false, false, false };
 
-	ERevertRebindReason CanRegisterKey(FKey NewKey, int Index) const;
 	bool UpdateKeyIconForKey(int Index);
 	FText GetKeyText(int Index);
 	void UpdateKeyDisplay(int Index);

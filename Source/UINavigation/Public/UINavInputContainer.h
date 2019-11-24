@@ -73,6 +73,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "UINav Input")
 		void ResetKeyMappings();
 
+	ERevertRebindReason CanRegisterKey(const class UUINavInputBox* InputBox, FKey NewKey, int Index) const;
+
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "UINav Input")
 		bool CanUseKey(const class UUINavInputBox* InputBox, FKey CompareKey) const;
 
