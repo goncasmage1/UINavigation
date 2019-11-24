@@ -123,7 +123,7 @@ void UUINavInputContainer::CreateInputBoxes()
 	}
 }
 
-ERevertRebindReason UUINavInputContainer::CanRegisterKey(const UUINavInputBox * InputBox, FKey NewKey, int Index) const
+ERevertRebindReason UUINavInputContainer::CanRegisterKey(const UUINavInputBox * InputBox, FKey NewKey, int Index)
 {
 	if (!CanUseKey(InputBox, NewKey))
 	{

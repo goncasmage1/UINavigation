@@ -265,24 +265,6 @@ void UUINavInputBox::ProcessInputName()
 	InputText->SetText(InputData.InputText);
 }
 
-ERevertRebindReason UUINavInputBox::CanRegisterKey(FKey NewKey, int Index) const
-{
-	if (!Container->CanUseKey(this, NewKey))
-	{
-		return ERevertRebindReason::UsedBySameActionGroup;
-	}
-	else if (Container->KeyBlacklist.Contains(NewKey) || !NewKey.IsValid())
-	{
-		ERevertRebindReason::BlacklistedKey;
-	}
-	else if (!Container->RespectsRestriction(NewKey, Index))
-	{
-		ERevertRebindReason::RestrictionMismatch;
-	}
-	
-	return ERevertRebindReason::None;
-}
-
 bool UUINavInputBox::UpdateKeyIconForKey(int Index)
 {
 	UTexture2D* NewTexture = Container->UINavPC->GetKeyIcon(Keys[Index]);
