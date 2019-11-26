@@ -15,6 +15,8 @@
 #define IS_POSITIVE_AXIS (AxisType == EAxisType::Positive)
 #define IS_NEGATIVE_AXIS (AxisType == EAxisType::Negative)
 #define IS_SCALE_CORRECT(AxisMapping) ((TempAxes[i].Scale > 0.0f && IS_POSITIVE_AXIS) || (TempAxes[i].Scale < 0.0f && IS_NEGATIVE_AXIS))
+#define IS_RIGHT_SCALE(Axis) ((Axis.Scale > 0.0f && IS_POSITIVE_AXIS) || (Axis.Scale < 0.0f && IS_NEGATIVE_AXIS))
+#define GET_REVERSE_AXIS (AxisType == EAxisType::Positive ? EAxisType::Negative : EAxisType::Positive)
 
 /**
 * This class contains the logic for rebinding input keys to their respective actions
