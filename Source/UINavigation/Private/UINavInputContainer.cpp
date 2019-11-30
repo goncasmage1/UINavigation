@@ -2,6 +2,7 @@
 
 #include "UINavInputContainer.h"
 #include "UINavWidget.h"
+#include "SwapKeysWidget.h"
 #include "UINavPCComponent.h"
 #include "UINavButton.h"
 #include "UINavInputBox.h"
@@ -46,6 +47,21 @@ void UUINavInputContainer::OnAddInputBox_Implementation(class UUINavInputBox* Ne
 
 void UUINavInputContainer::OnRebindCancelled_Implementation(ERevertRebindReason RevertReason, FKey PressedKey)
 {
+}
+
+bool UUINavInputContainer::RequestKeySwap(FInputCollisionData InputCollisionData, int CurrentInputIndex, int CollidingInputIndex)
+{
+	if (SwapKeysWidgetClass != nullptr)
+	{
+		APlayerController* PC = Cast<APlayerController>(UINavPC->GetOwner());
+		USwapKeysWidget* SwapKeysWidget = CreateWidget<USwapKeysWidget>(PC, SwapKeysWidgetClass);
+		SwapKeysWidget->CollidingInputBox = ParentWidget->UINavInputBoxes[CollidingInputIndex];
+		SwapKeysWidget->CurrentInputBox = ParentWidget->UINavInputBoxes[CurrentInputIndex];
+		SwapKeysWidget->InputCollisionData = InputCollisionData;
+		ParentWidget->GoToBuiltWidget(SwapKeysWidget, false, false);
+		return true;
+	}
+	return false;
 }
 
 void UUINavInputContainer::ResetKeyMappings()
@@ -123,44 +139,54 @@ void UUINavInputContainer::CreateInputBoxes()
 	}
 }
 
-ERevertRebindReason UUINavInputContainer::CanRegisterKey(const UUINavInputBox * InputBox, FKey NewKey, int Index)
+ERevertRebindReason UUINavInputContainer::CanRegisterKey(const UUINavInputBox * InputBox, FKey NewKey, int Index, int& CollidingActionIndex, int& CollidingKeyIndex)
 {
-	if (!CanUseKey(InputBox, NewKey))
+	if (KeyBlacklist.Contains(NewKey) || !NewKey.IsValid())
 	{
-		return ERevertRebindReason::UsedBySameActionGroup;
-	}
-	else if (KeyBlacklist.Contains(NewKey) || !NewKey.IsValid())
-	{
-		ERevertRebindReason::BlacklistedKey;
+		return ERevertRebindReason::BlacklistedKey;
 	}
 	else if (!RespectsRestriction(NewKey, Index))
 	{
-		ERevertRebindReason::RestrictionMismatch;
+		return ERevertRebindReason::RestrictionMismatch;
+	}
+	else if (!CanUseKey(InputBox, NewKey, CollidingActionIndex, CollidingKeyIndex))
+	{
+		return ERevertRebindReason::UsedBySameInputGroup;
 	}
 
 	return ERevertRebindReason::None;
 }
 
-bool UUINavInputContainer::CanUseKey(const UUINavInputBox* InputBox, FKey CompareKey) const
+bool UUINavInputContainer::CanUseKey(const UUINavInputBox* InputBox, FKey CompareKey, int& CollidingActionIndex, int& CollidingKeyIndex) const
 {
 	TArray<int> InputGroups = InputBox->InputData.InputGroups;
 	if (InputGroups.Num() == 0) InputGroups.Add(-1);
 
-	for (UUINavInputBox* box : ParentWidget->UINavInputBoxes)
+	for (int i = 0; i < ParentWidget->UINavInputBoxes.Num(); ++i)
 	{
-		if (InputBox == box) continue;
+		if (InputBox == ParentWidget->UINavInputBoxes[i]) continue;
 
-		if (box->ContainsKey(CompareKey))
+		int KeyIndex = ParentWidget->UINavInputBoxes[i]->ContainsKey(CompareKey);
+		if (KeyIndex != INDEX_NONE)
 		{
-			if (InputGroups.Contains(-1) ||
-				box->InputData.InputGroups.Contains(-1)) return false;
+			TArray<int> CollidingInputGroups = ParentWidget->UINavInputBoxes[i]->InputData.InputGroups;
 
-			TArray<int> CollidingInputGroups = box->InputData.InputGroups;
-			if (CollidingInputGroups.Contains(-1)) return false;
+			if (InputGroups.Contains(-1) ||
+				CollidingInputGroups.Contains(-1))
+			{
+				CollidingActionIndex = i;
+				CollidingKeyIndex = KeyIndex;
+				return false;
+			}
 
 			for (int InputGroup : InputGroups)
 			{
-				if (CollidingInputGroups.Contains(InputGroup)) return false;
+				if (CollidingInputGroups.Contains(InputGroup))
+				{
+					CollidingActionIndex = i;
+					CollidingKeyIndex = KeyIndex;
+					return false;
+				}
 			}
 		}
 	}
@@ -208,4 +234,12 @@ int UUINavInputContainer::GetOffsetFromTargetColumn(bool bTop)
 			break;
 	}
 	return 0;
+}
+
+void UUINavInputContainer::GetInputRebindData(int InputIndex, FInputRebindData& RebindData)
+{
+	if (InputIndex > 0 && InputIndex < ParentWidget->UINavInputBoxes.Num())
+	{
+		RebindData = ParentWidget->UINavInputBoxes[InputIndex]->InputData;
+	}
 }

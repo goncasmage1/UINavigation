@@ -3,10 +3,11 @@
 #pragma once
 
 #include "Blueprint/UserWidget.h"
+#include "Data/AxisType.h"
 #include "Data/InputIconMapping.h"
 #include "Data/InputNameMapping.h"
 #include "Data/InputRebindData.h"
-#include "Data/AxisType.h"
+#include "Data/RevertRebindReason.h"
 #include "UINavInputBox.generated.h"
 
 #define DISPLAYERROR(Text) GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, FString::Printf(TEXT("%s"), *(FString(TEXT("Error in ")).Append(GetName()).Append(TEXT(": ")).Append(Text))));
@@ -32,6 +33,9 @@ protected:
 
 	TArray<bool> bUsingKeyImage = { false, false, false };
 
+	FKey AwaitingNewKey;
+	int AwaitingIndex;
+
 	bool UpdateKeyIconForKey(int Index);
 	FText GetKeyText(int Index);
 	void UpdateKeyDisplay(int Index);
@@ -45,12 +49,14 @@ public:
 	void CreateKeyWidgets();
 	bool TrySetupNewKey(FKey NewKey, int KeyIndex, class UUINavInputComponent* NewInputButton);
 	void ResetKeyWidgets();
-	void UpdateInputKey(FKey NewKey, int Index);
+	void UpdateInputKey(FKey NewKey, int Index, bool bSkipChecks = false);
+	void FinishUpdateInputKey();
+	void CancelUpdateInputKey(ERevertRebindReason Reason);
 	void RevertToKeyText(int Index);
 
 	void NotifySelected(int Index);
 
-	bool ContainsKey(FKey CompareKey) const;
+	int ContainsKey(FKey CompareKey) const;
 	FORCEINLINE bool IsAxis() const { return IS_AXIS; }
 
 	EAxisType AxisType = EAxisType::None;

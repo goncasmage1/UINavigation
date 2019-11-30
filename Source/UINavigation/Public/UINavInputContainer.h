@@ -3,6 +3,8 @@
 #pragma once
 
 #include "Data/AxisType.h"
+#include "Data/InputCollisionData.h"
+#include "Data/InputRebindData.h"
 #include "Data/InputRestriction.h"
 #include "Data/RevertRebindReason.h"
 #include "Data/TargetColumn.h"
@@ -70,13 +72,18 @@ public:
 		void OnRebindCancelled(ERevertRebindReason RevertReason, FKey PressedKey);
 	virtual void OnRebindCancelled_Implementation(ERevertRebindReason RevertReason, FKey PressedKey);
 
+	/**
+	*	Called when the player presses a key being used by another action
+	*/
+	bool RequestKeySwap(FInputCollisionData InputCollisionData, int CurrentInputIndex, int CollidingInputIndex);
+
 	UFUNCTION(BlueprintCallable, Category = "UINav Input")
 		void ResetKeyMappings();
 
-	ERevertRebindReason CanRegisterKey(const class UUINavInputBox* InputBox, FKey NewKey, int Index);
+	ERevertRebindReason CanRegisterKey(const class UUINavInputBox* InputBox, FKey NewKey, int Index, int& CollidingActionIndex, int& CollidingKeyIndex);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "UINav Input")
-		bool CanUseKey(const class UUINavInputBox* InputBox, FKey CompareKey) const;
+		bool CanUseKey(const class UUINavInputBox* InputBox, FKey CompareKey, int& CollidingActionIndex, int& CollidingKeyIndex) const;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "UINav Input")
 		bool RespectsRestriction(FKey CompareKey, int Index);
@@ -86,11 +93,16 @@ public:
 	//Fetches the index offset from the TargetColumn variable for both the top and bottom of the Input Container
 	int GetOffsetFromTargetColumn(bool bTop);
 
+	void GetInputRebindData(int InputIndex, FInputRebindData& RebindData);
+
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "UINav Input")
 		FKey GetAxisFromKey(FKey Key);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "UINav Input")
 		FORCEINLINE ETargetColumn GetTargetColumn() const { return TargetColumn; }
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "UINav Input")
+		FORCEINLINE class UUINavWidget* GetParentWidget() const { return ParentWidget; }
 
 	//-----------------------------------------------------------------------
 
@@ -144,6 +156,12 @@ public:
 			EKeys::LeftCommand,
 			EKeys::RightCommand,
 		};
+
+	/*
+	The widget class of the widget that will tell the player that 2 keys can be swapped.
+	*/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Input")
+		TSubclassOf<class USwapKeysWidget> SwapKeysWidgetClass;
 
 	/*
 	Indicates whether unused input boxes will hidden or collapsed

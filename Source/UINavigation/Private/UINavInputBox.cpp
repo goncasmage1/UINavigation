@@ -3,6 +3,7 @@
 #include "UINavInputBox.h"
 #include "UINavInputComponent.h"
 #include "UINavInputContainer.h"
+#include "UINavWidget.h"
 #include "UINavSettings.h"
 #include "UINavPCComponent.h"
 #include "Components/TextBlock.h"
@@ -131,15 +132,55 @@ void UUINavInputBox::ResetKeyWidgets()
 	}
 }
 
-void UUINavInputBox::UpdateInputKey(FKey NewKey, int Index)
+void UUINavInputBox::UpdateInputKey(FKey NewKey, int Index, bool bSkipChecks)
 {
-	ERevertRebindReason RevertReason = Container->CanRegisterKey(this, NewKey, Index);
-	if (RevertReason != ERevertRebindReason::None)
+	AwaitingNewKey = NewKey;
+	AwaitingIndex = Index;
+
+	if (!bSkipChecks)
 	{
-		Container->OnRebindCancelled(RevertReason, NewKey);
-		RevertToKeyText(Index);
-		return;
+		int CollidingActionIndex = INDEX_NONE;
+		int CollidingKeyIndex = INDEX_NONE;
+		ERevertRebindReason RevertReason = Container->CanRegisterKey(this, NewKey, Index, CollidingActionIndex, CollidingKeyIndex);
+		if (RevertReason == ERevertRebindReason::UsedBySameInputGroup)
+		{
+			int SelfIndex = INDEX_NONE;
+			FInputRebindData CollidingInputData;
+			Container->GetInputRebindData(CollidingActionIndex, CollidingInputData);
+			if (Container->GetParentWidget()->UINavInputBoxes.Find(this, SelfIndex) &&
+				!Container->RequestKeySwap(FInputCollisionData(InputData.InputText,
+															   CollidingInputData.InputText,
+															   CollidingKeyIndex,
+															   Keys[Index],
+															   NewKey),
+				SelfIndex,
+				CollidingActionIndex)
+				)
+			{
+				CancelUpdateInputKey(RevertReason);
+			}
+
+			return;
+		}
+		else if (Keys.Contains(NewKey))
+		{
+			CancelUpdateInputKey(ERevertRebindReason::UsedBySameInput);
+			return;
+		}
+		else if (RevertReason != ERevertRebindReason::None)
+		{
+			CancelUpdateInputKey(RevertReason);
+			return;
+		}
 	}
+
+	FinishUpdateInputKey();
+}
+
+void UUINavInputBox::FinishUpdateInputKey()
+{
+	FKey NewKey = AwaitingNewKey;
+	int Index = AwaitingIndex;
 
 	UInputSettings* Settings = const_cast<UInputSettings*>(GetDefault<UInputSettings>());
 	TArray<FInputActionKeyMapping>& Actions = Settings->ActionMappings;
@@ -151,7 +192,7 @@ void UUINavInputBox::UpdateInputKey(FKey NewKey, int Index)
 	int Iterations = IS_AXIS ? Axes.Num() : Actions.Num();
 	for (int i = Iterations - 1; i >= 0; --i)
 	{
-		if ((IS_AXIS && Axes[i].AxisName.IsEqual(InputName)) || 
+		if ((IS_AXIS && Axes[i].AxisName.IsEqual(InputName)) ||
 			(!IS_AXIS && Actions[i].ActionName.IsEqual(InputName)))
 		{
 			FKey InputKey = IS_AXIS ? GetKeyFromAxis(Axes[i].Key) : Actions[i].Key;
@@ -226,6 +267,12 @@ void UUINavInputBox::UpdateInputKey(FKey NewKey, int Index)
 	{
 		Container->ResetInputBox(InputName, GET_REVERSE_AXIS);
 	}
+}
+
+void UUINavInputBox::CancelUpdateInputKey(ERevertRebindReason Reason)
+{
+	Container->OnRebindCancelled(Reason, AwaitingNewKey);
+	RevertToKeyText(AwaitingIndex);
 }
 
 FKey UUINavInputBox::GetKeyFromAxis(FKey AxisKey)
@@ -324,8 +371,8 @@ void UUINavInputBox::NotifySelected(int Index)
 	}
 }
 
-bool UUINavInputBox::ContainsKey(FKey CompareKey) const
+int UUINavInputBox::ContainsKey(FKey CompareKey) const
 {
-	return Keys.Contains(CompareKey);
+	return Keys.IndexOfByKey(CompareKey);
 }
 

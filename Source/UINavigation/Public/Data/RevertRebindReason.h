@@ -9,5 +9,7 @@ enum class ERevertRebindReason : uint8
 	None UMETA(DisplayName = "None"),
 	RestrictionMismatch UMETA(DisplayName = "Restriction Mismatch"),
 	BlacklistedKey UMETA(DisplayName = "Blacklisted Key"),
-	UsedBySameActionGroup UMETA(DisplayName = "Used By Same Action Group")
+	UsedBySameInputGroup UMETA(DisplayName = "Used By Same Input Group"),
+	UsedBySameInput UMETA(DisplayName = "Used By Same Input"),
+	SwapRejected UMETA(DisplayName = "Swap Rejected"),
 };
