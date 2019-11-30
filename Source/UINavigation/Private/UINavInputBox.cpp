@@ -144,6 +144,12 @@ void UUINavInputBox::UpdateInputKey(FKey NewKey, int Index, bool bSkipChecks)
 		ERevertRebindReason RevertReason = Container->CanRegisterKey(this, NewKey, Index, CollidingActionIndex, CollidingKeyIndex);
 		if (RevertReason == ERevertRebindReason::UsedBySameInputGroup)
 		{
+			if (!Keys[Index].IsValid())
+			{
+				CancelUpdateInputKey(RevertReason);
+				return;
+			}
+
 			int SelfIndex = INDEX_NONE;
 			FInputRebindData CollidingInputData;
 			Container->GetInputRebindData(CollidingActionIndex, CollidingInputData);
@@ -153,9 +159,8 @@ void UUINavInputBox::UpdateInputKey(FKey NewKey, int Index, bool bSkipChecks)
 															   CollidingKeyIndex,
 															   Keys[Index],
 															   NewKey),
-				SelfIndex,
-				CollidingActionIndex)
-				)
+										   SelfIndex,
+										   CollidingActionIndex))
 			{
 				CancelUpdateInputKey(RevertReason);
 			}
