@@ -153,7 +153,7 @@ void UUINavInputBox::UpdateInputKey(FKey NewKey, int Index, bool bSkipChecks)
 			int SelfIndex = INDEX_NONE;
 			FInputRebindData CollidingInputData;
 			Container->GetInputRebindData(CollidingActionIndex, CollidingInputData);
-			if (Container->GetParentWidget()->UINavInputBoxes.Find(this, SelfIndex) &&
+			if (!Container->GetParentWidget()->UINavInputBoxes.Find(this, SelfIndex) ||
 				!Container->RequestKeySwap(FInputCollisionData(InputData.InputText,
 															   CollidingInputData.InputText,
 															   CollidingKeyIndex,

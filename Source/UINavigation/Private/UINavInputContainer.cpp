@@ -238,7 +238,7 @@ int UUINavInputContainer::GetOffsetFromTargetColumn(bool bTop)
 
 void UUINavInputContainer::GetInputRebindData(int InputIndex, FInputRebindData& RebindData)
 {
-	if (InputIndex > 0 && InputIndex < ParentWidget->UINavInputBoxes.Num())
+	if (InputIndex >= 0 && InputIndex < ParentWidget->UINavInputBoxes.Num())
 	{
 		RebindData = ParentWidget->UINavInputBoxes[InputIndex]->InputData;
 	}
