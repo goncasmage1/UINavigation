@@ -317,6 +317,7 @@ void UUINavWidget::UINavSetup()
 		DispatchNavigation(ButtonIndex);
 		OnNavigate(-1, ButtonIndex);
 		CollectionNavigateTo(ButtonIndex);
+		CurrentButton->OnHovered.Broadcast();
 	}
 
 	OnSetupCompleted();
@@ -1444,8 +1445,12 @@ void UUINavWidget::NavigateTo(int Index, bool bHoverEvent)
 	OnNavigate(ButtonIndex, Index);
 	CollectionNavigateTo(Index);
 
+	if (!bHoverEvent) CurrentButton->OnUnhovered.Broadcast();
+
 	ButtonIndex = Index;
 	CurrentButton = UINavButtons[ButtonIndex];
+
+	if (!bHoverEvent)CurrentButton->OnHovered.Broadcast();
 }
 
 void UUINavWidget::CollectionNavigateTo(int Index)
@@ -1538,8 +1543,14 @@ void UUINavWidget::CollectionOnSelect(int Index)
 
 void UUINavWidget::OnPreSelect(int Index, bool bMouseClick)
 {
-	if (CurrentButton == nullptr)
+	if (CurrentButton == nullptr) return;
+
+	if (!bMouseClick)
 	{
+		USoundBase* PressSound = Cast<USoundBase>(CurrentButton->WidgetStyle.PressedSlateSound.GetResourceObject());
+		if (PressSound != nullptr) PlaySound(PressSound);
+		CurrentButton->OnClicked.Broadcast();
+		CurrentButton->OnPressed.Broadcast();
 		return;
 	}
 
@@ -1562,11 +1573,6 @@ void UUINavWidget::OnPreSelect(int Index, bool bMouseClick)
 	}
 	else
 	{
-		if (!bMouseClick)
-		{
-			USoundBase* PressSound = Cast<USoundBase>(CurrentButton->WidgetStyle.PressedSlateSound.GetResourceObject());
-			if (PressSound != nullptr) PlaySound(PressSound);
-		}
 		OnSelect(Index);
 		CollectionOnSelect(Index);
 	}
