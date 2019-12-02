@@ -118,6 +118,6 @@ void UUINavOptionBox::Update()
 
 	NavText->SetText(bUseNumberRange ? 
 		FText::FromString(FString::FromInt(MinRange + OptionIndex*Interval)) : 
-		FText::FromName(StringOptions[OptionIndex]));
+		StringOptions[OptionIndex]);
 }
 
