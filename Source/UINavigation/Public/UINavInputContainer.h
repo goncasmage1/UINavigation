@@ -38,9 +38,6 @@ protected:
 		{EKeys::MotionController_Right_Grip2, EKeys::MotionController_Right_Grip2Axis},
 	};
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UINav Input")
-		TSubclassOf<class UUINavInputBox> InputBox_BP;
-
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget), Category = "UINav Input")
 		class UPanelWidget* InputBoxesPanel;
 	
@@ -156,6 +153,9 @@ public:
 			EKeys::LeftCommand,
 			EKeys::RightCommand,
 		};
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Input")
+		TSubclassOf<class UUINavInputBox> InputBox_BP;
 
 	/*
 	The widget class of the widget that will tell the player that 2 keys can be swapped.
