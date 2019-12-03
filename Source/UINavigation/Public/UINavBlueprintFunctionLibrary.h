@@ -5,6 +5,7 @@
 #include "Engine.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "Data/Grid.h"
+#include "Data/InputRestriction.h"
 #include "UINavButton.h"
 #include "UINavBlueprintFunctionLibrary.generated.h"
 
@@ -31,6 +32,9 @@ public:
 	// Resets the input settings to their default state
 	UFUNCTION(BlueprintCallable, Category = UINavInput)
 		static void ResetInputSettings();
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "UINav Input")
+		static bool RespectsRestriction(FKey CompareKey, EInputRestriction Restriction);
 
 	// Checks whether a gamepad is connected
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavigationLibrary)

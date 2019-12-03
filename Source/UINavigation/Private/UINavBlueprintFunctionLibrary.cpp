@@ -79,6 +79,30 @@ void UUINavBlueprintFunctionLibrary::ResetInputSettings()
 	Settings->ForceRebuildKeymaps();
 }
 
+bool UUINavBlueprintFunctionLibrary::RespectsRestriction(FKey Key, EInputRestriction Restriction)
+{
+	switch (Restriction)
+	{
+		case EInputRestriction::None:
+			return true;
+			break;
+		case EInputRestriction::Keyboard:
+			return (!Key.IsMouseButton() && !Key.IsGamepadKey());
+			break;
+		case EInputRestriction::Mouse:
+			return Key.IsMouseButton();
+			break;
+		case EInputRestriction::Keyboard_Mouse:
+			return !Key.IsGamepadKey();
+			break;
+		case EInputRestriction::Gamepad:
+			return Key.IsGamepadKey();
+			break;
+	}
+
+	return false;
+}
+
 bool UUINavBlueprintFunctionLibrary::IsGamepadConnected()
 {
 	return FSlateApplication::Get().IsGamepadAttached();

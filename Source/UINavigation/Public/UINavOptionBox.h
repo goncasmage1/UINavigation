@@ -34,10 +34,10 @@ public:
 
 	//The list of Names to display as options in this slider
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavOptionBox, meta = (EditCondition = "!bUseNumberRange"))
-		TArray<FName> StringOptions;
+		TArray<FText> StringOptions;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavOptionBox)
-		FORCEINLINE FName GetCurrentString() const { return StringOptions[OptionIndex]; }
+		FORCEINLINE FText GetCurrentString() const { return StringOptions[OptionIndex]; }
 
 	virtual void NavigateRight() override;
 
