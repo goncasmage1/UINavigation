@@ -43,15 +43,18 @@ void UUINavWidget::NativeConstruct()
 	//If this widget was added through a child widget, destroy it
 	if (ReturnedFromWidget != nullptr)
 	{
+		APlayerController* PC = Cast<APlayerController>(UINavPC->GetOwner());
+		if (ReturnedFromWidget->HasUserFocus(PC))
+		{
+			SetUserFocus(PC);
+			if (UINavPC->GetInputMode() == EInputMode::UI)
+			{
+				SetKeyboardFocus();
+			}
+		}
+
 		if (WidgetComp == nullptr) ReturnedFromWidget->Destruct();
 		ReturnedFromWidget = nullptr;
-
-		APlayerController* PC = Cast<APlayerController>(UINavPC->GetOwner());
-		SetUserFocus(PC);
-		if (UINavPC->GetInputMode() == EInputMode::UI)
-		{
-			SetKeyboardFocus();
-		}
 	}
 
 	PreSetup();
