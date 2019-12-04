@@ -314,9 +314,10 @@ void UUINavWidget::UINavSetup()
 
 	if (UINavButtons.Num() > 0)
 	{
-		DispatchNavigation(ButtonIndex);
+		/*DispatchNavigation(ButtonIndex);
 		OnNavigate(-1, ButtonIndex);
-		CollectionNavigateTo(ButtonIndex);
+		CollectionNavigateTo(ButtonIndex);*/
+		ButtonIndex = -1;
 		CurrentButton->OnHovered.Broadcast();
 	}
 
@@ -1332,7 +1333,7 @@ FVector2D UUINavWidget::GetButtonLocation(int Index)
 
 void UUINavWidget::ExecuteAnimations(int From, int To)
 {
-	if (From != -1 && UINavAnimations.Num() > From)
+	if (From >= 0 && UINavAnimations.Num() > From)
 	{
 		if (IsAnimationPlaying(UINavAnimations[From]))
 		{
@@ -1357,7 +1358,7 @@ void UUINavWidget::ExecuteAnimations(int From, int To)
 
 void UUINavWidget::UpdateTextColor(int Index)
 {
-	SwitchTextColorTo(ButtonIndex, TextDefaultColor);
+	if (ButtonIndex > 0) SwitchTextColorTo(ButtonIndex, TextDefaultColor);
 	SwitchTextColorTo(Index, TextNavigatedColor);
 }
 
@@ -1388,7 +1389,7 @@ void UUINavWidget::UpdateButtonsStates(int Index, bool bHovered)
 		ToButton->bSwitchedStyle = !bHovered;
 	}
 
-	if (ButtonIndex == Index) return;
+	if (ButtonIndex == Index || ButtonIndex < 0) return;
 
 	//Update previous button state
 	if (!(bHovered ^ !ToButton->bSwitchedStyle))
@@ -1453,29 +1454,6 @@ void UUINavWidget::NavigateTo(int Index, bool bHoverEvent)
 	if (!bHoverEvent)CurrentButton->OnHovered.Broadcast();
 }
 
-void UUINavWidget::CollectionNavigateTo(int Index)
-{
-	bool bFoundFrom = false;
-	bool bFoundTo = false;
-	for (UUINavCollection* Collection : UINavCollections)
-	{
-		int CollectionFromIndex = Index != ButtonIndex ? GetCollectionButtonIndex(Collection, ButtonIndex) : -1;
-		int CollectionToIndex = GetCollectionButtonIndex(Collection, Index);
-
-		bool bValidFrom = CollectionFromIndex != -1;
-		bool bValidTo = CollectionToIndex != -1;
-		if (bValidFrom || bValidTo)
-		{
-			if (!bFoundFrom) bFoundFrom = bValidFrom;
-			if (!bFoundTo) bFoundTo = bValidTo;
-
-			Collection->NotifyOnNavigate(Index != ButtonIndex ? ButtonIndex : -1, Index, CollectionFromIndex, CollectionToIndex);
-		}
-
-		if (bFoundFrom && bFoundTo) break;
-	}
-}
-
 void UUINavWidget::DispatchNavigation(int Index, bool bHoverEvent)
 {
 	//Update all the possible scroll boxes in the widget
@@ -1494,7 +1472,7 @@ void UUINavWidget::DispatchNavigation(int Index, bool bHoverEvent)
 
 	if (bUseTextColor) UpdateTextColor(Index);
 
-	UUINavComponent* FromComponent = GetUINavComponentAtIndex(ButtonIndex);
+	UUINavComponent* FromComponent = ButtonIndex >= 0 ? GetUINavComponentAtIndex(ButtonIndex) : nullptr;
 	UUINavComponent* ToComponent = GetUINavComponentAtIndex(Index);
 	if (FromComponent != nullptr) FromComponent->OnNavigatedFrom();
 	if (ToComponent != nullptr) ToComponent->OnNavigatedTo();
@@ -1502,11 +1480,34 @@ void UUINavWidget::DispatchNavigation(int Index, bool bHoverEvent)
 	if (UINavAnimations.Num() > 0) ExecuteAnimations(ButtonIndex, Index);
 }
 
+void UUINavWidget::CollectionNavigateTo(int Index)
+{
+	bool bFoundFrom = false;
+	bool bFoundTo = false;
+	for (UUINavCollection* Collection : UINavCollections)
+	{
+		int CollectionFromIndex = (Index != ButtonIndex && ButtonIndex >= 0) ? GetCollectionButtonIndex(Collection, ButtonIndex) : -1;
+		int CollectionToIndex = GetCollectionButtonIndex(Collection, Index);
+
+		bool bValidFrom = CollectionFromIndex != -1;
+		bool bValidTo = CollectionToIndex != -1;
+		if (bValidFrom || bValidTo)
+		{
+			if (!bFoundFrom) bFoundFrom = bValidFrom;
+			if (!bFoundTo) bFoundTo = bValidTo;
+
+			Collection->NotifyOnNavigate(Index != ButtonIndex ? ButtonIndex : -1, Index, CollectionFromIndex, CollectionToIndex);
+		}
+
+		if (bFoundFrom && bFoundTo) break;
+	}
+}
+
 void UUINavWidget::BeginSelectorMovement(int Index)
 {
 	if (MoveCurve == nullptr) return;
 
-	SelectorOrigin = bMovingSelector ? TheSelector->RenderTransform.Translation : GetButtonLocation(ButtonIndex);
+	SelectorOrigin = bMovingSelector || ButtonIndex < 0 ? TheSelector->RenderTransform.Translation : GetButtonLocation(ButtonIndex);
 	SelectorDestination = GetButtonLocation(Index);
 	Distance = SelectorDestination - SelectorOrigin;
 
