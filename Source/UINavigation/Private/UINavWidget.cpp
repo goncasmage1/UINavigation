@@ -317,6 +317,8 @@ void UUINavWidget::UINavSetup()
 		DispatchNavigation(ButtonIndex);
 		OnNavigate(-1, ButtonIndex);
 		CollectionNavigateTo(ButtonIndex);
+
+		bIgnoreHoverEvent = true;
 		CurrentButton->OnHovered.Broadcast();
 	}
 
@@ -1445,12 +1447,20 @@ void UUINavWidget::NavigateTo(int Index, bool bHoverEvent)
 	OnNavigate(ButtonIndex, Index);
 	CollectionNavigateTo(Index);
 
-	if (!bHoverEvent) CurrentButton->OnUnhovered.Broadcast();
+	if (!bHoverEvent)
+	{
+		bIgnoreUnhoverEvent = true;
+		CurrentButton->OnUnhovered.Broadcast();
+	}
 
 	ButtonIndex = Index;
 	CurrentButton = UINavButtons[ButtonIndex];
 
-	if (!bHoverEvent)CurrentButton->OnHovered.Broadcast();
+	if (!bHoverEvent)
+	{
+		bIgnoreHoverEvent = true;
+		CurrentButton->OnHovered.Broadcast();
+	}
 }
 
 void UUINavWidget::CollectionNavigateTo(int Index)
@@ -2129,6 +2139,12 @@ UUINavHorizontalComponent * UUINavWidget::GetUINavHorizontalCompAtIndex(int Inde
 
 void UUINavWidget::HoverEvent(int Index)
 {
+	if (bIgnoreHoverEvent)
+	{
+		bIgnoreHoverEvent = false;
+		return;
+	}
+
 	if (bWaitForInput)
 	{
 		bWaitForInput = false;
@@ -2152,6 +2168,12 @@ void UUINavWidget::HoverEvent(int Index)
 
 void UUINavWidget::UnhoverEvent(int Index)
 {
+	if (bIgnoreUnhoverEvent)
+	{
+		bIgnoreUnhoverEvent = false;
+		return;
+	}
+
 	if (bWaitForInput)
 	{
 		bWaitForInput = false;

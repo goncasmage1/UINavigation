@@ -34,6 +34,9 @@ protected:
 
 	bool bMovingSelector = false;
 
+	bool bIgnoreHoverEvent = false;
+	bool bIgnoreUnhoverEvent = false;
+
 	//Used to track when the selector's position should be updated
 	int WaitForTick;
 
