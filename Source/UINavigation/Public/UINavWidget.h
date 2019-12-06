@@ -446,8 +446,8 @@ public:
 	*	Called before this widget is setup for UINav logic
 	*/
 	UFUNCTION(BlueprintNativeEvent, Category = UINavWidget)
-		void PreSetup();
-	virtual void PreSetup_Implementation();
+		void PreSetup(bool bFirstSetup);
+	virtual void PreSetup_Implementation(bool bFirstSetup);
 
 	/**
 	*	Called when this widget completed UINavSetup

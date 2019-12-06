@@ -54,7 +54,7 @@ void UUINavWidget::NativeConstruct()
 		}
 	}
 
-	PreSetup();
+	PreSetup(!bCompletedSetup);
 	InitialSetup();
 }
 
@@ -1610,7 +1610,7 @@ void UUINavWidget::OnInputChanged_Implementation(EInputType From, EInputType To)
 
 }
 
-void UUINavWidget::PreSetup_Implementation()
+void UUINavWidget::PreSetup_Implementation(bool bFirstSetup)
 {
 }
 
