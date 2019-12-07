@@ -251,6 +251,7 @@ void UUINavWidget::TraverseHierarquy()
 				UUINavHorizontalComponent* HorizComp = Cast<UUINavHorizontalComponent>(widget);
 				if (HorizComp != nullptr)
 				{
+					HorizComp->ParentWidget = this;
 					UINavHorizontalComps.Add(HorizComp);
 				}
 			}
@@ -1627,6 +1628,10 @@ void UUINavWidget::OnHorizCompNavigateRight_Implementation(int Index)
 {
 }
 
+void UUINavWidget::OnHorizCompUpdated_Implementation(int Index)
+{
+}
+
 UWidget* UUINavWidget::GoToWidget(TSubclassOf<UUINavWidget> NewWidgetClass, bool bRemoveParent, bool bDestroyParent, int ZOrder)
 {
 	if (NewWidgetClass == nullptr)
@@ -2287,13 +2292,12 @@ void UUINavWidget::NavigateInDirection(ENavigationDirection Direction)
 		if (Direction == ENavigationDirection::Left)
 		{
 			HorizComp->NavigateLeft();
-			OnHorizCompNavigateLeft(ButtonIndex);
 		}
 		else
 		{
 			HorizComp->NavigateRight();
-			OnHorizCompNavigateRight(ButtonIndex);
 		}
+		OnHorizCompUpdated(ButtonIndex);
 	}
 	else MenuNavigate(Direction);
 }

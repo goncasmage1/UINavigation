@@ -22,9 +22,15 @@ protected:
 		class USpinBox* NavSpinBox;
 
 	bool bIgnoreSpinBoxCommit = false;
+
+	int LastOptionIndex = -1;
 	
 	UFUNCTION()
 		void HandleOnSliderValueChanged(float InValue);
+	UFUNCTION()
+		void HandleOnMouseCaptureBegin();
+	UFUNCTION()
+		void HandleOnMouseCaptureEnd();
 	UFUNCTION()
 		void HandleOnSpinBoxValueChanged(float InValue, ETextCommit::Type CommitMethod);
 
