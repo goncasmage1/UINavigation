@@ -459,16 +459,23 @@ public:
 	/**
 	*	Called when the user navigates left on a UINavComponentBox
 	*/
-	UFUNCTION(BlueprintNativeEvent, Category = UINavWidget)
+	UFUNCTION(BlueprintNativeEvent, Category = UINavWidget, meta = (DeprecatedFunction, DeprecationMessage = "Use the new OnHorizCompUpdate event"))
 		void OnHorizCompNavigateLeft(int Index);
 	virtual void OnHorizCompNavigateLeft_Implementation(int Index);
 
 	/**
 	*	Called when the user navigates right on a UINavComponentBox
 	*/
-	UFUNCTION(BlueprintNativeEvent, Category = UINavWidget)
+	UFUNCTION(BlueprintNativeEvent, Category = UINavWidget, meta = (DeprecatedFunction, DeprecationMessage = "Use the new OnHorizCompUpdate event"))
 		void OnHorizCompNavigateRight(int Index);
 	virtual void OnHorizCompNavigateRight_Implementation(int Index);
+
+	/**
+	* Called when a HorizontalComponent was updated
+	*/
+	UFUNCTION(BlueprintNativeEvent, Category = UINavWidget)
+		void OnHorizCompUpdated(int Index);
+	virtual void OnHorizCompUpdated_Implementation(int Index);
 
 	virtual void MenuNavigate(ENavigationDirection Direction);
 

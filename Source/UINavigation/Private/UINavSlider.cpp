@@ -37,6 +37,8 @@ void UUINavSlider::NativeConstruct()
 	}
 
 	if (!Slider->OnValueChanged.IsBound()) Slider->OnValueChanged.AddDynamic(this, &UUINavSlider::HandleOnSliderValueChanged);
+	if (!Slider->OnMouseCaptureBegin.IsBound()) Slider->OnMouseCaptureBegin.AddDynamic(this, &UUINavSlider::HandleOnMouseCaptureBegin);
+	if (!Slider->OnMouseCaptureEnd.IsBound()) Slider->OnMouseCaptureEnd.AddDynamic(this, &UUINavSlider::HandleOnMouseCaptureEnd);
 
 	Difference = MaxValue - MinValue;
 	Slider->IsFocusable = false;
@@ -62,6 +64,8 @@ void UUINavSlider::Update()
 
 	if (NavText != nullptr) NavText->SetText(ValueText);
 	if (NavSpinBox != nullptr) NavSpinBox->SetValue(Value);
+
+	Super::Update();
 }
 
 void UUINavSlider::OnNavigatedTo_Implementation()
@@ -117,6 +121,20 @@ void UUINavSlider::HandleOnSliderValueChanged(float InValue)
 {
 	OptionIndex = IndexFromPercent(InValue);
 	Update();
+}
+
+void UUINavSlider::HandleOnMouseCaptureBegin()
+{
+	LastOptionIndex = OptionIndex;
+}
+
+void UUINavSlider::HandleOnMouseCaptureEnd()
+{
+	if (OptionIndex != LastOptionIndex &&
+		ParentWidget != nullptr)
+	{
+		ParentWidget->OnHorizCompUpdated(ComponentIndex);
+	}
 }
 
 void UUINavSlider::HandleOnSpinBoxValueChanged(float InValue, ETextCommit::Type CommitMethod)

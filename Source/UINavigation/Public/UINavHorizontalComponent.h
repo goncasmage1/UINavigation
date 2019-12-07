@@ -13,9 +13,6 @@ class UINAVIGATION_API UUINavHorizontalComponent : public UUINavComponent
 {
 	GENERATED_BODY()
 
-protected:
-
-
 public:
 
 	//Indicates the option that should appear first in the slider
@@ -25,6 +22,8 @@ public:
 	//If set to true, will loop between options (won't disable buttons, even if DisableButtons is set to true)
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavComponentBox)
 		bool bLoopOptions = false;
+
+	class UUINavWidget* ParentWidget;
 
 	UFUNCTION(BlueprintCallable, Category = UINavHorizontalComponent)
 		virtual void Update();
