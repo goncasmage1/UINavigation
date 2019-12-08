@@ -43,6 +43,8 @@ void UUINavSliderBox::Update()
 
 	float Percent = UKismetMathLibrary::NormalizeToRange(MinRange + OptionIndex * Interval, MinRange, MaxRange);
 	SliderBar->SetPercent(Percent);
+
+	Super::Update();
 }
 
 void UUINavSliderBox::NavigateRight()

@@ -4,7 +4,6 @@
 #include "UINavHorizontalComponent.h"
 #include "Components/TextBlock.h"
 
-
 void UUINavHorizontalComponent::NavigateLeft()
 {
 	OnNavigateLeft();
@@ -18,7 +17,6 @@ void UUINavHorizontalComponent::NavigateRight()
 void UUINavHorizontalComponent::Update()
 {
 }
-
 
 void UUINavHorizontalComponent::UpdateTextToIndex(int NewIndex)
 {
