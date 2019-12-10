@@ -1996,7 +1996,7 @@ int UUINavWidget::GetIndexInGridFromButtonIndex(int InButtonIndex)
 	}
 	else
 	{
-		return UINavButtons[ButtonIndex]->IndexInGrid;
+		return UINavButtons[InButtonIndex]->IndexInGrid;
 	}
 }
 
@@ -2008,7 +2008,7 @@ int UUINavWidget::GetGridIndexFromButtonIndex(int InButtonIndex)
 	}
 	else
 	{
-		return UINavButtons[ButtonIndex]->GridIndex;
+		return UINavButtons[InButtonIndex]->GridIndex;
 	}
 }
 
