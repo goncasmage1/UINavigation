@@ -224,20 +224,16 @@ public:
 	/*********************************************************************************/
 
 	
+	virtual void NativeOnInitialized() override;
+
+	virtual void NativeConstruct() override;
+
+	virtual void NativeTick(const FGeometry & MyGeometry, float DeltaTime) override;
 
 	/**
 	*	Reconfigures the blueprint if it has already been setup
 	*/
 	void ReconfigureSetup();
-
-	/**
-	*	The widget's construct event
-	*/
-	virtual void NativeConstruct() override;
-	/**
-	*	The widget's tick event (Used to make sure Geometry is updated)
-	*/
-	virtual void NativeTick(const FGeometry & MyGeometry, float DeltaTime) override;
 
 	virtual FReply NativeOnMouseWheel(const FGeometry & InGeometry, const FPointerEvent & InMouseEvent) override;
 	virtual FReply NativeOnKeyDown(const FGeometry & InGeometry, const FKeyEvent & InKeyEvent) override;
