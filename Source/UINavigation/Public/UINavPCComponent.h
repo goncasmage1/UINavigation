@@ -5,13 +5,36 @@
 #include "Components/ActorComponent.h"
 #include "Engine/DataTable.h"
 #include "Data/CountdownPhase.h"
-#include "Data/InputRestriction.h"
 #include "Data/InputMode.h"
+#include "Data/InputRebindData.h"
+#include "Data/InputRestriction.h"
 #include "Data/InputType.h"
 #include "Data/NavigationDirection.h"
 #include "UINavPCComponent.generated.h"
 
 DECLARE_DELEGATE_OneParam(FMouseKeyDelegate, FKey);
+
+USTRUCT(BlueprintType)
+struct FAxis2D_Keys
+{
+	GENERATED_BODY()
+
+public:
+
+	FAxis2D_Keys()
+	{
+
+	}
+
+	FAxis2D_Keys(FKey InPositiveKey, FKey InNegativeKey)
+	{
+		PositiveKey = InPositiveKey;
+		NegativeKey = InNegativeKey;
+	}
+
+	FKey PositiveKey;
+	FKey NegativeKey;
+};
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class UINAVIGATION_API UUINavPCComponent : public UActorComponent
@@ -69,7 +92,7 @@ protected:
 	*
 	*	@return The input type of the given action
 	*/
-	EInputType GetActionInputType(FString Action);
+	EInputType GetMenuActionInputType(FString Action);
 
 	/**
 	*	Verifies if a new input type is being used
@@ -153,6 +176,23 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavController)
 		UDataTable* KeyboardMouseKeyNameData;
 
+	/*
+	Holds all the data for each rebindable input
+	*/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavController)
+		UDataTable* InputRebindDataTable;
+
+	TMap<FKey, FAxis2D_Keys> Axis2DToKeyMap = {
+		{EKeys::Gamepad_LeftX, {EKeys::Gamepad_LeftStick_Right, EKeys::Gamepad_LeftStick_Left}},
+		{EKeys::Gamepad_LeftY, {EKeys::Gamepad_LeftStick_Up, EKeys::Gamepad_LeftStick_Down}},
+		{EKeys::Gamepad_RightX, {EKeys::Gamepad_RightStick_Right, EKeys::Gamepad_RightStick_Left}},
+		{EKeys::Gamepad_RightY, {EKeys::Gamepad_RightStick_Up, EKeys::Gamepad_RightStick_Down}},
+		{EKeys::MotionController_Left_Thumbstick_X, {EKeys::MotionController_Left_Thumbstick_Right, EKeys::MotionController_Left_Thumbstick_Left}},
+		{EKeys::MotionController_Left_Thumbstick_Y, {EKeys::MotionController_Left_Thumbstick_Up, EKeys::MotionController_Left_Thumbstick_Down}},
+		{EKeys::MotionController_Right_Thumbstick_X, {EKeys::MotionController_Right_Thumbstick_Right, EKeys::MotionController_Right_Thumbstick_Left}},
+		{EKeys::MotionController_Right_Thumbstick_Y, {EKeys::MotionController_Right_Thumbstick_Up, EKeys::MotionController_Right_Thumbstick_Down}},
+	};
+
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
 		FORCEINLINE bool AllowsAllMenuInput() const { return bAllowDirectionalInput && bAllowSelectInput && bAllowReturnInput && bAllowSectionInput; }
 
@@ -215,13 +255,6 @@ public:
 	void NotifyKeyReleased(FKey ReleasedKey);
 
 	/**
-	*	Indicates whether the pressed key is associated with the return action
-	*
-	*	@param PressedKey The pressed key
-	*/
-	bool IsReturnKey(FKey PressedKey);
-
-	/**
 	*	Executes a Menu Action by its name
 	*
 	*	@param Action The action's name
@@ -262,23 +295,44 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
 		EInputMode GetInputMode();
 
-	//Get first found key associated with the given input name
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
+		FKey GetKeyFromAxis(FKey Key, bool bPositive);
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
+		bool Is2DAxis(FKey Key);
+
+	//Receives the name of the action, or axis with a + or - suffix, and returns
+	//the first key that respects the given restriction.
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
 		FKey GetInputKey(FName ActionName, EInputRestriction InputRestriction);
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
+		class UTexture2D* GetKeyIcon(FKey Key);
 
 	//Get first found Icon associated with the given input name
 	//Will search the icon table
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
 		class UTexture2D* GetInputIcon(FName ActionName, EInputRestriction InputRestriction);
 
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
+		FText GetKeyText(FKey Key);
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
+		void GetInputRebindData(FName InputName, FInputRebindData& OutData, bool& bSuccess);
+
 	//Get first found name associated with the given input name
 	//Will search the name table, if name can't be found will return the key's display name
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
-		FString GetInputName(FName ActionName, EInputRestriction InputRestriction);
+		FText GetInputText(FName InputName);
 
 	//Get all keys associated with the input with the given name
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
+	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DeprecatedFunction, DeprecationMessage = "Please use GetInputKeys instead") , Category = UINavController)
 		TArray<FKey> GetInputKeysFromName(FName InputName);
+
+	//Receives the name of the action, or axis with a + or - suffix, and returns
+	//all the keys associated with that input.
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
+		void GetInputKeys(FName ActionName, TArray<FKey>& OutKeys);
 
 	UFUNCTION(BlueprintCallable, Category = UINavController)
 		void SetActiveWidget(class UUINavWidget* NewActiveWidget);

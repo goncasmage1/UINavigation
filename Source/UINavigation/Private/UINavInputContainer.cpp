@@ -1,7 +1,8 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Copyright (C) 2019 Gon�alo Marques - All Rights Reserved
 
 #include "UINavInputContainer.h"
 #include "UINavWidget.h"
+#include "SwapKeysWidget.h"
 #include "UINavPCComponent.h"
 #include "UINavButton.h"
 #include "UINavInputBox.h"
@@ -29,27 +30,54 @@ void UUINavInputContainer::Init(UUINavWidget * NewParent)
 	else if (InputRestrictions.Num() > 3) InputRestrictions.SetNum(3);
 	KeysPerInput = InputRestrictions.Num();
 
-	CreateInputBoxes();
+	SetupInputBoxes();
 }
 
 void UUINavInputContainer::OnSetupCompleted_Implementation()
 {
 }
 
+void UUINavInputContainer::OnAddInputBox_Implementation(class UUINavInputBox* NewInputBox)
+{
+	if (InputBoxesPanel != nullptr)
+	{
+		InputBoxesPanel->AddChild(NewInputBox);
+	}
+}
+
+void UUINavInputContainer::OnRebindCancelled_Implementation(ERevertRebindReason RevertReason, FKey PressedKey)
+{
+}
+
+bool UUINavInputContainer::RequestKeySwap(FInputCollisionData InputCollisionData, int CurrentInputIndex, int CollidingInputIndex)
+{
+	if (SwapKeysWidgetClass != nullptr)
+	{
+		APlayerController* PC = Cast<APlayerController>(UINavPC->GetOwner());
+		USwapKeysWidget* SwapKeysWidget = CreateWidget<USwapKeysWidget>(PC, SwapKeysWidgetClass);
+		SwapKeysWidget->CollidingInputBox = ParentWidget->UINavInputBoxes[CollidingInputIndex];
+		SwapKeysWidget->CurrentInputBox = ParentWidget->UINavInputBoxes[CurrentInputIndex];
+		SwapKeysWidget->InputCollisionData = InputCollisionData;
+		ParentWidget->GoToBuiltWidget(SwapKeysWidget, false, false);
+		return true;
+	}
+	return false;
+}
+
 void UUINavInputContainer::ResetKeyMappings()
 {
 	UUINavBlueprintFunctionLibrary::ResetInputSettings();
-	for (UUINavInputBox* InputBox : ParentWidget->UINavInputBoxes) InputBox->ResetKeyMappings();
+	for (UUINavInputBox* InputBox : ParentWidget->UINavInputBoxes) InputBox->ResetKeyWidgets();
 }
 
-void UUINavInputContainer::CreateInputBoxes()
+void UUINavInputContainer::SetupInputBoxes()
 {
 	if (InputBox_BP == nullptr) return;
 
+	NumberOfInputs = InputNames.Num();
 	FirstButtonIndex = ParentWidget->UINavButtons.Num();
 
-	CreateActionBoxes();
-	CreateAxisBoxes();
+	CreateInputBoxes();
 
 	LastButtonIndex = ParentWidget->UINavButtons.Num() != FirstButtonIndex ? ParentWidget->UINavButtons.Num() - 1 : FirstButtonIndex;
 
@@ -68,32 +96,32 @@ void UUINavInputContainer::CreateInputBoxes()
 	OnSetupCompleted();
 }
 
-void UUINavInputContainer::CreateActionBoxes()
+void UUINavInputContainer::CreateInputBoxes()
 {
-	UInputSettings* Settings = const_cast<UInputSettings*>(GetDefault<UInputSettings>());
-	TArray<FInputActionKeyMapping> Actions = Settings->GetActionMappings();
-
-	if (Actions.Num() == 0) return;
+	if (InputBox_BP == nullptr) return;
 
 	int TempFirstButtonIndex = ParentWidget->UINavButtons.Num();
 	int StartingInputComponentIndex = ParentWidget->UINavComponents.Num();
 
-	int Iterations = ActionNames.Num();
+	int Iterations = InputNames.Num();
 
 	APlayerController* PC = Cast<APlayerController>(UINavPC->GetOwner());
 	for (int i = 0; i < Iterations; ++i)
 	{
 		UUINavInputBox* NewInputBox = CreateWidget<UUINavInputBox>(PC, InputBox_BP);
-		if (NewInputBox == nullptr) continue;
 		NewInputBox->Container = this;
-		NewInputBox->bIsAxis = false;
 		NewInputBox->KeysPerInput = KeysPerInput;
-		NewInputBox->InputName = ActionNames[i];
+		NewInputBox->InputName = InputNames[i];
 
-		ActionPanel->AddChild(NewInputBox);
+		FInputRebindData InputRebindData;
+		bool bSuccess = false;
+		UINavPC->GetInputRebindData(InputNames[i], InputRebindData, bSuccess);
+		if (bSuccess) NewInputBox->InputData = InputRebindData;
+
+		OnAddInputBox(NewInputBox);
+		NewInputBox->CreateKeyWidgets();
 
 		ParentWidget->UINavInputBoxes.Add(NewInputBox);
-		NumberOfInputs++;
 
 		for (int j = 0; j < KeysPerInput; j++)
 		{
@@ -108,89 +136,88 @@ void UUINavInputContainer::CreateActionBoxes()
 			NewInputBox->InputButtons[j]->ComponentIndex = NewButtonIndex;
 			ParentWidget->SetupUINavButtonDelegates(NewInputBox->InputButtons[j]->NavButton);
 		}
-	} 
+	}
 }
 
-void UUINavInputContainer::CreateAxisBoxes()
+ERevertRebindReason UUINavInputContainer::CanRegisterKey(const UUINavInputBox * InputBox, FKey NewKey, int Index, int& CollidingActionIndex, int& CollidingKeyIndex)
 {
-
-	UInputSettings* Settings = const_cast<UInputSettings*>(GetDefault<UInputSettings>());
-	TArray<FInputAxisKeyMapping> Axes = Settings->GetAxisMappings();
-
-	if (Axes.Num() == 0) return;
-
-	int TempFirstButtonIndex = ParentWidget->UINavButtons.Num();
-	int StartingInputComponentIndex = ParentWidget->UINavComponents.Num();
-
-	int Iterations = AxisNames.Num();
-
-	APlayerController* PC = Cast<APlayerController>(UINavPC->GetOwner());
-	for (int i = 0; i < Iterations; ++i)
+	if (KeyBlacklist.Contains(NewKey) || !NewKey.IsValid())
 	{
-		UUINavInputBox* NewInputBox = CreateWidget<UUINavInputBox>(PC, InputBox_BP);
-		if (NewInputBox == nullptr) continue;
-		NewInputBox->Container = this;
-		NewInputBox->bIsAxis = true;
-		NewInputBox->KeysPerInput = KeysPerInput;
-		NewInputBox->InputName = AxisNames[i];
-
-		AxisPanel->AddChild(NewInputBox);
-
-		ParentWidget->UINavInputBoxes.Add(NewInputBox);
-		NumberOfInputs++;
-
-		for (int j = 0; j < KeysPerInput; j++)
-		{
-			ParentWidget->UINavButtons.Add(nullptr);
-			ParentWidget->UINavComponents.Add(nullptr);
-
-			int NewButtonIndex = TempFirstButtonIndex + i * KeysPerInput + j;
-			int NewComponentIndex = StartingInputComponentIndex + i * KeysPerInput + j;
-			ParentWidget->UINavButtons[NewButtonIndex] = NewInputBox->InputButtons[j]->NavButton;
-			ParentWidget->UINavComponents[NewComponentIndex] = NewInputBox->InputButtons[j];
-			NewInputBox->InputButtons[j]->NavButton->ButtonIndex = NewButtonIndex;
-			NewInputBox->InputButtons[j]->ComponentIndex = NewButtonIndex;
-			ParentWidget->SetupUINavButtonDelegates(NewInputBox->InputButtons[j]->NavButton);
-		}
-	} 
-}
-
-bool UUINavInputContainer::IsKeyBeingUsed(FKey CompareKey) const
-{
-	for (UUINavInputBox* box : ParentWidget->UINavInputBoxes)
+		return ERevertRebindReason::BlacklistedKey;
+	}
+	else if (!RespectsRestriction(NewKey, Index))
 	{
-		if (box->ContainsKey(CompareKey)) return true;
+		return ERevertRebindReason::RestrictionMismatch;
+	}
+	else if (!CanUseKey(InputBox, NewKey, CollidingActionIndex, CollidingKeyIndex))
+	{
+		return ERevertRebindReason::UsedBySameInputGroup;
 	}
 
-	return false;
+	return ERevertRebindReason::None;
+}
+
+bool UUINavInputContainer::CanUseKey(const UUINavInputBox* InputBox, FKey CompareKey, int& CollidingActionIndex, int& CollidingKeyIndex) const
+{
+	TArray<int> InputGroups = InputBox->InputData.InputGroups;
+	if (InputGroups.Num() == 0) InputGroups.Add(-1);
+
+	for (int i = 0; i < ParentWidget->UINavInputBoxes.Num(); ++i)
+	{
+		if (InputBox == ParentWidget->UINavInputBoxes[i]) continue;
+
+		int KeyIndex = ParentWidget->UINavInputBoxes[i]->ContainsKey(CompareKey);
+		if (KeyIndex != INDEX_NONE)
+		{
+			TArray<int> CollidingInputGroups = ParentWidget->UINavInputBoxes[i]->InputData.InputGroups;
+
+			if (InputGroups.Contains(-1) ||
+				CollidingInputGroups.Contains(-1))
+			{
+				CollidingActionIndex = i;
+				CollidingKeyIndex = KeyIndex;
+				return false;
+			}
+
+			for (int InputGroup : InputGroups)
+			{
+				if (CollidingInputGroups.Contains(InputGroup))
+				{
+					CollidingActionIndex = i;
+					CollidingKeyIndex = KeyIndex;
+					return false;
+				}
+			}
+		}
+	}
+
+	return true;
 }
 
 bool UUINavInputContainer::RespectsRestriction(FKey CompareKey, int Index)
 {
 	EInputRestriction Restriction = InputRestrictions[Index];
 
-	switch (Restriction)
-	{
-		case EInputRestriction::None:
-			return true;
-			break;
-		case EInputRestriction::Keyboard:
-			return (!CompareKey.IsMouseButton() && !CompareKey.IsGamepadKey());
-			break;
-		case EInputRestriction::Mouse:
-			return CompareKey.IsMouseButton();
-			break;
-		case EInputRestriction::Keyboard_Mouse:
-			return !CompareKey.IsGamepadKey();
-			break;
-		case EInputRestriction::Gamepad:
-			return CompareKey.IsGamepadKey();
-			break;
-		default:
-			break;
-	}
+	return UUINavBlueprintFunctionLibrary::RespectsRestriction(CompareKey, Restriction);
+}
 
-	return false;
+void UUINavInputContainer::ResetInputBox(FName InputName, EAxisType AxisType)
+{
+	for (UUINavInputBox* InputBox : ParentWidget->UINavInputBoxes)
+	{
+		if (InputBox->InputName.IsEqual(InputName) &&
+			InputBox->AxisType == AxisType)
+		{
+			InputBox->ResetKeyWidgets();
+			break;
+		}
+	}
+}
+
+FKey UUINavInputContainer::GetAxisFromKey(FKey Key)
+{
+	FKey* AxisKey = KeyToAxisMap.Find(Key);
+	return AxisKey == nullptr ? Key : *AxisKey;
 }
 
 int UUINavInputContainer::GetOffsetFromTargetColumn(bool bTop)
@@ -209,71 +236,10 @@ int UUINavInputContainer::GetOffsetFromTargetColumn(bool bTop)
 	return 0;
 }
 
-FKey UUINavInputContainer::GetAxisKeyFromActionKey(FKey ActionKey)
+void UUINavInputContainer::GetInputRebindData(int InputIndex, FInputRebindData& RebindData)
 {
-	FString KeyName = ActionKey.GetFName().ToString();
-	int KeyIndex = PossibleAxisNames.Find(KeyName);
-	if (KeyIndex == INDEX_NONE) return FKey();
-
-	switch (KeyIndex)
+	if (InputIndex >= 0 && InputIndex < ParentWidget->UINavInputBoxes.Num())
 	{
-		case 0:
-			return FKey(FName("Gamepad_LeftTriggerAxis"));
-			break;
-		case 1:
-			return FKey(FName("Gamepad_RightTriggerAxis"));
-			break;
-		case 2:
-		case 3:
-			return FKey(FName("Gamepad_LeftY"));
-			break;
-		case 4:
-		case 5:
-			return FKey(FName("Gamepad_LeftX"));
-			break;
-		case 6:
-		case 7:
-			return FKey(FName("Gamepad_RightY"));
-			break;
-		case 8:
-		case 9:
-			return FKey(FName("Gamepad_RightX"));
-			break;
-		case 10:
-		case 11:
-			return FKey(FName("MotionController_Left_Thumbstick_Y"));
-			break;
-		case 12:
-		case 13:
-			return FKey(FName("MotionController_Left_Thumbstick_X"));
-			break;
-		case 14:
-		case 15:
-			return FKey(FName("MotionController_Right_Thumbstick_Y"));
-			break;
-		case 16:
-		case 17:
-			return FKey(FName("MotionController_Right_Thumbstick_X"));
-			break;
-		case 18:
-			return FKey(FName("MotionController_Left_TriggerAxis"));
-			break;
-		case 19:
-			return FKey(FName("MotionController_Left_Grip1Axis"));
-			break;
-		case 20:
-			return FKey(FName("MotionController_Left_Grip2Axis"));
-			break;
-		case 21:
-			return FKey(FName("MotionController_Right_TriggerAxis"));
-			break;
-		case 22:
-			return FKey(FName("MotionController_Right_Grip1Axis"));
-			break;
-		case 23:
-			return FKey(FName("MotionController_Right_Grip2Axis"));
-			break;
+		RebindData = ParentWidget->UINavInputBoxes[InputIndex]->InputData;
 	}
-
-	return FKey();
 }

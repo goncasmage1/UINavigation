@@ -1,7 +1,7 @@
 {
 	"FileVersion": 3,
 	"Version": 1,
-	"VersionName": "2.13.2",
+	"VersionName": "2.14.0",
 	"FriendlyName": "UI Navigation",
 	"Description": "A plugin that allows you to easily setup mouse, keyboard and controller navigation in UMG, among other things.",
 	"Category": "Plugins",
@@ -10,7 +10,7 @@
 	"DocsURL": "",
 	"MarketplaceURL": "com.epicgames.launcher://ue/marketplace/content/4601ff4d12fc4ed1a7418e1585374a48",
 	"SupportURL": "",
-	"EngineVersion": "4.23.0",
+	"EngineVersion": "4.24.0",
 	"CanContainContent": true,
 	"Installed": true,
 	"Modules": [
@@ -22,7 +22,6 @@
 				"Win64",
 				"Win32",
 				"Linux",
-				"HTML5",
 				"Mac",
 				"PS4",
 				"XboxOne",
