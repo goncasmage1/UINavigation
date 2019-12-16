@@ -71,6 +71,11 @@ protected:
 	void FetchButtonsInHierarchy();
 
 	/**
+	*	Configures the UINavPC
+	*/
+	void ConfigureUINavPC();
+
+	/**
 	*	Traverses this widget's hierarchy to setup all the UIUINavButtons
 	*/
 	void TraverseHierarquy();

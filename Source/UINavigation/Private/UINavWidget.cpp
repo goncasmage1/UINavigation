@@ -80,18 +80,7 @@ void UUINavWidget::InitialSetup()
 	WidgetClass = GetClass();
 	if (UINavPC == nullptr)
 	{
-		APlayerController* PC = Cast<APlayerController>(GetOwningPlayer());
-		if (PC == nullptr)
-		{
-			DISPLAYERROR("Player Controller is Null!");
-			return;
-		}
-		UINavPC = Cast<UUINavPCComponent>(PC->GetComponentByClass(UUINavPCComponent::StaticClass()));
-		if (UINavPC == nullptr)
-		{
-			DISPLAYERROR("Player Controller doesn't have a UINavPCComponent!");
-			return;
-		}
+		ConfigureUINavPC();
 	}
 
 	FetchButtonsInHierarchy();
@@ -200,6 +189,22 @@ void UUINavWidget::FetchButtonsInHierarchy()
 	}
 }
 
+void UUINavWidget::ConfigureUINavPC()
+{
+	APlayerController* PC = Cast<APlayerController>(GetOwningPlayer());
+	if (PC == nullptr)
+	{
+		DISPLAYERROR("Player Controller is Null!");
+		return;
+	}
+	UINavPC = Cast<UUINavPCComponent>(PC->GetComponentByClass(UUINavPCComponent::StaticClass()));
+	if (UINavPC == nullptr)
+	{
+		DISPLAYERROR("Player Controller doesn't have a UINavPCComponent!");
+		return;
+	}
+}
+
 void UUINavWidget::TraverseHierarquy()
 {
 	//Find UINavButtons in the widget hierarchy
@@ -298,22 +303,21 @@ void UUINavWidget::SetupSelector()
 
 void UUINavWidget::UINavSetup()
 {
+	if (UINavPC == nullptr) ConfigureUINavPC();
+
+	UINavPC->SetActiveWidget(this);
+	if (UINavPC->GetInputMode() == EInputMode::UI)
+	{
+		SetUserFocus(UINavPC->GetPC());
+		SetKeyboardFocus();
+	}
+
 	//Re-enable all buttons (bug fix)
 	for (UUINavButton* button : UINavButtons)
 	{
 		if (button->bAutoCollapse)
 		{
 			button->SetIsEnabled(true);
-		}
-	}
-
-	if (UINavPC != nullptr)
-	{
-		UINavPC->SetActiveWidget(this);
-		if (UINavPC->GetInputMode() == EInputMode::UI)
-		{
-			SetUserFocus(UINavPC->GetPC());
-			SetKeyboardFocus();
 		}
 	}
 
