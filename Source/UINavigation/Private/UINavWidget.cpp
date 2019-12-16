@@ -311,6 +311,25 @@ void UUINavWidget::UINavSetup()
 			SetKeyboardFocus();
 		}
 	}
+	else
+	{
+		if (UINavPC == nullptr)
+		{
+			APlayerController* PC = Cast<APlayerController>(GetOwningPlayer());
+			if (PC == nullptr)
+			{
+				DISPLAYERROR("Player Controller is Null!");
+				return;
+			}
+			UINavPC = Cast<UUINavPCComponent>(PC->GetComponentByClass(UUINavPCComponent::StaticClass()));
+			if (UINavPC == nullptr)
+			{
+				DISPLAYERROR("Player Controller doesn't have a UINavPCComponent!");
+				return;
+			}
+		}
+		UINavSetup();
+	}
 
 	if (IsSelectorValid()) TheSelector->SetVisibility(ESlateVisibility::HitTestInvisible);
 
