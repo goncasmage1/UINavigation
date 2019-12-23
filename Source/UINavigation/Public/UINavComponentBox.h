@@ -23,11 +23,11 @@ protected:
 	virtual void CheckLeftLimit();
 	virtual void CheckRightLimit();
 
-	virtual void UpdateTextToIndex(int NewIndex) override;
-
 public:
 
 	virtual void NativeConstruct() override;
+
+	virtual void UpdateTextToIndex(int NewIndex) override;
 
 	virtual int GetLastOptionIndex();
 

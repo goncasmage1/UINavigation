@@ -32,7 +32,7 @@ struct FInputCollisionData
 	FText CollidingInputText;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = InputCollisionData)
-	int CollidingKeyIndex;
+	int CollidingKeyIndex = -1;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = InputCollisionData)
 	FKey CurrentInputKey;
