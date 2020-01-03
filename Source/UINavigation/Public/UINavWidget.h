@@ -73,6 +73,7 @@ protected:
 	/**
 	*	Configures the UINavPC
 	*/
+	UFUNCTION(BlueprintCallable, Category = UINavWidget)
 	void ConfigureUINavPC();
 
 	/**
