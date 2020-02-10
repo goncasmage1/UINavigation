@@ -37,6 +37,9 @@ protected:
 	bool bIgnoreHoverEvent = false;
 	bool bIgnoreUnhoverEvent = false;
 
+	UPROPERTY(EditDefaultsOnly, Category = UINavWidget)
+	bool bUseClickEventForSelect = false;
+
 	//Used to track when the selector's position should be updated
 	int WaitForTick;
 
@@ -69,6 +72,12 @@ protected:
 	*	Sets up the UIUINavButtons and does error checking
 	*/
 	void FetchButtonsInHierarchy();
+
+	/**
+	*	Configures the UINavPC
+	*/
+	UFUNCTION(BlueprintCallable, Category = UINavWidget)
+	void ConfigureUINavPC();
 
 	/**
 	*	Traverses this widget's hierarchy to setup all the UIUINavButtons
@@ -224,20 +233,14 @@ public:
 	/*********************************************************************************/
 
 	
+	virtual void NativeConstruct() override;
+
+	virtual void NativeTick(const FGeometry & MyGeometry, float DeltaTime) override;
 
 	/**
 	*	Reconfigures the blueprint if it has already been setup
 	*/
 	void ReconfigureSetup();
-
-	/**
-	*	The widget's construct event
-	*/
-	virtual void NativeConstruct() override;
-	/**
-	*	The widget's tick event (Used to make sure Geometry is updated)
-	*/
-	virtual void NativeTick(const FGeometry & MyGeometry, float DeltaTime) override;
 
 	virtual FReply NativeOnMouseWheel(const FGeometry & InGeometry, const FPointerEvent & InMouseEvent) override;
 	virtual FReply NativeOnKeyDown(const FGeometry & InGeometry, const FKeyEvent & InKeyEvent) override;
@@ -728,6 +731,7 @@ public:
 	*/
 	UFUNCTION(Category = UINavWidget)
 		void PressEvent(int Index);
+
 	/**
 	*	Button Release event
 	*
