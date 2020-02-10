@@ -230,8 +230,6 @@ public:
 	/*********************************************************************************/
 
 	
-	virtual void NativeOnInitialized() override;
-
 	virtual void NativeConstruct() override;
 
 	virtual void NativeTick(const FGeometry & MyGeometry, float DeltaTime) override;

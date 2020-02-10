@@ -21,11 +21,6 @@
 #include "Components/CanvasPanelSlot.h"
 #include "Components/ActorComponent.h"
 
-void UUINavWidget::NativeOnInitialized()
-{
-	Super::NativeOnInitialized();
-}
-
 void UUINavWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
