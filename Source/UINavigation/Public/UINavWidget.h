@@ -37,6 +37,9 @@ protected:
 	bool bIgnoreHoverEvent = false;
 	bool bIgnoreUnhoverEvent = false;
 
+	UPROPERTY(EditDefaultsOnly, Category = UINavWidget)
+	bool bUseClickEventForSelect = false;
+
 	//Used to track when the selector's position should be updated
 	int WaitForTick;
 
@@ -728,6 +731,7 @@ public:
 	*/
 	UFUNCTION(Category = UINavWidget)
 		void PressEvent(int Index);
+
 	/**
 	*	Button Release event
 	*
