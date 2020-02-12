@@ -1563,8 +1563,8 @@ void UUINavWidget::OnPreSelect(int Index, bool bMouseClick)
 	{
 		USoundBase* PressSound = Cast<USoundBase>(CurrentButton->WidgetStyle.PressedSlateSound.GetResourceObject());
 		if (PressSound != nullptr) PlaySound(PressSound);
-		//CurrentButton->OnClicked.Broadcast();
-		CurrentButton->OnPressed.Broadcast();
+		//CurrentButton->OnPressed.Broadcast();
+		CurrentButton->OnClicked.Broadcast();
 		return;
 	}
 
@@ -2231,8 +2231,8 @@ void UUINavWidget::SetupUINavButtonDelegates(UUINavButton * NewButton)
 {
 	NewButton->CustomHover.AddDynamic(this, &UUINavWidget::HoverEvent);
 	NewButton->CustomUnhover.AddDynamic(this, &UUINavWidget::UnhoverEvent);
-	NewButton->CustomPress.AddDynamic(this, &UUINavWidget::PressEvent);
 	if (bUseClickEventForSelect) NewButton->CustomClick.AddDynamic(this, &UUINavWidget::PressEvent);
+	else NewButton->CustomPress.AddDynamic(this, &UUINavWidget::PressEvent);
 	NewButton->CustomRelease.AddDynamic(this, &UUINavWidget::ReleaseEvent);
 }
 
