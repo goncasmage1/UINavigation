@@ -3,15 +3,18 @@
 
 #include "UINavHorizontalComponent.h"
 #include "Components/TextBlock.h"
+#include "UINavWidget.h"
 
 void UUINavHorizontalComponent::NavigateLeft()
 {
 	OnNavigateLeft();
+	ParentWidget->OnHorizCompUpdated(ComponentIndex);
 }
 
 void UUINavHorizontalComponent::NavigateRight()
 {
 	OnNavigateRight();
+	ParentWidget->OnHorizCompUpdated(ComponentIndex);
 }
 
 void UUINavHorizontalComponent::Update()
