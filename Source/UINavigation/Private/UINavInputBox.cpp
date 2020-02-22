@@ -188,8 +188,8 @@ void UUINavInputBox::FinishUpdateInputKey()
 	int Index = AwaitingIndex;
 
 	UInputSettings* Settings = const_cast<UInputSettings*>(GetDefault<UInputSettings>());
-	TArray<FInputActionKeyMapping> Actions = Settings->GetActionMappings();
-	TArray<FInputAxisKeyMapping> Axes = Settings->GetAxisMappings();
+	TArray<FInputActionKeyMapping>& Actions = const_cast<TArray<FInputActionKeyMapping>&>(Settings->GetActionMappings());
+	TArray<FInputAxisKeyMapping>& Axes = const_cast<TArray<FInputAxisKeyMapping>&>(Settings->GetAxisMappings());
 
 	FKey NewAxisKey;
 	bool bFound = false;

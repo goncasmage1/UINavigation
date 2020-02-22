@@ -109,10 +109,10 @@ void UUINavComponentBox::NavigateLeft()
 	//Enable button if previously disabled
 	if (!RightButton->bIsEnabled) RightButton->SetIsEnabled(true);
 
-	OnNavigateLeft();
+	Super::NavigateLeft();
 }
 
 void UUINavComponentBox::NavigateRight()
 {
-	OnNavigateRight();
+	Super::OnNavigateRight();
 }
