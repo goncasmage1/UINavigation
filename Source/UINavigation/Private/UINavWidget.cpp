@@ -1565,6 +1565,7 @@ void UUINavWidget::OnPreSelect(int Index, bool bMouseClick)
 		if (PressSound != nullptr) PlaySound(PressSound);
 		//CurrentButton->OnPressed.Broadcast();
 		CurrentButton->OnClicked.Broadcast();
+		OnSelect(Index);
 		return;
 	}
 
