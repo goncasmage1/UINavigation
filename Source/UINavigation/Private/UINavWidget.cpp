@@ -482,7 +482,7 @@ FReply UUINavWidget::OnKeyPressed(FKey PressedKey)
 FReply UUINavWidget::OnKeyReleased(FKey PressedKey)
 {
 	FString ActionName = UINavPC->FindActionByKey(PressedKey);
-	if (ActionName.Equals(TEXT(""))) return FReply::Handled();
+	if (ActionName.Equals(TEXT(""))) return FReply::Unhandled();
 
 	return UINavPC->OnActionReleased(ActionName, PressedKey);
 }
