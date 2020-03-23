@@ -37,8 +37,7 @@ protected:
 	bool bIgnoreHoverEvent = false;
 	bool bIgnoreUnhoverEvent = false;
 
-	UPROPERTY(EditDefaultsOnly, Category = UINavWidget)
-	bool bUseClickEventForSelect = false;
+	bool bIgnoreMousePress = false;
 
 	//Used to track when the selector's position should be updated
 	int WaitForTick;

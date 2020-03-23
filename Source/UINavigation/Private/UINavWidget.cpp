@@ -1561,10 +1561,10 @@ void UUINavWidget::OnPreSelect(int Index, bool bMouseClick)
 
 	if (!bMouseClick)
 	{
+		bIgnoreMousePress = true;
 		USoundBase* PressSound = Cast<USoundBase>(CurrentButton->WidgetStyle.PressedSlateSound.GetResourceObject());
 		if (PressSound != nullptr) PlaySound(PressSound);
-		//CurrentButton->OnPressed.Broadcast();
-		CurrentButton->OnClicked.Broadcast();
+		CurrentButton->OnPressed.Broadcast();
 		return;
 	}
 
@@ -2212,7 +2212,8 @@ void UUINavWidget::PressEvent(int Index)
 	}
 	else
 	{
-		UINavPC->NotifyMouseInputType();
+		if (bIgnoreMousePress) bIgnoreMousePress = false;
+		else UINavPC->NotifyMouseInputType();
 
 		if (!UINavPC->AllowsSelectInput()) return;
 
@@ -2231,8 +2232,11 @@ void UUINavWidget::SetupUINavButtonDelegates(UUINavButton * NewButton)
 {
 	NewButton->CustomHover.AddDynamic(this, &UUINavWidget::HoverEvent);
 	NewButton->CustomUnhover.AddDynamic(this, &UUINavWidget::UnhoverEvent);
-	if (bUseClickEventForSelect) NewButton->CustomClick.AddDynamic(this, &UUINavWidget::PressEvent);
-	else NewButton->CustomPress.AddDynamic(this, &UUINavWidget::PressEvent);
+	/*Silly workaround*/
+	NewButton->OnPressed.Clear();
+	NewButton->OnPressed.AddDynamic(NewButton, &UUINavButton::OnPress);
+	/*Silly workaround*/
+	NewButton->CustomPress.AddDynamic(this, &UUINavWidget::PressEvent);
 	NewButton->CustomRelease.AddDynamic(this, &UUINavWidget::ReleaseEvent);
 }
 
