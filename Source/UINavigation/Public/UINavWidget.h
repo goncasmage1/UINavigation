@@ -421,6 +421,8 @@ public:
 	virtual void OnStopSelect_Implementation(int Index);
 
 	void CollectionOnSelect(int Index);
+	void CollectionOnStartSelect(int Index);
+	void CollectionOnStopSelect(int Index);
 
 	void OnPreSelect(int Index, bool bMouseClick = false);
 

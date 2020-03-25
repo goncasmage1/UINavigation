@@ -1571,6 +1571,32 @@ void UUINavWidget::CollectionOnSelect(int Index)
 	}
 }
 
+void UUINavWidget::CollectionOnStartSelect(int Index)
+{
+	for (UUINavCollection* Collection : UINavCollections)
+	{
+		int CollectionButtonIndex = GetCollectionButtonIndex(Collection, Index);
+		if (CollectionButtonIndex != -1)
+		{
+			Collection->NotifyOnStartSelect(Index, CollectionButtonIndex);
+			break;
+		}
+	}
+}
+
+void UUINavWidget::CollectionOnStopSelect(int Index)
+{
+	for (UUINavCollection* Collection : UINavCollections)
+	{
+		int CollectionButtonIndex = GetCollectionButtonIndex(Collection, Index);
+		if (CollectionButtonIndex != -1)
+		{
+			Collection->NotifyOnStopSelect(Index, CollectionButtonIndex);
+			break;
+		}
+	}
+}
+
 void UUINavWidget::OnPreSelect(int Index, bool bMouseClick)
 {
 	if (CurrentButton == nullptr ||
@@ -1611,6 +1637,7 @@ void UUINavWidget::OnPreSelect(int Index, bool bMouseClick)
 		}
 		SelectedButtonIndex = -1;
 		OnStopSelect(Index);
+		CollectionOnStopSelect(Index);
 	}
 }
 
@@ -2371,6 +2398,7 @@ void UUINavWidget::MenuSelectPress()
 		CurrentButton->OnPressed.Broadcast();
 
 		OnStartSelect(ButtonIndex);
+		CollectionOnStartSelect(ButtonIndex);
 	}
 }
 

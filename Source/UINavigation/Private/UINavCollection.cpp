@@ -51,6 +51,14 @@ void UUINavCollection::OnSelect_Implementation(int Index, int LocalIndex)
 {
 }
 
+void UUINavCollection::OnStartSelect_Implementation(int Index, int LocalIndex)
+{
+}
+
+void UUINavCollection::OnStopSelect_Implementation(int Index, int LocalIndex)
+{
+}
+
 void UUINavCollection::NotifyOnSelect(int Index, int LocalIndex)
 {
 	for (UUINavCollection* Collection : UINavCollections)
