@@ -348,6 +348,9 @@ public:
 	void MenuUpRelease();
 	void MenuDownRelease();
 	void MenuLeftRelease();
+	void MenuRightRelease();
+	void MenuSelectRelease();
+	void MenuReturnRelease();
 
 	void MouseKeyPressed(FKey MouseKey);
 
@@ -357,7 +360,6 @@ public:
 	void StartMenuDown();
 	void StartMenuLeft();
 	void StartMenuRight();
-	void MenuRightRelease();
 
 
 	UFUNCTION(BlueprintCallable, Category = UINavController)

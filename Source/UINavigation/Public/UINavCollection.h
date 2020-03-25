@@ -50,7 +50,17 @@ public:
 		void OnSelect(int Index, int LocalIndex);
 	virtual void OnSelect_Implementation(int Index, int LocalIndex);
 
+	UFUNCTION(BlueprintNativeEvent, Category = UINavCollection)
+		void OnStartSelect(int Index, int LocalIndex);
+	virtual void OnStartSelect_Implementation(int Index, int LocalIndex);
+
+	UFUNCTION(BlueprintNativeEvent, Category = UINavCollection)
+		void OnStopSelect(int Index, int LocalIndex);
+	virtual void OnStopSelect_Implementation(int Index, int LocalIndex);
+
 	void NotifyOnSelect(int Index, int LocalIndex);
+	void NotifyOnStartSelect(int Index, int LocalIndex);
+	void NotifyOnStopSelect(int Index, int LocalIndex);
 
 	void Init(int StartIndex);
 
