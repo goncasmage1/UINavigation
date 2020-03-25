@@ -115,7 +115,7 @@ public:
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget, OptionalWidget = true), Category = UINavWidget)
 		UUserWidget* TheSelector;
 
-	//All the scrollboxes in this widget
+	//All the animation in this widget
 	UPROPERTY(BlueprintReadWrite, Category = UINavWidget)
 		TArray<class UWidgetAnimation*> UINavAnimations;
 
