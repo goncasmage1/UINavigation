@@ -114,5 +114,5 @@ void UUINavComponentBox::NavigateLeft()
 
 void UUINavComponentBox::NavigateRight()
 {
-	Super::OnNavigateRight();
+	Super::NavigateRight();
 }
