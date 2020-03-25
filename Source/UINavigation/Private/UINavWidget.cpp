@@ -2305,6 +2305,13 @@ void UUINavWidget::SetupUINavButtonDelegates(UUINavButton * NewButton)
 {
 	NewButton->CustomHover.AddDynamic(this, &UUINavWidget::HoverEvent);
 	NewButton->CustomUnhover.AddDynamic(this, &UUINavWidget::UnhoverEvent);
+	FScriptDelegate OnClickScriptDelegate;
+	OnClickScriptDelegate.BindUFunction(NewButton, FName("OnClick"));
+	if (NewButton->OnPressed.Contains(OnClickScriptDelegate))
+	{
+		NewButton->OnPressed.Remove(OnClickScriptDelegate);
+		NewButton->OnPressed.AddDynamic(NewButton, &UUINavButton::OnPress);
+	}
 	NewButton->CustomPress.AddDynamic(this, &UUINavWidget::PressEvent);
 	NewButton->CustomRelease.AddDynamic(this, &UUINavWidget::ReleaseEvent);
 }
