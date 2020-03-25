@@ -73,6 +73,34 @@ void UUINavCollection::NotifyOnSelect(int Index, int LocalIndex)
 	OnSelect(Index, LocalIndex);
 }
 
+void UUINavCollection::NotifyOnStartSelect(int Index, int LocalIndex)
+{
+	for (UUINavCollection* Collection : UINavCollections)
+	{
+		int CollectionButtonIndex = ParentWidget->GetCollectionButtonIndex(Collection, Index);
+		if (CollectionButtonIndex != -1)
+		{
+			Collection->OnStartSelect(Index, CollectionButtonIndex);
+			break;
+		}
+	}
+	OnStartSelect(Index, LocalIndex);
+}
+
+void UUINavCollection::NotifyOnStopSelect(int Index, int LocalIndex)
+{
+	for (UUINavCollection* Collection : UINavCollections)
+	{
+		int CollectionButtonIndex = ParentWidget->GetCollectionButtonIndex(Collection, Index);
+		if (CollectionButtonIndex != -1)
+		{
+			Collection->OnStopSelect(Index, CollectionButtonIndex);
+			break;
+		}
+	}
+	OnStopSelect(Index, LocalIndex);
+}
+
 void UUINavCollection::Init(int StartIndex)
 {
 	FirstButtonIndex = StartIndex;
