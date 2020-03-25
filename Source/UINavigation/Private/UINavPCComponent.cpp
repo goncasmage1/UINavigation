@@ -126,6 +126,12 @@ void UUINavPCComponent::BindMenuInputs()
 	FInputActionBinding& Action4_2 = InputComponent->BindAction("MenuRight", IE_Released, this, &UUINavPCComponent::MenuRightRelease);
 	Action4_2.bExecuteWhenPaused = true;
 	Action4_2.bConsumeInput = false;
+	FInputActionBinding& Action5_2 = InputComponent->BindAction("MenuSelect", IE_Released, this, &UUINavPCComponent::MenuSelectRelease);
+	Action5_1.bExecuteWhenPaused = true;
+	Action5_1.bConsumeInput = false;
+	FInputActionBinding& Action6_2 = InputComponent->BindAction("MenuReturn", IE_Released, this, &UUINavPCComponent::MenuReturnRelease);
+	Action6_1.bExecuteWhenPaused = true;
+	Action6_1.bConsumeInput = false;
 
 }
 
@@ -684,13 +690,15 @@ void UUINavPCComponent::ExecuteActionByName(FString Action, bool bPressed)
 		if (bPressed) StartMenuRight();
 		else MenuRightRelease();
 	}
-	else if (Action.Equals("MenuSelect") && bPressed)
+	else if (Action.Equals("MenuSelect"))
 	{
-		MenuSelect();
+		if (bPressed) MenuSelect();
+		else MenuSelectRelease();
 	}
-	else if (Action.Equals("MenuReturn") && bPressed)
+	else if (Action.Equals("MenuReturn"))
 	{
-		MenuReturn();
+		if (bPressed) MenuReturn();
+		else MenuReturnRelease();
 	}
 	else if (Action.Equals("MenuNext") && bPressed)
 	{
@@ -731,24 +739,43 @@ void UUINavPCComponent::MenuInput(ENavigationDirection InDirection)
 
 void UUINavPCComponent::MenuSelect()
 {
+	VerifyInputTypeChangeByAction(TEXT("MenuSelect"));
+
+	if (ActiveWidget == nullptr || !bAllowSelectInput) return;
+
+	ClearTimer();
+	ActiveWidget->MenuSelectPress();
+}
+
+void UUINavPCComponent::MenuSelectRelease()
+{
 	IUINavPCReceiver::Execute_OnSelect(GetOwner());
 	VerifyInputTypeChangeByAction(TEXT("MenuSelect"));
 
 	if (ActiveWidget == nullptr || !bAllowSelectInput) return;
 
 	ClearTimer();
-	ActiveWidget->MenuSelect();
+	ActiveWidget->MenuSelectRelease();
 }
 
 void UUINavPCComponent::MenuReturn()
 {
-	IUINavPCReceiver::Execute_OnReturn(GetOwner());
 	VerifyInputTypeChangeByAction(TEXT("MenuReturn"));
 
 	if (ActiveWidget == nullptr || !bAllowReturnInput) return;
 
 	ClearTimer();
-	ActiveWidget->MenuReturn();
+	ActiveWidget->MenuReturnPress();
+}
+
+void UUINavPCComponent::MenuReturnRelease()
+{
+	IUINavPCReceiver::Execute_OnReturn(GetOwner());
+
+	if (ActiveWidget == nullptr || !bAllowReturnInput) return;
+
+	ClearTimer();
+	ActiveWidget->MenuReturnRelease();
 }
 
 void UUINavPCComponent::MenuNext()

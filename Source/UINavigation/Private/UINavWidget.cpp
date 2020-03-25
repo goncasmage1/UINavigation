@@ -142,6 +142,7 @@ void UUINavWidget::CleanSetup()
 
 	}
 	bSetupStarted = false;
+	SelectedButtonIndex = -1;
 }
 
 void UUINavWidget::FetchButtonsInHierarchy()
@@ -326,7 +327,7 @@ void UUINavWidget::UINavSetup()
 		OnNavigate(-1, ButtonIndex);
 		CollectionNavigateTo(ButtonIndex);
 
-		bIgnoreHoverEvent = true;
+		bIgnoreMouseEvent = true;
 		CurrentButton->OnHovered.Broadcast();
 	}
 
@@ -1443,6 +1444,31 @@ bool UUINavWidget::IsSelectorVisible()
 	return TheSelector->GetVisibility() == ESlateVisibility::HitTestInvisible;
 }
 
+void UUINavWidget::OnNavigate_Implementation(int From, int To)
+{
+
+}
+
+void UUINavWidget::OnNavigatedDirection_Implementation(ENavigationDirection Direction)
+{
+
+}
+
+void UUINavWidget::OnSelect_Implementation(int Index)
+{
+
+}
+
+void UUINavWidget::OnStartSelect_Implementation(int Index)
+{
+
+}
+
+void UUINavWidget::OnStopSelect_Implementation(int Index)
+{
+
+}
+
 void UUINavWidget::NavigateTo(int Index, bool bHoverEvent)
 {
 	if (Index >= UINavButtons.Num() || Index == ButtonIndex) return;
@@ -1453,7 +1479,7 @@ void UUINavWidget::NavigateTo(int Index, bool bHoverEvent)
 
 	if (!bHoverEvent)
 	{
-		bIgnoreUnhoverEvent = true;
+		bIgnoreMouseEvent = true;
 		CurrentButton->OnUnhovered.Broadcast();
 	}
 
@@ -1462,7 +1488,7 @@ void UUINavWidget::NavigateTo(int Index, bool bHoverEvent)
 
 	if (!bHoverEvent)
 	{
-		bIgnoreHoverEvent = true;
+		bIgnoreMouseEvent = true;
 		CurrentButton->OnHovered.Broadcast();
 	}
 }
@@ -1532,16 +1558,6 @@ void UUINavWidget::BeginSelectorMovement(int Index)
 	bMovingSelector = true;
 }
 
-void UUINavWidget::OnNavigate_Implementation(int From, int To)
-{
-
-}
-
-void UUINavWidget::OnSelect_Implementation(int Index)
-{
-
-}
-
 void UUINavWidget::CollectionOnSelect(int Index)
 {
 	for (UUINavCollection* Collection : UINavCollections)
@@ -1557,14 +1573,15 @@ void UUINavWidget::CollectionOnSelect(int Index)
 
 void UUINavWidget::OnPreSelect(int Index, bool bMouseClick)
 {
-	if (CurrentButton == nullptr) return;
+	if (CurrentButton == nullptr ||
+		SelectedButtonIndex == -1) return;
+
+	bool bIsSelectedButton = SelectedButtonIndex == Index;
 
 	if (!bMouseClick)
 	{
-		bIgnoreMousePress = true;
-		USoundBase* PressSound = Cast<USoundBase>(CurrentButton->WidgetStyle.PressedSlateSound.GetResourceObject());
-		if (PressSound != nullptr) PlaySound(PressSound);
-		CurrentButton->OnPressed.Broadcast();
+		CurrentButton->OnReleased.Broadcast();
+		if (bIsSelectedButton) CurrentButton->OnClicked.Broadcast();
 		return;
 	}
 
@@ -1587,8 +1604,13 @@ void UUINavWidget::OnPreSelect(int Index, bool bMouseClick)
 	}
 	else
 	{
-		OnSelect(Index);
-		CollectionOnSelect(Index);
+		if (bIsSelectedButton)
+		{
+			OnSelect(Index);
+			CollectionOnSelect(Index);
+		}
+		SelectedButtonIndex = -1;
+		OnStopSelect(Index);
 	}
 }
 
@@ -1599,14 +1621,12 @@ void UUINavWidget::OnReturn_Implementation()
 
 void UUINavWidget::OnNext_Implementation()
 {
+
 }
 
 void UUINavWidget::OnPrevious_Implementation()
 {
-}
 
-void UUINavWidget::OnNavigatedDirection_Implementation(ENavigationDirection Direction)
-{
 }
 
 void UUINavWidget::OnInputChanged_Implementation(EInputType From, EInputType To)
@@ -1616,6 +1636,7 @@ void UUINavWidget::OnInputChanged_Implementation(EInputType From, EInputType To)
 
 void UUINavWidget::PreSetup_Implementation(bool bFirstSetup)
 {
+
 }
 
 void UUINavWidget::OnSetupCompleted_Implementation()
@@ -1625,14 +1646,17 @@ void UUINavWidget::OnSetupCompleted_Implementation()
 
 void UUINavWidget::OnHorizCompNavigateLeft_Implementation(int Index)
 {
+
 }
 
 void UUINavWidget::OnHorizCompNavigateRight_Implementation(int Index)
 {
+
 }
 
 void UUINavWidget::OnHorizCompUpdated_Implementation(int Index)
 {
+
 }
 
 UWidget* UUINavWidget::GoToWidget(TSubclassOf<UUINavWidget> NewWidgetClass, bool bRemoveParent, bool bDestroyParent, int ZOrder)
@@ -2147,9 +2171,9 @@ UUINavHorizontalComponent * UUINavWidget::GetUINavHorizontalCompAtIndex(int Inde
 
 void UUINavWidget::HoverEvent(int Index)
 {
-	if (bIgnoreHoverEvent)
+	if (bIgnoreMouseEvent)
 	{
-		bIgnoreHoverEvent = false;
+		bIgnoreMouseEvent = false;
 		return;
 	}
 
@@ -2175,9 +2199,9 @@ void UUINavWidget::HoverEvent(int Index)
 
 void UUINavWidget::UnhoverEvent(int Index)
 {
-	if (bIgnoreUnhoverEvent)
+	if (bIgnoreMouseEvent)
 	{
-		bIgnoreUnhoverEvent = false;
+		bIgnoreMouseEvent = false;
 		return;
 	}
 
@@ -2212,30 +2236,48 @@ void UUINavWidget::PressEvent(int Index)
 	}
 	else
 	{
-		if (bIgnoreMousePress) bIgnoreMousePress = false;
-		else UINavPC->NotifyMouseInputType();
+		if (bIgnoreMouseEvent)
+		{
+			bIgnoreMouseEvent = false;
+			return;
+		}
+		else
+		{
+			UINavPC->NotifyMouseInputType();
+		}
 
 		if (!UINavPC->AllowsSelectInput()) return;
 
-		OnPreSelect(Index, true);
-
-		if (Index != ButtonIndex) NavigateTo(Index);
+		SelectedButtonIndex = ButtonIndex;
+		OnStartSelect(ButtonIndex);
 	}
 }
 
 void UUINavWidget::ReleaseEvent(int Index)
 {
+	if (bIgnoreMouseEvent)
+	{
+		bIgnoreMouseEvent = false;
+		return;
+	}
+	else
+	{
+		UINavPC->NotifyMouseInputType();
+	}
+
 	if (!UINavButtons[Index]->IsHovered()) SwitchButtonStyle(Index);
+
+	if (!UINavPC->AllowsSelectInput()) return;
+
+	OnPreSelect(Index, true);
+
+	if (Index != ButtonIndex) NavigateTo(Index);
 }
 
 void UUINavWidget::SetupUINavButtonDelegates(UUINavButton * NewButton)
 {
 	NewButton->CustomHover.AddDynamic(this, &UUINavWidget::HoverEvent);
 	NewButton->CustomUnhover.AddDynamic(this, &UUINavWidget::UnhoverEvent);
-	/*Silly workaround*/
-	NewButton->OnPressed.Clear();
-	NewButton->OnPressed.AddDynamic(NewButton, &UUINavButton::OnPress);
-	/*Silly workaround*/
 	NewButton->CustomPress.AddDynamic(this, &UUINavWidget::PressEvent);
 	NewButton->CustomRelease.AddDynamic(this, &UUINavWidget::ReleaseEvent);
 }
@@ -2301,11 +2343,40 @@ void UUINavWidget::NavigateInDirection(ENavigationDirection Direction)
 
 void UUINavWidget::MenuSelect()
 {
+	MenuSelectPress();
+	MenuSelectRelease();
+}
+
+void UUINavWidget::MenuReturn()
+{
+	MenuReturnPress();
+	MenuReturnRelease();
+}
+
+void UUINavWidget::MenuSelectPress()
+{
 	if (bWaitForInput)
 	{
 		CancelRebind();
 		return;
 	}
+
+	if (CurrentButton != nullptr)
+	{
+		SelectedButtonIndex = ButtonIndex;
+
+		USoundBase* PressSound = Cast<USoundBase>(CurrentButton->WidgetStyle.PressedSlateSound.GetResourceObject());
+		if (PressSound != nullptr) PlaySound(PressSound);
+		bIgnoreMouseEvent = true;
+		CurrentButton->OnPressed.Broadcast();
+
+		OnStartSelect(ButtonIndex);
+	}
+}
+
+void UUINavWidget::MenuSelectRelease()
+{
+	if (SelectedButtonIndex == -1) return;
 
 	if (bMovingSelector)
 	{
@@ -2315,7 +2386,12 @@ void UUINavWidget::MenuSelect()
 	OnPreSelect(ButtonIndex);
 }
 
-void UUINavWidget::MenuReturn()
+void UUINavWidget::MenuReturnPress()
+{
+
+}
+
+void UUINavWidget::MenuReturnRelease()
 {
 	if (bWaitForInput)
 	{

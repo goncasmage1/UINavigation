@@ -34,16 +34,16 @@ protected:
 
 	bool bMovingSelector = false;
 
-	bool bIgnoreHoverEvent = false;
-	bool bIgnoreUnhoverEvent = false;
-
-	bool bIgnoreMousePress = false;
+	bool bIgnoreMouseEvent = false;
 
 	//Used to track when the selector's position should be updated
 	int WaitForTick;
 
 	//The index of the button that will be navigated to when movement is allowed
 	int HaltedIndex = -1;
+
+	//The index of the button that was selected
+	int SelectedButtonIndex = -1;
 
 	int InputBoxIndex = -1;
 	int NumberOfButtonsInGrids = 0;
@@ -412,6 +412,14 @@ public:
 		void OnSelect(int Index);
 	virtual void OnSelect_Implementation(int Index);
 
+	UFUNCTION(BlueprintNativeEvent, Category = UINavWidget)
+		void OnStartSelect(int Index);
+	virtual void OnStartSelect_Implementation(int Index);
+
+	UFUNCTION(BlueprintNativeEvent, Category = UINavWidget)
+		void OnStopSelect(int Index);
+	virtual void OnStopSelect_Implementation(int Index);
+
 	void CollectionOnSelect(int Index);
 
 	void OnPreSelect(int Index, bool bMouseClick = false);
@@ -755,5 +763,10 @@ public:
 		virtual void MenuSelect();
 	UFUNCTION(BlueprintCallable, Category = UINavWidget)
 		virtual void MenuReturn();
+
+	virtual void MenuSelectPress();
+	virtual void MenuSelectRelease();
+	virtual void MenuReturnPress();
+	virtual void MenuReturnRelease();
 
 };
