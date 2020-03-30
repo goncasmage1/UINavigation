@@ -1606,9 +1606,9 @@ void UUINavWidget::OnPreSelect(int Index, bool bMouseClick)
 
 	if (!bMouseClick)
 	{
+		bIgnoreMouseEvent = true;
 		CurrentButton->OnReleased.Broadcast();
 		if (bIsSelectedButton) CurrentButton->OnClicked.Broadcast();
-		return;
 	}
 
 	UUINavComponent* CurrentUINavComp = GetUINavComponentAtIndex(Index);
