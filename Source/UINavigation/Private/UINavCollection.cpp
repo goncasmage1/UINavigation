@@ -180,6 +180,7 @@ void UUINavCollection::TraverseHierarquy(int StartIndex)
 				UUINavHorizontalComponent* HorizComp = Cast<UUINavHorizontalComponent>(widget);
 				if (HorizComp != nullptr)
 				{
+					HorizComp->ParentWidget = ParentWidget;
 					UINavHorizontalComps.Add(HorizComp);
 				}
 			}
