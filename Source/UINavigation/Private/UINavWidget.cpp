@@ -1339,26 +1339,43 @@ FVector2D UUINavWidget::GetButtonLocation(int Index)
 
 void UUINavWidget::ExecuteAnimations(int From, int To)
 {
-	if (From != -1 && UINavAnimations.Num() > From)
+	UUserWidget* TargetFromWidget = this;
+	UUserWidget* TargetToWidget = this;
+
+	/* Widget Animations functions must be called in the widget directly,
+	so we need to check whether this animation belongs to a UINavCollection */
+	for (UUINavCollection* Collection : UINavCollections)
 	{
-		if (IsAnimationPlaying(UINavAnimations[From]))
+		if (Collection->FirstButtonIndex <= From && Collection->LastButtonIndex >= From)
 		{
-			ReverseAnimation(UINavAnimations[From]);
+			TargetFromWidget = Collection;
+		}
+		if (Collection->FirstButtonIndex <= To && Collection->LastButtonIndex >= To)
+		{
+			TargetToWidget = Collection;
+		}
+	}
+
+	if (From != -1 && From != To && UINavAnimations.Num() > From && From < UINavAnimations.Num())
+	{
+		if (TargetFromWidget->IsAnimationPlaying(UINavAnimations[From]))
+		{
+			TargetFromWidget->ReverseAnimation(UINavAnimations[From]);
 		}
 		else
 		{
-			PlayAnimation(UINavAnimations[From], 0.0f, 1, EUMGSequencePlayMode::Reverse, AnimationPlaybackSpeed);
+			TargetFromWidget->PlayAnimation(UINavAnimations[From], 0.0f, 1, EUMGSequencePlayMode::Reverse, AnimationPlaybackSpeed);
 		}
 	}
 
 	if (UINavAnimations.Num() <= To) return;
-	if (IsAnimationPlaying(UINavAnimations[To]))
+	if (TargetToWidget->IsAnimationPlaying(UINavAnimations[To]))
 	{
-		ReverseAnimation(UINavAnimations[To]);
+		TargetToWidget->ReverseAnimation(UINavAnimations[To]);
 	}
 	else
 	{
-		PlayAnimation(UINavAnimations[To], 0.0f, 1, EUMGSequencePlayMode::Forward, AnimationPlaybackSpeed);
+		TargetToWidget->PlayAnimation(UINavAnimations[To], 0.0f, 1, EUMGSequencePlayMode::Forward, AnimationPlaybackSpeed);
 	}
 }
 
