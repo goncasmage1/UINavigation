@@ -92,6 +92,9 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = UINavCollection)
 		TArray<class UUINavComponent*> UINavComponents;
 
+	UPROPERTY(BlueprintReadWrite, Category = UINavCollection)
+		TArray<class UWidgetAnimation*> UINavAnimations;
+
 	UPROPERTY(BlueprintReadOnly, Category = UINavCollection)
 		TArray<class UUINavHorizontalComponent*> UINavHorizontalComps;
 

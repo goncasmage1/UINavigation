@@ -115,6 +115,8 @@ void UUINavCollection::Init(int StartIndex)
 		UINavButtons.Empty();
 		ParentWidget->UINavComponents.Append(UINavComponents);
 		UINavComponents.Empty();
+		ParentWidget->UINavAnimations.Append(UINavAnimations);
+		UINavAnimations.Empty();
 		ParentWidget->UINavHorizontalComps.Append(UINavHorizontalComps);
 		UINavHorizontalComps.Empty();
 	}
