@@ -56,19 +56,7 @@ void UUINavSliderBox::NavigateRight()
 		else return;
 	}
 
-	Update();
-
-	if (!bDisableButtons || bLoopOptions)
-	{
-		Super::NavigateRight();
-		return;
-	}
-
-	CheckRightLimit();
-	//Enable button if previously disabled
-	if (!LeftButton->bIsEnabled) LeftButton->SetIsEnabled(true);
-
-	Super::NavigateRight();
+	FinishNavigateRight(LastOptionIndex != OptionIndex);
 }
 
 float UUINavSliderBox::GetSliderPercent() const
