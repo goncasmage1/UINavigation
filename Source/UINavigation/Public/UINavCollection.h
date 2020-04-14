@@ -86,17 +86,8 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = UINavCollection)
 		class UUINavCollection* ParentCollection;
 
-	UPROPERTY(BlueprintReadOnly, Category = UINavCollection)
-		TArray<class UUINavButton*> UINavButtons;
-
-	UPROPERTY(BlueprintReadOnly, Category = UINavCollection)
-		TArray<class UUINavComponent*> UINavComponents;
-
 	UPROPERTY(BlueprintReadWrite, Category = UINavCollection)
 		TArray<class UWidgetAnimation*> UINavAnimations;
-
-	UPROPERTY(BlueprintReadOnly, Category = UINavCollection)
-		TArray<class UUINavHorizontalComponent*> UINavHorizontalComps;
 
 	UPROPERTY(BlueprintReadOnly, Category = UINavCollection)
 		TArray<class UUINavCollection*> UINavCollections;

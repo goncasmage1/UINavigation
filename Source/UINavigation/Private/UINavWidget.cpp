@@ -1253,8 +1253,13 @@ void UUINavWidget::AppendCollection(const TArray<FButtonNavigation>& EdgeNavigat
 		return;
 	}
 
-	UINavCollections[CollectionIndex]->FirstGridIndex = NavigationGrids.Num();
-	UINavCollections[CollectionIndex]->SetupNavigation(EdgeNavigations);
+	UUINavCollection* Collection = UINavCollections[CollectionIndex];
+	Collection->FirstGridIndex = NavigationGrids.Num();
+	Collection->SetupNavigation(EdgeNavigations);
+	if (Collection->LastButtonIndex < Collection->FirstButtonIndex)
+	{
+		Collection->LastButtonIndex = Collection->FirstButtonIndex;
+	}
 
 	CollectionIndex++;
 }
