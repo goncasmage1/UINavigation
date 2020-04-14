@@ -828,7 +828,6 @@ void UUINavWidget::MoveUINavElementToGrid(int Index, int TargetGridIndex, int In
 	ReplaceButtonInNavigationGrid(Button, OldGridIndex, OldIndexInGrid);
 
 	if (Button == CurrentButton) UpdateCurrentButton(Button);
-	ButtonIndex = CurrentButton->ButtonIndex;
 }
 
 void UUINavWidget::MoveUINavElementToGrid2(int FromGridIndex, int FromIndexInGrid, int TargetGridIndex, int TargetIndexInGrid)
@@ -1035,9 +1034,13 @@ void UUINavWidget::UpdateCurrentButton(UUINavButton * NewCurrentButton)
 		else UpdateSelectorLocation(NewCurrentButton->ButtonIndex);
 	}
 
-	for (int i = 0; i < ScrollBoxes.Num(); ++i)
+	for (UScrollBox* ScrollBox : ScrollBoxes)
 	{
-		ScrollBoxes[i]->ScrollWidgetIntoView(NewCurrentButton);
+		if (NewCurrentButton->IsChildOf(ScrollBox))
+		{
+			ScrollBox->ScrollWidgetIntoView(NewCurrentButton, bAnimateScrollBoxes);
+			break;
+		}
 	}
 }
 
@@ -1541,9 +1544,13 @@ void UUINavWidget::CollectionNavigateTo(int Index)
 void UUINavWidget::DispatchNavigation(int Index, bool bHoverEvent)
 {
 	//Update all the possible scroll boxes in the widget
-	for (int i = 0; i < ScrollBoxes.Num(); ++i)
+	for (UScrollBox* ScrollBox : ScrollBoxes)
 	{
-		ScrollBoxes[i]->ScrollWidgetIntoView(UINavButtons[Index], bAnimateScrollBoxes);
+		if (UINavButtons[Index]->IsChildOf(ScrollBox))
+		{
+			ScrollBox->ScrollWidgetIntoView(UINavButtons[Index], bAnimateScrollBoxes);
+			break;
+		}
 	}
 
 	if (bUseButtonStates) UpdateButtonsStates(Index, bHoverEvent);
