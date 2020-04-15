@@ -137,6 +137,7 @@ void UUINavSlider::HandleOnMouseCaptureEnd()
 	if (OptionIndex != LastOptionIndex &&
 		ParentWidget != nullptr)
 	{
+		OnUpdated();
 		ParentWidget->OnHorizCompUpdated(ComponentIndex);
 	}
 }

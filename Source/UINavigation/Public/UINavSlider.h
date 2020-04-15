@@ -23,8 +23,6 @@ protected:
 
 	bool bIgnoreSpinBoxCommit = false;
 
-	int LastOptionIndex = -1;
-	
 	UFUNCTION()
 		void HandleOnSliderValueChanged(float InValue);
 	UFUNCTION()

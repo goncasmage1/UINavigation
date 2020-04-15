@@ -2387,7 +2387,6 @@ void UUINavWidget::NavigateInDirection(ENavigationDirection Direction)
 		{
 			HorizComp->NavigateRight();
 		}
-		OnHorizCompUpdated(ButtonIndex);
 	}
 	else MenuNavigate(Direction);
 }

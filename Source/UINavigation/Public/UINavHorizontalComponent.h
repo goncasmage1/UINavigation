@@ -23,6 +23,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavComponentBox)
 		bool bLoopOptions = false;
 
+	int LastOptionIndex = -1;
+
 	class UUINavWidget* ParentWidget;
 
 	UFUNCTION(BlueprintCallable, Category = UINavHorizontalComponent)
@@ -46,5 +48,8 @@ public:
 	UFUNCTION(BlueprintNativeEvent, Category = UINavHorizontalComponent)
 		void OnNavigateRight();
 	void OnNavigateRight_Implementation();
+	UFUNCTION(BlueprintNativeEvent, Category = UINavHorizontalComponent)
+		void OnUpdated();
+	void OnUpdated_Implementation();
 	
 };

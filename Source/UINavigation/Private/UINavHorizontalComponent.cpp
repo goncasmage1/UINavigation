@@ -8,17 +8,22 @@
 void UUINavHorizontalComponent::NavigateLeft()
 {
 	OnNavigateLeft();
+	OnUpdated();
+	ParentWidget->OnHorizCompNavigateLeft(ComponentIndex);
 	ParentWidget->OnHorizCompUpdated(ComponentIndex);
 }
 
 void UUINavHorizontalComponent::NavigateRight()
 {
 	OnNavigateRight();
+	OnUpdated();
+	ParentWidget->OnHorizCompNavigateRight(ComponentIndex);
 	ParentWidget->OnHorizCompUpdated(ComponentIndex);
 }
 
 void UUINavHorizontalComponent::Update()
 {
+	LastOptionIndex = OptionIndex;
 }
 
 void UUINavHorizontalComponent::UpdateTextToIndex(int NewIndex)
@@ -37,5 +42,9 @@ void UUINavHorizontalComponent::OnNavigateLeft_Implementation()
 }
 
 void UUINavHorizontalComponent::OnNavigateRight_Implementation()
+{
+}
+
+void UUINavHorizontalComponent::OnUpdated_Implementation()
 {
 }
