@@ -29,6 +29,14 @@ public:
 		void OnSelected();
 	virtual void OnSelected_Implementation();
 
+	UFUNCTION(BlueprintNativeEvent, Category = UINavComponent)
+		void OnStartSelected();
+	virtual void OnStartSelected_Implementation();
+
+	UFUNCTION(BlueprintNativeEvent, Category = UINavComponent)
+		void OnStopSelected();
+	virtual void OnStopSelected_Implementation();
+
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavComponent)
 		bool IsValid();
 

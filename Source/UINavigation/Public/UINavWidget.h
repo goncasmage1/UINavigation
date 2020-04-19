@@ -771,4 +771,6 @@ public:
 	virtual void MenuReturnPress();
 	virtual void MenuReturnRelease();
 
+	void FinishPress();
+
 };

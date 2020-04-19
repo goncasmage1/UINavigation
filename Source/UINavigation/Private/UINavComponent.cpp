@@ -26,6 +26,14 @@ void UUINavComponent::OnSelected_Implementation()
 {
 }
 
+void UUINavComponent::OnStartSelected_Implementation()
+{
+}
+
+void UUINavComponent::OnStopSelected_Implementation()
+{
+}
+
 bool UUINavComponent::IsValid()
 {
 	return (Visibility != ESlateVisibility::Collapsed &&

@@ -1643,7 +1643,11 @@ void UUINavWidget::OnPreSelect(int Index, bool bMouseClick)
 	UUINavComponent* CurrentUINavComp = GetUINavComponentAtIndex(Index);
 	if (CurrentUINavComp != nullptr)
 	{
-		CurrentUINavComp->OnSelected();
+		if (bIsSelectedButton)
+		{
+			CurrentUINavComp->OnSelected();
+		}
+		CurrentUINavComp->OnStopSelected();
 	}
 
 	if (UINavInputContainer != nullptr && Index >= UINavInputContainer->FirstButtonIndex && Index <= UINavInputContainer->LastButtonIndex)
@@ -2273,7 +2277,8 @@ void UUINavWidget::UnhoverEvent(int Index)
 		Otherwise, if the button is the selected button, also switch style to make sure it's still selected
 		*/
 		UUINavButton* ToButton = UINavButtons[Index];
-		if (!ToButton->bSwitchedStyle || (ToButton->bSwitchedStyle && ButtonIndex == Index))
+		if (SelectedButtonIndex != ButtonIndex &&
+			(!ToButton->bSwitchedStyle || (ToButton->bSwitchedStyle && ButtonIndex == Index)))
 		{
 			SwitchButtonStyle(Index);
 			ToButton->bSwitchedStyle = ButtonIndex == Index;
@@ -2304,8 +2309,7 @@ void UUINavWidget::PressEvent(int Index)
 
 		if (!UINavPC->AllowsSelectInput()) return;
 
-		SelectedButtonIndex = ButtonIndex;
-		OnStartSelect(ButtonIndex);
+		FinishPress();
 	}
 }
 
@@ -2321,6 +2325,12 @@ void UUINavWidget::ReleaseEvent(int Index)
 		UINavPC->NotifyMouseInputType();
 	}
 
+	if (bMovingSelector)
+	{
+		HaltedIndex = SELECT_INDEX;
+		return;
+	}
+
 	if (!UINavButtons[Index]->IsHovered()) SwitchButtonStyle(Index);
 
 	if (!UINavPC->AllowsSelectInput()) return;
@@ -2328,6 +2338,20 @@ void UUINavWidget::ReleaseEvent(int Index)
 	OnPreSelect(Index, true);
 
 	if (Index != ButtonIndex) NavigateTo(Index);
+}
+
+void UUINavWidget::FinishPress()
+{
+	SelectedButtonIndex = ButtonIndex;
+
+	UUINavComponent* CurrentUINavComp = GetUINavComponentAtIndex(ButtonIndex);
+	if (CurrentUINavComp != nullptr)
+	{
+		CurrentUINavComp->OnStartSelected();
+	}
+
+	OnStartSelect(ButtonIndex);
+	CollectionOnStartSelect(ButtonIndex);
 }
 
 void UUINavWidget::SetupUINavButtonDelegates(UUINavButton * NewButton)
@@ -2425,15 +2449,12 @@ void UUINavWidget::MenuSelectPress()
 
 	if (CurrentButton != nullptr)
 	{
-		SelectedButtonIndex = ButtonIndex;
-
 		USoundBase* PressSound = Cast<USoundBase>(CurrentButton->WidgetStyle.PressedSlateSound.GetResourceObject());
 		if (PressSound != nullptr) PlaySound(PressSound);
 		bIgnoreMouseEvent = true;
 		CurrentButton->OnPressed.Broadcast();
 
-		OnStartSelect(ButtonIndex);
-		CollectionOnStartSelect(ButtonIndex);
+		FinishPress();
 	}
 }
 
