@@ -104,21 +104,15 @@ void UUINavCollection::NotifyOnStopSelect(int Index, int LocalIndex)
 void UUINavCollection::Init(int StartIndex)
 {
 	FirstButtonIndex = StartIndex;
-	LastButtonIndex = StartIndex;
+	LastButtonIndex = StartIndex - 1;
 	PreSetup();
 
 	TraverseHierarquy(StartIndex);
 
 	if (ParentWidget != nullptr)
 	{
-		ParentWidget->UINavButtons.Append(UINavButtons);
-		UINavButtons.Empty();
-		ParentWidget->UINavComponents.Append(UINavComponents);
-		UINavComponents.Empty();
 		ParentWidget->UINavAnimations.Append(UINavAnimations);
 		UINavAnimations.Empty();
-		ParentWidget->UINavHorizontalComps.Append(UINavHorizontalComps);
-		UINavHorizontalComps.Empty();
 	}
 }
 
@@ -146,7 +140,7 @@ void UUINavCollection::TraverseHierarquy(int StartIndex)
 		{
 			Collection->ParentWidget = ParentWidget;
 			Collection->ParentCollection = this;
-			Collection->Init(ParentWidget->UINavButtons.Num() + UINavButtons.Num());
+			Collection->Init(ParentWidget->UINavButtons.Num());
 			UINavCollections.Add(Collection);
 		}
 
@@ -159,7 +153,7 @@ void UUINavCollection::TraverseHierarquy(int StartIndex)
 				return;
 			}
 
-			ParentWidget->InputContainerIndex = ParentWidget->UINavButtons.Num() + UINavButtons.Num();
+			ParentWidget->InputContainerIndex = ParentWidget->UINavButtons.Num();
 			ParentWidget->UINavInputContainer = InputContainer;
 
 			InputContainer->Init(ParentWidget);
@@ -174,27 +168,27 @@ void UUINavCollection::TraverseHierarquy(int StartIndex)
 			{
 				NewNavButton = Cast<UUINavButton>(UIComp->NavButton);
 
-				if (UIComp->ComponentIndex == -1) UIComp->ComponentIndex = ParentWidget->UINavButtons.Num() + UINavButtons.Num();
+				if (UIComp->ComponentIndex == -1) UIComp->ComponentIndex = ParentWidget->UINavButtons.Num();
 				NewNavButton->ButtonIndex = UIComp->ComponentIndex;
 
-				UINavComponents.Add(UIComp);
+				ParentWidget->UINavComponents.Add(UIComp);
 
 				UUINavHorizontalComponent* HorizComp = Cast<UUINavHorizontalComponent>(widget);
 				if (HorizComp != nullptr)
 				{
 					HorizComp->ParentWidget = ParentWidget;
-					UINavHorizontalComps.Add(HorizComp);
+					ParentWidget->UINavHorizontalComps.Add(HorizComp);
 				}
 			}
 		}
 
 		if (NewNavButton == nullptr) continue;
 
-		if (NewNavButton->ButtonIndex == -1) NewNavButton->ButtonIndex = ParentWidget->UINavButtons.Num() + UINavButtons.Num();
+		if (NewNavButton->ButtonIndex == -1) NewNavButton->ButtonIndex = ParentWidget->UINavButtons.Num();
 
 		ParentWidget->SetupUINavButtonDelegates(NewNavButton);
 
-		UINavButtons.Add(NewNavButton);
+		ParentWidget->UINavButtons.Add(NewNavButton);
 	}
 }
 
@@ -218,16 +212,20 @@ void UUINavCollection::AppendCollection(TArray<FButtonNavigation> EdgeNavigation
 		return;
 	}
 
-	UINavCollections[CollectionIndex]->FirstGridIndex = FirstGridIndex + GridCount;
-	UINavCollections[CollectionIndex]->SetupNavigation(EdgeNavigations);
-
+	UUINavCollection* Collection = UINavCollections[CollectionIndex];
+	Collection->FirstGridIndex = FirstGridIndex + GridCount;
+	Collection->SetupNavigation(EdgeNavigations);
+	if (Collection->LastButtonIndex < Collection->FirstButtonIndex)
+	{
+		Collection->LastButtonIndex = Collection->FirstButtonIndex;
+	}
 	CollectionIndex++;
 }
 
 void UUINavCollection::IncrementGrids(int Dimension)
 {
 	GridCount++;
-	LastButtonIndex += (Dimension - 1);
+	LastButtonIndex += Dimension;
 	if (ParentCollection != nullptr) ParentCollection->IncrementGrids(Dimension);
 }
 

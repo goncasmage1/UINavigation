@@ -828,7 +828,6 @@ void UUINavWidget::MoveUINavElementToGrid(int Index, int TargetGridIndex, int In
 	ReplaceButtonInNavigationGrid(Button, OldGridIndex, OldIndexInGrid);
 
 	if (Button == CurrentButton) UpdateCurrentButton(Button);
-	ButtonIndex = CurrentButton->ButtonIndex;
 }
 
 void UUINavWidget::MoveUINavElementToGrid2(int FromGridIndex, int FromIndexInGrid, int TargetGridIndex, int TargetIndexInGrid)
@@ -1035,9 +1034,13 @@ void UUINavWidget::UpdateCurrentButton(UUINavButton * NewCurrentButton)
 		else UpdateSelectorLocation(NewCurrentButton->ButtonIndex);
 	}
 
-	for (int i = 0; i < ScrollBoxes.Num(); ++i)
+	for (UScrollBox* ScrollBox : ScrollBoxes)
 	{
-		ScrollBoxes[i]->ScrollWidgetIntoView(NewCurrentButton);
+		if (NewCurrentButton->IsChildOf(ScrollBox))
+		{
+			ScrollBox->ScrollWidgetIntoView(NewCurrentButton, bAnimateScrollBoxes);
+			break;
+		}
 	}
 }
 
@@ -1253,8 +1256,13 @@ void UUINavWidget::AppendCollection(const TArray<FButtonNavigation>& EdgeNavigat
 		return;
 	}
 
-	UINavCollections[CollectionIndex]->FirstGridIndex = NavigationGrids.Num();
-	UINavCollections[CollectionIndex]->SetupNavigation(EdgeNavigations);
+	UUINavCollection* Collection = UINavCollections[CollectionIndex];
+	Collection->FirstGridIndex = NavigationGrids.Num();
+	Collection->SetupNavigation(EdgeNavigations);
+	if (Collection->LastButtonIndex < Collection->FirstButtonIndex)
+	{
+		Collection->LastButtonIndex = Collection->FirstButtonIndex;
+	}
 
 	CollectionIndex++;
 }
@@ -1536,9 +1544,13 @@ void UUINavWidget::CollectionNavigateTo(int Index)
 void UUINavWidget::DispatchNavigation(int Index, bool bHoverEvent)
 {
 	//Update all the possible scroll boxes in the widget
-	for (int i = 0; i < ScrollBoxes.Num(); ++i)
+	for (UScrollBox* ScrollBox : ScrollBoxes)
 	{
-		ScrollBoxes[i]->ScrollWidgetIntoView(UINavButtons[Index], bAnimateScrollBoxes);
+		if (UINavButtons[Index]->IsChildOf(ScrollBox))
+		{
+			ScrollBox->ScrollWidgetIntoView(UINavButtons[Index], bAnimateScrollBoxes);
+			break;
+		}
 	}
 
 	if (bUseButtonStates) UpdateButtonsStates(Index, bHoverEvent);
@@ -1631,7 +1643,11 @@ void UUINavWidget::OnPreSelect(int Index, bool bMouseClick)
 	UUINavComponent* CurrentUINavComp = GetUINavComponentAtIndex(Index);
 	if (CurrentUINavComp != nullptr)
 	{
-		CurrentUINavComp->OnSelected();
+		if (bIsSelectedButton)
+		{
+			CurrentUINavComp->OnSelected();
+		}
+		CurrentUINavComp->OnStopSelected();
 	}
 
 	if (UINavInputContainer != nullptr && Index >= UINavInputContainer->FirstButtonIndex && Index <= UINavInputContainer->LastButtonIndex)
@@ -2261,7 +2277,8 @@ void UUINavWidget::UnhoverEvent(int Index)
 		Otherwise, if the button is the selected button, also switch style to make sure it's still selected
 		*/
 		UUINavButton* ToButton = UINavButtons[Index];
-		if (!ToButton->bSwitchedStyle || (ToButton->bSwitchedStyle && ButtonIndex == Index))
+		if (SelectedButtonIndex != ButtonIndex &&
+			(!ToButton->bSwitchedStyle || (ToButton->bSwitchedStyle && ButtonIndex == Index)))
 		{
 			SwitchButtonStyle(Index);
 			ToButton->bSwitchedStyle = ButtonIndex == Index;
@@ -2292,8 +2309,7 @@ void UUINavWidget::PressEvent(int Index)
 
 		if (!UINavPC->AllowsSelectInput()) return;
 
-		SelectedButtonIndex = ButtonIndex;
-		OnStartSelect(ButtonIndex);
+		FinishPress();
 	}
 }
 
@@ -2309,6 +2325,12 @@ void UUINavWidget::ReleaseEvent(int Index)
 		UINavPC->NotifyMouseInputType();
 	}
 
+	if (bMovingSelector)
+	{
+		HaltedIndex = SELECT_INDEX;
+		return;
+	}
+
 	if (!UINavButtons[Index]->IsHovered()) SwitchButtonStyle(Index);
 
 	if (!UINavPC->AllowsSelectInput()) return;
@@ -2316,6 +2338,20 @@ void UUINavWidget::ReleaseEvent(int Index)
 	OnPreSelect(Index, true);
 
 	if (Index != ButtonIndex) NavigateTo(Index);
+}
+
+void UUINavWidget::FinishPress()
+{
+	SelectedButtonIndex = ButtonIndex;
+
+	UUINavComponent* CurrentUINavComp = GetUINavComponentAtIndex(ButtonIndex);
+	if (CurrentUINavComp != nullptr)
+	{
+		CurrentUINavComp->OnStartSelected();
+	}
+
+	OnStartSelect(ButtonIndex);
+	CollectionOnStartSelect(ButtonIndex);
 }
 
 void UUINavWidget::SetupUINavButtonDelegates(UUINavButton * NewButton)
@@ -2413,15 +2449,12 @@ void UUINavWidget::MenuSelectPress()
 
 	if (CurrentButton != nullptr)
 	{
-		SelectedButtonIndex = ButtonIndex;
-
 		USoundBase* PressSound = Cast<USoundBase>(CurrentButton->WidgetStyle.PressedSlateSound.GetResourceObject());
 		if (PressSound != nullptr) PlaySound(PressSound);
 		bIgnoreMouseEvent = true;
 		CurrentButton->OnPressed.Broadcast();
 
-		OnStartSelect(ButtonIndex);
-		CollectionOnStartSelect(ButtonIndex);
+		FinishPress();
 	}
 }
 
