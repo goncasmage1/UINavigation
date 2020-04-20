@@ -1413,41 +1413,89 @@ void UUINavWidget::SwitchTextColorTo(int Index, FLinearColor Color)
 void UUINavWidget::UpdateButtonsStates(int Index, bool bHovered)
 {
 	UUINavButton* ToButton = UINavButtons[Index];
+
 	//Update new button state
-	if (!(bHovered ^ ToButton->bSwitchedStyle))
+	if (bHovered == (ToButton->ForcedStyle != EButtonStyle::Normal))
 	{
-		SwitchButtonStyle(Index);
-		ToButton->bSwitchedStyle = !bHovered;
+		SwitchButtonStyle(ToButton->ForcedStyle != EButtonStyle::Normal ? EButtonStyle::Normal : EButtonStyle::Hovered,
+						  Index);
+	}
+	else
+	{
+		RevertButtonStyle(Index);
 	}
 
 	if (ButtonIndex == Index) return;
 
 	//Update previous button state
-	if (!(bHovered ^ !ToButton->bSwitchedStyle))
+	if (bHovered != (ToButton->ForcedStyle != EButtonStyle::Normal))
 	{
-		SwitchButtonStyle(ButtonIndex);
-		CurrentButton->bSwitchedStyle = false;
+		SwitchButtonStyle(CurrentButton->ForcedStyle != EButtonStyle::Normal ? EButtonStyle::Normal : EButtonStyle::Hovered,
+						  ButtonIndex);
+	}
+	else
+	{
+		RevertButtonStyle(ButtonIndex);
 	}
 }
 
-void UUINavWidget::SwitchButtonStyle(int Index)
+void UUINavWidget::SwitchButtonStyle(EButtonStyle NewStyle, int Index, bool bRevertStyle)
 {
-	UUINavButton* TheButton = UINavButtons[Index];
-	FButtonStyle NewStile = TheButton->WidgetStyle;
-	FSlateBrush TempState;
-	TempState = NewStile.Hovered;
-	NewStile.Hovered = NewStile.Normal;
-	NewStile.Normal = TempState;
-	TheButton->SetStyle(NewStile);
-
-	if (Index != ButtonIndex)
+	if (bRevertStyle)
 	{
-		USoundBase* HoverSound = Cast<USoundBase>(NewStile.HoveredSlateSound.GetResourceObject());
+		RevertButtonStyle(Index);
+	}
+
+	UUINavButton* TheButton = UINavButtons[Index];
+	FButtonStyle Style = TheButton->WidgetStyle;
+	if (NewStyle != EButtonStyle::Normal)
+	{
+		FSlateBrush TempState;
+		if (NewStyle == EButtonStyle::Hovered)
+		{
+			TempState = Style.Hovered;
+			Style.Hovered = Style.Normal;
+		}
+		else
+		{
+			TempState = Style.Pressed;
+			Style.Pressed = Style.Normal;
+		}
+		Style.Normal = TempState;
+		TheButton->SetStyle(Style);
+		TheButton->ForcedStyle = NewStyle;
+	}
+
+	if (NewStyle == EButtonStyle::Hovered && Index != ButtonIndex)
+	{
+		USoundBase* HoverSound = Cast<USoundBase>(Style.HoveredSlateSound.GetResourceObject());
 		if (HoverSound != nullptr)
 		{
 			PlaySound(HoverSound);
 		}
 	}
+}
+
+void UUINavWidget::RevertButtonStyle(int Index)
+{
+	UUINavButton* TheButton = UINavButtons[Index];
+	if (TheButton->ForcedStyle == EButtonStyle::Normal) return;
+
+	FButtonStyle Style = TheButton->WidgetStyle;
+	FSlateBrush TempState;
+	if (TheButton->ForcedStyle == EButtonStyle::Hovered)
+	{
+		TempState = Style.Hovered;
+		Style.Hovered = Style.Normal;
+	}
+	else
+	{
+		TempState = Style.Pressed;
+		Style.Pressed = Style.Normal;
+	}
+	Style.Normal = TempState;
+	TheButton->SetStyle(Style);
+	TheButton->ForcedStyle = EButtonStyle::Normal;
 }
 
 void UUINavWidget::SetSelectorScale(FVector2D NewScale)
@@ -2249,7 +2297,7 @@ void UUINavWidget::HoverEvent(int Index)
 
 	if (UINavPC->GetCurrentInputType() != EInputType::Mouse || Index == ButtonIndex)
 	{
-		if (bUseButtonStates) SwitchButtonStyle(Index);
+		if (bUseButtonStates) RevertButtonStyle(Index);
 		return;
 	}
 
@@ -2277,14 +2325,14 @@ void UUINavWidget::UnhoverEvent(int Index)
 		Otherwise, if the button is the selected button, also switch style to make sure it's still selected
 		*/
 		UUINavButton* ToButton = UINavButtons[Index];
-		if (SelectedButtonIndex != ButtonIndex &&
-			(!ToButton->bSwitchedStyle || (ToButton->bSwitchedStyle && ButtonIndex == Index)))
+		if (SelectedButtonIndex != ButtonIndex && 
+			(ToButton->ForcedStyle != EButtonStyle::Normal) ||
+			((ToButton->ForcedStyle == EButtonStyle::Normal) && ButtonIndex == Index))
 		{
-			SwitchButtonStyle(Index);
-			ToButton->bSwitchedStyle = ButtonIndex == Index;
+			SwitchButtonStyle(ButtonIndex == Index ? EButtonStyle::Hovered : EButtonStyle::Normal, Index);
 		}
 
-		ButtonIndex = ToButton->bSwitchedStyle ? Index : ButtonIndex;
+		ButtonIndex = (ToButton->ForcedStyle != EButtonStyle::Normal) ? Index : ButtonIndex;
 	}
 }
 
@@ -2330,8 +2378,6 @@ void UUINavWidget::ReleaseEvent(int Index)
 		HaltedIndex = SELECT_INDEX;
 		return;
 	}
-
-	if (!UINavButtons[Index]->IsHovered()) SwitchButtonStyle(Index);
 
 	if (!UINavPC->AllowsSelectInput()) return;
 

@@ -8,6 +8,7 @@
 #include "Data/ReceiveInputType.h"
 #include "Data/SelectorPosition.h"
 #include "Data/Grid.h"
+#include "Data/ButtonStyle.h"
 #include "Components/ScrollBox.h"
 #include "UINavWidget.generated.h"
 
@@ -359,11 +360,15 @@ public:
 	void UpdateTextColor(int Index);
 
 	/**
-	*	Switches the button with the given index's style between normal and hovered
+	*	Switches the button with the given index's style
 	*
+	*	@param NewStyle The desired style
 	*	@param Index The button's index in the Button's array
+	*	@param bRevertStyle Whether to revert the button's style to normal before switching
 	*/
-	void SwitchButtonStyle(int Index);
+	void SwitchButtonStyle(EButtonStyle NewStyle, int Index, bool bRevertStyle = true);
+
+	void RevertButtonStyle(int Index);
 
 	/**
 	*	Changes the selector's scale to the scale given

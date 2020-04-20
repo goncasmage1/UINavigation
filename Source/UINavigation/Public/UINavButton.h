@@ -3,6 +3,7 @@
 #pragma once
 
 #include "Components/Button.h"
+#include "Data/ButtonStyle.h"
 #include "UINavButton.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FCustomHoverDelegate, int, Index);
@@ -12,7 +13,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FCustomPressDelegate, int, Index);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FCustomReleaseDelegate, int, Index);
 
 /**
- * 
+ * This class represents a required button type for the UI Navigation plugin
  */
 UCLASS()
 class UINAVIGATION_API UUINavButton : public UButton
@@ -48,7 +49,7 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = UINavButton)
 		int IndexInGrid = - 1;
 
-	bool bSwitchedStyle = false;
+	EButtonStyle ForcedStyle = EButtonStyle::Normal;
 
 	bool bAutoCollapse = false;
 
