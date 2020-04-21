@@ -340,9 +340,9 @@ public:
 	*	Changes the state of the current button to normal and the new button to hovered
 	*
 	*	@param	Index  The new button's index in the Button's array
-	*	@param  bHovered  Whether the function was called due to a button hover
+	*	@param  bHovered  Whether the function was called due to a mouse hover
 	*/
-	void UpdateButtonsStates(int Index, bool bHovered);
+	void UpdateHoveredButtonStates(int Index, bool bHovered);
 
 	/**
 	*	Plays the animations in the UINavAnimations array
@@ -776,6 +776,6 @@ public:
 	virtual void MenuReturnPress();
 	virtual void MenuReturnRelease();
 
-	void FinishPress();
+	void FinishPress(bool bMouse);
 
 };
