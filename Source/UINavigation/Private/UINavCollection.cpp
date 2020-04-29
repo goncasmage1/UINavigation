@@ -109,9 +109,14 @@ void UUINavCollection::Init(int StartIndex)
 
 	TraverseHierarquy(StartIndex);
 
-	if (ParentWidget != nullptr)
+	if (ParentCollection != nullptr)
 	{
-		ParentWidget->UINavAnimations.Append(UINavAnimations);
+		ParentCollection->UINavAnimations.Insert(UINavAnimations, FirstButtonIndex - ParentCollection->FirstButtonIndex);
+		UINavAnimations.Empty();
+	}
+	else if (ParentWidget != nullptr)
+	{
+		ParentWidget->UINavAnimations.Insert(UINavAnimations, FirstButtonIndex);
 		UINavAnimations.Empty();
 	}
 }
@@ -243,5 +248,18 @@ void UUINavCollection::GetGridAtIndex(int GridIndex, FGrid& Grid, bool& bIsValid
 
 	bIsValid = true;
 	Grid = ParentWidget->NavigationGrids[ActualIndex];
+}
+
+UUINavCollection* UUINavCollection::GetCollectionByIndex(int Index)
+{
+	for (UUINavCollection* Collection : UINavCollections)
+	{
+		if (Collection->FirstButtonIndex <= Index && Collection->LastButtonIndex >= Index)
+		{
+			return Collection->GetCollectionByIndex(Index);
+		}
+	}
+
+	return this;
 }
 

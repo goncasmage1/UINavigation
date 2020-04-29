@@ -111,5 +111,7 @@ public:
 	//Returns a reference to the grid in this collection at the specified index
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavCollection)
 		void GetGridAtIndex(int GridIndex, FGrid& Grid, bool& bIsValid);
+
+	UUINavCollection* GetCollectionByIndex(int Index);
 	
 };
