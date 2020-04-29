@@ -1546,11 +1546,8 @@ void UUINavWidget::DispatchNavigation(int Index, bool bHoverEvent)
 	//Update all the possible scroll boxes in the widget
 	for (UScrollBox* ScrollBox : ScrollBoxes)
 	{
-		if (UINavButtons[Index]->IsChildOf(ScrollBox))
-		{
-			ScrollBox->ScrollWidgetIntoView(UINavButtons[Index], bAnimateScrollBoxes);
-			break;
-		}
+		ScrollBox->ScrollWidgetIntoView(UINavButtons[Index], bAnimateScrollBoxes);
+		break;
 	}
 
 	if (bUseButtonStates) UpdateButtonsStates(Index, bHoverEvent);
