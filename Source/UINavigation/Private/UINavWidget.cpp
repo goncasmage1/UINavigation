@@ -1356,11 +1356,11 @@ void UUINavWidget::ExecuteAnimations(int From, int To)
 	{
 		if (Collection->FirstButtonIndex <= From && Collection->LastButtonIndex >= From)
 		{
-			TargetFromWidget = Collection;
+			TargetFromWidget = Collection->GetCollectionByIndex(From);
 		}
 		if (Collection->FirstButtonIndex <= To && Collection->LastButtonIndex >= To)
 		{
-			TargetToWidget = Collection;
+			TargetToWidget = Collection->GetCollectionByIndex(To);
 		}
 	}
 
