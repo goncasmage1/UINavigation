@@ -1364,7 +1364,9 @@ void UUINavWidget::ExecuteAnimations(int From, int To)
 		}
 	}
 
-	if (From != -1 && From != To && UINavAnimations.Num() > From && From < UINavAnimations.Num())
+	if (From != -1 && From != To &&
+		UINavAnimations.Num() > From && From < UINavAnimations.Num() &&
+		UINavAnimations[From] != nullptr)
 	{
 		if (TargetFromWidget->IsAnimationPlaying(UINavAnimations[From]))
 		{
@@ -1376,7 +1378,8 @@ void UUINavWidget::ExecuteAnimations(int From, int To)
 		}
 	}
 
-	if (UINavAnimations.Num() <= To) return;
+	if (UINavAnimations.Num() <= To || UINavAnimations[To] == nullptr) return;
+
 	if (TargetToWidget->IsAnimationPlaying(UINavAnimations[To]))
 	{
 		TargetToWidget->ReverseAnimation(UINavAnimations[To]);

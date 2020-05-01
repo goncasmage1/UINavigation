@@ -109,15 +109,26 @@ void UUINavCollection::Init(int StartIndex)
 
 	TraverseHierarquy(StartIndex);
 
-	if (ParentCollection != nullptr)
+	if (UINavAnimations.Num() > 0)
 	{
-		ParentCollection->UINavAnimations.Insert(UINavAnimations, FirstButtonIndex - ParentCollection->FirstButtonIndex);
-		UINavAnimations.Empty();
-	}
-	else if (ParentWidget != nullptr)
-	{
-		ParentWidget->UINavAnimations.Insert(UINavAnimations, FirstButtonIndex);
-		UINavAnimations.Empty();
+		if (ParentCollection != nullptr)
+		{
+			int Index = FirstButtonIndex - ParentCollection->FirstButtonIndex;
+			if (ParentCollection->UINavAnimations.Num() >= Index)
+			{
+				ParentCollection->UINavAnimations.Insert(UINavAnimations, Index);
+			}
+			UINavAnimations.Empty();
+		}
+		else if (ParentWidget != nullptr)
+		{
+			int Index = FirstButtonIndex;
+			if (ParentWidget->UINavAnimations.Num() >= Index)
+			{
+				ParentWidget->UINavAnimations.Insert(UINavAnimations, Index);
+			}
+			UINavAnimations.Empty();
+		}
 	}
 }
 
