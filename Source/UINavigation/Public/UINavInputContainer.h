@@ -30,12 +30,16 @@ protected:
 	TMap<FKey, FKey> KeyToAxisMap = {
 		{EKeys::Gamepad_LeftTrigger, EKeys::Gamepad_LeftTriggerAxis},
 		{EKeys::Gamepad_RightTrigger, EKeys::Gamepad_RightTriggerAxis},
-		{EKeys::MotionController_Left_Trigger, EKeys::MotionController_Left_TriggerAxis},
-		{EKeys::MotionController_Left_Grip1, EKeys::MotionController_Left_Grip1Axis},
-		{EKeys::MotionController_Left_Grip2, EKeys::MotionController_Left_Grip2Axis},
-		{EKeys::MotionController_Right_Trigger, EKeys::MotionController_Right_TriggerAxis},
-		{EKeys::MotionController_Right_Grip1, EKeys::MotionController_Right_Grip1Axis},
-		{EKeys::MotionController_Right_Grip2, EKeys::MotionController_Right_Grip2Axis},
+		{EKeys::MixedReality_Left_Trigger_Click, EKeys::MixedReality_Left_Trigger_Axis},
+		{EKeys::MixedReality_Right_Trigger_Click, EKeys::MixedReality_Right_Trigger_Axis},
+		{EKeys::OculusTouch_Left_Grip_Click, EKeys::OculusTouch_Left_Grip_Axis},
+		{EKeys::OculusTouch_Right_Grip_Click, EKeys::OculusTouch_Right_Grip_Axis},
+		{EKeys::ValveIndex_Left_Grip_Click, EKeys::ValveIndex_Left_Grip_Axis},
+		{EKeys::ValveIndex_Right_Grip_Click, EKeys::ValveIndex_Right_Grip_Axis},
+		{EKeys::ValveIndex_Left_Trigger_Click, EKeys::ValveIndex_Left_Trigger_Axis},
+		{EKeys::ValveIndex_Right_Trigger_Click, EKeys::ValveIndex_Right_Trigger_Axis},
+		{EKeys::Vive_Left_Trigger_Click, EKeys::Vive_Left_Trigger_Axis},
+		{EKeys::Vive_Right_Trigger_Click, EKeys::Vive_Right_Trigger_Axis},
 	};
 
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget), Category = "UINav Input")
