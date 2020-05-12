@@ -1550,7 +1550,6 @@ void UUINavWidget::DispatchNavigation(int Index, bool bHoverEvent)
 	for (UScrollBox* ScrollBox : ScrollBoxes)
 	{
 		ScrollBox->ScrollWidgetIntoView(UINavButtons[Index], bAnimateScrollBoxes);
-		break;
 	}
 
 	if (bUseButtonStates) UpdateButtonsStates(Index, bHoverEvent);
