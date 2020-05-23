@@ -598,6 +598,7 @@ public:
 	void UpdateArrays(int From, int To, int OldGridIndex, int OldIndexInGrid);
 	void UpdateButtonArray(int From, int To, int OldGridIndex, int OldIndexInGrid);
 	void UpdateComponentArray(int From, int To);
+	void UpdateCollectionLastIndex(int ButtonIndex, bool bAdded);
 	void ReplaceButtonInNavigationGrid(class UUINavButton* ButtonToReplace, int GridIndex, int IndexInGrid);
 
 	void UpdateCurrentButton(class UUINavButton* NewCurrentButton);
