@@ -2538,11 +2538,13 @@ void UUINavWidget::MenuSelectRelease()
 
 void UUINavWidget::MenuReturnPress()
 {
-
+	bReturning = true;
 }
 
 void UUINavWidget::MenuReturnRelease()
 {
+	if (!bReturning) return;
+
 	if (bWaitForInput)
 	{
 		CancelRebind();
@@ -2554,5 +2556,7 @@ void UUINavWidget::MenuReturnRelease()
 		HaltedIndex = RETURN_INDEX;
 		return;
 	}
+
+	bReturning = false;
 	OnReturn();
 }

@@ -32,10 +32,9 @@ protected:
 	bool bSetupStarted = false;
 
 	bool bShouldTick = true;
-
 	bool bMovingSelector = false;
-
 	bool bIgnoreMouseEvent = false;
+	bool bReturning = false;
 
 	//Used to track when the selector's position should be updated
 	int WaitForTick;
