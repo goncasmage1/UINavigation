@@ -348,8 +348,8 @@ FKey UUINavPCComponent::GetInputKey(FName InputName, EInputRestriction InputRest
 		{
 			if (UUINavBlueprintFunctionLibrary::RespectsRestriction(AxisMappings[i].Key, InputRestriction))
 			{
-				if (AxisMappings[i].Scale > 0.0f && AxisType == EAxisType::Positive ||
-					AxisMappings[i].Scale < 0.0f && AxisType == EAxisType::Negative)
+				if ((AxisMappings[i].Scale > 0.0f && AxisType == EAxisType::Positive) ||
+					(AxisMappings[i].Scale < 0.0f && AxisType == EAxisType::Negative))
 				{
 					return AxisMappings[i].Key;
 				}
@@ -512,8 +512,8 @@ void UUINavPCComponent::GetInputKeys(FName InputName, TArray<FKey>& OutKeys)
 		int Iterations = AxisMappings.Num();
 		for (int i = Iterations - 1; i >= 0; --i)
 		{
-			if (AxisMappings[i].Scale > 0.0f && AxisType == EAxisType::Positive ||
-				AxisMappings[i].Scale < 0.0f && AxisType == EAxisType::Negative)
+			if ((AxisMappings[i].Scale > 0.0f && AxisType == EAxisType::Positive) ||
+				(AxisMappings[i].Scale < 0.0f && AxisType == EAxisType::Negative))
 			{
 				OutKeys.Add(AxisMappings[i].Key);
 			}

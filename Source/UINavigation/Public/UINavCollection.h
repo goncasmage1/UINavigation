@@ -104,6 +104,7 @@ public:
 		void AppendCollection(TArray<FButtonNavigation> EdgeNavigations);
 
 	void IncrementGrids(int Dimension);
+	void UpdateCollectionLastIndex(int GridIndex, bool bAdded);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavCollection)
 		int GetGlobalGridIndex(int GridIndex);

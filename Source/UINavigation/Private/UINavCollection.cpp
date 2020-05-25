@@ -245,6 +245,20 @@ void UUINavCollection::IncrementGrids(int Dimension)
 	if (ParentCollection != nullptr) ParentCollection->IncrementGrids(Dimension);
 }
 
+void UUINavCollection::UpdateCollectionLastIndex(int GridIndex, bool bAdded)
+{
+	for (UUINavCollection* Collection : UINavCollections)
+	{
+		if (Collection->FirstGridIndex >= GridIndex &&
+			Collection->FirstGridIndex + Collection->GridCount <= GridIndex)
+		{
+			Collection->UpdateCollectionLastIndex(GridIndex, bAdded);
+			break;
+		}
+	}
+	LastButtonIndex--;
+}
+
 int UUINavCollection::GetGlobalGridIndex(int GridIndex)
 {
 	return FirstGridIndex + GridIndex;

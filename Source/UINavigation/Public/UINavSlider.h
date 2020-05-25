@@ -54,7 +54,7 @@ public:
 	float Difference = 0.0f;
 
 	FLinearColor HandleDefaultColor = FColor::Black;
-	FLinearColor BarDefaultColor = FColor::Black;
+	FLinearColor BarDefaultColor = FColor::White;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavSlider, meta = (ClampMin = "0"))
 		FLinearColor HandleHoverColor;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavSlider, meta = (ClampMin = "0"))

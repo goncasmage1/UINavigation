@@ -672,6 +672,8 @@ void UUINavWidget::IncrementGrid(UUINavButton* NewButton, FGrid & TargetGrid, in
 			TargetGrid.DimensionY++;
 		}
 	}
+
+	UpdateCollectionLastIndex(TargetGrid.GridIndex, true);
 }
 
 void UUINavWidget::DecrementGrid(FGrid & TargetGrid, int IndexInGrid)
@@ -694,6 +696,8 @@ void UUINavWidget::DecrementGrid(FGrid & TargetGrid, int IndexInGrid)
 			TargetGrid.DimensionY--;
 		}
 	}
+
+	UpdateCollectionLastIndex(TargetGrid.GridIndex, false);
 }
 
 void UUINavWidget::InsertNewComponent(UUINavComponent* NewComponent, int TargetIndex)
@@ -742,7 +746,10 @@ void UUINavWidget::IncrementUINavButtonIndices(int StartingIndex, int GridIndex)
 {
 	for (int i = StartingIndex + 1; i < UINavButtons.Num(); i++)
 	{
-		UINavButtons[i]->ButtonIndex = i;
+		if (UINavButtons[i]->ButtonIndex != i)
+		{
+			UINavButtons[i]->ButtonIndex = i;
+		}
 		if (UINavButtons[i]->GridIndex == GridIndex)
 		{
 			UINavButtons[i]->IndexInGrid++;
@@ -1009,6 +1016,19 @@ void UUINavWidget::UpdateComponentArray(int From, int To)
 				UINavComponents[i] = TempComp;
 				UINavComponents[i]->ComponentIndex =  UINavComponents[i]->NavButton->ButtonIndex;
 			}
+		}
+	}
+}
+
+void UUINavWidget::UpdateCollectionLastIndex(int GridIndex, bool bAdded)
+{
+	for (UUINavCollection* Collection : UINavCollections)
+	{
+		if (Collection->FirstGridIndex >= GridIndex &&
+			Collection->FirstGridIndex + Collection->GridCount <= GridIndex)
+		{
+			Collection->UpdateCollectionLastIndex(GridIndex, bAdded);
+			break;
 		}
 	}
 }
@@ -1590,7 +1610,6 @@ void UUINavWidget::DispatchNavigation(int Index, bool bHoverEvent)
 	for (UScrollBox* ScrollBox : ScrollBoxes)
 	{
 		ScrollBox->ScrollWidgetIntoView(UINavButtons[Index], bAnimateScrollBoxes);
-		break;
 	}
 
 	if (bUseButtonStates) UpdateHoveredButtonStates(Index, bHoverEvent);
