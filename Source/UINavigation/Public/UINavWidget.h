@@ -365,7 +365,7 @@ public:
 	*	@param Index The button's index in the Button's array
 	*	@param bRevertStyle Whether to revert the button's style to normal before switching
 	*/
-	void SwitchButtonStyle(EButtonStyle NewStyle, int Index, bool bRevertStyle = true);
+	void SwitchButtonStyle(EButtonStyle NewStyle, int Index, EButtonStyle FromStyle = EButtonStyle::Normal, bool bRevertStyle = true);
 
 	void RevertButtonStyle(int Index);
 
@@ -630,6 +630,8 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
 		class UUINavButton* GetButtonAtIndex(int InButtonIndex);
+
+	EButtonStyle GetStyleFromButtonState(UButton* Button);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
 		void GetGridAtIndex(int GridIndex, FGrid& Grid, bool& IsValid);

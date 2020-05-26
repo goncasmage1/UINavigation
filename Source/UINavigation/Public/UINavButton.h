@@ -51,6 +51,8 @@ public:
 
 	EButtonStyle ForcedStyle = EButtonStyle::Normal;
 
+	EButtonStyle FromStyle = EButtonStyle::Normal;
+
 	bool bAutoCollapse = false;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavButton)

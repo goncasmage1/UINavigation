@@ -1446,15 +1446,7 @@ void UUINavWidget::UpdateHoveredButtonStates(int Index, bool bHovered)
 	SwitchButtonStyle(CurrentButton->IsHovered() ? EButtonStyle::Hovered : EButtonStyle::Normal, ButtonIndex);
 }
 
-//void UUINavWidget::UpdatePressedButtonStates(int Index, bool bPressed)
-//{
-//	UUINavButton* ToButton = UINavButtons[Index];
-//
-//	SwitchButtonStyle(ToButton->ForcedStyle != EButtonStyle::Pressed ? EButtonStyle::Pressed : (bPressed ? EButtonStyle::Normal : EButtonStyle::Hovered),
-//						  Index);
-//}
-
-void UUINavWidget::SwitchButtonStyle(EButtonStyle NewStyle, int Index, bool bRevertStyle)
+void UUINavWidget::SwitchButtonStyle(EButtonStyle NewStyle, int Index, EButtonStyle FromStyle, bool bRevertStyle)
 {
 	if (bRevertStyle)
 	{
@@ -1474,11 +1466,16 @@ void UUINavWidget::SwitchButtonStyle(EButtonStyle NewStyle, int Index, bool bRev
 		else
 		{
 			TempState = Style.Pressed;
-			Style.Pressed = Style.Normal;
+			if (FromStyle == EButtonStyle::Normal) Style.Pressed = Style.Normal;
+			else Style.Pressed = Style.Hovered;
 		}
-		Style.Normal = TempState;
+		
+		if (FromStyle == EButtonStyle::Normal) Style.Normal = TempState;
+		else Style.Hovered = TempState;
+
 		TheButton->SetStyle(Style);
 		TheButton->ForcedStyle = NewStyle;
+		TheButton->FromStyle = FromStyle;
 	}
 
 	if (NewStyle == EButtonStyle::Hovered && Index != ButtonIndex)
@@ -1506,11 +1503,16 @@ void UUINavWidget::RevertButtonStyle(int Index)
 	else
 	{
 		TempState = Style.Pressed;
-		Style.Pressed = Style.Normal;
+		if (TheButton->FromStyle == EButtonStyle::Normal) Style.Pressed = Style.Normal;
+		else if (TheButton->FromStyle == EButtonStyle::Hovered) Style.Pressed = Style.Hovered;
 	}
-	Style.Normal = TempState;
+
+	if (TheButton->FromStyle == EButtonStyle::Normal) Style.Normal = TempState;
+	else Style.Hovered = TempState;
+
 	TheButton->SetStyle(Style);
 	TheButton->ForcedStyle = EButtonStyle::Normal;
+	TheButton->FromStyle = EButtonStyle::Normal;
 }
 
 void UUINavWidget::SetSelectorScale(FVector2D NewScale)
@@ -1722,7 +1724,9 @@ void UUINavWidget::OnPreSelect(int Index, bool bMouseClick)
 	}
 	else
 	{
-		SwitchButtonStyle(bMouseClick ? EButtonStyle::Normal : EButtonStyle::Hovered, ButtonIndex);
+		SwitchButtonStyle(!(CurrentButton->IsPressed() || CurrentButton->IsHovered()) ? EButtonStyle::Hovered : EButtonStyle::Normal,
+						  ButtonIndex,
+						  GetStyleFromButtonState(CurrentButton));
 
 		if (bIsSelectedButton)
 		{
@@ -2097,6 +2101,13 @@ UUINavButton * UUINavWidget::GetButtonAtIndex(int InButtonIndex)
 	else return UINavButtons[InButtonIndex];
 }
 
+EButtonStyle UUINavWidget::GetStyleFromButtonState(UButton* Button)
+{
+	if (Button->IsPressed()) return EButtonStyle::Pressed;
+	else if (Button->IsHovered()) return EButtonStyle::Hovered;
+	else return EButtonStyle::Normal;
+}
+
 void UUINavWidget::GetGridAtIndex(int GridIndex, FGrid & Grid, bool & IsValid)
 {
 	if (GridIndex < 0 || GridIndex >= NavigationGrids.Num())
@@ -2338,8 +2349,7 @@ void UUINavWidget::UnhoverEvent(int Index)
 		Otherwise, if the button is the selected button, also switch style to make sure it's still selected
 		*/
 		UUINavButton* ToButton = UINavButtons[Index];
-		if (SelectedButtonIndex != ButtonIndex && 
-			(ToButton->ForcedStyle != EButtonStyle::Normal) ||
+		if (SelectedButtonIndex != ButtonIndex && ToButton->ForcedStyle != EButtonStyle::Normal ||
 			((ToButton->ForcedStyle == EButtonStyle::Normal) && ButtonIndex == Index))
 		{
 			SwitchButtonStyle(ButtonIndex == Index ? EButtonStyle::Hovered : EButtonStyle::Normal, Index);
@@ -2407,7 +2417,22 @@ void UUINavWidget::FinishPress(bool bMouse)
 
 	if (!bMouse)
 	{
-		SwitchButtonStyle(EButtonStyle::Pressed, ButtonIndex);
+		if (!CurrentButton->IsPressed())
+		{
+ 			SwitchButtonStyle(EButtonStyle::Pressed,
+							  ButtonIndex,
+							  CurrentButton->IsHovered() ? EButtonStyle::Hovered : EButtonStyle::Normal);
+		}
+		else
+		{
+			CurrentButton->ForcedStyle = EButtonStyle::Pressed;
+		}
+	}
+	else if (CurrentButton->ForcedStyle != EButtonStyle::Normal)
+	{
+		SwitchButtonStyle(EButtonStyle::Pressed,
+						ButtonIndex,
+						CurrentButton->ForcedStyle);
 	}
 
 	UUINavComponent* CurrentUINavComp = GetUINavComponentAtIndex(ButtonIndex);
