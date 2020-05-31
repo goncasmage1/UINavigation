@@ -13,26 +13,36 @@ UINavigation is a UE4 plugin that allows you to easily setup Navigation within U
 
 ## Documentation
 
-![Documentation 1](/Screens/Docs_Overview.png)
+UI Navigation has a dedicated documentation blueprint inside its Content/Docs directory. These are some examples of the functions, variables and events you'll have access to:
 
-![Documentation 2](/Screens/Docs_1.png)
+![Documentation 1](/Screenshots/Docs_1.png)
 
-![Documentation 3](/Screens/Docs_2.png)
+![Documentation 2](/Screenshots/Docs_2.png)
 
-![Documentation 4](/Screens/Docs_3.png)
+![Documentation 3](/Screenshots/Docs_3.png)
 
-![Options](/Screens/DefaultsPanel.png)
+![Documentation 4](/Screenshots/Docs_4.png)
+
+![Documentation 5](/Screenshots/Docs_5.png)
+
+![Documentation 6](/Screenshots/Docs_6.png)
+
+![Documentation 7](/Screenshots/Docs_7.png)
+
+![Documentation 8](/Screenshots/Docs_8.png)
+
+![Options](/Screenshots/DefaultsPanel.png)
 
 ## Examples
 
 Simple menus have minimal required setup:
 
-![Example 1.1](/Screens/SimpleMenu_Designer.png)
+![Example 1.1](/Screenshots/SimpleMenu_Designer.png)
 
-![Example 1.2](/Screens/SimpleMenu_Graph.png)
+![Example 1.2](/Screenshots/SimpleMenu_Graph.png)
 
 Complex menus are manageable:
 
-![Example 2.1](/Screens/OptionsMenu_Designer.png)
+![Example 2.1](/Screenshots/OptionsMenu_Designer.png)
 
-![Example 2.2](/Screens/OptionsMenu_Graph.png)
+![Example 2.2](/Screenshots/OptionsMenu_Graph.png)
