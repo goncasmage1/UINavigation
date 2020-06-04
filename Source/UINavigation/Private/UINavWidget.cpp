@@ -428,7 +428,7 @@ FReply UUINavWidget::NativeOnMouseWheel(const FGeometry & InGeometry, const FPoi
 			UINavPC->NotifyMouseInputType();
 		}
 	}
-	return FReply::Unhandled();
+	return Super::NativeOnMouseWheel(InGeometry, InMouseEvent);
 }
 
 FReply UUINavWidget::NativeOnMouseButtonDown(const FGeometry & InGeometry, const FPointerEvent & InMouseEvent)
@@ -453,7 +453,7 @@ FReply UUINavWidget::NativeOnMouseButtonDown(const FGeometry & InGeometry, const
 		}
 	}
 
-	return FReply::Unhandled();
+	return Super::NativeOnMouseButtonDown(InGeometry, InMouseEvent);
 }
 
 FReply UUINavWidget::NativeOnMouseButtonUp(const FGeometry & InGeometry, const FPointerEvent & InMouseEvent)
@@ -465,7 +465,7 @@ FReply UUINavWidget::NativeOnMouseButtonUp(const FGeometry & InGeometry, const F
 		OnKeyReleased(InMouseEvent.GetEffectingButton());
 	}
 
-	return FReply::Unhandled();
+	return Super::NativeOnMouseButtonUp(InGeometry, InMouseEvent);
 }
 
 FReply UUINavWidget::OnKeyPressed(FKey PressedKey)
