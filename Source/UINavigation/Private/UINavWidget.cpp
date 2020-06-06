@@ -366,8 +366,6 @@ void UUINavWidget::NativeTick(const FGeometry & MyGeometry, float DeltaTime)
 
 FReply UUINavWidget::NativeOnKeyDown(const FGeometry & InGeometry, const FKeyEvent & InKeyEvent)
 {
-	Super::NativeOnKeyDown(InGeometry, InKeyEvent);
-
 	if (ReceiveInputType != EReceiveInputType::None)
 	{
 		FKey PressedKey = InKeyEvent.GetKey();
@@ -394,13 +392,11 @@ FReply UUINavWidget::NativeOnKeyDown(const FGeometry & InGeometry, const FKeyEve
 		}
 	}
 
-	return FReply::Unhandled();
+	return Super::NativeOnKeyDown(InGeometry, InKeyEvent);
 }
 
 FReply UUINavWidget::NativeOnKeyUp(const FGeometry & InGeometry, const FKeyEvent & InKeyEvent)
 {
-	Super::NativeOnKeyUp(InGeometry, InKeyEvent);
-
 	if (!bWaitForInput)
 	{
 		if (OnKeyReleased(InKeyEvent.GetKey()).IsEventHandled())
@@ -409,7 +405,7 @@ FReply UUINavWidget::NativeOnKeyUp(const FGeometry & InGeometry, const FKeyEvent
 		}
 	}
 
-	return FReply::Unhandled();
+	return Super::NativeOnKeyUp(InGeometry, InKeyEvent);
 }
 
 FReply UUINavWidget::NativeOnMouseWheel(const FGeometry & InGeometry, const FPointerEvent & InMouseEvent)
