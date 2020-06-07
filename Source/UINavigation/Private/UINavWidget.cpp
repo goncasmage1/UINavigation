@@ -1773,7 +1773,7 @@ void UUINavWidget::OnPreSelect(int Index, bool bMouseClick)
 	}
 	else
 	{
-		SwitchButtonStyle(GetStyleFromButtonState(CurrentButton),
+		SwitchButtonStyle(UINavButtons[Index]->IsPressed() ? EButtonStyle::Pressed : EButtonStyle::Hovered,
 						  ButtonIndex);
 
 		if (bIsSelectedButton)
