@@ -15,6 +15,8 @@ class UINAVIGATION_API UUINavComponent : public UUserWidget
 	
 public:
 
+	UUINavComponent(const FObjectInitializer& ObjectInitializer);
+
 	virtual void NativeConstruct() override;
 
 	UFUNCTION(BlueprintNativeEvent, Category = UINavComponent)

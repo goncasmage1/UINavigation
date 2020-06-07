@@ -4,14 +4,17 @@
 #include "UINavButton.h"
 #include "UINavWidget.h"
 
+UUINavComponent::UUINavComponent(const FObjectInitializer& ObjectInitializer)
+	:Super(ObjectInitializer)
+{
+	bIsFocusable = false;
+}
 
 void UUINavComponent::NativeConstruct()
 {
-	Super::NativeConstruct();
-
-	bIsFocusable = false;
-
 	check(NavButton != nullptr && "UINavComponent has no associated UINavButton");
+
+	Super::NativeConstruct();
 }
 
 void UUINavComponent::OnNavigatedTo_Implementation()
