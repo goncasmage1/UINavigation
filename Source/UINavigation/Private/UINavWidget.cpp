@@ -1439,17 +1439,16 @@ void UUINavWidget::UpdateHoveredButtonStates(int Index, bool bHovered)
 	UUINavButton* ToButton = UINavButtons[Index];
 
 	//Update new button state
-	SwitchButtonStyle(ToButton->IsHovered() ? EButtonStyle::Normal : EButtonStyle::Hovered, Index);
+	SwitchButtonStyle(/*ToButton->IsHovered() ? EButtonStyle::Normal : */EButtonStyle::Hovered, Index);
 
 	if (ButtonIndex == Index) return;
 
 	//Update previous button state
-	SwitchButtonStyle((CurrentButton->IsHovered() && !CurrentButton->IsPressed()) ? EButtonStyle::Hovered : EButtonStyle::Normal,
-					  ButtonIndex,
-					  CurrentButton->IsPressed() ? EButtonStyle::Pressed : EButtonStyle::Normal);
+	SwitchButtonStyle(EButtonStyle::Normal,
+					  ButtonIndex);
 }
 
-void UUINavWidget::SwitchButtonStyle(EButtonStyle NewStyle, int Index, EButtonStyle FromStyle, bool bRevertStyle)
+void UUINavWidget::SwitchButtonStyle(EButtonStyle NewStyle, int Index, bool bRevertStyle)
 {
 	if (bRevertStyle)
 	{
@@ -1458,14 +1457,15 @@ void UUINavWidget::SwitchButtonStyle(EButtonStyle NewStyle, int Index, EButtonSt
 
 	UUINavButton* TheButton = UINavButtons[Index];
 	FButtonStyle Style = TheButton->WidgetStyle;
+	EButtonStyle FromStyle = GetStyleFromButtonState(TheButton);
 	if (NewStyle != EButtonStyle::Normal)
 	{
 		FSlateBrush TempState;
 		if (NewStyle == EButtonStyle::Hovered)
 		{
 			TempState = Style.Hovered;
-			if (FromStyle == EButtonStyle::Normal) Style.Hovered = Style.Normal;
-			else Style.Hovered = Style.Pressed;
+			if (FromStyle == EButtonStyle::Pressed) Style.Hovered = Style.Pressed;
+			else Style.Hovered = Style.Normal;
 		}
 		else
 		{
@@ -1478,10 +1478,8 @@ void UUINavWidget::SwitchButtonStyle(EButtonStyle NewStyle, int Index, EButtonSt
 		else Style.Hovered = TempState;
 
 		TheButton->SetStyle(Style);
-		TheButton->ForcedStyle = NewStyle;
-		TheButton->FromStyle = FromStyle;
 	}
-	/*else if (FromStyle != EButtonStyle::Normal)
+	else if (FromStyle != EButtonStyle::Normal)
 	{
 		FSlateBrush TempState;
 		if (FromStyle == EButtonStyle::Hovered)
@@ -1498,9 +1496,10 @@ void UUINavWidget::SwitchButtonStyle(EButtonStyle NewStyle, int Index, EButtonSt
 		Style.Normal = TempState;
 
 		TheButton->SetStyle(Style);
-		TheButton->ForcedStyle = NewStyle;
-		TheButton->FromStyle = FromStyle;
-	}*/
+	}
+
+	TheButton->ForcedStyle = NewStyle;
+	TheButton->FromStyle = FromStyle;
 
 	if (NewStyle == EButtonStyle::Hovered && Index != ButtonIndex)
 	{
@@ -1515,34 +1514,54 @@ void UUINavWidget::SwitchButtonStyle(EButtonStyle NewStyle, int Index, EButtonSt
 void UUINavWidget::RevertButtonStyle(int Index)
 {
 	UUINavButton* TheButton = UINavButtons[Index];
-	if (TheButton->ForcedStyle == EButtonStyle::Normal) return;
+	if (TheButton->ForcedStyle != EButtonStyle::Normal)
+	{
+		FButtonStyle Style = TheButton->WidgetStyle;
+		FSlateBrush TempState;
+		if (TheButton->ForcedStyle == EButtonStyle::Hovered)
+		{
+			TempState = Style.Hovered;
+			Style.Hovered = Style.Normal;
+		}
+		else if (TheButton->ForcedStyle == EButtonStyle::Pressed)
+		{
+			TempState = Style.Pressed;
+			if (TheButton->FromStyle == EButtonStyle::Normal) Style.Pressed = Style.Normal;
+			else if (TheButton->FromStyle == EButtonStyle::Hovered) Style.Pressed = Style.Hovered;
+		}
+		else if (TheButton->FromStyle != EButtonStyle::Normal)
+		{
+			TempState = Style.Normal;
+			if (TheButton->FromStyle == EButtonStyle::Pressed) Style.Normal = Style.Pressed;
+			else if (TheButton->FromStyle == EButtonStyle::Hovered) Style.Normal = Style.Hovered;
+		}
 
-	FButtonStyle Style = TheButton->WidgetStyle;
-	FSlateBrush TempState;
-	if (TheButton->ForcedStyle == EButtonStyle::Hovered)
-	{
-		TempState = Style.Hovered;
-		Style.Hovered = Style.Normal;
-	}
-	else if (TheButton->ForcedStyle == EButtonStyle::Pressed)
-	{
-		TempState = Style.Pressed;
-		if (TheButton->FromStyle == EButtonStyle::Normal) Style.Pressed = Style.Normal;
-		else if (TheButton->FromStyle == EButtonStyle::Hovered) Style.Pressed = Style.Hovered;
+		if (TheButton->FromStyle == EButtonStyle::Normal) Style.Normal = TempState;
+		else if (TheButton->FromStyle == EButtonStyle::Hovered) Style.Hovered = TempState;
+		else Style.Pressed = TempState;
+
+		TheButton->SetStyle(Style);
+		TheButton->ForcedStyle = EButtonStyle::Normal;
 	}
 	else if (TheButton->FromStyle != EButtonStyle::Normal)
 	{
-		TempState = Style.Normal;
-		if (TheButton->FromStyle == EButtonStyle::Pressed) Style.Normal = Style.Pressed;
-		else if (TheButton->FromStyle == EButtonStyle::Hovered) Style.Normal = Style.Hovered;
+		FButtonStyle Style = TheButton->WidgetStyle;
+		FSlateBrush TempState;
+		if (TheButton->FromStyle == EButtonStyle::Hovered)
+		{
+			TempState = Style.Hovered;
+			Style.Hovered = Style.Normal;
+		}
+		else
+		{
+			TempState = Style.Pressed;
+			Style.Pressed = Style.Normal;
+		}
+
+		Style.Normal = TempState;
+
+		TheButton->SetStyle(Style);
 	}
-
-	if (TheButton->FromStyle == EButtonStyle::Normal) Style.Normal = TempState;
-	else if (TheButton->FromStyle == EButtonStyle::Hovered) Style.Hovered = TempState;
-	else Style.Pressed = TempState;
-
-	TheButton->SetStyle(Style);
-	TheButton->ForcedStyle = EButtonStyle::Normal;
 }
 
 void UUINavWidget::SetSelectorScale(FVector2D NewScale)
@@ -1754,9 +1773,8 @@ void UUINavWidget::OnPreSelect(int Index, bool bMouseClick)
 	}
 	else
 	{
-		SwitchButtonStyle(!(CurrentButton->IsPressed() || CurrentButton->IsHovered()) ? EButtonStyle::Hovered : EButtonStyle::Normal,
-						  ButtonIndex,
-						  GetStyleFromButtonState(CurrentButton));
+		SwitchButtonStyle(GetStyleFromButtonState(CurrentButton),
+						  ButtonIndex);
 
 		if (bIsSelectedButton)
 		{
@@ -2374,13 +2392,8 @@ void UUINavWidget::UnhoverEvent(int Index)
 
 	if (bUseButtonStates)
 	{
-		/*
-		If the button didn't switch style, switch style to make sure it's still selected
-		Otherwise, if the button is the selected button, also switch style to make sure it's still selected
-		*/
 		UUINavButton* ToButton = UINavButtons[Index];
-		if (SelectedButtonIndex != ButtonIndex && ToButton->ForcedStyle != EButtonStyle::Normal ||
-			((ToButton->ForcedStyle == EButtonStyle::Normal) && ButtonIndex == Index))
+		if (SelectedButtonIndex != ButtonIndex)
 		{
 			SwitchButtonStyle(ButtonIndex == Index ? EButtonStyle::Hovered : EButtonStyle::Normal, Index);
 		}
@@ -2450,8 +2463,7 @@ void UUINavWidget::FinishPress(bool bMouse)
 		if (!CurrentButton->IsPressed())
 		{
  			SwitchButtonStyle(EButtonStyle::Pressed,
-							  ButtonIndex,
-							  CurrentButton->IsHovered() ? EButtonStyle::Hovered : EButtonStyle::Normal);
+							  ButtonIndex);
 		}
 		else
 		{
@@ -2461,8 +2473,7 @@ void UUINavWidget::FinishPress(bool bMouse)
 	else if (CurrentButton->ForcedStyle != EButtonStyle::Normal)
 	{
 		SwitchButtonStyle(EButtonStyle::Pressed,
-						ButtonIndex,
-						CurrentButton->ForcedStyle);
+						ButtonIndex);
 	}
 
 	UUINavComponent* CurrentUINavComp = GetUINavComponentAtIndex(ButtonIndex);
