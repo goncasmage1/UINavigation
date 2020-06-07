@@ -21,10 +21,14 @@
 #include "Components/CanvasPanelSlot.h"
 #include "Components/ActorComponent.h"
 
+UUINavWidget::UUINavWidget(const FObjectInitializer& ObjectInitializer)
+	:Super(ObjectInitializer)
+{
+	bIsFocusable = true;
+}
+
 void UUINavWidget::NativeConstruct()
 {
-	Super::NativeConstruct();
-
 	/*
 	If this widget was added through a parent widget and should remove it from the viewport,
 	remove that widget from viewport
@@ -59,6 +63,8 @@ void UUINavWidget::NativeConstruct()
 
 	PreSetup(!bCompletedSetup);
 	InitialSetup();
+
+	Super::NativeConstruct();
 }
 
 void UUINavWidget::InitialSetup()
@@ -71,7 +77,6 @@ void UUINavWidget::InitialSetup()
 	}
 
 	bSetupStarted = true;
-	bIsFocusable = true;
 	WidgetClass = GetClass();
 	if (UINavPC == nullptr)
 	{

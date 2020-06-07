@@ -57,6 +57,8 @@ protected:
 
 	/******************************************************************************/
 
+	UUINavWidget(const FObjectInitializer& ObjectInitializer);
+
 	/**
 	*	Configures the blueprint on Construct event
 	*/
