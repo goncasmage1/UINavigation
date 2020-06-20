@@ -1460,8 +1460,7 @@ void UUINavWidget::SwitchButtonStyle(EButtonStyle NewStyle, int Index, bool bRev
 	TheButton->CurrentStyle = GetStyleFromButtonState(TheButton);
 	SwapStyle(TheButton, NewStyle, TheButton->CurrentStyle);
 
-	if (NewStyle != TheButton->CurrentStyle/* ||
-		NewStyle != TheButton->ForcedStyle*/) TheButton->ForcedStyle = NewStyle;
+	if (NewStyle != TheButton->CurrentStyle) TheButton->ForcedStyle = NewStyle;
 	
 	if (NewStyle == EButtonStyle::Hovered && Index != ButtonIndex)
 	{
@@ -2379,7 +2378,7 @@ void UUINavWidget::UnhoverEvent(int Index)
 			SwitchButtonStyle(ButtonIndex == Index ? EButtonStyle::Hovered : EButtonStyle::Normal, Index);
 		}
 
-		ButtonIndex = (ToButton->ForcedStyle != EButtonStyle::Normal) ? Index : ButtonIndex;
+		ButtonIndex = (ToButton->ForcedStyle != EButtonStyle::None) ? Index : ButtonIndex;
 	}
 }
 
@@ -2446,10 +2445,6 @@ void UUINavWidget::FinishPress(bool bMouse)
 		{
  			SwitchButtonStyle(EButtonStyle::Pressed,
 							  ButtonIndex);
-		}
-		else
-		{
-			CurrentButton->ForcedStyle = EButtonStyle::Pressed;
 		}
 	}
 	else if (CurrentButton->ForcedStyle != EButtonStyle::Normal)
