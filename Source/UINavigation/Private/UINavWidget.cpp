@@ -2454,7 +2454,6 @@ void UUINavWidget::FinishPress(bool bMouse)
 	}
 	else if (CurrentButton->ForcedStyle != EButtonStyle::Normal)
 	{
-		//TODO: Fix mouse double press (keyboard and mouse)
 		SwitchButtonStyle(EButtonStyle::Pressed,
 						ButtonIndex);
 	}

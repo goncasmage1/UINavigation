@@ -747,8 +747,6 @@ void UUINavPCComponent::MenuSelect()
 
 	if (ActiveWidget == nullptr || !bAllowSelectInput) return;
 
-	UE_LOG(LogTemp, Log, TEXT("Select Press"));
-
 	ClearTimer();
 	ActiveWidget->MenuSelectPress();
 }
