@@ -692,7 +692,11 @@ void UUINavPCComponent::ExecuteActionByName(FString Action, bool bPressed)
 	}
 	else if (Action.Equals("MenuSelect"))
 	{
-		if (bPressed) MenuSelect();
+		if (bPressed)
+		{
+			if (ActiveWidget->GetSelectCount() == 1) MenuSelect();
+			else PressedActions.Add(Action);
+		}
 		else MenuSelectRelease();
 	}
 	else if (Action.Equals("MenuReturn"))
@@ -742,6 +746,8 @@ void UUINavPCComponent::MenuSelect()
 	VerifyInputTypeChangeByAction(TEXT("MenuSelect"));
 
 	if (ActiveWidget == nullptr || !bAllowSelectInput) return;
+
+	UE_LOG(LogTemp, Log, TEXT("Select Press"));
 
 	ClearTimer();
 	ActiveWidget->MenuSelectPress();

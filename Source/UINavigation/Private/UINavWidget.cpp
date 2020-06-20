@@ -1451,13 +1451,13 @@ void UUINavWidget::UpdateHoveredButtonStates(int Index, bool bHovered)
 void UUINavWidget::SwitchButtonStyle(EButtonStyle NewStyle, int Index, bool bRevertStyle)
 {
 	UUINavButton* TheButton = UINavButtons[Index];
-	TheButton->CurrentStyle = GetStyleFromButtonState(TheButton);
 
 	if (bRevertStyle)
 	{
 		RevertButtonStyle(Index);
 	}
 
+	TheButton->CurrentStyle = GetStyleFromButtonState(TheButton);
 	SwapStyle(TheButton, NewStyle, TheButton->CurrentStyle);
 
 	if (NewStyle != TheButton->CurrentStyle/* ||
@@ -1716,21 +1716,24 @@ void UUINavWidget::OnPreSelect(int Index, bool bMouseClick)
 
 	bool bIsSelectedButton = SelectedButtonIndex == Index && (!bMouseClick || UINavButtons[Index]->IsHovered());
 
-	if (!bMouseClick)
+	if (SelectCount == 1)
 	{
-		bIgnoreMouseEvent = true;
-		CurrentButton->OnReleased.Broadcast();
-		if (bIsSelectedButton) CurrentButton->OnClicked.Broadcast();
-	}
-
-	UUINavComponent* CurrentUINavComp = GetUINavComponentAtIndex(Index);
-	if (CurrentUINavComp != nullptr)
-	{
-		if (bIsSelectedButton)
+		if (!bMouseClick)
 		{
-			CurrentUINavComp->OnSelected();
+			bIgnoreMouseEvent = true;
+			CurrentButton->OnReleased.Broadcast();
+			if (bIsSelectedButton) CurrentButton->OnClicked.Broadcast();
 		}
-		CurrentUINavComp->OnStopSelected();
+
+		UUINavComponent* CurrentUINavComp = GetUINavComponentAtIndex(Index);
+		if (CurrentUINavComp != nullptr)
+		{
+			if (bIsSelectedButton)
+			{
+				CurrentUINavComp->OnSelected();
+			}
+			CurrentUINavComp->OnStopSelected();
+		}
 	}
 
 	if (UINavInputContainer != nullptr && Index >= UINavInputContainer->FirstButtonIndex && Index <= UINavInputContainer->LastButtonIndex)
@@ -1746,17 +1749,22 @@ void UUINavWidget::OnPreSelect(int Index, bool bMouseClick)
 	}
 	else
 	{
-		SwitchButtonStyle(GetStyleFromButtonState(UINavButtons[Index]),
+		SwitchButtonStyle(UINavButtons[Index]->IsPressed() || SelectCount > 1 ? EButtonStyle::Pressed : (Index == ButtonIndex ? EButtonStyle::Hovered : EButtonStyle::Normal),
 						  ButtonIndex);
 
-		if (bIsSelectedButton)
+		SelectCount--;
+		if (SelectCount == 0)
 		{
-			OnSelect(Index);
-			CollectionOnSelect(Index);
+			SelectedButtonIndex = -1;
+
+			if (bIsSelectedButton)
+			{
+				OnSelect(Index);
+				CollectionOnSelect(Index);
+			}
+			OnStopSelect(Index);
+			CollectionOnStopSelect(Index);
 		}
-		SelectedButtonIndex = -1;
-		OnStopSelect(Index);
-		CollectionOnStopSelect(Index);
 	}
 }
 
@@ -2430,6 +2438,7 @@ void UUINavWidget::ReleaseEvent(int Index)
 void UUINavWidget::FinishPress(bool bMouse)
 {
 	SelectedButtonIndex = ButtonIndex;
+	SelectCount++;
 
   	if (!bMouse)
 	{
@@ -2445,7 +2454,7 @@ void UUINavWidget::FinishPress(bool bMouse)
 	}
 	else if (CurrentButton->ForcedStyle != EButtonStyle::Normal)
 	{
-		//TODO: Fix mouse press state change
+		//TODO: Fix mouse double press (keyboard and mouse)
 		SwitchButtonStyle(EButtonStyle::Pressed,
 						ButtonIndex);
 	}
@@ -2555,10 +2564,13 @@ void UUINavWidget::MenuSelectPress()
 
 	if (CurrentButton != nullptr)
 	{
-		USoundBase* PressSound = Cast<USoundBase>(CurrentButton->WidgetStyle.PressedSlateSound.GetResourceObject());
-		if (PressSound != nullptr) PlaySound(PressSound);
-		bIgnoreMouseEvent = true;
-		CurrentButton->OnPressed.Broadcast();
+		if (SelectCount == 0)
+		{
+			USoundBase* PressSound = Cast<USoundBase>(CurrentButton->WidgetStyle.PressedSlateSound.GetResourceObject());
+			if (PressSound != nullptr) PlaySound(PressSound);
+			bIgnoreMouseEvent = true;
+			CurrentButton->OnPressed.Broadcast();
+		}
 
 		FinishPress(false);
 	}
@@ -2566,8 +2578,6 @@ void UUINavWidget::MenuSelectPress()
 
 void UUINavWidget::MenuSelectRelease()
 {
-	if (SelectedButtonIndex == -1) return;
-
 	if (bMovingSelector)
 	{
 		HaltedIndex = SELECT_INDEX;

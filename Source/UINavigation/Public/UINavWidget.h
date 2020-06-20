@@ -44,6 +44,7 @@ protected:
 
 	//The index of the button that was selected
 	int SelectedButtonIndex = -1;
+	uint8 SelectCount = 0;
 
 	int InputBoxIndex = -1;
 	int NumberOfButtonsInGrids = 0;
@@ -504,6 +505,8 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
 		bool IsSelectorValid();
+
+	FORCEINLINE uint8 GetSelectCount() const { return SelectCount; }
 
 	/**
 	*	Returns the button that will be navigated to according to the given direction, starting at the given button
