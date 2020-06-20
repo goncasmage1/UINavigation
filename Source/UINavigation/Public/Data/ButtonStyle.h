@@ -6,6 +6,7 @@
 UENUM(BlueprintType)
 enum class EButtonStyle : uint8
 {
+	None UMETA(DisplayName = "None"),
 	Normal UMETA(DisplayName = "Normal"),
 	Hovered UMETA(DisplayName = "Hovered"),
 	Pressed UMETA(DisplayName = "Pressed")

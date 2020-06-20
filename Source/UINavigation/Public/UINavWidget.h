@@ -371,6 +371,8 @@ public:
 
 	void RevertButtonStyle(int Index);
 
+	void SwapStyle(UUINavButton* TargetButton, EButtonStyle Style1, EButtonStyle Style2);
+
 	/**
 	*	Changes the selector's scale to the scale given
 	*

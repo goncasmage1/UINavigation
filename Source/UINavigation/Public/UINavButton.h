@@ -49,9 +49,9 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = UINavButton)
 		int IndexInGrid = - 1;
 
-	EButtonStyle ForcedStyle = EButtonStyle::Normal;
+	EButtonStyle CurrentStyle = EButtonStyle::Normal;
 
-	EButtonStyle FromStyle = EButtonStyle::Normal;
+	EButtonStyle ForcedStyle = EButtonStyle::None;
 
 	bool bAutoCollapse = false;
 
