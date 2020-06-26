@@ -374,6 +374,8 @@ public:
 
 	void SwapStyle(UUINavButton* TargetButton, EButtonStyle Style1, EButtonStyle Style2);
 
+	void SwapPadding(UUINavButton* TargetButton);
+
 	/**
 	*	Changes the selector's scale to the scale given
 	*

@@ -18,6 +18,7 @@
 #include "Components/Image.h"
 #include "Components/Border.h"
 #include "Components/TextBlock.h"
+#include "Components/OverlaySlot.h"
 #include "Components/CanvasPanelSlot.h"
 #include "Components/ActorComponent.h"
 
@@ -1451,6 +1452,7 @@ void UUINavWidget::UpdateHoveredButtonStates(int Index, bool bHovered)
 void UUINavWidget::SwitchButtonStyle(EButtonStyle NewStyle, int Index, bool bRevertStyle)
 {
 	UUINavButton* TheButton = UINavButtons[Index];
+	bool bWasForcePressed = TheButton->ForcedStyle == EButtonStyle::Pressed;
 
 	if (bRevertStyle)
 	{
@@ -1459,6 +1461,15 @@ void UUINavWidget::SwitchButtonStyle(EButtonStyle NewStyle, int Index, bool bRev
 
 	TheButton->CurrentStyle = GetStyleFromButtonState(TheButton);
 	SwapStyle(TheButton, NewStyle, TheButton->CurrentStyle);
+
+	if (NewStyle == EButtonStyle::Pressed && TheButton->CurrentStyle != EButtonStyle::Pressed)
+	{
+		SwapPadding(TheButton);
+	}
+	else if (bWasForcePressed)
+	{
+		SwapPadding(TheButton);
+	}
 
 	if (NewStyle != TheButton->CurrentStyle) TheButton->ForcedStyle = NewStyle;
 	
@@ -1534,6 +1545,17 @@ void UUINavWidget::SwapStyle(UUINavButton* TargetButton, EButtonStyle Style1, EB
 	}
 
 	TargetButton->SetStyle(Style);
+}
+
+void UUINavWidget::SwapPadding(UUINavButton* TargetButton)
+{
+	FButtonStyle Style = TargetButton->WidgetStyle;
+	UOverlaySlot* OverlaySlot = Cast<UOverlaySlot>(TargetButton->Slot);
+	FMargin PressedPadding = Style.PressedPadding - Style.NormalPadding;
+	if (OverlaySlot != nullptr)
+	{
+		OverlaySlot->SetPadding(OverlaySlot->Padding == PressedPadding ? FMargin(0.0f) : PressedPadding);
+	}
 }
 
 void UUINavWidget::SetSelectorScale(FVector2D NewScale)
