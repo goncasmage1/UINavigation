@@ -693,7 +693,11 @@ void UUINavPCComponent::ExecuteActionByName(FString Action, bool bPressed)
 	else if (Action.Equals("MenuSelect"))
 	{
 		if (bPressed) MenuSelect();
-		else MenuSelectRelease();
+		else
+		{
+			if (ActiveWidget->GetSelectCount() > 1) PressedActions.Add(Action);
+			MenuSelectRelease();
+		}
 	}
 	else if (Action.Equals("MenuReturn"))
 	{
