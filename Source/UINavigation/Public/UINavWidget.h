@@ -8,6 +8,7 @@
 #include "Data/ReceiveInputType.h"
 #include "Data/SelectorPosition.h"
 #include "Data/Grid.h"
+#include "Data/ButtonStyle.h"
 #include "Components/ScrollBox.h"
 #include "UINavWidget.generated.h"
 
@@ -43,6 +44,7 @@ protected:
 
 	//The index of the button that was selected
 	int SelectedButtonIndex = -1;
+	uint8 SelectCount = 0;
 
 	int InputBoxIndex = -1;
 	int NumberOfButtonsInGrids = 0;
@@ -55,6 +57,8 @@ protected:
 	FVector2D Distance;
 
 	/******************************************************************************/
+
+	UUINavWidget(const FObjectInitializer& ObjectInitializer);
 
 	/**
 	*	Configures the blueprint on Construct event
@@ -338,9 +342,9 @@ public:
 	*	Changes the state of the current button to normal and the new button to hovered
 	*
 	*	@param	Index  The new button's index in the Button's array
-	*	@param  bHovered  Whether the function was called due to a button hover
+	*	@param  bHovered  Whether the function was called due to a mouse hover
 	*/
-	void UpdateButtonsStates(int Index, bool bHovered);
+	void UpdateHoveredButtonStates(int Index, bool bHovered);
 
 	/**
 	*	Plays the animations in the UINavAnimations array
@@ -358,11 +362,19 @@ public:
 	void UpdateTextColor(int Index);
 
 	/**
-	*	Switches the button with the given index's style between normal and hovered
+	*	Switches the button with the given index's style
 	*
+	*	@param NewStyle The desired style
 	*	@param Index The button's index in the Button's array
+	*	@param bRevertStyle Whether to revert the button's style to normal before switching
 	*/
-	void SwitchButtonStyle(int Index);
+	void SwitchButtonStyle(EButtonStyle NewStyle, int Index, bool bRevertStyle = true);
+
+	void RevertButtonStyle(int Index);
+
+	void SwapStyle(UUINavButton* TargetButton, EButtonStyle Style1, EButtonStyle Style2);
+
+	void SwapPadding(UUINavButton* TargetButton);
 
 	/**
 	*	Changes the selector's scale to the scale given
@@ -496,6 +508,8 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
 		bool IsSelectorValid();
 
+	FORCEINLINE uint8 GetSelectCount() const { return SelectCount; }
+
 	/**
 	*	Returns the button that will be navigated to according to the given direction, starting at the given button
 	*
@@ -625,6 +639,8 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
 		class UUINavButton* GetButtonAtIndex(int InButtonIndex);
+
+	EButtonStyle GetStyleFromButtonState(UButton* Button);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
 		void GetGridAtIndex(int GridIndex, FGrid& Grid, bool& IsValid);
@@ -771,6 +787,6 @@ public:
 	virtual void MenuReturnPress();
 	virtual void MenuReturnRelease();
 
-	void FinishPress();
+	void FinishPress(bool bMouse);
 
 };

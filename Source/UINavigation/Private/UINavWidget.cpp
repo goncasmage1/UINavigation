@@ -18,13 +18,18 @@
 #include "Components/Image.h"
 #include "Components/Border.h"
 #include "Components/TextBlock.h"
+#include "Components/OverlaySlot.h"
 #include "Components/CanvasPanelSlot.h"
 #include "Components/ActorComponent.h"
 
+UUINavWidget::UUINavWidget(const FObjectInitializer& ObjectInitializer)
+	:Super(ObjectInitializer)
+{
+	bIsFocusable = true;
+}
+
 void UUINavWidget::NativeConstruct()
 {
-	Super::NativeConstruct();
-
 	/*
 	If this widget was added through a parent widget and should remove it from the viewport,
 	remove that widget from viewport
@@ -59,6 +64,8 @@ void UUINavWidget::NativeConstruct()
 
 	PreSetup(!bCompletedSetup);
 	InitialSetup();
+
+	Super::NativeConstruct();
 }
 
 void UUINavWidget::InitialSetup()
@@ -71,7 +78,6 @@ void UUINavWidget::InitialSetup()
 	}
 
 	bSetupStarted = true;
-	bIsFocusable = true;
 	WidgetClass = GetClass();
 	if (UINavPC == nullptr)
 	{
@@ -366,8 +372,6 @@ void UUINavWidget::NativeTick(const FGeometry & MyGeometry, float DeltaTime)
 
 FReply UUINavWidget::NativeOnKeyDown(const FGeometry & InGeometry, const FKeyEvent & InKeyEvent)
 {
-	Super::NativeOnKeyDown(InGeometry, InKeyEvent);
-
 	if (ReceiveInputType != EReceiveInputType::None)
 	{
 		FKey PressedKey = InKeyEvent.GetKey();
@@ -394,13 +398,11 @@ FReply UUINavWidget::NativeOnKeyDown(const FGeometry & InGeometry, const FKeyEve
 		}
 	}
 
-	return FReply::Unhandled();
+	return Super::NativeOnKeyDown(InGeometry, InKeyEvent);
 }
 
 FReply UUINavWidget::NativeOnKeyUp(const FGeometry & InGeometry, const FKeyEvent & InKeyEvent)
 {
-	Super::NativeOnKeyUp(InGeometry, InKeyEvent);
-
 	if (!bWaitForInput)
 	{
 		if (OnKeyReleased(InKeyEvent.GetKey()).IsEventHandled())
@@ -409,7 +411,7 @@ FReply UUINavWidget::NativeOnKeyUp(const FGeometry & InGeometry, const FKeyEvent
 		}
 	}
 
-	return FReply::Unhandled();
+	return Super::NativeOnKeyUp(InGeometry, InKeyEvent);
 }
 
 FReply UUINavWidget::NativeOnMouseWheel(const FGeometry & InGeometry, const FPointerEvent & InMouseEvent)
@@ -428,7 +430,7 @@ FReply UUINavWidget::NativeOnMouseWheel(const FGeometry & InGeometry, const FPoi
 			UINavPC->NotifyMouseInputType();
 		}
 	}
-	return FReply::Unhandled();
+	return Super::NativeOnMouseWheel(InGeometry, InMouseEvent);
 }
 
 FReply UUINavWidget::NativeOnMouseButtonDown(const FGeometry & InGeometry, const FPointerEvent & InMouseEvent)
@@ -453,7 +455,7 @@ FReply UUINavWidget::NativeOnMouseButtonDown(const FGeometry & InGeometry, const
 		}
 	}
 
-	return FReply::Unhandled();
+	return Super::NativeOnMouseButtonDown(InGeometry, InMouseEvent);
 }
 
 FReply UUINavWidget::NativeOnMouseButtonUp(const FGeometry & InGeometry, const FPointerEvent & InMouseEvent)
@@ -465,7 +467,7 @@ FReply UUINavWidget::NativeOnMouseButtonUp(const FGeometry & InGeometry, const F
 		OnKeyReleased(InMouseEvent.GetEffectingButton());
 	}
 
-	return FReply::Unhandled();
+	return Super::NativeOnMouseButtonUp(InGeometry, InMouseEvent);
 }
 
 FReply UUINavWidget::OnKeyPressed(FKey PressedKey)
@@ -1433,43 +1435,126 @@ void UUINavWidget::SwitchTextColorTo(int Index, FLinearColor Color)
 	NewText->SetColorAndOpacity(Color);
 }
 
-void UUINavWidget::UpdateButtonsStates(int Index, bool bHovered)
+void UUINavWidget::UpdateHoveredButtonStates(int Index, bool bHovered)
 {
 	UUINavButton* ToButton = UINavButtons[Index];
+
 	//Update new button state
-	if (!(bHovered ^ ToButton->bSwitchedStyle))
-	{
-		SwitchButtonStyle(Index);
-		ToButton->bSwitchedStyle = !bHovered;
-	}
+	SwitchButtonStyle(EButtonStyle::Hovered, Index);
 
 	if (ButtonIndex == Index) return;
 
 	//Update previous button state
-	if (!(bHovered ^ !ToButton->bSwitchedStyle))
-	{
-		SwitchButtonStyle(ButtonIndex);
-		CurrentButton->bSwitchedStyle = false;
-	}
+	SwitchButtonStyle(EButtonStyle::Normal,
+					  ButtonIndex);
 }
 
-void UUINavWidget::SwitchButtonStyle(int Index)
+void UUINavWidget::SwitchButtonStyle(EButtonStyle NewStyle, int Index, bool bRevertStyle)
 {
 	UUINavButton* TheButton = UINavButtons[Index];
-	FButtonStyle NewStile = TheButton->WidgetStyle;
-	FSlateBrush TempState;
-	TempState = NewStile.Hovered;
-	NewStile.Hovered = NewStile.Normal;
-	NewStile.Normal = TempState;
-	TheButton->SetStyle(NewStile);
+	bool bWasForcePressed = TheButton->ForcedStyle == EButtonStyle::Pressed;
 
-	if (Index != ButtonIndex)
+	if (bRevertStyle)
 	{
-		USoundBase* HoverSound = Cast<USoundBase>(NewStile.HoveredSlateSound.GetResourceObject());
+		RevertButtonStyle(Index);
+	}
+
+	TheButton->CurrentStyle = GetStyleFromButtonState(TheButton);
+	SwapStyle(TheButton, NewStyle, TheButton->CurrentStyle);
+
+	if (NewStyle == EButtonStyle::Pressed && TheButton->CurrentStyle != EButtonStyle::Pressed)
+	{
+		SwapPadding(TheButton);
+	}
+	else if (bWasForcePressed)
+	{
+		SwapPadding(TheButton);
+	}
+
+	if (NewStyle != TheButton->CurrentStyle) TheButton->ForcedStyle = NewStyle;
+	
+	if (NewStyle == EButtonStyle::Hovered && Index != ButtonIndex)
+	{
+		USoundBase* HoverSound = Cast<USoundBase>(TheButton->WidgetStyle.HoveredSlateSound.GetResourceObject());
 		if (HoverSound != nullptr)
 		{
 			PlaySound(HoverSound);
 		}
+	}
+}
+
+void UUINavWidget::RevertButtonStyle(int Index)
+{
+	UUINavButton* TheButton = UINavButtons[Index];
+	if (TheButton->ForcedStyle == EButtonStyle::None) return;
+
+	SwapStyle(TheButton, TheButton->ForcedStyle, TheButton->CurrentStyle);
+
+	TheButton->ForcedStyle = EButtonStyle::None;
+}
+
+void UUINavWidget::SwapStyle(UUINavButton* TargetButton, EButtonStyle Style1, EButtonStyle Style2)
+{
+	FButtonStyle Style = TargetButton->WidgetStyle;
+	FSlateBrush TempState;
+
+	switch (Style1)
+	{
+		case EButtonStyle::Normal:
+			TempState = Style.Normal;
+			switch (Style2)
+			{
+				case EButtonStyle::Hovered:
+					Style.Normal = Style.Hovered;
+					Style.Hovered = TempState;
+					break;
+				case EButtonStyle::Pressed:
+					Style.Normal = Style.Pressed;
+					Style.Pressed = TempState;
+					break;
+			}
+			break;
+		case EButtonStyle::Hovered:
+			TempState = Style.Hovered;
+			switch (Style2)
+			{
+				case EButtonStyle::Normal:
+					Style.Hovered = Style.Normal;
+					Style.Normal = TempState;
+					break;
+				case EButtonStyle::Pressed:
+					Style.Hovered = Style.Pressed;
+					Style.Pressed = TempState;
+					break;
+			}
+			break;
+		case EButtonStyle::Pressed:
+			TempState = Style.Pressed;
+			switch (Style2)
+			{
+				case EButtonStyle::Normal:
+					Style.Pressed = Style.Normal;
+					Style.Normal = TempState;
+					break;
+				case EButtonStyle::Hovered:
+					Style.Pressed = Style.Hovered;
+					Style.Hovered = TempState;
+					break;
+			}
+			break;
+	}
+
+	TargetButton->SetStyle(Style);
+}
+
+void UUINavWidget::SwapPadding(UUINavButton* TargetButton)
+{
+	FButtonStyle Style = TargetButton->WidgetStyle;
+	UOverlaySlot* OverlaySlot = Cast<UOverlaySlot>(TargetButton->Slot);
+	FMargin PressedPadding = Style.PressedPadding - Style.NormalPadding;
+	if (OverlaySlot != nullptr)
+	{
+		OverlaySlot->SetPadding(OverlaySlot->Padding == PressedPadding ? FMargin(0.0f) : PressedPadding);
 	}
 }
 
@@ -1572,7 +1657,7 @@ void UUINavWidget::DispatchNavigation(int Index, bool bHoverEvent)
 		ScrollBox->ScrollWidgetIntoView(UINavButtons[Index], bAnimateScrollBoxes);
 	}
 
-	if (bUseButtonStates) UpdateButtonsStates(Index, bHoverEvent);
+	if (bUseButtonStates) UpdateHoveredButtonStates(Index, bHoverEvent);
 
 	if (IsSelectorValid())
 	{
@@ -1650,23 +1735,26 @@ void UUINavWidget::OnPreSelect(int Index, bool bMouseClick)
 	if (CurrentButton == nullptr ||
 		SelectedButtonIndex == -1) return;
 
-	bool bIsSelectedButton = SelectedButtonIndex == Index;
+	bool bIsSelectedButton = SelectedButtonIndex == Index && (!bMouseClick || UINavButtons[Index]->IsHovered());
 
-	if (!bMouseClick)
+	if (SelectCount == 1)
 	{
-		bIgnoreMouseEvent = true;
-		CurrentButton->OnReleased.Broadcast();
-		if (bIsSelectedButton) CurrentButton->OnClicked.Broadcast();
-	}
-
-	UUINavComponent* CurrentUINavComp = GetUINavComponentAtIndex(Index);
-	if (CurrentUINavComp != nullptr)
-	{
-		if (bIsSelectedButton)
+		if (!bMouseClick)
 		{
-			CurrentUINavComp->OnSelected();
+			bIgnoreMouseEvent = true;
+			CurrentButton->OnReleased.Broadcast();
+			if (bIsSelectedButton) CurrentButton->OnClicked.Broadcast();
 		}
-		CurrentUINavComp->OnStopSelected();
+
+		UUINavComponent* CurrentUINavComp = GetUINavComponentAtIndex(Index);
+		if (CurrentUINavComp != nullptr)
+		{
+			if (bIsSelectedButton)
+			{
+				CurrentUINavComp->OnSelected();
+			}
+			CurrentUINavComp->OnStopSelected();
+		}
 	}
 
 	if (UINavInputContainer != nullptr && Index >= UINavInputContainer->FirstButtonIndex && Index <= UINavInputContainer->LastButtonIndex)
@@ -1682,14 +1770,22 @@ void UUINavWidget::OnPreSelect(int Index, bool bMouseClick)
 	}
 	else
 	{
-		if (bIsSelectedButton)
+		SwitchButtonStyle(UINavButtons[Index]->IsPressed() || SelectCount > 1 ? EButtonStyle::Pressed : (Index == ButtonIndex ? EButtonStyle::Hovered : EButtonStyle::Normal),
+						  ButtonIndex);
+
+		SelectCount--;
+		if (SelectCount == 0)
 		{
-			OnSelect(Index);
-			CollectionOnSelect(Index);
+			SelectedButtonIndex = -1;
+
+			if (bIsSelectedButton)
+			{
+				OnSelect(Index);
+				CollectionOnSelect(Index);
+			}
+			OnStopSelect(Index);
+			CollectionOnStopSelect(Index);
 		}
-		SelectedButtonIndex = -1;
-		OnStopSelect(Index);
-		CollectionOnStopSelect(Index);
 	}
 }
 
@@ -2055,6 +2151,13 @@ UUINavButton * UUINavWidget::GetButtonAtIndex(int InButtonIndex)
 	else return UINavButtons[InButtonIndex];
 }
 
+EButtonStyle UUINavWidget::GetStyleFromButtonState(UButton* Button)
+{
+	if (Button->IsPressed()) return EButtonStyle::Pressed;
+	else if (Button->IsHovered()) return EButtonStyle::Hovered;
+	else return EButtonStyle::Normal;
+}
+
 void UUINavWidget::GetGridAtIndex(int GridIndex, FGrid & Grid, bool & IsValid)
 {
 	if (GridIndex < 0 || GridIndex >= NavigationGrids.Num())
@@ -2268,7 +2371,7 @@ void UUINavWidget::HoverEvent(int Index)
 
 	if (UINavPC->GetCurrentInputType() != EInputType::Mouse || Index == ButtonIndex)
 	{
-		if (bUseButtonStates) SwitchButtonStyle(Index);
+		if (bUseButtonStates) RevertButtonStyle(Index);
 		return;
 	}
 
@@ -2291,19 +2394,13 @@ void UUINavWidget::UnhoverEvent(int Index)
 
 	if (bUseButtonStates)
 	{
-		/*
-		If the button didn't switch style, switch style to make sure it's still selected
-		Otherwise, if the button is the selected button, also switch style to make sure it's still selected
-		*/
 		UUINavButton* ToButton = UINavButtons[Index];
-		if (SelectedButtonIndex != ButtonIndex &&
-			(!ToButton->bSwitchedStyle || (ToButton->bSwitchedStyle && ButtonIndex == Index)))
+		if (SelectedButtonIndex != ButtonIndex)
 		{
-			SwitchButtonStyle(Index);
-			ToButton->bSwitchedStyle = ButtonIndex == Index;
+			SwitchButtonStyle(ButtonIndex == Index ? EButtonStyle::Hovered : EButtonStyle::Normal, Index);
 		}
 
-		ButtonIndex = ToButton->bSwitchedStyle ? Index : ButtonIndex;
+		ButtonIndex = (ToButton->ForcedStyle != EButtonStyle::None) ? Index : ButtonIndex;
 	}
 }
 
@@ -2328,7 +2425,7 @@ void UUINavWidget::PressEvent(int Index)
 
 		if (!UINavPC->AllowsSelectInput()) return;
 
-		FinishPress();
+		FinishPress(true);
 	}
 }
 
@@ -2350,7 +2447,7 @@ void UUINavWidget::ReleaseEvent(int Index)
 		return;
 	}
 
-	if (!UINavButtons[Index]->IsHovered()) SwitchButtonStyle(Index);
+	if (!UINavButtons[Index]->IsHovered()) RevertButtonStyle(Index);
 
 	if (!UINavPC->AllowsSelectInput()) return;
 
@@ -2359,9 +2456,24 @@ void UUINavWidget::ReleaseEvent(int Index)
 	if (Index != ButtonIndex) NavigateTo(Index);
 }
 
-void UUINavWidget::FinishPress()
+void UUINavWidget::FinishPress(bool bMouse)
 {
 	SelectedButtonIndex = ButtonIndex;
+	SelectCount++;
+
+  	if (!bMouse)
+	{
+		if (!CurrentButton->IsPressed())
+		{
+ 			SwitchButtonStyle(EButtonStyle::Pressed,
+							  ButtonIndex);
+		}
+	}
+	else if (CurrentButton->ForcedStyle != EButtonStyle::Normal)
+	{
+		SwitchButtonStyle(EButtonStyle::Pressed,
+						ButtonIndex);
+	}
 
 	UUINavComponent* CurrentUINavComp = GetUINavComponentAtIndex(ButtonIndex);
 	if (CurrentUINavComp != nullptr)
@@ -2468,19 +2580,20 @@ void UUINavWidget::MenuSelectPress()
 
 	if (CurrentButton != nullptr)
 	{
-		USoundBase* PressSound = Cast<USoundBase>(CurrentButton->WidgetStyle.PressedSlateSound.GetResourceObject());
-		if (PressSound != nullptr) PlaySound(PressSound);
-		bIgnoreMouseEvent = true;
-		CurrentButton->OnPressed.Broadcast();
+		if (SelectCount == 0)
+		{
+			USoundBase* PressSound = Cast<USoundBase>(CurrentButton->WidgetStyle.PressedSlateSound.GetResourceObject());
+			if (PressSound != nullptr) PlaySound(PressSound);
+			bIgnoreMouseEvent = true;
+			CurrentButton->OnPressed.Broadcast();
+		}
 
-		FinishPress();
+		FinishPress(false);
 	}
 }
 
 void UUINavWidget::MenuSelectRelease()
 {
-	if (SelectedButtonIndex == -1) return;
-
 	if (bMovingSelector)
 	{
 		HaltedIndex = SELECT_INDEX;
