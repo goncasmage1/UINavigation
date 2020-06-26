@@ -305,7 +305,7 @@ void UUINavWidget::SetupSelector()
 
 void UUINavWidget::UINavSetup()
 {
-	if (UINavPC == nullptr) ConfigureUINavPC();
+	if (UINavPC == nullptr) return;
 
 	UINavPC->SetActiveWidget(this);
 	if (UINavPC->GetInputMode() == EInputMode::UI)
