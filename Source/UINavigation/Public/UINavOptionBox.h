@@ -15,15 +15,13 @@ class UINAVIGATION_API UUINavOptionBox : public UUINavComponentBox
 	
 protected:
 
-	virtual void CheckRightLimit() override;
-
 	virtual void Update() override;
 
 public:
 
 	virtual void NativeConstruct() override;
 
-	virtual int GetLastOptionIndex() override;
+	virtual int GetMaxOptionIndex() const override;
 
 	/*If set to false, will use StringOptions, otherwise will use
 	all integers in designated range (from MinRange to MaxRange, inclusive)*/
@@ -36,7 +34,5 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavOptionBox)
 		FORCEINLINE FText GetCurrentString() const { return StringOptions[OptionIndex]; }
-
-	virtual void NavigateRight() override;
 
 };

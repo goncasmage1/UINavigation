@@ -50,7 +50,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavSlider, meta = (ClampMin="0"))
 		bool bUseComma = false;
 
-	int MaxOptionIndex = 0;
 	float Difference = 0.0f;
 
 	FLinearColor HandleDefaultColor = FColor::Black;
@@ -63,6 +62,11 @@ public:
 	virtual void NativeConstruct() override;
 
 	virtual void Update() override;
+
+	virtual FORCEINLINE int GetMaxOptionIndex() const override
+	{
+		return (MaxValue - MinValue) / Interval;
+	}
 
 	virtual void OnNavigatedTo_Implementation() override;
 	virtual void OnNavigatedFrom_Implementation() override;

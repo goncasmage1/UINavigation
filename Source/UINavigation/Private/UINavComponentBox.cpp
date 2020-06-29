@@ -9,42 +9,26 @@ void UUINavComponentBox::NativeConstruct()
 {
 	BaseConstruct();
 
-	if (OptionIndex > (MaxRange - MinRange))
-	{
-		DISPLAYERROR(TEXT("Invalid OptionIndex"));
-	}
-
-	LeftButton->OnClicked.AddDynamic(this, &UUINavComponentBox::NavigateLeft);
-	RightButton->OnClicked.AddDynamic(this, &UUINavComponentBox::NavigateRight);
-	LeftButton->IsFocusable = false;
-	RightButton->IsFocusable = false;
+	if (!LeftButton->OnClicked.IsBound())
+		LeftButton->OnClicked.AddDynamic(this, &UUINavComponentBox::NavigateLeft);
+	if (!RightButton->OnClicked.IsBound())
+		RightButton->OnClicked.AddDynamic(this, &UUINavComponentBox::NavigateRight);
 }
 
 void UUINavComponentBox::BaseConstruct()
 {
 	Super::NativeConstruct();
 
-	if (MinRange >= MaxRange)
-	{
-		DISPLAYERROR(TEXT("MinRange has to be smaller that MaxRange"));
-	}
-	if (Interval <= 0)
-	{
-		DISPLAYERROR(TEXT("Interval must be at least 1"));
-	}
+	if (MinRange >= MaxRange) DISPLAYERROR(TEXT("MinRange has to be smaller that MaxRange"));
+	if (Interval <= 0) DISPLAYERROR(TEXT("Interval must be at least 1"));
 
-	if (LeftButton == nullptr)
-	{
-		DISPLAYERROR(TEXT("Couldn't find Button named LeftButton in UINavOptionBox"));
-	}
-	if (RightButton == nullptr)
-	{
-		DISPLAYERROR(TEXT("Couldn't find Button named RightButton in UINavOptionBox"));
-	}
-	if (NavText == nullptr)
-	{
-		DISPLAYERROR(TEXT("Couldn't find TextBlock named NavText in UINavOptionBox"));
-	}
+	if (LeftButton == nullptr) DISPLAYERROR(TEXT("Couldn't find Button named LeftButton in UINavOptionBox"));
+	else LeftButton->IsFocusable = false;
+
+	if (RightButton == nullptr) DISPLAYERROR(TEXT("Couldn't find Button named RightButton in UINavOptionBox"));
+	else RightButton->IsFocusable = false;
+
+	if (NavText == nullptr) DISPLAYERROR(TEXT("Couldn't find TextBlock named NavText in UINavOptionBox"));
 
 	Update();
 
@@ -54,23 +38,16 @@ void UUINavComponentBox::BaseConstruct()
 	CheckRightLimit();
 }
 
-int UUINavComponentBox::GetLastOptionIndex()
-{
-	return (MaxRange - MinRange) / Interval;
-}
-
 void UUINavComponentBox::CheckLeftLimit()
 {
 	if (bLoopOptions) return;
-	if (OptionIndex == 0)
-	{
-		LeftButton->SetIsEnabled(false);
-	}
+	if (OptionIndex == 0) LeftButton->SetIsEnabled(false);
 }
 
 void UUINavComponentBox::CheckRightLimit()
 {
-
+	if (bLoopOptions) return;
+	if (OptionIndex == GetMaxOptionIndex()) RightButton->SetIsEnabled(false);
 }
 
 void UUINavComponentBox::UpdateTextToIndex(int NewIndex)
@@ -87,21 +64,22 @@ void UUINavComponentBox::UpdateTextToIndex(int NewIndex)
 void UUINavComponentBox::NavigateLeft()
 {
 	//Make sure button still has options left to navigate
-	if (OptionIndex > 0)
-	{
-		OptionIndex--;
-	}
-	else if (bLoopOptions)
-	{
-		OptionIndex = GetLastOptionIndex();
-	}
+	if (OptionIndex > 0) OptionIndex--;
+	else if (bLoopOptions) OptionIndex = GetMaxOptionIndex();
 
 	FinishNavigateLeft(LastOptionIndex != OptionIndex);
 }
 
 void UUINavComponentBox::NavigateRight()
 {
-	Super::NavigateRight();
+	if ((OptionIndex + 1) <= GetMaxOptionIndex()) OptionIndex++;
+	else
+	{
+		if (bLoopOptions) OptionIndex = 0;
+		else return;
+	}
+
+	FinishNavigateRight(LastOptionIndex != OptionIndex);
 }
 
 void UUINavComponentBox::FinishNavigateLeft(bool bOptionChanged)

@@ -11,52 +11,21 @@ void UUINavSliderBox::NativeConstruct()
 {
 	Super::BaseConstruct();
 
-	//check(DefaultOptionIndex <= (MaxRange - MinRange) && "DefaultOptionIndex isn't valid");
-	if (OptionIndex > (MaxRange - MinRange))
-	{
-		DISPLAYERROR(TEXT("Invalid OptionIndex"));
-	}
-
-	LeftButton->OnClicked.AddDynamic(this, &UUINavSliderBox::NavigateLeft);
-	RightButton->OnClicked.AddDynamic(this, &UUINavSliderBox::NavigateRight);
-}
-
-void UUINavSliderBox::CheckRightLimit()
-{
-	int Difference = (MaxRange - MinRange) / Interval;
-	if (OptionIndex >= Difference)
-	{
-		RightButton->SetIsEnabled(false);
-	}
+	if (!LeftButton->OnClicked.IsBound())
+		LeftButton->OnClicked.AddDynamic(this, &UUINavSliderBox::NavigateLeft);
+	if (!RightButton->OnClicked.IsBound())
+		RightButton->OnClicked.AddDynamic(this, &UUINavSliderBox::NavigateRight);
 }
 
 void UUINavSliderBox::Update()
 {
-	int Difference = (MaxRange - MinRange) / Interval;
-	if (OptionIndex > (Difference))
-	{
-		OptionIndex = Difference;
-	}
+	Super::Update();
 	
 	if (NavText != nullptr)
-		NavText->SetText(FText::FromString(FString::FromInt(MinRange + OptionIndex*Interval)));
+		NavText->SetText(FText::FromString(FString::FromInt(MinRange + OptionIndex * Interval)));
 
 	float Percent = UKismetMathLibrary::NormalizeToRange(MinRange + OptionIndex * Interval, MinRange, MaxRange);
 	SliderBar->SetPercent(Percent);
-
-	Super::Update();
-}
-
-void UUINavSliderBox::NavigateRight()
-{
-	if (MinRange + OptionIndex*Interval < MaxRange) OptionIndex++;
-	else
-	{
-		if (bLoopOptions) OptionIndex = 0;
-		else return;
-	}
-
-	FinishNavigateRight(LastOptionIndex != OptionIndex);
 }
 
 float UUINavSliderBox::GetSliderPercent() const

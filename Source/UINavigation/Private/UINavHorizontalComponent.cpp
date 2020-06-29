@@ -23,6 +23,10 @@ void UUINavHorizontalComponent::NavigateRight()
 
 void UUINavHorizontalComponent::Update()
 {
+	int MaxOptionIndex = GetMaxOptionIndex();
+	if (OptionIndex > MaxOptionIndex) OptionIndex = MaxOptionIndex;
+	else if (OptionIndex < 0) OptionIndex = 0;
+
 	LastOptionIndex = OptionIndex;
 }
 
