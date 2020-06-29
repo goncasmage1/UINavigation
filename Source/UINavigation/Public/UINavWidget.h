@@ -629,8 +629,8 @@ public:
 	*	Adds this widget's parent to the viewport (if applicable)
 	*	and removes this widget from viewport
 	*/
-	UFUNCTION(BlueprintCallable, Category = UINavWidget)
-		virtual void ReturnToParent(bool bRemoveAllParents = false);
+	UFUNCTION(BlueprintCallable, Category = UINavWidget, meta = (AdvancedDisplay = 1))
+		virtual void ReturnToParent(bool bRemoveAllParents = false, int ZOrder = 0);
 
 	void RemoveAllParents();
 

@@ -1885,7 +1885,7 @@ UWidget * UUINavWidget::GoToBuiltWidget(UUINavWidget* NewWidget, bool bRemovePar
 	return NewWidget;
 }
 
-void UUINavWidget::ReturnToParent(bool bRemoveAllParents)
+void UUINavWidget::ReturnToParent(bool bRemoveAllParents, int ZOrder)
 {
 	if (ParentWidget == nullptr)
 	{
@@ -1937,7 +1937,7 @@ void UUINavWidget::ReturnToParent(bool bRemoveAllParents)
 			if (bParentRemoved)
 			{
 				ParentWidget->ReturnedFromWidget = this;
-				ParentWidget->AddToViewport();
+				ParentWidget->AddToViewport(ZOrder);
 			}
 			else
 			{
