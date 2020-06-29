@@ -10,8 +10,6 @@
 #include "Data/RevertRebindReason.h"
 #include "UINavInputBox.generated.h"
 
-#define DISPLAYERROR(Text) GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, FString::Printf(TEXT("%s"), *(FString(TEXT("Error in ")).Append(GetName()).Append(TEXT(": ")).Append(Text))));
-
 #define IS_AXIS (AxisType != EAxisType::None)
 #define IS_POSITIVE_AXIS (AxisType == EAxisType::Positive)
 #define IS_NEGATIVE_AXIS (AxisType == EAxisType::Negative)

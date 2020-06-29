@@ -4,6 +4,7 @@
 #include "Blueprint/WidgetTree.h"
 #include "Components/Button.h"
 #include "Components/TextBlock.h"
+#include "UINavMacros.h"
 
 void UUINavOptionBox::NativeConstruct()
 {

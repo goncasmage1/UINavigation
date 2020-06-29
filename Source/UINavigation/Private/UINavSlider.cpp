@@ -1,7 +1,7 @@
 // Copyright (C) 2019 Gon�alo Marques - All Rights Reserved
 
 #include "UINavSlider.h"
-#include "UINavWidget.h"
+#include "UINavMacros.h"
 #include "Components/Slider.h"
 #include "Components/TextBlock.h"
 #include "Components/SpinBox.h"

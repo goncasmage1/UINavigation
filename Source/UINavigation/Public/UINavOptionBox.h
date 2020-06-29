@@ -5,8 +5,6 @@
 #include "UINavComponentBox.h"
 #include "UINavOptionBox.generated.h"
 
-#define DISPLAYERROR(Text) GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, FString::Printf(TEXT("%s"), *(FString(TEXT("Error in ")).Append(GetName()).Append(TEXT(": ")).Append(Text))));
-
 /**
  * 
  */
