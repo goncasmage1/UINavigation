@@ -37,6 +37,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = UINavComponentBox)
 		void ChangeText(FText NewText);
 
+	UFUNCTION(BlueprintCallable, Category = UINavComponentBox)
+		virtual FORCEINLINE int GetMaxOptionIndex() const { return 0; }
+
 	UFUNCTION(BlueprintCallable, Category = UINavHorizontalComponent)
 		virtual void NavigateLeft();
 	UFUNCTION(BlueprintCallable, Category = UINavHorizontalComponent)

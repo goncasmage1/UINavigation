@@ -18,15 +18,16 @@ protected:
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget), Category = UINavSliderBox)
 		class UProgressBar* SliderBar;
 
-	virtual void CheckRightLimit() override;
-
 	virtual void Update() override;
 	
 public:
 
 	virtual void NativeConstruct() override;
 
-	virtual void NavigateRight() override;
+	FORCEINLINE virtual int GetMaxOptionIndex() const override
+	{
+		return (MaxRange - MinRange) / Interval;
+	}
 
 	UFUNCTION(BlueprintPure, BlueprintCallable, Category = UINavSliderBox)
 		float GetSliderPercent() const;

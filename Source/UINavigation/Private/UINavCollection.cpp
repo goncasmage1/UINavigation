@@ -5,6 +5,7 @@
 #include "UINavWidget.h"
 #include "UINavButton.h"
 #include "UINavComponent.h"
+#include "UINavComponentWrapper.h"
 #include "UINavHorizontalComponent.h"
 #include "Blueprint/WidgetTree.h"
 #include "UINavInputContainer.h"
@@ -143,12 +144,14 @@ void UUINavCollection::TraverseHierarquy(int StartIndex)
 		if (Scroll != nullptr)
 		{
 			ParentWidget->ScrollBoxes.Add(Scroll);
+			continue;
 		}
 
 		UUINavWidget* UINavWidget = Cast<UUINavWidget>(widget);
 		if (UINavWidget != nullptr)
 		{
 			DISPLAYERROR("The plugin doesn't support nested UINavWidgets. Use UINavCollections for this effect!");
+			return;
 		}
 
 		UUINavCollection* Collection = Cast<UUINavCollection>(widget);
@@ -158,6 +161,7 @@ void UUINavCollection::TraverseHierarquy(int StartIndex)
 			Collection->ParentCollection = this;
 			Collection->Init(ParentWidget->UINavButtons.Num());
 			UINavCollections.Add(Collection);
+			continue;
 		}
 
 		UUINavInputContainer* InputContainer = Cast<UUINavInputContainer>(widget);
@@ -173,13 +177,22 @@ void UUINavCollection::TraverseHierarquy(int StartIndex)
 			ParentWidget->UINavInputContainer = InputContainer;
 
 			InputContainer->Init(ParentWidget);
+			continue;
 		}
 
 		UUINavButton* NewNavButton = Cast<UUINavButton>(widget);
-
 		if (NewNavButton == nullptr)
 		{
 			UUINavComponent* UIComp = Cast<UUINavComponent>(widget);
+			if (UIComp == nullptr)
+			{
+				UUINavComponentWrapper* UICompWrapper = Cast<UUINavComponentWrapper>(widget);
+				if (UICompWrapper != nullptr)
+				{
+					UIComp = UICompWrapper->GetUINavComponent();
+				}
+			}
+
 			if (UIComp != nullptr)
 			{
 				NewNavButton = Cast<UUINavButton>(UIComp->NavButton);
@@ -189,7 +202,7 @@ void UUINavCollection::TraverseHierarquy(int StartIndex)
 
 				ParentWidget->UINavComponents.Add(UIComp);
 
-				UUINavHorizontalComponent* HorizComp = Cast<UUINavHorizontalComponent>(widget);
+				UUINavHorizontalComponent* HorizComp = Cast<UUINavHorizontalComponent>(UIComp);
 				if (HorizComp != nullptr)
 				{
 					HorizComp->ParentWidget = ParentWidget;
