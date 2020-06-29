@@ -5,6 +5,7 @@
 #include "UINavButton.h"
 #include "UINavHorizontalComponent.h"
 #include "UINavComponent.h"
+#include "UINavComponentWrapper.h"
 #include "UINavInputBox.h"
 #include "UINavInputContainer.h"
 #include "UINavPCComponent.h"
@@ -218,12 +219,14 @@ void UUINavWidget::TraverseHierarquy()
 		if (Scroll != nullptr)
 		{
 			ScrollBoxes.Add(Scroll);
+			continue;
 		}
 
 		UUINavWidget* UINavWidget = Cast<UUINavWidget>(widget);
 		if (UINavWidget != nullptr)
 		{
 			DISPLAYERROR("The plugin doesn't support nested UINavWidgets. Use UINavCollections for this effect!");
+			return;
 		}
 
 		UUINavCollection* Collection = Cast<UUINavCollection>(widget);
@@ -232,6 +235,7 @@ void UUINavWidget::TraverseHierarquy()
 			Collection->ParentWidget = this;
 			Collection->Init(UINavButtons.Num());
 			UINavCollections.Add(Collection);
+			continue;
 		}
 
 		UUINavInputContainer* InputContainer = Cast<UUINavInputContainer>(widget);
@@ -247,13 +251,22 @@ void UUINavWidget::TraverseHierarquy()
 			UINavInputContainer = InputContainer;
 
 			InputContainer->Init(this);
+			continue;
 		}
 
 		UUINavButton* NewNavButton = Cast<UUINavButton>(widget);
-
 		if (NewNavButton == nullptr)
 		{
 			UUINavComponent* UIComp = Cast<UUINavComponent>(widget);
+			if (UIComp == nullptr)
+			{
+				UUINavComponentWrapper* UICompWrapper = Cast<UUINavComponentWrapper>(widget);
+				if (UICompWrapper != nullptr)
+				{
+					UIComp = UICompWrapper->GetUINavComponent();
+				}
+			}
+
 			if (UIComp != nullptr)
 			{
 				NewNavButton = Cast<UUINavButton>(UIComp->NavButton);
@@ -263,7 +276,7 @@ void UUINavWidget::TraverseHierarquy()
 
 				UINavComponents.Add(UIComp);
 
-				UUINavHorizontalComponent* HorizComp = Cast<UUINavHorizontalComponent>(widget);
+				UUINavHorizontalComponent* HorizComp = Cast<UUINavHorizontalComponent>(UIComp);
 				if (HorizComp != nullptr)
 				{
 					HorizComp->ParentWidget = this;
@@ -305,7 +318,7 @@ void UUINavWidget::SetupSelector()
 
 void UUINavWidget::UINavSetup()
 {
-	if (UINavPC == nullptr) ConfigureUINavPC();
+	if (UINavPC == nullptr) return;
 
 	UINavPC->SetActiveWidget(this);
 	if (UINavPC->GetInputMode() == EInputMode::UI)
@@ -1872,7 +1885,7 @@ UWidget * UUINavWidget::GoToBuiltWidget(UUINavWidget* NewWidget, bool bRemovePar
 	return NewWidget;
 }
 
-void UUINavWidget::ReturnToParent(bool bRemoveAllParents)
+void UUINavWidget::ReturnToParent(bool bRemoveAllParents, int ZOrder)
 {
 	if (ParentWidget == nullptr)
 	{
@@ -1924,7 +1937,7 @@ void UUINavWidget::ReturnToParent(bool bRemoveAllParents)
 			if (bParentRemoved)
 			{
 				ParentWidget->ReturnedFromWidget = this;
-				ParentWidget->AddToViewport();
+				ParentWidget->AddToViewport(ZOrder);
 			}
 			else
 			{

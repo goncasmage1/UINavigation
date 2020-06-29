@@ -1,7 +1,7 @@
 // Copyright (C) 2019 Gon�alo Marques - All Rights Reserved
 
 #include "UINavSlider.h"
-#include "UINavWidget.h"
+#include "UINavMacros.h"
 #include "Components/Slider.h"
 #include "Components/TextBlock.h"
 #include "Components/SpinBox.h"
@@ -44,7 +44,6 @@ void UUINavSlider::NativeConstruct()
 	Slider->IsFocusable = false;
 	Slider->StepSize = Interval / Difference;
 
-	MaxOptionIndex = (Difference / Interval);
 	HandleDefaultColor = Slider->SliderHandleColor;
 	BarDefaultColor = Slider->SliderBarColor;
 
@@ -53,7 +52,9 @@ void UUINavSlider::NativeConstruct()
 
 void UUINavSlider::Update()
 {
-	Slider->SetValue((float)OptionIndex / (float)MaxOptionIndex);
+	Super::Update();
+
+	Slider->SetValue((float)OptionIndex / (float)GetMaxOptionIndex());
 	FNumberFormattingOptions FormatOptions = FNumberFormattingOptions();
 	FormatOptions.MaximumFractionalDigits = MaxDecimalDigits;
 	FormatOptions.MinimumFractionalDigits = MinDecimalDigits;
@@ -68,8 +69,6 @@ void UUINavSlider::Update()
 		bIgnoreSpinBoxCommit = true;
 		NavSpinBox->SetValue(Value);
 	}
-
-	Super::Update();
 }
 
 void UUINavSlider::OnNavigatedTo_Implementation()
@@ -101,7 +100,7 @@ void UUINavSlider::NavigateLeft()
 	{
 		OptionIndex--;
 	}
-	else if (bLoopOptions) OptionIndex = MaxOptionIndex;
+	else if (bLoopOptions) OptionIndex = GetMaxOptionIndex();
 
 	Update();
 
@@ -110,7 +109,7 @@ void UUINavSlider::NavigateLeft()
 
 void UUINavSlider::NavigateRight()
 {
-	if (OptionIndex < MaxOptionIndex)
+	if (OptionIndex < GetMaxOptionIndex())
 	{
 		OptionIndex++;
 	}
@@ -156,6 +155,7 @@ void UUINavSlider::HandleOnSpinBoxValueChanged(float InValue, ETextCommit::Type 
 float UUINavSlider::IndexFromPercent(float Value)
 {
 	float Div = Value / Slider->StepSize;
+	int MaxOptionIndex = GetMaxOptionIndex();
 	if (Div > MaxOptionIndex) Div = MaxOptionIndex;
 
 	int FlatDiv = (int)Div;

@@ -3,7 +3,7 @@
 #include "UINavInputBox.h"
 #include "UINavInputComponent.h"
 #include "UINavInputContainer.h"
-#include "UINavWidget.h"
+#include "UINavMacros.h"
 #include "UINavSettings.h"
 #include "UINavPCComponent.h"
 #include "Components/TextBlock.h"

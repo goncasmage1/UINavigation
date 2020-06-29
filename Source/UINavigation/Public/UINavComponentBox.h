@@ -29,8 +29,6 @@ public:
 
 	virtual void UpdateTextToIndex(int NewIndex) override;
 
-	virtual int GetLastOptionIndex();
-
 	void BaseConstruct();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavComponentBox, meta = (ClampMin="0"))

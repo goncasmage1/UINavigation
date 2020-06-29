@@ -2,7 +2,6 @@
 
 #pragma once
 
-#include "Engine.h"
 #include "Blueprint/UserWidget.h"
 #include "Data/NavigationDirection.h"
 #include "Data/ReceiveInputType.h"
@@ -10,10 +9,9 @@
 #include "Data/Grid.h"
 #include "Data/ButtonStyle.h"
 #include "Components/ScrollBox.h"
+#include "UINavMacros.h"
 #include "UINavWidget.generated.h"
 
-#define DISPLAYERROR(Text) GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, FString::Printf(TEXT("%s"), *(FString(TEXT("Error in ")).Append(GetName()).Append(TEXT(": ")).Append(Text))));
-#define DISPLAYWARNING(Text) GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Orange, FString::Printf(TEXT("%s"), *(FString(TEXT("Warning in ")).Append(GetName()).Append(TEXT(": ")).Append(Text))));
 #define SELECT_INDEX -101
 #define RETURN_INDEX -202
 
@@ -631,8 +629,8 @@ public:
 	*	Adds this widget's parent to the viewport (if applicable)
 	*	and removes this widget from viewport
 	*/
-	UFUNCTION(BlueprintCallable, Category = UINavWidget)
-		virtual void ReturnToParent(bool bRemoveAllParents = false);
+	UFUNCTION(BlueprintCallable, Category = UINavWidget, meta = (AdvancedDisplay = 1))
+		virtual void ReturnToParent(bool bRemoveAllParents = false, int ZOrder = 0);
 
 	void RemoveAllParents();
 

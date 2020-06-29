@@ -5,8 +5,6 @@
 #include "UINavComponentBox.h"
 #include "UINavOptionBox.generated.h"
 
-#define DISPLAYERROR(Text) GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, FString::Printf(TEXT("%s"), *(FString(TEXT("Error in ")).Append(GetName()).Append(TEXT(": ")).Append(Text))));
-
 /**
  * 
  */
@@ -17,15 +15,13 @@ class UINAVIGATION_API UUINavOptionBox : public UUINavComponentBox
 	
 protected:
 
-	virtual void CheckRightLimit() override;
-
 	virtual void Update() override;
 
 public:
 
 	virtual void NativeConstruct() override;
 
-	virtual int GetLastOptionIndex() override;
+	virtual int GetMaxOptionIndex() const override;
 
 	/*If set to false, will use StringOptions, otherwise will use
 	all integers in designated range (from MinRange to MaxRange, inclusive)*/
@@ -38,7 +34,5 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavOptionBox)
 		FORCEINLINE FText GetCurrentString() const { return StringOptions[OptionIndex]; }
-
-	virtual void NavigateRight() override;
 
 };
