@@ -448,8 +448,6 @@ FReply UUINavWidget::NativeOnMouseWheel(const FGeometry & InGeometry, const FPoi
 
 FReply UUINavWidget::NativeOnMouseButtonDown(const FGeometry & InGeometry, const FPointerEvent & InMouseEvent)
 {
-	Super::NativeOnMouseButtonDown(InGeometry, InMouseEvent);
-
 	if (bWaitForInput)
 	{
 		if (ReceiveInputType == EReceiveInputType::Axis)
