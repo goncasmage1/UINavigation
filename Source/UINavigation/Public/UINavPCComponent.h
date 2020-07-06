@@ -57,6 +57,8 @@ protected:
 	//Indicates whether the player can switch sections using the MenuNext and MenuPrevious actions
 	bool bAllowSectionInput = true;
 
+	TArray<bool> bAllowCustomInputs;
+
 	class APlayerController* PC;
 
 	ENavigationDirection Direction = ENavigationDirection::None;
@@ -119,6 +121,12 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = UINavController)
 	void UnbindMenuInputs();
 
+	UFUNCTION()
+	void OnCustomInput(int InputIndex, bool bPressed);
+
+	void CallCustomInput(FName ActionName, bool bPressed);
+
+
 public:
 
 	UUINavPCComponent();
@@ -155,6 +163,9 @@ public:
 	TMap<FString, TArray<FKey>> KeyMap = TMap<FString, TArray<FKey>>();
 
 	TArray<FString> PressedActions;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavController)
+		TArray<FName> CustomInputs;
 
 	/*
 	Holds the key icons for gamepad
@@ -209,6 +220,21 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
 		FORCEINLINE bool AllowsSectionInput() const { return bAllowSectionInput; }
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
+	FORCEINLINE bool AllowsCustomInputByName(FName InputName) const
+	{ 
+		int CustomInputIndex = CustomInputs.Find(InputName);
+		if (CustomInputIndex < 0) return false;
+		return bAllowCustomInputs[CustomInputIndex];
+	}
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
+	FORCEINLINE bool AllowsCustomInputByIndex(int InputIndex) const
+	{
+		if (InputIndex < 0 || InputIndex >= CustomInputs.Num()) return false;
+		return bAllowCustomInputs[InputIndex];
+	}
 	
 
 	UFUNCTION(BlueprintCallable, Category = UINavController)
@@ -225,6 +251,13 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = UINavController)
 		void SetAllowSectionInput(bool bAllowInput);
+
+	UFUNCTION(BlueprintCallable, Category = UINavController)
+		void SetAllowCustomInputByName(FName InputName, bool bAllowInput);
+
+	UFUNCTION(BlueprintCallable, Category = UINavController)
+		void SetAllowCustomInputByIndex(int InputIndex, bool bAllowInput);
+
 
 	void BindMouseWorkaround();
 	void UnbindMouseWorkaround();
