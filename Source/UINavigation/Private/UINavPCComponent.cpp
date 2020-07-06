@@ -133,6 +133,34 @@ void UUINavPCComponent::BindMenuInputs()
 	Action6_1.bExecuteWhenPaused = true;
 	Action6_1.bConsumeInput = false;
 
+	if (CustomInputs.Num() > 0)
+	{
+		bAllowCustomInputs.Empty();
+		bAllowCustomInputs.Init(true, CustomInputs.Num());
+
+		int i = 0;
+		for (const FName CustomInput : CustomInputs)
+		{
+			FInputActionHandlerSignature PressedActionHandler;
+			PressedActionHandler.BindUFunction(this, TEXT("OnCustomInput"), i, true);
+			FInputActionBinding PressedActionBinding(CustomInput, IE_Pressed);
+			PressedActionBinding.ActionDelegate = PressedActionHandler;
+			FInputActionBinding& CustomPressedInput = InputComponent->AddActionBinding(PressedActionBinding);
+			CustomPressedInput.bExecuteWhenPaused = true;
+			CustomPressedInput.bConsumeInput = false;
+
+			FInputActionHandlerSignature ReleasedActionHandler;
+			ReleasedActionHandler.BindUFunction(this, TEXT("OnCustomInput"), i, false);
+			FInputActionBinding ReleasedActionBinding(CustomInput, IE_Released);
+			ReleasedActionBinding.ActionDelegate = ReleasedActionHandler;
+			FInputActionBinding& CustomReleasedInput = InputComponent->AddActionBinding(ReleasedActionBinding);
+			CustomReleasedInput.bExecuteWhenPaused = true;
+			CustomReleasedInput.bConsumeInput = false;
+
+			i++;
+		}
+	}
+
 }
 
 void UUINavPCComponent::UnbindMenuInputs()
@@ -146,6 +174,35 @@ void UUINavPCComponent::UnbindMenuInputs()
 		if (InputComponent->GetActionBinding(i).ActionDelegate.IsBoundToObject(this))
 		{
 			InputComponent->RemoveActionBinding(i);
+		}
+	}
+}
+
+void UUINavPCComponent::OnCustomInput(int InputIndex, bool bPressed)
+{
+	CallCustomInput(CustomInputs[InputIndex], bPressed);
+}
+
+void UUINavPCComponent::CallCustomInput(FName ActionName, bool bPressed)
+{
+	if (ActiveWidget != nullptr && AllowsCustomInputByName(ActionName))
+	{
+		int CustomInputIndex = CustomInputs.Find(ActionName);
+		if (CustomInputIndex < 0) return;
+
+		UFunction* CustomFunction = ActiveWidget->FindFunction(CustomInputs[CustomInputIndex]);
+		if (CustomFunction != nullptr)
+		{
+			if (CustomFunction->ParmsSize == sizeof(bool))
+			{
+				uint8* Buffer = (uint8*)FMemory_Alloca(CustomFunction->ParmsSize);
+				FMemory::Memcpy(Buffer, &bPressed, sizeof(bool));
+				ActiveWidget->ProcessEvent(CustomFunction, Buffer);
+			}
+			else
+			{
+				DISPLAYERROR(FString::Printf(TEXT("%s Custom Event should have one boolean parameter!"), *ActionName.ToString()));
+			}
 		}
 	}
 }
@@ -223,6 +280,10 @@ void UUINavPCComponent::SetAllowAllMenuInput(bool bAllowInput)
 	bAllowSelectInput = bAllowInput;
 	bAllowReturnInput = bAllowInput;
 	bAllowSectionInput = bAllowInput;
+	for (bool& allowCustomInput : bAllowCustomInputs)
+	{
+		allowCustomInput = bAllowInput;
+	}
 }
 
 void UUINavPCComponent::SetAllowDirectionalInput(bool bAllowInput)
@@ -243,6 +304,19 @@ void UUINavPCComponent::SetAllowReturnInput(bool bAllowInput)
 void UUINavPCComponent::SetAllowSectionInput(bool bAllowInput)
 {
 	bAllowSectionInput = bAllowInput;
+}
+
+void UUINavPCComponent::SetAllowCustomInputByName(FName InputName, bool bAllowInput)
+{
+	int CustomInputIndex = CustomInputs.Find(InputName);
+	if (CustomInputIndex < 0) return;
+	bAllowCustomInputs[CustomInputIndex] = bAllowInput;
+}
+
+void UUINavPCComponent::SetAllowCustomInputByIndex(int InputIndex, bool bAllowInput)
+{
+	if (InputIndex < 0 || InputIndex >= CustomInputs.Num()) return;
+	bAllowCustomInputs[InputIndex] = bAllowInput;
 }
 
 void UUINavPCComponent::TimerCallback()
@@ -711,6 +785,10 @@ void UUINavPCComponent::ExecuteActionByName(FString Action, bool bPressed)
 	else if (Action.Equals("MenuPrevious") && bPressed)
 	{
 		MenuPrevious();
+	}
+	else
+	{
+		CallCustomInput(FName(*Action), bPressed);
 	}
 }
 
