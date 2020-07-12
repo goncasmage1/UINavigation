@@ -318,6 +318,8 @@ public:
 
 	void CollectionNavigateTo(int Index);
 
+	void CallCustomInput(FName ActionName, uint8* Buffer);
+
 	void DispatchNavigation(int Index, bool bHoverEvent = false);
 
 	/**

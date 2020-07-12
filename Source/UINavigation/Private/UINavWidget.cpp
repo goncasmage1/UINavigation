@@ -1660,6 +1660,27 @@ void UUINavWidget::CollectionNavigateTo(int Index)
 	}
 }
 
+void UUINavWidget::CallCustomInput(FName ActionName, uint8* Buffer)
+{
+	UFunction* CustomFunction = FindFunction(ActionName);
+	if (CustomFunction != nullptr)
+	{
+		if (CustomFunction->ParmsSize == sizeof(bool))
+		{
+			ProcessEvent(CustomFunction, Buffer);
+		}
+		else
+		{
+			DISPLAYERROR(FString::Printf(TEXT("%s Custom Event should have one boolean parameter!"), *ActionName.ToString()));
+		}
+	}
+
+	for (UUINavCollection* Collection : UINavCollections)
+	{
+		Collection->CallCustomInput(ActionName, Buffer);
+	}
+}
+
 void UUINavWidget::DispatchNavigation(int Index, bool bHoverEvent)
 {
 	//Update all the possible scroll boxes in the widget
