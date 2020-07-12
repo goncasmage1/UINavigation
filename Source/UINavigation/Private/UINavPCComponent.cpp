@@ -190,20 +190,10 @@ void UUINavPCComponent::CallCustomInput(FName ActionName, bool bPressed)
 		int CustomInputIndex = CustomInputs.Find(ActionName);
 		if (CustomInputIndex < 0) return;
 
-		UFunction* CustomFunction = ActiveWidget->FindFunction(CustomInputs[CustomInputIndex]);
-		if (CustomFunction != nullptr)
-		{
-			if (CustomFunction->ParmsSize == sizeof(bool))
-			{
-				uint8* Buffer = (uint8*)FMemory_Alloca(CustomFunction->ParmsSize);
-				FMemory::Memcpy(Buffer, &bPressed, sizeof(bool));
-				ActiveWidget->ProcessEvent(CustomFunction, Buffer);
-			}
-			else
-			{
-				DISPLAYERROR(FString::Printf(TEXT("%s Custom Event should have one boolean parameter!"), *ActionName.ToString()));
-			}
-		}
+		uint8* Buffer = (uint8*)FMemory_Alloca(sizeof(bool));
+		FMemory::Memcpy(Buffer, &bPressed, sizeof(bool));
+
+		ActiveWidget->CallCustomInput(ActionName, Buffer);
 	}
 }
 
