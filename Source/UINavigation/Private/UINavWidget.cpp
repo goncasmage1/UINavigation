@@ -397,7 +397,7 @@ FReply UUINavWidget::NativeOnKeyDown(const FGeometry & InGeometry, const FKeyEve
 		ProcessKeybind(PressedKey);
 		return FReply::Handled();
 	}
-	else if (UINavPC->GetInputMode() == EInputMode::UI)
+	else
 	{
 		//Allow fullscreen by pressing F11 or Alt+Enter
 		if (GEngine->GameViewport->TryToggleFullscreenOnInputKey(InKeyEvent.GetKey(), IE_Pressed))
@@ -416,7 +416,7 @@ FReply UUINavWidget::NativeOnKeyDown(const FGeometry & InGeometry, const FKeyEve
 
 FReply UUINavWidget::NativeOnKeyUp(const FGeometry & InGeometry, const FKeyEvent & InKeyEvent)
 {
-	if (!bWaitForInput && UINavPC->GetInputMode() == EInputMode::UI)
+	if (!bWaitForInput)
 	{
 		if (OnKeyReleased(InKeyEvent.GetKey()).IsEventHandled())
 		{
