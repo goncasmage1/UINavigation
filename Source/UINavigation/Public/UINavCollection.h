@@ -66,6 +66,8 @@ public:
 
 	void TraverseHierarquy(int StartIndex);
 
+	void CallCustomInput(FName ActionName, uint8* Buffer);
+
 	UPROPERTY(BlueprintReadOnly, Category = UINavCollection)
 		int FirstButtonIndex = -1;
 

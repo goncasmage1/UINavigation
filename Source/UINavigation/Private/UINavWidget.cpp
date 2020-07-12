@@ -397,7 +397,7 @@ FReply UUINavWidget::NativeOnKeyDown(const FGeometry & InGeometry, const FKeyEve
 		ProcessKeybind(PressedKey);
 		return FReply::Handled();
 	}
-	else if (UINavPC->GetInputMode() == EInputMode::UI)
+	else
 	{
 		//Allow fullscreen by pressing F11 or Alt+Enter
 		if (GEngine->GameViewport->TryToggleFullscreenOnInputKey(InKeyEvent.GetKey(), IE_Pressed))
@@ -416,7 +416,7 @@ FReply UUINavWidget::NativeOnKeyDown(const FGeometry & InGeometry, const FKeyEve
 
 FReply UUINavWidget::NativeOnKeyUp(const FGeometry & InGeometry, const FKeyEvent & InKeyEvent)
 {
-	if (!bWaitForInput && UINavPC->GetInputMode() == EInputMode::UI)
+	if (!bWaitForInput)
 	{
 		if (OnKeyReleased(InKeyEvent.GetKey()).IsEventHandled())
 		{
@@ -1657,6 +1657,27 @@ void UUINavWidget::CollectionNavigateTo(int Index)
 		}
 
 		if (bFoundFrom && bFoundTo) break;
+	}
+}
+
+void UUINavWidget::CallCustomInput(FName ActionName, uint8* Buffer)
+{
+	UFunction* CustomFunction = FindFunction(ActionName);
+	if (CustomFunction != nullptr)
+	{
+		if (CustomFunction->ParmsSize == sizeof(bool))
+		{
+			ProcessEvent(CustomFunction, Buffer);
+		}
+		else
+		{
+			DISPLAYERROR(FString::Printf(TEXT("%s Custom Event should have one boolean parameter!"), *ActionName.ToString()));
+		}
+	}
+
+	for (UUINavCollection* Collection : UINavCollections)
+	{
+		Collection->CallCustomInput(ActionName, Buffer);
 	}
 }
 
