@@ -77,7 +77,7 @@ protected:
 	*	Configures the UINavPC
 	*/
 	UFUNCTION(BlueprintCallable, Category = UINavWidget)
-	void ConfigureUINavPC();
+		void ConfigureUINavPC();
 
 	/**
 	*	Traverses this widget's hierarchy to setup all the UIUINavButtons
@@ -186,6 +186,13 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
 		bool bShouldDestroyParent = true;
 
+	//If set to true, UiNavWidget will automatically get and use the Player Controller from the Player at the Index specified below
+	UPROPERTY(EditDefaultsOnly, Category = UINavWidget)
+		bool bAutomaticallyGetPlayerController = false;
+
+	//This the Index of the Player that UiNavwidget will use
+	UPROPERTY(EditDefaultsOnly, Category = UINavWidget, meta = (EditCondition = bAutomaticallyGetPlayerController))
+		int PlayerIndex = 0;
 
 	//If set to true, buttons will be navigated by switching button states (Normal and Hovered)
 	UPROPERTY(EditDefaultsOnly, Category = UINavWidget)
@@ -232,21 +239,21 @@ public:
 
 	/*********************************************************************************/
 
-	
+
 	virtual void NativeConstruct() override;
 
-	virtual void NativeTick(const FGeometry & MyGeometry, float DeltaTime) override;
+	virtual void NativeTick(const FGeometry& MyGeometry, float DeltaTime) override;
 
 	/**
 	*	Reconfigures the blueprint if it has already been setup
 	*/
 	void ReconfigureSetup();
 
-	virtual FReply NativeOnMouseWheel(const FGeometry & InGeometry, const FPointerEvent & InMouseEvent) override;
-	virtual FReply NativeOnKeyDown(const FGeometry & InGeometry, const FKeyEvent & InKeyEvent) override;
-	virtual FReply NativeOnKeyUp(const FGeometry & InGeometry, const FKeyEvent & InKeyEvent) override;
-	virtual FReply NativeOnMouseButtonDown(const FGeometry & InGeometry, const FPointerEvent & InMouseEvent) override;
-	virtual FReply NativeOnMouseButtonUp(const FGeometry & InGeometry, const FPointerEvent & InMouseEvent) override;
+	virtual FReply NativeOnMouseWheel(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
+	virtual FReply NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent) override;
+	virtual FReply NativeOnKeyUp(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent) override;
+	virtual FReply NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
+	virtual FReply NativeOnMouseButtonUp(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
 
 	FReply OnKeyPressed(FKey PressedKey);
 	FReply OnKeyReleased(FKey PressedKey);
@@ -264,13 +271,13 @@ public:
 
 	/**
 	*	Appends a new navigation grid to the widget. Used for 2-dimensional grids.
-	*	
+	*
 	*	@param	DimensionX  The horizontal dimension of the grid
 	*	@param	DimensionY  The vertical dimension of the grid
 	*	@param	EdgeNavigation  The intended navigation at each of the four edges of the grid
 	*	@param  bWrap  Indicates whether navigation wraps around the grid
 	*/
-	UFUNCTION(BlueprintCallable, Category = UINavWidget, meta=(AdvancedDisplay=4))
+	UFUNCTION(BlueprintCallable, Category = UINavWidget, meta = (AdvancedDisplay = 4))
 		void AppendNavigationGrid2D(int DimensionX, int DimensionY, FButtonNavigation EdgeNavigation, bool bWrap, int ButtonsInGrid = -1);
 
 	/**
@@ -313,7 +320,7 @@ public:
 	*	@param	Index  The index of the button that was hovered upon
 	*	@param	bHoverEvent  Was this triggered by a button hover event?
 	*/
-	UFUNCTION(BlueprintCallable, Category = UINavWidget, meta = (AdvancedDisplay=1))
+	UFUNCTION(BlueprintCallable, Category = UINavWidget, meta = (AdvancedDisplay = 1))
 		void NavigateTo(int Index, bool bHoverEvent = false);
 
 	void CollectionNavigateTo(int Index);
@@ -533,7 +540,7 @@ public:
 	*	@param	RemoveParent  Whether to remove the parent widget (this widget) from the viewport
 	*	@param  DestroyParent  Whether to destruct the parent widget (this widget)
 	*/
-	UFUNCTION(BlueprintCallable, Category = UINavWidget, meta = (AdvancedDisplay=2))
+	UFUNCTION(BlueprintCallable, Category = UINavWidget, meta = (AdvancedDisplay = 2))
 		UWidget* GoToWidget(TSubclassOf<UUINavWidget> NewWidgetClass, bool bRemoveParent, bool bDestroyParent = false, int ZOrder = 0);
 
 	/**
@@ -543,7 +550,7 @@ public:
 	*	@param	RemoveParent  Whether to remove the parent widget (this widget) from the viewport
 	*	@param  DestroyParent  Whether to destruct the parent widget (this widget)
 	*/
-	UFUNCTION(BlueprintCallable, Category = UINavWidget, meta = (AdvancedDisplay=2))
+	UFUNCTION(BlueprintCallable, Category = UINavWidget, meta = (AdvancedDisplay = 2))
 		UWidget* GoToBuiltWidget(UUINavWidget* NewWidget, bool bRemoveParent, bool bDestroyParent = false, int ZOrder = 0);
 
 	/**
@@ -570,7 +577,7 @@ public:
 	*	next button to be navigated to automatically if the deleted button
 	*	is being navigated upon
 	*/
-	UFUNCTION(BlueprintCallable, Category = UINavWidget, meta=(AdvancedDisplay=1))
+	UFUNCTION(BlueprintCallable, Category = UINavWidget, meta = (AdvancedDisplay = 1))
 		void DeleteUINavElement(int Index, bool bAutoNavigate = true);
 
 	/**
@@ -581,7 +588,7 @@ public:
 	*	next button to be navigated to automatically if the deleted button
 	*	is being navigated upon
 	*/
-	UFUNCTION(BlueprintCallable, Category = UINavWidget, meta=(AdvancedDisplay=2))
+	UFUNCTION(BlueprintCallable, Category = UINavWidget, meta = (AdvancedDisplay = 2))
 		void DeleteUINavElementFromGrid(int GridIndex, int IndexInGrid, bool bAutoNavigate = true);
 
 	void IncrementGrid(class UUINavButton* NewButton, FGrid& TargetGrid, int& IndexInGrid);
@@ -652,7 +659,7 @@ public:
 	*	@return IsValid Whether the returned grid is valid
 	*/
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
-		void GetButtonGrid(class UUINavButton* Button, FGrid& ButtonGrid, bool &IsValid);
+		void GetButtonGrid(class UUINavButton* Button, FGrid& ButtonGrid, bool& IsValid);
 
 	/**
 	*	Returns the grid associated with the given button
@@ -661,7 +668,7 @@ public:
 	*	@return IsValid Whether the returned grid is valid
 	*/
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
-		void GetButtonGridFromIndex(int InButtonIndex, FGrid& ButtonGrid, bool &IsValid);
+		void GetButtonGridFromIndex(int InButtonIndex, FGrid& ButtonGrid, bool& IsValid);
 
 	/**
 	*	Returns the given button's index in its grid

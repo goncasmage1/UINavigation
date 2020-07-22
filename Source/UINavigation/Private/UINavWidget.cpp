@@ -195,10 +195,21 @@ void UUINavWidget::FetchButtonsInHierarchy()
 void UUINavWidget::ConfigureUINavPC()
 {
 	APlayerController* PC = Cast<APlayerController>(GetOwningPlayer());
-	if (PC == nullptr)
+	if (PC == nullptr && bAutomaticallyGetPlayerController == false)
 	{
 		DISPLAYERROR("Player Controller is Null!");
 		return;
+	}
+	else if (PC == nullptr && bAutomaticallyGetPlayerController == true) {
+		if (UGameplayStatics::GetPlayerController(GetWorld(), PlayerIndex) == nullptr) {
+			DISPLAYERROR("No Player found at Player Index!");
+			return;
+		}
+		else
+		{
+			SetOwningPlayer(UGameplayStatics::GetPlayerController(GetWorld(), PlayerIndex));
+			PC = Cast<APlayerController>(GetOwningPlayer());
+		}
 	}
 	UINavPC = Cast<UUINavPCComponent>(PC->GetComponentByClass(UUINavPCComponent::StaticClass()));
 	if (UINavPC == nullptr)
