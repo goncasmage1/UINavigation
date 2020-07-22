@@ -186,7 +186,7 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
 		bool bShouldDestroyParent = true;
 
-	//If set to true, UiNavWidget will automatically get and use the Player Controller from the Player at the Index specified below
+	//If set to true, UINavWidget will automatically get and use the Player Controller from the Player at the Index specified below
 	UPROPERTY(EditDefaultsOnly, Category = UINavWidget)
 		bool bAutomaticallyGetPlayerController = false;
 
