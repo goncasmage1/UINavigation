@@ -71,6 +71,12 @@ void UUINavWidget::NativeConstruct()
 
 void UUINavWidget::InitialSetup()
 {
+	//Checks if the Player Controller is still valid
+	if (UINavPC == nullptr)
+	{
+		ConfigureUINavPC();
+	}
+
 	//If widget was already setup, apply only certain steps
 	if (bCompletedSetup)
 	{
@@ -80,10 +86,6 @@ void UUINavWidget::InitialSetup()
 
 	bSetupStarted = true;
 	WidgetClass = GetClass();
-	if (UINavPC == nullptr)
-	{
-		ConfigureUINavPC();
-	}
 
 	FetchButtonsInHierarchy();
 	ReadyForSetup();
@@ -181,7 +183,7 @@ void UUINavWidget::FetchButtonsInHierarchy()
 	{
 		ButtonIndex++;
 		if (ButtonIndex >= UINavButtons.Num()) ButtonIndex = 0;
-		
+
 		CurrentButton = UINavButtons[ButtonIndex];
 		if (ButtonIndex == FirstButtonIndex) break;
 
@@ -307,9 +309,9 @@ void UUINavWidget::TraverseHierarquy()
 	}
 
 	UINavButtons.HeapSort([](const UUINavButton& Wid1, const UUINavButton& Wid2)
-	{
-		return Wid1.ButtonIndex < Wid2.ButtonIndex;
-	});
+		{
+			return Wid1.ButtonIndex < Wid2.ButtonIndex;
+		});
 }
 
 void UUINavWidget::ChangeTextColorToDefault()
@@ -369,7 +371,7 @@ void UUINavWidget::ReadyForSetup_Implementation()
 
 }
 
-void UUINavWidget::NativeTick(const FGeometry & MyGeometry, float DeltaTime)
+void UUINavWidget::NativeTick(const FGeometry& MyGeometry, float DeltaTime)
 {
 	Super::NativeTick(MyGeometry, DeltaTime);
 
@@ -394,7 +396,7 @@ void UUINavWidget::NativeTick(const FGeometry & MyGeometry, float DeltaTime)
 	}
 }
 
-FReply UUINavWidget::NativeOnKeyDown(const FGeometry & InGeometry, const FKeyEvent & InKeyEvent)
+FReply UUINavWidget::NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent)
 {
 	if (ReceiveInputType != EReceiveInputType::None)
 	{
@@ -425,7 +427,7 @@ FReply UUINavWidget::NativeOnKeyDown(const FGeometry & InGeometry, const FKeyEve
 	return Super::NativeOnKeyDown(InGeometry, InKeyEvent);
 }
 
-FReply UUINavWidget::NativeOnKeyUp(const FGeometry & InGeometry, const FKeyEvent & InKeyEvent)
+FReply UUINavWidget::NativeOnKeyUp(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent)
 {
 	if (!bWaitForInput)
 	{
@@ -438,7 +440,7 @@ FReply UUINavWidget::NativeOnKeyUp(const FGeometry & InGeometry, const FKeyEvent
 	return Super::NativeOnKeyUp(InGeometry, InKeyEvent);
 }
 
-FReply UUINavWidget::NativeOnMouseWheel(const FGeometry & InGeometry, const FPointerEvent & InMouseEvent)
+FReply UUINavWidget::NativeOnMouseWheel(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
 {
 	if (bWaitForInput)
 	{
@@ -457,7 +459,7 @@ FReply UUINavWidget::NativeOnMouseWheel(const FGeometry & InGeometry, const FPoi
 	return Super::NativeOnMouseWheel(InGeometry, InMouseEvent);
 }
 
-FReply UUINavWidget::NativeOnMouseButtonDown(const FGeometry & InGeometry, const FPointerEvent & InMouseEvent)
+FReply UUINavWidget::NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
 {
 	if (bWaitForInput)
 	{
@@ -480,7 +482,7 @@ FReply UUINavWidget::NativeOnMouseButtonDown(const FGeometry & InGeometry, const
 	return Super::NativeOnMouseButtonDown(InGeometry, InMouseEvent);
 }
 
-FReply UUINavWidget::NativeOnMouseButtonUp(const FGeometry & InGeometry, const FPointerEvent & InMouseEvent)
+FReply UUINavWidget::NativeOnMouseButtonUp(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
 {
 	Super::NativeOnMouseButtonUp(InGeometry, InMouseEvent);
 
@@ -535,10 +537,10 @@ void UUINavWidget::HandleSelectorMovement(float DeltaTime)
 		return;
 	}
 
-	TheSelector->SetRenderTranslation(SelectorOrigin + Distance*MoveCurve->GetFloatValue(MovementCounter));
+	TheSelector->SetRenderTranslation(SelectorOrigin + Distance * MoveCurve->GetFloatValue(MovementCounter));
 }
 
-void UUINavWidget::AddUINavButton(UUINavButton * NewButton, int TargetGridIndex, int IndexInGrid)
+void UUINavWidget::AddUINavButton(UUINavButton* NewButton, int TargetGridIndex, int IndexInGrid)
 {
 	if (NewButton == nullptr || TargetGridIndex >= NavigationGrids.Num() || TargetGridIndex < 0) return;
 
@@ -572,7 +574,7 @@ void UUINavWidget::AddUINavButton(UUINavButton * NewButton, int TargetGridIndex,
 	}
 }
 
-void UUINavWidget::AddUINavComponent(UUINavComponent * NewComponent, int TargetGridIndex, int IndexInGrid)
+void UUINavWidget::AddUINavComponent(UUINavComponent* NewComponent, int TargetGridIndex, int IndexInGrid)
 {
 	if (NewComponent == nullptr || TargetGridIndex >= NavigationGrids.Num() || TargetGridIndex < 0) return;
 
@@ -593,7 +595,7 @@ void UUINavWidget::AddUINavComponent(UUINavComponent * NewComponent, int TargetG
 	NewComponent->NavButton->GridIndex = TargetGrid.GridIndex;
 	NewComponent->NavButton->IndexInGrid = IndexInGrid;
 	SetupUINavButtonDelegates(NewComponent->NavButton);
-	
+
 	int TargetIndex = NewComponent->ComponentIndex;
 	UINavButtons.Insert(NewComponent->NavButton, NewComponent->NavButton->ButtonIndex);
 	InsertNewComponent(NewComponent, TargetIndex);
@@ -669,7 +671,7 @@ void UUINavWidget::DeleteUINavElementFromGrid(int GridIndex, int IndexInGrid, bo
 	DeleteUINavElement(TargetGrid.FirstButton->ButtonIndex + IndexInGrid, bAutoNavigate);
 }
 
-void UUINavWidget::IncrementGrid(UUINavButton* NewButton, FGrid & TargetGrid, int& IndexInGrid)
+void UUINavWidget::IncrementGrid(UUINavButton* NewButton, FGrid& TargetGrid, int& IndexInGrid)
 {
 	int FirstIndex = -1;
 	if (IndexInGrid == 0)
@@ -679,7 +681,7 @@ void UUINavWidget::IncrementGrid(UUINavButton* NewButton, FGrid & TargetGrid, in
 		NewButton->IndexInGrid = 0;
 	}
 	else FirstIndex = TargetGrid.FirstButton->ButtonIndex;
-	
+
 	NewButton->GridIndex = TargetGrid.GridIndex;
 
 	if (TargetGrid.GridType == EGridType::Horizontal) TargetGrid.DimensionX++;
@@ -700,13 +702,13 @@ void UUINavWidget::IncrementGrid(UUINavButton* NewButton, FGrid & TargetGrid, in
 	UpdateCollectionLastIndex(TargetGrid.GridIndex, true);
 }
 
-void UUINavWidget::DecrementGrid(FGrid & TargetGrid, int IndexInGrid)
+void UUINavWidget::DecrementGrid(FGrid& TargetGrid, int IndexInGrid)
 {
 	if (IndexInGrid == 0)
 	{
 		TargetGrid.FirstButton =
 			(TargetGrid.GetDimension() > 1 && TargetGrid.FirstButton->ButtonIndex + 1 < UINavButtons.Num())
-			? UINavButtons[TargetGrid.FirstButton->ButtonIndex + 1] 
+			? UINavButtons[TargetGrid.FirstButton->ButtonIndex + 1]
 			: nullptr;
 	}
 
@@ -793,7 +795,7 @@ void UUINavWidget::IncrementUINavComponentIndices(int StartingIndex)
 
 void UUINavWidget::DecrementUINavButtonIndices(int StartingIndex, int GridIndex)
 {
-	for (int i = StartingIndex; i < UINavButtons.Num()-1; i++)
+	for (int i = StartingIndex; i < UINavButtons.Num() - 1; i++)
 	{
 		UINavButtons[i] = UINavButtons[i + 1];
 		UINavButtons[i]->ButtonIndex = i;
@@ -802,7 +804,7 @@ void UUINavWidget::DecrementUINavButtonIndices(int StartingIndex, int GridIndex)
 			UINavButtons[i]->IndexInGrid--;
 		}
 	}
-	UINavButtons.RemoveAt(UINavButtons.Num()-1, 1, true);
+	UINavButtons.RemoveAt(UINavButtons.Num() - 1, 1, true);
 }
 
 void UUINavWidget::DecrementUINavComponentIndices(int StartingIndex)
@@ -818,7 +820,7 @@ void UUINavWidget::DecrementUINavComponentIndices(int StartingIndex)
 
 	if (Component != nullptr)
 	{
-		UINavComponents.RemoveAt(UINavComponents.Num()-1);
+		UINavComponents.RemoveAt(UINavComponents.Num() - 1);
 	}
 }
 
@@ -853,7 +855,7 @@ void UUINavWidget::MoveUINavElementToGrid(int Index, int TargetGridIndex, int In
 	Button->IndexInGrid = IndexInGrid;
 
 	if (From == To) return;
-	
+
 	UpdateArrays(From, To, OldGridIndex, OldIndexInGrid);
 
 	ReplaceButtonInNavigationGrid(Button, OldGridIndex, OldIndexInGrid);
@@ -923,7 +925,7 @@ void UUINavWidget::UpdateButtonArray(int From, int To, int OldGridIndex, int Old
 		for (int i = From - 1; i >= To; i--)
 		{
 			UINavButtons[i]->ButtonIndex++;
-			UINavButtons[i+1] = UINavButtons[i];
+			UINavButtons[i + 1] = UINavButtons[i];
 			if (UINavButtons[i]->GridIndex == OldGridIndex)
 			{
 				UINavButtons[i]->IndexInGrid--;
@@ -949,7 +951,7 @@ void UUINavWidget::UpdateButtonArray(int From, int To, int OldGridIndex, int Old
 				UINavButtons[From + j + 1]->IndexInGrid--;
 			}
 		}
-	}	
+	}
 }
 
 void UUINavWidget::UpdateComponentArray(int From, int To)
@@ -960,7 +962,7 @@ void UUINavWidget::UpdateComponentArray(int From, int To)
 
 	int i;
 	int Start = 0;
-	int End = UINavComponents.Num()-1;
+	int End = UINavComponents.Num() - 1;
 
 	if (Start == End)
 	{
@@ -994,14 +996,14 @@ void UUINavWidget::UpdateComponentArray(int From, int To)
 			return;
 		}
 
-		for (i = Start+1; i <= End; i++)
+		for (i = Start + 1; i <= End; i++)
 		{
 			UINavComponents[i]->ComponentIndex = UINavComponents[i]->NavButton->ButtonIndex;
-			UINavComponents[i-1] = UINavComponents[i];
+			UINavComponents[i - 1] = UINavComponents[i];
 			if (i == End)
 			{
 				UINavComponents[i] = TempComp;
-				UINavComponents[i]->ComponentIndex =  UINavComponents[i]->NavButton->ButtonIndex;
+				UINavComponents[i]->ComponentIndex = UINavComponents[i]->NavButton->ButtonIndex;
 			}
 		}
 	}
@@ -1031,14 +1033,14 @@ void UUINavWidget::UpdateComponentArray(int From, int To)
 			return;
 		}
 
-		for (i = End-1; i >= Start; i--)
+		for (i = End - 1; i >= Start; i--)
 		{
 			UINavComponents[i]->ComponentIndex = UINavComponents[i]->NavButton->ButtonIndex;
-			UINavComponents[i+1] = UINavComponents[i];
+			UINavComponents[i + 1] = UINavComponents[i];
 			if (i == Start)
 			{
 				UINavComponents[i] = TempComp;
-				UINavComponents[i]->ComponentIndex =  UINavComponents[i]->NavButton->ButtonIndex;
+				UINavComponents[i]->ComponentIndex = UINavComponents[i]->NavButton->ButtonIndex;
 			}
 		}
 	}
@@ -1057,7 +1059,7 @@ void UUINavWidget::UpdateCollectionLastIndex(int GridIndex, bool bAdded)
 	}
 }
 
-void UUINavWidget::ReplaceButtonInNavigationGrid(UUINavButton * ButtonToReplace, int GridIndex, int IndexInGrid)
+void UUINavWidget::ReplaceButtonInNavigationGrid(UUINavButton* ButtonToReplace, int GridIndex, int IndexInGrid)
 {
 	UUINavButton* NewButton = NavigationGrids[GridIndex].GetDimension() > IndexInGrid ? GetButtonAtGridIndex(NavigationGrids[GridIndex], IndexInGrid) : nullptr;
 	for (int i = 0; i < NavigationGrids.Num(); i++)
@@ -1069,7 +1071,7 @@ void UUINavWidget::ReplaceButtonInNavigationGrid(UUINavButton * ButtonToReplace,
 	}
 }
 
-void UUINavWidget::UpdateCurrentButton(UUINavButton * NewCurrentButton)
+void UUINavWidget::UpdateCurrentButton(UUINavButton* NewCurrentButton)
 {
 	ButtonIndex = NewCurrentButton->ButtonIndex;
 	if (IsSelectorValid())
@@ -1173,7 +1175,7 @@ void UUINavWidget::ClearGrid(int GridIndex, bool bAutoNavigate)
 	DeleteGridEdgeNavigationRefs(GridIndex);
 }
 
-void UUINavWidget::DeleteButtonEdgeNavigationRefs(UUINavButton * Button)
+void UUINavWidget::DeleteButtonEdgeNavigationRefs(UUINavButton* Button)
 {
 	for (FGrid& Grid : NavigationGrids)
 	{
@@ -1214,11 +1216,11 @@ void UUINavWidget::AppendNavigationGrid1D(EGridType GridType, int Dimension, FBu
 	}
 
 	Add1DGrid(GridType,
-			  UINavButtons.Num() > 0 ? UINavButtons[NumberOfButtonsInGrids] : nullptr,
-			  NavigationGrids.Num(),
-			  Dimension,
-			  EdgeNavigation,
-			  bWrap);
+		UINavButtons.Num() > 0 ? UINavButtons[NumberOfButtonsInGrids] : nullptr,
+		NavigationGrids.Num(),
+		Dimension,
+		EdgeNavigation,
+		bWrap);
 
 	int GridIndex = NavigationGrids.Num() - 1;
 	for (int i = 0; i < Dimension; i++)
@@ -1254,7 +1256,7 @@ void UUINavWidget::AppendNavigationGrid2D(int DimensionX, int DimensionY, FButto
 		return;
 	}
 
-	if (ButtonsInGrid < -1 || ButtonsInGrid > (DimensionX * DimensionY))
+	if (ButtonsInGrid < -1 || ButtonsInGrid >(DimensionX * DimensionY))
 	{
 		DISPLAYERROR("Invalid ButtonsInGrid value!");
 		return;
@@ -1268,14 +1270,14 @@ void UUINavWidget::AppendNavigationGrid2D(int DimensionX, int DimensionY, FButto
 		}
 	}
 
-	FGrid NewGrid = FGrid(EGridType::Grid2D, 
-						  ButtonsInGrid != 0 ? UINavButtons[NumberOfButtonsInGrids] : nullptr,
-						  NavigationGrids.Num(), 
-						  DimensionX, 
-						  DimensionY, 
-						  EdgeNavigation, 
-						  bWrap,
-						  ButtonsInGrid);
+	FGrid NewGrid = FGrid(EGridType::Grid2D,
+		ButtonsInGrid != 0 ? UINavButtons[NumberOfButtonsInGrids] : nullptr,
+		NavigationGrids.Num(),
+		DimensionX,
+		DimensionY,
+		EdgeNavigation,
+		bWrap,
+		ButtonsInGrid);
 
 	NavigationGrids.Add(NewGrid);
 
@@ -1329,7 +1331,7 @@ void UUINavWidget::SetEdgeNavigationByButton(int GridIndex, FButtonNavigation Ne
 	NavigationGrids[GridIndex].SetEdgeNavigationByButton(NewEdgeNavigation);
 }
 
-void UUINavWidget::Add1DGrid(EGridType GridType, UUINavButton * FirstButton, int StartingIndex, int Dimension, FButtonNavigation EdgeNavigation, bool bWrap)
+void UUINavWidget::Add1DGrid(EGridType GridType, UUINavButton* FirstButton, int StartingIndex, int Dimension, FButtonNavigation EdgeNavigation, bool bWrap)
 {
 	if (GridType == EGridType::Vertical)
 	{
@@ -1354,35 +1356,35 @@ FVector2D UUINavWidget::GetButtonLocation(int Index)
 	FVector2D LocalPosition;
 	switch (SelectorPositioning)
 	{
-		case ESelectorPosition::Position_Center:
-			LocalPosition = LocalSize / 2;
-			break;
-		case ESelectorPosition::Position_Top:
-			LocalPosition = FVector2D(LocalSize.X / 2, 0.f);
-			break;
-		case ESelectorPosition::Position_Bottom:
-			LocalPosition = FVector2D(LocalSize.X / 2, LocalSize.Y);
-			break;
-		case ESelectorPosition::Position_Left:
-			LocalPosition = FVector2D(0.f, LocalSize.Y / 2);
-			break;
-		case ESelectorPosition::Position_Right:
-			LocalPosition = FVector2D(LocalSize.X, LocalSize.Y / 2);
-			break;
-		case ESelectorPosition::Position_Top_Right:
-			LocalPosition = FVector2D(LocalSize.X, 0.f);
-			break;
-		case ESelectorPosition::Position_Top_Left:
-			LocalPosition = FVector2D(0.f, 0.f);
-			break;
-		case ESelectorPosition::Position_Bottom_Right:
-			LocalPosition = FVector2D(LocalSize.X, LocalSize.Y);
-			break;
-		case ESelectorPosition::Position_Bottom_Left:
-			LocalPosition = FVector2D(0.f, LocalSize.Y);
-			break;
+	case ESelectorPosition::Position_Center:
+		LocalPosition = LocalSize / 2;
+		break;
+	case ESelectorPosition::Position_Top:
+		LocalPosition = FVector2D(LocalSize.X / 2, 0.f);
+		break;
+	case ESelectorPosition::Position_Bottom:
+		LocalPosition = FVector2D(LocalSize.X / 2, LocalSize.Y);
+		break;
+	case ESelectorPosition::Position_Left:
+		LocalPosition = FVector2D(0.f, LocalSize.Y / 2);
+		break;
+	case ESelectorPosition::Position_Right:
+		LocalPosition = FVector2D(LocalSize.X, LocalSize.Y / 2);
+		break;
+	case ESelectorPosition::Position_Top_Right:
+		LocalPosition = FVector2D(LocalSize.X, 0.f);
+		break;
+	case ESelectorPosition::Position_Top_Left:
+		LocalPosition = FVector2D(0.f, 0.f);
+		break;
+	case ESelectorPosition::Position_Bottom_Right:
+		LocalPosition = FVector2D(LocalSize.X, LocalSize.Y);
+		break;
+	case ESelectorPosition::Position_Bottom_Left:
+		LocalPosition = FVector2D(0.f, LocalSize.Y);
+		break;
 	}
-	
+
 	FVector2D PixelPos, ViewportPos;
 	USlateBlueprintLibrary::LocalToViewport(GetWorld(), Geom, LocalPosition, PixelPos, ViewportPos);
 	ViewportPos += SelectorOffset;
@@ -1468,7 +1470,7 @@ void UUINavWidget::UpdateHoveredButtonStates(int Index, bool bHovered)
 
 	//Update previous button state
 	SwitchButtonStyle(EButtonStyle::Normal,
-					  ButtonIndex);
+		ButtonIndex);
 }
 
 void UUINavWidget::SwitchButtonStyle(EButtonStyle NewStyle, int Index, bool bRevertStyle)
@@ -1494,7 +1496,7 @@ void UUINavWidget::SwitchButtonStyle(EButtonStyle NewStyle, int Index, bool bRev
 	}
 
 	if (NewStyle != TheButton->CurrentStyle) TheButton->ForcedStyle = NewStyle;
-	
+
 	if (NewStyle == EButtonStyle::Hovered && Index != ButtonIndex)
 	{
 		USoundBase* HoverSound = Cast<USoundBase>(TheButton->WidgetStyle.HoveredSlateSound.GetResourceObject());
@@ -1522,48 +1524,48 @@ void UUINavWidget::SwapStyle(UUINavButton* TargetButton, EButtonStyle Style1, EB
 
 	switch (Style1)
 	{
-		case EButtonStyle::Normal:
-			TempState = Style.Normal;
-			switch (Style2)
-			{
-				case EButtonStyle::Hovered:
-					Style.Normal = Style.Hovered;
-					Style.Hovered = TempState;
-					break;
-				case EButtonStyle::Pressed:
-					Style.Normal = Style.Pressed;
-					Style.Pressed = TempState;
-					break;
-			}
-			break;
+	case EButtonStyle::Normal:
+		TempState = Style.Normal;
+		switch (Style2)
+		{
 		case EButtonStyle::Hovered:
-			TempState = Style.Hovered;
-			switch (Style2)
-			{
-				case EButtonStyle::Normal:
-					Style.Hovered = Style.Normal;
-					Style.Normal = TempState;
-					break;
-				case EButtonStyle::Pressed:
-					Style.Hovered = Style.Pressed;
-					Style.Pressed = TempState;
-					break;
-			}
+			Style.Normal = Style.Hovered;
+			Style.Hovered = TempState;
 			break;
 		case EButtonStyle::Pressed:
-			TempState = Style.Pressed;
-			switch (Style2)
-			{
-				case EButtonStyle::Normal:
-					Style.Pressed = Style.Normal;
-					Style.Normal = TempState;
-					break;
-				case EButtonStyle::Hovered:
-					Style.Pressed = Style.Hovered;
-					Style.Hovered = TempState;
-					break;
-			}
+			Style.Normal = Style.Pressed;
+			Style.Pressed = TempState;
 			break;
+		}
+		break;
+	case EButtonStyle::Hovered:
+		TempState = Style.Hovered;
+		switch (Style2)
+		{
+		case EButtonStyle::Normal:
+			Style.Hovered = Style.Normal;
+			Style.Normal = TempState;
+			break;
+		case EButtonStyle::Pressed:
+			Style.Hovered = Style.Pressed;
+			Style.Pressed = TempState;
+			break;
+		}
+		break;
+	case EButtonStyle::Pressed:
+		TempState = Style.Pressed;
+		switch (Style2)
+		{
+		case EButtonStyle::Normal:
+			Style.Pressed = Style.Normal;
+			Style.Normal = TempState;
+			break;
+		case EButtonStyle::Hovered:
+			Style.Pressed = Style.Hovered;
+			Style.Hovered = TempState;
+			break;
+		}
+		break;
 	}
 
 	TargetButton->SetStyle(Style);
@@ -1814,7 +1816,7 @@ void UUINavWidget::OnPreSelect(int Index, bool bMouseClick)
 	else
 	{
 		SwitchButtonStyle(UINavButtons[Index]->IsPressed() || SelectCount > 1 ? EButtonStyle::Pressed : (Index == ButtonIndex ? EButtonStyle::Hovered : EButtonStyle::Normal),
-						  ButtonIndex);
+			ButtonIndex);
 
 		SelectCount--;
 		if (SelectCount == 0)
@@ -1890,7 +1892,7 @@ UWidget* UUINavWidget::GoToWidget(TSubclassOf<UUINavWidget> NewWidgetClass, bool
 	return GoToBuiltWidget(NewWidget, bRemoveParent, bDestroyParent, ZOrder);
 }
 
-UWidget * UUINavWidget::GoToBuiltWidget(UUINavWidget* NewWidget, bool bRemoveParent, bool bDestroyParent, int ZOrder)
+UWidget* UUINavWidget::GoToBuiltWidget(UUINavWidget* NewWidget, bool bRemoveParent, bool bDestroyParent, int ZOrder)
 {
 	if (NewWidget == nullptr) return nullptr;
 	APlayerController* PC = Cast<APlayerController>(UINavPC->GetOwner());
@@ -2019,7 +2021,7 @@ int UUINavWidget::GetLocalHorizontalCompIndex(int Index)
 bool UUINavWidget::IsSelectorValid()
 {
 	return  TheSelector != nullptr &&
-			TheSelector->bIsEnabled;
+		TheSelector->bIsEnabled;
 }
 
 UUINavButton* UUINavWidget::FindNextButton(UUINavButton* Button, ENavigationDirection Direction)
@@ -2062,130 +2064,130 @@ UUINavButton* UUINavWidget::FetchButtonByDirection(ENavigationDirection Directio
 
 	switch (ButtonGrid.GridType)
 	{
-		case EGridType::Horizontal:
-			switch (Direction)
+	case EGridType::Horizontal:
+		switch (Direction)
+		{
+		case ENavigationDirection::Up:
+			if (ButtonGrid.EdgeNavigation.UpButton != nullptr) NextButton = ButtonGrid.EdgeNavigation.UpButton;
+			else NextButton = nullptr;
+			break;
+		case ENavigationDirection::Down:
+			if (ButtonGrid.EdgeNavigation.DownButton != nullptr) NextButton = ButtonGrid.EdgeNavigation.DownButton;
+			else NextButton = nullptr;
+			break;
+		case ENavigationDirection::Left:
+			if (Button->IndexInGrid == 0)
 			{
-				case ENavigationDirection::Up:
-					if (ButtonGrid.EdgeNavigation.UpButton != nullptr) NextButton = ButtonGrid.EdgeNavigation.UpButton;
-					else NextButton = nullptr;
-					break;
-				case ENavigationDirection::Down:
-					if (ButtonGrid.EdgeNavigation.DownButton != nullptr) NextButton = ButtonGrid.EdgeNavigation.DownButton;
-					else NextButton = nullptr;
-					break;
-				case ENavigationDirection::Left:
-					if (Button->IndexInGrid == 0)
-					{
-						if (ButtonGrid.EdgeNavigation.LeftButton != nullptr) NextButton = ButtonGrid.EdgeNavigation.LeftButton;
-						else if (ButtonGrid.bWrap) NextButton = UINavButtons[ButtonGrid.FirstButton->ButtonIndex + ButtonGrid.DimensionX - 1];
-						else NextButton = nullptr;
-					}
-					else
-					{
-						NextButton = UINavButtons[Button->ButtonIndex - 1];
-					}
-					break;
-				case ENavigationDirection::Right:
-					if (Button->IndexInGrid+1 >= ButtonGrid.DimensionX)
-					{
-						if (ButtonGrid.EdgeNavigation.RightButton != nullptr) NextButton = ButtonGrid.EdgeNavigation.RightButton;
-						else if (ButtonGrid.bWrap) NextButton = ButtonGrid.FirstButton;
-						else NextButton = nullptr;
-					}
-					else NextButton = UINavButtons[Button->ButtonIndex + 1];
-					break;
+				if (ButtonGrid.EdgeNavigation.LeftButton != nullptr) NextButton = ButtonGrid.EdgeNavigation.LeftButton;
+				else if (ButtonGrid.bWrap) NextButton = UINavButtons[ButtonGrid.FirstButton->ButtonIndex + ButtonGrid.DimensionX - 1];
+				else NextButton = nullptr;
+			}
+			else
+			{
+				NextButton = UINavButtons[Button->ButtonIndex - 1];
 			}
 			break;
-		case EGridType::Vertical:
-			switch (Direction)
+		case ENavigationDirection::Right:
+			if (Button->IndexInGrid + 1 >= ButtonGrid.DimensionX)
 			{
-				case ENavigationDirection::Up:
-					if (Button->IndexInGrid == 0)
-					{
-						if (ButtonGrid.EdgeNavigation.UpButton != nullptr) NextButton = ButtonGrid.EdgeNavigation.UpButton;
-						else if (ButtonGrid.bWrap) NextButton = UINavButtons[ButtonGrid.FirstButton->ButtonIndex + ButtonGrid.DimensionY - 1];
-						else NextButton = nullptr;
-					}
-					else
-					{
-						NextButton = UINavButtons[Button->ButtonIndex - 1];
-					}
-					break;
-				case ENavigationDirection::Down:
-					if (Button->IndexInGrid+1 >= ButtonGrid.DimensionY)
-					{
-						if (ButtonGrid.EdgeNavigation.DownButton != nullptr) NextButton = ButtonGrid.EdgeNavigation.DownButton;
-						else if (ButtonGrid.bWrap) NextButton = ButtonGrid.FirstButton;
-						else NextButton = nullptr;
-					}
-					else NextButton = UINavButtons[Button->ButtonIndex + 1];
-					break;
-				case ENavigationDirection::Left:
-					if (ButtonGrid.EdgeNavigation.LeftButton != nullptr) NextButton = ButtonGrid.EdgeNavigation.LeftButton;
-					else NextButton = nullptr;
-					break;
-				case ENavigationDirection::Right:
-					if (ButtonGrid.EdgeNavigation.RightButton != nullptr) NextButton = ButtonGrid.EdgeNavigation.RightButton;
-					else NextButton = nullptr;
-					break;
+				if (ButtonGrid.EdgeNavigation.RightButton != nullptr) NextButton = ButtonGrid.EdgeNavigation.RightButton;
+				else if (ButtonGrid.bWrap) NextButton = ButtonGrid.FirstButton;
+				else NextButton = nullptr;
+			}
+			else NextButton = UINavButtons[Button->ButtonIndex + 1];
+			break;
+		}
+		break;
+	case EGridType::Vertical:
+		switch (Direction)
+		{
+		case ENavigationDirection::Up:
+			if (Button->IndexInGrid == 0)
+			{
+				if (ButtonGrid.EdgeNavigation.UpButton != nullptr) NextButton = ButtonGrid.EdgeNavigation.UpButton;
+				else if (ButtonGrid.bWrap) NextButton = UINavButtons[ButtonGrid.FirstButton->ButtonIndex + ButtonGrid.DimensionY - 1];
+				else NextButton = nullptr;
+			}
+			else
+			{
+				NextButton = UINavButtons[Button->ButtonIndex - 1];
 			}
 			break;
-		case EGridType::Grid2D:
-			switch (Direction)
+		case ENavigationDirection::Down:
+			if (Button->IndexInGrid + 1 >= ButtonGrid.DimensionY)
 			{
-				case ENavigationDirection::Up:
-					if (Button->IndexInGrid < ButtonGrid.DimensionX)
-					{
-						if (ButtonGrid.EdgeNavigation.UpButton != nullptr) NextButton = ButtonGrid.EdgeNavigation.UpButton;
-						else if (ButtonGrid.bWrap)
-						{
-							int Offset = ButtonGrid.DimensionX * (ButtonGrid.DimensionY - 1) + Button->IndexInGrid;
-							NextButton = UINavButtons[ButtonGrid.FirstButton->ButtonIndex + (Offset >= ButtonGrid.NumGrid2DButtons ? Offset - ButtonGrid.DimensionX : Offset)];
-						}
-						else NextButton = nullptr;
-					}
-					else NextButton = UINavButtons[Button->ButtonIndex - ButtonGrid.DimensionX];
-					break;
-				case ENavigationDirection::Down:
-					if (Button->IndexInGrid + ButtonGrid.DimensionX >= ButtonGrid.GetDimension())
-					{
-						if (ButtonGrid.EdgeNavigation.DownButton != nullptr) NextButton = ButtonGrid.EdgeNavigation.DownButton;
-						else if (ButtonGrid.bWrap) NextButton = UINavButtons[ButtonGrid.FirstButton->ButtonIndex + (Button->IndexInGrid % ButtonGrid.DimensionX)];
-						else NextButton = nullptr;
-					}
-					else NextButton = UINavButtons[Button->ButtonIndex + ButtonGrid.DimensionX];
-					break;
-				case ENavigationDirection::Left:
-					if (Button->IndexInGrid % ButtonGrid.DimensionX == 0)
-					{
-						if (ButtonGrid.EdgeNavigation.LeftButton != nullptr) NextButton = ButtonGrid.EdgeNavigation.LeftButton;
-						else if (ButtonGrid.bWrap) NextButton = UINavButtons[FMath::Min(Button->ButtonIndex - 1 + ButtonGrid.DimensionX, ButtonGrid.GetLastButtonIndex())];
-						else NextButton = nullptr;
-					}
-					else NextButton = UINavButtons[Button->ButtonIndex - 1];
-					break;
-				case ENavigationDirection::Right:
-					if ((Button->IndexInGrid + 1) % ButtonGrid.DimensionX == 0)
-					{
-						if (ButtonGrid.EdgeNavigation.RightButton != nullptr) NextButton = ButtonGrid.EdgeNavigation.RightButton;
-						else if (ButtonGrid.bWrap) NextButton = UINavButtons[Button->ButtonIndex + 1 - ButtonGrid.DimensionX];
-						else NextButton = nullptr;
-					}
-					else if ((Button->IndexInGrid + 1) >= ButtonGrid.NumGrid2DButtons)
-					{
-						if (ButtonGrid.EdgeNavigation.RightButton != nullptr) NextButton = ButtonGrid.EdgeNavigation.RightButton;
-						else if (ButtonGrid.bWrap) NextButton = UINavButtons[Button->ButtonIndex + 1 - (Button->IndexInGrid + 1) % ButtonGrid.DimensionX];
-						else NextButton = nullptr;
-					}
-					else NextButton = UINavButtons[Button->ButtonIndex + 1];
-					break;
+				if (ButtonGrid.EdgeNavigation.DownButton != nullptr) NextButton = ButtonGrid.EdgeNavigation.DownButton;
+				else if (ButtonGrid.bWrap) NextButton = ButtonGrid.FirstButton;
+				else NextButton = nullptr;
 			}
+			else NextButton = UINavButtons[Button->ButtonIndex + 1];
 			break;
+		case ENavigationDirection::Left:
+			if (ButtonGrid.EdgeNavigation.LeftButton != nullptr) NextButton = ButtonGrid.EdgeNavigation.LeftButton;
+			else NextButton = nullptr;
+			break;
+		case ENavigationDirection::Right:
+			if (ButtonGrid.EdgeNavigation.RightButton != nullptr) NextButton = ButtonGrid.EdgeNavigation.RightButton;
+			else NextButton = nullptr;
+			break;
+		}
+		break;
+	case EGridType::Grid2D:
+		switch (Direction)
+		{
+		case ENavigationDirection::Up:
+			if (Button->IndexInGrid < ButtonGrid.DimensionX)
+			{
+				if (ButtonGrid.EdgeNavigation.UpButton != nullptr) NextButton = ButtonGrid.EdgeNavigation.UpButton;
+				else if (ButtonGrid.bWrap)
+				{
+					int Offset = ButtonGrid.DimensionX * (ButtonGrid.DimensionY - 1) + Button->IndexInGrid;
+					NextButton = UINavButtons[ButtonGrid.FirstButton->ButtonIndex + (Offset >= ButtonGrid.NumGrid2DButtons ? Offset - ButtonGrid.DimensionX : Offset)];
+				}
+				else NextButton = nullptr;
+			}
+			else NextButton = UINavButtons[Button->ButtonIndex - ButtonGrid.DimensionX];
+			break;
+		case ENavigationDirection::Down:
+			if (Button->IndexInGrid + ButtonGrid.DimensionX >= ButtonGrid.GetDimension())
+			{
+				if (ButtonGrid.EdgeNavigation.DownButton != nullptr) NextButton = ButtonGrid.EdgeNavigation.DownButton;
+				else if (ButtonGrid.bWrap) NextButton = UINavButtons[ButtonGrid.FirstButton->ButtonIndex + (Button->IndexInGrid % ButtonGrid.DimensionX)];
+				else NextButton = nullptr;
+			}
+			else NextButton = UINavButtons[Button->ButtonIndex + ButtonGrid.DimensionX];
+			break;
+		case ENavigationDirection::Left:
+			if (Button->IndexInGrid % ButtonGrid.DimensionX == 0)
+			{
+				if (ButtonGrid.EdgeNavigation.LeftButton != nullptr) NextButton = ButtonGrid.EdgeNavigation.LeftButton;
+				else if (ButtonGrid.bWrap) NextButton = UINavButtons[FMath::Min(Button->ButtonIndex - 1 + ButtonGrid.DimensionX, ButtonGrid.GetLastButtonIndex())];
+				else NextButton = nullptr;
+			}
+			else NextButton = UINavButtons[Button->ButtonIndex - 1];
+			break;
+		case ENavigationDirection::Right:
+			if ((Button->IndexInGrid + 1) % ButtonGrid.DimensionX == 0)
+			{
+				if (ButtonGrid.EdgeNavigation.RightButton != nullptr) NextButton = ButtonGrid.EdgeNavigation.RightButton;
+				else if (ButtonGrid.bWrap) NextButton = UINavButtons[Button->ButtonIndex + 1 - ButtonGrid.DimensionX];
+				else NextButton = nullptr;
+			}
+			else if ((Button->IndexInGrid + 1) >= ButtonGrid.NumGrid2DButtons)
+			{
+				if (ButtonGrid.EdgeNavigation.RightButton != nullptr) NextButton = ButtonGrid.EdgeNavigation.RightButton;
+				else if (ButtonGrid.bWrap) NextButton = UINavButtons[Button->ButtonIndex + 1 - (Button->IndexInGrid + 1) % ButtonGrid.DimensionX];
+				else NextButton = nullptr;
+			}
+			else NextButton = UINavButtons[Button->ButtonIndex + 1];
+			break;
+		}
+		break;
 	}
 	return NextButton;
 }
 
-UUINavButton * UUINavWidget::GetButtonAtIndex(int InButtonIndex)
+UUINavButton* UUINavWidget::GetButtonAtIndex(int InButtonIndex)
 {
 	if (InButtonIndex < 0 || InButtonIndex >= UINavButtons.Num())
 	{
@@ -2201,7 +2203,7 @@ EButtonStyle UUINavWidget::GetStyleFromButtonState(UButton* Button)
 	else return EButtonStyle::Normal;
 }
 
-void UUINavWidget::GetGridAtIndex(int GridIndex, FGrid & Grid, bool & IsValid)
+void UUINavWidget::GetGridAtIndex(int GridIndex, FGrid& Grid, bool& IsValid)
 {
 	if (GridIndex < 0 || GridIndex >= NavigationGrids.Num())
 	{
@@ -2214,7 +2216,7 @@ void UUINavWidget::GetGridAtIndex(int GridIndex, FGrid & Grid, bool & IsValid)
 	}
 }
 
-void UUINavWidget::GetButtonGrid(UUINavButton * Button, FGrid& ButtonGrid, bool& IsValid)
+void UUINavWidget::GetButtonGrid(UUINavButton* Button, FGrid& ButtonGrid, bool& IsValid)
 {
 	if (NavigationGrids.Num() > Button->GridIndex)
 	{
@@ -2229,7 +2231,7 @@ void UUINavWidget::GetButtonGrid(UUINavButton * Button, FGrid& ButtonGrid, bool&
 	}
 }
 
-void UUINavWidget::GetButtonGridFromIndex(int InButtonIndex, FGrid & ButtonGrid, bool & IsValid)
+void UUINavWidget::GetButtonGridFromIndex(int InButtonIndex, FGrid& ButtonGrid, bool& IsValid)
 {
 	if (InButtonIndex < 0 || InButtonIndex >= UINavButtons.Num())
 	{
@@ -2294,14 +2296,14 @@ int UUINavWidget::GetGridStartingIndex(int GridIndex)
 	return -1;
 }
 
-UUINavButton * UUINavWidget::GetLastButtonInGrid(const FGrid Grid)
+UUINavButton* UUINavWidget::GetLastButtonInGrid(const FGrid Grid)
 {
 	int LastIndex = Grid.GetLastButtonIndex();
 
 	return UINavButtons.Num() > LastIndex ? UINavButtons[LastIndex] : nullptr;
 }
 
-UUINavButton * UUINavWidget::GetButtonAtGridIndex(const FGrid ButtonGrid, const int IndexInGrid)
+UUINavButton* UUINavWidget::GetButtonAtGridIndex(const FGrid ButtonGrid, const int IndexInGrid)
 {
 	if (ButtonGrid.FirstButton == nullptr || IndexInGrid < 0) return nullptr;
 	int NewIndex = ButtonGrid.FirstButton->ButtonIndex + IndexInGrid;
@@ -2311,13 +2313,13 @@ UUINavButton * UUINavWidget::GetButtonAtGridIndex(const FGrid ButtonGrid, const 
 	return UINavButtons[NewIndex];
 }
 
-bool UUINavWidget::IsButtonInGrid(UUINavButton * Button, const FGrid Grid)
+bool UUINavWidget::IsButtonInGrid(UUINavButton* Button, const FGrid Grid)
 {
 	if (Button == nullptr) return false;
 	return Button->GridIndex == Grid.GridIndex;
 }
 
-void UUINavWidget::GetCoordinatesInGrid2D_FromIndex(const int Index, int & XCoord, int & YCoord)
+void UUINavWidget::GetCoordinatesInGrid2D_FromIndex(const int Index, int& XCoord, int& YCoord)
 {
 	XCoord = -1;
 	YCoord = -1;
@@ -2326,7 +2328,7 @@ void UUINavWidget::GetCoordinatesInGrid2D_FromIndex(const int Index, int & XCoor
 	GetCoordinatesInGrid2D_FromButton(UINavButtons[ButtonIndex], XCoord, YCoord);
 }
 
-void UUINavWidget::GetCoordinatesInGrid2D_FromButton(UUINavButton * Button, int & XCoord, int & YCoord)
+void UUINavWidget::GetCoordinatesInGrid2D_FromButton(UUINavButton* Button, int& XCoord, int& YCoord)
 {
 	XCoord = -1;
 	YCoord = -1;
@@ -2339,7 +2341,7 @@ void UUINavWidget::GetCoordinatesInGrid2D_FromButton(UUINavButton * Button, int 
 	XCoord = Button->IndexInGrid - (YCoord * Grid.DimensionX);
 }
 
-UUINavButton * UUINavWidget::GetButtonFromCoordinatesInGrid2D(const FGrid Grid, int XCoord, int YCoord)
+UUINavButton* UUINavWidget::GetButtonFromCoordinatesInGrid2D(const FGrid Grid, int XCoord, int YCoord)
 {
 	int Index = GetButtonIndexFromCoordinatesInGrid2D(Grid, XCoord, YCoord);
 	if (Index == -1) return nullptr;
@@ -2364,7 +2366,7 @@ int UUINavWidget::GetButtonIndexFromCoordinatesInGrid2D(const FGrid Grid, int XC
 	return Index;
 }
 
-int UUINavWidget::GetCollectionButtonIndex(UUINavCollection * Collection, int Index)
+int UUINavWidget::GetCollectionButtonIndex(UUINavCollection* Collection, int Index)
 {
 	if (Collection == nullptr || Index == -1) return -1;
 
@@ -2378,19 +2380,19 @@ int UUINavWidget::GetCollectionButtonIndex(UUINavCollection * Collection, int In
 	return -1;
 }
 
-UUINavComponent * UUINavWidget::GetUINavComponentAtIndex(int Index)
+UUINavComponent* UUINavWidget::GetUINavComponentAtIndex(int Index)
 {
 	int ValidIndex = GetLocalComponentIndex(Index);
 	if (ValidIndex == -1) return nullptr;
-	
+
 	return UINavComponents[ValidIndex];
 }
 
-UUINavHorizontalComponent * UUINavWidget::GetUINavHorizontalCompAtIndex(int Index)
+UUINavHorizontalComponent* UUINavWidget::GetUINavHorizontalCompAtIndex(int Index)
 {
 	int ValidIndex = GetLocalHorizontalCompIndex(Index);
 	if (ValidIndex == -1) return nullptr;
-	
+
 	return UINavHorizontalComps[ValidIndex];
 }
 
@@ -2504,18 +2506,18 @@ void UUINavWidget::FinishPress(bool bMouse)
 	SelectedButtonIndex = ButtonIndex;
 	SelectCount++;
 
-  	if (!bMouse)
+	if (!bMouse)
 	{
 		if (!CurrentButton->IsPressed())
 		{
- 			SwitchButtonStyle(EButtonStyle::Pressed,
-							  ButtonIndex);
+			SwitchButtonStyle(EButtonStyle::Pressed,
+				ButtonIndex);
 		}
 	}
 	else if (CurrentButton->ForcedStyle != EButtonStyle::Normal)
 	{
 		SwitchButtonStyle(EButtonStyle::Pressed,
-						ButtonIndex);
+			ButtonIndex);
 	}
 
 	UUINavComponent* CurrentUINavComp = GetUINavComponentAtIndex(ButtonIndex);
@@ -2528,7 +2530,7 @@ void UUINavWidget::FinishPress(bool bMouse)
 	CollectionOnStartSelect(ButtonIndex);
 }
 
-void UUINavWidget::SetupUINavButtonDelegates(UUINavButton * NewButton)
+void UUINavWidget::SetupUINavButtonDelegates(UUINavButton* NewButton)
 {
 	NewButton->CustomHover.AddDynamic(this, &UUINavWidget::HoverEvent);
 	NewButton->CustomUnhover.AddDynamic(this, &UUINavWidget::UnhoverEvent);
@@ -2585,9 +2587,9 @@ void UUINavWidget::NavigateInDirection(ENavigationDirection Direction)
 	OnNavigatedDirection(Direction);
 
 	UUINavHorizontalComponent* HorizComp = GetUINavHorizontalCompAtIndex(ButtonIndex);
-	if (HorizComp != nullptr && 
-		(Direction == ENavigationDirection::Left || 
-		 Direction == ENavigationDirection::Right))
+	if (HorizComp != nullptr &&
+		(Direction == ENavigationDirection::Left ||
+			Direction == ENavigationDirection::Right))
 	{
 		if (Direction == ENavigationDirection::Left)
 		{
