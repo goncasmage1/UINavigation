@@ -71,6 +71,12 @@ void UUINavWidget::NativeConstruct()
 
 void UUINavWidget::InitialSetup()
 {
+	//Checks if the Player Controller is still valid
+	if (UINavPC == nullptr)
+	{
+		ConfigureUINavPC();
+	}
+
 	//If widget was already setup, apply only certain steps
 	if (bCompletedSetup)
 	{
@@ -80,10 +86,6 @@ void UUINavWidget::InitialSetup()
 
 	bSetupStarted = true;
 	WidgetClass = GetClass();
-	if (UINavPC == nullptr)
-	{
-		ConfigureUINavPC();
-	}
 
 	FetchButtonsInHierarchy();
 	ReadyForSetup();
@@ -195,10 +197,21 @@ void UUINavWidget::FetchButtonsInHierarchy()
 void UUINavWidget::ConfigureUINavPC()
 {
 	APlayerController* PC = Cast<APlayerController>(GetOwningPlayer());
-	if (PC == nullptr)
+	if (PC == nullptr && bAutomaticallyGetPlayerController == false)
 	{
 		DISPLAYERROR("Player Controller is Null!");
 		return;
+	}
+	else if (PC == nullptr && bAutomaticallyGetPlayerController == true) {
+		if (UGameplayStatics::GetPlayerController(GetWorld(), PlayerIndex) == nullptr) {
+			DISPLAYERROR("No Player found at Player Index!");
+			return;
+		}
+		else
+		{
+			SetOwningPlayer(UGameplayStatics::GetPlayerController(GetWorld(), PlayerIndex));
+			PC = Cast<APlayerController>(GetOwningPlayer());
+		}
 	}
 	UINavPC = Cast<UUINavPCComponent>(PC->GetComponentByClass(UUINavPCComponent::StaticClass()));
 	if (UINavPC == nullptr)

@@ -187,6 +187,14 @@ public:
 		bool bShouldDestroyParent = true;
 
 
+	//If set to true, UINavWidget will automatically get and use the Player Controller from the Player at the Index specified below
+	UPROPERTY(EditDefaultsOnly, Category = UINavWidget)
+		bool bAutomaticallyGetPlayerController = false;
+
+	//This the Index of the Player that UiNavwidget will use
+	UPROPERTY(EditDefaultsOnly, Category = UINavWidget, meta = (EditCondition = bAutomaticallyGetPlayerController))
+		int PlayerIndex = 0;
+
 	//If set to true, buttons will be navigated by switching button states (Normal and Hovered)
 	UPROPERTY(EditDefaultsOnly, Category = UINavWidget)
 		bool bUseButtonStates = false;
