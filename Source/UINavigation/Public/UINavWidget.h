@@ -61,7 +61,7 @@ protected:
 	/**
 	*	Configures the blueprint on Construct event
 	*/
-	void InitialSetup();
+	void InitialSetup(bool bRebuilding = false);
 
 	/**
 	*	Resets the necessary variables in order for this widget to be used again
@@ -93,6 +93,12 @@ protected:
 	*	Sets all the UTextBlocks to the default color
 	*/
 	inline void ChangeTextColorToDefault();
+
+	/**
+	*	Rebuilds all of the widget's navigation and navigates to the button at the specified index
+	*/
+	UFUNCTION(BlueprintCallable, Category = UINavWidget)
+		void RebuildNavigation(int NewButtonIndex = -1);
 
 	/**
 	*	Returns the position of the UINavButton with the specified index

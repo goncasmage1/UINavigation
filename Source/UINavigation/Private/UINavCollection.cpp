@@ -218,6 +218,7 @@ void UUINavCollection::TraverseHierarquy(int StartIndex)
 		ParentWidget->SetupUINavButtonDelegates(NewNavButton);
 
 		ParentWidget->UINavButtons.Add(NewNavButton);
+		ParentWidget->RevertButtonStyle(ParentWidget->UINavButtons.Num() - 1);
 	}
 }
 
