@@ -1239,7 +1239,7 @@ void UUINavWidget::AppendNavigationGrid1D(EGridType GridType, int Dimension, FBu
 	}
 
 	Add1DGrid(GridType,
-			  UINavButtons.Num() > 0 ? UINavButtons[NumberOfButtonsInGrids] : nullptr,
+			  UINavButtons.Num() > 0 ? (UINavButtons.Num() > NumberOfButtonsInGrids ? UINavButtons[NumberOfButtonsInGrids] : nullptr) : nullptr,
 			  NavigationGrids.Num(),
 			  Dimension,
 			  EdgeNavigation,
