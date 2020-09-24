@@ -69,20 +69,23 @@ void UUINavWidget::NativeConstruct()
 	Super::NativeConstruct();
 }
 
-void UUINavWidget::InitialSetup()
+void UUINavWidget::InitialSetup(bool bRebuilding)
 {
-	//If widget was already setup, apply only certain steps
-	if (bCompletedSetup)
+	if (!bRebuilding)
 	{
-		ReconfigureSetup();
-		return;
-	}
+		//If widget was already setup, apply only certain steps
+		if (bCompletedSetup)
+		{
+			ReconfigureSetup();
+			return;
+		}
 
-	bSetupStarted = true;
-	WidgetClass = GetClass();
-	if (UINavPC == nullptr)
-	{
-		ConfigureUINavPC();
+		bSetupStarted = true;
+		WidgetClass = GetClass();
+		if (UINavPC == nullptr)
+		{
+			ConfigureUINavPC();
+		}
 	}
 
 	FetchButtonsInHierarchy();
@@ -293,6 +296,7 @@ void UUINavWidget::TraverseHierarquy()
 
 		NewNavButton->bAutoCollapse = NewNavButton->bIsEnabled;
 		UINavButtons.Add(NewNavButton);
+		RevertButtonStyle(UINavButtons.Num() - 1);
 	}
 
 	UINavButtons.HeapSort([](const UUINavButton& Wid1, const UUINavButton& Wid2)
@@ -304,6 +308,38 @@ void UUINavWidget::TraverseHierarquy()
 void UUINavWidget::ChangeTextColorToDefault()
 {
 	for (int j = 0; j < UINavButtons.Num(); j++) SwitchTextColorTo(j, TextDefaultColor);
+}
+
+void UUINavWidget::RebuildNavigation(int NewButtonIndex)
+{
+	bCompletedSetup = false;
+	bMovingSelector = false;
+	bIgnoreMouseEvent = false;
+	bReturning = false;
+	bWaitForInput = false;
+	bShouldTick = true;
+	ReceiveInputType = EReceiveInputType::None;
+	WaitForTick = 0;
+	HaltedIndex = -1;
+	SelectedButtonIndex = -1;
+	SelectCount = 0;
+	InputBoxIndex = -1;
+	NumberOfButtonsInGrids = 0;
+	CollectionIndex = 0;
+	FirstButtonIndex = NewButtonIndex > -1 ? NewButtonIndex : FirstButtonIndex;
+	UINavInputContainer = nullptr;
+	CurrentButton = nullptr;
+
+	NavigationGrids.Reset();
+	UINavAnimations.Reset();
+	ScrollBoxes.Reset();
+	UINavButtons.Reset();
+	UINavComponents.Reset();
+	UINavHorizontalComps.Reset();
+	UINavInputBoxes.Reset();
+	UINavCollections.Reset();
+
+	InitialSetup(true);
 }
 
 void UUINavWidget::SetupSelector()
@@ -1203,7 +1239,7 @@ void UUINavWidget::AppendNavigationGrid1D(EGridType GridType, int Dimension, FBu
 	}
 
 	Add1DGrid(GridType,
-			  UINavButtons.Num() > 0 ? UINavButtons[NumberOfButtonsInGrids] : nullptr,
+			  UINavButtons.Num() > 0 ? (UINavButtons.Num() > NumberOfButtonsInGrids ? UINavButtons[NumberOfButtonsInGrids] : nullptr) : nullptr,
 			  NavigationGrids.Num(),
 			  Dimension,
 			  EdgeNavigation,
@@ -2519,8 +2555,10 @@ void UUINavWidget::FinishPress(bool bMouse)
 
 void UUINavWidget::SetupUINavButtonDelegates(UUINavButton * NewButton)
 {
-	NewButton->CustomHover.AddDynamic(this, &UUINavWidget::HoverEvent);
-	NewButton->CustomUnhover.AddDynamic(this, &UUINavWidget::UnhoverEvent);
+	if (!NewButton->CustomHover.IsBound())
+		NewButton->CustomHover.AddDynamic(this, &UUINavWidget::HoverEvent);
+	if (!NewButton->CustomUnhover.IsBound())
+		NewButton->CustomUnhover.AddDynamic(this, &UUINavWidget::UnhoverEvent);
 	FScriptDelegate OnClickScriptDelegate;
 	OnClickScriptDelegate.BindUFunction(NewButton, FName("OnClick"));
 	if (NewButton->OnPressed.Contains(OnClickScriptDelegate))
@@ -2528,8 +2566,10 @@ void UUINavWidget::SetupUINavButtonDelegates(UUINavButton * NewButton)
 		NewButton->OnPressed.Remove(OnClickScriptDelegate);
 		NewButton->OnPressed.AddDynamic(NewButton, &UUINavButton::OnPress);
 	}
-	NewButton->CustomPress.AddDynamic(this, &UUINavWidget::PressEvent);
-	NewButton->CustomRelease.AddDynamic(this, &UUINavWidget::ReleaseEvent);
+	if (!NewButton->CustomPress.IsBound())
+		NewButton->CustomPress.AddDynamic(this, &UUINavWidget::PressEvent);
+	if (!NewButton->CustomRelease.IsBound())
+		NewButton->CustomRelease.AddDynamic(this, &UUINavWidget::ReleaseEvent);
 }
 
 void UUINavWidget::ProcessKeybind(FKey PressedKey)
