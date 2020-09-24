@@ -2298,7 +2298,7 @@ int UUINavWidget::GetGridStartingIndex(int GridIndex)
 	{
 		if (NavigationGrids[GridIndex].FirstButton->ButtonIndex < 0)
 		{
-			if (GridIndex > 0) return (GetGridStartingIndex(GridIndex - 1) + 1);
+			if (GridIndex > 0) return (GetGridStartingIndex(GridIndex - 1) +  NavigationGrids[GridIndex - 1].GetDimension());
 			else return 0;
 		}
 		else
