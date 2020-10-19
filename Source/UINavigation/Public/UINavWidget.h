@@ -167,7 +167,7 @@ public:
 		class UUINavButton* CurrentButton = nullptr;
 
 	//Reference to the parent widget that created this widget
-	UPROPERTY(BlueprintReadOnly, meta = (ExposeOnSpawn = true), Category = UINavWidget)
+	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
 		UUINavWidget* ParentWidget;
 
 	//This widget's class
