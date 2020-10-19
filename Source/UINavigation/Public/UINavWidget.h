@@ -322,6 +322,15 @@ public:
 	UFUNCTION(BlueprintCallable, Category = UINavWidget, meta = (AdvancedDisplay=1))
 		void NavigateTo(int Index, bool bHoverEvent = false);
 
+	/**
+	*	Navigate to the button with the specified index at the specified grid
+	*
+	*	@param	Index  The index of the button that was hovered upon
+	*	@param	bHoverEvent  Was this triggered by a button hover event?
+	*/
+	UFUNCTION(BlueprintCallable, Category = UINavWidget)
+		void NavigateToGrid(int GridIndex, int IndexInGrid = 0);
+
 	void CollectionNavigateTo(int Index);
 
 	void CallCustomInput(FName ActionName, uint8* Buffer);

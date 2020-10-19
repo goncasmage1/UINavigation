@@ -1673,6 +1673,21 @@ void UUINavWidget::NavigateTo(int Index, bool bHoverEvent)
 	}
 }
 
+void UUINavWidget::NavigateToGrid(int GridIndex, int IndexInGrid)
+{
+	FGrid Grid;
+	bool bValid;
+	GetGridAtIndex(GridIndex, Grid, bValid);
+
+	if (!bValid) return;
+
+	UUINavButton* TargetButton = GetButtonAtGridIndex(Grid, IndexInGrid);
+
+	if (TargetButton == nullptr) return;
+
+	NavigateTo(TargetButton->ButtonIndex);
+}
+
 void UUINavWidget::CollectionNavigateTo(int Index)
 {
 	bool bFoundFrom = false;
