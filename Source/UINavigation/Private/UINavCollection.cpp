@@ -25,8 +25,8 @@ void UUINavCollection::NotifyOnNavigate(int From, int To, int LocalFrom, int Loc
 	bool bFoundTo = false;
 	for (UUINavCollection* Collection : UINavCollections)
 	{
-		int CollectionFromIndex = ParentWidget->GetCollectionButtonIndex(Collection, From);
-		int CollectionToIndex = ParentWidget->GetCollectionButtonIndex(Collection, To);
+		int CollectionFromIndex = ParentWidget->GetCollectionFirstButtonIndex(Collection, From);
+		int CollectionToIndex = ParentWidget->GetCollectionFirstButtonIndex(Collection, To);
 
 		bool bValidFrom = CollectionFromIndex != -1;
 		bool bValidTo = CollectionToIndex != -1;
@@ -64,7 +64,7 @@ void UUINavCollection::NotifyOnSelect(int Index, int LocalIndex)
 {
 	for (UUINavCollection* Collection : UINavCollections)
 	{
-		int CollectionButtonIndex = ParentWidget->GetCollectionButtonIndex(Collection, Index);
+		int CollectionButtonIndex = ParentWidget->GetCollectionFirstButtonIndex(Collection, Index);
 		if (CollectionButtonIndex != -1)
 		{
 			Collection->OnSelect(Index, CollectionButtonIndex);
@@ -78,7 +78,7 @@ void UUINavCollection::NotifyOnStartSelect(int Index, int LocalIndex)
 {
 	for (UUINavCollection* Collection : UINavCollections)
 	{
-		int CollectionButtonIndex = ParentWidget->GetCollectionButtonIndex(Collection, Index);
+		int CollectionButtonIndex = ParentWidget->GetCollectionFirstButtonIndex(Collection, Index);
 		if (CollectionButtonIndex != -1)
 		{
 			Collection->OnStartSelect(Index, CollectionButtonIndex);
@@ -92,7 +92,7 @@ void UUINavCollection::NotifyOnStopSelect(int Index, int LocalIndex)
 {
 	for (UUINavCollection* Collection : UINavCollections)
 	{
-		int CollectionButtonIndex = ParentWidget->GetCollectionButtonIndex(Collection, Index);
+		int CollectionButtonIndex = ParentWidget->GetCollectionFirstButtonIndex(Collection, Index);
 		if (CollectionButtonIndex != -1)
 		{
 			Collection->OnStopSelect(Index, CollectionButtonIndex);
