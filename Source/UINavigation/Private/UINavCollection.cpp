@@ -108,7 +108,7 @@ void UUINavCollection::Init(int StartIndex)
 	LastButtonIndex = StartIndex - 1;
 	PreSetup();
 
-	TraverseHierarquy(StartIndex);
+	UUINavWidget::TraverseHierarquy(ParentWidget, this);
 
 	if (UINavAnimations.Num() > 0)
 	{
@@ -130,95 +130,6 @@ void UUINavCollection::Init(int StartIndex)
 			}
 			UINavAnimations.Empty();
 		}
-	}
-}
-
-void UUINavCollection::TraverseHierarquy(int StartIndex)
-{
-	//Find UINavButtons in the widget hierarchy
-	TArray<UWidget*> Widgets;
-	WidgetTree->GetAllWidgets(Widgets);
-	for (UWidget* widget : Widgets)
-	{
-		UScrollBox* Scroll = Cast<UScrollBox>(widget);
-		if (Scroll != nullptr)
-		{
-			ParentWidget->ScrollBoxes.Add(Scroll);
-			continue;
-		}
-
-		UUINavWidget* UINavWidget = Cast<UUINavWidget>(widget);
-		if (UINavWidget != nullptr)
-		{
-			DISPLAYERROR("The plugin doesn't support nested UINavWidgets. Use UINavCollections for this effect!");
-			return;
-		}
-
-		UUINavCollection* Collection = Cast<UUINavCollection>(widget);
-		if (Collection != nullptr)
-		{
-			Collection->ParentWidget = ParentWidget;
-			Collection->ParentCollection = this;
-			Collection->Init(ParentWidget->UINavButtons.Num());
-			UINavCollections.Add(Collection);
-			continue;
-		}
-
-		UUINavInputContainer* InputContainer = Cast<UUINavInputContainer>(widget);
-		if (InputContainer != nullptr)
-		{
-			if (ParentWidget->UINavInputContainer != nullptr)
-			{
-				DISPLAYERROR("You should only have 1 UINavInputContainer!");
-				return;
-			}
-
-			ParentWidget->InputContainerIndex = ParentWidget->UINavButtons.Num();
-			ParentWidget->UINavInputContainer = InputContainer;
-
-			InputContainer->Init(ParentWidget);
-			continue;
-		}
-
-		UUINavButton* NewNavButton = Cast<UUINavButton>(widget);
-		if (NewNavButton == nullptr)
-		{
-			UUINavComponent* UIComp = Cast<UUINavComponent>(widget);
-			if (UIComp == nullptr)
-			{
-				UUINavComponentWrapper* UICompWrapper = Cast<UUINavComponentWrapper>(widget);
-				if (UICompWrapper != nullptr)
-				{
-					UIComp = UICompWrapper->GetUINavComponent();
-				}
-			}
-
-			if (UIComp != nullptr)
-			{
-				NewNavButton = Cast<UUINavButton>(UIComp->NavButton);
-
-				if (UIComp->ComponentIndex == -1) UIComp->ComponentIndex = ParentWidget->UINavButtons.Num();
-				NewNavButton->ButtonIndex = UIComp->ComponentIndex;
-
-				ParentWidget->UINavComponents.Add(UIComp);
-
-				UUINavHorizontalComponent* HorizComp = Cast<UUINavHorizontalComponent>(UIComp);
-				if (HorizComp != nullptr)
-				{
-					HorizComp->ParentWidget = ParentWidget;
-					ParentWidget->UINavHorizontalComps.Add(HorizComp);
-				}
-			}
-		}
-
-		if (NewNavButton == nullptr) continue;
-
-		if (NewNavButton->ButtonIndex == -1) NewNavButton->ButtonIndex = ParentWidget->UINavButtons.Num();
-
-		ParentWidget->SetupUINavButtonDelegates(NewNavButton);
-
-		ParentWidget->UINavButtons.Add(NewNavButton);
-		ParentWidget->RevertButtonStyle(ParentWidget->UINavButtons.Num() - 1);
 	}
 }
 

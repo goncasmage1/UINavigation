@@ -80,11 +80,6 @@ protected:
 	void ConfigureUINavPC();
 
 	/**
-	*	Traverses this widget's hierarchy to setup all the UIUINavButtons
-	*/
-	void TraverseHierarquy();
-
-	/**
 	*	Configures the selector on event Construct
 	*/
 	void SetupSelector();
@@ -244,6 +239,11 @@ public:
 	virtual void NativeTick(const FGeometry & MyGeometry, float DeltaTime) override;
 
 	/**
+	*	Traverses this widget's hierarchy to setup all the UIUINavButtons
+	*/
+	static void TraverseHierarquy(UUINavWidget* UINavWidget, UUserWidget* WidgetToTraverse);
+
+	/**
 	*	Reconfigures the blueprint if it has already been setup
 	*/
 	void ReconfigureSetup();
@@ -296,6 +296,12 @@ public:
 	*/
 	UFUNCTION(BlueprintCallable, Category = UINavWidget)
 		void SetEdgeNavigationByButton(int GridIndex, FButtonNavigation NewEdgeNavigation);
+
+	/**
+	*	Determines whether the navigation wraps around the specified grid
+	*/
+	UFUNCTION(BlueprintCallable, Category = UINavWidget)
+		void SetWrap(int GridIndex, bool bWrap);
 
 	//Helper function to add a new 1D grid
 	UFUNCTION(BlueprintCallable, Category = UINavWidget)
@@ -650,6 +656,8 @@ public:
 		virtual void ReturnToParent(bool bRemoveAllParents = false, int ZOrder = 0);
 
 	void RemoveAllParents();
+
+	int GetWidgetHierarchyDepth(UWidget* Widget);
 
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
