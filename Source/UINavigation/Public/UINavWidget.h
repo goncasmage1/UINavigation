@@ -54,6 +54,8 @@ protected:
 	FVector2D SelectorDestination;
 	FVector2D Distance;
 
+	bool bUsingSplitScreen = false;
+
 	/******************************************************************************/
 
 	UUINavWidget(const FObjectInitializer& ObjectInitializer);

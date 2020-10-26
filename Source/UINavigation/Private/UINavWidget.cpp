@@ -35,6 +35,14 @@ UUINavWidget::UUINavWidget(const FObjectInitializer& ObjectInitializer)
 
 void UUINavWidget::NativeConstruct()
 {
+	const UWorld* const World = GetWorld();
+	if (World != nullptr)
+	{
+		if (UGameViewportClient* ViewportClient = World->GetGameViewport())
+		{
+			bUsingSplitScreen = ViewportClient->GetCurrentSplitscreenConfiguration() != ESplitScreenType::None;
+		}
+	}
 	/*
 	If this widget was added through a parent widget and should remove it from the viewport,
 	remove that widget from viewport
@@ -2042,7 +2050,8 @@ UWidget * UUINavWidget::GoToBuiltWidget(UUINavWidget* NewWidget, bool bRemovePar
 	}
 	else
 	{
-		NewWidget->AddToViewport(ZOrder);
+		if (!bUsingSplitScreen) NewWidget->AddToViewport(ZOrder);
+		else NewWidget->AddToPlayerScreen(ZOrder);
 		NewWidget->SetUserFocus(PC);
 		if (UINavPC->GetInputMode() == EInputMode::UI)
 		{
@@ -2105,7 +2114,8 @@ void UUINavWidget::ReturnToParent(bool bRemoveAllParents, int ZOrder)
 			if (bParentRemoved)
 			{
 				ParentWidget->ReturnedFromWidget = this;
-				ParentWidget->AddToViewport(ZOrder);
+				if (!bUsingSplitScreen) ParentWidget->AddToViewport(ZOrder);
+				else ParentWidget->AddToPlayerScreen(ZOrder);
 			}
 			else
 			{
