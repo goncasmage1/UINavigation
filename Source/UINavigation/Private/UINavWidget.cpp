@@ -524,19 +524,7 @@ void UUINavWidget::NativeTick(const FGeometry & MyGeometry, float DeltaTime)
 
 FReply UUINavWidget::NativeOnKeyDown(const FGeometry & InGeometry, const FKeyEvent & InKeyEvent)
 {
-	if (ReceiveInputType != EReceiveInputType::None)
-	{
-		FKey PressedKey = InKeyEvent.GetKey();
-
-		if (ReceiveInputType == EReceiveInputType::Axis)
-		{
-			PressedKey = UINavInputContainer->GetAxisFromKey(PressedKey);
-		}
-
-		ProcessKeybind(PressedKey);
-		return FReply::Handled();
-	}
-	else
+	if (ReceiveInputType == EReceiveInputType::None)
 	{
 		//Allow fullscreen by pressing F11 or Alt+Enter
 		if (GEngine->GameViewport->TryToggleFullscreenOnInputKey(InKeyEvent.GetKey(), IE_Pressed))
@@ -555,7 +543,19 @@ FReply UUINavWidget::NativeOnKeyDown(const FGeometry & InGeometry, const FKeyEve
 
 FReply UUINavWidget::NativeOnKeyUp(const FGeometry & InGeometry, const FKeyEvent & InKeyEvent)
 {
-	if (!bWaitForInput)
+	if (ReceiveInputType != EReceiveInputType::None)
+	{
+		FKey Key = InKeyEvent.GetKey();
+
+		if (ReceiveInputType == EReceiveInputType::Axis)
+		{
+			Key = UINavInputContainer->GetAxisFromKey(Key);
+		}
+
+		ProcessKeybind(Key);
+		return FReply::Handled();
+	}
+	else
 	{
 		if (OnKeyReleased(InKeyEvent.GetKey()).IsEventHandled())
 		{
