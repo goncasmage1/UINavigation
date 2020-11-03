@@ -205,6 +205,16 @@ void UUINavCollection::UpdateCollectionLastIndex(int GridIndex, bool bAdded)
 	LastButtonIndex--;
 }
 
+void UUINavCollection::SetEdgeNavigation(int GridIndex, FButtonNavigation NewEdgeNavigation)
+{
+	ParentWidget->SetEdgeNavigation(FirstGridIndex + GridIndex, NewEdgeNavigation);
+}
+
+void UUINavCollection::SetEdgeNavigationByButton(int GridIndex, FButtonNavigation NewEdgeNavigation)
+{
+	ParentWidget->SetEdgeNavigationByButton(FirstGridIndex + GridIndex, NewEdgeNavigation);
+}
+
 int UUINavCollection::GetGlobalGridIndex(int GridIndex)
 {
 	return FirstGridIndex + GridIndex;
