@@ -107,9 +107,6 @@ protected:
 
 public:
 
-	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
-		bool bWaitForInput = false;
-
 	EReceiveInputType ReceiveInputType = EReceiveInputType::None;
 
 	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
@@ -255,9 +252,6 @@ public:
 	virtual FReply NativeOnKeyUp(const FGeometry & InGeometry, const FKeyEvent & InKeyEvent) override;
 	virtual FReply NativeOnMouseButtonDown(const FGeometry & InGeometry, const FPointerEvent & InMouseEvent) override;
 	virtual FReply NativeOnMouseButtonUp(const FGeometry & InGeometry, const FPointerEvent & InMouseEvent) override;
-
-	FReply OnKeyPressed(FKey PressedKey);
-	FReply OnKeyReleased(FKey PressedKey);
 
 	/**
 	*	Appends a new navigation grid to the widget. Used for horizontal and vertical grids.
@@ -417,6 +411,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
 		bool IsSelectorVisible();
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
+		FORCEINLINE bool IsRebindingInput() const { return ReceiveInputType != EReceiveInputType::None; }
 
 	/**
 	*	Called when the button with the specified index was navigated upon

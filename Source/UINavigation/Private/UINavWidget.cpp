@@ -419,7 +419,6 @@ void UUINavWidget::RebuildNavigation(int NewButtonIndex)
 	bMovingSelector = false;
 	bIgnoreMouseEvent = false;
 	bReturning = false;
-	bWaitForInput = false;
 	bShouldTick = true;
 	ReceiveInputType = EReceiveInputType::None;
 	WaitForTick = 0;
@@ -524,15 +523,22 @@ void UUINavWidget::NativeTick(const FGeometry & MyGeometry, float DeltaTime)
 
 FReply UUINavWidget::NativeOnKeyDown(const FGeometry & InGeometry, const FKeyEvent & InKeyEvent)
 {
-	if (ReceiveInputType == EReceiveInputType::None)
+	if (UINavPC->GetInputMode() != EInputMode::UI)
 	{
-		//Allow fullscreen by pressing F11 or Alt+Enter
-		if (GEngine->GameViewport->TryToggleFullscreenOnInputKey(InKeyEvent.GetKey(), IE_Pressed))
+		if (ReceiveInputType == EReceiveInputType::None)
 		{
-			return FReply::Handled();
-		}
+			//Allow fullscreen by pressing F11 or Alt+Enter
+			if (GEngine->GameViewport->TryToggleFullscreenOnInputKey(InKeyEvent.GetKey(), IE_Pressed))
+			{
+				return FReply::Handled();
+			}
 
-		if (OnKeyPressed(InKeyEvent.GetKey()).IsEventHandled())
+			if (UINavPC->OnKeyPressed(InKeyEvent.GetKey()).IsEventHandled())
+			{
+				return FReply::Handled();
+			}
+		}
+		else
 		{
 			return FReply::Handled();
 		}
@@ -543,23 +549,26 @@ FReply UUINavWidget::NativeOnKeyDown(const FGeometry & InGeometry, const FKeyEve
 
 FReply UUINavWidget::NativeOnKeyUp(const FGeometry & InGeometry, const FKeyEvent & InKeyEvent)
 {
-	if (ReceiveInputType != EReceiveInputType::None)
+	if (UINavPC->GetInputMode() != EInputMode::UI)
 	{
-		FKey Key = InKeyEvent.GetKey();
-
-		if (ReceiveInputType == EReceiveInputType::Axis)
+		if (ReceiveInputType != EReceiveInputType::None)
 		{
-			Key = UINavInputContainer->GetAxisFromKey(Key);
-		}
+			FKey Key = InKeyEvent.GetKey();
 
-		ProcessKeybind(Key);
-		return FReply::Handled();
-	}
-	else
-	{
-		if (OnKeyReleased(InKeyEvent.GetKey()).IsEventHandled())
-		{
+			if (ReceiveInputType == EReceiveInputType::Axis)
+			{
+				Key = UINavInputContainer->GetAxisFromKey(Key);
+			}
+
+			ProcessKeybind(Key);
 			return FReply::Handled();
+		}
+		else
+		{
+			if (UINavPC->OnKeyReleased(InKeyEvent.GetKey()).IsEventHandled())
+			{
+				return FReply::Handled();
+			}
 		}
 	}
 
@@ -568,26 +577,20 @@ FReply UUINavWidget::NativeOnKeyUp(const FGeometry & InGeometry, const FKeyEvent
 
 FReply UUINavWidget::NativeOnMouseWheel(const FGeometry & InGeometry, const FPointerEvent & InMouseEvent)
 {
-	if (bWaitForInput)
+	if (IsRebindingInput())
 	{
 		FKey PressedMouseKey = InMouseEvent.GetWheelDelta() > 0.f ? EKeys::MouseScrollUp : EKeys::MouseScrollDown;
 		if (ReceiveInputType == EReceiveInputType::Axis) PressedMouseKey = EKeys::MouseWheelAxis;
 		ProcessKeybind(PressedMouseKey);
 		return FReply::Handled();
 	}
-	else
-	{
-		if (UINavPC->GetCurrentInputType() != EInputType::Mouse)
-		{
-			UINavPC->NotifyMouseInputType();
-		}
-	}
+
 	return Super::NativeOnMouseWheel(InGeometry, InMouseEvent);
 }
 
 FReply UUINavWidget::NativeOnMouseButtonDown(const FGeometry & InGeometry, const FPointerEvent & InMouseEvent)
 {
-	if (bWaitForInput)
+	if (IsRebindingInput())
 	{
 		if (ReceiveInputType == EReceiveInputType::Axis)
 		{
@@ -599,7 +602,7 @@ FReply UUINavWidget::NativeOnMouseButtonDown(const FGeometry & InGeometry, const
 	}
 	else
 	{
-		if (OnKeyPressed(InMouseEvent.GetEffectingButton()).IsEventHandled())
+		if (UINavPC->OnKeyPressed(InMouseEvent.GetEffectingButton()).IsEventHandled())
 		{
 			return FReply::Handled();
 		}
@@ -610,34 +613,12 @@ FReply UUINavWidget::NativeOnMouseButtonDown(const FGeometry & InGeometry, const
 
 FReply UUINavWidget::NativeOnMouseButtonUp(const FGeometry & InGeometry, const FPointerEvent & InMouseEvent)
 {
-	Super::NativeOnMouseButtonUp(InGeometry, InMouseEvent);
-
-	if (!bWaitForInput && InMouseEvent.GetEffectingButton().IsMouseButton())
+	if (!IsRebindingInput() && InMouseEvent.GetEffectingButton().IsMouseButton())
 	{
-		OnKeyReleased(InMouseEvent.GetEffectingButton());
+		UINavPC->OnKeyReleased(InMouseEvent.GetEffectingButton());
 	}
 
 	return Super::NativeOnMouseButtonUp(InGeometry, InMouseEvent);
-}
-
-FReply UUINavWidget::OnKeyPressed(FKey PressedKey)
-{
-	FString ActionName = UINavPC->FindActionByKey(PressedKey);
-	if (ActionName.Equals(TEXT("")))
-	{
-		UINavPC->VerifyInputTypeChangeByKey(PressedKey);
-		return FReply::Unhandled();
-	}
-
-	return UINavPC->OnActionPressed(ActionName, PressedKey);
-}
-
-FReply UUINavWidget::OnKeyReleased(FKey PressedKey)
-{
-	FString ActionName = UINavPC->FindActionByKey(PressedKey);
-	if (ActionName.Equals(TEXT(""))) return FReply::Unhandled();
-
-	return UINavPC->OnActionReleased(ActionName, PressedKey);
 }
 
 void UUINavWidget::HandleSelectorMovement(float DeltaTime)
@@ -1955,7 +1936,11 @@ void UUINavWidget::OnPreSelect(int Index, bool bMouseClick)
 		APlayerController* PC = Cast<APlayerController>(UINavPC->GetOwner());
 		SetUserFocus(PC);
 		SetKeyboardFocus();
-		bWaitForInput = true;
+
+		SwitchButtonStyle(UINavButtons[Index]->IsPressed() || SelectCount > 1 ? EButtonStyle::Pressed : (Index == ButtonIndex ? EButtonStyle::Hovered : EButtonStyle::Normal),
+			ButtonIndex);
+
+		SelectCount--;
 	}
 	else
 	{
@@ -2531,7 +2516,7 @@ void UUINavWidget::HoverEvent(int Index)
 		return;
 	}
 
-	if (bWaitForInput)
+	if (IsRebindingInput())
 	{
 		CancelRebind();
 	}
@@ -2559,7 +2544,7 @@ void UUINavWidget::UnhoverEvent(int Index)
 		return;
 	}
 
-	if (bWaitForInput)
+	if (IsRebindingInput())
 	{
 		CancelRebind();
 	}
@@ -2578,7 +2563,7 @@ void UUINavWidget::UnhoverEvent(int Index)
 
 void UUINavWidget::PressEvent(int Index)
 {
-	if (bWaitForInput)
+	if (IsRebindingInput())
 	{
 		if (ReceiveInputType == EReceiveInputType::Axis) CancelRebind();
 		else ProcessKeybind(EKeys::LeftMouseButton);
@@ -2589,10 +2574,6 @@ void UUINavWidget::PressEvent(int Index)
 		{
 			bIgnoreMouseEvent = false;
 			return;
-		}
-		else
-		{
-			UINavPC->NotifyMouseInputType();
 		}
 
 		if (!UINavPC->AllowsSelectInput()) return;
@@ -2607,10 +2588,6 @@ void UUINavWidget::ReleaseEvent(int Index)
 	{
 		bIgnoreMouseEvent = false;
 		return;
-	}
-	else
-	{
-		UINavPC->NotifyMouseInputType();
 	}
 
 	if (bMovingSelector)
@@ -2680,13 +2657,11 @@ void UUINavWidget::ProcessKeybind(FKey PressedKey)
 {
 	int KeysPerInput = UINavInputContainer->KeysPerInput;
 	UINavInputBoxes[InputBoxIndex / KeysPerInput]->UpdateInputKey(PressedKey, InputBoxIndex % KeysPerInput);
-	bWaitForInput = false;
 	ReceiveInputType = EReceiveInputType::None;
 }
 
 void UUINavWidget::CancelRebind()
 {
-	bWaitForInput = false;
 	int KeysPerInput = UINavInputContainer->KeysPerInput;
 	UINavInputBoxes[InputBoxIndex / KeysPerInput]->RevertToKeyText(InputBoxIndex % KeysPerInput);
 	ReceiveInputType = EReceiveInputType::None;
@@ -2694,7 +2669,7 @@ void UUINavWidget::CancelRebind()
 
 void UUINavWidget::NavigateInDirection(ENavigationDirection Direction)
 {
-	if (bWaitForInput)
+	if (IsRebindingInput())
 	{
 		CancelRebind();
 		return;
@@ -2748,7 +2723,7 @@ void UUINavWidget::MenuReturn()
 
 void UUINavWidget::MenuSelectPress()
 {
-	if (bWaitForInput)
+	if (IsRebindingInput())
 	{
 		CancelRebind();
 		return;
@@ -2787,7 +2762,7 @@ void UUINavWidget::MenuReturnRelease()
 {
 	if (!bReturning) return;
 
-	if (bWaitForInput)
+	if (IsRebindingInput())
 	{
 		CancelRebind();
 		return;

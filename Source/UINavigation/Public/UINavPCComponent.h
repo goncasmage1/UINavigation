@@ -3,6 +3,7 @@
 #pragma once
 
 #include "Components/ActorComponent.h"
+#include "Framework/Application/IInputProcessor.h"
 #include "Engine/DataTable.h"
 #include "Data/CountdownPhase.h"
 #include "Data/InputMode.h"
@@ -39,7 +40,7 @@ public:
 };
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
-class UINAVIGATION_API UUINavPCComponent : public UActorComponent
+class UINAVIGATION_API UUINavPCComponent : public UActorComponent, public IInputProcessor
 {
 	GENERATED_BODY()
 
@@ -61,6 +62,9 @@ protected:
 
 	class APlayerController* PC;
 
+	UPROPERTY()
+	UUINavPCComponent* This;
+
 	ENavigationDirection Direction = ENavigationDirection::None;
 
 	float PreviousX = -1.f;
@@ -72,6 +76,20 @@ protected:
 	float TimerCounter = 0.f;
 
 	/*************************************************************************/
+
+	virtual void Tick(const float DeltaTime, FSlateApplication& SlateApp, TSharedRef<ICursor> Cursor) override;
+
+	virtual bool HandleKeyDownEvent(FSlateApplication& SlateApp, const FKeyEvent& InKeyEvent) override;
+
+	virtual bool HandleKeyUpEvent(FSlateApplication& SlateApp, const FKeyEvent& InKeyEvent) override;
+
+	virtual bool HandleAnalogInputEvent(FSlateApplication& SlateApp, const FAnalogInputEvent& InAnalogInputEvent) override;
+
+	virtual bool HandleMouseMoveEvent(FSlateApplication& SlateApp, const FPointerEvent& MouseEvent) override;
+
+	virtual bool HandleMouseButtonDownEvent(FSlateApplication& SlateApp, const FPointerEvent& MouseEvent) override;
+
+	virtual bool HandleMouseWheelOrGestureEvent(FSlateApplication& SlateApp, const FPointerEvent& InWheelEvent, const FPointerEvent* InGesture) override;
 
 	void TimerCallback();
 	void SetTimer(ENavigationDirection NavigationDirection);
@@ -99,13 +117,6 @@ protected:
 	EInputType GetMenuActionInputType(FString Action);
 
 	/**
-	*	Verifies if a new input type is being used
-	*
-	*	@param Action The specified action
-	*/
-	void VerifyInputTypeChangeByAction(FString Action);
-
-	/**
 	*	Notifies to the active UUINavWidget that the input type changed
 	*
 	*	@param NewInputType The new input type that is being used
@@ -114,6 +125,7 @@ protected:
 
 	virtual void Activate(bool bReset) override;
 	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	UFUNCTION(BlueprintCallable, Category = UINavController)
@@ -312,18 +324,10 @@ public:
 	*/
 	FString FindActionByKey(FKey ActionKey);
 
-	/**
-	*	Called when an action key is pressed
-	*
-	*	@param ActionName The name of the action
-	*/
+	FReply OnKeyPressed(FKey PressedKey);
 	FReply OnActionPressed(FString ActionName, FKey Key);
 
-	/**
-	*	Called when an action key is released
-	*
-	*	@param ActionName The name of the action
-	*/
+	FReply OnKeyReleased(FKey PressedKey);
 	FReply OnActionReleased(FString ActionName, FKey Key);
 
 	//Returns the currently used input mode
