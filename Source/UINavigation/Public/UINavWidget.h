@@ -40,6 +40,11 @@ protected:
 	//The index of the button that will be navigated to when movement is allowed
 	int HaltedIndex = -1;
 
+	//The index of the UINavInputContainer found
+	int InputContainerIndex = -1;
+
+	int CollectionIndex = 0;
+
 	//The index of the button that was selected
 	int SelectedButtonIndex = -1;
 	uint8 SelectCount = 0;
@@ -53,6 +58,9 @@ protected:
 	FVector2D SelectorOrigin;
 	FVector2D SelectorDestination;
 	FVector2D Distance;
+
+	//This widget's class
+	TSubclassOf<UUINavWidget> WidgetClass;
 
 	bool bUsingSplitScreen = false;
 
@@ -132,9 +140,6 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
 		TArray<class UUINavHorizontalComponent*> UINavHorizontalComps;
 
-	//The index of the UINavInputContainer found
-	int InputContainerIndex = -1;
-
 	//The UINavInputContainer in this Widget
 	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
 		class UUINavInputContainer* UINavInputContainer;
@@ -146,8 +151,6 @@ public:
 	//All the UINavCollections in this widget
 	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
 		TArray<class UUINavCollection*> UINavCollections;
-
-	int CollectionIndex = 0;
 
 	//All the scrollboxes in this widget
 	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
@@ -163,9 +166,6 @@ public:
 	//Reference to the parent widget that created this widget
 	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
 		UUINavWidget* ParentWidget;
-
-	//This widget's class
-	TSubclassOf<UUINavWidget> WidgetClass;
 
 	//Current player controller
 	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
