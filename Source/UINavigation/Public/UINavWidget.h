@@ -528,6 +528,10 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
 		bool IsSelectorValid();
 
+	bool IsButtonIndexValid(const int InButtonIndex);
+
+	bool IsGridIndexValid(const int GridIndex);
+
 	FORCEINLINE uint8 GetSelectCount() const { return SelectCount; }
 
 	/**
