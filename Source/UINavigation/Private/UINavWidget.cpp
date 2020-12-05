@@ -433,6 +433,7 @@ void UUINavWidget::RebuildNavigation(int NewButtonIndex)
 	CurrentButton = nullptr;
 
 	NavigationGrids.Reset();
+	DynamicEdgeNavigations.Reset();
 	UINavAnimations.Reset();
 	ScrollBoxes.Reset();
 	UINavButtons.Reset();
@@ -486,6 +487,14 @@ void UUINavWidget::UINavSetup()
 
 		bIgnoreMouseEvent = true;
 		CurrentButton->OnHovered.Broadcast();
+
+		for (FDynamicEdgeNavigation& DynamicEdgeNavigation : DynamicEdgeNavigations)
+		{
+			if (DynamicEdgeNavigation.Event == ENavigationEvent::OnNavigate)
+			{
+				ProcessDynamicEdgeNavigation(DynamicEdgeNavigation);
+			}
+		}
 	}
 
 	OnSetupCompleted();
@@ -716,6 +725,8 @@ void UUINavWidget::AddUINavComponent(UUINavComponent * NewComponent, int TargetG
 		DispatchNavigation(ButtonIndex);
 		OnNavigate(-1, ButtonIndex);
 	}
+
+	UpdateDynamicEdgeNavigations(TargetGridIndex);
 }
 
 void UUINavWidget::DeleteUINavElement(int Index, bool bAutoNavigate)
@@ -1401,6 +1412,252 @@ void UUINavWidget::AppendNavigationGrid2D(int DimensionX, int DimensionY, FButto
 	NumberOfButtonsInGrids = NumberOfButtonsInGrids + Iterations;
 }
 
+void UUINavWidget::AddEdgeNavigation(const int GridIndex1, const int GridIndex2, const int TargetIndexInGrid1, const int TargetIndexInGrid2, const ENavigationDirection Direction, const bool bTwoWayConnection)
+{
+	if (!IsGridIndexValid(GridIndex1)) return;
+	if (!IsGridIndexValid(GridIndex2)) return;
+	if (GridIndex1 == GridIndex2) return;
+
+	FGrid& Grid1 = NavigationGrids[GridIndex1];
+	FGrid& Grid2 = NavigationGrids[GridIndex2];
+
+	UUINavButton* Grid1Button = GetButtonAtGridIndex(GridIndex1, TargetIndexInGrid1);
+	if (Grid1Button == nullptr) return;
+
+	UUINavButton* Grid2Button = GetButtonAtGridIndex(GridIndex2, TargetIndexInGrid2);
+	if (Grid2Button == nullptr) return;
+
+	if (Direction == ENavigationDirection::Left)
+	{
+		Grid1.EdgeNavigation.LeftButton = Grid2Button;
+		if (bTwoWayConnection) Grid2.EdgeNavigation.RightButton = Grid1Button;
+	}
+	else if (Direction == ENavigationDirection::Right)
+	{
+		Grid1.EdgeNavigation.RightButton = Grid2Button;
+		if (bTwoWayConnection) Grid2.EdgeNavigation.LeftButton = Grid1Button;
+	}
+	else if (Direction == ENavigationDirection::Up)
+	{
+		Grid1.EdgeNavigation.UpButton = Grid2Button;
+		if (bTwoWayConnection) Grid2.EdgeNavigation.DownButton = Grid1Button;
+	}
+	else if (Direction == ENavigationDirection::Down)
+	{
+		Grid1.EdgeNavigation.DownButton = Grid2Button;
+		if (bTwoWayConnection) Grid2.EdgeNavigation.UpButton = Grid1Button;
+	}
+}
+
+void UUINavWidget::AddSingleGridDynamicEdgeNavigation(const int GridIndex, const int TargetGridIndex, ENavigationEvent Event, TArray<int> TargetButtonIndices, const ENavigationDirection Direction, const bool bTwoWayConnection)
+{
+	if (!IsGridIndexValid(GridIndex) || !IsGridIndexValid(TargetGridIndex))
+	{
+		DISPLAYERROR("Invalid GridIndex or TargetGridIndex in AddSingleGridDynamicEdgeNavigation function!");
+		return;
+	}
+
+	if (TargetButtonIndices.Num() == 0)
+	{
+		FGrid& CurrentGrid = NavigationGrids[GridIndex];
+		FGrid& TargetGrid = NavigationGrids[TargetGridIndex];
+
+		const bool bHorizontal = Direction == ENavigationDirection::Left || Direction == ENavigationDirection::Right;
+
+		if (TargetGrid.GridType != EGridType::Grid2D)
+		{
+			if ((bHorizontal && (CurrentGrid.GridType == EGridType::Horizontal || TargetGrid.GridType == EGridType::Horizontal)) ||
+				(!bHorizontal && CurrentGrid.GridType == EGridType::Vertical))
+			{
+				DISPLAYERROR("Unnecessary use of AddSingleGridDynamicEdgeNavigation function.");
+				return;
+			}
+
+			for (int i = 0; i < TargetGrid.GetDimension(); ++i)
+			{
+				TargetButtonIndices.Add(i);
+			}
+		}
+		else
+		{
+			if (bHorizontal)
+			{
+				int Grid2ButtonsNum = ((TargetGrid.NumGrid2DButtons - 1) / TargetGrid.DimensionX) + 1;
+
+				for (int i = 0; i < Grid2ButtonsNum; ++i)
+				{
+					if (Direction == ENavigationDirection::Right) TargetButtonIndices.Add(i * TargetGrid.DimensionX);
+					else TargetButtonIndices.Add((i + 1) * TargetGrid.DimensionX - 1);
+
+					if (TargetButtonIndices.Last() >= TargetGrid.NumGrid2DButtons)
+					{
+						if (Direction == ENavigationDirection::Right) TargetButtonIndices.Last() = TargetGrid.DimensionX * (TargetGrid.DimensionY - 1);
+						else TargetButtonIndices.Last() = TargetGrid.NumGrid2DButtons - 1;
+					}
+				}
+			}
+			else
+			{
+				if (CurrentGrid.DimensionX == 1)
+				{
+					DISPLAYERROR("Unnecessary use of AddSingleGridDynamicEdgeNavigation function.");
+					return;
+				}
+
+				int Grid2ButtonsNum = TargetGrid.DimensionX;
+
+				for (int i = 0; i < Grid2ButtonsNum; ++i)
+				{
+					if (Direction == ENavigationDirection::Down) TargetButtonIndices.Add(i);
+					else
+					{
+						if ((TargetGrid.DimensionX * (TargetGrid.DimensionY - 1) + i) < TargetGrid.NumGrid2DButtons)
+						{
+							TargetButtonIndices.Add(TargetGrid.DimensionX * (TargetGrid.DimensionY - 1) + i);
+						}
+						else
+						{
+							TargetButtonIndices.Add(TargetGrid.DimensionX * (TargetGrid.DimensionY - 2) + i);
+						}
+					}
+
+					if (TargetButtonIndices.Last() >= TargetGrid.NumGrid2DButtons)
+					{
+						if (Direction == ENavigationDirection::Right) TargetButtonIndices.Last() = TargetGrid.DimensionX * (TargetGrid.DimensionY - 1);
+						else TargetButtonIndices.Last() = TargetGrid.NumGrid2DButtons - 1;
+					}
+				}
+			}
+		}
+	}
+
+	DynamicEdgeNavigations.Add(FDynamicEdgeNavigation(GridIndex, Event, TargetGridIndex, TargetButtonIndices, Direction, bTwoWayConnection));
+}
+
+void UUINavWidget::AddMultiGridDynamicEdgeNavigation(const int GridIndex, ENavigationEvent Event, TArray<FGridButton> TargetButtons, const ENavigationDirection Direction, const bool bTwoWayConnection)
+{
+	if (!IsGridIndexValid(GridIndex))
+	{
+		DISPLAYERROR("Invalid GridIndex in AddMultiGridDynamicEdgeNavigation function!");
+		return;
+	}
+
+	if (TargetButtons.Num() < 2)
+	{
+		DISPLAYERROR("Not enough TargetButtons in AddMultiGridDynamicEdgeNavigation function!");
+		return;
+	}
+
+	FGrid& CurrentGrid = NavigationGrids[GridIndex];
+	const bool bIsHorizontal = Direction == ENavigationDirection::Left || Direction == ENavigationDirection::Right;
+	if (bIsHorizontal && CurrentGrid.GridType == EGridType::Horizontal)
+	{
+		DISPLAYERROR("Unnecessary use of AddMultiGridDynamicEdgeNavigation function.");
+		return;
+	}
+	else if (!bIsHorizontal &&
+		(CurrentGrid.GridType == EGridType::Vertical || CurrentGrid.GridType == EGridType::Grid2D && CurrentGrid.DimensionX == 1))
+	{
+		DISPLAYERROR("Unnecessary use of AddMultiGridDynamicEdgeNavigation function.");
+		return;
+	}
+
+	for (int i = 0; i < TargetButtons.Num(); ++i)
+	{
+		const FGridButton& GridButton = TargetButtons[i];
+		if (!IsGridIndexValid(GridButton.GridIndex))
+		{
+			DISPLAYERROR("Invalid TargetButton GridIndex in AddMultiGridDynamicEdgeNavigation function!");
+			return;
+		}
+
+		int IndexInGrid = CurrentGrid.GridType != EGridType::Grid2D ? i : i * CurrentGrid.DimensionX;
+		if (IndexInGrid >= CurrentGrid.GetDimension())
+		{
+			IndexInGrid = CurrentGrid.GridType != EGridType::Grid2D ? CurrentGrid.GetDimension() - 1 : CurrentGrid.NumGrid2DButtons / CurrentGrid.DimensionX;
+		}
+
+		UUINavButton* TargetButton = GetButtonAtGridIndex(GridIndex, IndexInGrid);
+		UpdateEdgeNavigation(GridButton.GridIndex, TargetButton, Direction, true);
+
+		if (GetButtonAtGridIndex(GridButton.GridIndex, GridButton.IndexInGrid) == nullptr)
+		{
+			DISPLAYERROR("Invalid TargetButton IndexInGrid in AddMultiGridDynamicEdgeNavigation function!");
+			return;
+		}
+	}
+
+	DynamicEdgeNavigations.Add(FDynamicEdgeNavigation(GridIndex, Event, TargetButtons, Direction, bTwoWayConnection));
+}
+
+void UUINavWidget::UpdateDynamicEdgeNavigations(const int UpdatedGridIndex)
+{
+	for (FDynamicEdgeNavigation& DynamicEdgeNavigation : DynamicEdgeNavigations)
+	{
+		if (DynamicEdgeNavigation.TargetGridIndex == UpdatedGridIndex)
+		{
+			FGrid& CurrentGrid = NavigationGrids[DynamicEdgeNavigation.GridIndex];
+			FGrid& TargetGrid = NavigationGrids[DynamicEdgeNavigation.TargetGridIndex];
+			const bool bHorizontal = DynamicEdgeNavigation.Direction == ENavigationDirection::Left || DynamicEdgeNavigation.Direction == ENavigationDirection::Right;
+
+			if (TargetGrid.GridType != EGridType::Grid2D)
+			{
+				if ((bHorizontal && (CurrentGrid.GridType == EGridType::Horizontal || TargetGrid.GridType == EGridType::Horizontal)) ||
+					(!bHorizontal && CurrentGrid.GridType == EGridType::Vertical))
+				{
+					continue;
+				}
+
+				DynamicEdgeNavigation.TargetButtonIndices.Add(TargetGrid.GetDimension() - 1);
+			}
+			else
+			{
+				if (bHorizontal)
+				{
+					int Grid2ButtonsNum = ((TargetGrid.NumGrid2DButtons - 1) / TargetGrid.DimensionX) + 1;
+
+					if (DynamicEdgeNavigation.Direction == ENavigationDirection::Right) DynamicEdgeNavigation.TargetButtonIndices.Add((Grid2ButtonsNum - 1) * TargetGrid.DimensionX);
+					else DynamicEdgeNavigation.TargetButtonIndices.Add(((Grid2ButtonsNum - 1) + 1) * TargetGrid.DimensionX - 1);
+
+					if (DynamicEdgeNavigation.TargetButtonIndices.Last() >= TargetGrid.NumGrid2DButtons)
+					{
+						if (DynamicEdgeNavigation.Direction == ENavigationDirection::Right) DynamicEdgeNavigation.TargetButtonIndices.Last() = TargetGrid.DimensionX * (TargetGrid.DimensionY - 1);
+						else DynamicEdgeNavigation.TargetButtonIndices.Last() = TargetGrid.NumGrid2DButtons - 1;
+					}
+				}
+				else
+				{
+					if (CurrentGrid.DimensionX == 1)
+					{
+						continue;
+					}
+
+					int Grid2ButtonsNum = TargetGrid.DimensionX;
+
+					if (DynamicEdgeNavigation.Direction == ENavigationDirection::Down) DynamicEdgeNavigation.TargetButtonIndices.Add((Grid2ButtonsNum - 1));
+					else
+					{
+						if ((TargetGrid.DimensionX * (TargetGrid.DimensionY - 1) + (Grid2ButtonsNum - 1)) < TargetGrid.NumGrid2DButtons)
+						{
+							DynamicEdgeNavigation.TargetButtonIndices.Add(TargetGrid.DimensionX * (TargetGrid.DimensionY - 1) + (Grid2ButtonsNum - 1));
+						}
+						else
+						{
+							DynamicEdgeNavigation.TargetButtonIndices.Add(TargetGrid.DimensionX * (TargetGrid.DimensionY - 2) + (Grid2ButtonsNum - 1));
+						}
+					}
+
+					if (DynamicEdgeNavigation.TargetButtonIndices.Last() >= TargetGrid.NumGrid2DButtons)
+					{
+						if (DynamicEdgeNavigation.Direction == ENavigationDirection::Right) DynamicEdgeNavigation.TargetButtonIndices.Last() = TargetGrid.DimensionX * (TargetGrid.DimensionY - 1);
+						else DynamicEdgeNavigation.TargetButtonIndices.Last() = TargetGrid.NumGrid2DButtons - 1;
+					}
+				}
+			}
+		}
+	}
+}
+
 void UUINavWidget::AppendCollection(const TArray<FButtonNavigation>& EdgeNavigations)
 {
 	if (CollectionIndex >= UINavCollections.Num())
@@ -1764,6 +2021,14 @@ void UUINavWidget::NavigateTo(int Index, bool bHoverEvent)
 		bIgnoreMouseEvent = true;
 		CurrentButton->OnHovered.Broadcast();
 	}
+
+	for (FDynamicEdgeNavigation& DynamicEdgeNavigation : DynamicEdgeNavigations)
+	{
+		if (DynamicEdgeNavigation.Event == ENavigationEvent::OnNavigate)
+		{
+			ProcessDynamicEdgeNavigation(DynamicEdgeNavigation);
+		}
+	}
 }
 
 void UUINavWidget::NavigateToGrid(int GridIndex, int IndexInGrid)
@@ -1816,6 +2081,184 @@ void UUINavWidget::CallCustomInput(FName ActionName, uint8* Buffer)
 	for (UUINavCollection* Collection : UINavCollections)
 	{
 		Collection->CallCustomInput(ActionName, Buffer);
+	}
+}
+
+void UUINavWidget::ProcessDynamicEdgeNavigation(FDynamicEdgeNavigation& DynamicEdgeNavigation)
+{
+	const int CurrentGridIndex = GetButtonGridIndex(ButtonIndex);
+	const int CurrentIndexInGrid = GetButtonIndexInGrid(ButtonIndex);
+	int AdaptedCurrentIndexInGrid = CurrentIndexInGrid;
+	const ENavigationDirection Dir = DynamicEdgeNavigation.Direction;
+	const bool bHorizontal = Dir == ENavigationDirection::Left || Dir == ENavigationDirection::Right;
+
+	FGrid& CurrentGrid = NavigationGrids[CurrentGridIndex];
+	if (CurrentGrid.GridType == EGridType::Grid2D)
+	{
+		int XCoord, YCoord;
+		GetButtonCoordinatesInGrid2D(ButtonIndex, XCoord, YCoord);
+		if (XCoord != 0 &&
+			XCoord != CurrentGrid.DimensionX - 1 &&
+			YCoord != 0 &&
+			YCoord != CurrentGrid.DimensionY - 1 &&
+			CurrentIndexInGrid + CurrentGrid.DimensionX < CurrentGrid.NumGrid2DButtons)
+		{
+			return;
+		}
+		
+		AdaptedCurrentIndexInGrid = bHorizontal ? YCoord : XCoord;
+	}
+
+	// If single-grid
+	if (DynamicEdgeNavigation.TargetButtons.Num() == 0)
+	{
+		if (CurrentGridIndex == DynamicEdgeNavigation.GridIndex)
+		{
+			const int TargetIndicesNum = DynamicEdgeNavigation.TargetButtonIndices.Num();
+			int TargetIndexInGrid = DynamicEdgeNavigation.TargetButtonIndices[AdaptedCurrentIndexInGrid < TargetIndicesNum ? AdaptedCurrentIndexInGrid : TargetIndicesNum - 1];
+			UUINavButton* TargetButton = GetButtonAtGridIndex(DynamicEdgeNavigation.TargetGridIndex, TargetIndexInGrid);
+
+			UpdateEdgeNavigation(CurrentGridIndex, TargetButton, Dir, false);
+		}
+		else if (DynamicEdgeNavigation.bTwoWayConnection && CurrentGridIndex == DynamicEdgeNavigation.TargetGridIndex)
+		{
+			int IndexInGrid = -1;
+			for (int i = 0; i < DynamicEdgeNavigation.TargetButtonIndices.Num(); ++i)
+			{
+				if (CurrentIndexInGrid == DynamicEdgeNavigation.TargetButtonIndices[i])
+				{
+					FGrid& TargetGrid = NavigationGrids[DynamicEdgeNavigation.GridIndex];
+					if (TargetGrid.GridType == EGridType::Grid2D)
+					{
+						if (Dir == ENavigationDirection::Left) IndexInGrid = i * TargetGrid.DimensionX;
+						else if (Dir == ENavigationDirection::Right) IndexInGrid = ((i + 1) * TargetGrid.DimensionX) - 1;
+						else if (Dir == ENavigationDirection::Up) IndexInGrid = i < TargetGrid.DimensionX ? i : TargetGrid.DimensionX - 1;
+						else if (Dir == ENavigationDirection::Down) IndexInGrid = TargetGrid.DimensionX * (TargetGrid.DimensionY - 1) + i;
+
+						if (IndexInGrid >= TargetGrid.NumGrid2DButtons)
+						{
+							if (Dir == ENavigationDirection::Left) IndexInGrid = (i - 1) * TargetGrid.DimensionX;
+							else if (Dir == ENavigationDirection::Right) IndexInGrid = TargetGrid.NumGrid2DButtons - 1;
+							else if (Dir == ENavigationDirection::Down) IndexInGrid -= TargetGrid.DimensionX;
+						}
+					}
+					else IndexInGrid = i;
+					break;
+				}
+			}
+
+			if (IndexInGrid == -1) return;
+
+			UUINavButton* TargetButton = GetButtonAtGridIndex(DynamicEdgeNavigation.GridIndex, IndexInGrid);
+			UpdateEdgeNavigation(DynamicEdgeNavigation.TargetGridIndex, TargetButton, Dir, true);
+		}
+	}
+	// If multi-grid
+	else
+	{
+		if (CurrentGridIndex == DynamicEdgeNavigation.GridIndex)
+		{
+			int IndexInGrid = CurrentIndexInGrid;
+			if (CurrentGrid.GridType == EGridType::Grid2D)
+			{
+				int XCoord, YCoord;
+				GetButtonCoordinatesInGrid2D(ButtonIndex, XCoord, YCoord);
+				if ((Dir == ENavigationDirection::Left && XCoord != 0) ||
+					(Dir == ENavigationDirection::Right && XCoord != CurrentGrid.DimensionX - 1) ||
+					(Dir == ENavigationDirection::Up && YCoord != 0) ||
+					(Dir == ENavigationDirection::Down && YCoord != CurrentGrid.DimensionY - 1))
+				{
+					return;
+				}
+				IndexInGrid = bHorizontal ? YCoord : XCoord;
+			}
+			else if ((bHorizontal && CurrentGrid.GridType == EGridType::Horizontal) ||
+					(!bHorizontal && CurrentGrid.GridType == EGridType::Vertical))
+			{
+				return;
+			}
+
+			int NumTargetButtons = DynamicEdgeNavigation.TargetButtons.Num();
+			const FGridButton& GridButton = DynamicEdgeNavigation.TargetButtons[NumTargetButtons > IndexInGrid ? IndexInGrid : NumTargetButtons - 1];
+			UUINavButton* TargetButton = GetButtonAtGridIndex(GridButton.GridIndex, GridButton.IndexInGrid);
+			UpdateEdgeNavigation(DynamicEdgeNavigation.GridIndex, TargetButton, Dir, false);
+
+			return;
+		}
+		else if (DynamicEdgeNavigation.bTwoWayConnection)
+		{
+			bool bFoundGrid = false;
+			for (int i = 0; i < DynamicEdgeNavigation.TargetButtons.Num(); ++i)
+			{
+				const FGridButton& GridButton = DynamicEdgeNavigation.TargetButtons[i];
+				if (!IsGridIndexValid(GridButton.GridIndex) ||
+					GridButton.IndexInGrid >= NavigationGrids[GridButton.GridIndex].GetDimension())
+				{
+					return;
+				}
+
+				if (CurrentGridIndex == GridButton.GridIndex &&
+					GetButtonIndexInGrid(ButtonIndex) == GridButton.IndexInGrid)
+				{
+					bFoundGrid = true;
+					break;
+				}
+			}
+
+			if (!bFoundGrid) return;
+
+			int IndexInGrid = -1;
+			int GridIndex = -1;
+			for (int i = 0; i < DynamicEdgeNavigation.TargetButtons.Num(); ++i)
+			{
+				const FGridButton& GridButton = DynamicEdgeNavigation.TargetButtons[i];
+				if (GridButton.GridIndex == CurrentGridIndex &&
+					GridButton.IndexInGrid == CurrentIndexInGrid)
+				{
+					FGrid& TargetGrid = NavigationGrids[DynamicEdgeNavigation.GridIndex];
+					if (TargetGrid.GridType == EGridType::Grid2D)
+					{
+						if (Dir == ENavigationDirection::Left) IndexInGrid = i * TargetGrid.DimensionX;
+						else if (Dir == ENavigationDirection::Right) IndexInGrid = ((i + 1) * TargetGrid.DimensionX) - 1;
+						else if (Dir == ENavigationDirection::Up) IndexInGrid = i < TargetGrid.DimensionX ? i : TargetGrid.DimensionX - 1;
+						else if (Dir == ENavigationDirection::Down) IndexInGrid = TargetGrid.DimensionX * (TargetGrid.DimensionY - 1) + i;
+
+						if (IndexInGrid >= TargetGrid.NumGrid2DButtons)
+						{
+							if (Dir == ENavigationDirection::Left) IndexInGrid = (i - 1) * TargetGrid.DimensionX;
+							else if (Dir == ENavigationDirection::Right) IndexInGrid = TargetGrid.NumGrid2DButtons - 1;
+							else if (Dir == ENavigationDirection::Up) IndexInGrid = i;
+							else if (Dir == ENavigationDirection::Down) IndexInGrid -= TargetGrid.DimensionX;
+						}
+					}
+					else IndexInGrid = i;
+					break;
+				}
+			}
+
+			if (GridIndex == -1 || IndexInGrid == -1) return;
+
+			UUINavButton* TargetButton = GetButtonAtGridIndex(DynamicEdgeNavigation.GridIndex, IndexInGrid);
+			UpdateEdgeNavigation(GridIndex, TargetButton, Dir, true);
+		}
+	}
+}
+
+void UUINavWidget::UpdateEdgeNavigation(const int GridIndex, UUINavButton* TargetButton, ENavigationDirection Direction, bool bInverted)
+{
+	if (!bInverted)
+	{
+		if (Direction == ENavigationDirection::Left) NavigationGrids[GridIndex].EdgeNavigation.LeftButton = TargetButton;
+		else if (Direction == ENavigationDirection::Right) NavigationGrids[GridIndex].EdgeNavigation.RightButton = TargetButton;
+		else if (Direction == ENavigationDirection::Up) NavigationGrids[GridIndex].EdgeNavigation.UpButton = TargetButton;
+		else if (Direction == ENavigationDirection::Down) NavigationGrids[GridIndex].EdgeNavigation.DownButton = TargetButton;
+	}
+	else
+	{
+		if (Direction == ENavigationDirection::Left) NavigationGrids[GridIndex].EdgeNavigation.RightButton = TargetButton;
+		else if (Direction == ENavigationDirection::Right) NavigationGrids[GridIndex].EdgeNavigation.LeftButton = TargetButton;
+		else if (Direction == ENavigationDirection::Down) NavigationGrids[GridIndex].EdgeNavigation.UpButton = TargetButton;
+		else if (Direction == ENavigationDirection::Up) NavigationGrids[GridIndex].EdgeNavigation.DownButton = TargetButton;
 	}
 }
 
@@ -1956,6 +2399,14 @@ void UUINavWidget::OnPreSelect(int Index, bool bMouseClick)
 			{
 				OnSelect(Index);
 				CollectionOnSelect(Index);
+
+				for (FDynamicEdgeNavigation& DynamicEdgeNavigation : DynamicEdgeNavigations)
+				{
+					if (DynamicEdgeNavigation.Event == ENavigationEvent::OnSelect)
+					{
+						ProcessDynamicEdgeNavigation(DynamicEdgeNavigation);
+					}
+				}
 			}
 			OnStopSelect(Index);
 			CollectionOnStopSelect(Index);

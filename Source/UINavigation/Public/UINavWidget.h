@@ -8,6 +8,9 @@
 #include "Data/SelectorPosition.h"
 #include "Data/Grid.h"
 #include "Data/ButtonStyle.h"
+#include "Data/NavigationEvent.h"
+#include "Data/GridButton.h"
+#include "Data/DynamicEdgeNavigation.h"
 #include "Components/ScrollBox.h"
 #include "UINavMacros.h"
 #include "UINavWidget.generated.h"
@@ -58,6 +61,8 @@ protected:
 	FVector2D SelectorOrigin;
 	FVector2D SelectorDestination;
 	FVector2D Distance;
+
+	TArray<FDynamicEdgeNavigation> DynamicEdgeNavigations;
 
 	//This widget's class
 	TSubclassOf<UUINavWidget> WidgetClass;
@@ -276,9 +281,46 @@ public:
 		void AppendNavigationGrid2D(int DimensionX, int DimensionY, FButtonNavigation EdgeNavigation, bool bWrap, int ButtonsInGrid = -1);
 
 	/**
-	*	Appends a new navigation grid to the widget. Used to setup UINavCollections.
+	*	Adds an edge navigation connection between 2 grids
+	*	@param	Direction  The direction in which the edge navigation should go
+	*   @param	bTwoWayConnection  Whether the edge connection should go both from the first grid to the target grid and vice-versa
 	*/
 	UFUNCTION(BlueprintCallable, Category = UINavWidget)
+		void AddEdgeNavigation(const int GridIndex1, const int TargetIndexInGrid1, const int GridIndex2, const int TargetIndexInGrid2, const ENavigationDirection Direction, const bool bTwoWayConnection = true);
+
+	/**
+	*	Adds edge navigation that changes through navigation between 2 grids
+	*	Useful for connecting 1 vertical grid and 1 2D grid, for example
+	* 
+	*   @param	GridIndex  The index of the grid the connection belongs to
+	*   @param	TargetGridIndex  The index of the grid to connect to
+	*   @param	Event  The event that triggers the updating of the edge navigation
+	*   @param	TargetButtonIndices  Leave empty for auto-fill. The indices of the buttons to set as the edge navigation for each index in grid
+	*   @param	Direction  The direction in which the edge navigation should go
+	*   @param	bTwoWayConnection  Whether the edge connection should go both from the first grid to the target grid and vice-versa
+	*/
+	UFUNCTION(BlueprintCallable, Category = UINavWidget, meta = (AutoCreateRefTerm = "TargetButtonIndices"))
+		void AddSingleGridDynamicEdgeNavigation(const int GridIndex, const int TargetGridIndex, ENavigationEvent Event, TArray<int> TargetButtonIndices, const ENavigationDirection Direction, const bool bTwoWayConnection = true);
+
+	/**
+	*	Adds edge navigation that changes through navigation between 1 grid and multiple other grids
+	*	Useful for a grid that changes a widget switcher index, for example
+	* 
+	*   @param	GridIndex  The index of the grid the connection belongs to
+	*   @param	Event  The event that triggers the updating of the edge navigation
+	*   @param	TargetButtons  The indices of the buttons to set as the edge navigation for each index in grid
+	*   @param	Direction  The direction in which the edge navigation should go
+	*   @param	bTwoWayConnection  Whether the edge connection should go both from the first grid to the target grid and vice-versa
+	*/
+	UFUNCTION(BlueprintCallable, Category = UINavWidget)
+		void AddMultiGridDynamicEdgeNavigation(const int GridIndex, ENavigationEvent Event, TArray<FGridButton> TargetButtons, const ENavigationDirection Direction, const bool bTwoWayConnection = true);
+
+	void UpdateDynamicEdgeNavigations(const int UpdatedGridIndex);
+
+	/**
+	*	Appends a new navigation grid to the widget. Used to setup UINavCollections.
+	*/
+	UFUNCTION(BlueprintCallable, Category = UINavWidget, meta = (AutoCreateRefTerm = "EdgeNavigations"))
 		void AppendCollection(const TArray<FButtonNavigation>& EdgeNavigations);
 
 	/**
@@ -336,6 +378,10 @@ public:
 	void CollectionNavigateTo(int Index);
 
 	void CallCustomInput(FName ActionName, uint8* Buffer);
+
+	void ProcessDynamicEdgeNavigation(FDynamicEdgeNavigation& DynamicEdgeNavigation);
+
+	void UpdateEdgeNavigation(const int GridIndex, UUINavButton* TargetButton, ENavigationDirection Direction, bool bInverted);
 
 	void DispatchNavigation(int Index, bool bHoverEvent = false);
 
