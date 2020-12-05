@@ -1571,7 +1571,7 @@ void UUINavWidget::AddMultiGridDynamicEdgeNavigation(const int GridIndex, TArray
 		return;
 	}
 	else if (!bIsHorizontal &&
-		(CurrentGrid.GridType == EGridType::Vertical || CurrentGrid.GridType == EGridType::Grid2D && CurrentGrid.DimensionX == 1))
+		(CurrentGrid.GridType == EGridType::Vertical || (CurrentGrid.GridType == EGridType::Grid2D && CurrentGrid.DimensionX == 1)))
 	{
 		DISPLAYERROR("Unnecessary use of AddMultiGridDynamicEdgeNavigation function.");
 		return;
