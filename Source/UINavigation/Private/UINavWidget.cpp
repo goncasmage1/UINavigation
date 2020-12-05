@@ -494,10 +494,7 @@ void UUINavWidget::UINavSetup()
 
 		for (FDynamicEdgeNavigation& DynamicEdgeNavigation : DynamicEdgeNavigations)
 		{
-			if (DynamicEdgeNavigation.Event == ENavigationEvent::OnNavigate)
-			{
-				ProcessDynamicEdgeNavigation(DynamicEdgeNavigation);
-			}
+			ProcessDynamicEdgeNavigation(DynamicEdgeNavigation);
 		}
 	}
 
@@ -1453,7 +1450,7 @@ void UUINavWidget::AddEdgeNavigation(const int GridIndex1, const int GridIndex2,
 	}
 }
 
-void UUINavWidget::AddSingleGridDynamicEdgeNavigation(const int GridIndex, const int TargetGridIndex, ENavigationEvent Event, TArray<int> TargetButtonIndices, const ENavigationDirection Direction, const bool bTwoWayConnection)
+void UUINavWidget::AddSingleGridDynamicEdgeNavigation(const int GridIndex, const int TargetGridIndex, TArray<int> TargetButtonIndices, ENavigationEvent Event, const ENavigationDirection Direction, const bool bTwoWayConnection)
 {
 	if (!IsGridIndexValid(GridIndex) || !IsGridIndexValid(TargetGridIndex))
 	{
@@ -1461,22 +1458,36 @@ void UUINavWidget::AddSingleGridDynamicEdgeNavigation(const int GridIndex, const
 		return;
 	}
 
+	if (Direction == ENavigationDirection::None)
+	{
+		DISPLAYERROR("Invalid Direction in AddMultiGridDynamicEdgeNavigation function!");
+		return;
+	}
+
+	FGrid& CurrentGrid = NavigationGrids[GridIndex];
+	FGrid& TargetGrid = NavigationGrids[TargetGridIndex];
+
+	const bool bHorizontal = Direction == ENavigationDirection::Left || Direction == ENavigationDirection::Right;
+
+	if (TargetGrid.GridType != EGridType::Grid2D)
+	{
+		if ((bHorizontal && (CurrentGrid.GridType == EGridType::Horizontal || TargetGrid.GridType == EGridType::Horizontal)) ||
+			(!bHorizontal && CurrentGrid.GridType == EGridType::Vertical))
+		{
+			DISPLAYERROR("Unnecessary use of AddSingleGridDynamicEdgeNavigation function.");
+			return;
+		}
+	}
+	else if (!bHorizontal && CurrentGrid.DimensionX == 1)
+	{
+		DISPLAYERROR("Unnecessary use of AddSingleGridDynamicEdgeNavigation function.");
+		return;
+	}
+
 	if (TargetButtonIndices.Num() == 0)
 	{
-		FGrid& CurrentGrid = NavigationGrids[GridIndex];
-		FGrid& TargetGrid = NavigationGrids[TargetGridIndex];
-
-		const bool bHorizontal = Direction == ENavigationDirection::Left || Direction == ENavigationDirection::Right;
-
 		if (TargetGrid.GridType != EGridType::Grid2D)
 		{
-			if ((bHorizontal && (CurrentGrid.GridType == EGridType::Horizontal || TargetGrid.GridType == EGridType::Horizontal)) ||
-				(!bHorizontal && CurrentGrid.GridType == EGridType::Vertical))
-			{
-				DISPLAYERROR("Unnecessary use of AddSingleGridDynamicEdgeNavigation function.");
-				return;
-			}
-
 			for (int i = 0; i < TargetGrid.GetDimension(); ++i)
 			{
 				TargetButtonIndices.Add(i);
@@ -1502,12 +1513,6 @@ void UUINavWidget::AddSingleGridDynamicEdgeNavigation(const int GridIndex, const
 			}
 			else
 			{
-				if (CurrentGrid.DimensionX == 1)
-				{
-					DISPLAYERROR("Unnecessary use of AddSingleGridDynamicEdgeNavigation function.");
-					return;
-				}
-
 				int Grid2ButtonsNum = TargetGrid.DimensionX;
 
 				for (int i = 0; i < Grid2ButtonsNum; ++i)
@@ -1535,10 +1540,10 @@ void UUINavWidget::AddSingleGridDynamicEdgeNavigation(const int GridIndex, const
 		}
 	}
 
-	DynamicEdgeNavigations.Add(FDynamicEdgeNavigation(GridIndex, Event, TargetGridIndex, TargetButtonIndices, Direction, bTwoWayConnection));
+	DynamicEdgeNavigations.Add(FDynamicEdgeNavigation(GridIndex, TargetGridIndex, TargetButtonIndices, Event, Direction, bTwoWayConnection));
 }
 
-void UUINavWidget::AddMultiGridDynamicEdgeNavigation(const int GridIndex, ENavigationEvent Event, TArray<FGridButton> TargetButtons, const ENavigationDirection Direction, const bool bTwoWayConnection)
+void UUINavWidget::AddMultiGridDynamicEdgeNavigation(const int GridIndex, TArray<FGridButton> TargetButtons, ENavigationEvent Event, const ENavigationDirection Direction, const bool bTwoWayConnection)
 {
 	if (!IsGridIndexValid(GridIndex))
 	{
@@ -1549,6 +1554,12 @@ void UUINavWidget::AddMultiGridDynamicEdgeNavigation(const int GridIndex, ENavig
 	if (TargetButtons.Num() < 2)
 	{
 		DISPLAYERROR("Not enough TargetButtons in AddMultiGridDynamicEdgeNavigation function!");
+		return;
+	}
+
+	if (Direction == ENavigationDirection::None)
+	{
+		DISPLAYERROR("Invalid Direction in AddMultiGridDynamicEdgeNavigation function!");
 		return;
 	}
 
@@ -1591,7 +1602,7 @@ void UUINavWidget::AddMultiGridDynamicEdgeNavigation(const int GridIndex, ENavig
 		}
 	}
 
-	DynamicEdgeNavigations.Add(FDynamicEdgeNavigation(GridIndex, Event, TargetButtons, Direction, bTwoWayConnection));
+	DynamicEdgeNavigations.Add(FDynamicEdgeNavigation(GridIndex, TargetButtons, Event, Direction, bTwoWayConnection));
 }
 
 void UUINavWidget::UpdateDynamicEdgeNavigations(const int UpdatedGridIndex)

@@ -13,17 +13,17 @@ struct FDynamicEdgeNavigation
 
 	FDynamicEdgeNavigation() {}
 
-	FDynamicEdgeNavigation(const int InGridIndex, ENavigationEvent InEvent, const int InTargetGridIndex, TArray<int> InTargetButtonIndices, const ENavigationDirection InDirection, const bool InbTwoWayConnection = true)
+	FDynamicEdgeNavigation(const int InGridIndex, const int InTargetGridIndex, TArray<int> InTargetButtonIndices, ENavigationEvent InEvent, const ENavigationDirection InDirection, const bool InbTwoWayConnection = true)
 	{
 		GridIndex = InGridIndex;
-		Event = InEvent;
 		TargetGridIndex = InTargetGridIndex;
 		TargetButtonIndices = InTargetButtonIndices;
+		Event = InEvent;
 		Direction = InDirection;
 		bTwoWayConnection = InbTwoWayConnection;
 	}
 
-	FDynamicEdgeNavigation(const int InGridIndex, ENavigationEvent InEvent, TArray<FGridButton> InTargetButtons, const ENavigationDirection InDirection, const bool InbTwoWayConnection = true)
+	FDynamicEdgeNavigation(const int InGridIndex, TArray<FGridButton> InTargetButtons, ENavigationEvent InEvent, const ENavigationDirection InDirection, const bool InbTwoWayConnection = true)
 	{
 		GridIndex = InGridIndex;
 		Event = InEvent;
@@ -36,9 +36,6 @@ struct FDynamicEdgeNavigation
 		int GridIndex;
 
 	UPROPERTY(BlueprintReadWrite, Category = DynamicEdgeNavigation)
-		ENavigationEvent Event;
-
-	UPROPERTY(BlueprintReadWrite, Category = DynamicEdgeNavigation)
 		int TargetGridIndex = -1;
 
 	UPROPERTY(BlueprintReadWrite, Category = DynamicEdgeNavigation)
@@ -46,6 +43,9 @@ struct FDynamicEdgeNavigation
 
 	UPROPERTY(BlueprintReadWrite, Category = DynamicEdgeNavigation)
 		TArray<FGridButton> TargetButtons;
+
+	UPROPERTY(BlueprintReadWrite, Category = DynamicEdgeNavigation)
+		ENavigationEvent Event;
 
 	UPROPERTY(BlueprintReadWrite, Category = DynamicEdgeNavigation)
 		ENavigationDirection Direction;

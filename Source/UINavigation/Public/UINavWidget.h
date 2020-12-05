@@ -296,26 +296,26 @@ public:
 	* 
 	*   @param	GridIndex  The index of the grid the connection belongs to
 	*   @param	TargetGridIndex  The index of the grid to connect to
-	*   @param	Event  The event that triggers the updating of the edge navigation
 	*   @param	TargetButtonIndices  Leave empty for auto-fill. The indices of the buttons to set as the edge navigation for each index in grid
+	*   @param	Event  The event that triggers the updating of the edge navigation
 	*   @param	Direction  The direction in which the edge navigation should go
 	*   @param	bTwoWayConnection  Whether the edge connection should go both from the first grid to the target grid and vice-versa
 	*/
-	UFUNCTION(BlueprintCallable, Category = UINavWidget, meta = (AutoCreateRefTerm = "TargetButtonIndices"))
-		void AddSingleGridDynamicEdgeNavigation(const int GridIndex, const int TargetGridIndex, ENavigationEvent Event, TArray<int> TargetButtonIndices, const ENavigationDirection Direction, const bool bTwoWayConnection = true);
+	UFUNCTION(BlueprintCallable, Category = UINavWidget, meta = (AutoCreateRefTerm = "ButtonIndices, TargetButtonIndices"))
+		void AddSingleGridDynamicEdgeNavigation(const int GridIndex, const int TargetGridIndex, TArray<int> TargetButtonIndices, ENavigationEvent Event, const ENavigationDirection Direction, const bool bTwoWayConnection = true);
 
 	/**
 	*	Adds edge navigation that changes through navigation between 1 grid and multiple other grids
 	*	Useful for a grid that changes a widget switcher index, for example
 	* 
 	*   @param	GridIndex  The index of the grid the connection belongs to
-	*   @param	Event  The event that triggers the updating of the edge navigation
 	*   @param	TargetButtons  The indices of the buttons to set as the edge navigation for each index in grid
+	*   @param	Event  The event that triggers the updating of the edge navigation
 	*   @param	Direction  The direction in which the edge navigation should go
 	*   @param	bTwoWayConnection  Whether the edge connection should go both from the first grid to the target grid and vice-versa
 	*/
 	UFUNCTION(BlueprintCallable, Category = UINavWidget)
-		void AddMultiGridDynamicEdgeNavigation(const int GridIndex, ENavigationEvent Event, TArray<FGridButton> TargetButtons, const ENavigationDirection Direction, const bool bTwoWayConnection = true);
+		void AddMultiGridDynamicEdgeNavigation(const int GridIndex, TArray<FGridButton> TargetButtons, ENavigationEvent Event, const ENavigationDirection Direction, const bool bTwoWayConnection = true);
 
 	void UpdateDynamicEdgeNavigations(const int UpdatedGridIndex);
 
@@ -719,6 +719,7 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
 		void GetGridAtIndex(int GridIndex, FGrid& Grid, bool& IsValid);
 
+	// Returns the grid index of a panel widget object (Vertical Box, Horizontal Box or Uniform Grid)
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
 		int GetGridIndexFromPanelWidget(class UPanelWidget* PanelWidget);
 
