@@ -10,6 +10,7 @@
 #include "Data/InputIconMapping.h"
 #include "Data/InputNameMapping.h"
 #include "UINavBlueprintFunctionLibrary.h"
+#include "UINavInputProcessor.h"
 #include "Framework/Application/SlateApplication.h"
 
 UUINavPCComponent::UUINavPCComponent()
@@ -41,9 +42,11 @@ void UUINavPCComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (PC != nullptr && PC->IsLocalPlayerController())
+	if (PC != nullptr && PC->IsLocalPlayerController() && !SharedInputProcessor.IsValid())
 	{
-		FSlateApplication::Get().RegisterInputPreProcessor(MakeShareable(This));
+		SharedInputProcessor = MakeShareable(new FUINavInputProcessor());
+		SharedInputProcessor->SetUINavPC(this);
+		FSlateApplication::Get().RegisterInputPreProcessor(SharedInputProcessor);
 
 		VerifyDefaultInputs();
 		FetchUINavActionKeys();
@@ -54,7 +57,7 @@ void UUINavPCComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	if (PC != nullptr && PC->IsLocalPlayerController())
 	{
-		FSlateApplication::Get().UnregisterInputPreProcessor(MakeShareable(This));
+		FSlateApplication::Get().UnregisterInputPreProcessor(SharedInputProcessor);
 	}
 
 	Super::EndPlay(EndPlayReason);
@@ -323,11 +326,7 @@ void UUINavPCComponent::SetAllowCustomInputByIndex(int InputIndex, bool bAllowIn
 	bAllowCustomInputs[InputIndex] = bAllowInput;
 }
 
-void UUINavPCComponent::Tick(const float DeltaTime, FSlateApplication& SlateApp, TSharedRef<ICursor> Cursor)
-{
-}
-
-bool UUINavPCComponent::HandleKeyDownEvent(FSlateApplication& SlateApp, const FKeyEvent& InKeyEvent)
+void UUINavPCComponent::HandleKeyDownEvent(FSlateApplication& SlateApp, const FKeyEvent& InKeyEvent)
 {
 	VerifyInputTypeChangeByKey(InKeyEvent.GetKey());
 
@@ -342,11 +341,9 @@ bool UUINavPCComponent::HandleKeyDownEvent(FSlateApplication& SlateApp, const FK
 			}
 		}
 	}
-
-	return IInputProcessor::HandleKeyDownEvent(SlateApp, InKeyEvent);
 }
 
-bool UUINavPCComponent::HandleKeyUpEvent(FSlateApplication& SlateApp, const FKeyEvent& InKeyEvent)
+void UUINavPCComponent::HandleKeyUpEvent(FSlateApplication& SlateApp, const FKeyEvent& InKeyEvent)
 {
 	if (ActiveWidget != nullptr && GetInputMode() == EInputMode::UI)
 	{
@@ -366,48 +363,38 @@ bool UUINavPCComponent::HandleKeyUpEvent(FSlateApplication& SlateApp, const FKey
 			OnKeyReleased(InKeyEvent.GetKey());
 		}
 	}
-
-	return IInputProcessor::HandleKeyUpEvent(SlateApp, InKeyEvent);
 }
 
-bool UUINavPCComponent::HandleAnalogInputEvent(FSlateApplication& SlateApp, const FAnalogInputEvent& InAnalogInputEvent)
+void UUINavPCComponent::HandleAnalogInputEvent(FSlateApplication& SlateApp, const FAnalogInputEvent& InAnalogInputEvent)
 {
 	if (CurrentInputType != EInputType::Gamepad && InAnalogInputEvent.GetAnalogValue() > 0.5f)
 	{
 		NotifyInputTypeChange(EInputType::Gamepad);
 	}
-
-	return IInputProcessor::HandleAnalogInputEvent(SlateApp, InAnalogInputEvent);
 }
 
-bool UUINavPCComponent::HandleMouseMoveEvent(FSlateApplication& SlateApp, const FPointerEvent& MouseEvent)
+void UUINavPCComponent::HandleMouseMoveEvent(FSlateApplication& SlateApp, const FPointerEvent& MouseEvent)
 {
 	if (CurrentInputType != EInputType::Mouse && MouseEvent.GetCursorDelta().SizeSquared() > 0.0f)
 	{
 		NotifyInputTypeChange(EInputType::Mouse);
 	}
-
-	return IInputProcessor::HandleMouseMoveEvent(SlateApp, MouseEvent);
 }
 
-bool UUINavPCComponent::HandleMouseButtonDownEvent(FSlateApplication& SlateApp, const FPointerEvent& MouseEvent)
+void UUINavPCComponent::HandleMouseButtonDownEvent(FSlateApplication& SlateApp, const FPointerEvent& MouseEvent)
 {
 	if (CurrentInputType != EInputType::Mouse)
 	{
 		NotifyInputTypeChange(EInputType::Mouse);
 	}
-
-	return IInputProcessor::HandleMouseButtonDownEvent(SlateApp, MouseEvent);
 }
 
-bool UUINavPCComponent::HandleMouseWheelOrGestureEvent(FSlateApplication& SlateApp, const FPointerEvent& InWheelEvent, const FPointerEvent* InGesture)
+void UUINavPCComponent::HandleMouseWheelOrGestureEvent(FSlateApplication& SlateApp, const FPointerEvent& InWheelEvent, const FPointerEvent* InGesture)
 {
 	if (CurrentInputType != EInputType::Mouse && InWheelEvent.GetWheelDelta() != 0.0f)
 	{
 		NotifyInputTypeChange(EInputType::Mouse);
 	}
-
-	return IInputProcessor::HandleMouseWheelOrGestureEvent(SlateApp, InWheelEvent, InGesture);
 }
 
 void UUINavPCComponent::TimerCallback()

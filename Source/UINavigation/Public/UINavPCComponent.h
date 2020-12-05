@@ -3,7 +3,6 @@
 #pragma once
 
 #include "Components/ActorComponent.h"
-#include "Framework/Application/IInputProcessor.h"
 #include "Engine/DataTable.h"
 #include "Data/CountdownPhase.h"
 #include "Data/InputMode.h"
@@ -40,7 +39,7 @@ public:
 };
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
-class UINAVIGATION_API UUINavPCComponent : public UActorComponent, public IInputProcessor
+class UINAVIGATION_API UUINavPCComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
@@ -62,8 +61,7 @@ protected:
 
 	class APlayerController* PC;
 
-	UPROPERTY()
-	UUINavPCComponent* This;
+	TSharedPtr<class FUINavInputProcessor> SharedInputProcessor = nullptr;
 
 	ENavigationDirection Direction = ENavigationDirection::None;
 
@@ -76,20 +74,6 @@ protected:
 	float TimerCounter = 0.f;
 
 	/*************************************************************************/
-
-	virtual void Tick(const float DeltaTime, FSlateApplication& SlateApp, TSharedRef<ICursor> Cursor) override;
-
-	virtual bool HandleKeyDownEvent(FSlateApplication& SlateApp, const FKeyEvent& InKeyEvent) override;
-
-	virtual bool HandleKeyUpEvent(FSlateApplication& SlateApp, const FKeyEvent& InKeyEvent) override;
-
-	virtual bool HandleAnalogInputEvent(FSlateApplication& SlateApp, const FAnalogInputEvent& InAnalogInputEvent) override;
-
-	virtual bool HandleMouseMoveEvent(FSlateApplication& SlateApp, const FPointerEvent& MouseEvent) override;
-
-	virtual bool HandleMouseButtonDownEvent(FSlateApplication& SlateApp, const FPointerEvent& MouseEvent) override;
-
-	virtual bool HandleMouseWheelOrGestureEvent(FSlateApplication& SlateApp, const FPointerEvent& InWheelEvent, const FPointerEvent* InGesture) override;
 
 	void TimerCallback();
 	void SetTimer(ENavigationDirection NavigationDirection);
@@ -269,6 +253,14 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = UINavController)
 		void SetAllowCustomInputByIndex(int InputIndex, bool bAllowInput);
+
+
+	void HandleKeyDownEvent(FSlateApplication& SlateApp, const FKeyEvent& InKeyEvent);
+	void HandleKeyUpEvent(FSlateApplication& SlateApp, const FKeyEvent& InKeyEvent);
+	void HandleAnalogInputEvent(FSlateApplication& SlateApp, const FAnalogInputEvent& InAnalogInputEvent);
+	void HandleMouseMoveEvent(FSlateApplication& SlateApp, const FPointerEvent& MouseEvent);
+	void HandleMouseButtonDownEvent(FSlateApplication& SlateApp, const FPointerEvent& MouseEvent);
+	void HandleMouseWheelOrGestureEvent(FSlateApplication& SlateApp, const FPointerEvent& InWheelEvent, const FPointerEvent* InGesture);
 
 
 	void BindMouseWorkaround();
