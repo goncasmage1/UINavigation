@@ -267,6 +267,7 @@ void UUINavWidget::TraverseHierarquy(UUINavWidget* UINavWidget, UUserWidget* Wid
 			{
 				if (HorizontalBox->GetFName().ToString().Left(4).Equals(TEXT("UIN_")))
 				{
+					UINavWidget->GridIndexMap.Add(HorizontalBox, UINavWidget->NavigationGrids.Num());
 					GridDepth = UINavWidget->GetWidgetHierarchyDepth(HorizontalBox);
 					UINavWidget->Add1DGrid(EGridType::Horizontal, nullptr, UINavWidget->NavigationGrids.Num(), 0, FButtonNavigation(), true);
 				}
@@ -278,6 +279,7 @@ void UUINavWidget::TraverseHierarquy(UUINavWidget* UINavWidget, UUserWidget* Wid
 				{
 					if (VerticalBox->GetFName().ToString().Left(4).Equals(TEXT("UIN_")))
 					{
+						UINavWidget->GridIndexMap.Add(VerticalBox, UINavWidget->NavigationGrids.Num());
 						GridDepth = UINavWidget->GetWidgetHierarchyDepth(VerticalBox);
 						UINavWidget->Add1DGrid(EGridType::Vertical, nullptr, UINavWidget->NavigationGrids.Num(), 0, FButtonNavigation(), true);
 					}
@@ -289,6 +291,7 @@ void UUINavWidget::TraverseHierarquy(UUINavWidget* UINavWidget, UUserWidget* Wid
 					{
 						if (GridPanel->GetFName().ToString().Left(4).Equals(TEXT("UIN_")))
 						{
+							UINavWidget->GridIndexMap.Add(GridPanel, UINavWidget->NavigationGrids.Num());
 							GridDepth = UINavWidget->GetWidgetHierarchyDepth(GridPanel);
 							UINavWidget->NavigationGrids.Add(FGrid(EGridType::Grid2D,
 														nullptr,
@@ -433,6 +436,7 @@ void UUINavWidget::RebuildNavigation(int NewButtonIndex)
 	CurrentButton = nullptr;
 
 	NavigationGrids.Reset();
+	GridIndexMap.Reset();
 	DynamicEdgeNavigations.Reset();
 	UINavAnimations.Reset();
 	ScrollBoxes.Reset();
@@ -2820,6 +2824,12 @@ void UUINavWidget::GetGridAtIndex(int GridIndex, FGrid & Grid, bool & IsValid)
 		IsValid = true;
 		Grid = NavigationGrids[GridIndex];
 	}
+}
+
+int UUINavWidget::GetGridIndexFromPanelWidget(UPanelWidget* PanelWidget)
+{
+	int* GridIndex = GridIndexMap.Find(PanelWidget);
+	return GridIndex == nullptr || !IsGridIndexValid(*GridIndex) ? -1 : *GridIndex;
 }
 
 void UUINavWidget::GetButtonGrid(int InButtonIndex, FGrid & ButtonGrid, bool & IsValid)
