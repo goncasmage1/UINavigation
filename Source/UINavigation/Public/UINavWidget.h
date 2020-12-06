@@ -8,6 +8,9 @@
 #include "Data/SelectorPosition.h"
 #include "Data/Grid.h"
 #include "Data/ButtonStyle.h"
+#include "Data/NavigationEvent.h"
+#include "Data/GridButton.h"
+#include "Data/DynamicEdgeNavigation.h"
 #include "Components/ScrollBox.h"
 #include "UINavMacros.h"
 #include "UINavWidget.generated.h"
@@ -40,6 +43,11 @@ protected:
 	//The index of the button that will be navigated to when movement is allowed
 	int HaltedIndex = -1;
 
+	//The index of the UINavInputContainer found
+	int InputContainerIndex = -1;
+
+	int CollectionIndex = 0;
+
 	//The index of the button that was selected
 	int SelectedButtonIndex = -1;
 	uint8 SelectCount = 0;
@@ -53,6 +61,15 @@ protected:
 	FVector2D SelectorOrigin;
 	FVector2D SelectorDestination;
 	FVector2D Distance;
+
+	TArray<FDynamicEdgeNavigation> DynamicEdgeNavigations;
+
+	TMap<class UPanelWidget*, int> GridIndexMap;
+
+	//This widget's class
+	TSubclassOf<UUINavWidget> WidgetClass;
+
+	bool bUsingSplitScreen = false;
 
 	/******************************************************************************/
 
@@ -80,11 +97,6 @@ protected:
 	void ConfigureUINavPC();
 
 	/**
-	*	Traverses this widget's hierarchy to setup all the UIUINavButtons
-	*/
-	void TraverseHierarquy();
-
-	/**
 	*	Configures the selector on event Construct
 	*/
 	void SetupSelector();
@@ -109,9 +121,6 @@ protected:
 	void HandleSelectorMovement(float DeltaTime);
 
 public:
-
-	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
-		bool bWaitForInput = false;
 
 	EReceiveInputType ReceiveInputType = EReceiveInputType::None;
 
@@ -138,9 +147,6 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
 		TArray<class UUINavHorizontalComponent*> UINavHorizontalComps;
 
-	//The index of the UINavInputContainer found
-	int InputContainerIndex = -1;
-
 	//The UINavInputContainer in this Widget
 	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
 		class UUINavInputContainer* UINavInputContainer;
@@ -152,8 +158,6 @@ public:
 	//All the UINavCollections in this widget
 	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
 		TArray<class UUINavCollection*> UINavCollections;
-
-	int CollectionIndex = 0;
 
 	//All the scrollboxes in this widget
 	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
@@ -167,11 +171,8 @@ public:
 		class UUINavButton* CurrentButton = nullptr;
 
 	//Reference to the parent widget that created this widget
-	UPROPERTY(BlueprintReadOnly, meta = (ExposeOnSpawn = true), Category = UINavWidget)
+	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
 		UUINavWidget* ParentWidget;
-
-	//This widget's class
-	TSubclassOf<UUINavWidget> WidgetClass;
 
 	//Current player controller
 	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
@@ -244,6 +245,11 @@ public:
 	virtual void NativeTick(const FGeometry & MyGeometry, float DeltaTime) override;
 
 	/**
+	*	Traverses this widget's hierarchy to setup all the UIUINavButtons
+	*/
+	static void TraverseHierarquy(UUINavWidget* UINavWidget, UUserWidget* WidgetToTraverse);
+
+	/**
 	*	Reconfigures the blueprint if it has already been setup
 	*/
 	void ReconfigureSetup();
@@ -253,9 +259,6 @@ public:
 	virtual FReply NativeOnKeyUp(const FGeometry & InGeometry, const FKeyEvent & InKeyEvent) override;
 	virtual FReply NativeOnMouseButtonDown(const FGeometry & InGeometry, const FPointerEvent & InMouseEvent) override;
 	virtual FReply NativeOnMouseButtonUp(const FGeometry & InGeometry, const FPointerEvent & InMouseEvent) override;
-
-	FReply OnKeyPressed(FKey PressedKey);
-	FReply OnKeyReleased(FKey PressedKey);
 
 	/**
 	*	Appends a new navigation grid to the widget. Used for horizontal and vertical grids.
@@ -280,9 +283,46 @@ public:
 		void AppendNavigationGrid2D(int DimensionX, int DimensionY, FButtonNavigation EdgeNavigation, bool bWrap, int ButtonsInGrid = -1);
 
 	/**
-	*	Appends a new navigation grid to the widget. Used to setup UINavCollections.
+	*	Adds an edge navigation connection between 2 grids
+	*	@param	Direction  The direction in which the edge navigation should go
+	*   @param	bTwoWayConnection  Whether the edge connection should go both from the first grid to the target grid and vice-versa
 	*/
 	UFUNCTION(BlueprintCallable, Category = UINavWidget)
+		void AddEdgeNavigation(const int GridIndex1, const int TargetIndexInGrid1, const int GridIndex2, const int TargetIndexInGrid2, const ENavigationDirection Direction, const bool bTwoWayConnection = true);
+
+	/**
+	*	Adds edge navigation that changes through navigation between 2 grids
+	*	Useful for connecting 1 vertical grid and 1 2D grid, for example
+	* 
+	*   @param	GridIndex  The index of the grid the connection belongs to
+	*   @param	TargetGridIndex  The index of the grid to connect to
+	*   @param	TargetButtonIndices  Leave empty for auto-fill. The indices of the buttons to set as the edge navigation for each index in grid
+	*   @param	Event  The event that triggers the updating of the edge navigation
+	*   @param	Direction  The direction in which the edge navigation should go
+	*   @param	bTwoWayConnection  Whether the edge connection should go both from the first grid to the target grid and vice-versa
+	*/
+	UFUNCTION(BlueprintCallable, Category = UINavWidget, meta = (AutoCreateRefTerm = "ButtonIndices, TargetButtonIndices"))
+		void AddSingleGridDynamicEdgeNavigation(const int GridIndex, const int TargetGridIndex, TArray<int> TargetButtonIndices, ENavigationEvent Event, const ENavigationDirection Direction, const bool bTwoWayConnection = true);
+
+	/**
+	*	Adds edge navigation that changes through navigation between 1 grid and multiple other grids
+	*	Useful for a grid that changes a widget switcher index, for example
+	* 
+	*   @param	GridIndex  The index of the grid the connection belongs to
+	*   @param	TargetButtons  The indices of the buttons to set as the edge navigation for each index in grid
+	*   @param	Event  The event that triggers the updating of the edge navigation
+	*   @param	Direction  The direction in which the edge navigation should go
+	*   @param	bTwoWayConnection  Whether the edge connection should go both from the first grid to the target grid and vice-versa
+	*/
+	UFUNCTION(BlueprintCallable, Category = UINavWidget)
+		void AddMultiGridDynamicEdgeNavigation(const int GridIndex, TArray<FGridButton> TargetButtons, ENavigationEvent Event, const ENavigationDirection Direction, const bool bTwoWayConnection = true);
+
+	void UpdateDynamicEdgeNavigations(const int UpdatedGridIndex);
+
+	/**
+	*	Appends a new navigation grid to the widget. Used to setup UINavCollections.
+	*/
+	UFUNCTION(BlueprintCallable, Category = UINavWidget, meta = (AutoCreateRefTerm = "EdgeNavigations"))
 		void AppendCollection(const TArray<FButtonNavigation>& EdgeNavigations);
 
 	/**
@@ -296,6 +336,12 @@ public:
 	*/
 	UFUNCTION(BlueprintCallable, Category = UINavWidget)
 		void SetEdgeNavigationByButton(int GridIndex, FButtonNavigation NewEdgeNavigation);
+
+	/**
+	*	Determines whether the navigation wraps around the specified grid
+	*/
+	UFUNCTION(BlueprintCallable, Category = UINavWidget)
+		void SetWrap(int GridIndex, bool bWrap);
 
 	//Helper function to add a new 1D grid
 	UFUNCTION(BlueprintCallable, Category = UINavWidget)
@@ -322,9 +368,22 @@ public:
 	UFUNCTION(BlueprintCallable, Category = UINavWidget, meta = (AdvancedDisplay=1))
 		void NavigateTo(int Index, bool bHoverEvent = false);
 
+	/**
+	*	Navigate to the button with the specified index at the specified grid
+	*
+	*	@param	Index  The index of the button that was hovered upon
+	*	@param	bHoverEvent  Was this triggered by a button hover event?
+	*/
+	UFUNCTION(BlueprintCallable, Category = UINavWidget)
+		void NavigateToGrid(int GridIndex, int IndexInGrid = 0);
+
 	void CollectionNavigateTo(int Index);
 
 	void CallCustomInput(FName ActionName, uint8* Buffer);
+
+	void ProcessDynamicEdgeNavigation(FDynamicEdgeNavigation& DynamicEdgeNavigation);
+
+	void UpdateEdgeNavigation(const int GridIndex, UUINavButton* TargetButton, ENavigationDirection Direction, bool bInverted);
 
 	void DispatchNavigation(int Index, bool bHoverEvent = false);
 
@@ -400,6 +459,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
 		bool IsSelectorVisible();
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
+		FORCEINLINE bool IsRebindingInput() const { return ReceiveInputType != EReceiveInputType::None; }
 
 	/**
 	*	Called when the button with the specified index was navigated upon
@@ -513,6 +575,10 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
 		bool IsSelectorValid();
+
+	bool IsButtonIndexValid(const int InButtonIndex);
+
+	bool IsGridIndexValid(const int GridIndex);
 
 	FORCEINLINE uint8 GetSelectCount() const { return SelectCount; }
 
@@ -642,6 +708,8 @@ public:
 
 	void RemoveAllParents();
 
+	int GetWidgetHierarchyDepth(UWidget* Widget);
+
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
 		class UUINavButton* GetButtonAtIndex(int InButtonIndex);
@@ -651,14 +719,9 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
 		void GetGridAtIndex(int GridIndex, FGrid& Grid, bool& IsValid);
 
-	/**
-	*	Returns the grid associated with the given button
-	*
-	*	@return ButtonGrid The button's associated grid
-	*	@return IsValid Whether the returned grid is valid
-	*/
+	// Returns the grid index of a panel widget object (Vertical Box, Horizontal Box or Uniform Grid)
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
-		void GetButtonGrid(class UUINavButton* Button, FGrid& ButtonGrid, bool &IsValid);
+		int GetGridIndexFromPanelWidget(class UPanelWidget* PanelWidget);
 
 	/**
 	*	Returns the grid associated with the given button
@@ -667,21 +730,21 @@ public:
 	*	@return IsValid Whether the returned grid is valid
 	*/
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
-		void GetButtonGridFromIndex(int InButtonIndex, FGrid& ButtonGrid, bool &IsValid);
+		void GetButtonGrid(int InButtonIndex, FGrid& ButtonGrid, bool &IsValid);
 
 	/**
 	*	Returns the given button's index in its grid
 	*	-1 if the index is invalid
 	*/
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
-		int GetIndexInGridFromButtonIndex(int InButtonIndex);
+		int GetButtonIndexInGrid(int InButtonIndex);
 
 	/**
 	*	Returns the index of the grid associated with the given button
 	*	-1 if the index is invalid
 	*/
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
-		int GetGridIndexFromButtonIndex(int InButtonIndex);
+		int GetButtonGridIndex(int InButtonIndex);
 
 	/**
 	*	Returns the index of the first button in this grid.
@@ -690,38 +753,25 @@ public:
 	*	@return ButtonGrid The button's associated grid
 	*	@return IsValid Whether the returned grid is valid
 	*/
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
-		int GetGridStartingIndex(int GridIndex);
-
-	// Returns the last button in the given grid
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
-		class UUINavButton* GetLastButtonInGrid(const FGrid Grid);
+	int GetGridStartingIndex(int GridIndex);
 
 	// Returns the button at the specified index of the given grid
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
-		class UUINavButton* GetButtonAtGridIndex(const FGrid ButtonGrid, const int IndexInGrid);
+		class UUINavButton* GetButtonAtGridIndex(const int GridIndex, int IndexInGrid);
 
 	// Checks whether the given button is in the specified grid
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
-		bool IsButtonInGrid(class UUINavButton* Button, const FGrid Grid);
+		bool IsButtonInGrid(const int InButtonIndex, const int GridIndex);
 
 	// Returns the button's coordinates in a 2D grid
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
-		void GetCoordinatesInGrid2D_FromIndex(const int Index, int& XCoord, int& YCoord);
+		void GetButtonCoordinatesInGrid2D(const int InButtonIndex, int& XCoord, int& YCoord);
 
-	// Returns the button's coordinates in a 2D grid
+	// Returns the button in the specified coordinates of a 2D grid
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
-		void GetCoordinatesInGrid2D_FromButton(class UUINavButton* Button, int& XCoord, int& YCoord);
+		class UUINavButton* GetButtonFromCoordinatesInGrid2D(const int GridIndex, const int XCoord, const int YCoord);
 
-	// Returns the button's coordinates in a 2D grid
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
-		class UUINavButton* GetButtonFromCoordinatesInGrid2D(const FGrid Grid, int XCoord, int YCoord);
-
-	// Returns the button's coordinates in a 2D grid
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
-		int GetButtonIndexFromCoordinatesInGrid2D(const FGrid Grid, int XCoord, int YCoord);
-
-	int GetCollectionButtonIndex(UUINavCollection* Collection, int Index);
+	int GetCollectionFirstButtonIndex(UUINavCollection* Collection, int Index);
 
 	/**
 	*	Returns the UINavComponent with the specified index (null if that

@@ -61,6 +61,8 @@ protected:
 
 	class APlayerController* PC;
 
+	TSharedPtr<class FUINavInputProcessor> SharedInputProcessor = nullptr;
+
 	ENavigationDirection Direction = ENavigationDirection::None;
 
 	float PreviousX = -1.f;
@@ -99,13 +101,6 @@ protected:
 	EInputType GetMenuActionInputType(FString Action);
 
 	/**
-	*	Verifies if a new input type is being used
-	*
-	*	@param Action The specified action
-	*/
-	void VerifyInputTypeChangeByAction(FString Action);
-
-	/**
 	*	Notifies to the active UUINavWidget that the input type changed
 	*
 	*	@param NewInputType The new input type that is being used
@@ -114,6 +109,7 @@ protected:
 
 	virtual void Activate(bool bReset) override;
 	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	UFUNCTION(BlueprintCallable, Category = UINavController)
@@ -279,6 +275,14 @@ public:
 		void SetAllowCustomInputByIndex(int InputIndex, bool bAllowInput);
 
 
+	void HandleKeyDownEvent(FSlateApplication& SlateApp, const FKeyEvent& InKeyEvent);
+	void HandleKeyUpEvent(FSlateApplication& SlateApp, const FKeyEvent& InKeyEvent);
+	void HandleAnalogInputEvent(FSlateApplication& SlateApp, const FAnalogInputEvent& InAnalogInputEvent);
+	void HandleMouseMoveEvent(FSlateApplication& SlateApp, const FPointerEvent& MouseEvent);
+	void HandleMouseButtonDownEvent(FSlateApplication& SlateApp, const FPointerEvent& MouseEvent);
+	void HandleMouseWheelOrGestureEvent(FSlateApplication& SlateApp, const FPointerEvent& InWheelEvent, const FPointerEvent* InGesture);
+
+
 	void BindMouseWorkaround();
 	void UnbindMouseWorkaround();
 
@@ -332,18 +336,10 @@ public:
 	*/
 	FString FindActionByKey(FKey ActionKey);
 
-	/**
-	*	Called when an action key is pressed
-	*
-	*	@param ActionName The name of the action
-	*/
+	FReply OnKeyPressed(FKey PressedKey);
 	FReply OnActionPressed(FString ActionName, FKey Key);
 
-	/**
-	*	Called when an action key is released
-	*
-	*	@param ActionName The name of the action
-	*/
+	FReply OnKeyReleased(FKey PressedKey);
 	FReply OnActionReleased(FString ActionName, FKey Key);
 
 	//Returns the currently used input mode

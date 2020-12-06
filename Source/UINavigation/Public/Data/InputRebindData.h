@@ -1,6 +1,7 @@
 // Copyright (C) 2019 Gonçalo Marques - All Rights Reserved
 
 #pragma once
+#include "Engine/DataTable.h"
 #include "InputRebindData.generated.h"
 
 USTRUCT(BlueprintType)

@@ -108,6 +108,12 @@ public:
 	void IncrementGrids(int Dimension);
 	void UpdateCollectionLastIndex(int GridIndex, bool bAdded);
 
+	UFUNCTION(BlueprintCallable, Category = UINavCollection)
+		void SetEdgeNavigation(int GridIndex, FButtonNavigation NewEdgeNavigation);
+
+	UFUNCTION(BlueprintCallable, Category = UINavCollection)
+		void SetEdgeNavigationByButton(int GridIndex, FButtonNavigation NewEdgeNavigation);
+
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavCollection)
 		int GetGlobalGridIndex(int GridIndex);
 

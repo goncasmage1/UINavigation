@@ -31,7 +31,7 @@ public:
 		virtual void Update();
 
 	//Changes the text displayed to match the specified option index
-	UFUNCTION(BlueprintCallable, Category = UINavComponentBox)
+	UFUNCTION(BlueprintCallable, Category = UINavComponentBox, meta = (DisplayName = "Set Option Index"))
 		virtual void UpdateTextToIndex(int NewIndex);
 	//Changes the text displayed in the NavText element
 	UFUNCTION(BlueprintCallable, Category = UINavComponentBox)
