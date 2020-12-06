@@ -11,7 +11,7 @@ void UUINavWidgetComponent::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	UUINavWidget* NavWidget = Cast<UUINavWidget>(Widget);
+	UUINavWidget* NavWidget = Cast<UUINavWidget>(GetWidget());
 	if (NavWidget != nullptr)
 	{
 		if (NavWidget->WidgetComp != nullptr)
