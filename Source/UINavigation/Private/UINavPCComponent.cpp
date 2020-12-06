@@ -807,7 +807,7 @@ EInputMode UUINavPCComponent::GetInputMode()
 		ULocalPlayer* LocalPlayer = PC->GetLocalPlayer();
 
 		bool ignore = GameViewportClient->IgnoreInput();
-		EMouseCaptureMode capt = GameViewportClient->CaptureMouseOnClick();
+		EMouseCaptureMode capt = GameViewportClient->GetMouseCaptureMode();
 
 		if (ignore == false && capt == EMouseCaptureMode::CaptureDuringMouseDown)
 		{
