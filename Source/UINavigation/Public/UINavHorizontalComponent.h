@@ -47,12 +47,12 @@ public:
 
 	UFUNCTION(BlueprintNativeEvent, Category = UINavHorizontalComponent)
 		void OnNavigateLeft();
-	void OnNavigateLeft_Implementation();
+	virtual void OnNavigateLeft_Implementation();
 	UFUNCTION(BlueprintNativeEvent, Category = UINavHorizontalComponent)
 		void OnNavigateRight();
-	void OnNavigateRight_Implementation();
+	virtual void OnNavigateRight_Implementation();
 	UFUNCTION(BlueprintNativeEvent, Category = UINavHorizontalComponent)
 		void OnUpdated();
-	void OnUpdated_Implementation();
+	virtual void OnUpdated_Implementation();
 	
 };

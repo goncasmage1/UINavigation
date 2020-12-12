@@ -7,7 +7,6 @@
 #include "Data/ReceiveInputType.h"
 #include "Data/SelectorPosition.h"
 #include "Data/Grid.h"
-#include "Data/ButtonStyle.h"
 #include "Data/NavigationEvent.h"
 #include "Data/GridButton.h"
 #include "Data/DynamicEdgeNavigation.h"
@@ -17,6 +16,8 @@
 
 #define SELECT_INDEX -101
 #define RETURN_INDEX -202
+
+enum class EButtonStyle : uint8;
 
 /**
 * This class contains the logic for UserWidget navigation
@@ -755,7 +756,10 @@ public:
 	*/
 	int GetGridStartingIndex(int GridIndex);
 
-	// Returns the button at the specified index of the given grid
+	/**
+	*	Returns the button at the specified index of the given grid.
+	*	Pass -1 for IndexInGrid for last button in grid
+	*/
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
 		class UUINavButton* GetButtonAtGridIndex(const int GridIndex, int IndexInGrid);
 
