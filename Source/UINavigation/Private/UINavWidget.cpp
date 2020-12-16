@@ -303,6 +303,20 @@ void UUINavWidget::TraverseHierarquy(UUINavWidget* UINavWidget, UUserWidget* Wid
 														0));
 						}
 					}
+					else
+					{
+						UScrollBox* ScrollBox = Cast<UScrollBox>(Panel);
+						if (ScrollBox != nullptr)
+						{
+							if (ScrollBox->GetFName().ToString().Left(4).Equals(TEXT("UIN_")))
+							{
+								const bool bIsHorizontal = ScrollBox->Orientation == EOrientation::Orient_Horizontal;
+								UINavWidget->GridIndexMap.Add(ScrollBox, UINavWidget->NavigationGrids.Num());
+								GridDepth = UINavWidget->GetWidgetHierarchyDepth(ScrollBox);
+								UINavWidget->Add1DGrid(bIsHorizontal ? EGridType::Horizontal : EGridType::Vertical, nullptr, UINavWidget->NavigationGrids.Num(), 0, FButtonNavigation(), true);
+							}
+						}
+					}
 				}
 			}
 		}
@@ -336,6 +350,21 @@ void UUINavWidget::TraverseHierarquy(UUINavWidget* UINavWidget, UUserWidget* Wid
 			UINavWidget->UINavInputContainer = InputContainer;
 
 			InputContainer->Init(UINavWidget);
+
+			if (UINavWidget->NavigationGrids.Num() > 0)
+			{
+				UINavWidget->GridIndexMap.Add(InputContainer, UINavWidget->NavigationGrids.Num());
+				const int NumInputContainerButtons = InputContainer->KeysPerInput * InputContainer->NumberOfInputs;
+				UINavWidget->NavigationGrids.Add(FGrid(EGridType::Grid2D,
+												UINavWidget->UINavButtons[InputContainer->FirstButtonIndex],
+												UINavWidget->NavigationGrids.Num(),
+												InputContainer->KeysPerInput,
+												InputContainer->NumberOfInputs,
+												FButtonNavigation(),
+												true,
+												-1));
+				UINavWidget->NumberOfButtonsInGrids += NumInputContainerButtons;
+			}
 			continue;
 		}
 
