@@ -2837,9 +2837,9 @@ void UUINavWidget::GetGridAtIndex(int GridIndex, FGrid & Grid, bool & IsValid)
 	}
 }
 
-int UUINavWidget::GetGridIndexFromPanelWidget(UPanelWidget* PanelWidget)
+int UUINavWidget::GetGridIndexFromWidgetObject(UWidget* Widget)
 {
-	int* GridIndex = GridIndexMap.Find(PanelWidget);
+	int* GridIndex = GridIndexMap.Find(Widget);
 	return GridIndex == nullptr || !IsGridIndexValid(*GridIndex) ? -1 : *GridIndex;
 }
 

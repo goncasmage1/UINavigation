@@ -65,7 +65,7 @@ protected:
 
 	TArray<FDynamicEdgeNavigation> DynamicEdgeNavigations;
 
-	TMap<class UPanelWidget*, int> GridIndexMap;
+	TMap<class UWidget*, int> GridIndexMap;
 
 	//This widget's class
 	TSubclassOf<UUINavWidget> WidgetClass;
@@ -722,7 +722,7 @@ public:
 
 	// Returns the grid index of a panel widget object (Vertical Box, Horizontal Box or Uniform Grid)
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
-		int GetGridIndexFromPanelWidget(class UPanelWidget* PanelWidget);
+		int GetGridIndexFromWidgetObject(class UWidget* Widget);
 
 	/**
 	*	Returns the grid associated with the given button
