@@ -1701,6 +1701,14 @@ void UUINavWidget::SetEdgeNavigation(int GridIndex, FButtonNavigation NewEdgeNav
 	NavigationGrids[GridIndex].SetEdgeNavigation(NewEdgeNavigation);
 }
 
+void UUINavWidget::SetBulkEdgeNavigation(const TArray<int>& GridIndices, FButtonNavigation NewEdgeNavigation)
+{
+	for (const int& GridIndex : GridIndices)
+	{
+		SetEdgeNavigation(GridIndex, NewEdgeNavigation);
+	}
+}
+
 void UUINavWidget::SetEdgeNavigationByButton(int GridIndex, FButtonNavigation NewEdgeNavigation)
 {
 	if (!IsGridIndexValid(GridIndex))
@@ -1708,6 +1716,14 @@ void UUINavWidget::SetEdgeNavigationByButton(int GridIndex, FButtonNavigation Ne
 		return;
 	}
 	NavigationGrids[GridIndex].SetEdgeNavigationByButton(NewEdgeNavigation);
+}
+
+void UUINavWidget::SetBulkEdgeNavigationByButton(const TArray<int>& GridIndices, FButtonNavigation NewEdgeNavigation)
+{
+	for (const int& GridIndex : GridIndices)
+	{
+		SetEdgeNavigationByButton(GridIndex, NewEdgeNavigation);
+	}
 }
 
 void UUINavWidget::SetWrap(int GridIndex, bool bWrap)

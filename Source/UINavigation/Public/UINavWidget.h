@@ -333,10 +333,22 @@ public:
 		void SetEdgeNavigation(int GridIndex, FButtonNavigation NewEdgeNavigation);
 
 	/**
+	*	Replaces the edge navigation of the grids at the specified indices with the given edge navigation
+	*/
+	UFUNCTION(BlueprintCallable, Category = UINavWidget)
+		void SetBulkEdgeNavigation(const TArray<int>& GridIndices, FButtonNavigation NewEdgeNavigation);
+
+	/**
 	*	Replaces the edge navigation of the grid at the specified index with the non null buttons of the given edge navigation
 	*/
 	UFUNCTION(BlueprintCallable, Category = UINavWidget)
 		void SetEdgeNavigationByButton(int GridIndex, FButtonNavigation NewEdgeNavigation);
+
+	/**
+	*	Replaces the edge navigation of the grids at the specified indices with the non null buttons of the given edge navigation
+	*/
+	UFUNCTION(BlueprintCallable, Category = UINavWidget)
+		void SetBulkEdgeNavigationByButton(const TArray<int>& GridIndices, FButtonNavigation NewEdgeNavigation);
 
 	/**
 	*	Determines whether the navigation wraps around the specified grid
