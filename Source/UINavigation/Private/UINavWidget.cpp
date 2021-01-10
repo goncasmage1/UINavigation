@@ -349,9 +349,11 @@ void UUINavWidget::TraverseHierarquy(UUINavWidget* UINavWidget, UUserWidget* Wid
 			UINavWidget->InputContainerIndex = UINavWidget->UINavButtons.Num();
 			UINavWidget->UINavInputContainer = InputContainer;
 
-			InputContainer->Init(UINavWidget);
+			const bool bAutoAppend = UINavWidget->NavigationGrids.Num() > 0;
 
-			if (UINavWidget->NavigationGrids.Num() > 0)
+			InputContainer->Init(UINavWidget, bAutoAppend ? UINavWidget->NavigationGrids.Num() : -1);
+
+			if (bAutoAppend)
 			{
 				UINavWidget->GridIndexMap.Add(InputContainer, UINavWidget->NavigationGrids.Num());
 				const int NumInputContainerButtons = InputContainer->KeysPerInput * InputContainer->NumberOfInputs;

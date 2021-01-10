@@ -22,8 +22,8 @@ class UINAVIGATION_API UUINavInputContainer : public UUserWidget
 	
 protected:
 
-	void SetupInputBoxes();
-	void CreateInputBoxes();
+	void SetupInputBoxes(const int GridIndex);
+	void CreateInputBoxes(const int GridIndex);
 
 	//-----------------------------------------------------------------------
 
@@ -46,7 +46,7 @@ protected:
 
 public:
 
-	void Init(class UUINavWidget* NewParent);
+	void Init(class UUINavWidget* NewParent, const int GridIndex);
 
 	/**
 	*	Called when this widget completed setting up InputBoxes
