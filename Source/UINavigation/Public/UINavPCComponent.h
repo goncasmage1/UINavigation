@@ -59,6 +59,8 @@ protected:
 
 	TArray<bool> bAllowCustomInputs;
 
+	bool bUseLeftThumbstickAsMouse = false;
+
 	class APlayerController* PC;
 
 	TSharedPtr<class FUINavInputProcessor> SharedInputProcessor = nullptr;

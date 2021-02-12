@@ -204,6 +204,10 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = UINavWidget)
 		bool bUseTextColor = false;
 
+	/*If set to true, the gamepad's left thumbstick will be used to move the mouse */
+	UPROPERTY(EditDefaultsOnly, Category = UINavWidget)
+		bool bUseLeftThumbstickAsMouse = false;
+
 	//The index of the button to be first navigated to (when the widget is added to viewport)
 	UPROPERTY(EditDefaultsOnly, Category = UINavWidget)
 		int FirstButtonIndex = 0;

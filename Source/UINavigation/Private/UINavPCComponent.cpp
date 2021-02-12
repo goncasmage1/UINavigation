@@ -87,18 +87,8 @@ void UUINavPCComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAct
 			}
 			break;
 	}
+	
 
-	float PosX, PosY;
-	PC->GetMousePosition(PosX, PosY);
-	if (CurrentInputType != EInputType::Mouse)
-	{
-		if ((PosX != 0.f && PosX != PreviousX) || (PosY != 0.f && PosY != PreviousY))
-		{
-			NotifyMouseInputType();
-		}
-	}
-	PreviousX = PosX;
-	PreviousY = PosY;
 }
 
 void UUINavPCComponent::BindMenuInputs()
@@ -279,6 +269,8 @@ void UUINavPCComponent::SetActiveWidget(UUINavWidget * NewActiveWidget)
 		BindMenuInputs();
 	}
 	ActiveWidget = NewActiveWidget;
+
+	bUseLeftThumbstickAsMouse = ActiveWidget != nullptr ? ActiveWidget->bUseLeftThumbstickAsMouse : false;
 }
 
 void UUINavPCComponent::SetAllowAllMenuInput(bool bAllowInput)
@@ -370,6 +362,51 @@ void UUINavPCComponent::HandleAnalogInputEvent(FSlateApplication& SlateApp, cons
 	if (CurrentInputType != EInputType::Gamepad && InAnalogInputEvent.GetAnalogValue() > 0.5f)
 	{
 		NotifyInputTypeChange(EInputType::Gamepad);
+	}
+
+	if (bUseLeftThumbstickAsMouse)
+	{
+		FKey Key = InAnalogInputEvent.GetKey();
+		if (Key == EKeys::Gamepad_LeftX || Key == EKeys::Gamepad_LeftY)
+		{
+			const bool bIsHorizontal = Key == EKeys::Gamepad_LeftX;
+			const float Value = InAnalogInputEvent.GetAnalogValue() / 3.0f;
+
+			if (Value == 0.0f) return;
+
+			const ULocalPlayer* const VictoryPlayer = Cast<ULocalPlayer>(PC->Player);
+			if (!VictoryPlayer) return;
+
+			const UGameViewportClient* const VictoryViewportClient = Cast <UGameViewportClient>(VictoryPlayer->ViewportClient);
+			if (!VictoryViewportClient) return;
+
+			FViewport* VictoryViewport = VictoryViewportClient->Viewport;
+			if (!VictoryViewport) return;
+
+			FVector2D OldPosition;
+			PC->GetMousePosition(OldPosition.X, OldPosition.Y);
+			const FVector2D NewPosition(OldPosition.X + (bIsHorizontal ? Value : 0.0f), OldPosition.Y + (!bIsHorizontal ? -Value : 0.0f));
+			//VictoryViewport->SetMouse();
+
+			SlateApp.SetCursorPos(NewPosition);
+			// Since the cursor may have been locked and its location clamped, get the actual new position
+			if (TSharedPtr<FSlateUser> SlateUser = SlateApp.GetUser(SlateApp.CursorUserIndex))
+			{
+				//create a new mouse event
+				const bool bIsPrimaryUser = FSlateApplication::CursorUserIndex == SlateUser->GetUserIndex();
+				FPointerEvent MouseEvent(
+					SlateApp.CursorPointerIndex,
+					NewPosition,
+					OldPosition,
+					bIsPrimaryUser ? SlateApp.GetPressedMouseButtons() : TSet<FKey>(),
+					EKeys::Invalid,
+					0,
+					bIsPrimaryUser ? SlateApp.GetModifierKeys() : FModifierKeysState()
+				);
+				//process the event
+				SlateApp.ProcessMouseMoveEvent(MouseEvent);
+			}
+		}
 	}
 }
 
