@@ -2473,15 +2473,14 @@ void UUINavWidget::OnPreSelect(int Index, bool bMouseClick)
 		SetUserFocus(PC);
 		SetKeyboardFocus();
 
-		SwitchButtonStyle(UINavButtons[Index]->IsPressed() || SelectCount > 1 ? EButtonStyle::Pressed : (Index == ButtonIndex ? EButtonStyle::Hovered : EButtonStyle::Normal),
-			ButtonIndex);
+		SwitchButtonStyle(UINavButtons[Index]->IsPressed() || SelectCount > 1 ? EButtonStyle::Pressed : (Index == ButtonIndex ? EButtonStyle::Hovered : EButtonStyle::Normal), ButtonIndex);
 
 		SelectCount--;
+		if (SelectCount == 0) SelectedButtonIndex = -1;
 	}
 	else
 	{
-		SwitchButtonStyle(UINavButtons[Index]->IsPressed() || SelectCount > 1 ? EButtonStyle::Pressed : (Index == ButtonIndex ? EButtonStyle::Hovered : EButtonStyle::Normal),
-						  ButtonIndex);
+		SwitchButtonStyle(UINavButtons[Index]->IsPressed() || SelectCount > 1 ? EButtonStyle::Pressed : (Index == ButtonIndex ? EButtonStyle::Hovered : EButtonStyle::Normal), ButtonIndex);
 
 		SelectCount--;
 		if (SelectCount == 0)
