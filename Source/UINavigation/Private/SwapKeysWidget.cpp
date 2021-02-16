@@ -6,19 +6,19 @@
 
 void USwapKeysWidget::OnSelect_Implementation(int Index)
 {
-	NotifySwapResult(Index > 0);
+	NotifySwapResult(Index);
 }
 
 void USwapKeysWidget::OnReturn_Implementation()
 {
-	NotifySwapResult(false);
+	NotifySwapResult(ReturnSelectedIndex);
 }
 
-void USwapKeysWidget::NotifySwapResult(bool bAccept)
+void USwapKeysWidget::NotifySwapResult(int Index)
 {
 	if (CurrentInputBox != nullptr && CollidingInputBox != nullptr)
 	{
-		if (bAccept)
+		if (Index > 0)
 		{
 			CurrentInputBox->FinishUpdateInputKey();
 			CollidingInputBox->UpdateInputKey(InputCollisionData.CurrentInputKey,
@@ -31,5 +31,5 @@ void USwapKeysWidget::NotifySwapResult(bool bAccept)
 		}
 	}
 
-	ReturnToParent();
+	ProcessPromptWidgetSelected(Index);
 }

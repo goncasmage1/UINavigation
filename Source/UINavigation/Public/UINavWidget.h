@@ -7,16 +7,16 @@
 #include "Data/ReceiveInputType.h"
 #include "Data/SelectorPosition.h"
 #include "Data/Grid.h"
-#include "Data/ButtonStyle.h"
 #include "Data/NavigationEvent.h"
 #include "Data/GridButton.h"
 #include "Data/DynamicEdgeNavigation.h"
-#include "Components/ScrollBox.h"
 #include "UINavMacros.h"
 #include "UINavWidget.generated.h"
 
 #define SELECT_INDEX -101
 #define RETURN_INDEX -202
+
+enum class EButtonStyle : uint8;
 
 /**
 * This class contains the logic for UserWidget navigation
@@ -64,7 +64,7 @@ protected:
 
 	TArray<FDynamicEdgeNavigation> DynamicEdgeNavigations;
 
-	TMap<class UPanelWidget*, int> GridIndexMap;
+	TMap<class UWidget*, int> GridIndexMap;
 
 	//This widget's class
 	TSubclassOf<UUINavWidget> WidgetClass;
@@ -123,6 +123,9 @@ protected:
 public:
 
 	EReceiveInputType ReceiveInputType = EReceiveInputType::None;
+
+	TSubclassOf<class UUINavPromptWidget> PromptWidgetClass;
+	int PromptSelectedIndex = -1;
 
 	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
 		TArray<FGrid> NavigationGrids;
@@ -332,10 +335,22 @@ public:
 		void SetEdgeNavigation(int GridIndex, FButtonNavigation NewEdgeNavigation);
 
 	/**
+	*	Replaces the edge navigation of the grids at the specified indices with the given edge navigation
+	*/
+	UFUNCTION(BlueprintCallable, Category = UINavWidget)
+		void SetBulkEdgeNavigation(const TArray<int>& GridIndices, FButtonNavigation NewEdgeNavigation);
+
+	/**
 	*	Replaces the edge navigation of the grid at the specified index with the non null buttons of the given edge navigation
 	*/
 	UFUNCTION(BlueprintCallable, Category = UINavWidget)
 		void SetEdgeNavigationByButton(int GridIndex, FButtonNavigation NewEdgeNavigation);
+
+	/**
+	*	Replaces the edge navigation of the grids at the specified indices with the non null buttons of the given edge navigation
+	*/
+	UFUNCTION(BlueprintCallable, Category = UINavWidget)
+		void SetBulkEdgeNavigationByButton(const TArray<int>& GridIndices, FButtonNavigation NewEdgeNavigation);
 
 	/**
 	*	Determines whether the navigation wraps around the specified grid
@@ -380,6 +395,8 @@ public:
 	void CollectionNavigateTo(int Index);
 
 	void CallCustomInput(FName ActionName, uint8* Buffer);
+
+	void OnPromptDecided(TSubclassOf<class UUINavPromptWidget> PromptClass, int Index);
 
 	void ProcessDynamicEdgeNavigation(FDynamicEdgeNavigation& DynamicEdgeNavigation);
 
@@ -721,7 +738,7 @@ public:
 
 	// Returns the grid index of a panel widget object (Vertical Box, Horizontal Box or Uniform Grid)
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
-		int GetGridIndexFromPanelWidget(class UPanelWidget* PanelWidget);
+		int GetGridIndexFromWidgetObject(class UWidget* Widget);
 
 	/**
 	*	Returns the grid associated with the given button
@@ -755,7 +772,10 @@ public:
 	*/
 	int GetGridStartingIndex(int GridIndex);
 
-	// Returns the button at the specified index of the given grid
+	/**
+	*	Returns the button at the specified index of the given grid.
+	*	Pass -1 for IndexInGrid for last button in grid
+	*/
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
 		class UUINavButton* GetButtonAtGridIndex(const int GridIndex, int IndexInGrid);
 
