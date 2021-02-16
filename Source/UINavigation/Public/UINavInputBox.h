@@ -56,6 +56,7 @@ public:
 
 	int ContainsKey(FKey CompareKey) const;
 	FORCEINLINE bool IsAxis() const { return IS_AXIS; }
+	FORCEINLINE FKey GetKey(int Index) { return Index >= 0 && Index < Keys.Num() ? Keys[Index] : FKey(); }
 
 	EAxisType AxisType = EAxisType::None;
 
