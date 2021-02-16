@@ -10,7 +10,6 @@
 #include "Data/NavigationEvent.h"
 #include "Data/GridButton.h"
 #include "Data/DynamicEdgeNavigation.h"
-#include "Components/ScrollBox.h"
 #include "UINavMacros.h"
 #include "UINavWidget.generated.h"
 
@@ -124,6 +123,9 @@ protected:
 public:
 
 	EReceiveInputType ReceiveInputType = EReceiveInputType::None;
+
+	TSubclassOf<class UUINavPromptWidget> PromptWidgetClass;
+	int PromptSelectedIndex = -1;
 
 	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
 		TArray<FGrid> NavigationGrids;
@@ -393,6 +395,8 @@ public:
 	void CollectionNavigateTo(int Index);
 
 	void CallCustomInput(FName ActionName, uint8* Buffer);
+
+	void OnPromptDecided(TSubclassOf<class UUINavPromptWidget> PromptClass, int Index);
 
 	void ProcessDynamicEdgeNavigation(FDynamicEdgeNavigation& DynamicEdgeNavigation);
 
