@@ -63,7 +63,14 @@ public:
 	virtual void OnAddInputBox_Implementation(class UUINavInputBox* NewInputBox);
 
 	/*
-	*	Called when a rebind was cancelled, specifying the reason for the revert.
+	*	Called when key was successfully rebinded
+	*/
+	UFUNCTION(BlueprintNativeEvent, Category = UINavWidget)
+		void OnKeyRebinded(FName InputName, FKey OldKey, FKey NewKey);
+	virtual void OnKeyRebinded_Implementation(FName InputName, FKey OldKey, FKey NewKey);
+
+	/*
+	*	Called when a rebind was cancelled, specifying the reason for the revert
 	*/
 	UFUNCTION(BlueprintNativeEvent, Category = UINavWidget)
 		void OnRebindCancelled(ERevertRebindReason RevertReason, FKey PressedKey);

@@ -45,6 +45,10 @@ void UUINavInputContainer::OnAddInputBox_Implementation(class UUINavInputBox* Ne
 	}
 }
 
+void UUINavInputContainer::OnKeyRebinded_Implementation(FName InputName, FKey OldKey, FKey NewKey)
+{
+}
+
 void UUINavInputContainer::OnRebindCancelled_Implementation(ERevertRebindReason RevertReason, FKey PressedKey)
 {
 }

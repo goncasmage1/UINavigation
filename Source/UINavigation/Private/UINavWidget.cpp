@@ -3216,7 +3216,13 @@ void UUINavWidget::SetupUINavButtonDelegates(UUINavButton * NewButton)
 void UUINavWidget::ProcessKeybind(FKey PressedKey)
 {
 	int KeysPerInput = UINavInputContainer->KeysPerInput;
-	UINavInputBoxes[InputBoxIndex / KeysPerInput]->UpdateInputKey(PressedKey, InputBoxIndex % KeysPerInput);
+	UUINavInputBox* const UINavInputBox = UINavInputBoxes[InputBoxIndex / KeysPerInput];
+	FKey OldKey = UINavInputBox->GetKey(InputBoxIndex % KeysPerInput);
+
+	UINavInputBox->UpdateInputKey(PressedKey, InputBoxIndex % KeysPerInput);
+
+	FKey NewKey = UINavInputBox->GetKey(InputBoxIndex % KeysPerInput);
+	if (OldKey != NewKey) UINavInputContainer->OnKeyRebinded(UINavInputBox->InputName, OldKey, PressedKey);
 	ReceiveInputType = EReceiveInputType::None;
 }
 
