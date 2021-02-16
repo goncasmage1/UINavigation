@@ -37,9 +37,9 @@ protected:
 
 public:
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavSlider, meta = (ClampMin="0"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavSlider)
 		float MinValue = 0.0f;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavSlider, meta = (ClampMin="0"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavSlider)
 		float MaxValue = 1.0f;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavSlider, meta = (ClampMin="0"))
 		float Interval = 0.1f;
@@ -47,7 +47,7 @@ public:
 		int MaxDecimalDigits = 1;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavSlider, meta = (ClampMin="0"))
 		int MinDecimalDigits = 0;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavSlider, meta = (ClampMin="0"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavSlider)
 		bool bUseComma = false;
 
 	float Difference = 0.0f;

@@ -31,10 +31,10 @@ public:
 
 	void BaseConstruct();
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavComponentBox, meta = (ClampMin="0"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavComponentBox)
 		int MinRange = 0;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavComponentBox, meta = (ClampMin="0"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavComponentBox)
 		int MaxRange = 1;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavComponentBox, meta = (ClampMin="1"))
