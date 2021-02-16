@@ -10,6 +10,7 @@
 #include "UINavInputContainer.h"
 #include "UINavPCComponent.h"
 #include "UINavPCReceiver.h"
+#include "UINavPromptWidget.h"
 #include "UINavWidgetComponent.h"
 #include "Animation/WidgetAnimation.h"
 #include "Blueprint/UserWidget.h"
@@ -23,6 +24,7 @@
 #include "Components/VerticalBox.h"
 #include "Components/UniformGridPanel.h"
 #include "Components/OverlaySlot.h"
+#include "Components/ScrollBox.h"
 #include "Components/CanvasPanelSlot.h"
 #include "Components/UniformGridSlot.h"
 #include "Components/ActorComponent.h"
@@ -465,6 +467,7 @@ void UUINavWidget::RebuildNavigation(int NewButtonIndex)
 	FirstButtonIndex = NewButtonIndex > -1 ? NewButtonIndex : FirstButtonIndex;
 	UINavInputContainer = nullptr;
 	CurrentButton = nullptr;
+	PromptWidgetClass = 0;
 
 	NavigationGrids.Reset();
 	GridIndexMap.Reset();
@@ -530,6 +533,11 @@ void UUINavWidget::UINavSetup()
 	}
 
 	OnSetupCompleted();
+
+	if (PromptWidgetClass != nullptr)
+	{
+		OnPromptDecided(PromptWidgetClass, PromptSelectedIndex);
+	}
 }
 
 void UUINavWidget::ReadyForSetup_Implementation()
@@ -2146,6 +2154,29 @@ void UUINavWidget::CallCustomInput(FName ActionName, uint8* Buffer)
 	}
 }
 
+void UUINavWidget::OnPromptDecided(TSubclassOf<UUINavPromptWidget> PromptClass, int Index)
+{
+	PromptWidgetClass = nullptr;
+
+	FString ClassString = PromptClass->GetFName().ToString();
+	ClassString.RemoveAt(ClassString.Len() - 2, 2);
+	const FName EventName = FName(*(ClassString.Append(TEXT("_Decided"))));
+	UFunction* CustomFunction = FindFunction(EventName);
+	if (CustomFunction != nullptr)
+	{
+		if (CustomFunction->ParmsSize == sizeof(int))
+		{
+			uint8* Buffer = (uint8*)FMemory_Alloca(sizeof(int));
+			FMemory::Memcpy(Buffer, &Index, sizeof(int));
+			ProcessEvent(CustomFunction, Buffer);
+		}
+		else
+		{
+			DISPLAYERROR(FString::Printf(TEXT("%s Prompt Event could not be found!"), *EventName.ToString()));
+		}
+	}
+}
+
 void UUINavWidget::ProcessDynamicEdgeNavigation(FDynamicEdgeNavigation& DynamicEdgeNavigation)
 {
 	const int CurrentGridIndex = GetButtonGridIndex(ButtonIndex);
@@ -2442,15 +2473,14 @@ void UUINavWidget::OnPreSelect(int Index, bool bMouseClick)
 		SetUserFocus(PC);
 		SetKeyboardFocus();
 
-		SwitchButtonStyle(UINavButtons[Index]->IsPressed() || SelectCount > 1 ? EButtonStyle::Pressed : (Index == ButtonIndex ? EButtonStyle::Hovered : EButtonStyle::Normal),
-			ButtonIndex);
+		SwitchButtonStyle(UINavButtons[Index]->IsPressed() || SelectCount > 1 ? EButtonStyle::Pressed : (Index == ButtonIndex ? EButtonStyle::Hovered : EButtonStyle::Normal), ButtonIndex);
 
 		SelectCount--;
+		if (SelectCount == 0) SelectedButtonIndex = -1;
 	}
 	else
 	{
-		SwitchButtonStyle(UINavButtons[Index]->IsPressed() || SelectCount > 1 ? EButtonStyle::Pressed : (Index == ButtonIndex ? EButtonStyle::Hovered : EButtonStyle::Normal),
-						  ButtonIndex);
+		SwitchButtonStyle(UINavButtons[Index]->IsPressed() || SelectCount > 1 ? EButtonStyle::Pressed : (Index == ButtonIndex ? EButtonStyle::Hovered : EButtonStyle::Normal), ButtonIndex);
 
 		SelectCount--;
 		if (SelectCount == 0)
@@ -3185,7 +3215,13 @@ void UUINavWidget::SetupUINavButtonDelegates(UUINavButton * NewButton)
 void UUINavWidget::ProcessKeybind(FKey PressedKey)
 {
 	int KeysPerInput = UINavInputContainer->KeysPerInput;
-	UINavInputBoxes[InputBoxIndex / KeysPerInput]->UpdateInputKey(PressedKey, InputBoxIndex % KeysPerInput);
+	UUINavInputBox* const UINavInputBox = UINavInputBoxes[InputBoxIndex / KeysPerInput];
+	FKey OldKey = UINavInputBox->GetKey(InputBoxIndex % KeysPerInput);
+
+	UINavInputBox->UpdateInputKey(PressedKey, InputBoxIndex % KeysPerInput);
+
+	FKey NewKey = UINavInputBox->GetKey(InputBoxIndex % KeysPerInput);
+	if (OldKey != NewKey) UINavInputContainer->OnKeyRebinded(UINavInputBox->InputName, OldKey, PressedKey);
 	ReceiveInputType = EReceiveInputType::None;
 }
 

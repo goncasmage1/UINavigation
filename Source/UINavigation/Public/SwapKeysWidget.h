@@ -2,12 +2,12 @@
 
 #pragma once
 
-#include "UINavWidget.h"
+#include "UINavPromptWidget.h"
 #include "Data/InputCollisionData.h"
 #include "SwapKeysWidget.generated.h"
 
 UCLASS()
-class UINAVIGATION_API USwapKeysWidget : public UUINavWidget
+class UINAVIGATION_API USwapKeysWidget : public UUINavPromptWidget
 {
 	GENERATED_BODY()
 
@@ -18,7 +18,7 @@ public:
 	virtual void OnReturn_Implementation() override;
 
 	UFUNCTION(BlueprintCallable, Category = SwapKeysWidget)
-	void NotifySwapResult(bool bAccept);
+	void NotifySwapResult(int Index);
 
 
 	UPROPERTY(BlueprintReadOnly, Category = SwapKeysWidget)

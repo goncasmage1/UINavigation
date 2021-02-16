@@ -1,6 +1,5 @@
 ﻿// Copyright (C) 2019 Gon�alo Marques - All Rights Reserved
 
-
 #include "UINavPCComponent.h"
 #include "UINavWidget.h"
 #include "UINavSettings.h"
