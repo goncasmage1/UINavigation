@@ -87,6 +87,12 @@ void UUINavWidget::InitialSetup(bool bRebuilding)
 {
 	if (!bRebuilding)
 	{
+		WidgetClass = GetClass();
+		if (UINavPC == nullptr)
+		{
+			ConfigureUINavPC();
+		}
+
 		//If widget was already setup, apply only certain steps
 		if (bCompletedSetup)
 		{
@@ -95,11 +101,6 @@ void UUINavWidget::InitialSetup(bool bRebuilding)
 		}
 
 		bSetupStarted = true;
-		WidgetClass = GetClass();
-		if (UINavPC == nullptr)
-		{
-			ConfigureUINavPC();
-		}
 	}
 
 	FetchButtonsInHierarchy();
