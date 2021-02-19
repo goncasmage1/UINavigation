@@ -143,11 +143,11 @@ void UUINavPCComponent::BindMenuInputs()
 	Action4_2.bExecuteWhenPaused = true;
 	Action4_2.bConsumeInput = false;
 	FInputActionBinding& Action5_2 = InputComponent->BindAction("MenuSelect", IE_Released, this, &UUINavPCComponent::MenuSelectRelease);
-	Action5_1.bExecuteWhenPaused = true;
-	Action5_1.bConsumeInput = false;
+	Action5_2.bExecuteWhenPaused = true;
+	Action5_2.bConsumeInput = false;
 	FInputActionBinding& Action6_2 = InputComponent->BindAction("MenuReturn", IE_Released, this, &UUINavPCComponent::MenuReturnRelease);
-	Action6_1.bExecuteWhenPaused = true;
-	Action6_1.bConsumeInput = false;
+	Action6_2.bExecuteWhenPaused = true;
+	Action6_2.bConsumeInput = false;
 
 	if (CustomInputs.Num() > 0)
 	{
