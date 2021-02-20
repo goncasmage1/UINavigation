@@ -1376,15 +1376,18 @@ void UUINavWidget::AppendNavigationGrid1D(EGridType GridType, int Dimension, FBu
 		return;
 	}
 
-	bool bFoundContainer = InputContainerIndex >= NumberOfButtonsInGrids && InputContainerIndex <= NumberOfButtonsInGrids + Dimension - 1;
-	if (bFoundContainer)
+	if (Dimension > 0)
 	{
-		DISPLAYERROR("In order to append InputContainer navigation, use Append Navigation Grid 2D");
-		return;
+		bool bFoundContainer = InputContainerIndex >= NumberOfButtonsInGrids && InputContainerIndex <= NumberOfButtonsInGrids + Dimension - 1;
+		if (bFoundContainer)
+		{
+			DISPLAYERROR("In order to append InputContainer navigation, use Append Navigation Grid 2D");
+			return;
+		}
 	}
 
 	Add1DGrid(GridType,
-			  UINavButtons.Num() > 0 ? (UINavButtons.Num() > NumberOfButtonsInGrids ? UINavButtons[NumberOfButtonsInGrids] : nullptr) : nullptr,
+			  UINavButtons.Num() > 0 && Dimension > 0 ? (UINavButtons.Num() > NumberOfButtonsInGrids ? UINavButtons[NumberOfButtonsInGrids] : nullptr) : nullptr,
 			  NavigationGrids.Num(),
 			  Dimension,
 			  EdgeNavigation,
@@ -1404,9 +1407,14 @@ void UUINavWidget::AppendNavigationGrid1D(EGridType GridType, int Dimension, FBu
 
 void UUINavWidget::AppendNavigationGrid2D(int DimensionX, int DimensionY, FButtonNavigation EdgeNavigation, bool bWrap, int ButtonsInGrid)
 {
-	if (DimensionX <= 0 || DimensionY <= 0)
+	if (DimensionX <= 0)
 	{
-		DISPLAYERROR("AppendNavigationGrid2D Dimensions should be greater than 0");
+		DISPLAYERROR("AppendNavigationGrid2D Dimension X should be greater than 0");
+		return;
+	}
+	if (DimensionY < 0)
+	{
+		DISPLAYERROR("AppendNavigationGrid2D Dimension Y should be at least 0");
 		return;
 	}
 
