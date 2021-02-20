@@ -470,6 +470,15 @@ void UUINavWidget::RebuildNavigation(int NewButtonIndex)
 	CurrentButton = nullptr;
 	PromptWidgetClass = 0;
 
+	for (UUINavButton* UINavButton : UINavButtons)
+	{
+		UINavButton->ButtonIndex = -1;
+	}
+	for (UUINavComponent* UINavComponent : UINavComponents)
+	{
+		UINavComponent->ComponentIndex = -1;
+	}
+
 	NavigationGrids.Reset();
 	GridIndexMap.Reset();
 	DynamicEdgeNavigations.Reset();
