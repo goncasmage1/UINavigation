@@ -470,6 +470,15 @@ void UUINavWidget::RebuildNavigation(int NewButtonIndex)
 	CurrentButton = nullptr;
 	PromptWidgetClass = 0;
 
+	for (UUINavButton* UINavButton : UINavButtons)
+	{
+		UINavButton->ButtonIndex = -1;
+	}
+	for (UUINavComponent* UINavComponent : UINavComponents)
+	{
+		UINavComponent->ComponentIndex = -1;
+	}
+
 	NavigationGrids.Reset();
 	GridIndexMap.Reset();
 	DynamicEdgeNavigations.Reset();
@@ -1367,15 +1376,18 @@ void UUINavWidget::AppendNavigationGrid1D(EGridType GridType, int Dimension, FBu
 		return;
 	}
 
-	bool bFoundContainer = InputContainerIndex >= NumberOfButtonsInGrids && InputContainerIndex <= NumberOfButtonsInGrids + Dimension - 1;
-	if (bFoundContainer)
+	if (Dimension > 0)
 	{
-		DISPLAYERROR("In order to append InputContainer navigation, use Append Navigation Grid 2D");
-		return;
+		bool bFoundContainer = InputContainerIndex >= NumberOfButtonsInGrids && InputContainerIndex <= NumberOfButtonsInGrids + Dimension - 1;
+		if (bFoundContainer)
+		{
+			DISPLAYERROR("In order to append InputContainer navigation, use Append Navigation Grid 2D");
+			return;
+		}
 	}
 
 	Add1DGrid(GridType,
-			  UINavButtons.Num() > 0 ? (UINavButtons.Num() > NumberOfButtonsInGrids ? UINavButtons[NumberOfButtonsInGrids] : nullptr) : nullptr,
+			  UINavButtons.Num() > 0 && Dimension > 0 ? (UINavButtons.Num() > NumberOfButtonsInGrids ? UINavButtons[NumberOfButtonsInGrids] : nullptr) : nullptr,
 			  NavigationGrids.Num(),
 			  Dimension,
 			  EdgeNavigation,
@@ -1395,9 +1407,14 @@ void UUINavWidget::AppendNavigationGrid1D(EGridType GridType, int Dimension, FBu
 
 void UUINavWidget::AppendNavigationGrid2D(int DimensionX, int DimensionY, FButtonNavigation EdgeNavigation, bool bWrap, int ButtonsInGrid)
 {
-	if (DimensionX <= 0 || DimensionY <= 0)
+	if (DimensionX <= 0)
 	{
-		DISPLAYERROR("AppendNavigationGrid2D Dimensions should be greater than 0");
+		DISPLAYERROR("AppendNavigationGrid2D Dimension X should be greater than 0");
+		return;
+	}
+	if (DimensionY < 0)
+	{
+		DISPLAYERROR("AppendNavigationGrid2D Dimension Y should be at least 0");
 		return;
 	}
 
@@ -2444,26 +2461,6 @@ void UUINavWidget::OnPreSelect(int Index, bool bMouseClick)
 
 	bool bIsSelectedButton = SelectedButtonIndex == Index && (!bMouseClick || UINavButtons[Index]->IsHovered());
 
-	if (SelectCount == 1)
-	{
-		if (!bMouseClick)
-		{
-			bIgnoreMouseEvent = true;
-			CurrentButton->OnReleased.Broadcast();
-			if (bIsSelectedButton) CurrentButton->OnClicked.Broadcast();
-		}
-
-		UUINavComponent* CurrentUINavComp = GetUINavComponentAtIndex(Index);
-		if (CurrentUINavComp != nullptr)
-		{
-			if (bIsSelectedButton)
-			{
-				CurrentUINavComp->OnSelected();
-			}
-			CurrentUINavComp->OnStopSelected();
-		}
-	}
-
 	if (UINavInputContainer != nullptr && Index >= UINavInputContainer->FirstButtonIndex && Index <= UINavInputContainer->LastButtonIndex)
 	{
 		InputBoxIndex = Index - UINavInputContainer->FirstButtonIndex;
@@ -2503,6 +2500,26 @@ void UUINavWidget::OnPreSelect(int Index, bool bMouseClick)
 			}
 			OnStopSelect(Index);
 			CollectionOnStopSelect(Index);
+		}
+	}
+
+	if (SelectCount == 0)
+	{
+		if (!bMouseClick)
+		{
+			bIgnoreMouseEvent = true;
+			CurrentButton->OnReleased.Broadcast();
+			if (bIsSelectedButton) CurrentButton->OnClicked.Broadcast();
+		}
+
+		UUINavComponent* CurrentUINavComp = GetUINavComponentAtIndex(Index);
+		if (CurrentUINavComp != nullptr)
+		{
+			if (bIsSelectedButton)
+			{
+				CurrentUINavComp->OnSelected();
+			}
+			CurrentUINavComp->OnStopSelected();
 		}
 	}
 }
@@ -2600,12 +2617,14 @@ void UUINavWidget::ReturnToParent(bool bRemoveAllParents, int ZOrder)
 			IUINavPCReceiver::Execute_OnRootWidgetRemoved(UINavPC->GetOwner());
 			UINavPC->SetActiveWidget(nullptr);
 
+			SelectCount = 0;
 			if (WidgetComp != nullptr) WidgetComp->SetWidget(nullptr);
 			else RemoveFromParent();
 		}
 		return;
 	}
 
+	SelectCount = 0;
 	if (WidgetComp != nullptr)
 	{
 		if (bRemoveAllParents)
@@ -3297,15 +3316,15 @@ void UUINavWidget::MenuSelectPress()
 
 	if (CurrentButton != nullptr)
 	{
-		if (SelectCount == 0)
+		FinishPress(false);
+
+		if (SelectCount == 1)
 		{
 			USoundBase* PressSound = Cast<USoundBase>(CurrentButton->WidgetStyle.PressedSlateSound.GetResourceObject());
 			if (PressSound != nullptr) PlaySound(PressSound);
 			bIgnoreMouseEvent = true;
 			CurrentButton->OnPressed.Broadcast();
 		}
-
-		FinishPress(false);
 	}
 }
 
