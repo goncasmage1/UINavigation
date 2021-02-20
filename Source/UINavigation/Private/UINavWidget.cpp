@@ -2461,26 +2461,6 @@ void UUINavWidget::OnPreSelect(int Index, bool bMouseClick)
 
 	bool bIsSelectedButton = SelectedButtonIndex == Index && (!bMouseClick || UINavButtons[Index]->IsHovered());
 
-	if (SelectCount == 1)
-	{
-		if (!bMouseClick)
-		{
-			bIgnoreMouseEvent = true;
-			CurrentButton->OnReleased.Broadcast();
-			if (bIsSelectedButton) CurrentButton->OnClicked.Broadcast();
-		}
-
-		UUINavComponent* CurrentUINavComp = GetUINavComponentAtIndex(Index);
-		if (CurrentUINavComp != nullptr)
-		{
-			if (bIsSelectedButton)
-			{
-				CurrentUINavComp->OnSelected();
-			}
-			CurrentUINavComp->OnStopSelected();
-		}
-	}
-
 	if (UINavInputContainer != nullptr && Index >= UINavInputContainer->FirstButtonIndex && Index <= UINavInputContainer->LastButtonIndex)
 	{
 		InputBoxIndex = Index - UINavInputContainer->FirstButtonIndex;
@@ -2520,6 +2500,26 @@ void UUINavWidget::OnPreSelect(int Index, bool bMouseClick)
 			}
 			OnStopSelect(Index);
 			CollectionOnStopSelect(Index);
+		}
+	}
+
+	if (SelectCount == 0)
+	{
+		if (!bMouseClick)
+		{
+			bIgnoreMouseEvent = true;
+			CurrentButton->OnReleased.Broadcast();
+			if (bIsSelectedButton) CurrentButton->OnClicked.Broadcast();
+		}
+
+		UUINavComponent* CurrentUINavComp = GetUINavComponentAtIndex(Index);
+		if (CurrentUINavComp != nullptr)
+		{
+			if (bIsSelectedButton)
+			{
+				CurrentUINavComp->OnSelected();
+			}
+			CurrentUINavComp->OnStopSelected();
 		}
 	}
 }
@@ -2617,12 +2617,14 @@ void UUINavWidget::ReturnToParent(bool bRemoveAllParents, int ZOrder)
 			IUINavPCReceiver::Execute_OnRootWidgetRemoved(UINavPC->GetOwner());
 			UINavPC->SetActiveWidget(nullptr);
 
+			SelectCount = 0;
 			if (WidgetComp != nullptr) WidgetComp->SetWidget(nullptr);
 			else RemoveFromParent();
 		}
 		return;
 	}
 
+	SelectCount = 0;
 	if (WidgetComp != nullptr)
 	{
 		if (bRemoveAllParents)
@@ -3314,15 +3316,15 @@ void UUINavWidget::MenuSelectPress()
 
 	if (CurrentButton != nullptr)
 	{
-		if (SelectCount == 0)
+		FinishPress(false);
+
+		if (SelectCount == 1)
 		{
 			USoundBase* PressSound = Cast<USoundBase>(CurrentButton->WidgetStyle.PressedSlateSound.GetResourceObject());
 			if (PressSound != nullptr) PlaySound(PressSound);
 			bIgnoreMouseEvent = true;
 			CurrentButton->OnPressed.Broadcast();
 		}
-
-		FinishPress(false);
 	}
 }
 
