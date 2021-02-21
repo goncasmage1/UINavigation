@@ -2473,14 +2473,14 @@ void UUINavWidget::OnPreSelect(int Index, bool bMouseClick)
 
 		SwitchButtonStyle(UINavButtons[Index]->IsPressed() || SelectCount > 1 ? EButtonStyle::Pressed : (Index == ButtonIndex ? EButtonStyle::Hovered : EButtonStyle::Normal), ButtonIndex);
 
-		SelectCount--;
+		if (SelectCount > 0) SelectCount--;
 		if (SelectCount == 0) SelectedButtonIndex = -1;
 	}
 	else
 	{
 		SwitchButtonStyle(UINavButtons[Index]->IsPressed() || SelectCount > 1 ? EButtonStyle::Pressed : (Index == ButtonIndex ? EButtonStyle::Hovered : EButtonStyle::Normal), ButtonIndex);
 
-		SelectCount--;
+		if (SelectCount > 0) SelectCount--;
 		if (SelectCount == 0)
 		{
 			SelectedButtonIndex = -1;
@@ -2618,6 +2618,7 @@ void UUINavWidget::ReturnToParent(bool bRemoveAllParents, int ZOrder)
 			UINavPC->SetActiveWidget(nullptr);
 
 			SelectCount = 0;
+			SelectedButtonIndex = -1;
 			if (WidgetComp != nullptr) WidgetComp->SetWidget(nullptr);
 			else RemoveFromParent();
 		}
@@ -2625,6 +2626,7 @@ void UUINavWidget::ReturnToParent(bool bRemoveAllParents, int ZOrder)
 	}
 
 	SelectCount = 0;
+	SelectedButtonIndex = -1;
 	if (WidgetComp != nullptr)
 	{
 		if (bRemoveAllParents)
