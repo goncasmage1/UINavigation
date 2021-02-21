@@ -2618,6 +2618,7 @@ void UUINavWidget::ReturnToParent(bool bRemoveAllParents, int ZOrder)
 			UINavPC->SetActiveWidget(nullptr);
 
 			SelectCount = 0;
+			SelectedButtonIndex = -1;
 			if (WidgetComp != nullptr) WidgetComp->SetWidget(nullptr);
 			else RemoveFromParent();
 		}
@@ -2625,6 +2626,7 @@ void UUINavWidget::ReturnToParent(bool bRemoveAllParents, int ZOrder)
 	}
 
 	SelectCount = 0;
+	SelectedButtonIndex = -1;
 	if (WidgetComp != nullptr)
 	{
 		if (bRemoveAllParents)
