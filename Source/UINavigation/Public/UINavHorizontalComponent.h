@@ -3,6 +3,7 @@
 #pragma once
 
 #include "UINavComponent.h"
+#include "UINavWidget.h"
 #include "UINavHorizontalComponent.generated.h"
 
 /**
