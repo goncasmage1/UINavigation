@@ -8,7 +8,6 @@
 #include "Data/InputNameMapping.h"
 #include "Data/InputRebindData.h"
 #include "Data/RevertRebindReason.h"
-#include "UINavWidget.h"
 #include "UINavInputBox.generated.h"
 
 #define IS_AXIS (AxisType != EAxisType::None)

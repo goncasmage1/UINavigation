@@ -2,6 +2,7 @@
 
 #include "UINavSlider.h"
 #include "UINavMacros.h"
+#include "UINavWidget.h"
 #include "Components/Slider.h"
 #include "Components/TextBlock.h"
 #include "Components/SpinBox.h"
