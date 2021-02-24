@@ -365,7 +365,7 @@ void UUINavPCComponent::HandleAnalogInputEvent(FSlateApplication& SlateApp, cons
 
 	if (bUseLeftThumbstickAsMouse)
 	{
-		FKey Key = InAnalogInputEvent.GetKey();
+		const FKey Key = InAnalogInputEvent.GetKey();
 		if (Key == EKeys::Gamepad_LeftX || Key == EKeys::Gamepad_LeftY)
 		{
 			const bool bIsHorizontal = Key == EKeys::Gamepad_LeftX;
@@ -382,18 +382,15 @@ void UUINavPCComponent::HandleAnalogInputEvent(FSlateApplication& SlateApp, cons
 			FViewport* VictoryViewport = VictoryViewportClient->Viewport;
 			if (!VictoryViewport) return;
 
-			FVector2D OldPosition;
-			PC->GetMousePosition(OldPosition.X, OldPosition.Y);
-			const FVector2D NewPosition(OldPosition.X + (bIsHorizontal ? Value : 0.0f), OldPosition.Y + (!bIsHorizontal ? -Value : 0.0f));
-			//VictoryViewport->SetMouse();
-
+			const FVector2D OldPosition = SlateApp.GetCursorPos();
+			const FVector2D NewPosition(OldPosition.X + (bIsHorizontal ? Value * 10.0f : 0.0f), OldPosition.Y + (!bIsHorizontal ? -Value * 10.0f : 0.0f));
 			SlateApp.SetCursorPos(NewPosition);
 			// Since the cursor may have been locked and its location clamped, get the actual new position
-			if (TSharedPtr<FSlateUser> SlateUser = SlateApp.GetUser(SlateApp.CursorUserIndex))
+			if (const TSharedPtr<FSlateUser> SlateUser = SlateApp.GetUser(SlateApp.CursorUserIndex))
 			{
 				//create a new mouse event
 				const bool bIsPrimaryUser = FSlateApplication::CursorUserIndex == SlateUser->GetUserIndex();
-				FPointerEvent MouseEvent(
+				const FPointerEvent MouseEvent(
 					SlateApp.CursorPointerIndex,
 					NewPosition,
 					OldPosition,
