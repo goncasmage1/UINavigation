@@ -6,6 +6,7 @@
 #include "UINavMacros.h"
 #include "UINavSettings.h"
 #include "UINavPCComponent.h"
+#include "UINavWidget.h"
 #include "Components/TextBlock.h"
 #include "Components/HorizontalBox.h"
 #include "Components/Image.h"
