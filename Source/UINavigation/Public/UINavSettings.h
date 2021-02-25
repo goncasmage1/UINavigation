@@ -9,10 +9,16 @@
 /**
  * 
  */
-UCLASS(config = UINavInput)
+UCLASS(config = UINavInput, defaultconfig)
 class UINAVIGATION_API UUINavSettings : public UObject
 {
 	GENERATED_BODY()
+
+	UUINavSettings(const FObjectInitializer& ObjectInitializer)
+	:Super(ObjectInitializer)
+	{
+		bRemoveWidgetOnReturn = true;
+	}
 	
 public:
 
@@ -22,5 +28,6 @@ public:
 	UPROPERTY(config, EditAnywhere, Category = "Bindings")
 		TArray<struct FInputAxisKeyMapping> AxisMappings;
 	
-	
+	UPROPERTY(config, EditAnywhere)
+		bool bRemoveWidgetOnReturn;
 };
