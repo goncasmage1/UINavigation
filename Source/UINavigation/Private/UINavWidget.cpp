@@ -28,6 +28,7 @@
 #include "Components/CanvasPanelSlot.h"
 #include "Components/UniformGridSlot.h"
 #include "Components/ActorComponent.h"
+#include "UINavSettings.h"
 
 UUINavWidget::UUINavWidget(const FObjectInitializer& ObjectInitializer)
 	:Super(ObjectInitializer)
@@ -2526,7 +2527,9 @@ void UUINavWidget::OnPreSelect(int Index, bool bMouseClick)
 
 void UUINavWidget::OnReturn_Implementation()
 {
-	ReturnToParent();
+	UUINavSettings* MySettings = GetMutableDefault<UUINavSettings>();
+	
+	if(MySettings->bRemoveWidgetOnReturn) ReturnToParent();
 }
 
 void UUINavWidget::OnNext_Implementation()
