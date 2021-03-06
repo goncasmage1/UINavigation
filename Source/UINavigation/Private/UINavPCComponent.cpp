@@ -740,40 +740,65 @@ void UUINavPCComponent::NotifyKeyReleased(FKey ReleasedKey)
 
 void UUINavPCComponent::ExecuteActionByKey(FKey PressedKey, bool bPressed)
 {
-	FString ActionName = FindActionByKey(PressedKey);
-	if (ActionName.Equals(TEXT(""))) return;
+	TArray<FString> ActionNames = FindActionByKey(PressedKey);
+	if (ActionNames.Num() == 0) return;
 
-	ExecuteActionByName(ActionName, bPressed);
+	for (const FString ActionName : ActionNames)
+	{
+		ExecuteActionByName(ActionName, bPressed);
+	}
 }
 
-FString UUINavPCComponent::FindActionByKey(FKey ActionKey)
+TArray<FString> UUINavPCComponent::FindActionByKey(FKey ActionKey)
 {
 	TArray<FString> Actions;
+	TArray<FString> TriggeredActions;
 	KeyMap.GenerateKeyArray(Actions);
-	for (FString action : Actions)
+	for (FString Action : Actions)
 	{
-		for (FKey key : KeyMap[action])
+		for (FKey key : KeyMap[Action])
 		{
-			if (key == ActionKey) return action;
+			if (key == ActionKey)
+			{
+				TriggeredActions.Add(Action);
+			}
 		}
 	}
-	return TEXT("");
+	return TriggeredActions;
 }
 
 FReply UUINavPCComponent::OnKeyPressed(FKey PressedKey)
 {
-	FString ActionName = FindActionByKey(PressedKey);
-	if (ActionName.Equals(TEXT(""))) return FReply::Unhandled();
+	const TArray<FString> ActionNames = FindActionByKey(PressedKey);
+	if (ActionNames.Num() == 0) return FReply::Unhandled();
 
-	return OnActionPressed(ActionName, PressedKey);
+	FReply Reply = FReply::Unhandled();
+	for (const FString ActionName : ActionNames)
+	{
+		if (OnActionPressed(ActionName, PressedKey).IsEventHandled())
+		{
+			Reply = FReply::Handled();
+		}
+	}
+
+	return Reply;
 }
 
 FReply UUINavPCComponent::OnKeyReleased(FKey PressedKey)
 {
-	FString ActionName = FindActionByKey(PressedKey);
-	if (ActionName.Equals(TEXT(""))) return FReply::Unhandled();
+	const TArray<FString> ActionNames = FindActionByKey(PressedKey);
+	if (ActionNames.Num() == 0) return FReply::Unhandled();
 
-	return OnActionReleased(ActionName, PressedKey);
+	FReply Reply = FReply::Unhandled();
+	for (const FString ActionName : ActionNames)
+	{
+		if (OnActionReleased(ActionName, PressedKey).IsEventHandled())
+		{
+			Reply = FReply::Handled();
+		}
+	}
+
+	return Reply;
 }
 
 FReply UUINavPCComponent::OnActionPressed(FString ActionName, FKey Key)
