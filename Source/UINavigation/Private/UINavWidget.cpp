@@ -188,12 +188,13 @@ void UUINavWidget::FetchButtonsInHierarchy()
 	if (ButtonsNum > 0) CurrentButton = UINavButtons[FirstButtonIndex];
 	else return;
 
-	bool bValid = CurrentButton->IsValid();
+	const bool bIgnoreDisabledUINavButton = GetDefault<UUINavSettings>()->bIgnoreDisabledUINavButton;
+	bool bValid = CurrentButton->IsValid(bIgnoreDisabledUINavButton);
 
 	if (bValid)
 	{
 		UUINavComponent* UINavComp = GetUINavComponentAtIndex(ButtonIndex);
-		if (UINavComp != nullptr && !UINavComp->IsValid()) bValid = false;
+		if (UINavComp != nullptr && !UINavComp->IsValid(bIgnoreDisabledUINavButton)) bValid = false;
 	}
 
 	while (!bValid)
@@ -205,9 +206,9 @@ void UUINavWidget::FetchButtonsInHierarchy()
 		if (ButtonIndex == FirstButtonIndex) break;
 
 		UUINavComponent* UINavComp = GetUINavComponentAtIndex(ButtonIndex);
-		if (UINavComp != nullptr && !UINavComp->IsValid()) continue;
+		if (UINavComp != nullptr && !UINavComp->IsValid(bIgnoreDisabledUINavButton)) continue;
 
-		bValid = CurrentButton->IsValid();
+		bValid = CurrentButton->IsValid(bIgnoreDisabledUINavButton);
 	}
 }
 
@@ -833,10 +834,11 @@ void UUINavWidget::DeleteUINavElement(int Index, bool bAutoNavigate)
 			Temp = UINavButtons[NewIndex];
 			if (NewIndex == FirstButtonIndex) break;
 
+			const bool bIgnoreDisabledUINavButton = GetDefault<UUINavSettings>()->bIgnoreDisabledUINavButton;
 			UUINavComponent* UINavComp = GetUINavComponentAtIndex(NewIndex);
-			if (UINavComp != nullptr && !UINavComp->IsValid()) continue;
+			if (UINavComp != nullptr && !UINavComp->IsValid(bIgnoreDisabledUINavButton)) continue;
 
-			bValid = Temp->IsValid();
+			bValid = Temp->IsValid(bIgnoreDisabledUINavButton);
 		}
 
 		if (!bValid)
@@ -1323,10 +1325,11 @@ void UUINavWidget::ClearGrid(int GridIndex, bool bAutoNavigate)
 
 			if (NewIndex >= FirstIndex && NewIndex <= ButtonIndex) continue;
 
+			const bool bIgnoreDisabledUINavButton = GetDefault<UUINavSettings>()->bIgnoreDisabledUINavButton;
 			UUINavComponent* UINavComp = GetUINavComponentAtIndex(NewIndex);
-			if (UINavComp != nullptr && !UINavComp->IsValid()) continue;
+			if (UINavComp != nullptr && !UINavComp->IsValid(bIgnoreDisabledUINavButton)) continue;
 
-			bValid = NextButton->IsValid();
+			bValid = NextButton->IsValid(bIgnoreDisabledUINavButton);
 		}
 
 		if (bValid)
@@ -2563,9 +2566,7 @@ void UUINavWidget::OnPreSelect(int Index, bool bMouseClick)
 
 void UUINavWidget::OnReturn_Implementation()
 {
-	UUINavSettings* MySettings = GetMutableDefault<UUINavSettings>();
-	
-	if(MySettings->bRemoveWidgetOnReturn) ReturnToParent();
+	if(GetDefault<UUINavSettings>()->bRemoveWidgetOnReturn) ReturnToParent();
 }
 
 void UUINavWidget::OnNext_Implementation()
@@ -2791,11 +2792,12 @@ UUINavButton* UUINavWidget::FindNextButton(UUINavButton* Button, ENavigationDire
 	if (NewButton == nullptr || NewButton == Button) return nullptr;
 
 	//Check if the button is visible, if not, skip to next button
-	bool bValid = NewButton->IsValid();
+	const bool bIgnoreDisabledUINavButton = GetDefault<UUINavSettings>()->bIgnoreDisabledUINavButton;
+	bool bValid = NewButton->IsValid(bIgnoreDisabledUINavButton);
 	if (bValid)
 	{
 		UUINavComponent* UINavComp = GetUINavComponentAtIndex(NewButton->ButtonIndex);
-		if (UINavComp != nullptr && !UINavComp->IsValid()) bValid = false;
+		if (UINavComp != nullptr && !UINavComp->IsValid(bIgnoreDisabledUINavButton)) bValid = false;
 	}
 	while (!bValid)
 	{
@@ -2803,10 +2805,10 @@ UUINavButton* UUINavWidget::FindNextButton(UUINavButton* Button, ENavigationDire
 		NewButton = FetchButtonByDirection(Direction, NewButton);
 		if (NewButton == nullptr) return nullptr;
 		UUINavComponent* UINavComp = GetUINavComponentAtIndex(NewButton->ButtonIndex);
-		if (UINavComp != nullptr && !UINavComp->IsValid()) continue;
+		if (UINavComp != nullptr && !UINavComp->IsValid(bIgnoreDisabledUINavButton)) continue;
 		if (NewButton == nullptr || NewButton == UINavButtons[ButtonIndex]) return nullptr;
 
-		bValid = NewButton->IsValid();
+		bValid = NewButton->IsValid(bIgnoreDisabledUINavButton);
 	}
 	return NewButton;
 }

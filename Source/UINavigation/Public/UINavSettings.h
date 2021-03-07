@@ -17,17 +17,21 @@ class UINAVIGATION_API UUINavSettings : public UObject
 	UUINavSettings(const FObjectInitializer& ObjectInitializer)
 	:Super(ObjectInitializer)
 	{
+		bIgnoreDisabledUINavButton = true;
 		bRemoveWidgetOnReturn = true;
 	}
 	
 public:
+
+	UPROPERTY(config, EditAnywhere)
+		bool bIgnoreDisabledUINavButton;
+	
+	UPROPERTY(config, EditAnywhere)
+		bool bRemoveWidgetOnReturn;
 
 	UPROPERTY(config, EditAnywhere, Category = "Bindings")
 		TArray<struct FInputActionKeyMapping> ActionMappings;
 
 	UPROPERTY(config, EditAnywhere, Category = "Bindings")
 		TArray<struct FInputAxisKeyMapping> AxisMappings;
-	
-	UPROPERTY(config, EditAnywhere)
-		bool bRemoveWidgetOnReturn;
 };
