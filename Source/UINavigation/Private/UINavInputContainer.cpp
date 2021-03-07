@@ -150,18 +150,11 @@ void UUINavInputContainer::CreateInputBoxes(const int GridIndex)
 
 ERevertRebindReason UUINavInputContainer::CanRegisterKey(const UUINavInputBox * InputBox, FKey NewKey, int Index, int& CollidingActionIndex, int& CollidingKeyIndex)
 {
-	if (KeyBlacklist.Contains(NewKey) || !NewKey.IsValid())
-	{
-		return ERevertRebindReason::BlacklistedKey;
-	}
-	else if (!RespectsRestriction(NewKey, Index))
-	{
-		return ERevertRebindReason::RestrictionMismatch;
-	}
-	else if (!CanUseKey(InputBox, NewKey, CollidingActionIndex, CollidingKeyIndex))
-	{
-		return ERevertRebindReason::UsedBySameInputGroup;
-	}
+	if (!NewKey.IsValid()) return ERevertRebindReason::BlacklistedKey;
+	if (KeyWhitelist.Num() > 0 && !KeyWhitelist.Contains(NewKey)) return ERevertRebindReason::NonWhitelistedKey;
+	if (KeyBlacklist.Contains(NewKey)) return ERevertRebindReason::BlacklistedKey;
+	if (!RespectsRestriction(NewKey, Index)) return ERevertRebindReason::RestrictionMismatch;
+	if (!CanUseKey(InputBox, NewKey, CollidingActionIndex, CollidingKeyIndex)) return ERevertRebindReason::UsedBySameInputGroup;
 
 	return ERevertRebindReason::None;
 }
