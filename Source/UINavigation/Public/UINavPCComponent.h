@@ -316,7 +316,7 @@ public:
 	*
 	*	@param PressedKey The given key
 	*/
-	FString FindActionByKey(FKey ActionKey);
+	TArray<FString> FindActionByKey(FKey ActionKey);
 
 	FReply OnKeyPressed(FKey PressedKey);
 	FReply OnActionPressed(FString ActionName, FKey Key);
