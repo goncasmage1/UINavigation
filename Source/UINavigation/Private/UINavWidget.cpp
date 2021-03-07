@@ -707,7 +707,7 @@ void UUINavWidget::HandleSelectorMovement(float DeltaTime)
 	TheSelector->SetRenderTranslation(SelectorOrigin + Distance*MoveCurve->GetFloatValue(MovementCounter));
 }
 
-void UUINavWidget::AddUINavButton(UUINavButton * NewButton, int TargetGridIndex, int IndexInGrid)
+void UUINavWidget::AddUINavButton(UUINavButton * NewButton, int const TargetGridIndex, int IndexInGrid)
 {
 	if (NewButton == nullptr || !IsGridIndexValid(TargetGridIndex)) return;
 
@@ -741,7 +741,25 @@ void UUINavWidget::AddUINavButton(UUINavButton * NewButton, int TargetGridIndex,
 	}
 }
 
-void UUINavWidget::AddUINavComponent(UUINavComponent * NewComponent, int TargetGridIndex, int IndexInGrid)
+void UUINavWidget::AddUINavButtons(TArray<UUINavButton*> NewButtons, const int TargetGridIndex, int IndexInGrid)
+{
+	if (!IsGridIndexValid(TargetGridIndex)) return;
+	if (UINavAnimations.Num() > 0)
+	{
+		DISPLAYERROR("Runtime manipulation not supported with navigation using animations.");
+	}
+	
+	if (IndexInGrid >= NavigationGrids[TargetGridIndex].GetDimension()) IndexInGrid = -1;
+	const bool bIncrementIndexInGrid = IndexInGrid > -1;
+
+	for (UUINavButton* NewButton : NewButtons)
+	{
+		AddUINavButton(NewButton, TargetGridIndex, IndexInGrid);
+		if (bIncrementIndexInGrid) IndexInGrid++;
+	}
+}
+
+void UUINavWidget::AddUINavComponent(UUINavComponent * NewComponent, const int TargetGridIndex, int IndexInGrid)
 {
 	if (NewComponent == nullptr || !IsGridIndexValid(TargetGridIndex)) return;
 
@@ -778,6 +796,24 @@ void UUINavWidget::AddUINavComponent(UUINavComponent * NewComponent, int TargetG
 	}
 
 	UpdateDynamicEdgeNavigations(TargetGridIndex);
+}
+
+void UUINavWidget::AddUINavComponents(TArray<UUINavComponent*> NewComponents, const int TargetGridIndex, int IndexInGrid)
+{
+	if (!IsGridIndexValid(TargetGridIndex)) return;
+	if (UINavAnimations.Num() > 0)
+	{
+		DISPLAYERROR("Runtime manipulation not supported with navigation using animations.");
+	}
+	
+	if (IndexInGrid >= NavigationGrids[TargetGridIndex].GetDimension()) IndexInGrid = -1;
+	const bool bIncrementIndexInGrid = IndexInGrid > -1;
+
+	for (UUINavComponent* NewComponent : NewComponents)
+	{
+		AddUINavComponent(NewComponent, TargetGridIndex, IndexInGrid);
+		if (bIncrementIndexInGrid) IndexInGrid++;
+	}
 }
 
 void UUINavWidget::DeleteUINavElement(int Index, bool bAutoNavigate)
