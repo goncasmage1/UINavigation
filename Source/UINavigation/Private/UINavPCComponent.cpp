@@ -1,4 +1,4 @@
-﻿// Copyright (C) 2019 Gon�alo Marques - All Rights Reserved
+﻿// Copyright (C) 2019 Gonçalo Marques - All Rights Reserved
 
 #include "UINavPCComponent.h"
 #include "UINavWidget.h"
@@ -86,18 +86,8 @@ void UUINavPCComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAct
 			}
 			break;
 	}
+	
 
-	float PosX, PosY;
-	PC->GetMousePosition(PosX, PosY);
-	if (CurrentInputType != EInputType::Mouse)
-	{
-		if ((PosX != 0.f && PosX != PreviousX) || (PosY != 0.f && PosY != PreviousY))
-		{
-			NotifyMouseInputType();
-		}
-	}
-	PreviousX = PosX;
-	PreviousY = PosY;
 }
 
 void UUINavPCComponent::BindMenuInputs()
@@ -278,6 +268,8 @@ void UUINavPCComponent::SetActiveWidget(UUINavWidget * NewActiveWidget)
 		BindMenuInputs();
 	}
 	ActiveWidget = NewActiveWidget;
+
+	bUseLeftThumbstickAsMouse = ActiveWidget != nullptr ? ActiveWidget->bUseLeftThumbstickAsMouse : false;
 }
 
 void UUINavPCComponent::SetAllowAllMenuInput(bool bAllowInput)
@@ -370,11 +362,47 @@ void UUINavPCComponent::HandleAnalogInputEvent(FSlateApplication& SlateApp, cons
 	{
 		NotifyInputTypeChange(EInputType::Gamepad);
 	}
+
+	if (bUseLeftThumbstickAsMouse)
+	{
+		const FKey Key = InAnalogInputEvent.GetKey();
+		if (Key == EKeys::Gamepad_LeftX || Key == EKeys::Gamepad_LeftY)
+		{
+			const bool bIsHorizontal = Key == EKeys::Gamepad_LeftX;
+			const float Value = InAnalogInputEvent.GetAnalogValue() / 3.0f;
+			if (bIsHorizontal) LeftStickDelta.X = Value;
+			else LeftStickDelta.Y = Value;
+
+			if (Value == 0.0f) return;
+
+			const FVector2D OldPosition = SlateApp.GetCursorPos();
+			const FVector2D NewPosition(OldPosition.X + (bIsHorizontal ? Value * LeftStickCursorSensitivity : 0.0f),
+										OldPosition.Y + (!bIsHorizontal ? -Value * LeftStickCursorSensitivity : 0.0f));
+			SlateApp.SetCursorPos(NewPosition);
+			// Since the cursor may have been locked and its location clamped, get the actual new position
+			if (const TSharedPtr<FSlateUser> SlateUser = SlateApp.GetUser(SlateApp.CursorUserIndex))
+			{
+				//create a new mouse event
+				const bool bIsPrimaryUser = FSlateApplication::CursorUserIndex == SlateUser->GetUserIndex();
+				const FPointerEvent MouseEvent(
+					SlateApp.CursorPointerIndex,
+					NewPosition,
+					OldPosition,
+					bIsPrimaryUser ? SlateApp.GetPressedMouseButtons() : TSet<FKey>(),
+					EKeys::Invalid,
+					0,
+					bIsPrimaryUser ? SlateApp.GetModifierKeys() : FModifierKeysState()
+				);
+				//process the event
+				SlateApp.ProcessMouseMoveEvent(MouseEvent);
+			}
+		}
+	}
 }
 
 void UUINavPCComponent::HandleMouseMoveEvent(FSlateApplication& SlateApp, const FPointerEvent& MouseEvent)
 {
-	if (CurrentInputType != EInputType::Mouse && MouseEvent.GetCursorDelta().SizeSquared() > 0.0f)
+	if (CurrentInputType != EInputType::Mouse && MouseEvent.GetCursorDelta().SizeSquared() > 0.0f && (!bUseLeftThumbstickAsMouse || !IsMovingLeftStick()))
 	{
 		NotifyInputTypeChange(EInputType::Mouse);
 	}
@@ -740,40 +768,65 @@ void UUINavPCComponent::NotifyKeyReleased(FKey ReleasedKey)
 
 void UUINavPCComponent::ExecuteActionByKey(FKey PressedKey, bool bPressed)
 {
-	FString ActionName = FindActionByKey(PressedKey);
-	if (ActionName.Equals(TEXT(""))) return;
+	TArray<FString> ActionNames = FindActionByKey(PressedKey);
+	if (ActionNames.Num() == 0) return;
 
-	ExecuteActionByName(ActionName, bPressed);
+	for (const FString ActionName : ActionNames)
+	{
+		ExecuteActionByName(ActionName, bPressed);
+	}
 }
 
-FString UUINavPCComponent::FindActionByKey(FKey ActionKey)
+TArray<FString> UUINavPCComponent::FindActionByKey(FKey ActionKey)
 {
 	TArray<FString> Actions;
+	TArray<FString> TriggeredActions;
 	KeyMap.GenerateKeyArray(Actions);
-	for (FString action : Actions)
+	for (FString Action : Actions)
 	{
-		for (FKey key : KeyMap[action])
+		for (FKey key : KeyMap[Action])
 		{
-			if (key == ActionKey) return action;
+			if (key == ActionKey)
+			{
+				TriggeredActions.Add(Action);
+			}
 		}
 	}
-	return TEXT("");
+	return TriggeredActions;
 }
 
 FReply UUINavPCComponent::OnKeyPressed(FKey PressedKey)
 {
-	FString ActionName = FindActionByKey(PressedKey);
-	if (ActionName.Equals(TEXT(""))) return FReply::Unhandled();
+	const TArray<FString> ActionNames = FindActionByKey(PressedKey);
+	if (ActionNames.Num() == 0) return FReply::Unhandled();
 
-	return OnActionPressed(ActionName, PressedKey);
+	FReply Reply = FReply::Unhandled();
+	for (const FString ActionName : ActionNames)
+	{
+		if (OnActionPressed(ActionName, PressedKey).IsEventHandled())
+		{
+			Reply = FReply::Handled();
+		}
+	}
+
+	return Reply;
 }
 
 FReply UUINavPCComponent::OnKeyReleased(FKey PressedKey)
 {
-	FString ActionName = FindActionByKey(PressedKey);
-	if (ActionName.Equals(TEXT(""))) return FReply::Unhandled();
+	const TArray<FString> ActionNames = FindActionByKey(PressedKey);
+	if (ActionNames.Num() == 0) return FReply::Unhandled();
 
-	return OnActionReleased(ActionName, PressedKey);
+	FReply Reply = FReply::Unhandled();
+	for (const FString ActionName : ActionNames)
+	{
+		if (OnActionReleased(ActionName, PressedKey).IsEventHandled())
+		{
+			Reply = FReply::Handled();
+		}
+	}
+
+	return Reply;
 }
 
 FReply UUINavPCComponent::OnActionPressed(FString ActionName, FKey Key)

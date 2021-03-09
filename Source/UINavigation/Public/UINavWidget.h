@@ -36,6 +36,7 @@ protected:
 	bool bMovingSelector = false;
 	bool bIgnoreMouseEvent = false;
 	bool bReturning = false;
+	bool bReturningToParent = false;
 
 	//Used to track when the selector's position should be updated
 	int WaitForTick;
@@ -206,6 +207,10 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = UINavWidget)
 		bool bUseTextColor = false;
 
+	/*If set to true, the gamepad's left thumbstick will be used to move the mouse */
+	UPROPERTY(EditDefaultsOnly, Category = UINavWidget)
+		bool bUseLeftThumbstickAsMouse = false;
+
 	//The index of the button to be first navigated to (when the widget is added to viewport)
 	UPROPERTY(EditDefaultsOnly, Category = UINavWidget)
 		int FirstButtonIndex = 0;
@@ -246,6 +251,8 @@ public:
 	virtual void NativeConstruct() override;
 
 	virtual void NativeTick(const FGeometry & MyGeometry, float DeltaTime) override;
+
+	virtual void RemoveFromParent() override;
 
 	/**
 	*	Traverses this widget's hierarchy to setup all the UIUINavButtons
@@ -645,6 +652,15 @@ public:
 		void AddUINavButton(class UUINavButton* NewButton, int TargetGridIndex, int IndexInGrid = -1);
 
 	/**
+	*	Setup several new UINavButtons added at runtime (must be added to viewport manually)
+	*	Set IndexInGrid to -1 or to a number greater than the dimension of the grid to
+	*	add the button to the end of the grid.
+	*	Note: The plugin doesn't support adding buttons at runtime while navigating with animations!
+	*/
+	UFUNCTION(BlueprintCallable, Category = UINavWidget)
+        void AddUINavButtons(TArray<class UUINavButton*> NewButtons, int TargetGridIndex, int IndexInGrid = -1);
+
+	/**
 	*	Setup a new UINavComponent added at runtime (must be added to viewport manually)
 	*	Set IndexInGrid to -1 or to a number greater than the dimension of the grid to
 	*	add the component to the end of the grid.
@@ -652,6 +668,15 @@ public:
 	*/
 	UFUNCTION(BlueprintCallable, Category = UINavWidget)
 		void AddUINavComponent(class UUINavComponent* NewComponent, int TargetGridIndex, int IndexInGrid = -1);
+
+	/**
+	*	Setup several new UINavComponents added at runtime (must be added to viewport manually)
+	*	Set IndexInGrid to -1 or to a number greater than the dimension of the grid to
+	*	add the component to the end of the grid.
+	*	Note: The plugin doesn't support adding buttons at runtime while navigating with animations!
+	*/
+	UFUNCTION(BlueprintCallable, Category = UINavWidget)
+        void AddUINavComponents(TArray<class UUINavComponent*> NewComponents, int TargetGridIndex, int IndexInGrid = -1);
 
 	/**
 	*	Removes the UINav element at the specified index from the widget
