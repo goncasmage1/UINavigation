@@ -52,6 +52,7 @@ void UUINavWidget::NativeConstruct()
 	*/
 	if (ParentWidget != nullptr && ParentWidget->IsInViewport() && bParentRemoved)
 	{
+		ParentWidget->bReturningToParent = true;
 		ParentWidget->RemoveFromParent();
 
 		if (bShouldDestroyParent)
@@ -580,6 +581,17 @@ void UUINavWidget::NativeTick(const FGeometry & MyGeometry, float DeltaTime)
 
 		WaitForTick++;
 	}
+}
+
+void UUINavWidget::RemoveFromParent()
+{
+	if (!bReturningToParent && !IsPendingKill())
+	{
+		ReturnToParent();
+		return;
+	}
+
+	Super::RemoveFromParent();
 }
 
 FReply UUINavWidget::NativeOnKeyDown(const FGeometry & InGeometry, const FKeyEvent & InKeyEvent)
@@ -2652,15 +2664,22 @@ void UUINavWidget::ReturnToParent(bool bRemoveAllParents, int ZOrder)
 {
 	if (ParentWidget == nullptr)
 	{
-		if (bAllowRemoveIfRoot)
+		if (bAllowRemoveIfRoot && UINavPC != nullptr)
 		{
 			IUINavPCReceiver::Execute_OnRootWidgetRemoved(UINavPC->GetOwner());
 			UINavPC->SetActiveWidget(nullptr);
 
 			SelectCount = 0;
 			SelectedButtonIndex = -1;
-			if (WidgetComp != nullptr) WidgetComp->SetWidget(nullptr);
-			else RemoveFromParent();
+			if (WidgetComp != nullptr)
+			{
+				WidgetComp->SetWidget(nullptr);
+			}
+			else
+			{
+				bReturningToParent = true;
+				RemoveFromParent();
+			}
 		}
 		return;
 	}
@@ -2695,6 +2714,7 @@ void UUINavWidget::ReturnToParent(bool bRemoveAllParents, int ZOrder)
 			IUINavPCReceiver::Execute_OnRootWidgetRemoved(UINavPC->GetOwner());
 			UINavPC->SetActiveWidget(nullptr);
 			ParentWidget->RemoveAllParents();
+			bReturningToParent = true;
 			RemoveFromParent();
 			Destruct();
 		}
@@ -2703,15 +2723,19 @@ void UUINavWidget::ReturnToParent(bool bRemoveAllParents, int ZOrder)
 			//If parent was removed, add it to viewport
 			if (bParentRemoved)
 			{
-				ParentWidget->ReturnedFromWidget = this;
-				if (!bUsingSplitScreen) ParentWidget->AddToViewport(ZOrder);
-				else ParentWidget->AddToPlayerScreen(ZOrder);
+				if (!ParentWidget->IsPendingKill())
+				{
+					ParentWidget->ReturnedFromWidget = this;
+					if (!bUsingSplitScreen) ParentWidget->AddToViewport(ZOrder);
+					else ParentWidget->AddToPlayerScreen(ZOrder);
+				}
 			}
 			else
 			{
 				UINavPC->SetActiveWidget(ParentWidget);
 				ParentWidget->ReconfigureSetup();
 			}
+			bReturningToParent = true;
 			RemoveFromParent();
 		}
 	}
@@ -2723,6 +2747,7 @@ void UUINavWidget::RemoveAllParents()
 	{
 		ParentWidget->RemoveAllParents();
 	}
+	bReturningToParent = true;
 	RemoveFromParent();
 	Destruct();
 }
