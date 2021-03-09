@@ -64,7 +64,7 @@ public:
 	bool bAutoCollapse = false;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavButton)
-		bool IsValid();
+		bool IsValid(const bool bIgnoreDisabledUINavButton = true);
 
 	UFUNCTION()
 		void OnHover();

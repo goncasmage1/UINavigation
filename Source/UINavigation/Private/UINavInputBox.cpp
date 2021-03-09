@@ -6,6 +6,7 @@
 #include "UINavMacros.h"
 #include "UINavSettings.h"
 #include "UINavPCComponent.h"
+#include "UINavWidget.h"
 #include "Components/TextBlock.h"
 #include "Components/HorizontalBox.h"
 #include "Components/Image.h"
@@ -102,7 +103,7 @@ void UUINavInputBox::CreateKeyWidgets()
 	}
 }
 
-bool UUINavInputBox::TrySetupNewKey(FKey NewKey, int KeyIndex, UUINavInputComponent* NewInputButton)
+bool UUINavInputBox::TrySetupNewKey(const FKey NewKey, const int KeyIndex, UUINavInputComponent* NewInputButton)
 {
 	if (!NewKey.IsValid() || Keys.IsValidIndex(KeyIndex) || Keys.Contains(NewKey)) return false;
 
@@ -132,7 +133,7 @@ void UUINavInputBox::ResetKeyWidgets()
 	}
 }
 
-void UUINavInputBox::UpdateInputKey(FKey NewKey, int Index, bool bSkipChecks)
+void UUINavInputBox::UpdateInputKey(const FKey NewKey, const int Index, const bool bSkipChecks)
 {
 	AwaitingNewKey = NewKey;
 	AwaitingIndex = Index;
@@ -141,7 +142,7 @@ void UUINavInputBox::UpdateInputKey(FKey NewKey, int Index, bool bSkipChecks)
 	{
 		int CollidingActionIndex = INDEX_NONE;
 		int CollidingKeyIndex = INDEX_NONE;
-		ERevertRebindReason RevertReason = Container->CanRegisterKey(this, NewKey, Index, CollidingActionIndex, CollidingKeyIndex);
+		const ERevertRebindReason RevertReason = Container->CanRegisterKey(this, NewKey, Index, CollidingActionIndex, CollidingKeyIndex);
 		if (RevertReason == ERevertRebindReason::UsedBySameInputGroup)
 		{
 			if (!Keys[Index].IsValid())
@@ -274,13 +275,13 @@ void UUINavInputBox::FinishUpdateInputKey()
 	}
 }
 
-void UUINavInputBox::CancelUpdateInputKey(ERevertRebindReason Reason)
+void UUINavInputBox::CancelUpdateInputKey(const ERevertRebindReason Reason)
 {
 	Container->OnRebindCancelled(Reason, AwaitingNewKey);
 	RevertToKeyText(AwaitingIndex);
 }
 
-FKey UUINavInputBox::GetKeyFromAxis(FKey AxisKey)
+FKey UUINavInputBox::GetKeyFromAxis(const FKey AxisKey)
 {
 	FKey NewKey = Container->UINavPC->GetKeyFromAxis(AxisKey, AxisType == EAxisType::Positive);
 	if (!NewKey.IsValid())
@@ -314,7 +315,7 @@ void UUINavInputBox::ProcessInputName()
 	InputText->SetText(InputData.InputText);
 }
 
-bool UUINavInputBox::UpdateKeyIconForKey(int Index)
+bool UUINavInputBox::UpdateKeyIconForKey(const int Index)
 {
 	UTexture2D* NewTexture = Container->UINavPC->GetKeyIcon(Keys[Index]);
 	if (NewTexture != nullptr)
@@ -325,13 +326,13 @@ bool UUINavInputBox::UpdateKeyIconForKey(int Index)
 	return false;
 }
 
-FText UUINavInputBox::GetKeyText(int Index)
+FText UUINavInputBox::GetKeyText(const int Index)
 {
 	FKey Key = Keys[Index];
 	return Container->UINavPC->GetKeyText(Key);
 }
 
-void UUINavInputBox::UpdateKeyDisplay(int Index)
+void UUINavInputBox::UpdateKeyDisplay(const int Index)
 {
 	bUsingKeyImage[Index] = UpdateKeyIconForKey(Index);
 	if (bUsingKeyImage[Index])
@@ -341,7 +342,7 @@ void UUINavInputBox::UpdateKeyDisplay(int Index)
 	}
 }
 
-void UUINavInputBox::RevertToKeyText(int Index)
+void UUINavInputBox::RevertToKeyText(const int Index)
 {
 	FText OldName;
 	if (Index < KeysPerInput && !(Keys[Index].GetFName().IsEqual(FName("None"))))
@@ -363,7 +364,7 @@ void UUINavInputBox::RevertToKeyText(int Index)
 	}
 }
 
-void UUINavInputBox::NotifySelected(int Index)
+void UUINavInputBox::NotifySelected(const int Index)
 {
 	InputButtons[Index]->NavText->SetText(Container->PressKeyText);
 
@@ -376,7 +377,7 @@ void UUINavInputBox::NotifySelected(int Index)
 	}
 }
 
-int UUINavInputBox::ContainsKey(FKey CompareKey) const
+int UUINavInputBox::ContainsKey(const FKey CompareKey) const
 {
 	return Keys.IndexOfByKey(CompareKey);
 }

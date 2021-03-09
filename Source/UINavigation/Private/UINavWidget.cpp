@@ -28,6 +28,7 @@
 #include "Components/CanvasPanelSlot.h"
 #include "Components/UniformGridSlot.h"
 #include "Components/ActorComponent.h"
+#include "UINavSettings.h"
 
 UUINavWidget::UUINavWidget(const FObjectInitializer& ObjectInitializer)
 	:Super(ObjectInitializer)
@@ -51,6 +52,7 @@ void UUINavWidget::NativeConstruct()
 	*/
 	if (ParentWidget != nullptr && ParentWidget->IsInViewport() && bParentRemoved)
 	{
+		ParentWidget->bReturningToParent = true;
 		ParentWidget->RemoveFromParent();
 
 		if (bShouldDestroyParent)
@@ -187,12 +189,13 @@ void UUINavWidget::FetchButtonsInHierarchy()
 	if (ButtonsNum > 0) CurrentButton = UINavButtons[FirstButtonIndex];
 	else return;
 
-	bool bValid = CurrentButton->IsValid();
+	const bool bIgnoreDisabledUINavButton = GetDefault<UUINavSettings>()->bIgnoreDisabledUINavButton;
+	bool bValid = CurrentButton->IsValid(bIgnoreDisabledUINavButton);
 
 	if (bValid)
 	{
 		UUINavComponent* UINavComp = GetUINavComponentAtIndex(ButtonIndex);
-		if (UINavComp != nullptr && !UINavComp->IsValid()) bValid = false;
+		if (UINavComp != nullptr && !UINavComp->IsValid(bIgnoreDisabledUINavButton)) bValid = false;
 	}
 
 	while (!bValid)
@@ -204,9 +207,9 @@ void UUINavWidget::FetchButtonsInHierarchy()
 		if (ButtonIndex == FirstButtonIndex) break;
 
 		UUINavComponent* UINavComp = GetUINavComponentAtIndex(ButtonIndex);
-		if (UINavComp != nullptr && !UINavComp->IsValid()) continue;
+		if (UINavComp != nullptr && !UINavComp->IsValid(bIgnoreDisabledUINavButton)) continue;
 
-		bValid = CurrentButton->IsValid();
+		bValid = CurrentButton->IsValid(bIgnoreDisabledUINavButton);
 	}
 }
 
@@ -580,6 +583,17 @@ void UUINavWidget::NativeTick(const FGeometry & MyGeometry, float DeltaTime)
 	}
 }
 
+void UUINavWidget::RemoveFromParent()
+{
+	if (!bReturningToParent && !IsPendingKill())
+	{
+		ReturnToParent();
+		return;
+	}
+
+	Super::RemoveFromParent();
+}
+
 FReply UUINavWidget::NativeOnKeyDown(const FGeometry & InGeometry, const FKeyEvent & InKeyEvent)
 {
 	if (UINavPC->GetInputMode() != EInputMode::UI)
@@ -706,7 +720,7 @@ void UUINavWidget::HandleSelectorMovement(float DeltaTime)
 	TheSelector->SetRenderTranslation(SelectorOrigin + Distance*MoveCurve->GetFloatValue(MovementCounter));
 }
 
-void UUINavWidget::AddUINavButton(UUINavButton * NewButton, int TargetGridIndex, int IndexInGrid)
+void UUINavWidget::AddUINavButton(UUINavButton * NewButton, int const TargetGridIndex, int IndexInGrid)
 {
 	if (NewButton == nullptr || !IsGridIndexValid(TargetGridIndex)) return;
 
@@ -740,7 +754,25 @@ void UUINavWidget::AddUINavButton(UUINavButton * NewButton, int TargetGridIndex,
 	}
 }
 
-void UUINavWidget::AddUINavComponent(UUINavComponent * NewComponent, int TargetGridIndex, int IndexInGrid)
+void UUINavWidget::AddUINavButtons(TArray<UUINavButton*> NewButtons, const int TargetGridIndex, int IndexInGrid)
+{
+	if (!IsGridIndexValid(TargetGridIndex)) return;
+	if (UINavAnimations.Num() > 0)
+	{
+		DISPLAYERROR("Runtime manipulation not supported with navigation using animations.");
+	}
+	
+	if (IndexInGrid >= NavigationGrids[TargetGridIndex].GetDimension()) IndexInGrid = -1;
+	const bool bIncrementIndexInGrid = IndexInGrid > -1;
+
+	for (UUINavButton* NewButton : NewButtons)
+	{
+		AddUINavButton(NewButton, TargetGridIndex, IndexInGrid);
+		if (bIncrementIndexInGrid) IndexInGrid++;
+	}
+}
+
+void UUINavWidget::AddUINavComponent(UUINavComponent * NewComponent, const int TargetGridIndex, int IndexInGrid)
 {
 	if (NewComponent == nullptr || !IsGridIndexValid(TargetGridIndex)) return;
 
@@ -779,6 +811,24 @@ void UUINavWidget::AddUINavComponent(UUINavComponent * NewComponent, int TargetG
 	UpdateDynamicEdgeNavigations(TargetGridIndex);
 }
 
+void UUINavWidget::AddUINavComponents(TArray<UUINavComponent*> NewComponents, const int TargetGridIndex, int IndexInGrid)
+{
+	if (!IsGridIndexValid(TargetGridIndex)) return;
+	if (UINavAnimations.Num() > 0)
+	{
+		DISPLAYERROR("Runtime manipulation not supported with navigation using animations.");
+	}
+	
+	if (IndexInGrid >= NavigationGrids[TargetGridIndex].GetDimension()) IndexInGrid = -1;
+	const bool bIncrementIndexInGrid = IndexInGrid > -1;
+
+	for (UUINavComponent* NewComponent : NewComponents)
+	{
+		AddUINavComponent(NewComponent, TargetGridIndex, IndexInGrid);
+		if (bIncrementIndexInGrid) IndexInGrid++;
+	}
+}
+
 void UUINavWidget::DeleteUINavElement(int Index, bool bAutoNavigate)
 {
 	if (!IsButtonIndexValid(Index)) return;
@@ -796,10 +846,11 @@ void UUINavWidget::DeleteUINavElement(int Index, bool bAutoNavigate)
 			Temp = UINavButtons[NewIndex];
 			if (NewIndex == FirstButtonIndex) break;
 
+			const bool bIgnoreDisabledUINavButton = GetDefault<UUINavSettings>()->bIgnoreDisabledUINavButton;
 			UUINavComponent* UINavComp = GetUINavComponentAtIndex(NewIndex);
-			if (UINavComp != nullptr && !UINavComp->IsValid()) continue;
+			if (UINavComp != nullptr && !UINavComp->IsValid(bIgnoreDisabledUINavButton)) continue;
 
-			bValid = Temp->IsValid();
+			bValid = Temp->IsValid(bIgnoreDisabledUINavButton);
 		}
 
 		if (!bValid)
@@ -1286,10 +1337,11 @@ void UUINavWidget::ClearGrid(int GridIndex, bool bAutoNavigate)
 
 			if (NewIndex >= FirstIndex && NewIndex <= ButtonIndex) continue;
 
+			const bool bIgnoreDisabledUINavButton = GetDefault<UUINavSettings>()->bIgnoreDisabledUINavButton;
 			UUINavComponent* UINavComp = GetUINavComponentAtIndex(NewIndex);
-			if (UINavComp != nullptr && !UINavComp->IsValid()) continue;
+			if (UINavComp != nullptr && !UINavComp->IsValid(bIgnoreDisabledUINavButton)) continue;
 
-			bValid = NextButton->IsValid();
+			bValid = NextButton->IsValid(bIgnoreDisabledUINavButton);
 		}
 
 		if (bValid)
@@ -2473,14 +2525,14 @@ void UUINavWidget::OnPreSelect(int Index, bool bMouseClick)
 
 		SwitchButtonStyle(UINavButtons[Index]->IsPressed() || SelectCount > 1 ? EButtonStyle::Pressed : (Index == ButtonIndex ? EButtonStyle::Hovered : EButtonStyle::Normal), ButtonIndex);
 
-		SelectCount--;
+		if (SelectCount > 0) SelectCount--;
 		if (SelectCount == 0) SelectedButtonIndex = -1;
 	}
 	else
 	{
 		SwitchButtonStyle(UINavButtons[Index]->IsPressed() || SelectCount > 1 ? EButtonStyle::Pressed : (Index == ButtonIndex ? EButtonStyle::Hovered : EButtonStyle::Normal), ButtonIndex);
 
-		SelectCount--;
+		if (SelectCount > 0) SelectCount--;
 		if (SelectCount == 0)
 		{
 			SelectedButtonIndex = -1;
@@ -2526,7 +2578,7 @@ void UUINavWidget::OnPreSelect(int Index, bool bMouseClick)
 
 void UUINavWidget::OnReturn_Implementation()
 {
-	ReturnToParent();
+	if(GetDefault<UUINavSettings>()->bRemoveWidgetOnReturn) ReturnToParent();
 }
 
 void UUINavWidget::OnNext_Implementation()
@@ -2612,19 +2664,28 @@ void UUINavWidget::ReturnToParent(bool bRemoveAllParents, int ZOrder)
 {
 	if (ParentWidget == nullptr)
 	{
-		if (bAllowRemoveIfRoot)
+		if (bAllowRemoveIfRoot && UINavPC != nullptr)
 		{
 			IUINavPCReceiver::Execute_OnRootWidgetRemoved(UINavPC->GetOwner());
 			UINavPC->SetActiveWidget(nullptr);
 
 			SelectCount = 0;
-			if (WidgetComp != nullptr) WidgetComp->SetWidget(nullptr);
-			else RemoveFromParent();
+			SelectedButtonIndex = -1;
+			if (WidgetComp != nullptr)
+			{
+				WidgetComp->SetWidget(nullptr);
+			}
+			else
+			{
+				bReturningToParent = true;
+				RemoveFromParent();
+			}
 		}
 		return;
 	}
 
 	SelectCount = 0;
+	SelectedButtonIndex = -1;
 	if (WidgetComp != nullptr)
 	{
 		if (bRemoveAllParents)
@@ -2653,6 +2714,7 @@ void UUINavWidget::ReturnToParent(bool bRemoveAllParents, int ZOrder)
 			IUINavPCReceiver::Execute_OnRootWidgetRemoved(UINavPC->GetOwner());
 			UINavPC->SetActiveWidget(nullptr);
 			ParentWidget->RemoveAllParents();
+			bReturningToParent = true;
 			RemoveFromParent();
 			Destruct();
 		}
@@ -2661,15 +2723,19 @@ void UUINavWidget::ReturnToParent(bool bRemoveAllParents, int ZOrder)
 			//If parent was removed, add it to viewport
 			if (bParentRemoved)
 			{
-				ParentWidget->ReturnedFromWidget = this;
-				if (!bUsingSplitScreen) ParentWidget->AddToViewport(ZOrder);
-				else ParentWidget->AddToPlayerScreen(ZOrder);
+				if (!ParentWidget->IsPendingKill())
+				{
+					ParentWidget->ReturnedFromWidget = this;
+					if (!bUsingSplitScreen) ParentWidget->AddToViewport(ZOrder);
+					else ParentWidget->AddToPlayerScreen(ZOrder);
+				}
 			}
 			else
 			{
 				UINavPC->SetActiveWidget(ParentWidget);
 				ParentWidget->ReconfigureSetup();
 			}
+			bReturningToParent = true;
 			RemoveFromParent();
 		}
 	}
@@ -2681,6 +2747,7 @@ void UUINavWidget::RemoveAllParents()
 	{
 		ParentWidget->RemoveAllParents();
 	}
+	bReturningToParent = true;
 	RemoveFromParent();
 	Destruct();
 }
@@ -2750,11 +2817,12 @@ UUINavButton* UUINavWidget::FindNextButton(UUINavButton* Button, ENavigationDire
 	if (NewButton == nullptr || NewButton == Button) return nullptr;
 
 	//Check if the button is visible, if not, skip to next button
-	bool bValid = NewButton->IsValid();
+	const bool bIgnoreDisabledUINavButton = GetDefault<UUINavSettings>()->bIgnoreDisabledUINavButton;
+	bool bValid = NewButton->IsValid(bIgnoreDisabledUINavButton);
 	if (bValid)
 	{
 		UUINavComponent* UINavComp = GetUINavComponentAtIndex(NewButton->ButtonIndex);
-		if (UINavComp != nullptr && !UINavComp->IsValid()) bValid = false;
+		if (UINavComp != nullptr && !UINavComp->IsValid(bIgnoreDisabledUINavButton)) bValid = false;
 	}
 	while (!bValid)
 	{
@@ -2762,10 +2830,10 @@ UUINavButton* UUINavWidget::FindNextButton(UUINavButton* Button, ENavigationDire
 		NewButton = FetchButtonByDirection(Direction, NewButton);
 		if (NewButton == nullptr) return nullptr;
 		UUINavComponent* UINavComp = GetUINavComponentAtIndex(NewButton->ButtonIndex);
-		if (UINavComp != nullptr && !UINavComp->IsValid()) continue;
+		if (UINavComp != nullptr && !UINavComp->IsValid(bIgnoreDisabledUINavButton)) continue;
 		if (NewButton == nullptr || NewButton == UINavButtons[ButtonIndex]) return nullptr;
 
-		bValid = NewButton->IsValid();
+		bValid = NewButton->IsValid(bIgnoreDisabledUINavButton);
 	}
 	return NewButton;
 }
@@ -3105,7 +3173,7 @@ void UUINavWidget::HoverEvent(int Index)
 		return;
 	}
 
-	if (UINavPC->GetCurrentInputType() != EInputType::Mouse || Index == ButtonIndex)
+	if (Index == ButtonIndex || (UINavPC->GetCurrentInputType() != EInputType::Mouse && (!bUseLeftThumbstickAsMouse || !UINavPC->IsMovingLeftStick())))
 	{
 		if (bUseButtonStates) RevertButtonStyle(Index);
 		return;
