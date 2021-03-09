@@ -59,14 +59,15 @@ protected:
 
 	TArray<bool> bAllowCustomInputs;
 
+	bool bUseLeftThumbstickAsMouse = false;
+
 	class APlayerController* PC;
 
 	TSharedPtr<class FUINavInputProcessor> SharedInputProcessor = nullptr;
 
 	ENavigationDirection Direction = ENavigationDirection::None;
 
-	float PreviousX = -1.f;
-	float PreviousY = -1.f;
+	FVector2D LeftStickDelta = FVector2D::ZeroVector;
 
 	ECountdownPhase CountdownPhase = ECountdownPhase::None;
 
@@ -127,7 +128,7 @@ public:
 
 	UUINavPCComponent();
 
-	UPROPERTY(BlueprintReadWrite, Category = UINavController)
+	UPROPERTY(BlueprintReadOnly, Category = UINavController)
 		EInputType CurrentInputType = EInputType::Keyboard;
 
 	/*
@@ -149,6 +150,12 @@ public:
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavController)
 		float NavigationChainFrequency = 0.2f;
+
+	/*
+	The sensitivity of the cursor when moved with the left stick
+	*/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavController)
+		float LeftStickCursorSensitivity = 10.0f;
 
 	/*
 	The required value for an axis to be considered for rebinding
@@ -274,14 +281,12 @@ public:
 	UFUNCTION(BlueprintCallable, Category = UINavController)
 		void SetAllowCustomInputByIndex(int InputIndex, bool bAllowInput);
 
-
 	void HandleKeyDownEvent(FSlateApplication& SlateApp, const FKeyEvent& InKeyEvent);
 	void HandleKeyUpEvent(FSlateApplication& SlateApp, const FKeyEvent& InKeyEvent);
 	void HandleAnalogInputEvent(FSlateApplication& SlateApp, const FAnalogInputEvent& InAnalogInputEvent);
 	void HandleMouseMoveEvent(FSlateApplication& SlateApp, const FPointerEvent& MouseEvent);
 	void HandleMouseButtonDownEvent(FSlateApplication& SlateApp, const FPointerEvent& MouseEvent);
 	void HandleMouseWheelOrGestureEvent(FSlateApplication& SlateApp, const FPointerEvent& InWheelEvent, const FPointerEvent* InGesture);
-
 
 	void BindMouseWorkaround();
 	void UnbindMouseWorkaround();
@@ -334,7 +339,7 @@ public:
 	*
 	*	@param PressedKey The given key
 	*/
-	FString FindActionByKey(FKey ActionKey);
+	TArray<FString> FindActionByKey(FKey ActionKey);
 
 	FReply OnKeyPressed(FKey PressedKey);
 	FReply OnActionPressed(FString ActionName, FKey Key);
@@ -420,5 +425,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = UINavController)
 		FORCEINLINE UUINavWidget* GetActiveWidget() const { return ActiveWidget; }
 
+	UFUNCTION(BlueprintCallable, Category = UINavController)
+        FORCEINLINE FVector2D GetLeftStickDelta() const { return LeftStickDelta; }
+
+	UFUNCTION(BlueprintCallable, Category = UINavController)
+        FORCEINLINE bool IsMovingLeftStick() const { return LeftStickDelta.X != 0.0f || LeftStickDelta.Y != 0.0f; }
 		
 };
