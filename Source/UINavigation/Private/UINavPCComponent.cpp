@@ -1,4 +1,4 @@
-﻿// Copyright (C) 2019 Gon�alo Marques - All Rights Reserved
+﻿// Copyright (C) 2019 Gonçalo Marques - All Rights Reserved
 
 #include "UINavPCComponent.h"
 #include "UINavWidget.h"
@@ -370,20 +370,14 @@ void UUINavPCComponent::HandleAnalogInputEvent(FSlateApplication& SlateApp, cons
 		{
 			const bool bIsHorizontal = Key == EKeys::Gamepad_LeftX;
 			const float Value = InAnalogInputEvent.GetAnalogValue() / 3.0f;
+			if (bIsHorizontal) LeftStickDelta.X = Value;
+			else LeftStickDelta.Y = Value;
 
 			if (Value == 0.0f) return;
 
-			const ULocalPlayer* const VictoryPlayer = Cast<ULocalPlayer>(PC->Player);
-			if (!VictoryPlayer) return;
-
-			const UGameViewportClient* const VictoryViewportClient = Cast <UGameViewportClient>(VictoryPlayer->ViewportClient);
-			if (!VictoryViewportClient) return;
-
-			FViewport* VictoryViewport = VictoryViewportClient->Viewport;
-			if (!VictoryViewport) return;
-
 			const FVector2D OldPosition = SlateApp.GetCursorPos();
-			const FVector2D NewPosition(OldPosition.X + (bIsHorizontal ? Value * 10.0f : 0.0f), OldPosition.Y + (!bIsHorizontal ? -Value * 10.0f : 0.0f));
+			const FVector2D NewPosition(OldPosition.X + (bIsHorizontal ? Value * LeftStickCursorSensitivity : 0.0f),
+										OldPosition.Y + (!bIsHorizontal ? -Value * LeftStickCursorSensitivity : 0.0f));
 			SlateApp.SetCursorPos(NewPosition);
 			// Since the cursor may have been locked and its location clamped, get the actual new position
 			if (const TSharedPtr<FSlateUser> SlateUser = SlateApp.GetUser(SlateApp.CursorUserIndex))
@@ -408,7 +402,7 @@ void UUINavPCComponent::HandleAnalogInputEvent(FSlateApplication& SlateApp, cons
 
 void UUINavPCComponent::HandleMouseMoveEvent(FSlateApplication& SlateApp, const FPointerEvent& MouseEvent)
 {
-	if (CurrentInputType != EInputType::Mouse && MouseEvent.GetCursorDelta().SizeSquared() > 0.0f)
+	if (CurrentInputType != EInputType::Mouse && MouseEvent.GetCursorDelta().SizeSquared() > 0.0f && (!bUseLeftThumbstickAsMouse || !IsMovingLeftStick()))
 	{
 		NotifyInputTypeChange(EInputType::Mouse);
 	}

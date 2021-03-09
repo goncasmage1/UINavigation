@@ -3148,7 +3148,7 @@ void UUINavWidget::HoverEvent(int Index)
 		return;
 	}
 
-	if (UINavPC->GetCurrentInputType() != EInputType::Mouse || Index == ButtonIndex)
+	if (Index == ButtonIndex || (UINavPC->GetCurrentInputType() != EInputType::Mouse && (!bUseLeftThumbstickAsMouse || !UINavPC->IsMovingLeftStick())))
 	{
 		if (bUseButtonStates) RevertButtonStyle(Index);
 		return;
