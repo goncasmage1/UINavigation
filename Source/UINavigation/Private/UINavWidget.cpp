@@ -590,6 +590,7 @@ void UUINavWidget::RemoveFromParent()
 		ReturnToParent();
 		return;
 	}
+	bReturningToParent = false;
 
 	Super::RemoveFromParent();
 }
