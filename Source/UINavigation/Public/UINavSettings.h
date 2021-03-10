@@ -23,10 +23,10 @@ class UINAVIGATION_API UUINavSettings : public UObject
 	
 public:
 
-	UPROPERTY(config, EditAnywhere)
+	UPROPERTY(config, EditAnywhere, Category = "UINavSettings")
 		bool bIgnoreDisabledUINavButton;
 	
-	UPROPERTY(config, EditAnywhere)
+	UPROPERTY(config, EditAnywhere, Category = "UINavSettings")
 		bool bRemoveWidgetOnReturn;
 
 	UPROPERTY(config, EditAnywhere, Category = "Bindings")
