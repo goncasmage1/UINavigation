@@ -771,7 +771,7 @@ void UUINavPCComponent::ExecuteActionByKey(FKey PressedKey, bool bPressed)
 	TArray<FString> ActionNames = FindActionByKey(PressedKey);
 	if (ActionNames.Num() == 0) return;
 
-	for (const FString ActionName : ActionNames)
+	for (const FString& ActionName : ActionNames)
 	{
 		ExecuteActionByName(ActionName, bPressed);
 	}
@@ -801,7 +801,7 @@ FReply UUINavPCComponent::OnKeyPressed(FKey PressedKey)
 	if (ActionNames.Num() == 0) return FReply::Unhandled();
 
 	FReply Reply = FReply::Unhandled();
-	for (const FString ActionName : ActionNames)
+	for (const FString& ActionName : ActionNames)
 	{
 		if (OnActionPressed(ActionName, PressedKey).IsEventHandled())
 		{
@@ -818,7 +818,7 @@ FReply UUINavPCComponent::OnKeyReleased(FKey PressedKey)
 	if (ActionNames.Num() == 0) return FReply::Unhandled();
 
 	FReply Reply = FReply::Unhandled();
-	for (const FString ActionName : ActionNames)
+	for (const FString& ActionName : ActionNames)
 	{
 		if (OnActionReleased(ActionName, PressedKey).IsEventHandled())
 		{
