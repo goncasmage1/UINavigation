@@ -96,7 +96,7 @@ bool UUINavBlueprintFunctionLibrary::RespectsRestriction(FKey Key, EInputRestric
 			return !Key.IsGamepadKey();
 			break;
 		case EInputRestriction::Gamepad:
-			return Key.IsGamepadKey();
+			return (Key.IsGamepadKey() && Key.GetMenuCategory() == "Gamepad");
 			break;
 	}
 
