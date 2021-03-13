@@ -1,4 +1,4 @@
-// Copyright (C) 2019 Gonçalo Marques - All Rights Reserved
+// Copyright (C) 2019 Gonï¿½alo Marques - All Rights Reserved
 
 #pragma once
 #include "InputRestriction.generated.h"
@@ -11,4 +11,5 @@ enum class EInputRestriction : uint8
 	Mouse UMETA(DisplayName = "Mouse"),
 	Keyboard_Mouse UMETA(DisplayName = "Keyboard and Mouse"),
 	Gamepad UMETA(DisplayName = "Gamepad"),
+	VR UMETA(DisplayName = "VR")
 };
