@@ -95,11 +95,11 @@ bool UUINavBlueprintFunctionLibrary::RespectsRestriction(FKey Key, EInputRestric
 		case EInputRestriction::Keyboard_Mouse:
 			return !Key.IsGamepadKey();
 			break;
-		case EInputRestriction::Gamepad:
-			return (Key.IsGamepadKey() && !IsVRKey(Key));
-			break;
 		case EInputRestriction::VR:
 			return IsVRKey(Key);
+			break;
+		case EInputRestriction::Gamepad:
+			return (Key.IsGamepadKey() && !IsVRKey(Key));
 			break;
 	}
 
