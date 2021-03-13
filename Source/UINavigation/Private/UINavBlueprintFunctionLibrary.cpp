@@ -96,7 +96,7 @@ bool UUINavBlueprintFunctionLibrary::RespectsRestriction(FKey Key, EInputRestric
 			return !Key.IsGamepadKey();
 			break;
 		case EInputRestriction::Gamepad:
-			return (Key.IsGamepadKey() && Key.GetMenuCategory() == "Gamepad");
+			return (Key.IsGamepadKey() && !IsVRKey(Key));
 			break;
 	}
 
@@ -149,4 +149,10 @@ UUINavButton* UUINavBlueprintFunctionLibrary::Conv_UINavComponentToUINavButton(U
 int UUINavBlueprintFunctionLibrary::Conv_GridToInt(FGrid Grid)
 {
 	return Grid.GridIndex;
+}
+
+bool UUINavBlueprintFunctionLibrary::IsVRKey(FKey Key)
+{
+	return Key.ToString().Contains("Oculus") || Key.ToString().Contains("Vive") ||
+		Key.ToString().Contains("MixedReality") || Key.ToString().Contains("Valve");
 }
