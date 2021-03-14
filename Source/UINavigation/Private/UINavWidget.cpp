@@ -585,7 +585,7 @@ void UUINavWidget::NativeTick(const FGeometry & MyGeometry, float DeltaTime)
 
 void UUINavWidget::RemoveFromParent()
 {
-	if (!bReturningToParent && !IsPendingKill() &&
+	if (!bReturningToParent && !bDestroying && !IsPendingKill() &&
 	    (ParentWidget != nullptr || (bAllowRemoveIfRoot && UINavPC != nullptr)))
 	{
 		ReturnToParent();
@@ -594,6 +594,12 @@ void UUINavWidget::RemoveFromParent()
 	bReturningToParent = false;
 
 	Super::RemoveFromParent();
+}
+
+void UUINavWidget::OnLevelRemovedFromWorld(ULevel* InLevel, UWorld* InWorld)
+{
+	bDestroying = true;
+	Super::OnLevelRemovedFromWorld(InLevel, InWorld);
 }
 
 FReply UUINavWidget::NativeOnKeyDown(const FGeometry & InGeometry, const FKeyEvent & InKeyEvent)
