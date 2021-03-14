@@ -6,6 +6,8 @@
 #include "GameFramework/InputSettings.h"
 #include "UINavSettings.h"
 #include "UINavComponent.h"
+#include "Kismet/GameplayStatics.h"
+#include "IXRTrackingSystem.h"
 
 void UUINavBlueprintFunctionLibrary::SetSoundClassVolume(USoundClass * TargetClass, float NewVolume)
 {
@@ -81,6 +83,8 @@ void UUINavBlueprintFunctionLibrary::ResetInputSettings()
 
 bool UUINavBlueprintFunctionLibrary::RespectsRestriction(FKey Key, EInputRestriction Restriction)
 {
+	FString HMD = GEngine->XRSystem->GetSystemName().ToString();
+
 	switch (Restriction)
 	{
 		case EInputRestriction::None:
@@ -96,10 +100,21 @@ bool UUINavBlueprintFunctionLibrary::RespectsRestriction(FKey Key, EInputRestric
 			return !Key.IsGamepadKey();
 			break;
 		case EInputRestriction::VR:
-			return IsVRKey(Key);
+			if (HMD == "OculusHMD") {
+				return IsKeyInCategory(Key, "Oculus");
+			}
+			else if (HMD == "PSVR") {
+				return IsKeyInCategory(Key, "PSMove");
+			}
 			break;
 		case EInputRestriction::Gamepad:
-			return (Key.IsGamepadKey() && !IsVRKey(Key));
+			FString Platform = UGameplayStatics::GetPlatformName();
+			if (Platform == "Windows") {
+				return (Key.IsGamepadKey() && !IsVRKey(Key));
+			}
+			else {
+				return ((Key.IsGamepadKey() || Key.GetMenuCategory().ToString() == Platform) && !IsVRKey(Key));
+			}
 			break;
 	}
 
@@ -156,6 +171,11 @@ int UUINavBlueprintFunctionLibrary::Conv_GridToInt(FGrid Grid)
 
 bool UUINavBlueprintFunctionLibrary::IsVRKey(FKey Key)
 {
-	return Key.ToString().Contains("Oculus") || Key.ToString().Contains("Vive") ||
-		Key.ToString().Contains("MixedReality") || Key.ToString().Contains("Valve");
+	return IsKeyInCategory(Key, "Oculus") || IsKeyInCategory(Key, "Vive") ||
+		IsKeyInCategory(Key, "MixedReality") || IsKeyInCategory(Key, "Valve") || IsKeyInCategory(Key, "PSMove");
+}
+
+bool UUINavBlueprintFunctionLibrary::IsKeyInCategory(FKey Key, FString Category)
+{
+	return Key.ToString().Contains(Category);
 }

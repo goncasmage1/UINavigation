@@ -61,5 +61,8 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = UINavigationLibrary)
 		static bool IsVRKey(FKey Key);
+
+	UFUNCTION(BlueprintPure, Category = UINavigationLibrary)
+		static bool IsKeyInCategory(FKey Key, FString Category);
 	
 };
