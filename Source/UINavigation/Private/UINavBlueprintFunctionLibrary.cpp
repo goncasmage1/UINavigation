@@ -9,6 +9,9 @@
 #include "Kismet/GameplayStatics.h"
 #include "IXRTrackingSystem.h"
 
+FString Platform = UGameplayStatics::GetPlatformName();
+FString HMD = GEngine->XRSystem->GetSystemName().ToString();
+
 void UUINavBlueprintFunctionLibrary::SetSoundClassVolume(USoundClass * TargetClass, float NewVolume)
 {
 	if (TargetClass == nullptr) return;
@@ -83,8 +86,6 @@ void UUINavBlueprintFunctionLibrary::ResetInputSettings()
 
 bool UUINavBlueprintFunctionLibrary::RespectsRestriction(FKey Key, EInputRestriction Restriction)
 {
-	FString HMD = GEngine->XRSystem->GetSystemName().ToString();
-
 	switch (Restriction)
 	{
 		case EInputRestriction::None:
@@ -103,12 +104,11 @@ bool UUINavBlueprintFunctionLibrary::RespectsRestriction(FKey Key, EInputRestric
 			if (HMD == "OculusHMD") {
 				return IsKeyInCategory(Key, "Oculus");
 			}
-			else if (HMD == "PSVR") {
+			else if (HMD == "Morpheus") {
 				return IsKeyInCategory(Key, "PSMove");
 			}
 			break;
 		case EInputRestriction::Gamepad:
-			FString Platform = UGameplayStatics::GetPlatformName();
 			if (Platform == "Windows") {
 				return (Key.IsGamepadKey() && !IsVRKey(Key));
 			}
