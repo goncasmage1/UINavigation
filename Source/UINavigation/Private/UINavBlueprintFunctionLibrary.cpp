@@ -6,6 +6,8 @@
 #include "GameFramework/InputSettings.h"
 #include "UINavSettings.h"
 #include "UINavComponent.h"
+#include "Kismet/GameplayStatics.h"
+#include "IXRTrackingSystem.h"
 
 void UUINavBlueprintFunctionLibrary::SetSoundClassVolume(USoundClass * TargetClass, float NewVolume)
 {
@@ -81,23 +83,32 @@ void UUINavBlueprintFunctionLibrary::ResetInputSettings()
 
 bool UUINavBlueprintFunctionLibrary::RespectsRestriction(FKey Key, EInputRestriction Restriction)
 {
+	FString HMD = GEngine->XRSystem->GetSystemName().ToString();
 	switch (Restriction)
 	{
-		case EInputRestriction::None:
-			return true;
-			break;
-		case EInputRestriction::Keyboard:
-			return (!Key.IsMouseButton() && !Key.IsGamepadKey());
-			break;
-		case EInputRestriction::Mouse:
-			return Key.IsMouseButton();
-			break;
-		case EInputRestriction::Keyboard_Mouse:
-			return !Key.IsGamepadKey();
-			break;
-		case EInputRestriction::Gamepad:
-			return Key.IsGamepadKey();
-			break;
+	case EInputRestriction::None:
+		return true;
+		break;
+	case EInputRestriction::Keyboard:
+		return (!Key.IsMouseButton() && !Key.IsGamepadKey());
+		break;
+	case EInputRestriction::Mouse:
+		return Key.IsMouseButton();
+		break;
+	case EInputRestriction::Keyboard_Mouse:
+		return !Key.IsGamepadKey();
+		break;
+	case EInputRestriction::VR:
+		if (HMD == "OculusHMD") {
+			return IsKeyInCategory(Key, "Oculus");
+		}
+		else if (HMD == "Morpheus") {
+			return IsKeyInCategory(Key, "PSMove");
+		}
+		break;
+	case EInputRestriction::Gamepad:
+		return (Key.IsGamepadKey() && !IsVRKey(Key));
+		break;
 	}
 
 	return false;
@@ -149,4 +160,15 @@ UUINavButton* UUINavBlueprintFunctionLibrary::Conv_UINavComponentToUINavButton(U
 int UUINavBlueprintFunctionLibrary::Conv_GridToInt(FGrid Grid)
 {
 	return Grid.GridIndex;
+}
+
+bool UUINavBlueprintFunctionLibrary::IsVRKey(FKey Key)
+{
+	return IsKeyInCategory(Key, "Oculus") || IsKeyInCategory(Key, "Vive") ||
+		IsKeyInCategory(Key, "MixedReality") || IsKeyInCategory(Key, "Valve") || IsKeyInCategory(Key, "PSMove");
+}
+
+bool UUINavBlueprintFunctionLibrary::IsKeyInCategory(FKey Key, FString Category)
+{
+	return Key.ToString().Contains(Category);
 }

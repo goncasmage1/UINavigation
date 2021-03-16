@@ -38,6 +38,8 @@ protected:
 	bool bReturning = false;
 	bool bReturningToParent = false;
 
+	bool bDestroying = false;
+
 	//Used to track when the selector's position should be updated
 	int WaitForTick;
 
@@ -253,6 +255,7 @@ public:
 	virtual void NativeTick(const FGeometry & MyGeometry, float DeltaTime) override;
 
 	virtual void RemoveFromParent() override;
+	virtual void OnLevelRemovedFromWorld(ULevel* InLevel, UWorld* InWorld) override;
 
 	/**
 	*	Traverses this widget's hierarchy to setup all the UIUINavButtons

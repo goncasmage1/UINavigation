@@ -58,5 +58,11 @@ public:
 
 	UFUNCTION(BlueprintPure, meta = (DisplayName = "Grid To Index", CompactNodeTitle = "->", BlueprintAutocast), Category = "Navigation Grid")
 		static int Conv_GridToInt(FGrid Grid);
+
+	UFUNCTION(BlueprintPure, Category = UINavigationLibrary)
+		static bool IsVRKey(FKey Key);
+
+	UFUNCTION(BlueprintPure, Category = UINavigationLibrary)
+		static bool IsKeyInCategory(FKey Key, FString Category);
 	
 };
