@@ -585,7 +585,7 @@ void UUINavWidget::NativeTick(const FGeometry & MyGeometry, float DeltaTime)
 
 void UUINavWidget::RemoveFromParent()
 {
-	if (!bReturningToParent && !bDestroying && !IsPendingKill() &&
+	if (!bReturningToParent && !bDestroying && !GetFName().IsNone() && !IsPendingKill() &&
 	    (ParentWidget != nullptr || (bAllowRemoveIfRoot && UINavPC != nullptr)))
 	{
 		ReturnToParent();
