@@ -62,7 +62,7 @@ bool UUINavInputContainer::RequestKeySwap(FInputCollisionData InputCollisionData
 		SwapKeysWidget->CollidingInputBox = ParentWidget->UINavInputBoxes[CollidingInputIndex];
 		SwapKeysWidget->CurrentInputBox = ParentWidget->UINavInputBoxes[CurrentInputIndex];
 		SwapKeysWidget->InputCollisionData = InputCollisionData;
-		ParentWidget->GoToBuiltWidget(SwapKeysWidget, false, false);
+		ParentWidget->GoToBuiltWidget(SwapKeysWidget, false, false, SpawKeysWidgetZOrder);
 		return true;
 	}
 	return false;
