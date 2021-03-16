@@ -9,9 +9,6 @@
 #include "Kismet/GameplayStatics.h"
 #include "IXRTrackingSystem.h"
 
-FString Platform = UGameplayStatics::GetPlatformName();
-FString HMD = GEngine->XRSystem->GetSystemName().ToString();
-
 void UUINavBlueprintFunctionLibrary::SetSoundClassVolume(USoundClass * TargetClass, float NewVolume)
 {
 	if (TargetClass == nullptr) return;
@@ -86,36 +83,32 @@ void UUINavBlueprintFunctionLibrary::ResetInputSettings()
 
 bool UUINavBlueprintFunctionLibrary::RespectsRestriction(FKey Key, EInputRestriction Restriction)
 {
+	FString HMD = GEngine->XRSystem->GetSystemName().ToString();
 	switch (Restriction)
 	{
-		case EInputRestriction::None:
-			return true;
-			break;
-		case EInputRestriction::Keyboard:
-			return (!Key.IsMouseButton() && !Key.IsGamepadKey());
-			break;
-		case EInputRestriction::Mouse:
-			return Key.IsMouseButton();
-			break;
-		case EInputRestriction::Keyboard_Mouse:
-			return !Key.IsGamepadKey();
-			break;
-		case EInputRestriction::VR:
-			if (HMD == "OculusHMD") {
-				return IsKeyInCategory(Key, "Oculus");
-			}
-			else if (HMD == "Morpheus") {
-				return IsKeyInCategory(Key, "PSMove");
-			}
-			break;
-		case EInputRestriction::Gamepad:
-			if (Platform == "Windows") {
-				return (Key.IsGamepadKey() && !IsVRKey(Key));
-			}
-			else {
-				return ((Key.IsGamepadKey() || Key.GetMenuCategory().ToString() == Platform) && !IsVRKey(Key));
-			}
-			break;
+	case EInputRestriction::None:
+		return true;
+		break;
+	case EInputRestriction::Keyboard:
+		return (!Key.IsMouseButton() && !Key.IsGamepadKey());
+		break;
+	case EInputRestriction::Mouse:
+		return Key.IsMouseButton();
+		break;
+	case EInputRestriction::Keyboard_Mouse:
+		return !Key.IsGamepadKey();
+		break;
+	case EInputRestriction::VR:
+		if (HMD == "OculusHMD") {
+			return IsKeyInCategory(Key, "Oculus");
+		}
+		else if (HMD == "Morpheus") {
+			return IsKeyInCategory(Key, "PSMove");
+		}
+		break;
+	case EInputRestriction::Gamepad:
+		return (Key.IsGamepadKey() && !IsVRKey(Key));
+		break;
 	}
 
 	return false;
