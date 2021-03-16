@@ -1,4 +1,4 @@
-// Copyright (C) 2019 Gonçalo Marques - All Rights Reserved
+// Copyright (C) 2019 Gonï¿½alo Marques - All Rights Reserved
 
 using UnrealBuildTool;
 using System.IO;
@@ -28,7 +28,8 @@ public class UINavigation : ModuleRules
                 "Slate",
                 "SlateCore",
                 "InputCore",
-                "RHI"
+                "RHI",
+                "HeadMountedDisplay"
 			}
 			);
 		
