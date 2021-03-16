@@ -181,6 +181,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Input")
 		TSubclassOf<class USwapKeysWidget> SwapKeysWidgetClass;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Input")
+		int SpawKeysWidgetZOrder = 0;
+	
 	/*
 	Indicates whether unused input boxes will hidden or collapsed
 	*/
