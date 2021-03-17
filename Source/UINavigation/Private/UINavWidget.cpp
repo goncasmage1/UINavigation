@@ -234,6 +234,7 @@ void UUINavWidget::TraverseHierarquy(UUINavWidget* UINavWidget, UUserWidget* Wid
 	//Find UINavButtons in the widget hierarchy
 	TArray<UWidget*> Widgets;
 	WidgetToTraverse->WidgetTree->GetAllWidgets(Widgets);
+	UUINavCollection* TraversingCollection = Cast<UUINavCollection>(WidgetToTraverse);
 	int GridDepth = -1;
 	for (UWidget* Widget : Widgets)
 	{
@@ -258,16 +259,31 @@ void UUINavWidget::TraverseHierarquy(UUINavWidget* UINavWidget, UUserWidget* Wid
 			if (UINavWidget->GetWidgetHierarchyDepth(Widget) <= GridDepth) GridDepth = -1;
 		}
 
-		UScrollBox* Scroll = Cast<UScrollBox>(Widget);
-		if (Scroll != nullptr)
-		{
-			UINavWidget->ScrollBoxes.Add(Scroll);
-			continue;
-		}
-
 		UPanelWidget* Panel = Cast<UPanelWidget>(Widget);
 		if (Panel != nullptr)
 		{
+			UScrollBox* ScrollBox = Cast<UScrollBox>(Widget);
+			if (ScrollBox != nullptr)
+			{
+				UINavWidget->ScrollBoxes.Add(ScrollBox);
+				if (ScrollBox->GetFName().ToString().Left(4).Equals(TEXT("UIN_")))
+				{
+					const bool bIsHorizontal = ScrollBox->Orientation == EOrientation::Orient_Horizontal;
+					UINavWidget->GridIndexMap.Add(ScrollBox, UINavWidget->NavigationGrids.Num());
+					GridDepth = UINavWidget->GetWidgetHierarchyDepth(ScrollBox);
+					UINavWidget->Add1DGrid(bIsHorizontal ? EGridType::Horizontal : EGridType::Vertical, nullptr, UINavWidget->NavigationGrids.Num(), 0, FButtonNavigation(), true);
+					if (TraversingCollection != nullptr)
+					{
+						TraversingCollection->FirstGridIndex = UINavWidget->NavigationGrids.Num() - 1;
+						TraversingCollection->GridCount++;
+					}
+				}
+				else
+				{
+					continue;
+				}
+			}
+			
 			UHorizontalBox * HorizontalBox = Cast<UHorizontalBox>(Panel);
 			if (HorizontalBox != nullptr)
 			{
@@ -276,6 +292,11 @@ void UUINavWidget::TraverseHierarquy(UUINavWidget* UINavWidget, UUserWidget* Wid
 					UINavWidget->GridIndexMap.Add(HorizontalBox, UINavWidget->NavigationGrids.Num());
 					GridDepth = UINavWidget->GetWidgetHierarchyDepth(HorizontalBox);
 					UINavWidget->Add1DGrid(EGridType::Horizontal, nullptr, UINavWidget->NavigationGrids.Num(), 0, FButtonNavigation(), true);
+					if (TraversingCollection != nullptr)
+					{
+						TraversingCollection->FirstGridIndex = UINavWidget->NavigationGrids.Num() - 1;
+						TraversingCollection->GridCount++;
+					}
 				}
 			}
 			else
@@ -288,6 +309,11 @@ void UUINavWidget::TraverseHierarquy(UUINavWidget* UINavWidget, UUserWidget* Wid
 						UINavWidget->GridIndexMap.Add(VerticalBox, UINavWidget->NavigationGrids.Num());
 						GridDepth = UINavWidget->GetWidgetHierarchyDepth(VerticalBox);
 						UINavWidget->Add1DGrid(EGridType::Vertical, nullptr, UINavWidget->NavigationGrids.Num(), 0, FButtonNavigation(), true);
+						if (TraversingCollection != nullptr)
+						{
+							TraversingCollection->FirstGridIndex = UINavWidget->NavigationGrids.Num() - 1;
+							TraversingCollection->GridCount++;
+						}
 					}
 				}
 				else
@@ -307,19 +333,10 @@ void UUINavWidget::TraverseHierarquy(UUINavWidget* UINavWidget, UUserWidget* Wid
 														FButtonNavigation(),
 														true,
 														0));
-						}
-					}
-					else
-					{
-						UScrollBox* ScrollBox = Cast<UScrollBox>(Panel);
-						if (ScrollBox != nullptr)
-						{
-							if (ScrollBox->GetFName().ToString().Left(4).Equals(TEXT("UIN_")))
+							if (TraversingCollection != nullptr)
 							{
-								const bool bIsHorizontal = ScrollBox->Orientation == EOrientation::Orient_Horizontal;
-								UINavWidget->GridIndexMap.Add(ScrollBox, UINavWidget->NavigationGrids.Num());
-								GridDepth = UINavWidget->GetWidgetHierarchyDepth(ScrollBox);
-								UINavWidget->Add1DGrid(bIsHorizontal ? EGridType::Horizontal : EGridType::Vertical, nullptr, UINavWidget->NavigationGrids.Num(), 0, FButtonNavigation(), true);
+								TraversingCollection->FirstGridIndex = UINavWidget->NavigationGrids.Num() - 1;
+								TraversingCollection->GridCount++;
 							}
 						}
 					}

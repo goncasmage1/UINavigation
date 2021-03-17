@@ -83,32 +83,27 @@ void UUINavBlueprintFunctionLibrary::ResetInputSettings()
 
 bool UUINavBlueprintFunctionLibrary::RespectsRestriction(FKey Key, EInputRestriction Restriction)
 {
-	FString HMD = GEngine->XRSystem->GetSystemName().ToString();
+	FString HMD = GEngine->XRSystem != nullptr ? GEngine->XRSystem->GetSystemName().ToString() : TEXT("");
 	switch (Restriction)
 	{
 	case EInputRestriction::None:
 		return true;
-		break;
 	case EInputRestriction::Keyboard:
 		return (!Key.IsMouseButton() && !Key.IsGamepadKey());
-		break;
 	case EInputRestriction::Mouse:
 		return Key.IsMouseButton();
-		break;
 	case EInputRestriction::Keyboard_Mouse:
 		return !Key.IsGamepadKey();
-		break;
 	case EInputRestriction::VR:
 		if (HMD == "OculusHMD") {
 			return IsKeyInCategory(Key, "Oculus");
 		}
-		else if (HMD == "Morpheus") {
+		if (HMD == "Morpheus") {
 			return IsKeyInCategory(Key, "PSMove");
 		}
-		break;
+		return false;
 	case EInputRestriction::Gamepad:
 		return (Key.IsGamepadKey() && !IsVRKey(Key));
-		break;
 	}
 
 	return false;
