@@ -38,6 +38,7 @@ protected:
 	bool bReturning = false;
 	bool bReturningToParent = false;
 
+	bool bAutoAppended = false;
 	bool bDestroying = false;
 
 	//Used to track when the selector's position should be updated
