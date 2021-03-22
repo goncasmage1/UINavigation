@@ -240,10 +240,10 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "UINavigation Selector")
 		FVector2D SelectorOffset;
 
-	UPROPERTY(EditDefaultsOnly, Category = "UINavigation Text", meta = (EditCondition = "bUseTextColor"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UINavigation Text", meta = (EditCondition = "bUseTextColor"))
 		FLinearColor TextDefaultColor = FColor::Blue;
 
-	UPROPERTY(EditDefaultsOnly, Category = "UINavigation Text", meta = (EditCondition = "bUseTextColor"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UINavigation Text", meta = (EditCondition = "bUseTextColor"))
 		FLinearColor TextNavigatedColor = FColor::Green;
 
 
