@@ -539,6 +539,8 @@ public:
 		void OnReturn();
 	virtual void OnReturn_Implementation();
 
+	void CollectionOnReturn();
+
 	/**
 	*	Called when player navigates to the next section
 	*/

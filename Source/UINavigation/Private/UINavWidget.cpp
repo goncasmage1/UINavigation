@@ -235,6 +235,10 @@ void UUINavWidget::TraverseHierarquy(UUINavWidget* UINavWidget, UUserWidget* Wid
 	TArray<UWidget*> Widgets;
 	WidgetToTraverse->WidgetTree->GetAllWidgets(Widgets);
 	UUINavCollection* TraversingCollection = Cast<UUINavCollection>(WidgetToTraverse);
+	if (TraversingCollection != nullptr)
+	{
+		TraversingCollection->FirstGridIndex = UINavWidget->NavigationGrids.Num();
+	}
 	int GridDepth = -1;
 	for (UWidget* Widget : Widgets)
 	{
@@ -274,8 +278,7 @@ void UUINavWidget::TraverseHierarquy(UUINavWidget* UINavWidget, UUserWidget* Wid
 					UINavWidget->Add1DGrid(bIsHorizontal ? EGridType::Horizontal : EGridType::Vertical, nullptr, UINavWidget->NavigationGrids.Num(), 0, FButtonNavigation(), true);
 					if (TraversingCollection != nullptr)
 					{
-						TraversingCollection->FirstGridIndex = UINavWidget->NavigationGrids.Num() - 1;
-						TraversingCollection->GridCount++;
+						TraversingCollection->IncrementGridCount();
 					}
 				}
 				else
@@ -294,8 +297,7 @@ void UUINavWidget::TraverseHierarquy(UUINavWidget* UINavWidget, UUserWidget* Wid
 					UINavWidget->Add1DGrid(EGridType::Horizontal, nullptr, UINavWidget->NavigationGrids.Num(), 0, FButtonNavigation(), true);
 					if (TraversingCollection != nullptr)
 					{
-						TraversingCollection->FirstGridIndex = UINavWidget->NavigationGrids.Num() - 1;
-						TraversingCollection->GridCount++;
+						TraversingCollection->IncrementGridCount();
 					}
 				}
 			}
@@ -311,8 +313,7 @@ void UUINavWidget::TraverseHierarquy(UUINavWidget* UINavWidget, UUserWidget* Wid
 						UINavWidget->Add1DGrid(EGridType::Vertical, nullptr, UINavWidget->NavigationGrids.Num(), 0, FButtonNavigation(), true);
 						if (TraversingCollection != nullptr)
 						{
-							TraversingCollection->FirstGridIndex = UINavWidget->NavigationGrids.Num() - 1;
-							TraversingCollection->GridCount++;
+							TraversingCollection->IncrementGridCount();
 						}
 					}
 				}
@@ -335,8 +336,7 @@ void UUINavWidget::TraverseHierarquy(UUINavWidget* UINavWidget, UUserWidget* Wid
 														0));
 							if (TraversingCollection != nullptr)
 							{
-								TraversingCollection->FirstGridIndex = UINavWidget->NavigationGrids.Num() - 1;
-								TraversingCollection->GridCount++;
+								TraversingCollection->IncrementGridCount();
 							}
 						}
 					}
@@ -434,6 +434,12 @@ void UUINavWidget::TraverseHierarquy(UUINavWidget* UINavWidget, UUserWidget* Wid
 		UINavWidget->UINavButtons.Add(NewNavButton);
 		UINavWidget->RevertButtonStyle(UINavWidget->UINavButtons.Num() - 1);
 
+		if (TraversingCollection != nullptr)
+		{
+			if (TraversingCollection->FirstButtonIndex == -1) TraversingCollection->FirstButtonIndex = NewNavButton->ButtonIndex;
+			TraversingCollection->SetLastButtonIndex(NewNavButton->ButtonIndex);
+		}
+
 		if (GridDepth != -1)
 		{
 			FGrid& LastGrid = UINavWidget->NavigationGrids.Last();
@@ -462,6 +468,12 @@ void UUINavWidget::TraverseHierarquy(UUINavWidget* UINavWidget, UUserWidget* Wid
 			{
 				return Wid1.ButtonIndex < Wid2.ButtonIndex;
 			});
+	}
+
+	if (TraversingCollection != nullptr)
+	{
+		const TArray<FButtonNavigation> EdgeNavigations;
+		TraversingCollection->SetupNavigation(EdgeNavigations);
 	}
 }
 
@@ -734,7 +746,11 @@ void UUINavWidget::HandleSelectorMovement(float DeltaTime)
 		if (HaltedIndex != -1)
 		{
 			if (HaltedIndex == SELECT_INDEX) OnPreSelect(ButtonIndex);
-			else if (HaltedIndex == RETURN_INDEX) OnReturn();
+			else if (HaltedIndex == RETURN_INDEX)
+			{
+				CollectionOnReturn();
+				OnReturn();
+			}
 			else NavigateTo(HaltedIndex);
 
 			HaltedIndex = -1;
@@ -2221,10 +2237,8 @@ void UUINavWidget::CollectionNavigateTo(int Index)
 			if (!bFoundFrom) bFoundFrom = bValidFrom;
 			if (!bFoundTo) bFoundTo = bValidTo;
 
-			Collection->NotifyOnNavigate(Index != ButtonIndex ? ButtonIndex : -1, Index, CollectionFromIndex, CollectionToIndex);
+			Collection->OnNavigate(Index != ButtonIndex ? ButtonIndex : -1, Index, CollectionFromIndex, CollectionToIndex);
 		}
-
-		if (bFoundFrom && bFoundTo) break;
 	}
 }
 
@@ -2499,7 +2513,7 @@ void UUINavWidget::CollectionOnSelect(int Index)
 		int CollectionButtonIndex = GetCollectionFirstButtonIndex(Collection, Index);
 		if (CollectionButtonIndex != -1)
 		{
-			Collection->NotifyOnSelect(Index, CollectionButtonIndex);
+			Collection->OnSelect(Index, CollectionButtonIndex);
 			break;
 		}
 	}
@@ -2512,7 +2526,7 @@ void UUINavWidget::CollectionOnStartSelect(int Index)
 		int CollectionButtonIndex = GetCollectionFirstButtonIndex(Collection, Index);
 		if (CollectionButtonIndex != -1)
 		{
-			Collection->NotifyOnStartSelect(Index, CollectionButtonIndex);
+			Collection->OnStartSelect(Index, CollectionButtonIndex);
 			break;
 		}
 	}
@@ -2525,7 +2539,7 @@ void UUINavWidget::CollectionOnStopSelect(int Index)
 		int CollectionButtonIndex = GetCollectionFirstButtonIndex(Collection, Index);
 		if (CollectionButtonIndex != -1)
 		{
-			Collection->NotifyOnStopSelect(Index, CollectionButtonIndex);
+			Collection->OnStopSelect(Index, CollectionButtonIndex);
 			break;
 		}
 	}
@@ -2604,6 +2618,14 @@ void UUINavWidget::OnPreSelect(int Index, bool bMouseClick)
 void UUINavWidget::OnReturn_Implementation()
 {
 	if(GetDefault<UUINavSettings>()->bRemoveWidgetOnReturn) ReturnToParent();
+}
+
+void UUINavWidget::CollectionOnReturn()
+{
+	for (UUINavCollection* Collection : UINavCollections)
+	{
+		Collection->NotifyOnReturn();
+	}
 }
 
 void UUINavWidget::OnNext_Implementation()
@@ -3156,7 +3178,7 @@ int UUINavWidget::GetCollectionFirstButtonIndex(UUINavCollection * Collection, i
 
 	if (Collection->FirstButtonIndex <= Index &&
 		Collection->LastButtonIndex >= Index &&
-		Collection->FirstButtonIndex < Collection->LastButtonIndex)
+		Collection->FirstButtonIndex <= Collection->LastButtonIndex)
 	{
 		return Index - Collection->FirstButtonIndex;
 	}
@@ -3453,5 +3475,7 @@ void UUINavWidget::MenuReturnRelease()
 	}
 
 	bReturning = false;
+
+	CollectionOnReturn();
 	OnReturn();
 }
