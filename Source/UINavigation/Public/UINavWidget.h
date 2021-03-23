@@ -470,7 +470,7 @@ public:
 
 	void RevertButtonStyle(int Index);
 
-	void SwapStyle(UUINavButton* TargetButton, EButtonStyle Style1, EButtonStyle Style2);
+	static void SwapStyle(UUINavButton* TargetButton, EButtonStyle Style1, EButtonStyle Style2);
 
 	void SwapPadding(UUINavButton* TargetButton);
 
@@ -611,9 +611,9 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
 		bool IsSelectorValid();
 
-	bool IsButtonIndexValid(const int InButtonIndex);
+	bool IsButtonIndexValid(const int InButtonIndex) const;
 
-	bool IsGridIndexValid(const int GridIndex);
+	bool IsGridIndexValid(const int GridIndex) const;
 
 	FORCEINLINE uint8 GetSelectCount() const { return SelectCount; }
 
@@ -761,13 +761,12 @@ public:
 
 	void RemoveAllParents();
 
-	int GetWidgetHierarchyDepth(UWidget* Widget);
-
+	int GetWidgetHierarchyDepth(UWidget* Widget) const;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
 		class UUINavButton* GetButtonAtIndex(int InButtonIndex);
 
-	EButtonStyle GetStyleFromButtonState(UButton* Button);
+	static EButtonStyle GetStyleFromButtonState(UButton* Button);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
 		void GetGridAtIndex(int GridIndex, FGrid& Grid, bool& IsValid);
@@ -827,7 +826,7 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
 		class UUINavButton* GetButtonFromCoordinatesInGrid2D(const int GridIndex, const int XCoord, const int YCoord);
 
-	int GetCollectionFirstButtonIndex(UUINavCollection* Collection, int Index);
+	static int GetCollectionFirstButtonIndex(UUINavCollection* Collection, int Index);
 
 	/**
 	*	Returns the UINavComponent with the specified index (null if that
