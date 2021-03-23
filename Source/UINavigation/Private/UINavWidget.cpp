@@ -2554,6 +2554,26 @@ void UUINavWidget::OnPreSelect(int Index, bool bMouseClick)
 
 	bool bIsSelectedButton = SelectedButtonIndex == Index && (!bMouseClick || UINavButtons[Index]->IsHovered());
 
+	if (SelectCount == 1)
+	{
+		if (!bMouseClick)
+		{
+			bIgnoreMouseEvent = true;
+			CurrentButton->OnReleased.Broadcast();
+			if (bIsSelectedButton) CurrentButton->OnClicked.Broadcast();
+		}
+
+		UUINavComponent* CurrentUINavComp = GetUINavComponentAtIndex(Index);
+		if (CurrentUINavComp != nullptr)
+		{
+			if (bIsSelectedButton)
+			{
+				CurrentUINavComp->OnSelected();
+			}
+			CurrentUINavComp->OnStopSelected();
+		}
+	}
+
 	if (UINavInputContainer != nullptr && Index >= UINavInputContainer->FirstButtonIndex && Index <= UINavInputContainer->LastButtonIndex)
 	{
 		InputBoxIndex = Index - UINavInputContainer->FirstButtonIndex;
@@ -2593,26 +2613,6 @@ void UUINavWidget::OnPreSelect(int Index, bool bMouseClick)
 			}
 			OnStopSelect(Index);
 			CollectionOnStopSelect(Index);
-		}
-	}
-
-	if (SelectCount == 0)
-	{
-		if (!bMouseClick)
-		{
-			bIgnoreMouseEvent = true;
-			CurrentButton->OnReleased.Broadcast();
-			if (bIsSelectedButton) CurrentButton->OnClicked.Broadcast();
-		}
-
-		UUINavComponent* CurrentUINavComp = GetUINavComponentAtIndex(Index);
-		if (CurrentUINavComp != nullptr)
-		{
-			if (bIsSelectedButton)
-			{
-				CurrentUINavComp->OnSelected();
-			}
-			CurrentUINavComp->OnStopSelected();
 		}
 	}
 }
