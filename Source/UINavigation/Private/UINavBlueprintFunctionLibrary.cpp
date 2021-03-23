@@ -7,7 +7,10 @@
 #include "UINavSettings.h"
 #include "UINavComponent.h"
 #include "Kismet/GameplayStatics.h"
+#define IS_VR_PLATFORM() !PLATFORM_SWITCH && !PLATFORM_XBOXONE
+#if IS_VR_PLATFORM()
 #include "IXRTrackingSystem.h"
+#endif
 
 void UUINavBlueprintFunctionLibrary::SetSoundClassVolume(USoundClass * TargetClass, float NewVolume)
 {
@@ -83,7 +86,12 @@ void UUINavBlueprintFunctionLibrary::ResetInputSettings()
 
 bool UUINavBlueprintFunctionLibrary::RespectsRestriction(FKey Key, EInputRestriction Restriction)
 {
+#if IS_VR_PLATFORM()
 	FString HMD = GEngine->XRSystem != nullptr ? GEngine->XRSystem->GetSystemName().ToString() : TEXT("");
+#else
+	FString HMD = TEXT("");
+#endif
+	
 	switch (Restriction)
 	{
 	case EInputRestriction::None:
@@ -95,6 +103,8 @@ bool UUINavBlueprintFunctionLibrary::RespectsRestriction(FKey Key, EInputRestric
 	case EInputRestriction::Keyboard_Mouse:
 		return !Key.IsGamepadKey();
 	case EInputRestriction::VR:
+		if (HMD == "") return false;
+		
 		if (HMD == "OculusHMD") {
 			return IsKeyInCategory(Key, "Oculus");
 		}
