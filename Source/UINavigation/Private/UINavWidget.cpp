@@ -2697,7 +2697,7 @@ UWidget * UUINavWidget::GoToBuiltWidget(UUINavWidget* NewWidget, bool bRemovePar
 	}
 	else
 	{
-		if (!bUsingSplitScreen) NewWidget->AddToViewport(ZOrder);
+		if (!bUsingSplitScreen || NewWidget->bUseFullscreenWhenSplitscreen) NewWidget->AddToViewport(ZOrder);
 		else NewWidget->AddToPlayerScreen(ZOrder);
 		NewWidget->SetUserFocus(PC);
 		if (UINavPC->GetInputMode() == EInputMode::UI)
@@ -2775,7 +2775,7 @@ void UUINavWidget::ReturnToParent(bool bRemoveAllParents, int ZOrder)
 				if (!ParentWidget->IsPendingKill())
 				{
 					ParentWidget->ReturnedFromWidget = this;
-					if (!bUsingSplitScreen) ParentWidget->AddToViewport(ZOrder);
+					if (!bUsingSplitScreen || ParentWidget->bUseFullscreenWhenSplitscreen) ParentWidget->AddToViewport(ZOrder);
 					else ParentWidget->AddToPlayerScreen(ZOrder);
 				}
 			}

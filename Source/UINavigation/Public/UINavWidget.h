@@ -213,6 +213,10 @@ public:
 	/*If set to true, the gamepad's left thumbstick will be used to move the mouse */
 	UPROPERTY(EditDefaultsOnly, Category = UINavWidget)
 		bool bUseLeftThumbstickAsMouse = false;
+		
+    /*If set to true, the widget will be set to fullscreen even when using split screen */
+    UPROPERTY(EditDefaultsOnly, Category = UINavWidget)
+        bool bUseFullscreenWhenSplitscreen = false;
 
 	//The index of the button to be first navigated to (when the widget is added to viewport)
 	UPROPERTY(EditDefaultsOnly, Category = UINavWidget)
