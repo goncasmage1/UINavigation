@@ -24,7 +24,9 @@ public:
 		void PreSetup();
 	virtual void PreSetup_Implementation();
 
-	void NotifyOnNavigate(int From, int To, int LocalFrom, int LocalTo);
+	UFUNCTION(BlueprintNativeEvent, Category = UINavCollection)
+		void OnReturn();
+	virtual void OnReturn_Implementation();
 
 	/**
 	*	Called when the button with the specified index was navigated upon
@@ -58,13 +60,12 @@ public:
 		void OnStopSelect(int Index, int LocalIndex);
 	virtual void OnStopSelect_Implementation(int Index, int LocalIndex);
 
-	void NotifyOnSelect(int Index, int LocalIndex);
-	void NotifyOnStartSelect(int Index, int LocalIndex);
-	void NotifyOnStopSelect(int Index, int LocalIndex);
+	void NotifyOnReturn();
 
 	void Init(int StartIndex);
 
-	void TraverseHierarquy(int StartIndex);
+	void IncrementGridCount();
+	void SetLastButtonIndex(const int LastButtonIndex);
 
 	void CallCustomInput(FName ActionName, uint8* Buffer);
 

@@ -423,6 +423,15 @@ public:
 		FORCEINLINE EInputType GetCurrentInputType() const { return CurrentInputType; }
 
 	UFUNCTION(BlueprintCallable, Category = UINavController)
+        FORCEINLINE bool IsUsingMouse() const { return CurrentInputType == EInputType::Mouse; }
+
+	UFUNCTION(BlueprintCallable, Category = UINavController)
+        FORCEINLINE bool IsUsingKeyboard() const { return CurrentInputType == EInputType::Keyboard; }
+	
+	UFUNCTION(BlueprintCallable, Category = UINavController)
+        FORCEINLINE bool IsUsingGamepad() const { return CurrentInputType == EInputType::Gamepad; }
+
+	UFUNCTION(BlueprintCallable, Category = UINavController)
 		FORCEINLINE UUINavWidget* GetActiveWidget() const { return ActiveWidget; }
 
 	UFUNCTION(BlueprintCallable, Category = UINavController)

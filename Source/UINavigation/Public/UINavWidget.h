@@ -38,6 +38,7 @@ protected:
 	bool bReturning = false;
 	bool bReturningToParent = false;
 
+	bool bAutoAppended = false;
 	bool bDestroying = false;
 
 	//Used to track when the selector's position should be updated
@@ -212,6 +213,10 @@ public:
 	/*If set to true, the gamepad's left thumbstick will be used to move the mouse */
 	UPROPERTY(EditDefaultsOnly, Category = UINavWidget)
 		bool bUseLeftThumbstickAsMouse = false;
+		
+    /*If set to true, the widget will be set to fullscreen even when using split screen */
+    UPROPERTY(EditDefaultsOnly, Category = UINavWidget)
+        bool bUseFullscreenWhenSplitscreen = false;
 
 	//The index of the button to be first navigated to (when the widget is added to viewport)
 	UPROPERTY(EditDefaultsOnly, Category = UINavWidget)
@@ -239,10 +244,10 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "UINavigation Selector")
 		FVector2D SelectorOffset;
 
-	UPROPERTY(EditDefaultsOnly, Category = "UINavigation Text", meta = (EditCondition = "bUseTextColor"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UINavigation Text", meta = (EditCondition = "bUseTextColor"))
 		FLinearColor TextDefaultColor = FColor::Blue;
 
-	UPROPERTY(EditDefaultsOnly, Category = "UINavigation Text", meta = (EditCondition = "bUseTextColor"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UINavigation Text", meta = (EditCondition = "bUseTextColor"))
 		FLinearColor TextNavigatedColor = FColor::Green;
 
 
@@ -460,11 +465,12 @@ public:
 	*	@param Index The button's index in the Button's array
 	*	@param bRevertStyle Whether to revert the button's style to normal before switching
 	*/
+	UFUNCTION(BlueprintCallable, Category = UINavWidget)
 	void SwitchButtonStyle(EButtonStyle NewStyle, int Index, bool bRevertStyle = true);
 
 	void RevertButtonStyle(int Index);
 
-	void SwapStyle(UUINavButton* TargetButton, EButtonStyle Style1, EButtonStyle Style2);
+	static void SwapStyle(UUINavButton* TargetButton, EButtonStyle Style1, EButtonStyle Style2);
 
 	void SwapPadding(UUINavButton* TargetButton);
 
@@ -539,6 +545,8 @@ public:
 		void OnReturn();
 	virtual void OnReturn_Implementation();
 
+	void CollectionOnReturn();
+
 	/**
 	*	Called when player navigates to the next section
 	*/
@@ -603,9 +611,9 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
 		bool IsSelectorValid();
 
-	bool IsButtonIndexValid(const int InButtonIndex);
+	bool IsButtonIndexValid(const int InButtonIndex) const;
 
-	bool IsGridIndexValid(const int GridIndex);
+	bool IsGridIndexValid(const int GridIndex) const;
 
 	FORCEINLINE uint8 GetSelectCount() const { return SelectCount; }
 
@@ -753,13 +761,12 @@ public:
 
 	void RemoveAllParents();
 
-	int GetWidgetHierarchyDepth(UWidget* Widget);
-
+	int GetWidgetHierarchyDepth(UWidget* Widget) const;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
 		class UUINavButton* GetButtonAtIndex(int InButtonIndex);
 
-	EButtonStyle GetStyleFromButtonState(UButton* Button);
+	static EButtonStyle GetStyleFromButtonState(UButton* Button);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
 		void GetGridAtIndex(int GridIndex, FGrid& Grid, bool& IsValid);
@@ -819,7 +826,7 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
 		class UUINavButton* GetButtonFromCoordinatesInGrid2D(const int GridIndex, const int XCoord, const int YCoord);
 
-	int GetCollectionFirstButtonIndex(UUINavCollection* Collection, int Index);
+	static int GetCollectionFirstButtonIndex(UUINavCollection* Collection, int Index);
 
 	/**
 	*	Returns the UINavComponent with the specified index (null if that

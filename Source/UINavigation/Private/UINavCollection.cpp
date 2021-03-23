@@ -19,29 +19,8 @@ void UUINavCollection::PreSetup_Implementation()
 {
 }
 
-void UUINavCollection::NotifyOnNavigate(int From, int To, int LocalFrom, int LocalTo)
+void UUINavCollection::OnReturn_Implementation()
 {
-	bool bFoundFrom = false;
-	bool bFoundTo = false;
-	for (UUINavCollection* Collection : UINavCollections)
-	{
-		int CollectionFromIndex = ParentWidget->GetCollectionFirstButtonIndex(Collection, From);
-		int CollectionToIndex = ParentWidget->GetCollectionFirstButtonIndex(Collection, To);
-
-		bool bValidFrom = CollectionFromIndex != -1;
-		bool bValidTo = CollectionToIndex != -1;
-		if (bValidFrom || bValidTo)
-		{
-			if (!bFoundFrom) bFoundFrom = bValidFrom;
-			if (!bFoundTo) bFoundTo = bValidTo;
-
-			Collection->NotifyOnNavigate(From, To, CollectionFromIndex, CollectionToIndex);
-		}
-
-		if (bFoundFrom && bFoundTo) break;
-	}
-
-	OnNavigate(From, To, LocalFrom, LocalTo);
 }
 
 void UUINavCollection::OnNavigate_Implementation(int From, int To, int LocalFrom, int LocalTo)
@@ -60,46 +39,14 @@ void UUINavCollection::OnStopSelect_Implementation(int Index, int LocalIndex)
 {
 }
 
-void UUINavCollection::NotifyOnSelect(int Index, int LocalIndex)
+void UUINavCollection::NotifyOnReturn()
 {
 	for (UUINavCollection* Collection : UINavCollections)
 	{
-		int CollectionButtonIndex = ParentWidget->GetCollectionFirstButtonIndex(Collection, Index);
-		if (CollectionButtonIndex != -1)
-		{
-			Collection->OnSelect(Index, CollectionButtonIndex);
-			break;
-		}
+		Collection->NotifyOnReturn();
 	}
-	OnSelect(Index, LocalIndex);
-}
-
-void UUINavCollection::NotifyOnStartSelect(int Index, int LocalIndex)
-{
-	for (UUINavCollection* Collection : UINavCollections)
-	{
-		int CollectionButtonIndex = ParentWidget->GetCollectionFirstButtonIndex(Collection, Index);
-		if (CollectionButtonIndex != -1)
-		{
-			Collection->OnStartSelect(Index, CollectionButtonIndex);
-			break;
-		}
-	}
-	OnStartSelect(Index, LocalIndex);
-}
-
-void UUINavCollection::NotifyOnStopSelect(int Index, int LocalIndex)
-{
-	for (UUINavCollection* Collection : UINavCollections)
-	{
-		int CollectionButtonIndex = ParentWidget->GetCollectionFirstButtonIndex(Collection, Index);
-		if (CollectionButtonIndex != -1)
-		{
-			Collection->OnStopSelect(Index, CollectionButtonIndex);
-			break;
-		}
-	}
-	OnStopSelect(Index, LocalIndex);
+	
+	OnReturn();
 }
 
 void UUINavCollection::Init(int StartIndex)
@@ -130,6 +77,24 @@ void UUINavCollection::Init(int StartIndex)
 			}
 			UINavAnimations.Empty();
 		}
+	}
+}
+
+void UUINavCollection::IncrementGridCount()
+{
+	GridCount++;
+	if (ParentCollection != nullptr)
+	{
+		ParentCollection->IncrementGridCount();
+	}
+}
+
+void UUINavCollection::SetLastButtonIndex(const int InLastButtonIndex)
+{
+	LastButtonIndex = InLastButtonIndex;
+	if (ParentCollection != nullptr)
+	{
+		ParentCollection->SetLastButtonIndex(InLastButtonIndex);
 	}
 }
 
