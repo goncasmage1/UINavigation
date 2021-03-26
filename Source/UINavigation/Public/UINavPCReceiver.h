@@ -42,7 +42,7 @@ public:
 	/**
 	*	Called when the player navigates in a certain direction
 	*
-	*	@param Direction The direction of navigation
+	*	@param NavigationDirection The direction of navigation
 	*/
 	UFUNCTION(BlueprintNativeEvent, Category = UINavController)
 		void OnNavigated(ENavigationDirection NavigationDirection);

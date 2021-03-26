@@ -14,7 +14,7 @@ void USwapKeysWidget::OnReturn_Implementation()
 	NotifySwapResult(ReturnSelectedIndex);
 }
 
-void USwapKeysWidget::NotifySwapResult(int Index)
+void USwapKeysWidget::NotifySwapResult(const int Index)
 {
 	if (CurrentInputBox != nullptr && CollidingInputBox != nullptr)
 	{

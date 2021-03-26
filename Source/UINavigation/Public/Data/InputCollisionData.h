@@ -12,11 +12,11 @@ struct FInputCollisionData
 	{
 	}
 
-	FInputCollisionData(FText InCurrentInputText,
-						FText InCollidingInputText,
-						int InCollidingKeyIndex,
-						FKey InCurrentInputKey,
-						FKey InPressedKey) :
+	FInputCollisionData(const FText InCurrentInputText,
+						const FText InCollidingInputText,
+						const int InCollidingKeyIndex,
+						const FKey InCurrentInputKey,
+						const FKey InPressedKey) :
 		CurrentInputText(InCurrentInputText),
 		CollidingInputText(InCollidingInputText),
 		CollidingKeyIndex(InCollidingKeyIndex),

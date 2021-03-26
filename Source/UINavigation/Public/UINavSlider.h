@@ -24,7 +24,7 @@ protected:
 	bool bIgnoreSpinBoxCommit = false;
 
 	UFUNCTION()
-		void HandleOnSliderValueChanged(float InValue);
+		void HandleOnSliderValueChanged(const float InValue);
 	UFUNCTION()
 		void HandleOnMouseCaptureBegin();
 	UFUNCTION()
@@ -32,8 +32,8 @@ protected:
 	UFUNCTION()
 		void HandleOnSpinBoxValueChanged(float InValue, ETextCommit::Type CommitMethod);
 
-	float IndexFromPercent(float Value);
-	float IndexFromValue(float Value);
+	float IndexFromPercent(const float Value);
+	float IndexFromValue(const float Value);
 
 public:
 
@@ -76,7 +76,7 @@ public:
 		FORCEINLINE float GetCurrentValue() const { return (MinValue + OptionIndex * Interval); }
 
 	UFUNCTION(BlueprintCallable, Category = UINavSlider)
-		void SetValueClamped(float Value);
+		void SetValueClamped(const float Value);
 
 	//Get Current Slider value (0 to 1)
 	UFUNCTION(BlueprintPure, BlueprintCallable, Category = UINavSlider)

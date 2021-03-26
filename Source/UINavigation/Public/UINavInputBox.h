@@ -37,7 +37,7 @@ protected:
 	bool UpdateKeyIconForKey(const int Index);
 	FText GetKeyText(const int Index);
 	void UpdateKeyDisplay(const int Index);
-	FKey GetKeyFromAxis(FKey AxisKey);
+	FKey GetKeyFromAxis(FKey AxisKey) const;
 	void ProcessInputName();
 
 public:

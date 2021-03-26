@@ -40,7 +40,7 @@ public:
 	virtual void OnStopSelected_Implementation();
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavComponent)
-		bool IsValid(const bool bIgnoreDisabledUINavButton = true);
+		bool IsValid(const bool bIgnoreDisabledUINavButton = true) const;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavComponent)
 		int ComponentIndex = -1;

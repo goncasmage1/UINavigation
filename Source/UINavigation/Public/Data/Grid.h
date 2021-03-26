@@ -16,7 +16,15 @@ struct FGrid
 
 	}
 
-	FGrid(EGridType NewGridType, UUINavButton* NewFirstButton, int NewGridIndex, int NewDimensionX, int NewDimensionY, FButtonNavigation NewEdgeNavigation, bool bShouldWrap, int NewNum2DButtons = -1)
+	FGrid(
+		const EGridType NewGridType,
+		UUINavButton* NewFirstButton,
+		const int NewGridIndex,
+		const int NewDimensionX,
+		const int NewDimensionY,
+		const FButtonNavigation NewEdgeNavigation,
+		const bool bShouldWrap,
+		const int NewNum2DButtons = -1)
 	{
 		GridType = NewGridType;
 		FirstButton = NewFirstButton;
@@ -34,12 +42,12 @@ struct FGrid
 
 	int GetLastButtonIndex() const;
 
-	void SetEdgeNavigation(FButtonNavigation NewEdgeNavigation)
+	void SetEdgeNavigation(const FButtonNavigation NewEdgeNavigation)
 	{
 		EdgeNavigation = NewEdgeNavigation;
 	}
 
-	void SetEdgeNavigationByButton(FButtonNavigation NewEdgeNavigation)
+	void SetEdgeNavigationByButton(const FButtonNavigation NewEdgeNavigation)
 	{
 		if (NewEdgeNavigation.LeftButton != nullptr)
 		{
@@ -74,7 +82,7 @@ struct FGrid
 			EdgeNavigation.DownButton = nullptr;
 	}
 
-	void RemoveGridFromEdgeNavigation(int InGridIndex)
+	void RemoveGridFromEdgeNavigation(const int InGridIndex)
 	{
 		if (EdgeNavigation.LeftButton != nullptr &&
 			EdgeNavigation.LeftButton->GridIndex == InGridIndex)

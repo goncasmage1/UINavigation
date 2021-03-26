@@ -3,13 +3,6 @@
 
 #include "UINavCollection.h"
 #include "UINavWidget.h"
-#include "UINavButton.h"
-#include "UINavComponent.h"
-#include "UINavComponentWrapper.h"
-#include "UINavHorizontalComponent.h"
-#include "Blueprint/WidgetTree.h"
-#include "UINavInputContainer.h"
-
 
 void UUINavCollection::SetupNavigation_Implementation(const TArray<FButtonNavigation>& EdgeNavigations)
 {
@@ -61,7 +54,7 @@ void UUINavCollection::Init(int StartIndex)
 	{
 		if (ParentCollection != nullptr)
 		{
-			int Index = FirstButtonIndex - ParentCollection->FirstButtonIndex;
+			const int Index = FirstButtonIndex - ParentCollection->FirstButtonIndex;
 			if (ParentCollection->UINavAnimations.Num() >= Index)
 			{
 				ParentCollection->UINavAnimations.Insert(UINavAnimations, Index);
@@ -70,7 +63,7 @@ void UUINavCollection::Init(int StartIndex)
 		}
 		else if (ParentWidget != nullptr)
 		{
-			int Index = FirstButtonIndex;
+			const int Index = FirstButtonIndex;
 			if (ParentWidget->UINavAnimations.Num() >= Index)
 			{
 				ParentWidget->UINavAnimations.Insert(UINavAnimations, Index);
@@ -98,7 +91,7 @@ void UUINavCollection::SetLastButtonIndex(const int InLastButtonIndex)
 	}
 }
 
-void UUINavCollection::CallCustomInput(FName ActionName, uint8* Buffer)
+void UUINavCollection::CallCustomInput(const FName ActionName, uint8* Buffer)
 {
 	UFunction* CustomFunction = FindFunction(ActionName);
 	if (CustomFunction != nullptr)
@@ -119,19 +112,19 @@ void UUINavCollection::CallCustomInput(FName ActionName, uint8* Buffer)
 	}
 }
 
-void UUINavCollection::AppendNavigationGrid1D(EGridType GridType, int Dimension, FButtonNavigation EdgeNavigation, bool bWrap)
+void UUINavCollection::AppendNavigationGrid1D(const EGridType GridType, const int Dimension, const FButtonNavigation EdgeNavigation, const bool bWrap)
 {
 	ParentWidget->AppendNavigationGrid1D(GridType, Dimension, EdgeNavigation, bWrap);
 	IncrementGrids(Dimension);
 }
 
-void UUINavCollection::AppendNavigationGrid2D(int DimensionX, int DimensionY, FButtonNavigation EdgeNavigation, bool bWrap, int ButtonsInGrid)
+void UUINavCollection::AppendNavigationGrid2D(const int DimensionX, const int DimensionY, const FButtonNavigation EdgeNavigation, const bool bWrap, const int ButtonsInGrid)
 {
 	ParentWidget->AppendNavigationGrid2D(DimensionX, DimensionY, EdgeNavigation, bWrap, ButtonsInGrid);
 	IncrementGrids((ButtonsInGrid == -1 ? (DimensionX * DimensionY) : ButtonsInGrid));
 }
 
-void UUINavCollection::AppendCollection(TArray<FButtonNavigation> EdgeNavigations)
+void UUINavCollection::AppendCollection(const TArray<FButtonNavigation> EdgeNavigations)
 {
 	if (CollectionIndex >= UINavCollections.Num())
 	{
@@ -149,14 +142,14 @@ void UUINavCollection::AppendCollection(TArray<FButtonNavigation> EdgeNavigation
 	CollectionIndex++;
 }
 
-void UUINavCollection::IncrementGrids(int Dimension)
+void UUINavCollection::IncrementGrids(const int Dimension)
 {
 	GridCount++;
 	LastButtonIndex += Dimension;
 	if (ParentCollection != nullptr) ParentCollection->IncrementGrids(Dimension);
 }
 
-void UUINavCollection::UpdateCollectionLastIndex(int GridIndex, bool bAdded)
+void UUINavCollection::UpdateCollectionLastIndex(const int GridIndex, const bool bAdded)
 {
 	for (UUINavCollection* Collection : UINavCollections)
 	{
@@ -170,25 +163,25 @@ void UUINavCollection::UpdateCollectionLastIndex(int GridIndex, bool bAdded)
 	LastButtonIndex--;
 }
 
-void UUINavCollection::SetEdgeNavigation(int GridIndex, FButtonNavigation NewEdgeNavigation)
+void UUINavCollection::SetEdgeNavigation(const int GridIndex, FButtonNavigation const NewEdgeNavigation)
 {
 	ParentWidget->SetEdgeNavigation(FirstGridIndex + GridIndex, NewEdgeNavigation);
 }
 
-void UUINavCollection::SetEdgeNavigationByButton(int GridIndex, FButtonNavigation NewEdgeNavigation)
+void UUINavCollection::SetEdgeNavigationByButton(const int GridIndex, const FButtonNavigation NewEdgeNavigation)
 {
 	ParentWidget->SetEdgeNavigationByButton(FirstGridIndex + GridIndex, NewEdgeNavigation);
 }
 
-int UUINavCollection::GetGlobalGridIndex(int GridIndex)
+int UUINavCollection::GetGlobalGridIndex(const int GridIndex)
 {
 	return FirstGridIndex + GridIndex;
 }
 
-void UUINavCollection::GetGridAtIndex(int GridIndex, FGrid& Grid, bool& bIsValid)
+void UUINavCollection::GetGridAtIndex(const int GridIndex, FGrid& Grid, bool& bIsValid)
 {
 	bIsValid = false;
-	int ActualIndex = FirstGridIndex + GridIndex;
+	const int ActualIndex = FirstGridIndex + GridIndex;
 
 	if (ParentWidget == nullptr || ParentWidget->NavigationGrids.Num() <= ActualIndex || ActualIndex < 0) return;
 
@@ -196,7 +189,7 @@ void UUINavCollection::GetGridAtIndex(int GridIndex, FGrid& Grid, bool& bIsValid
 	Grid = ParentWidget->NavigationGrids[ActualIndex];
 }
 
-UUINavCollection* UUINavCollection::GetCollectionByIndex(int Index)
+UUINavCollection* UUINavCollection::GetCollectionByIndex(const int Index)
 {
 	for (UUINavCollection* Collection : UINavCollections)
 	{

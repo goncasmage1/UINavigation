@@ -19,21 +19,21 @@ class UINAVIGATION_API UUINavBlueprintFunctionLibrary : public UBlueprintFunctio
 public:
 
 	UFUNCTION(BlueprintCallable, Category = UINavigationLibrary)
-		static void SetSoundClassVolume(class USoundClass* TargetClass, float NewVolume);
+		static void SetSoundClassVolume(class USoundClass* TargetClass, const float NewVolume);
 	UFUNCTION(BlueprintPure, Category = UINavigationLibrary)
 		static float GetSoundClassVolume(class USoundClass* TargetClass);
 	
 	UFUNCTION(BlueprintCallable, Category = UINavigationLibrary)
-		static void SetPostProcessSettings(FString Variable, FString Value);
+		static void SetPostProcessSettings(const FString Variable, const FString Value);
 	UFUNCTION(BlueprintPure, Category = UINavigationLibrary)
-		static FString GetPostProcessSettings(FString Variable);
+		static FString GetPostProcessSettings(const FString Variable);
 
 	// Resets the input settings to their default state
 	UFUNCTION(BlueprintCallable, Category = UINavInput)
 		static void ResetInputSettings();
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "UINav Input")
-		static bool RespectsRestriction(FKey CompareKey, EInputRestriction Restriction);
+		static bool RespectsRestriction(const FKey CompareKey, const EInputRestriction Restriction);
 
 	// Checks whether a gamepad is connected
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavigationLibrary)
@@ -57,12 +57,12 @@ public:
 		static UUINavButton* Conv_UINavComponentToUINavButton(class UUINavComponent* Component);
 
 	UFUNCTION(BlueprintPure, meta = (DisplayName = "Grid To Index", CompactNodeTitle = "->", BlueprintAutocast), Category = "Navigation Grid")
-		static int Conv_GridToInt(FGrid Grid);
+		static int Conv_GridToInt(const FGrid Grid);
 
 	UFUNCTION(BlueprintPure, Category = UINavigationLibrary)
-		static bool IsVRKey(FKey Key);
+		static bool IsVRKey(const FKey Key);
 
 	UFUNCTION(BlueprintPure, Category = UINavigationLibrary)
-		static bool IsKeyInCategory(FKey Key, FString Category);
+		static bool IsKeyInCategory(const FKey Key, const FString Category);
 	
 };

@@ -14,7 +14,7 @@ struct FInputRebindData : public FTableRowBase
 
 	}
 
-	FInputRebindData(FText InInputText, TArray<int> InInputGroups)
+	FInputRebindData(const FText InInputText, const TArray<int>& InInputGroups)
 	{
 		InputText = InInputText;
 		InputGroups = InInputGroups;

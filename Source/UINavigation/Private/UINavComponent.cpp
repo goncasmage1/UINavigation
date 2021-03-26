@@ -1,7 +1,6 @@
 // Copyright (C) 2019 Gonçalo Marques - All Rights Reserved
 
 #include "UINavComponent.h"
-#include "UINavButton.h"
 #include "UINavWidget.h"
 
 UUINavComponent::UUINavComponent(const FObjectInitializer& ObjectInitializer)
@@ -37,7 +36,7 @@ void UUINavComponent::OnStopSelected_Implementation()
 {
 }
 
-bool UUINavComponent::IsValid(const bool bIgnoreDisabledUINavButton)
+bool UUINavComponent::IsValid(const bool bIgnoreDisabledUINavButton) const
 {
 	return (Visibility != ESlateVisibility::Collapsed &&
 			Visibility != ESlateVisibility::Hidden &&

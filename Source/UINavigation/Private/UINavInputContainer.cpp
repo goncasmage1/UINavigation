@@ -9,15 +9,11 @@
 #include "UINavComponent.h"
 #include "UINavInputComponent.h"
 #include "UINavBlueprintFunctionLibrary.h"
-#include "GameFramework/InputSettings.h"
 #include "Blueprint/UserWidget.h"
 #include "Blueprint/WidgetTree.h"
 #include "Engine/DataTable.h"
 #include "Components/PanelWidget.h"
-#include "Kismet/GameplayStatics.h"
-#include "ImageUtils.h"
 #include "IImageWrapper.h"
-#include "IImageWrapperModule.h"
 
 void UUINavInputContainer::Init(UUINavWidget * NewParent, const int GridIndex)
 {
