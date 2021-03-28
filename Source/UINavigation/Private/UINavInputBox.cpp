@@ -8,7 +8,6 @@
 #include "UINavPCComponent.h"
 #include "UINavWidget.h"
 #include "Components/TextBlock.h"
-#include "Components/HorizontalBox.h"
 #include "Components/Image.h"
 #include "Data/RevertRebindReason.h"
 #include "Engine/DataTable.h"
@@ -54,14 +53,14 @@ void UUINavInputBox::CreateKeyWidgets()
 
 		if (j < KeysPerInput)
 		{
-			int Iterations = IS_AXIS ? Axes.Num() : Actions.Num();
+			const int Iterations = IS_AXIS ? Axes.Num() : Actions.Num();
 			FKey PotentialAxisKey;
 			for (int i = Iterations - 1; i >= 0; --i)
 			{
 				if ((IS_AXIS && !PotentialAxisKey.IsValid() && IS_RIGHT_SCALE(Axes[i])) ||
 					(!IS_AXIS))
 				{
-					FKey NewKey = IS_AXIS ? GetKeyFromAxis(Axes[i].Key) : Actions[i].Key;
+					const FKey NewKey = IS_AXIS ? GetKeyFromAxis(Axes[i].Key) : Actions[i].Key;
 					if (!Container->RespectsRestriction(NewKey, j))
 					{
 						continue;
@@ -186,7 +185,7 @@ void UUINavInputBox::UpdateInputKey(const FKey NewKey, const int Index, const bo
 void UUINavInputBox::FinishUpdateInputKey()
 {
 	FKey NewKey = AwaitingNewKey;
-	int Index = AwaitingIndex;
+	const int Index = AwaitingIndex;
 
 	UInputSettings* Settings = const_cast<UInputSettings*>(GetDefault<UInputSettings>());
 	TArray<FInputActionKeyMapping>& Actions = const_cast<TArray<FInputActionKeyMapping>&>(Settings->GetActionMappings());
@@ -195,7 +194,7 @@ void UUINavInputBox::FinishUpdateInputKey()
 	FKey NewAxisKey;
 	bool bFound = false;
 	bool bRemoved2DAxis = false;
-	int Iterations = IS_AXIS ? Axes.Num() : Actions.Num();
+	const int Iterations = IS_AXIS ? Axes.Num() : Actions.Num();
 	for (int i = Iterations - 1; i >= 0; --i)
 	{
 		if ((IS_AXIS && Axes[i].AxisName.IsEqual(InputName)) ||
@@ -234,7 +233,7 @@ void UUINavInputBox::FinishUpdateInputKey()
 	{
 		if (IS_AXIS)
 		{
-			FKey AxisKey = NewAxisKey.IsValid() ? NewAxisKey : NewKey;
+			const FKey AxisKey = NewAxisKey.IsValid() ? NewAxisKey : NewKey;
 			FInputAxisKeyMapping Axis;
 			Axis.Key = AxisKey;
 			Axis.AxisName = InputName;
@@ -281,7 +280,7 @@ void UUINavInputBox::CancelUpdateInputKey(const ERevertRebindReason Reason)
 	RevertToKeyText(AwaitingIndex);
 }
 
-FKey UUINavInputBox::GetKeyFromAxis(const FKey AxisKey)
+FKey UUINavInputBox::GetKeyFromAxis(const FKey AxisKey) const
 {
 	FKey NewKey = Container->UINavPC->GetKeyFromAxis(AxisKey, AxisType == EAxisType::Positive);
 	if (!NewKey.IsValid())
@@ -294,7 +293,7 @@ FKey UUINavInputBox::GetKeyFromAxis(const FKey AxisKey)
 void UUINavInputBox::ProcessInputName()
 {
 	FString InputNameString = InputName.ToString();
-	FString LastNameChar = InputNameString.Right(1);
+	const FString LastNameChar = InputNameString.Right(1);
 	if (LastNameChar.Equals(TEXT("+")))
 	{
 		AxisType = EAxisType::Positive;
@@ -328,7 +327,7 @@ bool UUINavInputBox::UpdateKeyIconForKey(const int Index)
 
 FText UUINavInputBox::GetKeyText(const int Index)
 {
-	FKey Key = Keys[Index];
+	const FKey Key = Keys[Index];
 	return Container->UINavPC->GetKeyText(Key);
 }
 

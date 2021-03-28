@@ -2,10 +2,6 @@
 
 #include "UINavController.h"
 #include "UINavPCComponent.h"
-#include "UINavWidget.h"
-#include "UINavSettings.h"
-#include "Data/InputIconMapping.h"
-#include "Data/InputNameMapping.h"
 
 AUINavController::AUINavController()
 {

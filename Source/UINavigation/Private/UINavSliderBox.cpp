@@ -24,7 +24,7 @@ void UUINavSliderBox::Update()
 	if (NavText != nullptr)
 		NavText->SetText(FText::FromString(FString::FromInt(MinRange + OptionIndex * Interval)));
 
-	float Percent = UKismetMathLibrary::NormalizeToRange(MinRange + OptionIndex * Interval, MinRange, MaxRange);
+	const float Percent = UKismetMathLibrary::NormalizeToRange(MinRange + OptionIndex * Interval, MinRange, MaxRange);
 	SliderBar->SetPercent(Percent);
 }
 
