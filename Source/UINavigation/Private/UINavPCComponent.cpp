@@ -333,7 +333,7 @@ void UUINavPCComponent::SetActiveNestedWidget(UUINavWidget* NewActiveWidget)
 	bShouldIgnoreHoverEvents = false;
 }
 
-void UUINavPCComponent::SetAllowAllMenuInput(bool bAllowInput)
+void UUINavPCComponent::SetAllowAllMenuInput(const bool bAllowInput)
 {
 	bAllowDirectionalInput = bAllowInput;
 	bAllowSelectInput = bAllowInput;
@@ -345,34 +345,34 @@ void UUINavPCComponent::SetAllowAllMenuInput(bool bAllowInput)
 	}
 }
 
-void UUINavPCComponent::SetAllowDirectionalInput(bool bAllowInput)
+void UUINavPCComponent::SetAllowDirectionalInput(const bool bAllowInput)
 {
 	bAllowDirectionalInput = bAllowInput;
 }
 
-void UUINavPCComponent::SetAllowSelectInput(bool bAllowInput)
+void UUINavPCComponent::SetAllowSelectInput(const bool bAllowInput)
 {
 	bAllowSelectInput = bAllowInput;
 }
 
-void UUINavPCComponent::SetAllowReturnInput(bool bAllowInput)
+void UUINavPCComponent::SetAllowReturnInput(const bool bAllowInput)
 {
 	bAllowReturnInput = bAllowInput;
 }
 
-void UUINavPCComponent::SetAllowSectionInput(bool bAllowInput)
+void UUINavPCComponent::SetAllowSectionInput(const bool bAllowInput)
 {
 	bAllowSectionInput = bAllowInput;
 }
 
-void UUINavPCComponent::SetAllowCustomInputByName(FName InputName, bool bAllowInput)
+void UUINavPCComponent::SetAllowCustomInputByName(const FName InputName, const bool bAllowInput)
 {
 	const int CustomInputIndex = CustomInputs.Find(InputName);
 	if (CustomInputIndex < 0) return;
 	bAllowCustomInputs[CustomInputIndex] = bAllowInput;
 }
 
-void UUINavPCComponent::SetAllowCustomInputByIndex(int InputIndex, bool bAllowInput)
+void UUINavPCComponent::SetAllowCustomInputByIndex(const int InputIndex, const bool bAllowInput)
 {
 	if (InputIndex < 0 || InputIndex >= CustomInputs.Num()) return;
 	bAllowCustomInputs[InputIndex] = bAllowInput;
@@ -490,7 +490,7 @@ void UUINavPCComponent::TimerCallback()
 	MenuInput(CallbackDirection);
 }
 
-void UUINavPCComponent::SetTimer(ENavigationDirection TimerDirection)
+void UUINavPCComponent::SetTimer(const ENavigationDirection TimerDirection)
 {
 	TimerCounter = 0.f;
 	CallbackDirection = TimerDirection;
@@ -825,9 +825,9 @@ void UUINavPCComponent::NotifyKeyReleased(const FKey ReleasedKey)
 	ExecuteActionByKey(ReleasedKey, false);
 }
 
-void UUINavPCComponent::ExecuteActionByKey(const FKey PressedKey, const bool bPressed)
+void UUINavPCComponent::ExecuteActionByKey(const FKey ActionKey, const bool bPressed)
 {
-	TArray<FString> ActionNames = FindActionByKey(PressedKey);
+	TArray<FString> ActionNames = FindActionByKey(ActionKey);
 	if (ActionNames.Num() == 0) return;
 
 	for (const FString& ActionName : ActionNames)
