@@ -35,7 +35,7 @@ UUINavButton::UUINavButton()
 	OnReleased.AddDynamic(this, &UUINavButton::OnRelease);
 }
 
-bool UUINavButton::IsValid(const bool bIgnoreDisabledUINavButton)
+bool UUINavButton::IsValid(const bool bIgnoreDisabledUINavButton) const
 {
 	return (Visibility != ESlateVisibility::Collapsed &&
 			Visibility != ESlateVisibility::Hidden &&
