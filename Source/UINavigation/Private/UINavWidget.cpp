@@ -12,12 +12,12 @@
 #include "UINavPCReceiver.h"
 #include "UINavPromptWidget.h"
 #include "UINavWidgetComponent.h"
+#include "UINavBlueprintFunctionLibrary.h"
 #include "Animation/WidgetAnimation.h"
 #include "Blueprint/UserWidget.h"
 #include "Blueprint/WidgetTree.h"
 #include "Blueprint/SlateBlueprintLibrary.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
-#include "Components/Image.h"
 #include "Components/Border.h"
 #include "Components/TextBlock.h"
 #include "Components/HorizontalBox.h"
@@ -39,6 +39,11 @@ UUINavWidget::UUINavWidget(const FObjectInitializer& ObjectInitializer)
 void UUINavWidget::NativeConstruct()
 {
 	const UWorld* const World = GetWorld();
+	OuterUINavWidget = Cast<UUINavWidget>(GetOuter() != nullptr ? GetOuter()->GetOuter() : nullptr);
+	if (OuterUINavWidget != nullptr)
+	{
+		ParentWidget = OuterUINavWidget;
+	}
 	if (World != nullptr)
 	{
 		if (UGameViewportClient* ViewportClient = World->GetGameViewport())
@@ -348,10 +353,11 @@ void UUINavWidget::TraverseHierarquy(UUINavWidget* UINavWidget, UUserWidget* Wid
 			}
 		}
 
-		if (Widget->IsA<UUINavWidget>())
+		UUINavWidget* ChildUINavWidget = Cast<UUINavWidget>(Widget);
+		if (ChildUINavWidget != nullptr)
 		{
-			DISPLAYERROR_STATIC(WidgetToTraverse, "The plugin doesn't support nested UINavWidgets. Use UINavCollections for this effect!");
-			return;
+			ChildUINavWidget->AddParentToPath(UINavWidget->ChildUINavWidgets.Num());
+			UINavWidget->ChildUINavWidgets.Add(ChildUINavWidget);
 		}
 
 		UUINavCollection* Collection = Cast<UUINavCollection>(Widget);
@@ -541,11 +547,15 @@ void UUINavWidget::UINavSetup()
 {
 	if (UINavPC == nullptr) return;
 
-	UINavPC->SetActiveWidget(this);
-	if (UINavPC->GetInputMode() == EInputMode::UI)
+	if (OuterUINavWidget == nullptr)
 	{
-		SetUserFocus(UINavPC->GetPC());
-		SetKeyboardFocus();
+		UINavPC->SetActiveWidget(this);
+
+		if (UINavPC->GetInputMode() == EInputMode::UI)
+		{
+			SetUserFocus(UINavPC->GetPC());
+			SetKeyboardFocus();
+		}
 	}
 
 	//Re-enable all buttons (bug fix)
@@ -556,16 +566,59 @@ void UUINavWidget::UINavSetup()
 			button->SetIsEnabled(true);
 		}
 	}
-
-	if (IsSelectorValid()) TheSelector->SetVisibility(ESlateVisibility::HitTestInvisible);
-
+	
 	bCompletedSetup = true;
 
+	if (OuterUINavWidget == nullptr)
+	{
+		GainNavigation(nullptr);
+	}
+
+	OnSetupCompleted();
+
+	if (PromptWidgetClass != nullptr)
+	{
+		OnPromptDecided(PromptWidgetClass, PromptSelectedIndex);
+	}
+}
+
+void UUINavWidget::AddParentToPath(const int IndexInParent)
+{
+	UINavWidgetPath.EmplaceAt(0, IndexInParent);
+
+	for (UUINavWidget* ChildUINavWidget : ChildUINavWidgets)
+	{
+		ChildUINavWidget->AddParentToPath(IndexInParent);
+	}
+}
+
+void UUINavWidget::PropagateGainNavigation(UUINavWidget* PreviousActiveWidget, UUINavWidget* NewActiveWidget, const UUINavWidget* const CommonParent)
+{
+	if (this == PreviousActiveWidget) return;
+
+	if (OuterUINavWidget != nullptr && this != CommonParent)
+	{
+		OuterUINavWidget->PropagateGainNavigation(PreviousActiveWidget, NewActiveWidget, CommonParent);
+	}
+
+	if (this != CommonParent || this == NewActiveWidget)
+	{
+		GainNavigation(PreviousActiveWidget);
+	}
+}
+
+void UUINavWidget::GainNavigation(UUINavWidget* PreviousActiveWidget)
+{
 	if (UINavButtons.Num() > 0)
 	{
 		DispatchNavigation(ButtonIndex);
 		OnNavigate(-1, ButtonIndex);
 		CollectionNavigateTo(ButtonIndex);
+
+		if (IsSelectorValid())
+		{
+			TheSelector->SetVisibility(ESlateVisibility::HitTestInvisible);
+		}
 
 		bIgnoreMouseEvent = true;
 		CurrentButton->OnHovered.Broadcast();
@@ -576,12 +629,60 @@ void UUINavWidget::UINavSetup()
 		}
 	}
 
-	OnSetupCompleted();
+	const bool bPreviousWidgetIsChild = PreviousActiveWidget != nullptr ?
+                                    UUINavBlueprintFunctionLibrary::ContainsArray<int>(PreviousActiveWidget->GetUINavWidgetPath(), UINavWidgetPath) :
+                                    false;
+	OnGainedNavigation(PreviousActiveWidget, bPreviousWidgetIsChild);
+}
 
-	if (PromptWidgetClass != nullptr)
+void UUINavWidget::OnGainedNavigation_Implementation(UUINavWidget* PreviousActiveWidget, const bool bFromChild)
+{
+}
+
+void UUINavWidget::PropagateLoseNavigation(UUINavWidget* NewActiveWidget, UUINavWidget* PreviousActiveWidget, const UUINavWidget* const CommonParent)
+{
+	if (this == NewActiveWidget) return;
+
+	if (this != CommonParent || this == PreviousActiveWidget)
 	{
-		OnPromptDecided(PromptWidgetClass, PromptSelectedIndex);
+		LoseNavigation(NewActiveWidget);
 	}
+
+	if (OuterUINavWidget != nullptr && this != CommonParent)
+	{
+		OuterUINavWidget->PropagateLoseNavigation(NewActiveWidget, PreviousActiveWidget, CommonParent);
+	}
+}
+
+void UUINavWidget::LoseNavigation(UUINavWidget* NewActiveWidget)
+{
+	const bool bNewWidgetIsChild = NewActiveWidget != nullptr ?
+									UUINavBlueprintFunctionLibrary::ContainsArray<int>(NewActiveWidget->GetUINavWidgetPath(), UINavWidgetPath) :
+									false;
+
+	if ((bNewWidgetIsChild && !bMaintainNavigationForChild) ||
+		(!bNewWidgetIsChild && !bMaintainNavigationForParent))
+	{
+		DispatchNavigation(-1);
+		OnNavigate(ButtonIndex, -1);
+		CollectionNavigateTo(-1);
+
+		if (IsSelectorValid())
+		{
+			TheSelector->SetVisibility(ESlateVisibility::Hidden);
+		}
+
+		bIgnoreMouseEvent = true;
+		CurrentButton->OnUnhovered.Broadcast();
+	}
+
+	SelectedButtonIndex = -1;
+	
+	OnLostNavigation(NewActiveWidget, bNewWidgetIsChild);
+}
+
+void UUINavWidget::OnLostNavigation_Implementation(UUINavWidget* NewActiveWidget, const bool bToChild)
+{
 }
 
 void UUINavWidget::ReadyForSetup_Implementation()
@@ -1975,15 +2076,18 @@ void UUINavWidget::ExecuteAnimations(int From, int To)
 		}
 	}
 
-	if (UINavAnimations.Num() <= To || UINavAnimations[To] == nullptr) return;
+	if (To > -1)
+	{
+		if (UINavAnimations.Num() <= To || UINavAnimations[To] == nullptr) return;
 
-	if (TargetToWidget->IsAnimationPlaying(UINavAnimations[To]))
-	{
-		TargetToWidget->ReverseAnimation(UINavAnimations[To]);
-	}
-	else
-	{
-		TargetToWidget->PlayAnimation(UINavAnimations[To], 0.0f, 1, EUMGSequencePlayMode::Forward, AnimationPlaybackSpeed);
+		if (TargetToWidget->IsAnimationPlaying(UINavAnimations[To]))
+		{
+			TargetToWidget->ReverseAnimation(UINavAnimations[To]);
+		}
+		else
+		{
+			TargetToWidget->PlayAnimation(UINavAnimations[To], 0.0f, 1, EUMGSequencePlayMode::Forward, AnimationPlaybackSpeed);
+		}
 	}
 }
 
@@ -2000,13 +2104,13 @@ void UUINavWidget::SwitchTextColorTo(int Index, FLinearColor Color)
 	if (NewComponentIndex != -1)
 	{
 		NewText = UINavComponents[NewComponentIndex]->NavText;
-		if (NewText == nullptr) return;
 	}
-	else
+	else if (Index != -1)
 	{
 		NewText = Cast<UTextBlock>(UINavButtons[Index]->GetChildAt(0));
-		if (NewText == nullptr) return;
 	}
+	
+	if (NewText == nullptr) return;
 	NewText->SetColorAndOpacity(Color);
 }
 
@@ -2023,6 +2127,8 @@ void UUINavWidget::UpdateHoveredButtonStates(int Index, bool bHovered)
 
 void UUINavWidget::SwitchButtonStyle(EButtonStyle NewStyle, int Index, bool bRevertStyle)
 {
+	if (Index < 0 || Index >= UINavButtons.Num()) return;
+	
 	UUINavButton* TheButton = UINavButtons[Index];
 	const bool bWasForcePressed = TheButton->ForcedStyle == EButtonStyle::Pressed;
 
@@ -2461,14 +2567,17 @@ void UUINavWidget::UpdateEdgeNavigation(const int GridIndex, UUINavButton* Targe
 void UUINavWidget::DispatchNavigation(int Index, bool bHoverEvent)
 {
 	//Update all the possible scroll boxes in the widget
-	for (UScrollBox* ScrollBox : ScrollBoxes)
+	if (Index > -1)
 	{
-		ScrollBox->ScrollWidgetIntoView(UINavButtons[Index], bAnimateScrollBoxes);
+		for (UScrollBox* ScrollBox : ScrollBoxes)
+		{
+			ScrollBox->ScrollWidgetIntoView(UINavButtons[Index], bAnimateScrollBoxes);
+		}
 	}
 
 	if (bUseButtonStates) UpdateHoveredButtonStates(Index, bHoverEvent);
 
-	if (IsSelectorValid())
+	if (Index > -1 && IsSelectorValid())
 	{
 		if (MoveCurve != nullptr) BeginSelectorMovement(Index);
 		else UpdateSelectorLocation(Index);
@@ -2678,26 +2787,43 @@ UWidget* UUINavWidget::GoToWidget(TSubclassOf<UUINavWidget> NewWidgetClass, bool
 UWidget * UUINavWidget::GoToBuiltWidget(UUINavWidget* NewWidget, bool bRemoveParent, bool bDestroyParent, int ZOrder)
 {
 	if (NewWidget == nullptr) return nullptr;
-	APlayerController* PC = Cast<APlayerController>(UINavPC->GetOwner());
-	NewWidget->ParentWidget = this;
-	NewWidget->bParentRemoved = bRemoveParent;
-	NewWidget->bShouldDestroyParent = bDestroyParent;
-	NewWidget->WidgetComp = WidgetComp;
-	if (WidgetComp != nullptr)
+
+	if (OuterUINavWidget == nullptr && NewWidget->GetMostOuterUINavWidget() != this)
 	{
-		WidgetComp->SetWidget(NewWidget);
+		NewWidget->ParentWidget = this;
+		NewWidget->bParentRemoved = bRemoveParent;
+		NewWidget->bShouldDestroyParent = bDestroyParent;
+		NewWidget->WidgetComp = WidgetComp;
+		if (WidgetComp != nullptr)
+		{
+			WidgetComp->SetWidget(NewWidget);
+		}
+		else
+		{
+			if (!bUsingSplitScreen || NewWidget->bUseFullscreenWhenSplitscreen) NewWidget->AddToViewport(ZOrder);
+			else NewWidget->AddToPlayerScreen(ZOrder);
+
+			APlayerController* PC = Cast<APlayerController>(UINavPC->GetOwner());
+			NewWidget->SetUserFocus(PC);
+			if (UINavPC->GetInputMode() == EInputMode::UI)
+			{
+				NewWidget->SetKeyboardFocus();
+			}
+		}
+		CleanSetup();
 	}
 	else
 	{
-		if (!bUsingSplitScreen || NewWidget->bUseFullscreenWhenSplitscreen) NewWidget->AddToViewport(ZOrder);
-		else NewWidget->AddToPlayerScreen(ZOrder);
-		NewWidget->SetUserFocus(PC);
-		if (UINavPC->GetInputMode() == EInputMode::UI)
+		if (NewWidget->GetMostOuterUINavWidget() == GetMostOuterUINavWidget())
 		{
-			NewWidget->SetKeyboardFocus();
+			UINavPC->SetActiveNestedWidget(NewWidget);
+		}
+		else
+		{
+			UINavPC->SetActiveNestedWidget(nullptr);
 		}
 	}
-	CleanSetup();
+	
 	return NewWidget;
 }
 
@@ -2750,34 +2876,41 @@ void UUINavWidget::ReturnToParent(bool bRemoveAllParents, int ZOrder)
 	}
 	else
 	{
-		if (bRemoveAllParents)
+		if (OuterUINavWidget == nullptr)
 		{
-			IUINavPCReceiver::Execute_OnRootWidgetRemoved(UINavPC->GetOwner());
-			UINavPC->SetActiveWidget(nullptr);
-			ParentWidget->RemoveAllParents();
-			bReturningToParent = true;
-			RemoveFromParent();
-			Destruct();
-		}
-		else
-		{
-			//If parent was removed, add it to viewport
-			if (bParentRemoved)
+			if (bRemoveAllParents)
 			{
-				if (!ParentWidget->IsPendingKill())
-				{
-					ParentWidget->ReturnedFromWidget = this;
-					if (!bUsingSplitScreen || ParentWidget->bUseFullscreenWhenSplitscreen) ParentWidget->AddToViewport(ZOrder);
-					else ParentWidget->AddToPlayerScreen(ZOrder);
-				}
+				IUINavPCReceiver::Execute_OnRootWidgetRemoved(UINavPC->GetOwner());
+				UINavPC->SetActiveWidget(nullptr);
+				ParentWidget->RemoveAllParents();
+				bReturningToParent = true;
+				RemoveFromParent();
+				Destruct();
 			}
 			else
 			{
-				UINavPC->SetActiveWidget(ParentWidget);
-				ParentWidget->ReconfigureSetup();
+				//If parent was removed, add it to viewport
+				if (bParentRemoved)
+				{
+					if (!ParentWidget->IsPendingKill())
+					{
+						ParentWidget->ReturnedFromWidget = this;
+						if (!bUsingSplitScreen || ParentWidget->bUseFullscreenWhenSplitscreen) ParentWidget->AddToViewport(ZOrder);
+						else ParentWidget->AddToPlayerScreen(ZOrder);
+					}
+				}
+				else
+				{
+					UINavPC->SetActiveWidget(ParentWidget);
+					ParentWidget->ReconfigureSetup();
+				}
+				bReturningToParent = true;
+				RemoveFromParent();
 			}
-			bReturningToParent = true;
-			RemoveFromParent();
+		}
+		else
+		{
+			UINavPC->SetActiveNestedWidget(ParentWidget);
 		}
 	}
 }
@@ -2812,6 +2945,22 @@ void UUINavWidget::MenuNavigate(ENavigationDirection Direction)
 	UUINavButton* NewButton = FindNextButton(CurrentButton, Direction);
 	if (NewButton == nullptr) return;
 	NavigateTo(NewButton->ButtonIndex);
+}
+
+UUINavWidget* UUINavWidget::GetMostOuterUINavWidget()
+{
+	UUINavWidget* MostOUter = this;
+	while (MostOUter->OuterUINavWidget != nullptr)
+	{
+		MostOUter = MostOUter->OuterUINavWidget;
+	}
+
+	return MostOUter;
+}
+
+UUINavWidget* UUINavWidget::GetChildUINavWidget(const int ChildIndex)
+{
+	return ChildIndex < ChildUINavWidgets.Num() ? ChildUINavWidgets[ChildIndex] : nullptr;
 }
 
 int UUINavWidget::GetLocalComponentIndex(int Index)
@@ -3198,6 +3347,12 @@ UUINavHorizontalComponent * UUINavWidget::GetUINavHorizontalCompAtIndex(int Inde
 
 void UUINavWidget::HoverEvent(int Index)
 {
+	if ((OuterUINavWidget != nullptr || ChildUINavWidgets.Num() > 0) &&
+		UINavPC != nullptr && !UINavPC->ShouldIgnoreHoverEvents())
+	{
+		UINavPC->SetActiveNestedWidget(this);
+	}
+	
 	if (bIgnoreMouseEvent)
 	{
 		bIgnoreMouseEvent = false;

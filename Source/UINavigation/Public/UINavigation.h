@@ -1,9 +1,7 @@
 // Copyright (C) 2019 Gonçalo Marques - All Rights Reserved
 
 #pragma once
-
-#include "CoreMinimal.h"
-//#include "ModuleManager.h"
+#include "Modules/ModuleInterface.h"
 
 class FUINavigationModule : public IModuleInterface
 {

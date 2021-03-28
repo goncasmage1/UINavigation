@@ -70,6 +70,8 @@ protected:
 
 	TMap<class UWidget*, int> GridIndexMap;
 
+	TArray<int> UINavWidgetPath;
+
 	//This widget's class
 	TSubclassOf<UUINavWidget> WidgetClass;
 
@@ -150,6 +152,10 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
 		TArray<class UUINavComponent*> UINavComponents;
 
+	//All the child UINavWidgets in this Widget
+	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
+		TArray<UUINavWidget*> ChildUINavWidgets;
+
 	//All the UINavComponentBoxes in this Widget
 	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
 		TArray<class UUINavHorizontalComponent*> UINavHorizontalComps;
@@ -181,6 +187,10 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
 		UUINavWidget* ParentWidget;
 
+	//Reference to the widget that encapsulates this widget
+	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
+		UUINavWidget* OuterUINavWidget;
+
 	//Current player controller
 	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
 		class UUINavPCComponent* UINavPC;
@@ -194,11 +204,11 @@ public:
 
 	//Should this widget remove its parent from the viewport when created?
 	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
-		bool bParentRemoved = true;
+		bool bParentRemoved = false;
 
 	//Should this widget destroy its parent
 	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
-		bool bShouldDestroyParent = true;
+		bool bShouldDestroyParent = false;
 
 
 	//If set to true, buttons will be navigated by switching button states (Normal and Hovered)
@@ -210,13 +220,19 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = UINavWidget)
 		bool bUseTextColor = false;
 
+	/*If set to true, the UINavWidget will maintain its navigated state when navigation moves to a child nested widget,
+	 otherwise, the button being navigated to at that moment will be navigated out of */
+	UPROPERTY(EditDefaultsOnly, Category = UINavWidget)
+		bool bMaintainNavigationForChild = true;
+
+	/*If set to true, the UINavWidget will maintain its navigated state when navigation moves to a parent nested widget,
+	otherwise, the button being navigated to at that moment will be navigated out of */
+	UPROPERTY(EditDefaultsOnly, Category = UINavWidget)
+		bool bMaintainNavigationForParent = false;
+
 	/*If set to true, the gamepad's left thumbstick will be used to move the mouse */
 	UPROPERTY(EditDefaultsOnly, Category = UINavWidget)
 		bool bUseLeftThumbstickAsMouse = false;
-		
-    /*If set to true, the widget will be set to fullscreen even when using split screen */
-    UPROPERTY(EditDefaultsOnly, Category = UINavWidget)
-        bool bUseFullscreenWhenSplitscreen = false;
 
 	//The index of the button to be first navigated to (when the widget is added to viewport)
 	UPROPERTY(EditDefaultsOnly, Category = UINavWidget)
@@ -232,6 +248,10 @@ public:
 	//UINavAnimations Playback Speed
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = UINavWidget)
 		float AnimationPlaybackSpeed = 1.f;
+		
+    /*If set to true, the widget will be set to fullscreen even when using split screen */
+    UPROPERTY(EditDefaultsOnly, Category = UINavWidget)
+        bool bUseFullscreenWhenSplitscreen = false;
 
 	UPROPERTY(EditDefaultsOnly, Category = "UINavigation Selector", meta = (EditCondition = "bUseMovementCurve"))
 		UCurveFloat* MoveCurve;
@@ -382,6 +402,30 @@ public:
 	*/
 	virtual void UINavSetup();
 
+	void AddParentToPath(const int IndexInParent);
+
+	void PropagateGainNavigation(UUINavWidget* PreviousActiveWidget, UUINavWidget* NewActiveWidget, const UUINavWidget* const CommonParent);
+
+	virtual void GainNavigation(UUINavWidget* PreviousActiveWidget);
+
+	/**
+	*	Called when navigation is gained
+	*/
+	UFUNCTION(BlueprintNativeEvent, Category = UINavWidget)
+        void OnGainedNavigation(UUINavWidget* PreviousActiveWidget, const bool bFromChild);
+	virtual void OnGainedNavigation_Implementation(UUINavWidget* PreviousActiveWidget, const bool bFromChild);
+
+	void PropagateLoseNavigation(UUINavWidget* NewActiveWidget, UUINavWidget* PreviousActiveWidget, const UUINavWidget* const CommonParent);
+	
+	virtual void LoseNavigation(UUINavWidget* NewActiveWidget);
+
+	/**
+	*	Called when navigation is lost
+	*/
+	UFUNCTION(BlueprintNativeEvent, Category = UINavWidget)
+        void OnLostNavigation(UUINavWidget* NewActiveWidget, const bool bToChild);
+	virtual void OnLostNavigation_Implementation(UUINavWidget* NewActiveWidget, const bool bToChild);
+
 	/**
 	*	Called when geometry is updated after 1st tick (ready for SetupUI)
 	*/
@@ -392,7 +436,7 @@ public:
 	/**
 	*	Navigate to the button with the specified index
 	*
-	*	@param	Index  The index of the button that was hovered upon
+	*	@param	Index  The index of the button to be navigated to
 	*	@param	bHoverEvent  Was this triggered by a button hover event?
 	*/
 	UFUNCTION(BlueprintCallable, Category = UINavWidget, meta = (AdvancedDisplay=1))
@@ -401,8 +445,8 @@ public:
 	/**
 	*	Navigate to the button with the specified index at the specified grid
 	*
-	*	@param	Index  The index of the button that was hovered upon
-	*	@param	bHoverEvent  Was this triggered by a button hover event?
+	*	@param	GridIndex  The index of the grid to be navigated to
+	*	@param	IndexInGrid  The index in the grid to be navigated to
 	*/
 	UFUNCTION(BlueprintCallable, Category = UINavWidget)
 		void NavigateToGrid(int GridIndex, int IndexInGrid = 0);
@@ -604,6 +648,13 @@ public:
 	virtual void OnHorizCompUpdated_Implementation(int Index);
 
 	virtual void MenuNavigate(ENavigationDirection Direction);
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
+	UUINavWidget* GetMostOuterUINavWidget();
+
+	UUINavWidget* GetChildUINavWidget(const int ChildIndex);
+	
+	FORCEINLINE TArray<int> GetUINavWidgetPath() const { return UINavWidgetPath; }
 
 	int GetLocalComponentIndex(int Index);
 	int GetLocalHorizontalCompIndex(int Index);

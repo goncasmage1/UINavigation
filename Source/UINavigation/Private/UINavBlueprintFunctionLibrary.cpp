@@ -12,7 +12,7 @@
 #include "IXRTrackingSystem.h"
 #endif
 
-void UUINavBlueprintFunctionLibrary::SetSoundClassVolume(USoundClass * TargetClass, float NewVolume)
+void UUINavBlueprintFunctionLibrary::SetSoundClassVolume(USoundClass * TargetClass, const float NewVolume)
 {
 	if (TargetClass == nullptr) return;
 	TargetClass->Properties.Volume = NewVolume;
@@ -24,7 +24,7 @@ float UUINavBlueprintFunctionLibrary::GetSoundClassVolume(USoundClass * TargetCl
 	return TargetClass->Properties.Volume;
 }
 
-void UUINavBlueprintFunctionLibrary::SetPostProcessSettings(FString Variable, FString Value)
+void UUINavBlueprintFunctionLibrary::SetPostProcessSettings(const FString Variable, const FString Value)
 {
 	if (!GConfig)return;
 	FString PostProcess = TEXT("PostProcessQuality@");
@@ -37,7 +37,7 @@ void UUINavBlueprintFunctionLibrary::SetPostProcessSettings(FString Variable, FS
 	);
 }
 
-FString UUINavBlueprintFunctionLibrary::GetPostProcessSettings(FString Variable)
+FString UUINavBlueprintFunctionLibrary::GetPostProcessSettings(const FString Variable)
 {
 	if (!GConfig) return FString();
 
@@ -84,7 +84,7 @@ void UUINavBlueprintFunctionLibrary::ResetInputSettings()
 	Settings->ForceRebuildKeymaps();
 }
 
-bool UUINavBlueprintFunctionLibrary::RespectsRestriction(FKey Key, EInputRestriction Restriction)
+bool UUINavBlueprintFunctionLibrary::RespectsRestriction(const FKey Key, const EInputRestriction Restriction)
 {
 #if IS_VR_PLATFORM()
 	FString HMD = GEngine->XRSystem != nullptr ? GEngine->XRSystem->GetSystemName().ToString() : TEXT("");
@@ -162,18 +162,18 @@ UUINavButton* UUINavBlueprintFunctionLibrary::Conv_UINavComponentToUINavButton(U
 	return Component->NavButton;
 }
 
-int UUINavBlueprintFunctionLibrary::Conv_GridToInt(FGrid Grid)
+int UUINavBlueprintFunctionLibrary::Conv_GridToInt(const FGrid Grid)
 {
 	return Grid.GridIndex;
 }
 
-bool UUINavBlueprintFunctionLibrary::IsVRKey(FKey Key)
+bool UUINavBlueprintFunctionLibrary::IsVRKey(const FKey Key)
 {
 	return IsKeyInCategory(Key, "Oculus") || IsKeyInCategory(Key, "Vive") ||
 		IsKeyInCategory(Key, "MixedReality") || IsKeyInCategory(Key, "Valve") || IsKeyInCategory(Key, "PSMove");
 }
 
-bool UUINavBlueprintFunctionLibrary::IsKeyInCategory(FKey Key, FString Category)
+bool UUINavBlueprintFunctionLibrary::IsKeyInCategory(const FKey Key, const FString Category)
 {
 	return Key.ToString().Contains(Category);
 }

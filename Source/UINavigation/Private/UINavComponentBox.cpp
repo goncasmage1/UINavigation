@@ -50,7 +50,7 @@ void UUINavComponentBox::CheckRightLimit()
 	if (OptionIndex == GetMaxOptionIndex()) RightButton->SetIsEnabled(false);
 }
 
-void UUINavComponentBox::UpdateTextToIndex(int NewIndex)
+void UUINavComponentBox::UpdateTextToIndex(const int NewIndex)
 {
 	Super::UpdateTextToIndex(NewIndex);
 
@@ -82,7 +82,7 @@ void UUINavComponentBox::NavigateRight()
 	FinishNavigateRight(LastOptionIndex != OptionIndex);
 }
 
-void UUINavComponentBox::FinishNavigateLeft(bool bOptionChanged)
+void UUINavComponentBox::FinishNavigateLeft(const bool bOptionChanged)
 {
 	Update();
 
@@ -110,7 +110,7 @@ void UUINavComponentBox::FinishNavigateLeft(bool bOptionChanged)
 	}
 }
 
-void UUINavComponentBox::FinishNavigateRight(bool bOptionChanged)
+void UUINavComponentBox::FinishNavigateRight(const bool bOptionChanged)
 {
 	Update();
 

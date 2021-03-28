@@ -60,7 +60,7 @@ void UUINavSlider::Update()
 	FormatOptions.MaximumFractionalDigits = MaxDecimalDigits;
 	FormatOptions.MinimumFractionalDigits = MinDecimalDigits;
 
-	float Value = MinValue + Slider->Value * Difference;
+	const float Value = MinValue + Slider->Value * Difference;
 	FText ValueText = FText::AsNumber(Value, &FormatOptions);
 	if (!bUseComma) ValueText = FText::FromString(ValueText.ToString().Replace(TEXT(","),TEXT(".")));
 
@@ -84,7 +84,7 @@ void UUINavSlider::OnNavigatedFrom_Implementation()
 	Slider->SetSliderBarColor(BarDefaultColor);
 }
 
-void UUINavSlider::SetValueClamped(float Value)
+void UUINavSlider::SetValueClamped(const float Value)
 {
 	OptionIndex = IndexFromValue(Value);
 	Update();
@@ -153,19 +153,18 @@ void UUINavSlider::HandleOnSpinBoxValueChanged(float InValue, ETextCommit::Type 
 	Update();
 }
 
-float UUINavSlider::IndexFromPercent(float Value)
+float UUINavSlider::IndexFromPercent(const float Value)
 {
 	float Div = Value / Slider->StepSize;
-	int MaxOptionIndex = GetMaxOptionIndex();
+	const int MaxOptionIndex = GetMaxOptionIndex();
 	if (Div > MaxOptionIndex) Div = MaxOptionIndex;
 
-	int FlatDiv = (int)Div;
-	float Decimal = Div - FlatDiv;
+	const int FlatDiv = (int)Div;
+	const float Decimal = Div - FlatDiv;
 	return Decimal < 0.5 ? FlatDiv : (FlatDiv + 1 <= MaxOptionIndex ? FlatDiv + 1 : MaxOptionIndex);
 }
 
-float UUINavSlider::IndexFromValue(float Value)
+float UUINavSlider::IndexFromValue(const float Value)
 {
-	float Percent = Value <= MinValue ? 0.f : (Value >= MaxValue ? 1.f : (Value - MinValue) / Difference);
-	return IndexFromPercent(Percent);
+	return IndexFromPercent(Value <= MinValue ? 0.f : (Value >= MaxValue ? 1.f : (Value - MinValue) / Difference));
 }
