@@ -38,6 +38,19 @@ public:
 	// Checks whether a gamepad is connected
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavigationLibrary)
 		static bool IsGamepadConnected();
+	
+	template <typename T>
+	static bool ContainsArray(const TArray<T>& Array1, const TArray<T>& Array2)
+	{
+		if (Array1.Num() < Array2.Num()) return false;
+
+		for (int i = 0; i < Array2.Num(); ++i)
+		{
+			if (Array1[i] != Array2[i]) return false;
+		}
+
+		return true;
+	}
 
 	// Returns the desired grid's dimension
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)

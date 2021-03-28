@@ -57,6 +57,8 @@ protected:
 	//Indicates whether the player can switch sections using the MenuNext and MenuPrevious actions
 	bool bAllowSectionInput = true;
 
+	bool bShouldIgnoreHoverEvents = false;
+
 	TArray<bool> bAllowCustomInputs;
 
 	bool bUseLeftThumbstickAsMouse = false;
@@ -330,6 +332,8 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
 		EInputMode GetInputMode() const;
 
+	FORCEINLINE bool ShouldIgnoreHoverEvents() const { return bShouldIgnoreHoverEvents; }
+
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
 		FKey GetKeyFromAxis(FKey Key, bool bPositive) const;
 
@@ -371,6 +375,8 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = UINavController)
 		void SetActiveWidget(class UUINavWidget* NewActiveWidget);
+
+	void SetActiveNestedWidget(class UUINavWidget* NewActiveWidget);
 
 	void MenuInput(const ENavigationDirection Direction);
 	void MenuSelect();

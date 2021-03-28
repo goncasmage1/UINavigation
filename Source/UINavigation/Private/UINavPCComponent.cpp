@@ -258,6 +258,8 @@ void UUINavPCComponent::UnbindMouseWorkaround()
 
 void UUINavPCComponent::SetActiveWidget(UUINavWidget * NewActiveWidget)
 {
+	if (NewActiveWidget == ActiveWidget) return;
+	
 	if (ActiveWidget != nullptr && NewActiveWidget == nullptr)
 	{
 		UnbindMenuInputs();
@@ -270,6 +272,65 @@ void UUINavPCComponent::SetActiveWidget(UUINavWidget * NewActiveWidget)
 	ActiveWidget = NewActiveWidget;
 
 	bUseLeftThumbstickAsMouse = ActiveWidget != nullptr ? ActiveWidget->bUseLeftThumbstickAsMouse : false;
+}
+
+void UUINavPCComponent::SetActiveNestedWidget(UUINavWidget* NewActiveWidget)
+{
+	if (NewActiveWidget == ActiveWidget) return;
+
+	UUINavWidget* OldActiveWidget = ActiveWidget;
+
+	if (NewActiveWidget != nullptr)
+	{
+		NewActiveWidget->SetUserFocus(PC);
+		if (GetInputMode() == EInputMode::UI)
+		{
+			NewActiveWidget->SetKeyboardFocus();
+		}
+
+		SetActiveWidget(NewActiveWidget);
+	}
+
+	UUINavWidget* MostOuter = OldActiveWidget->GetMostOuterUINavWidget();
+	if (MostOuter == nullptr) return;
+	
+	UUINavWidget* CommonParent = MostOuter;
+	
+	uint8 Depth = 0;
+	const TArray<int>& OldPath = OldActiveWidget != nullptr ? OldActiveWidget->GetUINavWidgetPath() : TArray<int>();
+	const TArray<int>& NewPath = NewActiveWidget != nullptr ? NewActiveWidget->GetUINavWidgetPath() : TArray<int>();
+
+	if (OldPath.Num() == Depth) OldActiveWidget->LoseNavigation(NewActiveWidget);
+	if (NewPath.Num() == Depth) NewActiveWidget->GainNavigation(OldActiveWidget);
+	
+	bShouldIgnoreHoverEvents = true;
+	while (true)
+	{
+		const int OldIndex = OldPath.Num() > Depth ? OldPath[Depth] : -1;
+		const int NewIndex = NewPath.Num() > Depth ? NewPath[Depth] : -1;
+		Depth++;
+
+		if (OldIndex == -1 && NewIndex == -1) break;
+
+		if (OldIndex != NewIndex)
+		{
+			if (Depth == FMath::Max(OldPath.Num(), NewPath.Num()))
+			{
+				if (OldIndex != -1) OldActiveWidget->PropagateLoseNavigation(NewActiveWidget, OldActiveWidget, CommonParent);
+				if (NewIndex != -1) NewActiveWidget->PropagateGainNavigation(OldActiveWidget, NewActiveWidget, CommonParent);
+				break;
+			}
+		}
+		else
+		{
+		    CommonParent = CommonParent->GetChildUINavWidget(OldIndex);
+		}
+		
+		if (OldPath.Num() == Depth) OldActiveWidget->LoseNavigation(NewActiveWidget);
+		if (NewPath.Num() == Depth) NewActiveWidget->GainNavigation(OldActiveWidget);
+	}
+
+	bShouldIgnoreHoverEvents = false;
 }
 
 void UUINavPCComponent::SetAllowAllMenuInput(bool bAllowInput)
