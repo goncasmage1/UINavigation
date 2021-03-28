@@ -79,7 +79,7 @@ protected:
 	/*************************************************************************/
 
 	void TimerCallback();
-	void SetTimer(ENavigationDirection NavigationDirection);
+	void SetTimer(const ENavigationDirection NavigationDirection);
 
 	void VerifyDefaultInputs();
 
@@ -243,25 +243,25 @@ public:
 	
 
 	UFUNCTION(BlueprintCallable, Category = UINavController)
-		void SetAllowAllMenuInput(bool bAllowInput);
+		void SetAllowAllMenuInput(const bool bAllowInput);
 
 	UFUNCTION(BlueprintCallable, Category = UINavController)
-		void SetAllowDirectionalInput(bool bAllowInput);
+		void SetAllowDirectionalInput(const bool bAllowInput);
 
 	UFUNCTION(BlueprintCallable, Category = UINavController)
-		void SetAllowSelectInput(bool bAllowInput);
+		void SetAllowSelectInput(const bool bAllowInput);
 
 	UFUNCTION(BlueprintCallable, Category = UINavController)
-		void SetAllowReturnInput(bool bAllowInput);
+		void SetAllowReturnInput(const bool bAllowInput);
 
 	UFUNCTION(BlueprintCallable, Category = UINavController)
-		void SetAllowSectionInput(bool bAllowInput);
+		void SetAllowSectionInput(const bool bAllowInput);
 
 	UFUNCTION(BlueprintCallable, Category = UINavController)
-		void SetAllowCustomInputByName(FName InputName, bool bAllowInput);
+		void SetAllowCustomInputByName(const FName InputName, const bool bAllowInput);
 
 	UFUNCTION(BlueprintCallable, Category = UINavController)
-		void SetAllowCustomInputByIndex(int InputIndex, bool bAllowInput);
+		void SetAllowCustomInputByIndex(const int InputIndex, const bool bAllowInput);
 
 	void HandleKeyDownEvent(FSlateApplication& SlateApp, const FKeyEvent& InKeyEvent);
 	void HandleKeyUpEvent(FSlateApplication& SlateApp, const FKeyEvent& InKeyEvent);

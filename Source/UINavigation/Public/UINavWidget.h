@@ -84,7 +84,7 @@ protected:
 	/**
 	*	Configures the blueprint on Construct event
 	*/
-	void InitialSetup(bool bRebuilding = false);
+	void InitialSetup(const bool bRebuilding = false);
 
 	/**
 	*	Resets the necessary variables in order for this widget to be used again
@@ -116,15 +116,15 @@ protected:
 	*	Rebuilds all of the widget's navigation and navigates to the button at the specified index
 	*/
 	UFUNCTION(BlueprintCallable, Category = UINavWidget)
-		void RebuildNavigation(int NewButtonIndex = -1);
+		void RebuildNavigation(const int NewButtonIndex = -1);
 
 	/**
 	*	Returns the position of the UINavButton with the specified index
 	*/
-	FVector2D GetButtonLocation(int Index);
+	FVector2D GetButtonLocation(const int Index);
 
-	void BeginSelectorMovement(int Index);
-	void HandleSelectorMovement(float DeltaTime);
+	void BeginSelectorMovement(const int Index);
+	void HandleSelectorMovement(const float DeltaTime);
 
 public:
 
@@ -307,7 +307,7 @@ public:
 	*	@param  bWrap  Indicates whether navigation wraps around the grid
 	*/
 	UFUNCTION(BlueprintCallable, Category = UINavWidget)
-		void AppendNavigationGrid1D(EGridType GridType, int Dimension, FButtonNavigation EdgeNavigation, bool bWrap);
+		void AppendNavigationGrid1D(const EGridType GridType, int Dimension, const FButtonNavigation EdgeNavigation, const bool bWrap);
 
 	/**
 	*	Appends a new navigation grid to the widget. Used for 2-dimensional grids.
@@ -316,9 +316,10 @@ public:
 	*	@param	DimensionY  The vertical dimension of the grid
 	*	@param	EdgeNavigation  The intended navigation at each of the four edges of the grid
 	*	@param  bWrap  Indicates whether navigation wraps around the grid
+	*	@param	ButtonsInGrid  The number of buttons in this grid
 	*/
 	UFUNCTION(BlueprintCallable, Category = UINavWidget, meta=(AdvancedDisplay=4))
-		void AppendNavigationGrid2D(int DimensionX, int DimensionY, FButtonNavigation EdgeNavigation, bool bWrap, int ButtonsInGrid = -1);
+		void AppendNavigationGrid2D(const int DimensionX, int DimensionY, const FButtonNavigation EdgeNavigation, const bool bWrap, const int ButtonsInGrid = -1);
 
 	/**
 	*	Adds an edge navigation connection between 2 grids
@@ -340,7 +341,7 @@ public:
 	*   @param	bTwoWayConnection  Whether the edge connection should go both from the first grid to the target grid and vice-versa
 	*/
 	UFUNCTION(BlueprintCallable, Category = UINavWidget, meta = (AutoCreateRefTerm = "ButtonIndices, TargetButtonIndices"))
-		void AddSingleGridDynamicEdgeNavigation(const int GridIndex, const int TargetGridIndex, TArray<int> TargetButtonIndices, ENavigationEvent Event, const ENavigationDirection Direction, const bool bTwoWayConnection = true);
+		void AddSingleGridDynamicEdgeNavigation(const int GridIndex, const int TargetGridIndex, TArray<int> TargetButtonIndices, const ENavigationEvent Event, const ENavigationDirection Direction, const bool bTwoWayConnection = true);
 
 	/**
 	*	Adds edge navigation that changes through navigation between 1 grid and multiple other grids
@@ -353,7 +354,7 @@ public:
 	*   @param	bTwoWayConnection  Whether the edge connection should go both from the first grid to the target grid and vice-versa
 	*/
 	UFUNCTION(BlueprintCallable, Category = UINavWidget)
-		void AddMultiGridDynamicEdgeNavigation(const int GridIndex, TArray<FGridButton> TargetButtons, ENavigationEvent Event, const ENavigationDirection Direction, const bool bTwoWayConnection = true);
+		void AddMultiGridDynamicEdgeNavigation(const int GridIndex, TArray<FGridButton> TargetButtons, const ENavigationEvent Event, const ENavigationDirection Direction, const bool bTwoWayConnection = true);
 
 	void UpdateDynamicEdgeNavigations(const int UpdatedGridIndex);
 
@@ -367,35 +368,35 @@ public:
 	*	Replaces the edge navigation of the grid at the specified index with the given edge navigation
 	*/
 	UFUNCTION(BlueprintCallable, Category = UINavWidget)
-		void SetEdgeNavigation(int GridIndex, FButtonNavigation NewEdgeNavigation);
+		void SetEdgeNavigation(const int GridIndex, const FButtonNavigation NewEdgeNavigation);
 
 	/**
 	*	Replaces the edge navigation of the grids at the specified indices with the given edge navigation
 	*/
 	UFUNCTION(BlueprintCallable, Category = UINavWidget)
-		void SetBulkEdgeNavigation(const TArray<int>& GridIndices, FButtonNavigation NewEdgeNavigation);
+		void SetBulkEdgeNavigation(const TArray<int>& GridIndices, const FButtonNavigation NewEdgeNavigation);
 
 	/**
 	*	Replaces the edge navigation of the grid at the specified index with the non null buttons of the given edge navigation
 	*/
 	UFUNCTION(BlueprintCallable, Category = UINavWidget)
-		void SetEdgeNavigationByButton(int GridIndex, FButtonNavigation NewEdgeNavigation);
+		void SetEdgeNavigationByButton(const int GridIndex, const FButtonNavigation NewEdgeNavigation);
 
 	/**
 	*	Replaces the edge navigation of the grids at the specified indices with the non null buttons of the given edge navigation
 	*/
 	UFUNCTION(BlueprintCallable, Category = UINavWidget)
-		void SetBulkEdgeNavigationByButton(const TArray<int>& GridIndices, FButtonNavigation NewEdgeNavigation);
+		void SetBulkEdgeNavigationByButton(const TArray<int>& GridIndices, const FButtonNavigation NewEdgeNavigation);
 
 	/**
 	*	Determines whether the navigation wraps around the specified grid
 	*/
 	UFUNCTION(BlueprintCallable, Category = UINavWidget)
-		void SetWrap(int GridIndex, bool bWrap);
+		void SetWrap(const int GridIndex, const bool bWrap);
 
 	//Helper function to add a new 1D grid
 	UFUNCTION(BlueprintCallable, Category = UINavWidget)
-		void Add1DGrid(EGridType GridType, UUINavButton* FirstButton, int StartingIndex, int Dimension, FButtonNavigation EdgeNavigation, bool bWrap);
+		void Add1DGrid(const EGridType GridType, UUINavButton* FirstButton, const int StartingIndex, const int Dimension, const FButtonNavigation EdgeNavigation, const bool bWrap);
 
 	/**
 	*	Called manually to setup all the elements in the Widget
@@ -440,7 +441,7 @@ public:
 	*	@param	bHoverEvent  Was this triggered by a button hover event?
 	*/
 	UFUNCTION(BlueprintCallable, Category = UINavWidget, meta = (AdvancedDisplay=1))
-		void NavigateTo(int Index, bool bHoverEvent = false);
+		void NavigateTo(const int Index, const bool bHoverEvent = false);
 
 	/**
 	*	Navigate to the button with the specified index at the specified grid
@@ -449,19 +450,19 @@ public:
 	*	@param	IndexInGrid  The index in the grid to be navigated to
 	*/
 	UFUNCTION(BlueprintCallable, Category = UINavWidget)
-		void NavigateToGrid(int GridIndex, int IndexInGrid = 0);
+		void NavigateToGrid(const int GridIndex, const int IndexInGrid = 0);
 
-	void CollectionNavigateTo(int Index);
+	void CollectionNavigateTo(const int Index);
 
-	void CallCustomInput(FName ActionName, uint8* Buffer);
+	void CallCustomInput(const FName ActionName, uint8* Buffer);
 
-	void OnPromptDecided(TSubclassOf<class UUINavPromptWidget> PromptClass, int Index);
+	void OnPromptDecided(const TSubclassOf<class UUINavPromptWidget> PromptClass, const int Index);
 
 	void ProcessDynamicEdgeNavigation(FDynamicEdgeNavigation& DynamicEdgeNavigation);
 
-	void UpdateEdgeNavigation(const int GridIndex, UUINavButton* TargetButton, ENavigationDirection Direction, bool bInverted);
+	void UpdateEdgeNavigation(const int GridIndex, UUINavButton* TargetButton, const ENavigationDirection Direction, const bool bInverted);
 
-	void DispatchNavigation(int Index, bool bHoverEvent = false);
+	void DispatchNavigation(const int Index);
 
 	/**
 	*	Changes the selector's location to that of the button with the given index in the Button's array
@@ -469,7 +470,7 @@ public:
 	*	@param	Index  The new button's index in the Button's array
 	*/
 	UFUNCTION(BlueprintCallable, Category = UINavWidget)
-		void UpdateSelectorLocation(int Index);
+		void UpdateSelectorLocation(const int Index);
 
 	/**
 	*	Changes the color of the text with the specified index to the specified color
@@ -477,7 +478,7 @@ public:
 	*	@param	Index  The new button's index in the Button's array
 	*	@param	Color  The text's new color
 	*/
-	void SwitchTextColorTo(int Index, FLinearColor Color);
+	void SwitchTextColorTo(const int Index, FLinearColor Color);
 
 	/**
 	*	Changes the state of the current button to normal and the new button to hovered
@@ -485,7 +486,7 @@ public:
 	*	@param	Index  The new button's index in the Button's array
 	*	@param  bHovered  Whether the function was called due to a mouse hover
 	*/
-	void UpdateHoveredButtonStates(int Index, bool bHovered);
+	void UpdateHoveredButtonStates(const int Index);
 
 	/**
 	*	Plays the animations in the UINavAnimations array
@@ -493,14 +494,14 @@ public:
 	*	@param	From  The index of the button that was navigated from
 	*	@param	To  The index of the button that was navigated to
 	*/
-	void ExecuteAnimations(int From, int To);
+	void ExecuteAnimations(const int From, const int To);
 
 	/**
 	*	Changes the new text and previous text's colors to the desired colors
 	*
 	*	@param	Index  The new button's index in the Button's array
 	*/
-	void UpdateTextColor(int Index);
+	void UpdateTextColor(const int Index);
 
 	/**
 	*	Switches the button with the given index's style
@@ -510,13 +511,13 @@ public:
 	*	@param bRevertStyle Whether to revert the button's style to normal before switching
 	*/
 	UFUNCTION(BlueprintCallable, Category = UINavWidget)
-	void SwitchButtonStyle(EButtonStyle NewStyle, int Index, bool bRevertStyle = true);
+	void SwitchButtonStyle(const EButtonStyle NewStyle, const int Index, const bool bRevertStyle = true);
 
-	void RevertButtonStyle(int Index);
+	void RevertButtonStyle(const int Index);
 
 	static void SwapStyle(UUINavButton* TargetButton, EButtonStyle Style1, EButtonStyle Style2);
 
-	void SwapPadding(UUINavButton* TargetButton);
+	static void SwapPadding(UUINavButton* TargetButton);
 
 	/**
 	*	Changes the selector's scale to the scale given
@@ -532,7 +533,7 @@ public:
 	*	@param	bVisible Whether the selector will be visible
 	*/
 	UFUNCTION(BlueprintCallable, Category = UINavWidget)
-		void SetSelectorVisibility(bool bVisible);
+		void SetSelectorVisibility(const bool bVisible);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
 		bool IsSelectorVisible();
@@ -547,8 +548,8 @@ public:
 	*	@param	To  The index of the button that was navigated to
 	*/
 	UFUNCTION(BlueprintNativeEvent, Category = UINavWidget)
-		void OnNavigate(int From, int To);
-	virtual void OnNavigate_Implementation(int From, int To);
+		void OnNavigate(const int From, const int To);
+	virtual void OnNavigate_Implementation(const int From, const int To);
 
 	/**
 	*	Notifies that the player navigated in the specified direction
@@ -556,8 +557,8 @@ public:
 	*	@param	Direction  The direction of navigation
 	*/
 	UFUNCTION(BlueprintNativeEvent, Category = UINavWidget)
-		void OnNavigatedDirection(ENavigationDirection Direction);
-	virtual void OnNavigatedDirection_Implementation(ENavigationDirection Direction);
+		void OnNavigatedDirection(const ENavigationDirection Direction);
+	virtual void OnNavigatedDirection_Implementation(const ENavigationDirection Direction);
 
 	/**
 	*	Notifies that a button was selected, and indicates its index
@@ -565,22 +566,22 @@ public:
 	*	@param	Index  The index of the button that was selected
 	*/
 	UFUNCTION(BlueprintNativeEvent, Category = UINavWidget)
-		void OnSelect(int Index);
-	virtual void OnSelect_Implementation(int Index);
+		void OnSelect(const int Index);
+	virtual void OnSelect_Implementation(const int Index);
 
 	UFUNCTION(BlueprintNativeEvent, Category = UINavWidget)
-		void OnStartSelect(int Index);
-	virtual void OnStartSelect_Implementation(int Index);
+		void OnStartSelect(const int Index);
+	virtual void OnStartSelect_Implementation(const int Index);
 
 	UFUNCTION(BlueprintNativeEvent, Category = UINavWidget)
-		void OnStopSelect(int Index);
-	virtual void OnStopSelect_Implementation(int Index);
+		void OnStopSelect(const int Index);
+	virtual void OnStopSelect_Implementation(const int Index);
 
-	void CollectionOnSelect(int Index);
-	void CollectionOnStartSelect(int Index);
-	void CollectionOnStopSelect(int Index);
+	void CollectionOnSelect(const int Index);
+	void CollectionOnStartSelect(const int Index);
+	void CollectionOnStopSelect(const int Index);
 
-	void OnPreSelect(int Index, bool bMouseClick = false);
+	void OnPreSelect(const int Index, const bool bMouseClick = false);
 
 	/**
 	*	Called when ReturnToParent is called (i.e. the player wants to exit the menu)
@@ -609,15 +610,15 @@ public:
 	*	Called when the input type changed
 	*/
 	UFUNCTION(BlueprintNativeEvent, Category = UINavWidget)
-		void OnInputChanged(EInputType From, EInputType To);
-	virtual void OnInputChanged_Implementation(EInputType From, EInputType To);
+		void OnInputChanged(const EInputType From, const EInputType To);
+	virtual void OnInputChanged_Implementation(const EInputType From, const EInputType To);
 
 	/**
 	*	Called before this widget is setup for UINav logic
 	*/
 	UFUNCTION(BlueprintNativeEvent, Category = UINavWidget)
-		void PreSetup(bool bFirstSetup);
-	virtual void PreSetup_Implementation(bool bFirstSetup);
+		void PreSetup(const bool bFirstSetup);
+	virtual void PreSetup_Implementation(const bool bFirstSetup);
 
 	/**
 	*	Called when this widget completed UINavSetup
@@ -630,24 +631,24 @@ public:
 	*	Called when the user navigates left on a UINavComponentBox
 	*/
 	UFUNCTION(BlueprintNativeEvent, Category = UINavWidget)
-		void OnHorizCompNavigateLeft(int Index);
-	virtual void OnHorizCompNavigateLeft_Implementation(int Index);
+		void OnHorizCompNavigateLeft(const int Index);
+	virtual void OnHorizCompNavigateLeft_Implementation(const int Index);
 
 	/**
 	*	Called when the user navigates right on a UINavComponentBox
 	*/
 	UFUNCTION(BlueprintNativeEvent, Category = UINavWidget)
-		void OnHorizCompNavigateRight(int Index);
-	virtual void OnHorizCompNavigateRight_Implementation(int Index);
+		void OnHorizCompNavigateRight(const int Index);
+	virtual void OnHorizCompNavigateRight_Implementation(const int Index);
 
 	/**
 	* Called when a HorizontalComponent was updated
 	*/
 	UFUNCTION(BlueprintNativeEvent, Category = UINavWidget)
-		void OnHorizCompUpdated(int Index);
-	virtual void OnHorizCompUpdated_Implementation(int Index);
+		void OnHorizCompUpdated(const int Index);
+	virtual void OnHorizCompUpdated_Implementation(const int Index);
 
-	virtual void MenuNavigate(ENavigationDirection Direction);
+	virtual void MenuNavigate(const ENavigationDirection Direction);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
 	UUINavWidget* GetMostOuterUINavWidget();
@@ -656,8 +657,8 @@ public:
 	
 	FORCEINLINE TArray<int> GetUINavWidgetPath() const { return UINavWidgetPath; }
 
-	int GetLocalComponentIndex(int Index);
-	int GetLocalHorizontalCompIndex(int Index);
+	int GetLocalComponentIndex(const int Index);
+	int GetLocalHorizontalCompIndex(const int Index);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
 		bool IsSelectorValid();
@@ -675,14 +676,14 @@ public:
 	*	@return UUINavButton* The button that will be navigated to
 	*/
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
-		virtual class UUINavButton* FindNextButton(class UUINavButton* Button, ENavigationDirection Direction);
+		virtual class UUINavButton* FindNextButton(class UUINavButton* Button, const ENavigationDirection Direction);
 
 	/**
 	*	Returns the next button to navigate to
 	*
 	*	@param	Direction  Direction of navigation
 	*/
-	class UUINavButton* FetchButtonByDirection(ENavigationDirection Direction, UUINavButton* Button);
+	class UUINavButton* FetchButtonByDirection(const ENavigationDirection Direction, UUINavButton* Button);
 
 	/**
 	*	Adds given widget to screen (strongly recomended over manual alternative)
@@ -692,7 +693,7 @@ public:
 	*	@param  DestroyParent  Whether to destruct the parent widget (this widget)
 	*/
 	UFUNCTION(BlueprintCallable, Category = UINavWidget, meta = (AdvancedDisplay=2))
-		UWidget* GoToWidget(TSubclassOf<UUINavWidget> NewWidgetClass, bool bRemoveParent, bool bDestroyParent = false, int ZOrder = 0);
+		UWidget* GoToWidget(TSubclassOf<UUINavWidget> NewWidgetClass, const bool bRemoveParent, const bool bDestroyParent = false, const int ZOrder = 0);
 
 	/**
 	*	Adds given widget to screen (strongly recomended over manual alternative)
@@ -702,7 +703,7 @@ public:
 	*	@param  DestroyParent  Whether to destruct the parent widget (this widget)
 	*/
 	UFUNCTION(BlueprintCallable, Category = UINavWidget, meta = (AdvancedDisplay=2))
-		UWidget* GoToBuiltWidget(UUINavWidget* NewWidget, bool bRemoveParent, bool bDestroyParent = false, int ZOrder = 0);
+		UWidget* GoToBuiltWidget(UUINavWidget* NewWidget, const bool bRemoveParent, const bool bDestroyParent = false, const int ZOrder = 0);
 
 	/**
 	*	Setup a new UINavButton added at runtime (must be added to viewport manually)
@@ -747,7 +748,7 @@ public:
 	*	is being navigated upon
 	*/
 	UFUNCTION(BlueprintCallable, Category = UINavWidget, meta=(AdvancedDisplay=1))
-		void DeleteUINavElement(int Index, bool bAutoNavigate = true);
+		void DeleteUINavElement(const int Index, const bool bAutoNavigate = true);
 
 	/**
 	*	Removes the UINav element at the index in the specified grid
@@ -758,14 +759,14 @@ public:
 	*	is being navigated upon
 	*/
 	UFUNCTION(BlueprintCallable, Category = UINavWidget, meta=(AdvancedDisplay=2))
-		void DeleteUINavElementFromGrid(int GridIndex, int IndexInGrid, bool bAutoNavigate = true);
+		void DeleteUINavElementFromGrid(const int GridIndex, int IndexInGrid, const bool bAutoNavigate = true);
 
 	void IncrementGrid(class UUINavButton* NewButton, FGrid& TargetGrid, int& IndexInGrid);
-	void DecrementGrid(FGrid& TargetGrid, int IndexInGrid = -1);
-	void IncrementUINavButtonIndices(int StartingIndex, int GridIndex);
-	void IncrementUINavComponentIndices(int StartingIndex);
-	void DecrementUINavButtonIndices(int StartingIndex, int GridIndex);
-	void DecrementUINavComponentIndices(int StartingIndex);
+	void DecrementGrid(FGrid& TargetGrid, const int IndexInGrid = -1);
+	void IncrementUINavButtonIndices(const int StartingIndex, const int GridIndex);
+	void IncrementUINavComponentIndices(const int StartingIndex);
+	void DecrementUINavButtonIndices(const int StartingIndex, const int GridIndex);
+	void DecrementUINavComponentIndices(const int StartingIndex);
 
 	/**
 	*	Moves a UINavButton or UINavComponent to the specified grid and its index.
@@ -773,7 +774,7 @@ public:
 	*	move the element to the end of the grid.
 	*/
 	UFUNCTION(BlueprintCallable, Category = UINavWidget)
-		void MoveUINavElementToGrid(int Index, int TargetGridIndex, int IndexInGrid = -1);
+		void MoveUINavElementToGrid(const int Index, const int TargetGridIndex, int IndexInGrid = -1);
 
 	/**
 	*	Moves a UINavButton or UINavComponent to the specified grid and its index.
@@ -781,14 +782,14 @@ public:
 	*	move the element to the end of the grid.
 	*/
 	UFUNCTION(BlueprintCallable, Category = UINavWidget)
-		void MoveUINavElementToGrid2(int FromGridIndex, int FromIndexInGrid, int TargetGridIndex, int TargetIndexInGrid = -1);
+		void MoveUINavElementToGrid2(const int FromGridIndex, const int FromIndexInGrid, const int TargetGridIndex, const int TargetIndexInGrid = -1);
 
-	void InsertNewComponent(class UUINavComponent* NewComponent, int ComponentIndex);
-	void UpdateArrays(int From, int To, int OldGridIndex, int OldIndexInGrid);
-	void UpdateButtonArray(int From, int To, int OldGridIndex, int OldIndexInGrid);
-	void UpdateComponentArray(int From, int To);
-	void UpdateCollectionLastIndex(int ButtonIndex, bool bAdded);
-	void ReplaceButtonInNavigationGrid(class UUINavButton* ButtonToReplace, int GridIndex, int IndexInGrid);
+	void InsertNewComponent(class UUINavComponent* NewComponent, const int ComponentIndex);
+	void UpdateArrays(const int From, const int To, const int OldGridIndex, const int OldIndexInGrid);
+	void UpdateButtonArray(const int From, int To, const int OldGridIndex, const int OldIndexInGrid);
+	void UpdateComponentArray(const int From, const int To);
+	void UpdateCollectionLastIndex(const int ButtonIndex, const bool bAdded);
+	void ReplaceButtonInNavigationGrid(class UUINavButton* ButtonToReplace, const int GridIndex, const int IndexInGrid);
 
 	void UpdateCurrentButton(class UUINavButton* NewCurrentButton);
 
@@ -797,30 +798,30 @@ public:
 	*	NOTE: You must remove the UINavButtons and UINavComponents manually
 	*/
 	UFUNCTION(BlueprintCallable, Category = UINavWidget, meta = (AdvancedDisplay = 1))
-		void ClearGrid(int GridIndex, bool bAutoNavigate = true);
+		void ClearGrid(const int GridIndex, const bool bAutoNavigate = true);
 
 	void DeleteButtonEdgeNavigationRefs(class UUINavButton* Button);
 
-	void DeleteGridEdgeNavigationRefs(int GridIndex);
+	void DeleteGridEdgeNavigationRefs(const int GridIndex);
 
 	/**
 	*	Adds this widget's parent to the viewport (if applicable)
 	*	and removes this widget from viewport
 	*/
 	UFUNCTION(BlueprintCallable, Category = UINavWidget, meta = (AdvancedDisplay = 1))
-		virtual void ReturnToParent(bool bRemoveAllParents = false, int ZOrder = 0);
+		virtual void ReturnToParent(const bool bRemoveAllParents = false, const int ZOrder = 0);
 
 	void RemoveAllParents();
 
 	int GetWidgetHierarchyDepth(UWidget* Widget) const;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
-		class UUINavButton* GetButtonAtIndex(int InButtonIndex);
+		class UUINavButton* GetButtonAtIndex(const int InButtonIndex);
 
 	static EButtonStyle GetStyleFromButtonState(UButton* Button);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
-		void GetGridAtIndex(int GridIndex, FGrid& Grid, bool& IsValid);
+		void GetGridAtIndex(const int GridIndex, FGrid& Grid, bool& IsValid);
 
 	// Returns the grid index of a panel widget object (Vertical Box, Horizontal Box or Uniform Grid)
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
@@ -833,21 +834,21 @@ public:
 	*	@return IsValid Whether the returned grid is valid
 	*/
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
-		void GetButtonGrid(int InButtonIndex, FGrid& ButtonGrid, bool &IsValid);
+		void GetButtonGrid(const int InButtonIndex, FGrid& ButtonGrid, bool &IsValid);
 
 	/**
 	*	Returns the given button's index in its grid
 	*	-1 if the index is invalid
 	*/
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
-		int GetButtonIndexInGrid(int InButtonIndex);
+		int GetButtonIndexInGrid(const int InButtonIndex);
 
 	/**
 	*	Returns the index of the grid associated with the given button
 	*	-1 if the index is invalid
 	*/
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
-		int GetButtonGridIndex(int InButtonIndex);
+		int GetButtonGridIndex(const int InButtonIndex);
 
 	/**
 	*	Returns the index of the first button in this grid.
@@ -856,7 +857,7 @@ public:
 	*	@return ButtonGrid The button's associated grid
 	*	@return IsValid Whether the returned grid is valid
 	*/
-	int GetGridStartingIndex(int GridIndex);
+	int GetGridStartingIndex(const int GridIndex);
 
 	/**
 	*	Returns the button at the specified index of the given grid.
@@ -877,7 +878,7 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
 		class UUINavButton* GetButtonFromCoordinatesInGrid2D(const int GridIndex, const int XCoord, const int YCoord);
 
-	static int GetCollectionFirstButtonIndex(UUINavCollection* Collection, int Index);
+	static int GetCollectionFirstButtonIndex(UUINavCollection* Collection, const int Index);
 
 	/**
 	*	Returns the UINavComponent with the specified index (null if that
@@ -886,7 +887,7 @@ public:
 	*	@return  UINavComponent  The UINavComponent with the specified index
 	*/
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
-		UUINavComponent* GetUINavComponentAtIndex(int Index);
+		UUINavComponent* GetUINavComponentAtIndex(const int Index);
 
 	/**
 	*	Returns the UINavComponentBox with the specified index (null if that
@@ -895,7 +896,7 @@ public:
 	*	@return  UINavComponentBox  The UINavComponentBox with the specified index
 	*/
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
-		UUINavHorizontalComponent* GetUINavHorizontalCompAtIndex(int Index);
+		UUINavHorizontalComponent* GetUINavHorizontalCompAtIndex(const int Index);
 
 	/**
 	*	Button Hover event
@@ -937,7 +938,7 @@ public:
 	*	@param	Direction  The direction of navigation
 	*/
 	UFUNCTION(BlueprintCallable, Category = UINavWidget)
-		virtual void NavigateInDirection(ENavigationDirection Direction);
+		virtual void NavigateInDirection(const ENavigationDirection Direction);
 
 	UFUNCTION(BlueprintCallable, Category = UINavWidget)
 		virtual void MenuSelect();
@@ -949,6 +950,6 @@ public:
 	virtual void MenuReturnPress();
 	virtual void MenuReturnRelease();
 
-	void FinishPress(bool bMouse);
+	void FinishPress(const bool bMouse);
 
 };
