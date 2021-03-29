@@ -276,7 +276,7 @@ void UUINavPCComponent::SetActiveWidget(UUINavWidget * NewActiveWidget)
 
 void UUINavPCComponent::SetActiveNestedWidget(UUINavWidget* NewActiveWidget)
 {
-	if (NewActiveWidget == ActiveWidget) return;
+	if (NewActiveWidget == ActiveWidget || ActiveWidget == nullptr) return;
 
 	UUINavWidget* OldActiveWidget = ActiveWidget;
 
