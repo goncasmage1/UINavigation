@@ -28,7 +28,10 @@
 #include "Components/CanvasPanelSlot.h"
 #include "Components/UniformGridSlot.h"
 #include "Components/ActorComponent.h"
-#include "UINavSettings.h"
+#define IS_VR_PLATFORM !PLATFORM_SWITCH && !PLATFORM_XBOXONE
+#if IS_VR_PLATFORM
+#include "HeadMountedDisplayFunctionLibrary.h"
+#endif
 
 UUINavWidget::UUINavWidget(const FObjectInitializer& ObjectInitializer)
 	:Super(ObjectInitializer)
@@ -3369,7 +3372,12 @@ void UUINavWidget::HoverEvent(int Index)
 		return;
 	}
 
-	if (Index == ButtonIndex || (UINavPC->GetCurrentInputType() != EInputType::Mouse && (!bUseLeftThumbstickAsMouse || !UINavPC->IsMovingLeftStick())))
+	bool bIsVR = false;
+	#if IS_VR_PLATFORM 
+	bIsVR = UHeadMountedDisplayFunctionLibrary::IsHeadMountedDisplayEnabled();
+	#endif
+
+	if (Index == ButtonIndex || (!bIsVR && UINavPC->GetCurrentInputType() != EInputType::Mouse && (!bUseLeftThumbstickAsMouse || !UINavPC->IsMovingLeftStick())))
 	{
 		if (bUseButtonStates) RevertButtonStyle(Index);
 		return;
