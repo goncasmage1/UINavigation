@@ -45,7 +45,7 @@ public:
 
 	/*
 	WARNING: Edit this index manually at your own risk. If the indices are
-	not correctly alligned with the automatically set indices several bugs may appear.
+	not correctly aligned with the automatically set indices several bugs may appear.
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavButton)
 		int ButtonIndex = -1;
@@ -64,7 +64,7 @@ public:
 	bool bAutoCollapse = false;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavButton)
-		bool IsValid();
+		bool IsValid(const bool bIgnoreDisabledUINavButton = true) const;
 
 	UFUNCTION()
 		void OnHover();

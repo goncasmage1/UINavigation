@@ -24,7 +24,9 @@ public:
 		void PreSetup();
 	virtual void PreSetup_Implementation();
 
-	void NotifyOnNavigate(int From, int To, int LocalFrom, int LocalTo);
+	UFUNCTION(BlueprintNativeEvent, Category = UINavCollection)
+		void OnReturn();
+	virtual void OnReturn_Implementation();
 
 	/**
 	*	Called when the button with the specified index was navigated upon
@@ -33,8 +35,8 @@ public:
 	*
 	*	@param	From  The global index of the button that was navigated from
 	*	@param	To  The global index of the button that was navigated to
-	*	@param	From  The local index of the button that was navigated from
-	*	@param	To  The local index of the button that was navigated to
+	*	@param	LocalFrom  The local index of the button that was navigated from
+	*	@param	LocalTo  The local index of the button that was navigated to
 	*/
 	UFUNCTION(BlueprintNativeEvent, Category = UINavCollection)
 		void OnNavigate(int From, int To, int LocalFrom, int LocalTo);
@@ -44,7 +46,7 @@ public:
 	*	Notifies that a button was selected, and indicates its index
 	*
 	*	@param	Index  The global index of the button that was selected
-	*	@param	Index  The local index of the button that was selected
+	*	@param	LocalIndex  The local index of the button that was selected
 	*/
 	UFUNCTION(BlueprintNativeEvent, Category = UINavCollection)
 		void OnSelect(int Index, int LocalIndex);
@@ -58,15 +60,14 @@ public:
 		void OnStopSelect(int Index, int LocalIndex);
 	virtual void OnStopSelect_Implementation(int Index, int LocalIndex);
 
-	void NotifyOnSelect(int Index, int LocalIndex);
-	void NotifyOnStartSelect(int Index, int LocalIndex);
-	void NotifyOnStopSelect(int Index, int LocalIndex);
+	void NotifyOnReturn();
 
 	void Init(int StartIndex);
 
-	void TraverseHierarquy(int StartIndex);
+	void IncrementGridCount();
+	void SetLastButtonIndex(const int LastButtonIndex);
 
-	void CallCustomInput(FName ActionName, uint8* Buffer);
+	void CallCustomInput(const FName ActionName, uint8* Buffer);
 
 	UPROPERTY(BlueprintReadOnly, Category = UINavCollection)
 		int FirstButtonIndex = -1;
@@ -97,30 +98,30 @@ public:
 	int CollectionIndex = 0;
 
 	UFUNCTION(BlueprintCallable, Category = UINavCollection)
-		void AppendNavigationGrid1D(EGridType GridType, int Dimension, FButtonNavigation EdgeNavigation, bool bWrap);
+		void AppendNavigationGrid1D(const EGridType GridType, const int Dimension, const FButtonNavigation EdgeNavigation, const bool bWrap);
 
 	UFUNCTION(BlueprintCallable, Category = UINavCollection, meta=(AdvancedDisplay=4))
-		void AppendNavigationGrid2D(int DimensionX, int DimensionY, FButtonNavigation EdgeNavigation, bool bWrap, int ButtonsInGrid = -1);
+		void AppendNavigationGrid2D(const int DimensionX, const int DimensionY, const FButtonNavigation EdgeNavigation, const bool bWrap, const int ButtonsInGrid = -1);
 
 	UFUNCTION(BlueprintCallable, Category = UINavCollection)
-		void AppendCollection(TArray<FButtonNavigation> EdgeNavigations);
+		void AppendCollection(const TArray<FButtonNavigation> EdgeNavigations);
 
-	void IncrementGrids(int Dimension);
-	void UpdateCollectionLastIndex(int GridIndex, bool bAdded);
-
-	UFUNCTION(BlueprintCallable, Category = UINavCollection)
-		void SetEdgeNavigation(int GridIndex, FButtonNavigation NewEdgeNavigation);
+	void IncrementGrids(const int Dimension);
+	void UpdateCollectionLastIndex(const int GridIndex, const bool bAdded);
 
 	UFUNCTION(BlueprintCallable, Category = UINavCollection)
-		void SetEdgeNavigationByButton(int GridIndex, FButtonNavigation NewEdgeNavigation);
+		void SetEdgeNavigation(const int GridIndex, const FButtonNavigation NewEdgeNavigation);
+
+	UFUNCTION(BlueprintCallable, Category = UINavCollection)
+		void SetEdgeNavigationByButton(const int GridIndex, const FButtonNavigation NewEdgeNavigation);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavCollection)
-		int GetGlobalGridIndex(int GridIndex);
+		int GetGlobalGridIndex(const int GridIndex);
 
 	//Returns a reference to the grid in this collection at the specified index
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavCollection)
-		void GetGridAtIndex(int GridIndex, FGrid& Grid, bool& bIsValid);
+		void GetGridAtIndex(const int GridIndex, FGrid& Grid, bool& bIsValid);
 
-	UUINavCollection* GetCollectionByIndex(int Index);
+	UUINavCollection* GetCollectionByIndex(const int Index);
 	
 };

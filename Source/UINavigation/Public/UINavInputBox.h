@@ -34,10 +34,10 @@ protected:
 	FKey AwaitingNewKey;
 	int AwaitingIndex;
 
-	bool UpdateKeyIconForKey(int Index);
-	FText GetKeyText(int Index);
-	void UpdateKeyDisplay(int Index);
-	FKey GetKeyFromAxis(FKey AxisKey);
+	bool UpdateKeyIconForKey(const int Index);
+	FText GetKeyText(const int Index);
+	void UpdateKeyDisplay(const int Index);
+	FKey GetKeyFromAxis(FKey AxisKey) const;
 	void ProcessInputName();
 
 public:
@@ -47,16 +47,16 @@ public:
 	void CreateKeyWidgets();
 	bool TrySetupNewKey(FKey NewKey, int KeyIndex, class UUINavInputComponent* NewInputButton);
 	void ResetKeyWidgets();
-	void UpdateInputKey(FKey NewKey, int Index, bool bSkipChecks = false);
+	void UpdateInputKey(const FKey NewKey, const int Index, const bool bSkipChecks = false);
 	void FinishUpdateInputKey();
-	void CancelUpdateInputKey(ERevertRebindReason Reason);
-	void RevertToKeyText(int Index);
+	void CancelUpdateInputKey(const ERevertRebindReason Reason);
+	void RevertToKeyText(const int Index);
 
-	void NotifySelected(int Index);
+	void NotifySelected(const int Index);
 
-	int ContainsKey(FKey CompareKey) const;
+	int ContainsKey(const FKey CompareKey) const;
 	FORCEINLINE bool IsAxis() const { return IS_AXIS; }
-	FORCEINLINE FKey GetKey(int Index) { return Index >= 0 && Index < Keys.Num() ? Keys[Index] : FKey(); }
+	FORCEINLINE FKey GetKey(const int Index) { return Index >= 0 && Index < Keys.Num() ? Keys[Index] : FKey(); }
 
 	EAxisType AxisType = EAxisType::None;
 

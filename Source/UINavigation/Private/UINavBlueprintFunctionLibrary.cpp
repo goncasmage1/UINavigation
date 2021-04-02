@@ -6,8 +6,13 @@
 #include "GameFramework/InputSettings.h"
 #include "UINavSettings.h"
 #include "UINavComponent.h"
+#include "Kismet/GameplayStatics.h"
+#define IS_VR_PLATFORM() !PLATFORM_SWITCH && !PLATFORM_XBOXONE
+#if IS_VR_PLATFORM()
+#include "IXRTrackingSystem.h"
+#endif
 
-void UUINavBlueprintFunctionLibrary::SetSoundClassVolume(USoundClass * TargetClass, float NewVolume)
+void UUINavBlueprintFunctionLibrary::SetSoundClassVolume(USoundClass * TargetClass, const float NewVolume)
 {
 	if (TargetClass == nullptr) return;
 	TargetClass->Properties.Volume = NewVolume;
@@ -19,7 +24,7 @@ float UUINavBlueprintFunctionLibrary::GetSoundClassVolume(USoundClass * TargetCl
 	return TargetClass->Properties.Volume;
 }
 
-void UUINavBlueprintFunctionLibrary::SetPostProcessSettings(FString Variable, FString Value)
+void UUINavBlueprintFunctionLibrary::SetPostProcessSettings(const FString Variable, const FString Value)
 {
 	if (!GConfig)return;
 	FString PostProcess = TEXT("PostProcessQuality@");
@@ -32,7 +37,7 @@ void UUINavBlueprintFunctionLibrary::SetPostProcessSettings(FString Variable, FS
 	);
 }
 
-FString UUINavBlueprintFunctionLibrary::GetPostProcessSettings(FString Variable)
+FString UUINavBlueprintFunctionLibrary::GetPostProcessSettings(const FString Variable)
 {
 	if (!GConfig) return FString();
 
@@ -79,25 +84,36 @@ void UUINavBlueprintFunctionLibrary::ResetInputSettings()
 	Settings->ForceRebuildKeymaps();
 }
 
-bool UUINavBlueprintFunctionLibrary::RespectsRestriction(FKey Key, EInputRestriction Restriction)
+bool UUINavBlueprintFunctionLibrary::RespectsRestriction(const FKey Key, const EInputRestriction Restriction)
 {
+#if IS_VR_PLATFORM()
+	FString HMD = GEngine->XRSystem != nullptr ? GEngine->XRSystem->GetSystemName().ToString() : TEXT("");
+#else
+	FString HMD = TEXT("");
+#endif
+	
 	switch (Restriction)
 	{
-		case EInputRestriction::None:
-			return true;
-			break;
-		case EInputRestriction::Keyboard:
-			return (!Key.IsMouseButton() && !Key.IsGamepadKey());
-			break;
-		case EInputRestriction::Mouse:
-			return Key.IsMouseButton();
-			break;
-		case EInputRestriction::Keyboard_Mouse:
-			return !Key.IsGamepadKey();
-			break;
-		case EInputRestriction::Gamepad:
-			return Key.IsGamepadKey();
-			break;
+	case EInputRestriction::None:
+		return true;
+	case EInputRestriction::Keyboard:
+		return (!Key.IsMouseButton() && !Key.IsGamepadKey());
+	case EInputRestriction::Mouse:
+		return Key.IsMouseButton();
+	case EInputRestriction::Keyboard_Mouse:
+		return !Key.IsGamepadKey();
+	case EInputRestriction::VR:
+		if (HMD == "") return false;
+		
+		if (HMD == "OculusHMD") {
+			return IsKeyInCategory(Key, "Oculus");
+		}
+		if (HMD == "Morpheus") {
+			return IsKeyInCategory(Key, "PSMove");
+		}
+		return false;
+	case EInputRestriction::Gamepad:
+		return (Key.IsGamepadKey() && !IsVRKey(Key));
 	}
 
 	return false;
@@ -146,7 +162,18 @@ UUINavButton* UUINavBlueprintFunctionLibrary::Conv_UINavComponentToUINavButton(U
 	return Component->NavButton;
 }
 
-int UUINavBlueprintFunctionLibrary::Conv_GridToInt(FGrid Grid)
+int UUINavBlueprintFunctionLibrary::Conv_GridToInt(const FGrid Grid)
 {
 	return Grid.GridIndex;
+}
+
+bool UUINavBlueprintFunctionLibrary::IsVRKey(const FKey Key)
+{
+	return IsKeyInCategory(Key, "Oculus") || IsKeyInCategory(Key, "Vive") ||
+		IsKeyInCategory(Key, "MixedReality") || IsKeyInCategory(Key, "Valve") || IsKeyInCategory(Key, "PSMove");
+}
+
+bool UUINavBlueprintFunctionLibrary::IsKeyInCategory(const FKey Key, const FString Category)
+{
+	return Key.ToString().Contains(Category);
 }

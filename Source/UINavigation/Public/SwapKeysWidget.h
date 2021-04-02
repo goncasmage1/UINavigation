@@ -18,7 +18,7 @@ public:
 	virtual void OnReturn_Implementation() override;
 
 	UFUNCTION(BlueprintCallable, Category = SwapKeysWidget)
-	void NotifySwapResult(int Index);
+	void NotifySwapResult(const int Index);
 
 
 	UPROPERTY(BlueprintReadOnly, Category = SwapKeysWidget)

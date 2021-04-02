@@ -1,4 +1,4 @@
-// Copyright (C) 2019 Gonçalo Marques - All Rights Reserved
+// Copyright (C) 2019 GonÃ§alo Marques - All Rights Reserved
 
 #include "UINavButton.h"
 #include "Data/Grid.h"
@@ -35,11 +35,11 @@ UUINavButton::UUINavButton()
 	OnReleased.AddDynamic(this, &UUINavButton::OnRelease);
 }
 
-bool UUINavButton::IsValid()
+bool UUINavButton::IsValid(const bool bIgnoreDisabledUINavButton) const
 {
 	return (Visibility != ESlateVisibility::Collapsed &&
 			Visibility != ESlateVisibility::Hidden &&
-			bIsEnabled);
+			(!bIgnoreDisabledUINavButton || bIsEnabled));
 }
 
 void UUINavButton::OnHover()

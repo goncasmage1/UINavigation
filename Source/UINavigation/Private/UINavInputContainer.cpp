@@ -9,15 +9,11 @@
 #include "UINavComponent.h"
 #include "UINavInputComponent.h"
 #include "UINavBlueprintFunctionLibrary.h"
-#include "GameFramework/InputSettings.h"
 #include "Blueprint/UserWidget.h"
 #include "Blueprint/WidgetTree.h"
 #include "Engine/DataTable.h"
 #include "Components/PanelWidget.h"
-#include "Kismet/GameplayStatics.h"
-#include "ImageUtils.h"
 #include "IImageWrapper.h"
-#include "IImageWrapperModule.h"
 
 void UUINavInputContainer::Init(UUINavWidget * NewParent, const int GridIndex)
 {
@@ -62,7 +58,7 @@ bool UUINavInputContainer::RequestKeySwap(FInputCollisionData InputCollisionData
 		SwapKeysWidget->CollidingInputBox = ParentWidget->UINavInputBoxes[CollidingInputIndex];
 		SwapKeysWidget->CurrentInputBox = ParentWidget->UINavInputBoxes[CurrentInputIndex];
 		SwapKeysWidget->InputCollisionData = InputCollisionData;
-		ParentWidget->GoToBuiltWidget(SwapKeysWidget, false, false);
+		ParentWidget->GoToBuiltWidget(SwapKeysWidget, false, false, SpawKeysWidgetZOrder);
 		return true;
 	}
 	return false;
@@ -150,18 +146,11 @@ void UUINavInputContainer::CreateInputBoxes(const int GridIndex)
 
 ERevertRebindReason UUINavInputContainer::CanRegisterKey(const UUINavInputBox * InputBox, FKey NewKey, int Index, int& CollidingActionIndex, int& CollidingKeyIndex)
 {
-	if (KeyBlacklist.Contains(NewKey) || !NewKey.IsValid())
-	{
-		return ERevertRebindReason::BlacklistedKey;
-	}
-	else if (!RespectsRestriction(NewKey, Index))
-	{
-		return ERevertRebindReason::RestrictionMismatch;
-	}
-	else if (!CanUseKey(InputBox, NewKey, CollidingActionIndex, CollidingKeyIndex))
-	{
-		return ERevertRebindReason::UsedBySameInputGroup;
-	}
+	if (!NewKey.IsValid()) return ERevertRebindReason::BlacklistedKey;
+	if (KeyWhitelist.Num() > 0 && !KeyWhitelist.Contains(NewKey)) return ERevertRebindReason::NonWhitelistedKey;
+	if (KeyBlacklist.Contains(NewKey)) return ERevertRebindReason::BlacklistedKey;
+	if (!RespectsRestriction(NewKey, Index)) return ERevertRebindReason::RestrictionMismatch;
+	if (!CanUseKey(InputBox, NewKey, CollidingActionIndex, CollidingKeyIndex)) return ERevertRebindReason::UsedBySameInputGroup;
 
 	return ERevertRebindReason::None;
 }

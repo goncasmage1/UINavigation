@@ -27,7 +27,7 @@ public:
 
 	virtual void NativeConstruct() override;
 
-	virtual void UpdateTextToIndex(int NewIndex) override;
+	virtual void UpdateTextToIndex(const int NewIndex) override;
 
 	void BaseConstruct();
 
@@ -50,7 +50,7 @@ public:
 
 	virtual void NavigateLeft() override;
 	virtual void NavigateRight() override;
-	virtual void FinishNavigateLeft(bool bOptionChanged);
-	virtual void FinishNavigateRight(bool bOptionChanged);
+	virtual void FinishNavigateLeft(const bool bOptionChanged);
+	virtual void FinishNavigateRight(const bool bOptionChanged);
 
 };

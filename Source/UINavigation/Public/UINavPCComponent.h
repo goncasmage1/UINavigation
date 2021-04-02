@@ -57,7 +57,11 @@ protected:
 	//Indicates whether the player can switch sections using the MenuNext and MenuPrevious actions
 	bool bAllowSectionInput = true;
 
+	bool bShouldIgnoreHoverEvents = false;
+
 	TArray<bool> bAllowCustomInputs;
+
+	bool bUseLeftThumbstickAsMouse = false;
 
 	class APlayerController* PC;
 
@@ -65,8 +69,7 @@ protected:
 
 	ENavigationDirection Direction = ENavigationDirection::None;
 
-	float PreviousX = -1.f;
-	float PreviousY = -1.f;
+	FVector2D LeftStickDelta = FVector2D::ZeroVector;
 
 	ECountdownPhase CountdownPhase = ECountdownPhase::None;
 
@@ -76,7 +79,7 @@ protected:
 	/*************************************************************************/
 
 	void TimerCallback();
-	void SetTimer(ENavigationDirection NavigationDirection);
+	void SetTimer(const ENavigationDirection NavigationDirection);
 
 	void VerifyDefaultInputs();
 
@@ -91,21 +94,21 @@ protected:
 	*	@param Key The specified key	
 	*	@return The input type of the given key
 	*/
-	EInputType GetKeyInputType(FKey Key);
+	static EInputType GetKeyInputType(const FKey Key);
 
 	/**
 	*	Returns the input type of the given action
 	*
 	*	@return The input type of the given action
 	*/
-	EInputType GetMenuActionInputType(FString Action);
+	EInputType GetMenuActionInputType(const FString Action) const;
 
 	/**
 	*	Notifies to the active UUINavWidget that the input type changed
 	*
 	*	@param NewInputType The new input type that is being used
 	*/
-	void NotifyInputTypeChange(EInputType NewInputType);
+	void NotifyInputTypeChange(const EInputType NewInputType);
 
 	virtual void Activate(bool bReset) override;
 	virtual void BeginPlay() override;
@@ -118,16 +121,16 @@ protected:
 	void UnbindMenuInputs();
 
 	UFUNCTION()
-	void OnCustomInput(int InputIndex, bool bPressed);
+	void OnCustomInput(const int InputIndex, const bool bPressed);
 
-	void CallCustomInput(FName ActionName, bool bPressed);
+	void CallCustomInput(const FName ActionName, const bool bPressed);
 
 
 public:
 
 	UUINavPCComponent();
 
-	UPROPERTY(BlueprintReadWrite, Category = UINavController)
+	UPROPERTY(BlueprintReadOnly, Category = UINavController)
 		EInputType CurrentInputType = EInputType::Keyboard;
 
 	/*
@@ -149,6 +152,12 @@ public:
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavController)
 		float NavigationChainFrequency = 0.2f;
+
+	/*
+	The sensitivity of the cursor when moved with the left stick
+	*/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavController)
+		float LeftStickCursorSensitivity = 10.0f;
 
 	/*
 	The required value for an axis to be considered for rebinding
@@ -218,15 +227,15 @@ public:
 		FORCEINLINE bool AllowsSectionInput() const { return bAllowSectionInput; }
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
-	FORCEINLINE bool AllowsCustomInputByName(FName InputName) const
+	FORCEINLINE bool AllowsCustomInputByName(const FName InputName) const
 	{ 
-		int CustomInputIndex = CustomInputs.Find(InputName);
+		const int CustomInputIndex = CustomInputs.Find(InputName);
 		if (CustomInputIndex < 0) return false;
 		return bAllowCustomInputs[CustomInputIndex];
 	}
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
-	FORCEINLINE bool AllowsCustomInputByIndex(int InputIndex) const
+	FORCEINLINE bool AllowsCustomInputByIndex(const int InputIndex) const
 	{
 		if (InputIndex < 0 || InputIndex >= CustomInputs.Num()) return false;
 		return bAllowCustomInputs[InputIndex];
@@ -234,26 +243,25 @@ public:
 	
 
 	UFUNCTION(BlueprintCallable, Category = UINavController)
-		void SetAllowAllMenuInput(bool bAllowInput);
+		void SetAllowAllMenuInput(const bool bAllowInput);
 
 	UFUNCTION(BlueprintCallable, Category = UINavController)
-		void SetAllowDirectionalInput(bool bAllowInput);
+		void SetAllowDirectionalInput(const bool bAllowInput);
 
 	UFUNCTION(BlueprintCallable, Category = UINavController)
-		void SetAllowSelectInput(bool bAllowInput);
+		void SetAllowSelectInput(const bool bAllowInput);
 
 	UFUNCTION(BlueprintCallable, Category = UINavController)
-		void SetAllowReturnInput(bool bAllowInput);
+		void SetAllowReturnInput(const bool bAllowInput);
 
 	UFUNCTION(BlueprintCallable, Category = UINavController)
-		void SetAllowSectionInput(bool bAllowInput);
+		void SetAllowSectionInput(const bool bAllowInput);
 
 	UFUNCTION(BlueprintCallable, Category = UINavController)
-		void SetAllowCustomInputByName(FName InputName, bool bAllowInput);
+		void SetAllowCustomInputByName(const FName InputName, const bool bAllowInput);
 
 	UFUNCTION(BlueprintCallable, Category = UINavController)
-		void SetAllowCustomInputByIndex(int InputIndex, bool bAllowInput);
-
+		void SetAllowCustomInputByIndex(const int InputIndex, const bool bAllowInput);
 
 	void HandleKeyDownEvent(FSlateApplication& SlateApp, const FKeyEvent& InKeyEvent);
 	void HandleKeyUpEvent(FSlateApplication& SlateApp, const FKeyEvent& InKeyEvent);
@@ -262,7 +270,6 @@ public:
 	void HandleMouseButtonDownEvent(FSlateApplication& SlateApp, const FPointerEvent& MouseEvent);
 	void HandleMouseWheelOrGestureEvent(FSlateApplication& SlateApp, const FPointerEvent& InWheelEvent, const FPointerEvent* InGesture);
 
-
 	void BindMouseWorkaround();
 	void UnbindMouseWorkaround();
 
@@ -270,9 +277,8 @@ public:
 	*	Verifies if a new input type is being used
 	*
 	*	@param Key The specified key
-	*	@param PressedKey The pressed key
 	*/
-	void VerifyInputTypeChangeByKey(FKey Key);
+	void VerifyInputTypeChangeByKey(const FKey Key);
 
 	/**
 	*	Notifies the controller that a mouse is being used
@@ -284,14 +290,14 @@ public:
 	*
 	*	@param PressedKey The pressed key
 	*/
-	void NotifyKeyPressed(FKey PressedKey);
+	void NotifyKeyPressed(const FKey PressedKey);
 
 	/**
 	*	Notifies the controller that the given key was just released
 	*
 	*	@param ReleasedKey The released key
 	*/
-	void NotifyKeyReleased(FKey ReleasedKey);
+	void NotifyKeyReleased(const FKey ReleasedKey);
 
 	/**
 	*	Executes a Menu Action by its name
@@ -299,66 +305,68 @@ public:
 	*	@param Action The action's name
 	*	@param bPressed Whether the action was pressed or released
 	*/
-	void ExecuteActionByName(FString Action, bool bPressed);
+	void ExecuteActionByName(const FString Action, const bool bPressed);
 
 	/**
 	*	Executes a Menu Action by its key
 	*
-	*	@param PressedKey The given key
+	*	@param ActionKey The given key
 	*	@param bPressed Whether the action was pressed or released
 	*/
-	void ExecuteActionByKey(FKey ActionKey, bool bPressed);
+	void ExecuteActionByKey(const FKey ActionKey, const bool bPressed);
 
 	/**
 	*	Returns the action that contains the given key
 	*
-	*	@param PressedKey The given key
+	*	@param ActionKey The given key
 	*/
-	FString FindActionByKey(FKey ActionKey);
+	TArray<FString> FindActionByKey(const FKey ActionKey) const;
 
-	FReply OnKeyPressed(FKey PressedKey);
-	FReply OnActionPressed(FString ActionName, FKey Key);
+	FReply OnKeyPressed(const FKey PressedKey);
+	FReply OnActionPressed(const FString ActionName, const FKey Key);
 
-	FReply OnKeyReleased(FKey PressedKey);
-	FReply OnActionReleased(FString ActionName, FKey Key);
+	FReply OnKeyReleased(const FKey PressedKey);
+	FReply OnActionReleased(const FString ActionName, const FKey Key);
 
 	//Returns the currently used input mode
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
-		EInputMode GetInputMode();
+		EInputMode GetInputMode() const;
+
+	FORCEINLINE bool ShouldIgnoreHoverEvents() const { return bShouldIgnoreHoverEvents; }
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
-		FKey GetKeyFromAxis(FKey Key, bool bPositive);
+		FKey GetKeyFromAxis(FKey Key, bool bPositive) const;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
-		bool Is2DAxis(FKey Key);
+		bool Is2DAxis(const FKey Key) const;
 
 	//Receives the name of the action, or axis with a + or - suffix, and returns
 	//the first key that respects the given restriction.
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
-		FKey GetInputKey(FName ActionName, EInputRestriction InputRestriction);
+		FKey GetInputKey(FName ActionName, const EInputRestriction InputRestriction) const;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
-		class UTexture2D* GetKeyIcon(FKey Key);
+		class UTexture2D* GetKeyIcon(const FKey Key) const;
 
 	//Get first found Icon associated with the given input name
 	//Will search the icon table
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
-		class UTexture2D* GetInputIcon(FName ActionName, EInputRestriction InputRestriction);
+		class UTexture2D* GetInputIcon(const FName ActionName, const EInputRestriction InputRestriction) const;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
-		FText GetKeyText(FKey Key);
+		FText GetKeyText(const FKey Key) const;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
-		void GetInputRebindData(FName InputName, FInputRebindData& OutData, bool& bSuccess);
+		void GetInputRebindData(const FName InputName, FInputRebindData& OutData, bool& bSuccess) const;
 
 	//Get first found name associated with the given input name
 	//Will search the name table, if name can't be found will return the key's display name
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
-		FText GetInputText(FName InputName);
+		FText GetInputText(const FName InputName) const;
 
 	//Get all keys associated with the input with the given name
 	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DeprecatedFunction, DeprecationMessage = "Please use GetInputKeys instead") , Category = UINavController)
-		TArray<FKey> GetInputKeysFromName(FName InputName);
+		TArray<FKey> GetInputKeysFromName(const FName InputName) const;
 
 	//Receives the name of the action, or axis with a + or - suffix, and returns
 	//all the keys associated with that input.
@@ -368,7 +376,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = UINavController)
 		void SetActiveWidget(class UUINavWidget* NewActiveWidget);
 
-	void MenuInput(ENavigationDirection Direction);
+	void SetActiveNestedWidget(class UUINavWidget* NewActiveWidget);
+
+	void MenuInput(const ENavigationDirection Direction);
 	void MenuSelect();
 	void MenuReturn();
 	void MenuNext();
@@ -381,7 +391,7 @@ public:
 	void MenuSelectRelease();
 	void MenuReturnRelease();
 
-	void MouseKeyPressed(FKey MouseKey);
+	void MouseKeyPressed(const FKey MouseKey);
 
 	void ClearTimer();
 
@@ -398,7 +408,21 @@ public:
 		FORCEINLINE EInputType GetCurrentInputType() const { return CurrentInputType; }
 
 	UFUNCTION(BlueprintCallable, Category = UINavController)
+        FORCEINLINE bool IsUsingMouse() const { return CurrentInputType == EInputType::Mouse; }
+
+	UFUNCTION(BlueprintCallable, Category = UINavController)
+        FORCEINLINE bool IsUsingKeyboard() const { return CurrentInputType == EInputType::Keyboard; }
+	
+	UFUNCTION(BlueprintCallable, Category = UINavController)
+        FORCEINLINE bool IsUsingGamepad() const { return CurrentInputType == EInputType::Gamepad; }
+
+	UFUNCTION(BlueprintCallable, Category = UINavController)
 		FORCEINLINE UUINavWidget* GetActiveWidget() const { return ActiveWidget; }
 
+	UFUNCTION(BlueprintCallable, Category = UINavController)
+        FORCEINLINE FVector2D GetLeftStickDelta() const { return LeftStickDelta; }
+
+	UFUNCTION(BlueprintCallable, Category = UINavController)
+        FORCEINLINE bool IsMovingLeftStick() const { return LeftStickDelta.X != 0.0f || LeftStickDelta.Y != 0.0f; }
 		
 };

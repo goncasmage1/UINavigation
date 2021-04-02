@@ -13,7 +13,7 @@ struct FDynamicEdgeNavigation
 
 	FDynamicEdgeNavigation() {}
 
-	FDynamicEdgeNavigation(const int InGridIndex, const int InTargetGridIndex, TArray<int> InTargetButtonIndices, ENavigationEvent InEvent, const ENavigationDirection InDirection, const bool InbTwoWayConnection = true)
+	FDynamicEdgeNavigation(const int InGridIndex, const int InTargetGridIndex, const TArray<int>& InTargetButtonIndices, const ENavigationEvent InEvent, const ENavigationDirection InDirection, const bool InbTwoWayConnection = true)
 	{
 		GridIndex = InGridIndex;
 		TargetGridIndex = InTargetGridIndex;
@@ -23,7 +23,7 @@ struct FDynamicEdgeNavigation
 		bTwoWayConnection = InbTwoWayConnection;
 	}
 
-	FDynamicEdgeNavigation(const int InGridIndex, TArray<FGridButton> InTargetButtons, ENavigationEvent InEvent, const ENavigationDirection InDirection, const bool InbTwoWayConnection = true)
+	FDynamicEdgeNavigation(const int InGridIndex, const TArray<FGridButton>& InTargetButtons, const ENavigationEvent InEvent, const ENavigationDirection InDirection, const bool InbTwoWayConnection = true)
 	{
 		GridIndex = InGridIndex;
 		Event = InEvent;

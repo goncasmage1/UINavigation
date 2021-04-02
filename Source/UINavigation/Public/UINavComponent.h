@@ -1,4 +1,4 @@
-// Copyright (C) 2019 Gonçalo Marques - All Rights Reserved
+// Copyright (C) 2019 GonÃ§alo Marques - All Rights Reserved
 
 #pragma once
 
@@ -40,7 +40,7 @@ public:
 	virtual void OnStopSelected_Implementation();
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavComponent)
-		bool IsValid();
+		bool IsValid(const bool bIgnoreDisabledUINavButton = true) const;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavComponent)
 		int ComponentIndex = -1;

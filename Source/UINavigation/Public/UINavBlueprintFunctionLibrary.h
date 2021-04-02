@@ -19,25 +19,38 @@ class UINAVIGATION_API UUINavBlueprintFunctionLibrary : public UBlueprintFunctio
 public:
 
 	UFUNCTION(BlueprintCallable, Category = UINavigationLibrary)
-		static void SetSoundClassVolume(class USoundClass* TargetClass, float NewVolume);
+		static void SetSoundClassVolume(class USoundClass* TargetClass, const float NewVolume);
 	UFUNCTION(BlueprintPure, Category = UINavigationLibrary)
 		static float GetSoundClassVolume(class USoundClass* TargetClass);
 	
 	UFUNCTION(BlueprintCallable, Category = UINavigationLibrary)
-		static void SetPostProcessSettings(FString Variable, FString Value);
+		static void SetPostProcessSettings(const FString Variable, const FString Value);
 	UFUNCTION(BlueprintPure, Category = UINavigationLibrary)
-		static FString GetPostProcessSettings(FString Variable);
+		static FString GetPostProcessSettings(const FString Variable);
 
 	// Resets the input settings to their default state
 	UFUNCTION(BlueprintCallable, Category = UINavInput)
 		static void ResetInputSettings();
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "UINav Input")
-		static bool RespectsRestriction(FKey CompareKey, EInputRestriction Restriction);
+		static bool RespectsRestriction(const FKey CompareKey, const EInputRestriction Restriction);
 
 	// Checks whether a gamepad is connected
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavigationLibrary)
 		static bool IsGamepadConnected();
+	
+	template <typename T>
+	static bool ContainsArray(const TArray<T>& Array1, const TArray<T>& Array2)
+	{
+		if (Array1.Num() < Array2.Num()) return false;
+
+		for (int i = 0; i < Array2.Num(); ++i)
+		{
+			if (Array1[i] != Array2[i]) return false;
+		}
+
+		return true;
+	}
 
 	// Returns the desired grid's dimension
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
@@ -57,6 +70,12 @@ public:
 		static UUINavButton* Conv_UINavComponentToUINavButton(class UUINavComponent* Component);
 
 	UFUNCTION(BlueprintPure, meta = (DisplayName = "Grid To Index", CompactNodeTitle = "->", BlueprintAutocast), Category = "Navigation Grid")
-		static int Conv_GridToInt(FGrid Grid);
+		static int Conv_GridToInt(const FGrid Grid);
+
+	UFUNCTION(BlueprintPure, Category = UINavigationLibrary)
+		static bool IsVRKey(const FKey Key);
+
+	UFUNCTION(BlueprintPure, Category = UINavigationLibrary)
+		static bool IsKeyInCategory(const FKey Key, const FString Category);
 	
 };
