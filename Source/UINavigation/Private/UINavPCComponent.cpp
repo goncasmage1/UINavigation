@@ -794,7 +794,7 @@ EInputType UUINavPCComponent::GetKeyInputType(const FKey Key)
 
 EInputType UUINavPCComponent::GetMenuActionInputType(const FString Action) const
 {
-	for (const FKey Key : KeyMap[Action])
+	for (const FKey& Key : KeyMap[Action])
 	{
 		if (PC->WasInputKeyJustPressed(Key)) return GetKeyInputType(Key);
 	}
@@ -852,7 +852,7 @@ TArray<FString> UUINavPCComponent::FindActionByKey(const FKey ActionKey) const
 	KeyMap.GenerateKeyArray(Actions);
 	for (FString Action : Actions)
 	{
-		for (FKey Key : KeyMap[Action])
+		for (const FKey& Key : KeyMap[Action])
 		{
 			if (Key == ActionKey)
 			{
