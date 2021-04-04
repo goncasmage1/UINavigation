@@ -1,4 +1,4 @@
-// Copyright (C) 2019 Gon�alo Marques - All Rights Reserved
+// Copyright (C) 2019 Gonçalo Marques - All Rights Reserved
 
 #include "UINavWidget.h"
 #include "UINavCollection.h"
@@ -13,7 +13,7 @@
 #include "UINavPromptWidget.h"
 #include "UINavWidgetComponent.h"
 #include "UINavBlueprintFunctionLibrary.h"
-#include "Animation/WidgetAnimation.h"
+#include "UINavMacros.h"
 #include "Blueprint/UserWidget.h"
 #include "Blueprint/WidgetTree.h"
 #include "Blueprint/SlateBlueprintLibrary.h"
@@ -28,7 +28,6 @@
 #include "Components/CanvasPanelSlot.h"
 #include "Components/UniformGridSlot.h"
 #include "Components/ActorComponent.h"
-#define IS_VR_PLATFORM !PLATFORM_SWITCH && !PLATFORM_XBOXONE
 #if IS_VR_PLATFORM
 #include "HeadMountedDisplayFunctionLibrary.h"
 #endif
