@@ -3390,10 +3390,11 @@ void UUINavWidget::HoverEvent(int Index)
 		return;
 	}
 
-	bool bIsVR = false;
-	#if IS_VR_PLATFORM 
-	bIsVR = UHeadMountedDisplayFunctionLibrary::IsHeadMountedDisplayEnabled();
-	#endif
+#if IS_VR_PLATFORM 
+	const bool bIsVR = UHeadMountedDisplayFunctionLibrary::IsHeadMountedDisplayEnabled();
+#else
+	const bool bIsVR = false;
+#endif
 
 	if (Index == ButtonIndex || (!bIsVR && UINavPC->GetCurrentInputType() != EInputType::Mouse && (!bUseLeftThumbstickAsMouse || !UINavPC->IsMovingLeftStick())))
 	{
