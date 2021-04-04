@@ -1,4 +1,4 @@
-// Copyright (C) 2019 Gon�alo Marques - All Rights Reserved
+// Copyright (C) 2019 Gonçalo Marques - All Rights Reserved
 
 #include "UINavWidget.h"
 #include "UINavCollection.h"
@@ -13,7 +13,7 @@
 #include "UINavPromptWidget.h"
 #include "UINavWidgetComponent.h"
 #include "UINavBlueprintFunctionLibrary.h"
-#include "Animation/WidgetAnimation.h"
+#include "UINavMacros.h"
 #include "Blueprint/UserWidget.h"
 #include "Blueprint/WidgetTree.h"
 #include "Blueprint/SlateBlueprintLibrary.h"
@@ -28,7 +28,9 @@
 #include "Components/CanvasPanelSlot.h"
 #include "Components/UniformGridSlot.h"
 #include "Components/ActorComponent.h"
-#include "UINavSettings.h"
+#if IS_VR_PLATFORM
+#include "HeadMountedDisplayFunctionLibrary.h"
+#endif
 
 UUINavWidget::UUINavWidget(const FObjectInitializer& ObjectInitializer)
 	:Super(ObjectInitializer)
@@ -609,8 +611,11 @@ void UUINavWidget::PropagateGainNavigation(UUINavWidget* PreviousActiveWidget, U
 
 void UUINavWidget::GainNavigation(UUINavWidget* PreviousActiveWidget)
 {
+	if (bHasNavigation) return;
+
 	if (UINavButtons.Num() > 0)
 	{
+		bHasNavigation = true;
 		DispatchNavigation(ButtonIndex);
 		OnNavigate(-1, ButtonIndex);
 		CollectionNavigateTo(ButtonIndex);
@@ -621,8 +626,11 @@ void UUINavWidget::GainNavigation(UUINavWidget* PreviousActiveWidget)
 		}
 
 		bIgnoreMouseEvent = true;
-		CurrentButton->OnHovered.Broadcast();
-
+		if (CurrentButton != nullptr)
+		{
+			CurrentButton->OnHovered.Broadcast();
+		}
+		
 		for (FDynamicEdgeNavigation& DynamicEdgeNavigation : DynamicEdgeNavigations)
 		{
 			ProcessDynamicEdgeNavigation(DynamicEdgeNavigation);
@@ -656,6 +664,8 @@ void UUINavWidget::PropagateLoseNavigation(UUINavWidget* NewActiveWidget, UUINav
 
 void UUINavWidget::LoseNavigation(UUINavWidget* NewActiveWidget)
 {
+	if (!bHasNavigation) return;
+	
 	const bool bNewWidgetIsChild = NewActiveWidget != nullptr ?
 									UUINavBlueprintFunctionLibrary::ContainsArray<int>(NewActiveWidget->GetUINavWidgetPath(), UINavWidgetPath) :
 									false;
@@ -673,9 +683,13 @@ void UUINavWidget::LoseNavigation(UUINavWidget* NewActiveWidget)
 		}
 
 		bIgnoreMouseEvent = true;
-		CurrentButton->OnUnhovered.Broadcast();
+		if (CurrentButton != nullptr)
+		{
+			CurrentButton->OnUnhovered.Broadcast();
+		}
 	}
 
+	bHasNavigation = false;
 	SelectedButtonIndex = -1;
 	
 	OnLostNavigation(NewActiveWidget, bNewWidgetIsChild);
@@ -1501,10 +1515,14 @@ void UUINavWidget::ClearGrid(const int GridIndex, const bool bAutoNavigate)
 	{
 		if (i <= LastIndex)
 		{
+			UINavButtons[FirstIndex]->ButtonIndex = -1;
+			UINavButtons[FirstIndex]->GridIndex = -1;
+			UINavButtons[FirstIndex]->IndexInGrid = -1;
 			UINavButtons.RemoveAt(FirstIndex);
 			UUINavComponent* Component = GetUINavComponentAtIndex(i);
 			if (Component != nullptr)
 			{
+				Component->ComponentIndex = -1;
 				UINavComponents.Remove(Component);
 			}
 		}
@@ -3347,6 +3365,8 @@ UUINavHorizontalComponent * UUINavWidget::GetUINavHorizontalCompAtIndex(const in
 
 void UUINavWidget::HoverEvent(int Index)
 {
+	if (!IsButtonIndexValid(Index)) return;
+	
 	if ((OuterUINavWidget != nullptr || ChildUINavWidgets.Num() > 0) &&
 		UINavPC != nullptr && !UINavPC->ShouldIgnoreHoverEvents())
 	{
@@ -3369,7 +3389,13 @@ void UUINavWidget::HoverEvent(int Index)
 		return;
 	}
 
-	if (Index == ButtonIndex || (UINavPC->GetCurrentInputType() != EInputType::Mouse && (!bUseLeftThumbstickAsMouse || !UINavPC->IsMovingLeftStick())))
+#if IS_VR_PLATFORM 
+	const bool bIsVR = UHeadMountedDisplayFunctionLibrary::IsHeadMountedDisplayEnabled();
+#else
+	const bool bIsVR = false;
+#endif
+
+	if (Index == ButtonIndex || (!bIsVR && UINavPC->GetCurrentInputType() != EInputType::Mouse && (!bUseLeftThumbstickAsMouse || !UINavPC->IsMovingLeftStick())))
 	{
 		if (bUseButtonStates) RevertButtonStyle(Index);
 		return;
@@ -3381,6 +3407,8 @@ void UUINavWidget::HoverEvent(int Index)
 
 void UUINavWidget::UnhoverEvent(int Index)
 {
+	if (!IsButtonIndexValid(Index)) return;
+	
 	if (bIgnoreMouseEvent)
 	{
 		bIgnoreMouseEvent = false;
@@ -3406,6 +3434,8 @@ void UUINavWidget::UnhoverEvent(int Index)
 
 void UUINavWidget::PressEvent(int Index)
 {
+	if (!IsButtonIndexValid(Index)) return;
+	
 	if (IsRebindingInput())
 	{
 		if (ReceiveInputType == EReceiveInputType::Axis) CancelRebind();
@@ -3427,6 +3457,8 @@ void UUINavWidget::PressEvent(int Index)
 
 void UUINavWidget::ReleaseEvent(int Index)
 {
+	if (!IsButtonIndexValid(Index)) return;
+	
 	if (bIgnoreMouseEvent)
 	{
 		bIgnoreMouseEvent = false;
