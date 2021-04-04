@@ -6,9 +6,8 @@
 #include "GameFramework/InputSettings.h"
 #include "UINavSettings.h"
 #include "UINavComponent.h"
-#include "Kismet/GameplayStatics.h"
-#define IS_VR_PLATFORM() !PLATFORM_SWITCH && !PLATFORM_XBOXONE
-#if IS_VR_PLATFORM()
+#include "UINavMacros.h"
+#if IS_VR_PLATFORM
 #include "IXRTrackingSystem.h"
 #endif
 
@@ -86,10 +85,10 @@ void UUINavBlueprintFunctionLibrary::ResetInputSettings()
 
 bool UUINavBlueprintFunctionLibrary::RespectsRestriction(const FKey Key, const EInputRestriction Restriction)
 {
-#if IS_VR_PLATFORM()
-	FString HMD = GEngine->XRSystem != nullptr ? GEngine->XRSystem->GetSystemName().ToString() : TEXT("");
+#if IS_VR_PLATFORM
+	const FString HMD = GEngine->XRSystem != nullptr ? GEngine->XRSystem->GetSystemName().ToString() : TEXT("");
 #else
-	FString HMD = TEXT("");
+	const FString HMD = TEXT("");
 #endif
 	
 	switch (Restriction)

@@ -260,14 +260,23 @@ void UUINavPCComponent::SetActiveWidget(UUINavWidget * NewActiveWidget)
 {
 	if (NewActiveWidget == ActiveWidget) return;
 	
-	if (ActiveWidget != nullptr && NewActiveWidget == nullptr)
+	if (ActiveWidget != nullptr)
 	{
-		UnbindMenuInputs();
-		PressedActions.Empty();
+		if (NewActiveWidget == nullptr)
+		{
+			UnbindMenuInputs();
+			PressedActions.Empty();
+		}
+
+		if (ActiveWidget->OuterUINavWidget == nullptr)
+		{
+			ActiveWidget->LoseNavigation(NewActiveWidget);
+		}
 	}
-	else if (ActiveWidget == nullptr && NewActiveWidget != nullptr)
+	else if (NewActiveWidget != nullptr)
 	{
 		BindMenuInputs();
+		NewActiveWidget->GainNavigation(nullptr);
 	}
 	ActiveWidget = NewActiveWidget;
 

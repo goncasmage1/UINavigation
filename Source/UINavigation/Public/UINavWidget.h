@@ -10,7 +10,6 @@
 #include "Data/NavigationEvent.h"
 #include "Data/GridButton.h"
 #include "Data/DynamicEdgeNavigation.h"
-#include "UINavMacros.h"
 #include "UINavWidget.generated.h"
 
 #define SELECT_INDEX -101
@@ -40,6 +39,7 @@ protected:
 
 	bool bAutoAppended = false;
 	bool bDestroying = false;
+	bool bHasNavigation = false;
 
 	//Used to track when the selector's position should be updated
 	int WaitForTick;
@@ -819,6 +819,8 @@ public:
 		class UUINavButton* GetButtonAtIndex(const int InButtonIndex);
 
 	static EButtonStyle GetStyleFromButtonState(UButton* Button);
+	
+	FORCEINLINE bool HasNavigation() const { return bHasNavigation; }
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
 		void GetGridAtIndex(const int GridIndex, FGrid& Grid, bool& IsValid);
