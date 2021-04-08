@@ -112,6 +112,8 @@ protected:
 	*/
 	inline void ChangeTextColorToDefault();
 
+	void SetEnableUINavButtons(const bool bEnable, const bool bRecursive);
+
 	/**
 	*	Rebuilds all of the widget's navigation and navigates to the button at the specified index
 	*/
@@ -198,6 +200,10 @@ public:
 	//Widget that created this widget (if returned from a child)
 	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
 		UUINavWidget* ReturnedFromWidget;
+
+	//Nested widget that created this widget (if returned from a child)
+	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
+		UUINavWidget* PreviousNestedWidget;
 
 	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
 		class UUINavWidgetComponent* WidgetComp;

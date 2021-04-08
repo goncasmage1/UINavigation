@@ -59,13 +59,14 @@ void UUINavWidget::NativeConstruct()
 	*/
 	if (ParentWidget != nullptr && ParentWidget->IsInViewport() && bParentRemoved)
 	{
-		ParentWidget->bReturningToParent = true;
-		ParentWidget->RemoveFromParent();
+		UUINavWidget* OuterParentWidget = ParentWidget->GetMostOuterUINavWidget();
+		OuterParentWidget->bReturningToParent = true;
+		OuterParentWidget->RemoveFromParent();
 
 		if (bShouldDestroyParent)
 		{
-			ParentWidget->Destruct();
-			ParentWidget = nullptr;
+			OuterParentWidget->Destruct();
+			OuterParentWidget = nullptr;
 		}
 	}
 
@@ -161,20 +162,23 @@ void UUINavWidget::ReconfigureSetup()
 
 	bShouldTick = true;
 	WaitForTick = 0;
+
+	for (UUINavWidget* ChildUINavWidget : ChildUINavWidgets)
+	{
+		ChildUINavWidget->ReconfigureSetup();
+	}
 }
 
 void UUINavWidget::CleanSetup()
 {
-	//Disable all buttons (bug fix)
-	for (UUINavButton* button : UINavButtons)
+	for (UUINavWidget* ChildUINavWidget : ChildUINavWidgets)
 	{
-		button->bAutoCollapse = button->bIsEnabled;
-		if (button->bIsEnabled)
-		{
-			button->SetIsEnabled(false);
-		}
-
+		ChildUINavWidget->CleanSetup();
 	}
+	
+	//Disable all buttons (bug fix)
+	SetEnableUINavButtons(false, false);
+	
 	bSetupStarted = false;
 	SelectedButtonIndex = -1;
 }
@@ -492,6 +496,24 @@ void UUINavWidget::ChangeTextColorToDefault()
 	for (int j = 0; j < UINavButtons.Num(); j++) SwitchTextColorTo(j, TextDefaultColor);
 }
 
+void UUINavWidget::SetEnableUINavButtons(const bool bEnable, const bool bRecursive)
+{
+	for (UUINavButton* Button : UINavButtons)
+	{
+		if (Button->bAutoCollapse)
+		{
+			Button->SetIsEnabled(bEnable);
+		}
+	}
+
+	if (!bRecursive) return;
+	
+	for (UUINavWidget* ChildUINavWidget : ChildUINavWidgets)
+	{
+		ChildUINavWidget->SetEnableUINavButtons(bEnable, bRecursive);
+	}
+}
+
 void UUINavWidget::RebuildNavigation(const int NewButtonIndex)
 {
 	bCompletedSetup = false;
@@ -561,12 +583,9 @@ void UUINavWidget::UINavSetup()
 	}
 
 	//Re-enable all buttons (bug fix)
-	for (UUINavButton* Button : UINavButtons)
+	if (OuterUINavWidget == nullptr)
 	{
-		if (Button->bAutoCollapse)
-		{
-			Button->SetIsEnabled(true);
-		}
+		SetEnableUINavButtons(true, true);
 	}
 	
 	bCompletedSetup = true;
@@ -574,6 +593,12 @@ void UUINavWidget::UINavSetup()
 	if (OuterUINavWidget == nullptr)
 	{
 		GainNavigation(nullptr);
+	}
+
+	if (PreviousNestedWidget != nullptr)
+	{
+		UINavPC->SetActiveNestedWidget(PreviousNestedWidget);
+		PreviousNestedWidget = nullptr;
 	}
 
 	OnSetupCompleted();
@@ -731,7 +756,7 @@ void UUINavWidget::NativeTick(const FGeometry & MyGeometry, float DeltaTime)
 
 void UUINavWidget::RemoveFromParent()
 {
-	if (!bReturningToParent && !bDestroying && !GetFName().IsNone() && !IsPendingKill() &&
+	if (OuterUINavWidget == nullptr && !bReturningToParent && !bDestroying && !GetFName().IsNone() && !IsPendingKill() &&
 	    (ParentWidget != nullptr || (bAllowRemoveIfRoot && UINavPC != nullptr)))
 	{
 		ReturnToParent();
@@ -2806,41 +2831,45 @@ UWidget * UUINavWidget::GoToBuiltWidget(UUINavWidget* NewWidget, const bool bRem
 {
 	if (NewWidget == nullptr) return nullptr;
 
-	if (OuterUINavWidget == nullptr && NewWidget->GetMostOuterUINavWidget() != this)
+	UUINavWidget* OldOuterUINavWidget = GetMostOuterUINavWidget();
+	UUINavWidget* NewOuterUINavWidget = NewWidget->GetMostOuterUINavWidget();
+	
+	if (OuterUINavWidget != nullptr || NewOuterUINavWidget == this)
 	{
-		NewWidget->ParentWidget = this;
-		NewWidget->bParentRemoved = bRemoveParent;
-		NewWidget->bShouldDestroyParent = bDestroyParent;
-		NewWidget->WidgetComp = WidgetComp;
-		if (WidgetComp != nullptr)
+		if (NewOuterUINavWidget == OldOuterUINavWidget)
 		{
-			WidgetComp->SetWidget(NewWidget);
+			UINavPC->SetActiveNestedWidget(NewWidget);
+			return NewWidget;
 		}
-		else
+		
+		UINavPC->SetActiveNestedWidget(nullptr);
+		if (OuterUINavWidget != nullptr)
 		{
-			if (!bUsingSplitScreen || NewWidget->bUseFullscreenWhenSplitscreen) NewWidget->AddToViewport(ZOrder);
-			else NewWidget->AddToPlayerScreen(ZOrder);
-
-			APlayerController* PC = Cast<APlayerController>(UINavPC->GetOwner());
-			NewWidget->SetUserFocus(PC);
-			if (UINavPC->GetInputMode() == EInputMode::UI)
-			{
-				NewWidget->SetKeyboardFocus();
-			}
+			OldOuterUINavWidget->PreviousNestedWidget = this;
 		}
-		CleanSetup();
+	}
+	
+	NewWidget->ParentWidget = GetMostOuterUINavWidget();
+	NewWidget->bParentRemoved = bRemoveParent;
+	NewWidget->bShouldDestroyParent = bDestroyParent;
+	NewWidget->WidgetComp = WidgetComp;
+	if (WidgetComp != nullptr)
+	{
+		WidgetComp->SetWidget(NewWidget);
 	}
 	else
 	{
-		if (NewWidget->GetMostOuterUINavWidget() == GetMostOuterUINavWidget())
+		if (!bUsingSplitScreen || NewWidget->bUseFullscreenWhenSplitscreen) NewWidget->AddToViewport(ZOrder);
+		else NewWidget->AddToPlayerScreen(ZOrder);
+
+		APlayerController* PC = Cast<APlayerController>(UINavPC->GetOwner());
+		NewWidget->SetUserFocus(PC);
+		if (UINavPC->GetInputMode() == EInputMode::UI)
 		{
-			UINavPC->SetActiveNestedWidget(NewWidget);
-		}
-		else
-		{
-			UINavPC->SetActiveNestedWidget(nullptr);
+			NewWidget->SetKeyboardFocus();
 		}
 	}
+	OldOuterUINavWidget->CleanSetup();
 	
 	return NewWidget;
 }
@@ -2919,8 +2948,14 @@ void UUINavWidget::ReturnToParent(const bool bRemoveAllParents, const int ZOrder
 				}
 				else
 				{
-					UINavPC->SetActiveWidget(ParentWidget);
+					UUINavWidget* ParentOuter = ParentWidget->GetMostOuterUINavWidget();
+					UINavPC->SetActiveWidget(ParentOuter);
 					ParentWidget->ReconfigureSetup();
+					if (ParentWidget->PreviousNestedWidget != nullptr)
+					{
+						UINavPC->SetActiveNestedWidget(ParentWidget->PreviousNestedWidget);
+						ParentWidget->PreviousNestedWidget = nullptr;
+					}
 				}
 				bReturningToParent = true;
 				RemoveFromParent();
