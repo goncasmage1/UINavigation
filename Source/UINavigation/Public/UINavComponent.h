@@ -18,6 +18,8 @@ public:
 	UUINavComponent(const FObjectInitializer& ObjectInitializer);
 
 	virtual void NativeConstruct() override;
+	
+	void CallCustomInput(FName ActionName, uint8* Buffer);
 
 	UFUNCTION(BlueprintNativeEvent, Category = UINavComponent)
 		void OnNavigatedTo();

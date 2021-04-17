@@ -21,6 +21,15 @@ void UUINavComponent::NativeConstruct()
 	Super::NativeConstruct();
 }
 
+void UUINavComponent::CallCustomInput(const FName ActionName, uint8* Buffer)
+{
+	UFunction* CustomFunction = FindFunction(ActionName);
+	if (CustomFunction != nullptr && CustomFunction->ParmsSize == sizeof(bool))
+	{
+		ProcessEvent(CustomFunction, Buffer);
+	}
+}
+
 void UUINavComponent::OnNavigatedTo_Implementation()
 {
 }
