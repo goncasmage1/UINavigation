@@ -2178,6 +2178,11 @@ void UUINavWidget::CallCustomInput(const FName ActionName, uint8* Buffer)
 		}
 	}
 
+	if (CurrentButton != nullptr && CurrentButton->NavComp != nullptr)
+	{
+		CurrentButton->NavComp->CallCustomInput(ActionName, Buffer);
+	}
+
 	for (UUINavCollection* Collection : UINavCollections)
 	{
 		Collection->CallCustomInput(ActionName, Buffer);
