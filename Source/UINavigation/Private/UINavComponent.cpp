@@ -13,6 +13,11 @@ void UUINavComponent::NativeConstruct()
 {
 	check(NavButton != nullptr && "UINavComponent has no associated UINavButton");
 
+	if (NavButton != nullptr)
+	{
+		NavButton->NavComp = this;
+	}
+
 	Super::NativeConstruct();
 }
 

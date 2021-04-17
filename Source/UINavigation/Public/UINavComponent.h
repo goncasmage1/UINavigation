@@ -42,9 +42,6 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavComponent)
 		bool IsValid(const bool bIgnoreDisabledUINavButton = true) const;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavComponent)
-		int ComponentIndex = -1;
-
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget), Category = UINavComponent)
 		class UUINavButton* NavButton;
 
