@@ -3304,10 +3304,16 @@ void UUINavWidget::FinishPress(const bool bMouse)
 
 void UUINavWidget::SetupUINavButtonDelegates(UUINavButton * NewButton)
 {
-	if (!NewButton->CustomHover.IsBound())
-		NewButton->CustomHover.AddDynamic(this, &UUINavWidget::HoverEvent);
-	if (!NewButton->CustomUnhover.IsBound())
-		NewButton->CustomUnhover.AddDynamic(this, &UUINavWidget::UnhoverEvent);
+	if (NewButton->CustomHover.IsBound())
+	{
+		NewButton->CustomHover.Clear();
+	}
+	NewButton->CustomHover.AddDynamic(this, &UUINavWidget::HoverEvent);
+	if (NewButton->CustomUnhover.IsBound())
+	{
+		NewButton->CustomUnhover.Clear();
+	}
+	NewButton->CustomUnhover.AddDynamic(this, &UUINavWidget::UnhoverEvent);
 	FScriptDelegate OnClickScriptDelegate;
 	OnClickScriptDelegate.BindUFunction(NewButton, FName("OnClick"));
 	if (NewButton->OnPressed.Contains(OnClickScriptDelegate))
