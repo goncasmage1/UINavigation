@@ -9,16 +9,16 @@ void UUINavHorizontalComponent::NavigateLeft()
 {
 	OnNavigateLeft();
 	OnUpdated();
-	ParentWidget->OnHorizCompNavigateLeft(ComponentIndex);
-	ParentWidget->OnHorizCompUpdated(ComponentIndex);
+	ParentWidget->OnHorizCompNavigateLeft(NavButton->ButtonIndex);
+	ParentWidget->OnHorizCompUpdated(NavButton->ButtonIndex);
 }
 
 void UUINavHorizontalComponent::NavigateRight()
 {
 	OnNavigateRight();
 	OnUpdated();
-	ParentWidget->OnHorizCompNavigateRight(ComponentIndex);
-	ParentWidget->OnHorizCompUpdated(ComponentIndex);
+	ParentWidget->OnHorizCompNavigateRight(NavButton->ButtonIndex);
+	ParentWidget->OnHorizCompUpdated(NavButton->ButtonIndex);
 }
 
 void UUINavHorizontalComponent::Update()

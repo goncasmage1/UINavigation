@@ -300,7 +300,7 @@ void UUINavPCComponent::SetActiveNestedWidget(UUINavWidget* NewActiveWidget)
 		SetActiveWidget(NewActiveWidget);
 	}
 
-	UUINavWidget* MostOuter = OldActiveWidget->GetMostOuterUINavWidget();
+	UUINavWidget* MostOuter = OldActiveWidget != nullptr ? OldActiveWidget->GetMostOuterUINavWidget() : NewActiveWidget->GetMostOuterUINavWidget();
 	if (MostOuter == nullptr) return;
 	
 	UUINavWidget* CommonParent = MostOuter;
@@ -309,8 +309,8 @@ void UUINavPCComponent::SetActiveNestedWidget(UUINavWidget* NewActiveWidget)
 	const TArray<int>& OldPath = OldActiveWidget != nullptr ? OldActiveWidget->GetUINavWidgetPath() : TArray<int>();
 	const TArray<int>& NewPath = NewActiveWidget != nullptr ? NewActiveWidget->GetUINavWidgetPath() : TArray<int>();
 
-	if (OldPath.Num() == Depth) OldActiveWidget->LoseNavigation(NewActiveWidget);
-	if (NewPath.Num() == Depth) NewActiveWidget->GainNavigation(OldActiveWidget);
+	if (OldPath.Num() == Depth && OldActiveWidget != nullptr) OldActiveWidget->LoseNavigation(NewActiveWidget);
+	if (NewPath.Num() == Depth && NewActiveWidget != nullptr) NewActiveWidget->GainNavigation(OldActiveWidget);
 	
 	bShouldIgnoreHoverEvents = true;
 	while (true)
@@ -325,8 +325,8 @@ void UUINavPCComponent::SetActiveNestedWidget(UUINavWidget* NewActiveWidget)
 		{
 			if (Depth == FMath::Max(OldPath.Num(), NewPath.Num()))
 			{
-				if (OldIndex != -1) OldActiveWidget->PropagateLoseNavigation(NewActiveWidget, OldActiveWidget, CommonParent);
-				if (NewIndex != -1) NewActiveWidget->PropagateGainNavigation(OldActiveWidget, NewActiveWidget, CommonParent);
+				if (OldIndex != -1 && OldActiveWidget != nullptr) OldActiveWidget->PropagateLoseNavigation(NewActiveWidget, OldActiveWidget, CommonParent);
+				if (NewIndex != -1 && NewActiveWidget != nullptr) NewActiveWidget->PropagateGainNavigation(OldActiveWidget, NewActiveWidget, CommonParent);
 				break;
 			}
 		}
@@ -335,8 +335,8 @@ void UUINavPCComponent::SetActiveNestedWidget(UUINavWidget* NewActiveWidget)
 		    CommonParent = CommonParent->GetChildUINavWidget(OldIndex);
 		}
 		
-		if (OldPath.Num() == Depth) OldActiveWidget->LoseNavigation(NewActiveWidget);
-		if (NewPath.Num() == Depth) NewActiveWidget->GainNavigation(OldActiveWidget);
+		if (OldPath.Num() == Depth && OldActiveWidget != nullptr) OldActiveWidget->LoseNavigation(NewActiveWidget);
+		if (NewPath.Num() == Depth && NewActiveWidget != nullptr) NewActiveWidget->GainNavigation(OldActiveWidget);
 	}
 
 	bShouldIgnoreHoverEvents = false;

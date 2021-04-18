@@ -112,6 +112,8 @@ protected:
 	*/
 	inline void ChangeTextColorToDefault();
 
+	void SetEnableUINavButtons(const bool bEnable, const bool bRecursive);
+
 	/**
 	*	Rebuilds all of the widget's navigation and navigates to the button at the specified index
 	*/
@@ -148,17 +150,9 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
 		TArray<class UUINavButton*> UINavButtons;
 
-	//All the UINavComponents in this Widget
-	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
-		TArray<class UUINavComponent*> UINavComponents;
-
 	//All the child UINavWidgets in this Widget
 	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
 		TArray<UUINavWidget*> ChildUINavWidgets;
-
-	//All the UINavComponentBoxes in this Widget
-	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
-		TArray<class UUINavHorizontalComponent*> UINavHorizontalComps;
 
 	//The UINavInputContainer in this Widget
 	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
@@ -198,6 +192,10 @@ public:
 	//Widget that created this widget (if returned from a child)
 	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
 		UUINavWidget* ReturnedFromWidget;
+
+	//Nested widget that created this widget (if returned from a child)
+	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
+		UUINavWidget* PreviousNestedWidget;
 
 	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
 		class UUINavWidgetComponent* WidgetComp;
@@ -657,8 +655,6 @@ public:
 	
 	FORCEINLINE TArray<int> GetUINavWidgetPath() const { return UINavWidgetPath; }
 
-	int GetLocalComponentIndex(const int Index);
-	int GetLocalHorizontalCompIndex(const int Index);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
 		bool IsSelectorValid();
@@ -688,9 +684,9 @@ public:
 	/**
 	*	Adds given widget to screen (strongly recomended over manual alternative)
 	*
-	*	@param	WidgetClass  The class of the widget to add to the screen
-	*	@param	RemoveParent  Whether to remove the parent widget (this widget) from the viewport
-	*	@param  DestroyParent  Whether to destruct the parent widget (this widget)
+	*	@param	NewWidgetClass  The class of the widget to add to the screen
+	*	@param	bRemoveParent  Whether to remove the parent widget (this widget) from the viewport
+	*	@param  bDestroyParent  Whether to destruct the parent widget (this widget)
 	*/
 	UFUNCTION(BlueprintCallable, Category = UINavWidget, meta = (AdvancedDisplay=2))
 		UWidget* GoToWidget(TSubclassOf<UUINavWidget> NewWidgetClass, const bool bRemoveParent, const bool bDestroyParent = false, const int ZOrder = 0);
@@ -698,9 +694,9 @@ public:
 	/**
 	*	Adds given widget to screen (strongly recomended over manual alternative)
 	*
-	*	@param	Widget  Object instance of the UINavWidget to add to the screen
-	*	@param	RemoveParent  Whether to remove the parent widget (this widget) from the viewport
-	*	@param  DestroyParent  Whether to destruct the parent widget (this widget)
+	*	@param	NewWidget  Object instance of the UINavWidget to add to the screen
+	*	@param	bRemoveParent  Whether to remove the parent widget (this widget) from the viewport
+	*	@param  bDestroyParent  Whether to destruct the parent widget (this widget)
 	*/
 	UFUNCTION(BlueprintCallable, Category = UINavWidget, meta = (AdvancedDisplay=2))
 		UWidget* GoToBuiltWidget(UUINavWidget* NewWidget, const bool bRemoveParent, const bool bDestroyParent = false, const int ZOrder = 0);
@@ -764,9 +760,7 @@ public:
 	void IncrementGrid(class UUINavButton* NewButton, FGrid& TargetGrid, int& IndexInGrid);
 	void DecrementGrid(FGrid& TargetGrid, const int IndexInGrid = -1);
 	void IncrementUINavButtonIndices(const int StartingIndex, const int GridIndex);
-	void IncrementUINavComponentIndices(const int StartingIndex);
 	void DecrementUINavButtonIndices(const int StartingIndex, const int GridIndex);
-	void DecrementUINavComponentIndices(const int StartingIndex);
 
 	/**
 	*	Moves a UINavButton or UINavComponent to the specified grid and its index.
@@ -784,10 +778,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = UINavWidget)
 		void MoveUINavElementToGrid2(const int FromGridIndex, const int FromIndexInGrid, const int TargetGridIndex, const int TargetIndexInGrid = -1);
 
-	void InsertNewComponent(class UUINavComponent* NewComponent, const int ComponentIndex);
 	void UpdateArrays(const int From, const int To, const int OldGridIndex, const int OldIndexInGrid);
 	void UpdateButtonArray(const int From, int To, const int OldGridIndex, const int OldIndexInGrid);
-	void UpdateComponentArray(const int From, const int To);
 	void UpdateCollectionLastIndex(const int ButtonIndex, const bool bAdded);
 	void ReplaceButtonInNavigationGrid(class UUINavButton* ButtonToReplace, const int GridIndex, const int IndexInGrid);
 
