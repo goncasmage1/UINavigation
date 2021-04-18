@@ -101,7 +101,6 @@ void UUINavInputContainer::CreateInputBoxes(const int GridIndex)
 	if (InputBox_BP == nullptr) return;
 
 	int TempFirstButtonIndex = ParentWidget->UINavButtons.Num();
-	int StartingInputComponentIndex = ParentWidget->UINavComponents.Num();
 
 	int Iterations = InputNames.Num();
 
@@ -126,19 +125,15 @@ void UUINavInputContainer::CreateInputBoxes(const int GridIndex)
 		for (int j = 0; j < KeysPerInput; j++)
 		{
 			ParentWidget->UINavButtons.Add(nullptr);
-			ParentWidget->UINavComponents.Add(nullptr);
 
 			int NewButtonIndex = TempFirstButtonIndex + i * KeysPerInput + j;
-			int NewComponentIndex = StartingInputComponentIndex + i * KeysPerInput + j;
 			ParentWidget->UINavButtons[NewButtonIndex] = NewInputBox->InputButtons[j]->NavButton;
-			ParentWidget->UINavComponents[NewComponentIndex] = NewInputBox->InputButtons[j];
 			NewInputBox->InputButtons[j]->NavButton->ButtonIndex = NewButtonIndex;
 			if (GridIndex != -1)
 			{
 				NewInputBox->InputButtons[j]->NavButton->GridIndex = GridIndex;
 				NewInputBox->InputButtons[j]->NavButton->IndexInGrid = (i * KeysPerInput) + j;
 			}
-			NewInputBox->InputButtons[j]->ComponentIndex = NewButtonIndex;
 			ParentWidget->SetupUINavButtonDelegates(NewInputBox->InputButtons[j]->NavButton);
 		}
 	}

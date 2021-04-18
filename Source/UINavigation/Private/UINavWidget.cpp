@@ -59,13 +59,14 @@ void UUINavWidget::NativeConstruct()
 	*/
 	if (ParentWidget != nullptr && ParentWidget->IsInViewport() && bParentRemoved)
 	{
-		ParentWidget->bReturningToParent = true;
-		ParentWidget->RemoveFromParent();
+		UUINavWidget* OuterParentWidget = ParentWidget->GetMostOuterUINavWidget();
+		OuterParentWidget->bReturningToParent = true;
+		OuterParentWidget->RemoveFromParent();
 
 		if (bShouldDestroyParent)
 		{
-			ParentWidget->Destruct();
-			ParentWidget = nullptr;
+			OuterParentWidget->Destruct();
+			OuterParentWidget = nullptr;
 		}
 	}
 
@@ -161,20 +162,23 @@ void UUINavWidget::ReconfigureSetup()
 
 	bShouldTick = true;
 	WaitForTick = 0;
+
+	for (UUINavWidget* ChildUINavWidget : ChildUINavWidgets)
+	{
+		ChildUINavWidget->ReconfigureSetup();
+	}
 }
 
 void UUINavWidget::CleanSetup()
 {
-	//Disable all buttons (bug fix)
-	for (UUINavButton* button : UINavButtons)
+	for (UUINavWidget* ChildUINavWidget : ChildUINavWidgets)
 	{
-		button->bAutoCollapse = button->bIsEnabled;
-		if (button->bIsEnabled)
-		{
-			button->SetIsEnabled(false);
-		}
-
+		ChildUINavWidget->CleanSetup();
 	}
+	
+	//Disable all buttons (bug fix)
+	SetEnableUINavButtons(false, false);
+	
 	bSetupStarted = false;
 	SelectedButtonIndex = -1;
 }
@@ -420,16 +424,10 @@ void UUINavWidget::TraverseHierarquy(UUINavWidget* UINavWidget, UUserWidget* Wid
 			{
 				NewNavButton = Cast<UUINavButton>(UIComp->NavButton);
 
-				if (UIComp->ComponentIndex == -1) UIComp->ComponentIndex = UINavWidget->UINavButtons.Num();
-				NewNavButton->ButtonIndex = UIComp->ComponentIndex;
-
-				UINavWidget->UINavComponents.Add(UIComp);
-
 				UUINavHorizontalComponent* HorizComp = Cast<UUINavHorizontalComponent>(UIComp);
 				if (HorizComp != nullptr)
 				{
 					HorizComp->ParentWidget = UINavWidget;
-					UINavWidget->UINavHorizontalComps.Add(HorizComp);
 				}
 			}
 		}
@@ -492,6 +490,24 @@ void UUINavWidget::ChangeTextColorToDefault()
 	for (int j = 0; j < UINavButtons.Num(); j++) SwitchTextColorTo(j, TextDefaultColor);
 }
 
+void UUINavWidget::SetEnableUINavButtons(const bool bEnable, const bool bRecursive)
+{
+	for (UUINavButton* Button : UINavButtons)
+	{
+		if (Button->bAutoCollapse)
+		{
+			Button->SetIsEnabled(bEnable);
+		}
+	}
+
+	if (!bRecursive) return;
+	
+	for (UUINavWidget* ChildUINavWidget : ChildUINavWidgets)
+	{
+		ChildUINavWidget->SetEnableUINavButtons(bEnable, bRecursive);
+	}
+}
+
 void UUINavWidget::RebuildNavigation(const int NewButtonIndex)
 {
 	bCompletedSetup = false;
@@ -516,19 +532,12 @@ void UUINavWidget::RebuildNavigation(const int NewButtonIndex)
 	{
 		UINavButton->ButtonIndex = -1;
 	}
-	for (UUINavComponent* UINavComponent : UINavComponents)
-	{
-		UINavComponent->ComponentIndex = -1;
-	}
-
 	NavigationGrids.Reset();
 	GridIndexMap.Reset();
 	DynamicEdgeNavigations.Reset();
 	UINavAnimations.Reset();
 	ScrollBoxes.Reset();
 	UINavButtons.Reset();
-	UINavComponents.Reset();
-	UINavHorizontalComps.Reset();
 	UINavInputBoxes.Reset();
 	UINavCollections.Reset();
 
@@ -561,12 +570,9 @@ void UUINavWidget::UINavSetup()
 	}
 
 	//Re-enable all buttons (bug fix)
-	for (UUINavButton* Button : UINavButtons)
+	if (OuterUINavWidget == nullptr)
 	{
-		if (Button->bAutoCollapse)
-		{
-			Button->SetIsEnabled(true);
-		}
+		SetEnableUINavButtons(true, true);
 	}
 	
 	bCompletedSetup = true;
@@ -574,6 +580,12 @@ void UUINavWidget::UINavSetup()
 	if (OuterUINavWidget == nullptr)
 	{
 		GainNavigation(nullptr);
+	}
+
+	if (PreviousNestedWidget != nullptr)
+	{
+		UINavPC->SetActiveNestedWidget(PreviousNestedWidget);
+		PreviousNestedWidget = nullptr;
 	}
 
 	OnSetupCompleted();
@@ -731,7 +743,7 @@ void UUINavWidget::NativeTick(const FGeometry & MyGeometry, float DeltaTime)
 
 void UUINavWidget::RemoveFromParent()
 {
-	if (!bReturningToParent && !bDestroying && !GetFName().IsNone() && !IsPendingKill() &&
+	if (OuterUINavWidget == nullptr && !bReturningToParent && !bDestroying && !GetFName().IsNone() && !IsPendingKill() &&
 	    (ParentWidget != nullptr || (bAllowRemoveIfRoot && UINavPC != nullptr)))
 	{
 		ReturnToParent();
@@ -901,7 +913,6 @@ void UUINavWidget::AddUINavButton(UUINavButton * NewButton, int const TargetGrid
 	UINavButtons.Insert(NewButton, NewButton->ButtonIndex);
 
 	IncrementUINavButtonIndices(NewButton->ButtonIndex, TargetGridIndex);
-	IncrementUINavComponentIndices(NewButton->ButtonIndex);
 
 	if (UINavButtons.Num() == 1)
 	{
@@ -932,41 +943,7 @@ void UUINavWidget::AddUINavButtons(TArray<UUINavButton*> NewButtons, const int T
 
 void UUINavWidget::AddUINavComponent(UUINavComponent * NewComponent, const int TargetGridIndex, int IndexInGrid)
 {
-	if (NewComponent == nullptr || !IsGridIndexValid(TargetGridIndex)) return;
-
-	if (UINavAnimations.Num() > 0)
-	{
-		DISPLAYERROR("Runtime manipulation not supported with navigation using animations.");
-	}
-
-	NumberOfButtonsInGrids++;
-	FGrid& TargetGrid = NavigationGrids[TargetGridIndex];
-
-	if (IndexInGrid >= TargetGrid.GetDimension() || IndexInGrid <= -1) IndexInGrid = TargetGrid.GetDimension();
-
-	IncrementGrid(NewComponent->NavButton, TargetGrid, IndexInGrid);
-
-	NewComponent->NavButton->ButtonIndex = GetGridStartingIndex(TargetGridIndex) + IndexInGrid;
-	NewComponent->ComponentIndex = NewComponent->NavButton->ButtonIndex;
-	NewComponent->NavButton->GridIndex = TargetGrid.GridIndex;
-	NewComponent->NavButton->IndexInGrid = IndexInGrid;
-	SetupUINavButtonDelegates(NewComponent->NavButton);
-	
-	const int TargetIndex = NewComponent->ComponentIndex;
-	UINavButtons.Insert(NewComponent->NavButton, NewComponent->NavButton->ButtonIndex);
-	InsertNewComponent(NewComponent, TargetIndex);
-
-	IncrementUINavButtonIndices(NewComponent->ComponentIndex, TargetGridIndex);
-
-	if (UINavButtons.Num() == 1)
-	{
-		ButtonIndex = 0;
-		CurrentButton = UINavButtons[0];
-		DispatchNavigation(ButtonIndex);
-		OnNavigate(-1, ButtonIndex);
-	}
-
-	UpdateDynamicEdgeNavigations(TargetGridIndex);
+	AddUINavButton(NewComponent->NavButton, TargetGridIndex, IndexInGrid);
 }
 
 void UUINavWidget::AddUINavComponents(TArray<UUINavComponent*> NewComponents, const int TargetGridIndex, int IndexInGrid)
@@ -982,7 +959,7 @@ void UUINavWidget::AddUINavComponents(TArray<UUINavComponent*> NewComponents, co
 
 	for (UUINavComponent* NewComponent : NewComponents)
 	{
-		AddUINavComponent(NewComponent, TargetGridIndex, IndexInGrid);
+		AddUINavButton(NewComponent->NavButton, TargetGridIndex, IndexInGrid);
 		if (bIncrementIndexInGrid) IndexInGrid++;
 	}
 }
@@ -1030,7 +1007,6 @@ void UUINavWidget::DeleteUINavElement(const int Index, const bool bAutoNavigate)
 	DecrementGrid(NavigationGrids[Button->GridIndex], Button->IndexInGrid);
 
 	DecrementUINavButtonIndices(Index, Button->GridIndex);
-	DecrementUINavComponentIndices(Index);
 
 	DeleteButtonEdgeNavigationRefs(Button);
 }
@@ -1100,48 +1076,6 @@ void UUINavWidget::DecrementGrid(FGrid & TargetGrid, const int IndexInGrid)
 	UpdateCollectionLastIndex(TargetGrid.GridIndex, false);
 }
 
-void UUINavWidget::InsertNewComponent(UUINavComponent* NewComponent, const int TargetIndex)
-{
-	const int FoundIndex = GetLocalComponentIndex(TargetIndex);
-	if (FoundIndex != -1)
-	{
-		UINavComponents.Insert(NewComponent, FoundIndex);
-	}
-	else
-	{
-		if (UINavComponents.Num() > 0)
-		{
-			if (UINavComponents[0]->ComponentIndex > TargetIndex)
-			{
-				UINavComponents.Insert(NewComponent, 0);
-				IncrementUINavComponentIndices(NewComponent->ComponentIndex);
-			}
-			else
-			{
-				bool bAdded = false;
-				for (int i = 0; i < UINavComponents.Num(); i++)
-				{
-					if (UINavComponents[i]->ComponentIndex > TargetIndex)
-					{
-						UINavComponents.Insert(NewComponent, i);
-						IncrementUINavComponentIndices(NewComponent->ComponentIndex);
-						bAdded = true;
-						break;
-					}
-				}
-				if (!bAdded)
-				{
-					UINavComponents.Add(NewComponent);
-				}
-			}
-		}
-		else
-		{
-			UINavComponents.Add(NewComponent);
-		}
-	}
-}
-
 void UUINavWidget::IncrementUINavButtonIndices(const int StartingIndex, const int GridIndex)
 {
 	for (int i = StartingIndex + 1; i < UINavButtons.Num(); i++)
@@ -1158,15 +1092,6 @@ void UUINavWidget::IncrementUINavButtonIndices(const int StartingIndex, const in
 	if (StartingIndex <= ButtonIndex) ButtonIndex++;
 }
 
-void UUINavWidget::IncrementUINavComponentIndices(const int StartingIndex)
-{
-	const int ValidIndex = GetLocalComponentIndex(StartingIndex);
-	for (int i = (ValidIndex != -1 ? ValidIndex + 1 : 0); i < UINavComponents.Num(); i++)
-	{
-		if (UINavComponents[i]->ComponentIndex > StartingIndex) UINavComponents[i]->ComponentIndex++;
-	}
-}
-
 void UUINavWidget::DecrementUINavButtonIndices(const int StartingIndex, const int GridIndex)
 {
 	for (int i = StartingIndex; i < UINavButtons.Num()-1; i++)
@@ -1179,23 +1104,6 @@ void UUINavWidget::DecrementUINavButtonIndices(const int StartingIndex, const in
 		}
 	}
 	UINavButtons.RemoveAt(UINavButtons.Num()-1, 1, true);
-}
-
-void UUINavWidget::DecrementUINavComponentIndices(const int StartingIndex)
-{
-	const int ValidIndex = GetLocalComponentIndex(StartingIndex);
-	UUINavComponent* Component = (ValidIndex != -1 ? UINavComponents[ValidIndex] : nullptr);
-
-	for (int i = (ValidIndex != -1 ? ValidIndex : 0); i < UINavComponents.Num() - 1; i++)
-	{
-		if (ValidIndex != -1) UINavComponents[i] = UINavComponents[i + 1];
-		if (UINavComponents[i]->ComponentIndex > StartingIndex) UINavComponents[i]->ComponentIndex--;
-	}
-
-	if (Component != nullptr)
-	{
-		UINavComponents.RemoveAt(UINavComponents.Num()-1);
-	}
 }
 
 void UUINavWidget::MoveUINavElementToGrid(const int Index, const int TargetGridIndex, int IndexInGrid)
@@ -1255,7 +1163,6 @@ void UUINavWidget::MoveUINavElementToGrid2(const int FromGridIndex, int FromInde
 void UUINavWidget::UpdateArrays(const int From, const int To, const int OldGridIndex, const int OldIndexInGrid)
 {
 	UpdateButtonArray(From, To, OldGridIndex, OldIndexInGrid);
-	UpdateComponentArray(From, To);
 }
 
 void UUINavWidget::UpdateButtonArray(const int From, int To, const int OldGridIndex, const int OldIndexInGrid)
@@ -1326,98 +1233,6 @@ void UUINavWidget::UpdateButtonArray(const int From, int To, const int OldGridIn
 			}
 		}
 	}	
-}
-
-void UUINavWidget::UpdateComponentArray(const int From, const int To)
-{
-	if (UINavComponents.Num() == 0) return;
-
-	UUINavComponent* TempComp = GetUINavComponentAtIndex(From);
-
-	int i;
-	int Start = 0;
-	int End = UINavComponents.Num()-1;
-
-	if (Start == End)
-	{
-		UINavComponents[Start]->ComponentIndex = UINavComponents[Start]->NavButton->ButtonIndex;
-		return;
-	}
-
-	if (From < To)
-	{
-		if (TempComp != nullptr) Start = UINavComponents.Find(TempComp);
-
-		if (UINavComponents[0]->ComponentIndex < From)
-		{
-			for (i = 0; i < UINavComponents.Num(); i++)
-			{
-				if (Start == 0 && UINavComponents[i]->ComponentIndex > From)
-				{
-					Start = i;
-				}
-				if (End == UINavComponents.Num() && UINavComponents[i]->ComponentIndex > To)
-				{
-					End = i;
-					break;
-				}
-			}
-		}
-
-		if (Start == End)
-		{
-			UINavComponents[Start]->ComponentIndex = UINavComponents[Start]->NavButton->ButtonIndex;
-			return;
-		}
-
-		for (i = Start+1; i <= End; i++)
-		{
-			UINavComponents[i]->ComponentIndex = UINavComponents[i]->NavButton->ButtonIndex;
-			UINavComponents[i-1] = UINavComponents[i];
-			if (i == End)
-			{
-				UINavComponents[i] = TempComp;
-				UINavComponents[i]->ComponentIndex =  UINavComponents[i]->NavButton->ButtonIndex;
-			}
-		}
-	}
-	else
-	{
-		if (TempComp != nullptr) End = UINavComponents.Find(TempComp);
-
-		if (UINavComponents[0]->ComponentIndex < To)
-		{
-			for (i = 0; i < UINavComponents.Num(); i++)
-			{
-				if (Start == 0 && UINavComponents[i]->ComponentIndex > To)
-				{
-					Start = i;
-				}
-				if (End == UINavComponents.Num() && UINavComponents[i]->ComponentIndex > From)
-				{
-					End = i;
-					break;
-				}
-			}
-		}
-
-		if (Start == End)
-		{
-			UINavComponents[Start]->ComponentIndex = UINavComponents[Start]->NavButton->ButtonIndex;
-			return;
-		}
-
-		for (i = End-1; i >= Start; i--)
-		{
-			UINavComponents[i]->ComponentIndex = UINavComponents[i]->NavButton->ButtonIndex;
-			UINavComponents[i+1] = UINavComponents[i];
-			if (i == Start)
-			{
-				UINavComponents[i] = TempComp;
-				UINavComponents[i]->ComponentIndex =  UINavComponents[i]->NavButton->ButtonIndex;
-			}
-		}
-	}
 }
 
 void UUINavWidget::UpdateCollectionLastIndex(const int GridIndex, const bool bAdded)
@@ -1519,23 +1334,11 @@ void UUINavWidget::ClearGrid(const int GridIndex, const bool bAutoNavigate)
 			UINavButtons[FirstIndex]->GridIndex = -1;
 			UINavButtons[FirstIndex]->IndexInGrid = -1;
 			UINavButtons.RemoveAt(FirstIndex);
-			UUINavComponent* Component = GetUINavComponentAtIndex(i);
-			if (Component != nullptr)
-			{
-				Component->ComponentIndex = -1;
-				UINavComponents.Remove(Component);
-			}
 		}
 		else
 		{
 			UUINavButton* Button = UINavButtons[i - Difference];
 			Button->ButtonIndex -= Difference;
-
-			UUINavComponent* Component = GetUINavComponentAtIndex(i);
-			if (Component != nullptr)
-			{
-				Component->ComponentIndex = Component->NavButton->ButtonIndex;
-			}
 		}
 	}
 
@@ -2118,10 +1921,10 @@ void UUINavWidget::UpdateTextColor(const int Index)
 void UUINavWidget::SwitchTextColorTo(const int Index, FLinearColor Color)
 {
 	UTextBlock* NewText = nullptr;
-	const int NewComponentIndex = GetLocalComponentIndex(Index);
-	if (NewComponentIndex != -1)
+	UUINavComponent* UINavComponent = UINavButtons[Index]->NavComp;
+	if (UINavComponent != nullptr)
 	{
-		NewText = UINavComponents[NewComponentIndex]->NavText;
+		NewText = UINavComponent->NavText;
 	}
 	else if (Index != -1)
 	{
@@ -2373,6 +2176,11 @@ void UUINavWidget::CallCustomInput(const FName ActionName, uint8* Buffer)
 		{
 			DISPLAYERROR(FString::Printf(TEXT("%s Custom Event should have one boolean parameter!"), *ActionName.ToString()));
 		}
+	}
+
+	if (CurrentButton != nullptr && CurrentButton->NavComp != nullptr)
+	{
+		CurrentButton->NavComp->CallCustomInput(ActionName, Buffer);
 	}
 
 	for (UUINavCollection* Collection : UINavCollections)
@@ -2806,41 +2614,45 @@ UWidget * UUINavWidget::GoToBuiltWidget(UUINavWidget* NewWidget, const bool bRem
 {
 	if (NewWidget == nullptr) return nullptr;
 
-	if (OuterUINavWidget == nullptr && NewWidget->GetMostOuterUINavWidget() != this)
+	UUINavWidget* OldOuterUINavWidget = GetMostOuterUINavWidget();
+	UUINavWidget* NewOuterUINavWidget = NewWidget->GetMostOuterUINavWidget();
+	
+	if (OuterUINavWidget != nullptr || NewOuterUINavWidget == this)
 	{
-		NewWidget->ParentWidget = this;
-		NewWidget->bParentRemoved = bRemoveParent;
-		NewWidget->bShouldDestroyParent = bDestroyParent;
-		NewWidget->WidgetComp = WidgetComp;
-		if (WidgetComp != nullptr)
+		if (NewOuterUINavWidget == OldOuterUINavWidget)
 		{
-			WidgetComp->SetWidget(NewWidget);
+			UINavPC->SetActiveNestedWidget(NewWidget);
+			return NewWidget;
 		}
-		else
+		
+		UINavPC->SetActiveNestedWidget(nullptr);
+		if (OuterUINavWidget != nullptr)
 		{
-			if (!bUsingSplitScreen || NewWidget->bUseFullscreenWhenSplitscreen) NewWidget->AddToViewport(ZOrder);
-			else NewWidget->AddToPlayerScreen(ZOrder);
-
-			APlayerController* PC = Cast<APlayerController>(UINavPC->GetOwner());
-			NewWidget->SetUserFocus(PC);
-			if (UINavPC->GetInputMode() == EInputMode::UI)
-			{
-				NewWidget->SetKeyboardFocus();
-			}
+			OldOuterUINavWidget->PreviousNestedWidget = this;
 		}
-		CleanSetup();
+	}
+	
+	NewWidget->ParentWidget = GetMostOuterUINavWidget();
+	NewWidget->bParentRemoved = bRemoveParent;
+	NewWidget->bShouldDestroyParent = bDestroyParent;
+	NewWidget->WidgetComp = WidgetComp;
+	if (WidgetComp != nullptr)
+	{
+		WidgetComp->SetWidget(NewWidget);
 	}
 	else
 	{
-		if (NewWidget->GetMostOuterUINavWidget() == GetMostOuterUINavWidget())
+		if (!bUsingSplitScreen || NewWidget->bUseFullscreenWhenSplitscreen) NewWidget->AddToViewport(ZOrder);
+		else NewWidget->AddToPlayerScreen(ZOrder);
+
+		APlayerController* PC = Cast<APlayerController>(UINavPC->GetOwner());
+		NewWidget->SetUserFocus(PC);
+		if (UINavPC->GetInputMode() == EInputMode::UI)
 		{
-			UINavPC->SetActiveNestedWidget(NewWidget);
-		}
-		else
-		{
-			UINavPC->SetActiveNestedWidget(nullptr);
+			NewWidget->SetKeyboardFocus();
 		}
 	}
+	OldOuterUINavWidget->CleanSetup();
 	
 	return NewWidget;
 }
@@ -2919,8 +2731,14 @@ void UUINavWidget::ReturnToParent(const bool bRemoveAllParents, const int ZOrder
 				}
 				else
 				{
-					UINavPC->SetActiveWidget(ParentWidget);
+					UUINavWidget* ParentOuter = ParentWidget->GetMostOuterUINavWidget();
+					UINavPC->SetActiveWidget(ParentOuter);
 					ParentWidget->ReconfigureSetup();
+					if (ParentWidget->PreviousNestedWidget != nullptr)
+					{
+						UINavPC->SetActiveNestedWidget(ParentWidget->PreviousNestedWidget);
+						ParentWidget->PreviousNestedWidget = nullptr;
+					}
 				}
 				bReturningToParent = true;
 				RemoveFromParent();
@@ -2979,26 +2797,6 @@ UUINavWidget* UUINavWidget::GetMostOuterUINavWidget()
 UUINavWidget* UUINavWidget::GetChildUINavWidget(const int ChildIndex)
 {
 	return ChildIndex < ChildUINavWidgets.Num() ? ChildUINavWidgets[ChildIndex] : nullptr;
-}
-
-int UUINavWidget::GetLocalComponentIndex(const int Index)
-{
-	for (int i = 0; i < UINavComponents.Num(); i++)
-	{
-		if (UINavComponents[i]->ComponentIndex == Index) return i;
-		if (UINavComponents[i]->ComponentIndex > Index) return -1;
-	}
-	return -1;
-}
-
-int UUINavWidget::GetLocalHorizontalCompIndex(const int Index)
-{
-	for (int i = 0; i < UINavHorizontalComps.Num(); i++)
-	{
-		if (UINavHorizontalComps[i]->ComponentIndex == Index) return i;
-		if (UINavHorizontalComps[i]->ComponentIndex > Index) return -1;
-	}
-	return -1;
 }
 
 bool UUINavWidget::IsSelectorValid()
@@ -3349,18 +3147,13 @@ int UUINavWidget::GetCollectionFirstButtonIndex(UUINavCollection * Collection, c
 
 UUINavComponent * UUINavWidget::GetUINavComponentAtIndex(const int Index)
 {
-	const int ValidIndex = GetLocalComponentIndex(Index);
-	if (ValidIndex == -1) return nullptr;
-	
-	return UINavComponents[ValidIndex];
+	if (!IsButtonIndexValid(Index)) return nullptr;
+	return UINavButtons[Index]->NavComp;
 }
 
 UUINavHorizontalComponent * UUINavWidget::GetUINavHorizontalCompAtIndex(const int Index)
 {
-	const int ValidIndex = GetLocalHorizontalCompIndex(Index);
-	if (ValidIndex == -1) return nullptr;
-	
-	return UINavHorizontalComps[ValidIndex];
+	return Cast<UUINavHorizontalComponent>(GetUINavComponentAtIndex(Index));
 }
 
 void UUINavWidget::HoverEvent(int Index)
@@ -3511,10 +3304,16 @@ void UUINavWidget::FinishPress(const bool bMouse)
 
 void UUINavWidget::SetupUINavButtonDelegates(UUINavButton * NewButton)
 {
-	if (!NewButton->CustomHover.IsBound())
-		NewButton->CustomHover.AddDynamic(this, &UUINavWidget::HoverEvent);
-	if (!NewButton->CustomUnhover.IsBound())
-		NewButton->CustomUnhover.AddDynamic(this, &UUINavWidget::UnhoverEvent);
+	if (NewButton->CustomHover.IsBound())
+	{
+		NewButton->CustomHover.Clear();
+	}
+	NewButton->CustomHover.AddDynamic(this, &UUINavWidget::HoverEvent);
+	if (NewButton->CustomUnhover.IsBound())
+	{
+		NewButton->CustomUnhover.Clear();
+	}
+	NewButton->CustomUnhover.AddDynamic(this, &UUINavWidget::UnhoverEvent);
 	FScriptDelegate OnClickScriptDelegate;
 	OnClickScriptDelegate.BindUFunction(NewButton, FName("OnClick"));
 	if (NewButton->OnPressed.Contains(OnClickScriptDelegate))
