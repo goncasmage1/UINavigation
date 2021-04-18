@@ -153,7 +153,7 @@ int UUINavBlueprintFunctionLibrary::Conv_UINavButtonToInt(UUINavButton * Button)
 
 int UUINavBlueprintFunctionLibrary::Conv_UINavComponentToInt(UUINavComponent * Component)
 {
-	return Component->ComponentIndex;
+	return Component->NavButton->ButtonIndex;
 }
 
 UUINavButton* UUINavBlueprintFunctionLibrary::Conv_UINavComponentToUINavButton(UUINavComponent * Component)

@@ -18,6 +18,8 @@ public:
 	UUINavComponent(const FObjectInitializer& ObjectInitializer);
 
 	virtual void NativeConstruct() override;
+	
+	void CallCustomInput(FName ActionName, uint8* Buffer);
 
 	UFUNCTION(BlueprintNativeEvent, Category = UINavComponent)
 		void OnNavigatedTo();
@@ -41,9 +43,6 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavComponent)
 		bool IsValid(const bool bIgnoreDisabledUINavButton = true) const;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavComponent)
-		int ComponentIndex = -1;
 
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget), Category = UINavComponent)
 		class UUINavButton* NavButton;
