@@ -1897,7 +1897,7 @@ void UUINavWidget::ExecuteAnimations(const int From, const int To)
 		}
 	}
 
-	if (To > -1)
+	if (To > -1 && To < UINavAnimations.Num())
 	{
 		if (UINavAnimations.Num() <= To || UINavAnimations[To] == nullptr) return;
 
@@ -1920,6 +1920,8 @@ void UUINavWidget::UpdateTextColor(const int Index)
 
 void UUINavWidget::SwitchTextColorTo(const int Index, FLinearColor Color)
 {
+    if (!IsButtonIndexValid(Index)) return;
+    
 	UTextBlock* NewText = nullptr;
 	UUINavComponent* UINavComponent = UINavButtons[Index]->NavComp;
 	if (UINavComponent != nullptr)
@@ -1948,7 +1950,7 @@ void UUINavWidget::UpdateHoveredButtonStates(const int Index)
 
 void UUINavWidget::SwitchButtonStyle(const EButtonStyle NewStyle, const int Index, const bool bRevertStyle)
 {
-	if (Index < 0 || Index >= UINavButtons.Num()) return;
+	if (!IsButtonIndexValid(Index)) return;
 	
 	UUINavButton* TheButton = UINavButtons[Index];
 	const bool bWasForcePressed = TheButton->ForcedStyle == EButtonStyle::Pressed;
