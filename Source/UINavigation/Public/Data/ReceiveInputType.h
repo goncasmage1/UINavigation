@@ -3,7 +3,7 @@
 #pragma once
 #include "ReceiveInputType.generated.h"
 
-UENUM(BlueprintType)
+UENUM(BlueprintType, meta = (ScriptName = "UINavReceiveInputType"))
 enum class EReceiveInputType : uint8
 {
 	None UMETA(DisplayName = "None"),
