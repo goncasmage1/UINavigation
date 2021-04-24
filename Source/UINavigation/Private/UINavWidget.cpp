@@ -1030,6 +1030,7 @@ void UUINavWidget::IncrementGrid(UUINavButton* NewButton, FGrid & TargetGrid, in
 	{
 		TargetGrid.FirstButton = NewButton;
 		NewButton->IndexInGrid = 0;
+		NewButton->ButtonIndex = GetGridStartingIndex(TargetGrid.GridIndex);
 	}
 	
 	NewButton->GridIndex = TargetGrid.GridIndex;
