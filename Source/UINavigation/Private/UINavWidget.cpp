@@ -478,7 +478,7 @@ void UUINavWidget::TraverseHierarquy(UUINavWidget* UINavWidget, UUserWidget* Wid
 			});
 	}
 
-	if (TraversingCollection != nullptr)
+	if (UINavWidget->bAutoAppended && TraversingCollection != nullptr)
 	{
 		const TArray<FButtonNavigation> EdgeNavigations;
 		TraversingCollection->SetupNavigation(EdgeNavigations);
