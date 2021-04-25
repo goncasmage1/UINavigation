@@ -1987,6 +1987,8 @@ void UUINavWidget::SwitchButtonStyle(const EButtonStyle NewStyle, const int Inde
 
 void UUINavWidget::RevertButtonStyle(const int Index)
 {
+    if (!IsButtonIndexValid(Index)) return;
+	
 	UUINavButton* TheButton = UINavButtons[Index];
 	if (TheButton->ForcedStyle == EButtonStyle::None) return;
 
