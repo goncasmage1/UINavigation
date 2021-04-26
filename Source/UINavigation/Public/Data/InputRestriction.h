@@ -3,7 +3,7 @@
 #pragma once
 #include "InputRestriction.generated.h"
 
-UENUM(BlueprintType)
+UENUM(BlueprintType, meta = (ScriptName = "UINavInputRestriction"))
 enum class EInputRestriction : uint8
 {
 	None UMETA(DisplayName = "None"),

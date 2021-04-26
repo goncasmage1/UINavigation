@@ -3,7 +3,7 @@
 #pragma once
 #include "GridType.generated.h"
 
-UENUM(BlueprintType)
+UENUM(BlueprintType, meta = (ScriptName = "UINavGridType"))
 enum class EGridType : uint8
 {
 	Horizontal UMETA(DisplayName = "Horizontal"),

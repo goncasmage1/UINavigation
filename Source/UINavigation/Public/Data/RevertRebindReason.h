@@ -3,7 +3,7 @@
 #pragma once
 #include "RevertRebindReason.generated.h"
 
-UENUM(BlueprintType)
+UENUM(BlueprintType, meta = (ScriptName = "UINavRevertRebindReason"))
 enum class ERevertRebindReason : uint8
 {
 	None UMETA(DisplayName = "None"),
