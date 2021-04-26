@@ -3,7 +3,7 @@
 #pragma once
 #include "CountdownPhase.generated.h"
 
-UENUM(BlueprintType)
+UENUM(BlueprintType, meta = (ScriptName = "UINavCountdownPhase"))
 enum class ECountdownPhase : uint8
 {
 	None UMETA(DisplayName = "None"),

@@ -3,7 +3,7 @@
 #pragma once
 #include "SelectorPosition.generated.h"
 
-UENUM(BlueprintType)
+UENUM(BlueprintType, meta = (ScriptName = "UINavSelectorPosition"))
 enum class ESelectorPosition : uint8
 {
 	Position_Center UMETA(DisplayName = "Center"),

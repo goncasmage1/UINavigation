@@ -13,7 +13,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FCustomClickDelegate, int, Index);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FCustomPressDelegate, int, Index);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FCustomReleaseDelegate, int, Index);
 
-UENUM(BlueprintType)
+UENUM(BlueprintType, meta = (ScriptName = "UINavButtonStyle"))
 enum class EButtonStyle : uint8
 {
 	None UMETA(DisplayName = "None"),

@@ -3,7 +3,7 @@
 #pragma once
 #include "AxisType.generated.h"
 
-UENUM(BlueprintType)
+UENUM(BlueprintType, meta = (ScriptName = "UINavAxisType"))
 enum class EAxisType : uint8
 {
 	None UMETA(DisplayName = "None"),
