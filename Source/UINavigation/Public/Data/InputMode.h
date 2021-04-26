@@ -3,7 +3,7 @@
 #pragma once
 #include "InputMode.generated.h"
 
-UENUM(BlueprintType)
+UENUM(BlueprintType, meta = (ScriptName = "UINavInputMode"))
 enum class EInputMode : uint8
 {
 	None UMETA(DisplayName = "None"),

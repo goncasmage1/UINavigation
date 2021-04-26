@@ -3,7 +3,7 @@
 #pragma once
 #include "NavigationDirection.generated.h"
 
-UENUM(BlueprintType)
+UENUM(BlueprintType, meta = (ScriptName = "UINavNavigationDirection"))
 enum class ENavigationDirection : uint8
 {
 	None,
