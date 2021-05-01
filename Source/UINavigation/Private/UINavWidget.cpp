@@ -2602,7 +2602,7 @@ void UUINavWidget::OnHorizCompUpdated_Implementation(const int Index)
 
 }
 
-UWidget* UUINavWidget::GoToWidget(TSubclassOf<UUINavWidget> NewWidgetClass, const bool bRemoveParent, const bool bDestroyParent, const int ZOrder)
+UUINavWidget* UUINavWidget::GoToWidget(TSubclassOf<UUINavWidget> NewWidgetClass, const bool bRemoveParent, const bool bDestroyParent, const int ZOrder)
 {
 	if (NewWidgetClass == nullptr)
 	{
@@ -2615,7 +2615,7 @@ UWidget* UUINavWidget::GoToWidget(TSubclassOf<UUINavWidget> NewWidgetClass, cons
 	return GoToBuiltWidget(NewWidget, bRemoveParent, bDestroyParent, ZOrder);
 }
 
-UWidget * UUINavWidget::GoToBuiltWidget(UUINavWidget* NewWidget, const bool bRemoveParent, const bool bDestroyParent, const int ZOrder)
+UUINavWidget * UUINavWidget::GoToBuiltWidget(UUINavWidget* NewWidget, const bool bRemoveParent, const bool bDestroyParent, const int ZOrder)
 {
 	if (NewWidget == nullptr) return nullptr;
 
