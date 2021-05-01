@@ -1009,7 +1009,7 @@ void UUINavPCComponent::NotifyInputTypeChange(const EInputType NewInputType)
 	const EInputType OldInputType = CurrentInputType;
 	CurrentInputType = NewInputType;
 	if (ActiveWidget != nullptr) ActiveWidget->OnInputChanged(OldInputType, CurrentInputType);
-
+	InputTypeChangedDelegate.Broadcast(CurrentInputType);
 }
 
 void UUINavPCComponent::MenuInput(const ENavigationDirection InDirection)
