@@ -689,7 +689,7 @@ public:
 	*	@param  bDestroyParent  Whether to destruct the parent widget (this widget)
 	*/
 	UFUNCTION(BlueprintCallable, Category = UINavWidget, meta = (AdvancedDisplay=2))
-		UWidget* GoToWidget(TSubclassOf<UUINavWidget> NewWidgetClass, const bool bRemoveParent, const bool bDestroyParent = false, const int ZOrder = 0);
+		UUINavWidget* GoToWidget(TSubclassOf<UUINavWidget> NewWidgetClass, const bool bRemoveParent, const bool bDestroyParent = false, const int ZOrder = 0);
 
 	/**
 	*	Adds given widget to screen (strongly recomended over manual alternative)
@@ -699,7 +699,7 @@ public:
 	*	@param  bDestroyParent  Whether to destruct the parent widget (this widget)
 	*/
 	UFUNCTION(BlueprintCallable, Category = UINavWidget, meta = (AdvancedDisplay=2))
-		UWidget* GoToBuiltWidget(UUINavWidget* NewWidget, const bool bRemoveParent, const bool bDestroyParent = false, const int ZOrder = 0);
+		UUINavWidget* GoToBuiltWidget(UUINavWidget* NewWidget, const bool bRemoveParent, const bool bDestroyParent = false, const int ZOrder = 0);
 
 	/**
 	*	Setup a new UINavButton added at runtime (must be added to viewport manually)
