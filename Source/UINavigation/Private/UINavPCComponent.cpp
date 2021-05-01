@@ -278,9 +278,9 @@ void UUINavPCComponent::SetActiveWidget(UUINavWidget * NewActiveWidget)
 		BindMenuInputs();
 		NewActiveWidget->GainNavigation(nullptr);
 	}
-	ActiveWidget = NewActiveWidget;
 
-	bUseLeftThumbstickAsMouse = ActiveWidget != nullptr ? ActiveWidget->bUseLeftThumbstickAsMouse : false;
+	IUINavPCReceiver::Execute_OnActiveWidgetChanged(GetOwner(), ActiveWidget, NewActiveWidget);	
+	ActiveWidget = NewActiveWidget;
 }
 
 void UUINavPCComponent::SetActiveNestedWidget(UUINavWidget* NewActiveWidget)
@@ -433,7 +433,7 @@ void UUINavPCComponent::HandleAnalogInputEvent(FSlateApplication& SlateApp, cons
 		NotifyInputTypeChange(EInputType::Gamepad);
 	}
 
-	if (bUseLeftThumbstickAsMouse)
+	if (ActiveWidget != nullptr && ActiveWidget->bUseLeftThumbstickAsMouse)
 	{
 		const FKey Key = InAnalogInputEvent.GetKey();
 		if (Key == EKeys::Gamepad_LeftX || Key == EKeys::Gamepad_LeftY)
@@ -472,6 +472,7 @@ void UUINavPCComponent::HandleAnalogInputEvent(FSlateApplication& SlateApp, cons
 
 void UUINavPCComponent::HandleMouseMoveEvent(FSlateApplication& SlateApp, const FPointerEvent& MouseEvent)
 {
+	const bool bUseLeftThumbstickAsMouse = ActiveWidget != nullptr && ActiveWidget->bUseLeftThumbstickAsMouse;
 	if (CurrentInputType != EInputType::Mouse && MouseEvent.GetCursorDelta().SizeSquared() > 0.0f && (!bUseLeftThumbstickAsMouse || !IsMovingLeftStick()))
 	{
 		NotifyInputTypeChange(EInputType::Mouse);

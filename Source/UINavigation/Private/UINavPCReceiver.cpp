@@ -11,6 +11,11 @@ void IUINavPCReceiver::OnInputChanged_Implementation(EInputType From, EInputType
 {
 }
 
+void IUINavPCReceiver::OnActiveWidgetChanged_Implementation(UUINavWidget* OldActiveWidget,
+	UUINavWidget* NewActiveWidget)
+{
+}
+
 void IUINavPCReceiver::OnNavigated_Implementation(ENavigationDirection NewDirection)
 {
 }
