@@ -7,6 +7,8 @@
 #include "Data/NavigationDirection.h"
 #include "UINavPCReceiver.generated.h"
 
+class UUINavWidget;
+
 UINTERFACE(MinimalAPI)
 class UUINavPCReceiver : public UInterface
 {
@@ -38,6 +40,16 @@ public:
 	UFUNCTION(BlueprintNativeEvent, Category = UINavController)
 		void OnInputChanged(EInputType From, EInputType To);
 	virtual void OnInputChanged_Implementation(EInputType From, EInputType To);
+
+	/**
+	*	Called when the active widget changes
+	*
+	*	@param OldActiveWidget The previously active widget
+	*	@param NewActiveWidget The new active widget
+	*/
+	UFUNCTION(BlueprintNativeEvent, Category = UINavController)
+		void OnActiveWidgetChanged(UUINavWidget* OldActiveWidget, UUINavWidget* NewActiveWidget);
+	virtual void OnActiveWidgetChanged_Implementation(UUINavWidget* OldActiveWidget, UUINavWidget* NewActiveWidget);
 
 	/**
 	*	Called when the player navigates in a certain direction
