@@ -15,6 +15,7 @@
 #include "UINavPCComponent.generated.h"
 
 DECLARE_DELEGATE_OneParam(FMouseKeyDelegate, FKey);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FInputTypeChangedDelegate, EInputType, InputType);
 
 USTRUCT(BlueprintType)
 struct FAxis2D_Keys
@@ -210,6 +211,9 @@ public:
 		{EKeys::MotionController_Right_Thumbstick_X, {EKeys::MotionController_Right_Thumbstick_Right, EKeys::MotionController_Right_Thumbstick_Left}},
 		{EKeys::MotionController_Right_Thumbstick_Y, {EKeys::MotionController_Right_Thumbstick_Up, EKeys::MotionController_Right_Thumbstick_Down}},
 	};
+
+	UPROPERTY(BlueprintAssignable, BlueprintCallable, BlueprintReadOnly, Category = UINavController)
+		FInputTypeChangedDelegate InputTypeChangedDelegate;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
 		FORCEINLINE bool AllowsAllMenuInput() const { return bAllowDirectionalInput && bAllowSelectInput && bAllowReturnInput && bAllowSectionInput; }
