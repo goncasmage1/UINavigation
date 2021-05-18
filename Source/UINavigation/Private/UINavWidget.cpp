@@ -134,8 +134,6 @@ void UUINavWidget::InitialSetup(const bool bRebuilding)
 	if (!IsSelectorValid())
 	{
 		UINavSetup();
-		bShouldTick = false;
-		return;
 	}
 	else
 	{
@@ -153,15 +151,11 @@ void UUINavWidget::ReconfigureSetup()
 	if (!IsSelectorValid())
 	{
 		UINavSetup();
-		return;
 	}
 	else
 	{
 		SetupSelector();
 	}
-
-	bShouldTick = true;
-	WaitForTick = 0;
 
 	for (UUINavWidget* ChildUINavWidget : ChildUINavWidgets)
 	{
@@ -514,9 +508,7 @@ void UUINavWidget::RebuildNavigation(const int NewButtonIndex)
 	bMovingSelector = false;
 	bIgnoreMouseEvent = false;
 	bReturning = false;
-	bShouldTick = true;
 	ReceiveInputType = EReceiveInputType::None;
-	WaitForTick = 0;
 	HaltedIndex = -1;
 	SelectedButtonIndex = -1;
 	SelectCount = 0;
@@ -552,6 +544,11 @@ void UUINavWidget::SetupSelector()
 
 	SelectorSlot->SetAlignment(FVector2D(0.5f, 0.5f));
 	SelectorSlot->SetPosition(FVector2D(0.f, 0.f));
+
+	if (UINavPC != nullptr)
+	{
+		UINavPC->GetPC()->GetWorldTimerManager().SetTimer(SelectorHandle, this, &UUINavWidget::UINavSetup, 0.001f);
+	}
 }
 
 void UUINavWidget::UINavSetup()
@@ -720,24 +717,9 @@ void UUINavWidget::NativeTick(const FGeometry & MyGeometry, float DeltaTime)
 {
 	Super::NativeTick(MyGeometry, DeltaTime);
 
-	if (!IsSelectorValid() || !bSetupStarted) return;
-
-	if (bMovingSelector)
+	if (IsSelectorValid() && bMovingSelector)
 	{
 		HandleSelectorMovement(DeltaTime);
-	}
-	else
-	{
-		if (!bShouldTick) return;
-
-		if (WaitForTick == 1)
-		{
-			UINavSetup();
-			bShouldTick = false;
-			return;
-		}
-
-		WaitForTick++;
 	}
 }
 
