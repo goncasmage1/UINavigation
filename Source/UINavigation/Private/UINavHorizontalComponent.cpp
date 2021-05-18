@@ -38,7 +38,7 @@ void UUINavHorizontalComponent::UpdateTextToIndex(int NewIndex)
 
 void UUINavHorizontalComponent::ChangeText(FText NewText)
 {
-	NavText->SetText(NewText);
+	if (NavText != nullptr) NavText->SetText(NewText);
 }
 
 void UUINavHorizontalComponent::OnNavigateLeft_Implementation()
