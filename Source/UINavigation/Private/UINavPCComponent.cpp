@@ -496,6 +496,46 @@ void UUINavPCComponent::HandleMouseWheelOrGestureEvent(FSlateApplication& SlateA
 	}
 }
 
+void UUINavPCComponent::SimulateMousePress()
+{
+	FSlateApplication& SlateApp = FSlateApplication::Get();
+	FPointerEvent MouseDownEvent(
+		0,
+		SlateApp.CursorPointerIndex,
+		SlateApp.GetCursorPos(),
+		SlateApp.GetLastCursorPos(),
+		SlateApp.GetPressedMouseButtons(),
+		EKeys::LeftMouseButton,
+		0,
+		SlateApp.GetPlatformApplication()->GetModifierKeys()
+	);
+	TSharedPtr<FGenericWindow> GenWindow;
+	SlateApp.ProcessMouseButtonDownEvent(GenWindow, MouseDownEvent);
+}
+
+void UUINavPCComponent::SimulateMouseRelease()
+{
+	FSlateApplication& SlateApp = FSlateApplication::Get();
+	FPointerEvent MouseUpEvent(
+		0,
+		SlateApp.CursorPointerIndex,
+		SlateApp.GetCursorPos(),
+		SlateApp.GetLastCursorPos(),
+		SlateApp.GetPressedMouseButtons(),
+		EKeys::LeftMouseButton,
+		0,
+		SlateApp.GetPlatformApplication()->GetModifierKeys()
+	);
+	TSharedPtr<FGenericWindow> GenWindow;
+	SlateApp.ProcessMouseButtonUpEvent(MouseUpEvent);
+}
+
+void UUINavPCComponent::SimulateMouseClick()
+{
+	SimulateMousePress();
+	SimulateMouseRelease();
+}
+
 void UUINavPCComponent::TimerCallback()
 {
 	MenuInput(CallbackDirection);

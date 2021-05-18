@@ -279,6 +279,13 @@ public:
 	void HandleMouseButtonDownEvent(FSlateApplication& SlateApp, const FPointerEvent& MouseEvent);
 	void HandleMouseWheelOrGestureEvent(FSlateApplication& SlateApp, const FPointerEvent& InWheelEvent, const FPointerEvent* InGesture);
 
+	UFUNCTION(BlueprintCallable, Category = UINavController)
+	void SimulateMousePress();
+	UFUNCTION(BlueprintCallable, Category = UINavController)
+	void SimulateMouseRelease();
+	UFUNCTION(BlueprintCallable, Category = UINavController)
+	void SimulateMouseClick();
+
 	void BindMouseWorkaround();
 	void UnbindMouseWorkaround();
 
