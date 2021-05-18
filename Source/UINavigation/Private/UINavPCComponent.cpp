@@ -433,7 +433,8 @@ void UUINavPCComponent::HandleAnalogInputEvent(FSlateApplication& SlateApp, cons
 		NotifyInputTypeChange(EInputType::Gamepad);
 	}
 
-	if (ActiveWidget != nullptr && ActiveWidget->bUseLeftThumbstickAsMouse)
+	if ((ActiveWidget != nullptr && ActiveWidget->bUseLeftThumbstickAsMouse) ||
+		bUseLeftThumbstickAsMouse)
 	{
 		const FKey Key = InAnalogInputEvent.GetKey();
 		if (Key == EKeys::Gamepad_LeftX || Key == EKeys::Gamepad_LeftY)
@@ -472,8 +473,8 @@ void UUINavPCComponent::HandleAnalogInputEvent(FSlateApplication& SlateApp, cons
 
 void UUINavPCComponent::HandleMouseMoveEvent(FSlateApplication& SlateApp, const FPointerEvent& MouseEvent)
 {
-	const bool bUseLeftThumbstickAsMouse = ActiveWidget != nullptr && ActiveWidget->bUseLeftThumbstickAsMouse;
-	if (CurrentInputType != EInputType::Mouse && MouseEvent.GetCursorDelta().SizeSquared() > 0.0f && (!bUseLeftThumbstickAsMouse || !IsMovingLeftStick()))
+	const bool bShouldUseLeftThumbstickAsMouse = (ActiveWidget != nullptr && ActiveWidget->bUseLeftThumbstickAsMouse) || bUseLeftThumbstickAsMouse;
+	if (CurrentInputType != EInputType::Mouse && MouseEvent.GetCursorDelta().SizeSquared() > 0.0f && (!bShouldUseLeftThumbstickAsMouse || !IsMovingLeftStick()))
 	{
 		NotifyInputTypeChange(EInputType::Mouse);
 	}
@@ -493,6 +494,46 @@ void UUINavPCComponent::HandleMouseWheelOrGestureEvent(FSlateApplication& SlateA
 	{
 		NotifyInputTypeChange(EInputType::Mouse);
 	}
+}
+
+void UUINavPCComponent::SimulateMousePress()
+{
+	FSlateApplication& SlateApp = FSlateApplication::Get();
+	FPointerEvent MouseDownEvent(
+		0,
+		SlateApp.CursorPointerIndex,
+		SlateApp.GetCursorPos(),
+		SlateApp.GetLastCursorPos(),
+		SlateApp.GetPressedMouseButtons(),
+		EKeys::LeftMouseButton,
+		0,
+		SlateApp.GetPlatformApplication()->GetModifierKeys()
+	);
+	TSharedPtr<FGenericWindow> GenWindow;
+	SlateApp.ProcessMouseButtonDownEvent(GenWindow, MouseDownEvent);
+}
+
+void UUINavPCComponent::SimulateMouseRelease()
+{
+	FSlateApplication& SlateApp = FSlateApplication::Get();
+	FPointerEvent MouseUpEvent(
+		0,
+		SlateApp.CursorPointerIndex,
+		SlateApp.GetCursorPos(),
+		SlateApp.GetLastCursorPos(),
+		SlateApp.GetPressedMouseButtons(),
+		EKeys::LeftMouseButton,
+		0,
+		SlateApp.GetPlatformApplication()->GetModifierKeys()
+	);
+	TSharedPtr<FGenericWindow> GenWindow;
+	SlateApp.ProcessMouseButtonUpEvent(MouseUpEvent);
+}
+
+void UUINavPCComponent::SimulateMouseClick()
+{
+	SimulateMousePress();
+	SimulateMouseRelease();
 }
 
 void UUINavPCComponent::TimerCallback()
