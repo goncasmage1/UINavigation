@@ -472,8 +472,8 @@ void UUINavPCComponent::HandleAnalogInputEvent(FSlateApplication& SlateApp, cons
 
 void UUINavPCComponent::HandleMouseMoveEvent(FSlateApplication& SlateApp, const FPointerEvent& MouseEvent)
 {
-	const bool bUseLeftThumbstickAsMouse = ActiveWidget != nullptr && ActiveWidget->bUseLeftThumbstickAsMouse;
-	if (CurrentInputType != EInputType::Mouse && MouseEvent.GetCursorDelta().SizeSquared() > 0.0f && (!bUseLeftThumbstickAsMouse || !IsMovingLeftStick()))
+	const bool bShouldUseLeftThumbstickAsMouse = (ActiveWidget != nullptr && ActiveWidget->bUseLeftThumbstickAsMouse) || bUseLeftThumbstickAsMouse;
+	if (CurrentInputType != EInputType::Mouse && MouseEvent.GetCursorDelta().SizeSquared() > 0.0f && (!bShouldUseLeftThumbstickAsMouse || !IsMovingLeftStick()))
 	{
 		NotifyInputTypeChange(EInputType::Mouse);
 	}
