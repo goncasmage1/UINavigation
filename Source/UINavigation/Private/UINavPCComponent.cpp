@@ -433,7 +433,8 @@ void UUINavPCComponent::HandleAnalogInputEvent(FSlateApplication& SlateApp, cons
 		NotifyInputTypeChange(EInputType::Gamepad);
 	}
 
-	if (ActiveWidget != nullptr && ActiveWidget->bUseLeftThumbstickAsMouse)
+	if ((ActiveWidget != nullptr && ActiveWidget->bUseLeftThumbstickAsMouse) ||
+		bUseLeftThumbstickAsMouse)
 	{
 		const FKey Key = InAnalogInputEvent.GetKey();
 		if (Key == EKeys::Gamepad_LeftX || Key == EKeys::Gamepad_LeftY)
