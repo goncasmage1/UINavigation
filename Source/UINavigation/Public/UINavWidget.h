@@ -34,6 +34,12 @@ protected:
 	bool bMovingSelector = false;
 	bool bIgnoreMouseEvent = false;
 	bool bReturning = false;
+	
+	bool bUpdateSelector = false;
+	int UpdateSelectorPrevButtonIndex;
+	int UpdateSelectorNextButtonIndex;
+	int UpdateSelectorWaitForTick;
+
 	bool bReturningToParent = false;
 
 	bool bAutoAppended = false;
@@ -123,7 +129,7 @@ protected:
 	*/
 	FVector2D GetButtonLocation(const int Index);
 
-	void BeginSelectorMovement(const int Index);
+	void BeginSelectorMovement(const int PrevButtonIndex, const int NextButtonIndex);
 	void HandleSelectorMovement(const float DeltaTime);
 
 public:

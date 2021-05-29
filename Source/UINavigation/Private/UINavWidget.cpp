@@ -717,9 +717,24 @@ void UUINavWidget::NativeTick(const FGeometry & MyGeometry, float DeltaTime)
 {
 	Super::NativeTick(MyGeometry, DeltaTime);
 
-	if (IsSelectorValid() && bMovingSelector)
+	if (IsSelectorValid())
 	{
-		HandleSelectorMovement(DeltaTime);
+		if (bUpdateSelector)
+		{
+			if (UpdateSelectorWaitForTick == 1)
+			{
+				if (MoveCurve != nullptr) BeginSelectorMovement(UpdateSelectorPrevButtonIndex, UpdateSelectorNextButtonIndex);
+				else UpdateSelectorLocation(UpdateSelectorNextButtonIndex);
+				bUpdateSelector = false;
+			}
+			
+			UpdateSelectorWaitForTick++;
+		}
+
+		if (bMovingSelector)
+		{
+			HandleSelectorMovement(DeltaTime);
+		}
 	}
 }
 
@@ -1245,20 +1260,19 @@ void UUINavWidget::ReplaceButtonInNavigationGrid(UUINavButton * ButtonToReplace,
 
 void UUINavWidget::UpdateCurrentButton(UUINavButton * NewCurrentButton)
 {
-	ButtonIndex = NewCurrentButton->ButtonIndex;
 	if (IsSelectorValid())
 	{
-		if (MoveCurve != nullptr) BeginSelectorMovement(NewCurrentButton->ButtonIndex);
-		else UpdateSelectorLocation(NewCurrentButton->ButtonIndex);
+		UpdateSelectorWaitForTick = 0;
+		UpdateSelectorPrevButtonIndex = ButtonIndex;
+		UpdateSelectorNextButtonIndex = NewCurrentButton->ButtonIndex;
+		bUpdateSelector = true;
 	}
 
+	ButtonIndex = NewCurrentButton->ButtonIndex;
+	
 	for (UScrollBox* ScrollBox : ScrollBoxes)
 	{
-		if (NewCurrentButton->IsChildOf(ScrollBox))
-		{
-			ScrollBox->ScrollWidgetIntoView(NewCurrentButton, bAnimateScrollBoxes);
-			break;
-		}
+		ScrollBox->ScrollWidgetIntoView(NewCurrentButton, bAnimateScrollBoxes);
 	}
 }
 
@@ -2392,8 +2406,10 @@ void UUINavWidget::DispatchNavigation(const int Index)
 
 	if (Index > -1 && IsSelectorValid())
 	{
-		if (MoveCurve != nullptr) BeginSelectorMovement(Index);
-		else UpdateSelectorLocation(Index);
+		UpdateSelectorWaitForTick = 0;
+		UpdateSelectorPrevButtonIndex = ButtonIndex;
+		UpdateSelectorNextButtonIndex = Index;
+		bUpdateSelector = true;
 	}
 
 	if (bUseTextColor) UpdateTextColor(Index);
@@ -2406,12 +2422,12 @@ void UUINavWidget::DispatchNavigation(const int Index)
 	if (UINavAnimations.Num() > 0) ExecuteAnimations(ButtonIndex, Index);
 }
 
-void UUINavWidget::BeginSelectorMovement(const int Index)
+void UUINavWidget::BeginSelectorMovement(const int PrevButtonIndex, const int NextButtonIndex)
 {
 	if (MoveCurve == nullptr) return;
 
-	SelectorOrigin = bMovingSelector ? TheSelector->RenderTransform.Translation : GetButtonLocation(ButtonIndex);
-	SelectorDestination = GetButtonLocation(Index);
+	SelectorOrigin = bMovingSelector ? TheSelector->RenderTransform.Translation : GetButtonLocation(PrevButtonIndex);
+	SelectorDestination = GetButtonLocation(NextButtonIndex);
 	Distance = SelectorDestination - SelectorOrigin;
 
 	float MinTime, MaxTime;
