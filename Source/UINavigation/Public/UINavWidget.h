@@ -31,6 +31,7 @@ protected:
 	bool bCompletedSetup = false;
 	bool bSetupStarted = false;
 
+	bool bShouldTick = true;
 	bool bMovingSelector = false;
 	bool bIgnoreMouseEvent = false;
 	bool bReturning = false;
@@ -39,6 +40,9 @@ protected:
 	bool bAutoAppended = false;
 	bool bDestroying = false;
 	bool bHasNavigation = false;
+
+	//Used to track when the selector's position should be updated
+	int WaitForTick;
 
 	//The index of the button that will be navigated to when movement is allowed
 	int HaltedIndex = -1;
@@ -61,8 +65,6 @@ protected:
 	FVector2D SelectorOrigin;
 	FVector2D SelectorDestination;
 	FVector2D Distance;
-
-	FTimerHandle SelectorHandle;
 
 	TArray<FDynamicEdgeNavigation> DynamicEdgeNavigations;
 
@@ -397,7 +399,6 @@ public:
 	/**
 	*	Called manually to setup all the elements in the Widget
 	*/
-	UFUNCTION()
 	virtual void UINavSetup();
 
 	void AddParentToPath(const int IndexInParent);
