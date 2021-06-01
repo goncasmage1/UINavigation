@@ -229,18 +229,18 @@ public:
 		bool bMaintainNavigationForParent = false;
 
 	/*If set to true, the gamepad's left thumbstick will be used to move the mouse */
-	UPROPERTY(EditDefaultsOnly, Category = UINavWidget)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = UINavWidget)
 		bool bUseLeftThumbstickAsMouse = false;
 
 	//The index of the button to be first navigated to (when the widget is added to viewport)
-	UPROPERTY(EditDefaultsOnly, Category = UINavWidget)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = UINavWidget)
 		int FirstButtonIndex = 0;
 
 	//If set to true, this widget will be removed if it has no ParentWidget and is returned from
-	UPROPERTY(EditDefaultsOnly, Category = UINavWidget)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = UINavWidget)
 		bool bAllowRemoveIfRoot = true;
 
-	UPROPERTY(EditDefaultsOnly, Category = UINavWidget)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = UINavWidget)
 		bool bAnimateScrollBoxes = false;
 
 	//UINavAnimations Playback Speed
@@ -251,15 +251,15 @@ public:
     UPROPERTY(EditDefaultsOnly, Category = UINavWidget)
         bool bUseFullscreenWhenSplitscreen = false;
 
-	UPROPERTY(EditDefaultsOnly, Category = "UINavigation Selector", meta = (EditCondition = "bUseMovementCurve"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UINavigation Selector", meta = (EditCondition = "bUseMovementCurve"))
 		UCurveFloat* MoveCurve;
 
 	//The position the selector will be in relative to the button
-	UPROPERTY(EditDefaultsOnly, Category = "UINavigation Selector")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UINavigation Selector")
 		ESelectorPosition SelectorPositioning = ESelectorPosition::Position_Center;
 
 	//The offset to apply when positioning the selector on a button
-	UPROPERTY(EditDefaultsOnly, Category = "UINavigation Selector")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UINavigation Selector")
 		FVector2D SelectorOffset;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UINavigation Text", meta = (EditCondition = "bUseTextColor"))
