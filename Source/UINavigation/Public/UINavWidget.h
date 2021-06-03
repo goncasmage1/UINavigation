@@ -123,7 +123,6 @@ protected:
 	*/
 	FVector2D GetButtonLocation(const int Index);
 
-	void BeginSelectorMovement(const int Index);
 	void HandleSelectorMovement(const float DeltaTime);
 
 public:
@@ -468,6 +467,14 @@ public:
 	*/
 	UFUNCTION(BlueprintCallable, Category = UINavWidget)
 		void UpdateSelectorLocation(const int Index);
+
+	/**
+	*	Changes the selector's location to that of the button with the given index in the Button's array. Performs a transition animation following the animation curve.
+	*
+	*	@param	Index  The new button's index in the Button's array
+	*/
+	UFUNCTION(BlueprintCallable, Category = UINavWidget)
+		void BeginSelectorMovement(const int PrevButtonIndex, const int NextButtonIndex);
 
 	/**
 	*	Changes the color of the text with the specified index to the specified color

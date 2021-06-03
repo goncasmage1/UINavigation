@@ -1245,20 +1245,19 @@ void UUINavWidget::ReplaceButtonInNavigationGrid(UUINavButton * ButtonToReplace,
 
 void UUINavWidget::UpdateCurrentButton(UUINavButton * NewCurrentButton)
 {
-	ButtonIndex = NewCurrentButton->ButtonIndex;
 	if (IsSelectorValid())
 	{
-		if (MoveCurve != nullptr) BeginSelectorMovement(NewCurrentButton->ButtonIndex);
-		else UpdateSelectorLocation(NewCurrentButton->ButtonIndex);
+		FTimerDelegate TimerDel;
+		if (MoveCurve != nullptr) TimerDel.BindUFunction(this, FName("BeginSelectorMovement"), ButtonIndex, NewCurrentButton->ButtonIndex);
+		else TimerDel.BindUFunction(this, FName("UpdateSelectorLocation"), NewCurrentButton->ButtonIndex);
+		UINavPC->GetPC()->GetWorldTimerManager().SetTimer(SelectorHandle, TimerDel, 0.001f, false);
 	}
+
+	ButtonIndex = NewCurrentButton->ButtonIndex;
 
 	for (UScrollBox* ScrollBox : ScrollBoxes)
 	{
-		if (NewCurrentButton->IsChildOf(ScrollBox))
-		{
-			ScrollBox->ScrollWidgetIntoView(NewCurrentButton, bAnimateScrollBoxes);
-			break;
-		}
+		ScrollBox->ScrollWidgetIntoView(NewCurrentButton, bAnimateScrollBoxes);
 	}
 }
 
@@ -2392,8 +2391,10 @@ void UUINavWidget::DispatchNavigation(const int Index)
 
 	if (Index > -1 && IsSelectorValid())
 	{
-		if (MoveCurve != nullptr) BeginSelectorMovement(Index);
-		else UpdateSelectorLocation(Index);
+		FTimerDelegate TimerDel;
+		if (MoveCurve != nullptr) TimerDel.BindUFunction(this, FName("BeginSelectorMovement"), ButtonIndex, Index);
+		else TimerDel.BindUFunction(this, FName("UpdateSelectorLocation"), Index);
+		UINavPC->GetPC()->GetWorldTimerManager().SetTimer(SelectorHandle, TimerDel, 0.001f, false);
 	}
 
 	if (bUseTextColor) UpdateTextColor(Index);
@@ -2406,12 +2407,12 @@ void UUINavWidget::DispatchNavigation(const int Index)
 	if (UINavAnimations.Num() > 0) ExecuteAnimations(ButtonIndex, Index);
 }
 
-void UUINavWidget::BeginSelectorMovement(const int Index)
+void UUINavWidget::BeginSelectorMovement(const int PrevButtonIndex, const int NextButtonIndex)
 {
 	if (MoveCurve == nullptr) return;
 
-	SelectorOrigin = bMovingSelector ? TheSelector->RenderTransform.Translation : GetButtonLocation(ButtonIndex);
-	SelectorDestination = GetButtonLocation(Index);
+	SelectorOrigin = bMovingSelector ? TheSelector->RenderTransform.Translation : GetButtonLocation(PrevButtonIndex);
+	SelectorDestination = GetButtonLocation(NextButtonIndex);
 	Distance = SelectorDestination - SelectorOrigin;
 
 	float MinTime, MaxTime;
