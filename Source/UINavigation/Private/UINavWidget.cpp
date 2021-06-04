@@ -11,6 +11,7 @@
 #include "UINavPCComponent.h"
 #include "UINavPCReceiver.h"
 #include "UINavPromptWidget.h"
+#include "UINavSettings.h"
 #include "UINavWidgetComponent.h"
 #include "UINavBlueprintFunctionLibrary.h"
 #include "UINavMacros.h"
@@ -545,10 +546,8 @@ void UUINavWidget::SetupSelector()
 	SelectorSlot->SetAlignment(FVector2D(0.5f, 0.5f));
 	SelectorSlot->SetPosition(FVector2D(0.f, 0.f));
 
-	if (UINavPC != nullptr)
-	{
-		UINavPC->GetPC()->GetWorldTimerManager().SetTimer(SelectorHandle, this, &UUINavWidget::UINavSetup, 0.001f);
-	}
+	UINavSetupWaitForTick=0;
+	bShouldTickUINavSetup = true;
 }
 
 void UUINavWidget::UINavSetup()
@@ -571,7 +570,7 @@ void UUINavWidget::UINavSetup()
 	{
 		SetEnableUINavButtons(true, true);
 	}
-	
+
 	bCompletedSetup = true;
 
 	if (OuterUINavWidget == nullptr)
@@ -719,21 +718,38 @@ void UUINavWidget::NativeTick(const FGeometry & MyGeometry, float DeltaTime)
 
 	if (IsSelectorValid())
 	{
-		if (bUpdateSelector)
+		if (bShouldTickUINavSetup)
 		{
-			if (UpdateSelectorWaitForTick == 1)
+			if (UINavSetupWaitForTick >= 1)
 			{
-				if (MoveCurve != nullptr) BeginSelectorMovement(UpdateSelectorPrevButtonIndex, UpdateSelectorNextButtonIndex);
-				else UpdateSelectorLocation(UpdateSelectorNextButtonIndex);
-				bUpdateSelector = false;
+				UINavSetup();
+				bShouldTickUINavSetup = false;
 			}
-			
-			UpdateSelectorWaitForTick++;
+			else
+			{
+				UINavSetupWaitForTick++;
+			}
 		}
-
-		if (bMovingSelector)
+		else
 		{
-			HandleSelectorMovement(DeltaTime);
+			if (bShouldTickUpdateSelector)
+			{
+				if (UpdateSelectorWaitForTick >= 1)
+				{
+					if (MoveCurve != nullptr) BeginSelectorMovement(UpdateSelectorPrevButtonIndex, UpdateSelectorNextButtonIndex);
+					else UpdateSelectorLocation(UpdateSelectorNextButtonIndex);
+					bShouldTickUpdateSelector = false;
+				}
+				else
+				{
+					UpdateSelectorWaitForTick++;
+				}
+			}
+
+			if (bMovingSelector)
+			{
+				HandleSelectorMovement(DeltaTime);
+			}
 		}
 	}
 }
@@ -1265,7 +1281,7 @@ void UUINavWidget::UpdateCurrentButton(UUINavButton * NewCurrentButton)
 		UpdateSelectorWaitForTick = 0;
 		UpdateSelectorPrevButtonIndex = ButtonIndex;
 		UpdateSelectorNextButtonIndex = NewCurrentButton->ButtonIndex;
-		bUpdateSelector = true;
+		bShouldTickUpdateSelector = true;
 	}
 
 	ButtonIndex = NewCurrentButton->ButtonIndex;
@@ -2409,7 +2425,7 @@ void UUINavWidget::DispatchNavigation(const int Index)
 		UpdateSelectorWaitForTick = 0;
 		UpdateSelectorPrevButtonIndex = ButtonIndex;
 		UpdateSelectorNextButtonIndex = Index;
-		bUpdateSelector = true;
+		bShouldTickUpdateSelector = true;
 	}
 
 	if (bUseTextColor) UpdateTextColor(Index);

@@ -35,10 +35,13 @@ protected:
 	bool bIgnoreMouseEvent = false;
 	bool bReturning = false;
 	
-	bool bUpdateSelector = false;
+	bool bShouldTickUINavSetup = false;
+	int UINavSetupWaitForTick=0;
+
+	bool bShouldTickUpdateSelector = false;
 	int UpdateSelectorPrevButtonIndex;
 	int UpdateSelectorNextButtonIndex;
-	int UpdateSelectorWaitForTick;
+	int UpdateSelectorWaitForTick=0;
 
 	bool bReturningToParent = false;
 
@@ -67,8 +70,6 @@ protected:
 	FVector2D SelectorOrigin;
 	FVector2D SelectorDestination;
 	FVector2D Distance;
-
-	FTimerHandle SelectorHandle;
 
 	TArray<FDynamicEdgeNavigation> DynamicEdgeNavigations;
 
@@ -403,7 +404,6 @@ public:
 	/**
 	*	Called manually to setup all the elements in the Widget
 	*/
-	UFUNCTION()
 	virtual void UINavSetup();
 
 	void AddParentToPath(const int IndexInParent);
