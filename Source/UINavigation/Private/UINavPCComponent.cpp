@@ -881,7 +881,7 @@ void UUINavPCComponent::ExecuteActionByKey(const FKey ActionKey, const bool bPre
 	TArray<FString> ActionNames = FindActionByKey(ActionKey);
 	if (ActionNames.Num() == 0) return;
 
-	for (const FString ActionName : ActionNames)
+	for (const FString& ActionName : ActionNames)
 	{
 		ExecuteActionByName(ActionName, bPressed);
 	}
@@ -911,7 +911,7 @@ FReply UUINavPCComponent::OnKeyPressed(const FKey PressedKey)
 	if (ActionNames.Num() == 0) return FReply::Unhandled();
 
 	FReply Reply = FReply::Unhandled();
-	for (const FString ActionName : ActionNames)
+	for (const FString& ActionName : ActionNames)
 	{
 		if (OnActionPressed(ActionName, PressedKey).IsEventHandled())
 		{
@@ -928,7 +928,7 @@ FReply UUINavPCComponent::OnKeyReleased(const FKey PressedKey)
 	if (ActionNames.Num() == 0) return FReply::Unhandled();
 
 	FReply Reply = FReply::Unhandled();
-	for (const FString ActionName : ActionNames)
+	for (const FString& ActionName : ActionNames)
 	{
 		if (OnActionReleased(ActionName, PressedKey).IsEventHandled())
 		{
@@ -967,8 +967,8 @@ EInputMode UUINavPCComponent::GetInputMode() const
 	{
 		UGameViewportClient* GameViewportClient = PC->GetWorld()->GetGameViewport();
 
-		const bool bIgnore = GameViewportClient->IgnoreInput();
-		const EMouseCaptureMode Capt = GameViewportClient->CaptureMouseOnClick();
+		bool bIgnore = GameViewportClient->IgnoreInput();
+		EMouseCaptureMode Capt = GameViewportClient->GetMouseCaptureMode();
 
 		if (bIgnore == false && Capt == EMouseCaptureMode::CaptureDuringMouseDown)
 		{

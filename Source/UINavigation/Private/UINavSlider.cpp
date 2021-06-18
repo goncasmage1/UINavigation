@@ -67,7 +67,6 @@ void UUINavSlider::Update()
 	if (NavText != nullptr) NavText->SetText(ValueText);
 	if (NavSpinBox != nullptr)
 	{
-		bIgnoreSpinBoxCommit = true;
 		NavSpinBox->SetValue(Value);
 	}
 }
@@ -144,11 +143,6 @@ void UUINavSlider::HandleOnMouseCaptureEnd()
 
 void UUINavSlider::HandleOnSpinBoxValueChanged(float InValue, ETextCommit::Type CommitMethod)
 {
-	if (bIgnoreSpinBoxCommit)
-	{
-		bIgnoreSpinBoxCommit = false;
-		return;
-	}
 	OptionIndex = IndexFromValue(InValue);
 	Update();
 }
