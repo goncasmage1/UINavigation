@@ -1,4 +1,4 @@
-// Copyright (C) 2019 Gonçalo Marques - All Rights Reserved
+// Copyright (C) 2019 GonÃ§alo Marques - All Rights Reserved
 
 #pragma once
 
@@ -20,8 +20,6 @@ protected:
 
 	UPROPERTY(BlueprintReadWrite, Category = UINavSlider, meta = (BindWidget, OptionalWidget = true))
 		class USpinBox* NavSpinBox;
-
-	bool bIgnoreSpinBoxCommit = false;
 
 	UFUNCTION()
 		void HandleOnSliderValueChanged(const float InValue);
