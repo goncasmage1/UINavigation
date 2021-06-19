@@ -124,7 +124,6 @@ protected:
 
 	void CallCustomInput(const FName ActionName, const bool bPressed);
 
-
 public:
 
 	UUINavPCComponent();

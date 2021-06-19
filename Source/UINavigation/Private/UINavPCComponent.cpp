@@ -49,6 +49,17 @@ void UUINavPCComponent::BeginPlay()
 
 		VerifyDefaultInputs();
 		FetchUINavActionKeys();
+		if (!FCoreDelegates::OnControllerConnectionChange.IsBoundToObject(this))
+		{
+			UUINavPCComponent* UINavPCComp = this;
+			FCoreDelegates::OnControllerConnectionChange.AddLambda([UINavPCComp](bool bConnected, FPlatformUserId UserId, int32 UserIndex)
+			{
+				if (IsValid(UINavPCComp))
+				{
+					IUINavPCReceiver::Execute_OnControllerConnectionChanged(UINavPCComp->GetOwner(), bConnected, UserId, UserIndex);
+				}
+			});
+		}
 	}
 }
 
