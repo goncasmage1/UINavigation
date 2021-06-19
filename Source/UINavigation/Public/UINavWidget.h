@@ -31,18 +31,23 @@ protected:
 	bool bCompletedSetup = false;
 	bool bSetupStarted = false;
 
-	bool bShouldTick = true;
 	bool bMovingSelector = false;
 	bool bIgnoreMouseEvent = false;
 	bool bReturning = false;
+		
+	bool bShouldTickUINavSetup = false;
+	int UINavSetupWaitForTick=0;
+
+	bool bShouldTickUpdateSelector = false;
+	int UpdateSelectorPrevButtonIndex;
+	int UpdateSelectorNextButtonIndex;
+	int UpdateSelectorWaitForTick=0;
+
 	bool bReturningToParent = false;
 
 	bool bAutoAppended = false;
 	bool bDestroying = false;
 	bool bHasNavigation = false;
-
-	//Used to track when the selector's position should be updated
-	int WaitForTick;
 
 	//The index of the button that will be navigated to when movement is allowed
 	int HaltedIndex = -1;
@@ -125,7 +130,7 @@ protected:
 	*/
 	FVector2D GetButtonLocation(const int Index);
 
-	void BeginSelectorMovement(const int Index);
+	void BeginSelectorMovement(const int PrevButtonIndex, const int NextButtonIndex);
 	void HandleSelectorMovement(const float DeltaTime);
 
 public:
