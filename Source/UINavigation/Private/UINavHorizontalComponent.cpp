@@ -23,7 +23,9 @@ void UUINavHorizontalComponent::NavigateRight()
 
 void UUINavHorizontalComponent::Update()
 {
-	int MaxOptionIndex = GetMaxOptionIndex();
+	const int MaxOptionIndex = GetMaxOptionIndex();
+	if (MaxOptionIndex < 1) return;
+	
 	if (OptionIndex > MaxOptionIndex) OptionIndex = MaxOptionIndex;
 	else if (OptionIndex < 0) OptionIndex = 0;
 
@@ -36,9 +38,9 @@ void UUINavHorizontalComponent::UpdateTextToIndex(int NewIndex)
 	Update();
 }
 
-void UUINavHorizontalComponent::ChangeText(FText NewText)
+void UUINavHorizontalComponent::ChangeText(const FText NewText)
 {
-	NavText->SetText(NewText);
+	if (NavText != nullptr) NavText->SetText(NewText);
 }
 
 void UUINavHorizontalComponent::OnNavigateLeft_Implementation()

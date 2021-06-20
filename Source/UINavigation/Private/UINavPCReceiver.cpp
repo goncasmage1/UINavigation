@@ -11,8 +11,11 @@ void IUINavPCReceiver::OnInputChanged_Implementation(EInputType From, EInputType
 {
 }
 
-void IUINavPCReceiver::OnActiveWidgetChanged_Implementation(UUINavWidget* OldActiveWidget,
-	UUINavWidget* NewActiveWidget)
+void IUINavPCReceiver::OnControllerConnectionChanged_Implementation(bool bConnected, int32 UserId, int32 UserIndex)
+{
+}
+
+void IUINavPCReceiver::OnActiveWidgetChanged_Implementation(UUINavWidget* OldActiveWidget, UUINavWidget* NewActiveWidget)
 {
 }
 

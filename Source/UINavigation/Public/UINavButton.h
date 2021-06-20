@@ -59,7 +59,7 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = UINavButton)
 		int IndexInGrid = - 1;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavButton)
+	UPROPERTY(BlueprintReadOnly, Category = UINavButton)
 		UUINavComponent* NavComp = nullptr;
 
 	EButtonStyle CurrentStyle = EButtonStyle::Normal;

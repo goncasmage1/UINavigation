@@ -33,6 +33,6 @@ public:
 		TArray<FText> StringOptions;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavOptionBox)
-		FORCEINLINE FText GetCurrentString() const { return StringOptions[OptionIndex]; }
+		FORCEINLINE FText GetCurrentString() const { return StringOptions.IsValidIndex(OptionIndex) ? StringOptions[OptionIndex] : FText(); }
 
 };
