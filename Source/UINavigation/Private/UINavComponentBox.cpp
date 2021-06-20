@@ -41,13 +41,13 @@ void UUINavComponentBox::BaseConstruct()
 void UUINavComponentBox::CheckLeftLimit()
 {
 	if (bLoopOptions) return;
-	if (OptionIndex == 0) LeftButton->SetIsEnabled(false);
+	if (OptionIndex <= 0) LeftButton->SetIsEnabled(false);
 }
 
 void UUINavComponentBox::CheckRightLimit()
 {
 	if (bLoopOptions) return;
-	if (OptionIndex == GetMaxOptionIndex()) RightButton->SetIsEnabled(false);
+	if (OptionIndex >= GetMaxOptionIndex()) RightButton->SetIsEnabled(false);
 }
 
 void UUINavComponentBox::UpdateTextToIndex(const int NewIndex)
@@ -102,7 +102,7 @@ void UUINavComponentBox::FinishNavigateLeft(const bool bOptionChanged)
 
 	CheckLeftLimit();
 	//Enable button if previously disabled
-	if (!RightButton->bIsEnabled) RightButton->SetIsEnabled(true);
+	if (!RightButton->bIsEnabled && GetMaxOptionIndex() > 0) RightButton->SetIsEnabled(true);
 
 	if (bOptionChanged)
 	{
@@ -130,7 +130,7 @@ void UUINavComponentBox::FinishNavigateRight(const bool bOptionChanged)
 
 	CheckRightLimit();
 	//Enable button if previously disabled
-	if (!LeftButton->bIsEnabled) LeftButton->SetIsEnabled(true);
+	if (!LeftButton->bIsEnabled && GetMaxOptionIndex() > 0) LeftButton->SetIsEnabled(true);
 
 	if (bOptionChanged)
 	{

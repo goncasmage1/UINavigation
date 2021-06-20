@@ -42,6 +42,13 @@ public:
 	virtual void OnInputChanged_Implementation(EInputType From, EInputType To);
 
 	/**
+	*	Called when a controller is connected and disconnected
+	*/
+	UFUNCTION(BlueprintNativeEvent, Category = UINavController)
+		void OnControllerConnectionChanged(bool bConnected, int32 UserId, int32 UserIndex);
+	virtual void OnControllerConnectionChanged_Implementation(bool bConnected, int32 UserId, int32 UserIndex);
+
+	/**
 	*	Called when the active widget changes
 	*
 	*	@param OldActiveWidget The previously active widget
