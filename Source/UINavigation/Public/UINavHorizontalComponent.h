@@ -35,7 +35,7 @@ public:
 		virtual void UpdateTextToIndex(int NewIndex);
 	//Changes the text displayed in the NavText element
 	UFUNCTION(BlueprintCallable, Category = UINavComponentBox)
-		void ChangeText(FText NewText);
+		void ChangeText(const FText NewText);
 
 	UFUNCTION(BlueprintCallable, Category = UINavComponentBox)
 		virtual FORCEINLINE int GetMaxOptionIndex() const { return 0; }

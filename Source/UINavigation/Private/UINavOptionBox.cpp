@@ -24,12 +24,7 @@ int UUINavOptionBox::GetMaxOptionIndex() const
 	}
 	else
 	{
-		if (StringOptions.Num() > 0) return StringOptions.Num() - 1;
-		else
-		{
-			DISPLAYERROR(TEXT("StringOptions needs to have at least 2 options"));
-			return 0;
-		}
+		return StringOptions.Num() - 1;
 	}
 }
 
@@ -39,6 +34,6 @@ void UUINavOptionBox::Update()
 
 	NavText->SetText(bUseNumberRange ? 
 		FText::FromString(FString::FromInt(MinRange + OptionIndex*Interval)) : 
-		StringOptions.Num() > OptionIndex ? StringOptions[OptionIndex] : FText());
+		StringOptions.IsValidIndex(OptionIndex) ? StringOptions[OptionIndex] : FText());
 }
 
