@@ -49,6 +49,10 @@ void UUINavPCComponent::BeginPlay()
 
 		VerifyDefaultInputs();
 		FetchUINavActionKeys();
+		if (!FCoreDelegates::OnControllerConnectionChange.IsBoundToObject(this))
+		{
+			FCoreDelegates::OnControllerConnectionChange.AddUObject(this, &UUINavPCComponent::OnControllerConnectionChanged);
+		}
 	}
 }
 
@@ -58,6 +62,8 @@ void UUINavPCComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	{
 		FSlateApplication::Get().UnregisterInputPreProcessor(SharedInputProcessor);
 	}
+	
+	FCoreDelegates::OnControllerConnectionChange.RemoveAll(this);
 
 	Super::EndPlay(EndPlayReason);
 }
@@ -201,6 +207,11 @@ void UUINavPCComponent::CallCustomInput(const FName ActionName, const bool bPres
 
 		ActiveWidget->CallCustomInput(ActionName, Buffer);
 	}
+}
+
+void UUINavPCComponent::OnControllerConnectionChanged(bool bConnected, int32 UserId, int32 UserIndex)
+{
+	IUINavPCReceiver::Execute_OnControllerConnectionChanged(GetOwner(), bConnected, UserId, UserIndex);
 }
 
 void UUINavPCComponent::VerifyDefaultInputs()
