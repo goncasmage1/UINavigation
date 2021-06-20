@@ -11,6 +11,7 @@
 #include "UINavPCComponent.h"
 #include "UINavPCReceiver.h"
 #include "UINavPromptWidget.h"
+#include "UINavSettings.h"
 #include "UINavWidgetComponent.h"
 #include "UINavBlueprintFunctionLibrary.h"
 #include "UINavMacros.h"
@@ -134,8 +135,6 @@ void UUINavWidget::InitialSetup(const bool bRebuilding)
 	if (!IsSelectorValid())
 	{
 		UINavSetup();
-		bShouldTick = false;
-		return;
 	}
 	else
 	{
@@ -153,15 +152,11 @@ void UUINavWidget::ReconfigureSetup()
 	if (!IsSelectorValid())
 	{
 		UINavSetup();
-		return;
 	}
 	else
 	{
 		SetupSelector();
 	}
-
-	bShouldTick = true;
-	WaitForTick = 0;
 
 	for (UUINavWidget* ChildUINavWidget : ChildUINavWidgets)
 	{
@@ -514,9 +509,7 @@ void UUINavWidget::RebuildNavigation(const int NewButtonIndex)
 	bMovingSelector = false;
 	bIgnoreMouseEvent = false;
 	bReturning = false;
-	bShouldTick = true;
 	ReceiveInputType = EReceiveInputType::None;
-	WaitForTick = 0;
 	HaltedIndex = -1;
 	SelectedButtonIndex = -1;
 	SelectCount = 0;
@@ -552,6 +545,9 @@ void UUINavWidget::SetupSelector()
 
 	SelectorSlot->SetAlignment(FVector2D(0.5f, 0.5f));
 	SelectorSlot->SetPosition(FVector2D(0.f, 0.f));
+	
+	UINavSetupWaitForTick=0;
+	bShouldTickUINavSetup = true;
 }
 
 void UUINavWidget::UINavSetup()
@@ -574,7 +570,7 @@ void UUINavWidget::UINavSetup()
 	{
 		SetEnableUINavButtons(true, true);
 	}
-	
+
 	bCompletedSetup = true;
 
 	if (OuterUINavWidget == nullptr)
@@ -720,24 +716,41 @@ void UUINavWidget::NativeTick(const FGeometry & MyGeometry, float DeltaTime)
 {
 	Super::NativeTick(MyGeometry, DeltaTime);
 
-	if (!IsSelectorValid() || !bSetupStarted) return;
-
-	if (bMovingSelector)
+	if (IsSelectorValid())
 	{
-		HandleSelectorMovement(DeltaTime);
-	}
-	else
-	{
-		if (!bShouldTick) return;
-
-		if (WaitForTick == 1)
+		if (bShouldTickUINavSetup)
 		{
-			UINavSetup();
-			bShouldTick = false;
-			return;
+			if (UINavSetupWaitForTick >= 1)
+			{
+				UINavSetup();
+				bShouldTickUINavSetup = false;
+			}
+			else
+			{
+				UINavSetupWaitForTick++;
+			}
 		}
+		else
+		{
+			if (bShouldTickUpdateSelector)
+			{
+				if (UpdateSelectorWaitForTick >= 1)
+				{
+					if (MoveCurve != nullptr) BeginSelectorMovement(UpdateSelectorPrevButtonIndex, UpdateSelectorNextButtonIndex);
+					else UpdateSelectorLocation(UpdateSelectorNextButtonIndex);
+					bShouldTickUpdateSelector = false;
+				}
+				else
+				{
+					UpdateSelectorWaitForTick++;
+				}
+			}
 
-		WaitForTick++;
+			if (bMovingSelector)
+			{
+				HandleSelectorMovement(DeltaTime);
+			}
+		}
 	}
 }
 
@@ -1263,20 +1276,19 @@ void UUINavWidget::ReplaceButtonInNavigationGrid(UUINavButton * ButtonToReplace,
 
 void UUINavWidget::UpdateCurrentButton(UUINavButton * NewCurrentButton)
 {
-	ButtonIndex = NewCurrentButton->ButtonIndex;
 	if (IsSelectorValid())
 	{
-		if (MoveCurve != nullptr) BeginSelectorMovement(NewCurrentButton->ButtonIndex);
-		else UpdateSelectorLocation(NewCurrentButton->ButtonIndex);
+		UpdateSelectorWaitForTick = 0;
+		UpdateSelectorPrevButtonIndex = ButtonIndex;
+		UpdateSelectorNextButtonIndex = NewCurrentButton->ButtonIndex;
+		bShouldTickUpdateSelector = true;
 	}
 
+	ButtonIndex = NewCurrentButton->ButtonIndex;
+	
 	for (UScrollBox* ScrollBox : ScrollBoxes)
 	{
-		if (NewCurrentButton->IsChildOf(ScrollBox))
-		{
 			ScrollBox->ScrollWidgetIntoView(NewCurrentButton, bAnimateScrollBoxes);
-			break;
-		}
 	}
 }
 
@@ -2410,8 +2422,10 @@ void UUINavWidget::DispatchNavigation(const int Index)
 
 	if (Index > -1 && IsSelectorValid())
 	{
-		if (MoveCurve != nullptr) BeginSelectorMovement(Index);
-		else UpdateSelectorLocation(Index);
+		UpdateSelectorWaitForTick = 0;
+		UpdateSelectorPrevButtonIndex = ButtonIndex;
+		UpdateSelectorNextButtonIndex = Index;
+		bShouldTickUpdateSelector = true;
 	}
 
 	if (bUseTextColor) UpdateTextColor(Index);
@@ -2424,12 +2438,12 @@ void UUINavWidget::DispatchNavigation(const int Index)
 	if (UINavAnimations.Num() > 0) ExecuteAnimations(ButtonIndex, Index);
 }
 
-void UUINavWidget::BeginSelectorMovement(const int Index)
+void UUINavWidget::BeginSelectorMovement(const int PrevButtonIndex, const int NextButtonIndex)
 {
 	if (MoveCurve == nullptr) return;
 
-	SelectorOrigin = bMovingSelector ? TheSelector->RenderTransform.Translation : GetButtonLocation(ButtonIndex);
-	SelectorDestination = GetButtonLocation(Index);
+	SelectorOrigin = bMovingSelector ? TheSelector->RenderTransform.Translation : GetButtonLocation(PrevButtonIndex);
+	SelectorDestination = GetButtonLocation(NextButtonIndex);
 	Distance = SelectorDestination - SelectorOrigin;
 
 	float MinTime, MaxTime;
