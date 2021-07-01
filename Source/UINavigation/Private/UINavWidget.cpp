@@ -2500,26 +2500,6 @@ void UUINavWidget::OnPreSelect(const int Index, const bool bMouseClick)
 
 	const bool bIsSelectedButton = SelectedButtonIndex == Index && (!bMouseClick || UINavButtons[Index]->IsHovered());
 
-	if (SelectCount == 1)
-	{
-		if (!bMouseClick)
-		{
-			bIgnoreMouseEvent = true;
-			CurrentButton->OnReleased.Broadcast();
-			if (bIsSelectedButton) CurrentButton->OnClicked.Broadcast();
-		}
-
-		UUINavComponent* CurrentUINavComp = GetUINavComponentAtIndex(Index);
-		if (CurrentUINavComp != nullptr)
-		{
-			if (bIsSelectedButton)
-			{
-				CurrentUINavComp->OnSelected();
-			}
-			CurrentUINavComp->OnStopSelected();
-		}
-	}
-
 	if (UINavInputContainer != nullptr && Index >= UINavInputContainer->FirstButtonIndex && Index <= UINavInputContainer->LastButtonIndex)
 	{
 		InputBoxIndex = Index - UINavInputContainer->FirstButtonIndex;
@@ -2546,9 +2526,6 @@ void UUINavWidget::OnPreSelect(const int Index, const bool bMouseClick)
 
 			if (bIsSelectedButton)
 			{
-				OnSelect(Index);
-				CollectionOnSelect(Index);
-
 				for (FDynamicEdgeNavigation& DynamicEdgeNavigation : DynamicEdgeNavigations)
 				{
 					if (DynamicEdgeNavigation.Event == ENavigationEvent::OnSelect)
@@ -2556,9 +2533,28 @@ void UUINavWidget::OnPreSelect(const int Index, const bool bMouseClick)
 						ProcessDynamicEdgeNavigation(DynamicEdgeNavigation);
 					}
 				}
+				OnSelect(Index);
+				CollectionOnSelect(Index);
 			}
 			OnStopSelect(Index);
 			CollectionOnStopSelect(Index);
+
+			if (!bMouseClick)
+			{
+				bIgnoreMouseEvent = true;
+				CurrentButton->OnReleased.Broadcast();
+				if (bIsSelectedButton) CurrentButton->OnClicked.Broadcast();
+			}
+
+			UUINavComponent* CurrentUINavComp = GetUINavComponentAtIndex(Index);
+			if (CurrentUINavComp != nullptr)
+			{
+				if (bIsSelectedButton)
+				{
+					CurrentUINavComp->OnSelected();
+				}
+				CurrentUINavComp->OnStopSelected();
+			}
 		}
 	}
 }
