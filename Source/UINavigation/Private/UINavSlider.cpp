@@ -153,7 +153,7 @@ float UUINavSlider::IndexFromPercent(const float Value)
 	const int MaxOptionIndex = GetMaxOptionIndex();
 	if (Div > MaxOptionIndex) Div = MaxOptionIndex;
 
-	const int FlatDiv = (int)Div;
+	const int FlatDiv = FMath::RoundToInt(Div);
 	const float Decimal = Div - FlatDiv;
 	return Decimal < 0.5 ? FlatDiv : (FlatDiv + 1 <= MaxOptionIndex ? FlatDiv + 1 : MaxOptionIndex);
 }
