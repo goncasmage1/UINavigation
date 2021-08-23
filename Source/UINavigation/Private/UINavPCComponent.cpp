@@ -5,6 +5,8 @@
 #include "UINavSettings.h"
 #include "UINavPCReceiver.h"
 #include "UINavInputContainer.h"
+#include "UINavMacros.h"
+#include "GameFramework/InputSettings.h"
 #include "Data/AxisType.h"
 #include "Data/InputIconMapping.h"
 #include "Data/InputNameMapping.h"
