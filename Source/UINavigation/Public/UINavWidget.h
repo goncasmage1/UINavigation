@@ -256,7 +256,7 @@ public:
     UPROPERTY(EditDefaultsOnly, Category = UINavWidget)
         bool bUseFullscreenWhenSplitscreen = false;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UINavigation Selector", meta = (EditCondition = "bUseMovementCurve"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UINavigation Selector")
 		UCurveFloat* MoveCurve;
 
 	//The position the selector will be in relative to the button
