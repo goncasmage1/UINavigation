@@ -3,6 +3,7 @@
 
 #include "UINavCollection.h"
 #include "UINavWidget.h"
+#include "UINavMacros.h"
 
 void UUINavCollection::SetupNavigation_Implementation(const TArray<FButtonNavigation>& EdgeNavigations)
 {
