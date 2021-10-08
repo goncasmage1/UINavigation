@@ -3192,7 +3192,7 @@ void UUINavWidget::HoverEvent(int Index)
 		CancelRebind();
 	}
 
-	if (!UINavPC->AllowsDirectionalInput())
+	if (UINavPC == nullptr || !UINavPC->AllowsDirectionalInput())
 	{
 		return;
 	}
