@@ -15,7 +15,8 @@ public class UINavigation : ModuleRules
 		PublicDependencyModuleNames.AddRange(
 			new string[]
 			{
-				"Core"
+				"Core",
+				"EnhancedInput"
 			}
 			);
 			
@@ -28,6 +29,7 @@ public class UINavigation : ModuleRules
                 "Slate",
                 "SlateCore",
                 "InputCore",
+                "EnhancedInput",
                 "RHI",
                 "HeadMountedDisplay"
 			}
