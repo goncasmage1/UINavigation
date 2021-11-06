@@ -905,7 +905,7 @@ void UUINavWidget::HandleSelectorMovement(const float DeltaTime)
 
 void UUINavWidget::AddUINavButton(UUINavButton * NewButton, int const TargetGridIndex, int IndexInGrid)
 {
-	if (NewButton == nullptr || !IsGridIndexValid(TargetGridIndex)) return;
+	if (!IsValid(NewButton) || !IsGridIndexValid(TargetGridIndex)) return;
 
 	if (UINavAnimations.Num() > 0)
 	{
@@ -2410,7 +2410,7 @@ void UUINavWidget::UpdateEdgeNavigation(const int GridIndex, UUINavButton* Targe
 void UUINavWidget::DispatchNavigation(const int Index)
 {
 	//Update all the possible scroll boxes in the widget
-	if (Index > -1)
+	if (UINavButtons.IsValidIndex(Index))
 	{
 		for (UScrollBox* ScrollBox : ScrollBoxes)
 		{
@@ -2420,7 +2420,7 @@ void UUINavWidget::DispatchNavigation(const int Index)
 
 	if (bUseButtonStates) UpdateHoveredButtonStates(Index);
 
-	if (Index > -1 && IsSelectorValid())
+	if (UINavButtons.IsValidIndex(Index) && IsSelectorValid())
 	{
 		UpdateSelectorWaitForTick = 0;
 		UpdateSelectorPrevButtonIndex = ButtonIndex;
@@ -2496,7 +2496,8 @@ void UUINavWidget::CollectionOnStopSelect(const int Index)
 void UUINavWidget::OnPreSelect(const int Index, const bool bMouseClick)
 {
 	if (CurrentButton == nullptr ||
-		SelectedButtonIndex == -1) return;
+		SelectedButtonIndex == -1 ||
+		!UINavButtons.IsValidIndex(Index)) return;
 
 	const bool bIsSelectedButton = SelectedButtonIndex == Index && (!bMouseClick || UINavButtons[Index]->IsHovered());
 
@@ -3268,7 +3269,7 @@ void UUINavWidget::PressEvent(int Index)
 
 void UUINavWidget::ReleaseEvent(int Index)
 {
-	if (!IsButtonIndexValid(Index)) return;
+	if (!IsButtonIndexValid(Index) || !bHasNavigation) return;
 	
 	if (bIgnoreMouseEvent)
 	{
