@@ -3090,7 +3090,7 @@ int UUINavWidget::GetGridStartingIndex(const int GridIndex)
 			}
 		}
 	}
-	return -1;
+	return 0;
 }
 
 UUINavButton * UUINavWidget::GetButtonAtGridIndex(const int GridIndex, int IndexInGrid)
