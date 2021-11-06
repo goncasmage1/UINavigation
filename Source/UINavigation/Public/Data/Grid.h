@@ -101,10 +101,10 @@ struct FGrid
 			EdgeNavigation.DownButton = nullptr;
 	}
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = ButtonGrid)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = ButtonGrid)
 		EGridType GridType = EGridType::Horizontal;
 
-	UPROPERTY(BlueprintReadOnly, Category = ButtonGrid)
+	UPROPERTY(BlueprintReadWrite, Category = ButtonGrid)
 		UUINavButton* FirstButton = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = ButtonGrid)
@@ -113,15 +113,15 @@ struct FGrid
 	UPROPERTY(BlueprintReadWrite, Category = ButtonGrid)
 		bool bWrap = false;
 
-	UPROPERTY(BlueprintReadOnly, Category = ButtonGrid)
+	UPROPERTY(BlueprintReadWrite, Category = ButtonGrid)
 		int GridIndex = -1;
 
-	UPROPERTY(BlueprintReadOnly, Category = ButtonGrid)
+	UPROPERTY(BlueprintReadWrite, Category = ButtonGrid)
 		int DimensionX = -1;
-	UPROPERTY(BlueprintReadOnly, Category = ButtonGrid)
+	UPROPERTY(BlueprintReadWrite, Category = ButtonGrid)
 		int DimensionY = -1;
 
-	UPROPERTY(BlueprintReadOnly, Category = ButtonGrid)
+	UPROPERTY(BlueprintReadWrite, Category = ButtonGrid)
 		int NumGrid2DButtons = -1;
 
 };
