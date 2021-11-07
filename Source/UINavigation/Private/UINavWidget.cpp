@@ -621,22 +621,36 @@ void UUINavWidget::GainNavigation(UUINavWidget* PreviousActiveWidget)
 {
 	if (bHasNavigation) return;
 
+	if (IsValid(UINavPC))
+	{
+		bForcingNavigation = bShouldForceNavigation || UINavPC->CurrentInputType != EInputType::Mouse;
+	}
+
+	const bool bShouldUpdateNavigation = bForcingNavigation || ButtonIndex == HoveredButtonIndex;
+	
 	if (UINavButtons.Num() > 0)
 	{
 		bHasNavigation = true;
 		DispatchNavigation(ButtonIndex);
-		OnNavigate(-1, ButtonIndex);
-		CollectionNavigateTo(ButtonIndex);
 
+		if (bShouldUpdateNavigation)
+		{
+			OnNavigate(-1, ButtonIndex);
+			CollectionNavigateTo(ButtonIndex);
+		}
+		
 		if (IsSelectorValid())
 		{
 			TheSelector->SetVisibility(ESlateVisibility::HitTestInvisible);
 		}
 
-		bIgnoreMouseEvent = true;
-		if (CurrentButton != nullptr)
+		if (bShouldUpdateNavigation)
 		{
-			CurrentButton->OnHovered.Broadcast();
+			bIgnoreMouseEvent = true;
+			if (CurrentButton != nullptr)
+			{
+				CurrentButton->OnHovered.Broadcast();
+			}
 		}
 		
 		for (FDynamicEdgeNavigation& DynamicEdgeNavigation : DynamicEdgeNavigations)
@@ -1910,7 +1924,7 @@ void UUINavWidget::ExecuteAnimations(const int From, const int To)
 		}
 	}
 
-	if (To > -1 && To < UINavAnimations.Num())
+	if (UINavAnimations.IsValidIndex(To))
 	{
 		if (UINavAnimations.Num() <= To || UINavAnimations[To] == nullptr) return;
 
@@ -2120,7 +2134,7 @@ void UUINavWidget::OnStopSelect_Implementation(const int Index)
 
 void UUINavWidget::NavigateTo(const int Index, const bool bHoverEvent)
 {
-	if (Index >= UINavButtons.Num() || Index == ButtonIndex) return;
+	if (Index >= UINavButtons.Num() || (Index == ButtonIndex && bForcingNavigation)) return;
 
 	DispatchNavigation(Index);
 	OnNavigate(ButtonIndex, Index);
@@ -2409,16 +2423,19 @@ void UUINavWidget::UpdateEdgeNavigation(const int GridIndex, UUINavButton* Targe
 
 void UUINavWidget::DispatchNavigation(const int Index)
 {
-	//Update all the possible scroll boxes in the widget
-	if (UINavButtons.IsValidIndex(Index))
+	if (bForcingNavigation || Index == HoveredButtonIndex)
 	{
-		for (UScrollBox* ScrollBox : ScrollBoxes)
+		//Update all the possible scroll boxes in the widget
+		if (UINavButtons.IsValidIndex(Index))
 		{
-			ScrollBox->ScrollWidgetIntoView(UINavButtons[Index], bAnimateScrollBoxes);
+			for (UScrollBox* ScrollBox : ScrollBoxes)
+			{
+				ScrollBox->ScrollWidgetIntoView(UINavButtons[Index], bAnimateScrollBoxes);
+			}
 		}
-	}
 
-	if (bUseButtonStates) UpdateHoveredButtonStates(Index);
+		if (bUseButtonStates) UpdateHoveredButtonStates(Index);
+	}
 
 	if (UINavButtons.IsValidIndex(Index) && IsSelectorValid())
 	{
@@ -2428,14 +2445,22 @@ void UUINavWidget::DispatchNavigation(const int Index)
 		bShouldTickUpdateSelector = true;
 	}
 
-	if (bUseTextColor) UpdateTextColor(Index);
+	if (bForcingNavigation || Index == HoveredButtonIndex)
+	{
+		if (bUseTextColor) UpdateTextColor(Index);
 
-	UUINavComponent* FromComponent = GetUINavComponentAtIndex(ButtonIndex);
-	UUINavComponent* ToComponent = GetUINavComponentAtIndex(Index);
-	if (FromComponent != nullptr) FromComponent->OnNavigatedFrom();
-	if (ToComponent != nullptr) ToComponent->OnNavigatedTo();
+		UUINavComponent* FromComponent = GetUINavComponentAtIndex(ButtonIndex);
+		UUINavComponent* ToComponent = GetUINavComponentAtIndex(Index);
+		if (FromComponent != nullptr) FromComponent->OnNavigatedFrom();
+		if (ToComponent != nullptr) ToComponent->OnNavigatedTo();
+		
+		if (UINavAnimations.Num() > 0) ExecuteAnimations(ButtonIndex, Index);
+	}
+}
 
-	if (UINavAnimations.Num() > 0) ExecuteAnimations(ButtonIndex, Index);
+void UUINavWidget::RestoreNavigation()
+{
+	DispatchNavigation(ButtonIndex);
 }
 
 void UUINavWidget::BeginSelectorMovement(const int PrevButtonIndex, const int NextButtonIndex)
@@ -2556,6 +2581,22 @@ void UUINavWidget::OnPreSelect(const int Index, const bool bMouseClick)
 				}
 				CurrentUINavComp->OnStopSelected();
 			}
+		}
+	}
+}
+
+void UUINavWidget::AttemptUnforceNavigation(const EInputType NewInputType)
+{
+	if (!bShouldForceNavigation && NewInputType == EInputType::Mouse)
+	{
+		bForcingNavigation = false;
+		if (bUseButtonStates) RevertButtonStyle(ButtonIndex);
+		if (bUseTextColor) SwitchTextColorTo(ButtonIndex, TextDefaultColor);
+		if (UINavAnimations.Num() > 0) ExecuteAnimations(ButtonIndex, -1);
+
+		if (HoveredButtonIndex != -1 && ButtonIndex != HoveredButtonIndex)
+		{
+			NavigateTo(HoveredButtonIndex);
 		}
 	}
 }
@@ -3198,16 +3239,19 @@ void UUINavWidget::HoverEvent(int Index)
 		return;
 	}
 
+	HoveredButtonIndex = Index;
+
 #if IS_VR_PLATFORM 
 	const bool bIsVR = UHeadMountedDisplayFunctionLibrary::IsHeadMountedDisplayEnabled();
 #else
 	const bool bIsVR = false;
 #endif
 
-	if (Index == ButtonIndex ||
+	if ((Index == ButtonIndex && bForcingNavigation) ||
 		(!bIsVR &&
 		UINavPC->GetCurrentInputType() != EInputType::Mouse &&
-		((!bUseLeftThumbstickAsMouse && !UINavPC->bUseLeftThumbstickAsMouse) || !UINavPC->IsMovingLeftStick())))
+		((!bUseLeftThumbstickAsMouse && !UINavPC->bUseLeftThumbstickAsMouse) || !UINavPC->IsMovingLeftStick())) &&
+		bForcingNavigation)
 	{
 		if (bUseButtonStates) RevertButtonStyle(Index);
 		return;
@@ -3232,7 +3276,26 @@ void UUINavWidget::UnhoverEvent(int Index)
 		CancelRebind();
 	}
 
-	if (bUseButtonStates)
+	if (!bShouldForceNavigation)
+	{
+		bForcingNavigation = false;
+
+		if (bUseButtonStates)
+		{
+			RevertButtonStyle(ButtonIndex);
+			RevertButtonStyle(HoveredButtonIndex);
+		}
+
+		if (bUseTextColor)
+		{
+			SwitchTextColorTo(ButtonIndex, TextDefaultColor);
+			SwitchTextColorTo(HoveredButtonIndex, TextDefaultColor);
+		}
+	}
+
+	HoveredButtonIndex = -1;
+
+	if (bUseButtonStates && bForcingNavigation)
 	{
 		UUINavButton* ToButton = UINavButtons[Index];
 		if (SelectedButtonIndex != ButtonIndex)
@@ -3373,6 +3436,17 @@ void UUINavWidget::NavigateInDirection(const ENavigationDirection Direction)
 		CancelRebind();
 		return;
 	}
+	
+	if (!bForcingNavigation)
+	{
+		bForcingNavigation = true;
+		RestoreNavigation();
+
+		if (HoveredButtonIndex == -1)
+		{
+			return;
+		}
+	}
 
 	if (Direction == ENavigationDirection::None || UINavButtons.Num() == 0) return;
 
@@ -3428,6 +3502,12 @@ void UUINavWidget::MenuSelectPress()
 		return;
 	}
 
+	if (!bForcingNavigation && HoveredButtonIndex == -1)
+	{
+		bRestoreNavigation = true;
+		return;
+	}
+
 	if (CurrentButton != nullptr)
 	{
 		FinishPress(false);
@@ -3444,6 +3524,14 @@ void UUINavWidget::MenuSelectPress()
 
 void UUINavWidget::MenuSelectRelease()
 {
+	if (bRestoreNavigation)
+	{
+		bRestoreNavigation = false;
+		bForcingNavigation = true;
+		RestoreNavigation();
+		return;
+	}
+	
 	if (bMovingSelector)
 	{
 		HaltedIndex = SELECT_INDEX;
@@ -3454,11 +3542,25 @@ void UUINavWidget::MenuSelectRelease()
 
 void UUINavWidget::MenuReturnPress()
 {
+	if (!bForcingNavigation && HoveredButtonIndex == -1)
+	{
+		bRestoreNavigation = true;
+		return;
+	}
+	
 	bReturning = true;
 }
 
 void UUINavWidget::MenuReturnRelease()
 {
+	if (bRestoreNavigation)
+	{
+		bRestoreNavigation = false;
+		bForcingNavigation = true;
+		RestoreNavigation();
+		return;
+	}
+	
 	if (!bReturning) return;
 
 	if (IsRebindingInput())
