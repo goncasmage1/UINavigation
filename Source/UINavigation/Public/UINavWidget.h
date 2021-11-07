@@ -48,6 +48,9 @@ protected:
 	bool bAutoAppended = false;
 	bool bDestroying = false;
 	bool bHasNavigation = false;
+	bool bForcingNavigation = true;
+	bool bRestoreNavigation = false;
+	int HoveredButtonIndex = -1;
 
 	//The index of the button that will be navigated to when movement is allowed
 	int HaltedIndex = -1;
@@ -213,7 +216,11 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
 		bool bShouldDestroyParent = false;
 
-
+	/*If set to true, the hovered/selected button styles will be always forced even when using the mouse,
+	  otherwise, the button style won't be forced whenever the player is using the mouse.*/
+	UPROPERTY(EditDefaultsOnly, Category = UINavWidget)
+		bool bShouldForceNavigation = true;
+	
 	//If set to true, buttons will be navigated by switching button states (Normal and Hovered)
 	UPROPERTY(EditDefaultsOnly, Category = UINavWidget)
 		bool bUseButtonStates = false;
@@ -467,6 +474,8 @@ public:
 
 	void DispatchNavigation(const int Index);
 
+	void RestoreNavigation();
+
 	/**
 	*	Changes the selector's location to that of the button with the given index in the Button's array
 	*
@@ -487,7 +496,6 @@ public:
 	*	Changes the state of the current button to normal and the new button to hovered
 	*
 	*	@param	Index  The new button's index in the Button's array
-	*	@param  bHovered  Whether the function was called due to a mouse hover
 	*/
 	void UpdateHoveredButtonStates(const int Index);
 
@@ -585,6 +593,8 @@ public:
 	void CollectionOnStopSelect(const int Index);
 
 	void OnPreSelect(const int Index, const bool bMouseClick = false);
+
+	void AttemptUnforceNavigation(const EInputType NewInputType);
 
 	/**
 	*	Called when ReturnToParent is called (i.e. the player wants to exit the menu)
