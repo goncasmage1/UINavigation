@@ -7,6 +7,7 @@
 #include "UINavSettings.h"
 #include "UINavComponent.h"
 #include "UINavMacros.h"
+#include "InputAction.h"
 #if IS_VR_PLATFORM
 #include "IXRTrackingSystem.h"
 #endif
@@ -121,6 +122,21 @@ bool UUINavBlueprintFunctionLibrary::RespectsRestriction(const FKey Key, const E
 bool UUINavBlueprintFunctionLibrary::IsGamepadConnected()
 {
 	return FSlateApplication::Get().IsGamepadAttached();
+}
+
+bool UUINavBlueprintFunctionLibrary::IsUINavInputAction(const UInputAction* const InputAction)
+{
+	const UUINavSettings* const UINavSettings = GetDefault<UUINavSettings>();
+	const FUINavEnhancedInputData& InputActions = UINavSettings->EnhancedInputActions;
+		
+	return (InputAction == InputActions.IA_MenuUp ||
+			InputAction == InputActions.IA_MenuDown ||
+			InputAction == InputActions.IA_MenuLeft ||
+			InputAction == InputActions.IA_MenuRight ||
+			InputAction == InputActions.IA_MenuSelect ||
+			InputAction == InputActions.IA_MenuReturn ||
+			InputAction == InputActions.IA_MenuNext ||
+			InputAction == InputActions.IA_MenuPrevious);
 }
 
 int UUINavBlueprintFunctionLibrary::GetGridDimension(const FGrid Grid)
