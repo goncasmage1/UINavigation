@@ -3278,19 +3278,11 @@ void UUINavWidget::UnhoverEvent(int Index)
 
 	if (!bShouldForceNavigation)
 	{
+		bForcingNavigation = true;
+		DispatchNavigation(-1);
 		bForcingNavigation = false;
-
-		if (bUseButtonStates)
-		{
-			RevertButtonStyle(ButtonIndex);
-			RevertButtonStyle(HoveredButtonIndex);
-		}
-
-		if (bUseTextColor)
-		{
-			SwitchTextColorTo(ButtonIndex, TextDefaultColor);
-			SwitchTextColorTo(HoveredButtonIndex, TextDefaultColor);
-		}
+		OnNavigate(ButtonIndex, -1);
+		CollectionNavigateTo(-1);
 	}
 
 	HoveredButtonIndex = -1;
