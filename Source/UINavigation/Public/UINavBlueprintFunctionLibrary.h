@@ -8,8 +8,6 @@
 #include "UINavButton.h"
 #include "UINavBlueprintFunctionLibrary.generated.h"
 
-class UInputAction;
-
 /**
  * 
  */
@@ -40,9 +38,6 @@ public:
 	// Checks whether a gamepad is connected
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavigationLibrary)
 		static bool IsGamepadConnected();
-
-	UFUNCTION(BlueprintCallable, Category = UINavInput)
-		static bool IsUINavInputAction(const UInputAction* const InputAction);
 	
 	template <typename T>
 	static bool ContainsArray(const TArray<T>& Array1, const TArray<T>& Array2)

@@ -12,7 +12,6 @@
 #include "Data/NavigationDirection.h"
 #include "InputCoreTypes.h"
 #include "Input/Reply.h"
-#include "InputAction.h"
 #include "UINavPCComponent.generated.h"
 
 DECLARE_DELEGATE_OneParam(FMouseKeyDelegate, FKey);
@@ -110,8 +109,6 @@ protected:
 	*/
 	void NotifyInputTypeChange(const EInputType NewInputType);
 
-	UEnhancedInputComponent* GetEnhancedInputComponent() const;
-
 	virtual void Activate(bool bReset) override;
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
@@ -121,9 +118,6 @@ protected:
 	void BindMenuInputs(); 
 	UFUNCTION(BlueprintCallable, Category = UINavController)
 	void UnbindMenuInputs();
-
-	UFUNCTION(BlueprintCallable, Category = UINavController)
-	void BindMenuEnhancedInputs();
 
 	UFUNCTION()
 	void OnCustomInput(const int InputIndex, const bool bPressed);
@@ -161,23 +155,11 @@ public:
 		float NavigationChainFrequency = 0.2f;
 
 	/*
-	Indicates whether to automatically add and remove the UINav Input Context
-	*/
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavController)
-	bool bAutoAddUINavInputContext = true;
-
-	/*
-	Indicates the desired priority of the UINav Input Context
-	*/
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavController)
-	int UINavInputContextPriority = 0;
-
-	/*
 	Indicates whether the controller should use the left stick as mouse.
 	If the active UINavWidget has this set to false, this will override that.
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavController)
-		bool bUseLeftThumbstickAsMouse = false;
+	bool bUseLeftThumbstickAsMouse = false;
 
 	/*
 	The sensitivity of the cursor when moved with the left stick
@@ -197,9 +179,6 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavController)
 		TArray<FName> CustomInputs;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavController)
-		TArray<UInputAction*> CustomEnhancedInputs;
 
 	/*
 	Holds the key icons for gamepad

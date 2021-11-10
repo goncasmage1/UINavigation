@@ -36,11 +36,5 @@
 			"Type": "Editor",
 			"LoadingPhase": "Default"
 		}
-	],
-	"Plugins": [
-		{
-			"Name": "EnhancedInput",
-			"Enabled": true
-		}
 	]
 }
