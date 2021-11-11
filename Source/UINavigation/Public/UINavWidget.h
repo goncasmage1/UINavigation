@@ -451,7 +451,7 @@ public:
 	*	@param	bHoverEvent  Was this triggered by a button hover event?
 	*/
 	UFUNCTION(BlueprintCallable, Category = UINavWidget, meta = (AdvancedDisplay=1))
-		void NavigateTo(const int Index, const bool bHoverEvent = false);
+		void NavigateTo(const int Index, const bool bHoverEvent = false, const bool bBypassChecks = false);
 
 	/**
 	*	Navigate to the button with the specified index at the specified grid
@@ -472,9 +472,7 @@ public:
 
 	void UpdateEdgeNavigation(const int GridIndex, UUINavButton* TargetButton, const ENavigationDirection Direction, const bool bInverted);
 
-	void DispatchNavigation(const int Index);
-
-	void RestoreNavigation();
+	void DispatchNavigation(const int Index, const bool bBypassForcedNavigation = false);
 
 	/**
 	*	Changes the selector's location to that of the button with the given index in the Button's array
