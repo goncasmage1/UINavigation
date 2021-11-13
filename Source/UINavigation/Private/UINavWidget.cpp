@@ -3246,12 +3246,12 @@ void UUINavWidget::HoverEvent(int Index)
 #else
 	const bool bIsVR = false;
 #endif
-
-	if ((Index == ButtonIndex && bForcingNavigation) ||
+	
+	if (bForcingNavigation &&
+		((Index == ButtonIndex) ||
 		(!bIsVR &&
 		UINavPC->GetCurrentInputType() != EInputType::Mouse &&
-		((!bUseLeftThumbstickAsMouse && !UINavPC->bUseLeftThumbstickAsMouse) || !UINavPC->IsMovingLeftStick())) &&
-		bForcingNavigation)
+		((!bUseLeftThumbstickAsMouse && !UINavPC->bUseLeftThumbstickAsMouse) || !UINavPC->IsMovingLeftStick()))))
 	{
 		if (bUseButtonStates) RevertButtonStyle(Index);
 		return;
