@@ -4,7 +4,7 @@
 	"VersionName": "2.22.0",
 	"FriendlyName": "UI Navigation",
 	"Description": "A plugin that allows you to easily setup mouse, keyboard and controller navigation in UMG, among other things.",
-	"Category": "Plugins",
+	"Category": "User Interface",
 	"CreatedBy": "Goncalo Marques",
 	"CreatedByURL": "https://goncasmage1.github.io/",
 	"DocsURL": "",
@@ -12,6 +12,8 @@
 	"SupportURL": "",
 	"EngineVersion": "4.26.0",
 	"CanContainContent": true,
+	"IsBetaVersion": false,
+	"IsExperimentalVersion": false,
 	"Installed": true,
 	"Modules": [
 		{
