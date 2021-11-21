@@ -3322,7 +3322,7 @@ void UUINavWidget::PressEvent(int Index)
 
 void UUINavWidget::ReleaseEvent(int Index)
 {
-	if (!IsButtonIndexValid(Index) || !bHasNavigation) return;
+	if (!IsButtonIndexValid(Index) || (!bHasNavigation && SelectCount == 0)) return;
 	
 	if (bIgnoreMouseEvent)
 	{
