@@ -1374,7 +1374,7 @@ void UUINavWidget::ClearGrid(const int GridIndex, const bool bAutoNavigate)
 	Grid.DimensionY = 0;
 	Grid.NumGrid2DButtons = 0;
 
-	if (bShouldNavigate)
+	if (bShouldNavigate && CurrentButton != nullptr)
 	{
 		ButtonIndex = CurrentButton->ButtonIndex;
 	}
