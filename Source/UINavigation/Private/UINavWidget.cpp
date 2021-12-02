@@ -2700,7 +2700,7 @@ UUINavWidget * UUINavWidget::GoToBuiltWidget(UUINavWidget* NewWidget, const bool
 	}
 	else
 	{
-		if (!bUsingSplitScreen || NewWidget->bUseFullscreenWhenSplitscreen) NewWidget->AddToViewport(ZOrder);
+		if (!bForceUsePlayerScreen && (!bUsingSplitScreen || NewWidget->bUseFullscreenWhenSplitscreen)) NewWidget->AddToViewport(ZOrder);
 		else NewWidget->AddToPlayerScreen(ZOrder);
 
 		APlayerController* PC = Cast<APlayerController>(UINavPC->GetOwner());
@@ -2783,7 +2783,7 @@ void UUINavWidget::ReturnToParent(const bool bRemoveAllParents, const int ZOrder
 					if (!ParentWidget->IsPendingKill())
 					{
 						ParentWidget->ReturnedFromWidget = this;
-						if (!bUsingSplitScreen || ParentWidget->bUseFullscreenWhenSplitscreen) ParentWidget->AddToViewport(ZOrder);
+						if (!bForceUsePlayerScreen && (!bUsingSplitScreen || ParentWidget->bUseFullscreenWhenSplitscreen)) ParentWidget->AddToViewport(ZOrder);
 						else ParentWidget->AddToPlayerScreen(ZOrder);
 					}
 				}
