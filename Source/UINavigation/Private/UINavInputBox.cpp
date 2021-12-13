@@ -13,6 +13,15 @@
 #include "Engine/DataTable.h"
 #include "GameFramework/InputSettings.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
+#include "InputAction.h"
+#include "InputMappingContext.h"
+
+#define IS_POSITIVE_AXIS (AxisType == EAxisType::Positive)
+#define IS_NEGATIVE_AXIS (AxisType == EAxisType::Negative)
+#define IS_RIGHT_SCALE(Axis) ((Axis.Scale > 0.0f && IS_POSITIVE_AXIS) || (Axis.Scale < 0.0f && IS_NEGATIVE_AXIS))
+#define GET_REVERSE_AXIS (AxisType == EAxisType::Positive ? EAxisType::Negative : EAxisType::Positive)
+
+#define IS_ENHANCED_INPUT IsValid(InputContext) && IsValid(InputActionData.Action)
 
 void UUINavInputBox::NativeConstruct()
 {
@@ -23,15 +32,92 @@ void UUINavInputBox::NativeConstruct()
 
 void UUINavInputBox::CreateKeyWidgets()
 {
+	InputButtons = { InputButton1, InputButton2, InputButton3 };
+	ProcessInputName();
+
+	if (IS_ENHANCED_INPUT)
+	{
+		CreateEnhancedInputKeyWidgets();
+	}
+	else
+	{
+		CreateInputKeyWidgets();
+	}
+}
+
+void UUINavInputBox::CreateEnhancedInputKeyWidgets()
+{
+	const TArray<FEnhancedActionKeyMapping>& ActionMappings = InputContext->GetMappings();
+	for (int j = 0; j < 3; j++)
+	{
+		UUINavInputComponent* NewInputButton = InputButtons[j];
+		if (j < KeysPerInput)
+		{
+			for (int i = ActionMappings.Num() - 1; i >= 0; --i)
+			{
+				const FEnhancedActionKeyMapping& ActionMapping = ActionMappings[i];
+				if (ActionMapping.Action != InputActionData.Action)
+				{
+					continue;
+				}
+
+				bool bPositive;
+				EInputAxis Axis;
+				Container->GetAxisPropertiesFromMapping(ActionMapping, bPositive, Axis);
+
+				if (InputActionData.Axis == Axis && (Container->UINavPC->Is2DAxis(ActionMapping.Key) || InputActionData.bPositive == bPositive))
+				{
+					FKey NewKey = ActionMapping.Key;
+					if (Container->UINavPC->Is2DAxis(NewKey))
+					{
+						NewKey = Container->UINavPC->GetKeyFromAxis(NewKey, bPositive);
+					}
+						
+					if (!Container->RespectsRestriction(NewKey, j))
+					{
+						continue;
+					}
+
+					if (TrySetupNewKey(NewKey, j, NewInputButton))
+					{
+						if (FirstMappingIndex < 0)
+						{
+							FirstMappingIndex = i;
+						}
+						break;
+					}
+				}
+			}
+		}
+		else
+		{
+			NewInputButton->SetVisibility(Container->bCollapseInputBoxes ? ESlateVisibility::Collapsed : ESlateVisibility::Hidden);
+		}
+
+		if (Keys.Num() - 1 < j)
+		{
+			NewInputButton->NavText->SetText(Container->EmptyKeyText);
+			NewInputButton->InputImage->SetVisibility(ESlateVisibility::Collapsed);
+			NewInputButton->NavText->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+			Keys.Add(FKey());
+		}
+	}
+
+	if (Keys.Num() == 0)
+	{
+		FString Message = TEXT("Couldn't find Input with name ");
+		Message.Append(*InputName.ToString());
+		Message.Append(TEXT(" or wtih valid restriction."));
+		DISPLAYERROR(Message);
+		return;
+	}
+}
+
+void UUINavInputBox::CreateInputKeyWidgets()
+{
 	const UInputSettings* Settings = GetDefault<UInputSettings>();
 	TArray<FInputActionKeyMapping> Actions;
 	TArray<FInputAxisKeyMapping> Axes;
-
-	InputButtons = {
-		InputButton1,
-		InputButton2,
-		InputButton3
-	};
 
 	ProcessInputName();
 
@@ -72,8 +158,8 @@ void UUINavInputBox::CreateKeyWidgets()
 					}
 				}
 				else if (IS_AXIS &&
-						 !PotentialAxisKey.IsValid() &&
-						 Container->RespectsRestriction(Axes[i].Key, j))
+					!PotentialAxisKey.IsValid() &&
+					Container->RespectsRestriction(Axes[i].Key, j))
 				{
 					FKey NewPotentialKey = Container->UINavPC->GetKeyFromAxis(Axes[i].Key, AxisType == EAxisType::Positive);
 					if (!Keys.Contains(NewPotentialKey))
@@ -102,7 +188,7 @@ void UUINavInputBox::CreateKeyWidgets()
 	}
 }
 
-bool UUINavInputBox::TrySetupNewKey(const FKey NewKey, const int KeyIndex, UUINavInputComponent* NewInputButton)
+bool UUINavInputBox::TrySetupNewKey(const FKey NewKey, const int KeyIndex, const UUINavInputComponent* const NewInputButton)
 {
 	if (!NewKey.IsValid() || Keys.IsValidIndex(KeyIndex) || Keys.Contains(NewKey)) return false;
 
@@ -122,6 +208,7 @@ bool UUINavInputBox::TrySetupNewKey(const FKey NewKey, const int KeyIndex, UUINa
 void UUINavInputBox::ResetKeyWidgets()
 {
 	Keys.Empty();
+	FirstMappingIndex = -1;
 	bUsingKeyImage = { false, false, false };
 	InputButtons.Empty();
 	CreateKeyWidgets();
@@ -151,18 +238,38 @@ void UUINavInputBox::UpdateInputKey(const FKey NewKey, const int Index, const bo
 			}
 
 			int SelfIndex = INDEX_NONE;
-			FInputRebindData CollidingInputData;
-			Container->GetInputRebindData(CollidingActionIndex, CollidingInputData);
-			if (!Container->GetParentWidget()->UINavInputBoxes.Find(this, SelfIndex) ||
-				!Container->RequestKeySwap(FInputCollisionData(InputData.InputText,
-															   CollidingInputData.InputText,
-															   CollidingKeyIndex,
-															   Keys[Index],
-															   NewKey),
-										   SelfIndex,
-										   CollidingActionIndex))
+
+			if (IS_ENHANCED_INPUT)
 			{
-				CancelUpdateInputKey(RevertReason);
+				FInputRebindData CollidingInputData;
+				Container->GetEnhancedInputRebindData(CollidingActionIndex, CollidingInputData);
+				if (!Container->GetParentWidget()->UINavInputBoxes.Find(this, SelfIndex) ||
+					!Container->RequestKeySwap(FInputCollisionData(InputText->GetText(),
+																   CollidingInputData.InputText,
+																   CollidingKeyIndex,
+																   Keys[Index],
+																   NewKey),
+											   SelfIndex,
+											   CollidingActionIndex))
+				{
+					CancelUpdateInputKey(RevertReason);
+				}
+			}
+			else
+			{
+				FInputRebindData CollidingInputData;
+				Container->GetInputRebindData(CollidingActionIndex, CollidingInputData);
+				if (!Container->GetParentWidget()->UINavInputBoxes.Find(this, SelfIndex) ||
+					!Container->RequestKeySwap(FInputCollisionData(InputData.InputText,
+																   CollidingInputData.InputText,
+																   CollidingKeyIndex,
+																   Keys[Index],
+																   NewKey),
+											   SelfIndex,
+											   CollidingActionIndex))
+				{
+					CancelUpdateInputKey(RevertReason);
+				}
 			}
 
 			return;
@@ -179,14 +286,103 @@ void UUINavInputBox::UpdateInputKey(const FKey NewKey, const int Index, const bo
 		}
 	}
 
-	FinishUpdateInputKey();
+	FinishUpdateNewKey();
 }
 
-void UUINavInputBox::FinishUpdateInputKey()
+void UUINavInputBox::FinishUpdateNewKey()
 {
-	FKey NewKey = AwaitingNewKey;
+	const FKey NewKey = AwaitingNewKey;
 	const int Index = AwaitingIndex;
 
+	if (IS_ENHANCED_INPUT)
+	{
+		FinishUpdateNewEnhancedInputKey(NewKey, Index);
+	}
+	else
+	{
+		FinishUpdateNewInputKey(NewKey, Index);
+	}
+}
+
+void UUINavInputBox::FinishUpdateNewEnhancedInputKey(const FKey NewKey, const int Index)
+{
+	const TArray<FEnhancedActionKeyMapping>& ActionMappings = InputContext->GetMappings();
+
+	FKey NewAxisKey;
+	bool bFound = false;
+	bool bRemoved2DAxis = false;
+	const int Iterations = ActionMappings.Num();
+	for (int i = Iterations - 1; i >= 0; --i)
+	{
+		FEnhancedActionKeyMapping& ActionMapping = InputContext->GetMapping(i);
+		if (ActionMapping.Action == InputActionData.Action)
+		{
+			bool bPositive;
+			EInputAxis Axis;
+			Container->GetAxisPropertiesFromMapping(ActionMapping, bPositive, Axis);
+			if (InputActionData.Axis == Axis)
+			{
+				const FKey InputKey = GetKeyFromAxis(ActionMapping.Key);
+				if (InputKey == Keys[Index] &&
+					Container->RespectsRestriction(NewKey, Index))
+				{
+					if (IS_AXIS)
+					{
+						if (InputKey != ActionMapping.Key &&
+							InputActionData.bPositive != bPositive)
+						{
+							NewAxisKey = NewKey;
+							break;
+						}
+
+						//Remove indirect axis in opposite scale input
+						if (Container->UINavPC->Is2DAxis(ActionMapping.Key))
+						{
+							bRemoved2DAxis = true;
+						}
+
+						ActionMapping.Key = NewKey;
+					}
+					else ActionMapping.Key = NewKey;
+					Keys[Index] = NewKey;
+					InputButtons[Index]->NavText->SetText(GetKeyText(Index));
+					bFound = true;
+					break;
+				}
+			}
+		}
+	}
+	if (!bFound)
+	{
+		const FKey Key = NewAxisKey.IsValid() ? NewAxisKey : NewKey;
+		FEnhancedActionKeyMapping& NewMapping =  InputContext->MapKey(InputActionData.Action, Key);
+		const FEnhancedActionKeyMapping& FirstMapping = InputContext->GetMapping(FirstMappingIndex);
+		NewMapping.Modifiers.Append(FirstMapping.Modifiers);
+		NewMapping.Triggers.Append(FirstMapping.Triggers);
+		Keys[Index] = Key;
+		InputButtons[Index]->NavText->SetText(GetKeyText(Index));
+	}
+
+	if (Container->UINavPC != nullptr)
+	{
+		Container->UINavPC->PressedActions.Empty();
+		if (Container->UINavPC->KeyMap.Contains(InputName.ToString()))
+		{
+			Container->UINavPC->KeyMap.Add(InputName.ToString(), Keys);
+		}
+		Container->UINavPC->UnbindMouseWorkaround();
+	}
+
+	UpdateKeyDisplay(Index);
+
+	if (bRemoved2DAxis)
+	{
+		Container->ResetInputBox(InputName, GET_REVERSE_AXIS);
+	}
+}
+
+void UUINavInputBox::FinishUpdateNewInputKey(const FKey NewKey, const int Index)
+{
 	UInputSettings* Settings = const_cast<UInputSettings*>(GetDefault<UInputSettings>());
 	TArray<FInputActionKeyMapping>& Actions = const_cast<TArray<FInputActionKeyMapping>&>(Settings->GetActionMappings());
 	TArray<FInputAxisKeyMapping>& Axes = const_cast<TArray<FInputAxisKeyMapping>&>(Settings->GetAxisMappings());
@@ -292,26 +488,39 @@ FKey UUINavInputBox::GetKeyFromAxis(const FKey AxisKey) const
 
 void UUINavInputBox::ProcessInputName()
 {
-	FString InputNameString = InputName.ToString();
-	const FString LastNameChar = InputNameString.Right(1);
-	if (LastNameChar.Equals(TEXT("+")))
+	if (IS_ENHANCED_INPUT)
 	{
-		AxisType = EAxisType::Positive;
-		InputNameString.RemoveAt(InputNameString.Len() - 1);
-		InputName = FName(*InputNameString);
+		AxisType = InputActionData.bPositive ? EAxisType::Positive : EAxisType::Negative;
+		InputName = InputActionData.Action->GetFName();
+		if (InputActionData.DisplayName.IsEmpty())
+		{
+			InputActionData.DisplayName = FText::FromName(InputActionData.Action->GetFName());
+		}
+		InputText->SetText(InputActionData.DisplayName);
 	}
-	else if (LastNameChar.Equals(TEXT("-")))
+	else
 	{
-		AxisType = EAxisType::Negative;
-		InputNameString.RemoveAt(InputNameString.Len() - 1);
-		InputName = FName(*InputNameString);
-	}
+		FString InputNameString = InputName.ToString();
+		const FString LastNameChar = InputNameString.Right(1);
+		if (LastNameChar.Equals(TEXT("+")))
+		{
+			AxisType = EAxisType::Positive;
+			InputNameString.RemoveAt(InputNameString.Len() - 1);
+			InputName = FName(*InputNameString);
+		}
+		else if (LastNameChar.Equals(TEXT("-")))
+		{
+			AxisType = EAxisType::Negative;
+			InputNameString.RemoveAt(InputNameString.Len() - 1);
+			InputName = FName(*InputNameString);
+		}
 
-	if (InputData.InputText.IsEmpty())
-	{
-		InputData.InputText = FText::FromName(InputName);
+		if (InputData.InputText.IsEmpty())
+		{
+			InputData.InputText = FText::FromName(InputName);
+		}
+		InputText->SetText(InputData.InputText);
 	}
-	InputText->SetText(InputData.InputText);
 }
 
 bool UUINavInputBox::UpdateKeyIconForKey(const int Index)

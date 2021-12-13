@@ -20,7 +20,7 @@ void USwapKeysWidget::NotifySwapResult(const int Index)
 	{
 		if (Index > 0)
 		{
-			CurrentInputBox->FinishUpdateInputKey();
+			CurrentInputBox->FinishUpdateNewKey();
 			CollidingInputBox->UpdateInputKey(InputCollisionData.CurrentInputKey,
 											  InputCollisionData.CollidingKeyIndex,
 											  true);

@@ -4,8 +4,8 @@
 
 #include "UObject/NoExportTypes.h"
 #include "GameFramework/PlayerInput.h"
-#include "Data/UINavEnhancedInputData.h"
 #include "InputMappingContext.h"
+#include "Data/UINavEnhancedInputActions.h"
 #include "UINavSettings.generated.h"
 
 /**
@@ -35,11 +35,15 @@ public:
 		TAssetPtr<UInputMappingContext> EnhancedInputContext;
 
 	UPROPERTY(config, EditAnywhere, Category = "Bindings")
-		FUINavEnhancedInputData EnhancedInputActions;
+		TAssetPtr<UUINavEnhancedInputActions> EnhancedInputActions;
 
 	UPROPERTY(config)
 		TArray<struct FInputActionKeyMapping> ActionMappings;
 
 	UPROPERTY(config)
 		TArray<struct FInputAxisKeyMapping> AxisMappings;
+
+	// A map for each Input Context in your game and its respective Default Input Context Mappings
+	UPROPERTY(config, EditAnywhere, Category = "Bindings")
+		TMap<TAssetPtr<UInputMappingContext>, TAssetPtr<UInputMappingContext>> DefaultInputContexts;
 };

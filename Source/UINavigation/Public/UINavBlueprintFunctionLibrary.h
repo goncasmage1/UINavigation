@@ -32,7 +32,7 @@ public:
 
 	// Resets the input settings to their default state
 	UFUNCTION(BlueprintCallable, Category = UINavInput)
-		static void ResetInputSettings();
+		static void ResetInputSettings(APlayerController* PC = nullptr);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "UINav Input")
 		static bool RespectsRestriction(const FKey CompareKey, const EInputRestriction Restriction);
