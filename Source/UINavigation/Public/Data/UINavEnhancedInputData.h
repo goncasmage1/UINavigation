@@ -1,21 +1,13 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Copyright (C) 2019 Gon�alo Marques - All Rights Reserved
 
 #pragma once
+#include "InputAction.h"
+#include "UINavEnhancedInputData.generated.h"
 
-#include "Engine/DataAsset.h"
-#include "UINavEnhancedInputActions.generated.h"
-
-class UInputAction;
-
-/**
- * 
- */
-UCLASS()
-class UINAVIGATION_API UUINavEnhancedInputActions : public UDataAsset
+USTRUCT(BlueprintType)
+struct FUINavEnhancedInputData
 {
 	GENERATED_BODY()
-
-public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = EnhancedInput)
 	UInputAction* IA_MenuUp;
@@ -40,5 +32,4 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = EnhancedInput)
 	UInputAction* IA_MenuPrevious;
-	
 };

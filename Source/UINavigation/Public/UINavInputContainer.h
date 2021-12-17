@@ -9,8 +9,6 @@
 #include "Data/RevertRebindReason.h"
 #include "Data/TargetColumn.h"
 #include "Blueprint/UserWidget.h"
-#include "Data/InputContainerEnhancedActionData.h"
-#include "EnhancedActionKeyMapping.h"
 #include "UINavInputContainer.generated.h"
 
 /**
@@ -83,29 +81,25 @@ public:
 	/**
 	*	Called when the player presses a key being used by another action
 	*/
-	bool RequestKeySwap(const FInputCollisionData& InputCollisionData, const int CurrentInputIndex, const int CollidingInputIndex) const;
+	bool RequestKeySwap(FInputCollisionData InputCollisionData, int CurrentInputIndex, int CollidingInputIndex);
 
 	UFUNCTION(BlueprintCallable, Category = "UINav Input")
 		void ResetKeyMappings();
 
-	ERevertRebindReason CanRegisterKey(const class UUINavInputBox* InputBox, const FKey NewKey, const int Index, int& OutCollidingActionIndex, int& OutCollidingKeyIndex);
+	ERevertRebindReason CanRegisterKey(const class UUINavInputBox* InputBox, FKey NewKey, int Index, int& CollidingActionIndex, int& CollidingKeyIndex);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "UINav Input")
-		bool CanUseKey(const class UUINavInputBox* InputBox, const FKey CompareKey, int& OutCollidingActionIndex, int& OutCollidingKeyIndex) const;
+		bool CanUseKey(const class UUINavInputBox* InputBox, FKey CompareKey, int& CollidingActionIndex, int& CollidingKeyIndex) const;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "UINav Input")
-		bool RespectsRestriction(const FKey CompareKey, const int Index);
+		bool RespectsRestriction(FKey CompareKey, int Index);
 
-	void ResetInputBox(const FName InputName, const EAxisType AxisType);
-
-	void GetAxisPropertiesFromMapping(const FEnhancedActionKeyMapping& ActionMapping, bool& bOutPositive, EInputAxis& OutAxis) const;
+	void ResetInputBox(FName InputName, EAxisType AxisType);
 
 	//Fetches the index offset from the TargetColumn variable for both the top and bottom of the Input Container
-	int GetOffsetFromTargetColumn(const bool bTop) const;
+	int GetOffsetFromTargetColumn(bool bTop);
 
-	void GetInputRebindData(const int InputIndex, FInputRebindData& RebindData) const;
-
-	void GetEnhancedInputRebindData(const int InputIndex, FInputRebindData& RebindData) const;
+	void GetInputRebindData(int InputIndex, FInputRebindData& RebindData);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "UINav Input")
 		FKey GetAxisFromKey(FKey Key);
@@ -150,10 +144,7 @@ public:
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Input")
 		TArray<FName> InputNames;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Input")
-		TMap<UInputMappingContext*, FInputContainerEnhancedActionDataArray> EnhancedInputs;
-	
+
 	/*
 	The restrictions for the type of input associated with each column
 	in the Input Container
@@ -189,7 +180,7 @@ public:
 		TSubclassOf<class USwapKeysWidget> SwapKeysWidgetClass;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Input")
-		int SpawnKeysWidgetZOrder = 0;
+		int SpawKeysWidgetZOrder = 0;
 	
 	/*
 	Indicates whether unused input boxes will hidden or collapsed
