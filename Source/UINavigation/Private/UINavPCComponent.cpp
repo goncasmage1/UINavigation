@@ -48,6 +48,28 @@ void UUINavPCComponent::BeginPlay()
 
 	if (PC != nullptr && PC->IsLocalPlayerController() && !SharedInputProcessor.IsValid())
 	{
+		if (IsValid(GetEnhancedInputComponent()))
+		{
+			const UUINavSettings* const UINavSettings = GetDefault<UUINavSettings>();
+			const UInputMappingContext* InputContext = UINavSettings->EnhancedInputContext.LoadSynchronous();
+			const UUINavEnhancedInputActions* const InputActions = UINavSettings->EnhancedInputActions.LoadSynchronous();
+		
+			if (!IsValid(InputContext) ||
+				!IsValid(InputActions) ||
+				!IsValid(InputActions->IA_MenuUp) ||
+				!IsValid(InputActions->IA_MenuDown) ||
+				!IsValid(InputActions->IA_MenuLeft) ||
+				!IsValid(InputActions->IA_MenuRight) ||
+				!IsValid(InputActions->IA_MenuSelect) ||
+				!IsValid(InputActions->IA_MenuReturn) ||
+				!IsValid(InputActions->IA_MenuNext) ||
+				!IsValid(InputActions->IA_MenuPrevious))
+			{
+				DISPLAYERROR("Not all Enhanced Menu Inputs have been setup!");
+				return;
+			}
+		}
+		
 		SharedInputProcessor = MakeShareable(new FUINavInputProcessor());
 		SharedInputProcessor->SetUINavPC(this);
 		FSlateApplication::Get().RegisterInputPreProcessor(SharedInputProcessor);
@@ -656,21 +678,6 @@ void UUINavPCComponent::FetchUINavActionKeys()
 		const UUINavSettings* const UINavSettings = GetDefault<UUINavSettings>();
 		const UInputMappingContext* InputContext = UINavSettings->EnhancedInputContext.LoadSynchronous();
 		const UUINavEnhancedInputActions* const InputActions = UINavSettings->EnhancedInputActions.LoadSynchronous();
-		
-		if (!IsValid(InputContext) ||
-			!IsValid(InputActions) ||
-			!IsValid(InputActions->IA_MenuUp) ||
-			!IsValid(InputActions->IA_MenuDown) ||
-			!IsValid(InputActions->IA_MenuLeft) ||
-			!IsValid(InputActions->IA_MenuRight) ||
-			!IsValid(InputActions->IA_MenuSelect) ||
-			!IsValid(InputActions->IA_MenuReturn) ||
-			!IsValid(InputActions->IA_MenuNext) ||
-			!IsValid(InputActions->IA_MenuPrevious))
-		{
-			DISPLAYERROR("Not all Menu Inputs have been setup!");
-			return;
-		}
 
 		for (const FEnhancedActionKeyMapping& Action : InputContext->GetMappings())
 		{
