@@ -3292,7 +3292,7 @@ void UUINavWidget::UnhoverEvent(int Index)
 
 void UUINavWidget::PressEvent(int Index)
 {
-	if (!UINavButtons.IsValidIndex(Index)) return;
+	if (!UINavButtons.IsValidIndex(Index) || UINavPC == nullptr) return;
 	
 	if (IsRebindingInput())
 	{
@@ -3315,7 +3315,7 @@ void UUINavWidget::PressEvent(int Index)
 
 void UUINavWidget::ReleaseEvent(int Index)
 {
-	if (!UINavButtons.IsValidIndex(Index) || (!bHasNavigation && SelectCount == 0)) return;
+	if (!UINavButtons.IsValidIndex(Index) || (!bHasNavigation && SelectCount == 0) || UINavPC == nullptr) return;
 	
 	if (bIgnoreMouseEvent)
 	{
