@@ -2138,18 +2138,18 @@ void UUINavWidget::NavigateTo(const int Index, const bool bHoverEvent, const boo
 	if (!bBypassChecks && (Index >= UINavButtons.Num() || (Index == ButtonIndex && bForcingNavigation))) return;
 
 	DispatchNavigation(Index);
-	OnNavigate(ButtonIndex, Index);
-	CollectionNavigateTo(Index);
-
-	if (!bHoverEvent)
-	{
-		bIgnoreMouseEvent = true;
-		CurrentButton->OnUnhovered.Broadcast();
-	}
-
+	const int OldButtonIndex = ButtonIndex;
+	const UUINavButton* OldButton = CurrentButton;
 	ButtonIndex = Index;
 	CurrentButton = UINavButtons[ButtonIndex];
+	OnNavigate(OldButtonIndex, ButtonIndex);
+	CollectionNavigateTo(ButtonIndex);
 
+	if (!bHoverEvent && IsValid(OldButton))
+	{
+		bIgnoreMouseEvent = true;
+		OldButton->OnUnhovered.Broadcast();
+	}
 	if (!bHoverEvent)
 	{
 		bIgnoreMouseEvent = true;
