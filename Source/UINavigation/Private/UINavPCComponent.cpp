@@ -677,7 +677,6 @@ void UUINavPCComponent::FetchUINavActionKeys()
 	{
 		const UUINavSettings* const UINavSettings = GetDefault<UUINavSettings>();
 		const UInputMappingContext* InputContext = UINavSettings->EnhancedInputContext.LoadSynchronous();
-		const UUINavEnhancedInputActions* const InputActions = UINavSettings->EnhancedInputActions.LoadSynchronous();
 
 		for (const FEnhancedActionKeyMapping& Action : InputContext->GetMappings())
 		{
