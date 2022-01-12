@@ -390,13 +390,13 @@ void UUINavPCComponent::SetAllowSectionInput(const bool bAllowInput)
 void UUINavPCComponent::SetAllowCustomInputByName(const FName InputName, const bool bAllowInput)
 {
 	const int CustomInputIndex = CustomInputs.Find(InputName);
-	if (CustomInputIndex < 0) return;
+	if (!bAllowCustomInputs.IsValidIndex(CustomInputIndex)) return;
 	bAllowCustomInputs[CustomInputIndex] = bAllowInput;
 }
 
 void UUINavPCComponent::SetAllowCustomInputByIndex(const int InputIndex, const bool bAllowInput)
 {
-	if (InputIndex < 0 || InputIndex >= CustomInputs.Num()) return;
+	if (!CustomInputs.IsValidIndex(InputIndex) || !bAllowCustomInputs.IsValidIndex(InputIndex)) return;
 	bAllowCustomInputs[InputIndex] = bAllowInput;
 }
 
