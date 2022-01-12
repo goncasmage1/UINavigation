@@ -263,10 +263,6 @@ public:
     UPROPERTY(EditDefaultsOnly, Category = UINavWidget)
         bool bUseFullscreenWhenSplitscreen = false;
 
-	// If set to true, will always use AddToPlayerScreen instead of AddToViewport, even if not in split screen
-	UPROPERTY(EditDefaultsOnly, Category = UINavWidget)
-		bool bForceUsePlayerScreen = false;
-
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UINavigation Selector")
 		UCurveFloat* MoveCurve;
 
@@ -675,6 +671,10 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
 		bool IsSelectorValid();
+
+	bool IsButtonIndexValid(const int InButtonIndex) const;
+
+	bool IsGridIndexValid(const int GridIndex) const;
 
 	FORCEINLINE uint8 GetSelectCount() const { return SelectCount; }
 

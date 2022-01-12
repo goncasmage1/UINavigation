@@ -177,7 +177,7 @@ public:
 
 	TArray<FString> PressedActions;
 
-	UPROPERTY(EditAnywhere, Category = UINavController)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavController)
 		TArray<FName> CustomInputs;
 
 	/*
