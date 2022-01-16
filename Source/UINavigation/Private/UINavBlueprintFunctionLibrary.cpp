@@ -62,7 +62,7 @@ void UUINavBlueprintFunctionLibrary::ResetInputSettings(APlayerController* PC)
 		if (Subsystem != nullptr)
 		{
 			const UUINavSettings* UINavSettings = GetDefault<UUINavSettings>();
-			for (const TPair<TAssetPtr<UInputMappingContext>, TAssetPtr<UInputMappingContext>> Entry : UINavSettings->DefaultInputContexts)
+			for (const TPair<TAssetPtr<UInputMappingContext>, TAssetPtr<UInputMappingContext>>& Entry : UINavSettings->DefaultInputContexts)
 			{
 				UInputMappingContext* CurrentContext = Entry.Key.LoadSynchronous();
 				UInputMappingContext* DefaultContext = Entry.Value.LoadSynchronous();

@@ -83,7 +83,7 @@ void UUINavInputContainer::SetupInputBoxes(const int GridIndex)
 	if (USING_ENHANCED_INPUT)
 	{
 		NumberOfInputs = 0;
-		for (const TPair<UInputMappingContext*, FInputContainerEnhancedActionDataArray> Context : EnhancedInputs)
+		for (const TPair<UInputMappingContext*, FInputContainerEnhancedActionDataArray>& Context : EnhancedInputs)
 		{
 			NumberOfInputs += Context.Value.Actions.Num();
 		}
@@ -135,7 +135,7 @@ void UUINavInputContainer::CreateInputBoxes(const int GridIndex)
 		if (USING_ENHANCED_INPUT)
 		{
 			int Index = i;
-			for (const TPair<UInputMappingContext*, FInputContainerEnhancedActionDataArray> Context : EnhancedInputs)
+			for (const TPair<UInputMappingContext*, FInputContainerEnhancedActionDataArray>&Context : EnhancedInputs)
 			{
 				if (Index >= Context.Value.Actions.Num())
 				{
