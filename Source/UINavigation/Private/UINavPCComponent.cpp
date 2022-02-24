@@ -211,9 +211,9 @@ void UUINavPCComponent::CallCustomInput(const FName ActionName, const bool bPres
 	}
 }
 
-void UUINavPCComponent::OnControllerConnectionChanged(bool bConnected, int32 UserId, int32 UserIndex)
+void UUINavPCComponent::OnControllerConnectionChanged(bool bConnected, FPlatformUserId UserId, int32 UserIndex)
 {
-	IUINavPCReceiver::Execute_OnControllerConnectionChanged(GetOwner(), bConnected, UserId, UserIndex);
+	IUINavPCReceiver::Execute_OnControllerConnectionChanged(GetOwner(), bConnected, static_cast<int32>(UserId), UserIndex);
 }
 
 void UUINavPCComponent::VerifyDefaultInputs()

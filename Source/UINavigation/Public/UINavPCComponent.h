@@ -12,6 +12,7 @@
 #include "Data/NavigationDirection.h"
 #include "InputCoreTypes.h"
 #include "Input/Reply.h"
+#include "Misc/CoreMiscDefines.h"
 #include "UINavPCComponent.generated.h"
 
 DECLARE_DELEGATE_OneParam(FMouseKeyDelegate, FKey);
@@ -124,8 +125,7 @@ protected:
 
 	void CallCustomInput(const FName ActionName, const bool bPressed);
 
-	UFUNCTION()
-	void OnControllerConnectionChanged(bool bConnected, int32 UserId, int32 UserIndex);
+	void OnControllerConnectionChanged(bool bConnected, FPlatformUserId UserId, int32 UserIndex);
 
 public:
 
