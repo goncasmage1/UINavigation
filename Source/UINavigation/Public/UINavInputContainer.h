@@ -44,7 +44,7 @@ protected:
 	class UPanelWidget* InputBoxesPanel = nullptr;
 	
 	UPROPERTY(BlueprintReadOnly, Category = "UINav Input")
-		class UUINavWidget* ParentWidget;
+	class UUINavWidget* ParentWidget = nullptr;
 
 public:
 
