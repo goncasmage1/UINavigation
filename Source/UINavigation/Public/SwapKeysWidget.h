@@ -24,7 +24,9 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = SwapKeysWidget)
 	FInputCollisionData InputCollisionData;
 
-	class UUINavInputBox* CurrentInputBox;
-	class UUINavInputBox* CollidingInputBox;
+	UPROPERTY()
+	class UUINavInputBox* CurrentInputBox = nullptr;
 	
+	UPROPERTY()
+	class UUINavInputBox* CollidingInputBox = nullptr;
 };

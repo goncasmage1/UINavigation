@@ -84,10 +84,10 @@ public:
 		int GridCount = 0;
 
 	UPROPERTY(BlueprintReadOnly, Category = UINavCollection)
-		class UUINavWidget* ParentWidget;
+	class UUINavWidget* ParentWidget = nullptr;
 
 	UPROPERTY(BlueprintReadOnly, Category = UINavCollection)
-		class UUINavCollection* ParentCollection;
+	class UUINavCollection* ParentCollection = nullptr;
 
 	UPROPERTY(BlueprintReadWrite, Category = UINavCollection)
 		TArray<class UWidgetAnimation*> UINavAnimations;
