@@ -16,9 +16,10 @@ class UINAVIGATION_API UUINavComponentBox : public UUINavHorizontalComponent
 protected:
 
 	UPROPERTY(BlueprintReadWrite, Category = UINavComponentBox, meta = (BindWidget))
-		class UButton* LeftButton;
+	class UButton* LeftButton = nullptr;
+	
 	UPROPERTY(BlueprintReadWrite, Category = UINavComponentBox, meta = (BindWidget))
-		class UButton* RightButton;
+	class UButton* RightButton = nullptr;
 
 	virtual void CheckLeftLimit();
 	virtual void CheckRightLimit();
