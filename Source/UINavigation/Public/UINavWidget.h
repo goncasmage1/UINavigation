@@ -149,7 +149,7 @@ public:
 
 	//The UserWidget object that will move along the Widget
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget, OptionalWidget = true), Category = UINavWidget)
-		UUserWidget* TheSelector;
+	UUserWidget* TheSelector = nullptr;
 
 	//All the animation in this widget
 	UPROPERTY(BlueprintReadWrite, Category = UINavWidget)
@@ -269,7 +269,7 @@ public:
 		bool bForceUsePlayerScreen = false;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UINavigation Selector")
-		UCurveFloat* MoveCurve;
+	UCurveFloat* MoveCurve=nullptr;
 
 	//The position the selector will be in relative to the button
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UINavigation Selector")
