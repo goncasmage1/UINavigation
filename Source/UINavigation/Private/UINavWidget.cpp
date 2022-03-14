@@ -2452,9 +2452,9 @@ void UUINavWidget::DispatchNavigation(const int Index, const bool bBypassForcedN
 
 		UUINavComponent* FromComponent = GetUINavComponentAtIndex(ButtonIndex);
 		UUINavComponent* ToComponent = GetUINavComponentAtIndex(Index);
+		
 		if (FromComponent != nullptr) FromComponent->OnNavigatedFrom();
 		if (ToComponent != nullptr) ToComponent->OnNavigatedTo();
-		
 		if (UINavAnimations.Num() > 0) ExecuteAnimations(ButtonIndex, Index);
 	}
 }

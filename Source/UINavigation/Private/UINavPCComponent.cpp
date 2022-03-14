@@ -95,7 +95,6 @@ void UUINavPCComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAct
 			break;
 	}
 	
-
 }
 
 void UUINavPCComponent::BindMenuInputs()
