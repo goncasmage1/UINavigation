@@ -716,7 +716,7 @@ public:
 	class UUINavButton* FetchButtonByDirection(const ENavigationDirection Direction, UUINavButton* Button);
 
 	/**
-	*	Adds given widget to screen (strongly recomended over manual alternative)
+	*	Adds given widget to screen (strongly recommended over manual alternative)
 	*
 	*	@param	NewWidgetClass  The class of the widget to add to the screen
 	*	@param	bRemoveParent  Whether to remove the parent widget (this widget) from the viewport
@@ -726,7 +726,7 @@ public:
 	UUINavWidget* GoToWidget(TSubclassOf<UUINavWidget> NewWidgetClass, const bool bRemoveParent, const bool bDestroyParent = false, const int ZOrder = 0);
 
 	/**
-	*	Adds given widget to screen (strongly recomended over manual alternative)
+	*	Adds given widget to screen (strongly recommended over manual alternative)
 	*
 	*	@param	NewWidget  Object instance of the UINavWidget to add to the screen
 	*	@param	bRemoveParent  Whether to remove the parent widget (this widget) from the viewport
