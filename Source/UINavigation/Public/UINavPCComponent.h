@@ -48,7 +48,7 @@ class UINAVIGATION_API UUINavPCComponent : public UActorComponent
 protected:
 
 	UPROPERTY(BlueprintReadOnly, Category = UINavController)
-		class UUINavWidget* ActiveWidget;
+	class UUINavWidget* ActiveWidget;
 
 	//Indicates whether the player can navigate the widget
 	bool bAllowDirectionalInput = true;
@@ -111,12 +111,16 @@ protected:
 	void NotifyInputTypeChange(const EInputType NewInputType);
 
 	virtual void Activate(bool bReset) override;
+	
 	virtual void BeginPlay() override;
+	
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+	
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	UFUNCTION(BlueprintCallable, Category = UINavController)
-	void BindMenuInputs(); 
+	void BindMenuInputs();
+	
 	UFUNCTION(BlueprintCallable, Category = UINavController)
 	void UnbindMenuInputs();
 
@@ -132,27 +136,27 @@ public:
 	UUINavPCComponent();
 
 	UPROPERTY(BlueprintReadOnly, Category = UINavController)
-		EInputType CurrentInputType = EInputType::Keyboard;
+	EInputType CurrentInputType = EInputType::Keyboard;
 
 	/*
 	Indicates whether navigation will occur periodically after the player
 	holds down a navigation key
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavController)
-		bool bChainNavigation = true;
+	bool bChainNavigation = true;
 
 	/*
 	The amount of time the player needs to hold a key for the navigation to
 	start occuring periodically
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavController)
-		float InputHeldWaitTime = 0.5f;
+	float InputHeldWaitTime = 0.5f;
 
 	/*
 	The amount of time that passes before the navigation chains further
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavController)
-		float NavigationChainFrequency = 0.2f;
+	float NavigationChainFrequency = 0.2f;
 
 	/*
 	Indicates whether the controller should use the left stick as mouse.
@@ -165,48 +169,49 @@ public:
 	The sensitivity of the cursor when moved with the left stick
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavController)
-		float LeftStickCursorSensitivity = 10.0f;
+	float LeftStickCursorSensitivity = 10.0f;
 
 	/*
 	The required value for an axis to be considered for rebinding
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavController)
-		float RebindThreshold = 0.5f;
+	float RebindThreshold = 0.5f;
 
 	TMap<FString, TArray<FKey>> KeyMap = TMap<FString, TArray<FKey>>();
 
 	TArray<FString> PressedActions;
 
 	UPROPERTY(EditAnywhere, Category = UINavController)
-		TArray<FName> CustomInputs;
+	TArray<FName> CustomInputs;
 
 	/*
 	Holds the key icons for gamepad
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavController)
-		UDataTable* GamepadKeyIconData;
+	UDataTable* GamepadKeyIconData;
 	/*
 	Holds the key icons for mouse and keyboard
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavController)
-		UDataTable* KeyboardMouseKeyIconData;
+	UDataTable* KeyboardMouseKeyIconData;
 
 	/*
 	Holds the key names for gamepad
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavController)
-		UDataTable* GamepadKeyNameData;
+	UDataTable* GamepadKeyNameData;
+	
 	/*
 	Holds the key names for mouse and keyboard
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavController)
-		UDataTable* KeyboardMouseKeyNameData;
+	UDataTable* KeyboardMouseKeyNameData;
 
 	/*
 	Holds all the data for each rebindable input
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavController)
-		UDataTable* InputRebindDataTable;
+	UDataTable* InputRebindDataTable;
 
 	TMap<FKey, FAxis2D_Keys> Axis2DToKeyMap = {
 		{EKeys::Gamepad_LeftX, {EKeys::Gamepad_LeftStick_Right, EKeys::Gamepad_LeftStick_Left}},
@@ -240,22 +245,22 @@ public:
 	};
 
 	UPROPERTY(BlueprintAssignable, BlueprintCallable, BlueprintReadOnly, Category = UINavController)
-		FInputTypeChangedDelegate InputTypeChangedDelegate;
+	FInputTypeChangedDelegate InputTypeChangedDelegate;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
-		FORCEINLINE bool AllowsAllMenuInput() const { return bAllowDirectionalInput && bAllowSelectInput && bAllowReturnInput && bAllowSectionInput; }
+	FORCEINLINE bool AllowsAllMenuInput() const { return bAllowDirectionalInput && bAllowSelectInput && bAllowReturnInput && bAllowSectionInput; }
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
-		FORCEINLINE bool AllowsDirectionalInput() const { return bAllowDirectionalInput; }
+	FORCEINLINE bool AllowsDirectionalInput() const { return bAllowDirectionalInput; }
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
-		FORCEINLINE bool AllowsSelectInput() const { return bAllowSelectInput; }
+	FORCEINLINE bool AllowsSelectInput() const { return bAllowSelectInput; }
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
-		FORCEINLINE bool AllowsReturnInput() const { return bAllowReturnInput; }
+	FORCEINLINE bool AllowsReturnInput() const { return bAllowReturnInput; }
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
-		FORCEINLINE bool AllowsSectionInput() const { return bAllowSectionInput; }
+	FORCEINLINE bool AllowsSectionInput() const { return bAllowSectionInput; }
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
 	FORCEINLINE bool AllowsCustomInputByName(const FName InputName) const
@@ -274,25 +279,25 @@ public:
 	
 
 	UFUNCTION(BlueprintCallable, Category = UINavController)
-		void SetAllowAllMenuInput(const bool bAllowInput);
+	void SetAllowAllMenuInput(const bool bAllowInput);
 
 	UFUNCTION(BlueprintCallable, Category = UINavController)
-		void SetAllowDirectionalInput(const bool bAllowInput);
+	void SetAllowDirectionalInput(const bool bAllowInput);
 
 	UFUNCTION(BlueprintCallable, Category = UINavController)
-		void SetAllowSelectInput(const bool bAllowInput);
+	void SetAllowSelectInput(const bool bAllowInput);
 
 	UFUNCTION(BlueprintCallable, Category = UINavController)
-		void SetAllowReturnInput(const bool bAllowInput);
+	void SetAllowReturnInput(const bool bAllowInput);
 
 	UFUNCTION(BlueprintCallable, Category = UINavController)
-		void SetAllowSectionInput(const bool bAllowInput);
+	void SetAllowSectionInput(const bool bAllowInput);
 
 	UFUNCTION(BlueprintCallable, Category = UINavController)
-		void SetAllowCustomInputByName(const FName InputName, const bool bAllowInput);
+	void SetAllowCustomInputByName(const FName InputName, const bool bAllowInput);
 
 	UFUNCTION(BlueprintCallable, Category = UINavController)
-		void SetAllowCustomInputByIndex(const int InputIndex, const bool bAllowInput);
+	void SetAllowCustomInputByIndex(const int InputIndex, const bool bAllowInput);
 
 	void HandleKeyDownEvent(FSlateApplication& SlateApp, const FKeyEvent& InKeyEvent);
 	void HandleKeyUpEvent(FSlateApplication& SlateApp, const FKeyEvent& InKeyEvent);
@@ -368,51 +373,51 @@ public:
 
 	//Returns the currently used input mode
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
-		EInputMode GetInputMode() const;
+	EInputMode GetInputMode() const;
 
 	FORCEINLINE bool ShouldIgnoreHoverEvents() const { return bShouldIgnoreHoverEvents; }
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
-		FKey GetKeyFromAxis(FKey Key, bool bPositive) const;
+	FKey GetKeyFromAxis(FKey Key, bool bPositive) const;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
-		bool Is2DAxis(const FKey Key) const;
+	bool Is2DAxis(const FKey Key) const;
 
 	//Receives the name of the action, or axis with a + or - suffix, and returns
 	//the first key that respects the given restriction.
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
-		FKey GetInputKey(FName ActionName, const EInputRestriction InputRestriction) const;
+	FKey GetInputKey(FName ActionName, const EInputRestriction InputRestriction) const;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
-		class UTexture2D* GetKeyIcon(const FKey Key) const;
+	class UTexture2D* GetKeyIcon(const FKey Key) const;
 
 	//Get first found Icon associated with the given input name
 	//Will search the icon table
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
-		class UTexture2D* GetInputIcon(const FName ActionName, const EInputRestriction InputRestriction) const;
+	class UTexture2D* GetInputIcon(const FName ActionName, const EInputRestriction InputRestriction) const;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
-		FText GetKeyText(const FKey Key) const;
+	FText GetKeyText(const FKey Key) const;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
-		void GetInputRebindData(const FName InputName, FInputRebindData& OutData, bool& bSuccess) const;
+	void GetInputRebindData(const FName InputName, FInputRebindData& OutData, bool& bSuccess) const;
 
 	//Get first found name associated with the given input name
 	//Will search the name table, if name can't be found will return the key's display name
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
-		FText GetInputText(const FName InputName) const;
+	FText GetInputText(const FName InputName) const;
 
 	//Get all keys associated with the input with the given name
 	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DeprecatedFunction, DeprecationMessage = "Please use GetInputKeys instead") , Category = UINavController)
-		TArray<FKey> GetInputKeysFromName(const FName InputName) const;
+	TArray<FKey> GetInputKeysFromName(const FName InputName) const;
 
 	//Receives the name of the action, or axis with a + or - suffix, and returns
 	//all the keys associated with that input.
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
-		void GetInputKeys(FName ActionName, TArray<FKey>& OutKeys);
+	void GetInputKeys(FName ActionName, TArray<FKey>& OutKeys);
 
 	UFUNCTION(BlueprintCallable, Category = UINavController)
-		void SetActiveWidget(class UUINavWidget* NewActiveWidget);
+	void SetActiveWidget(class UUINavWidget* NewActiveWidget);
 
 	void SetActiveNestedWidget(class UUINavWidget* NewActiveWidget);
 
@@ -440,27 +445,27 @@ public:
 
 
 	UFUNCTION(BlueprintCallable, Category = UINavController)
-		FORCEINLINE APlayerController* GetPC() const { return PC; }
+	FORCEINLINE APlayerController* GetPC() const { return PC; }
 
 	UFUNCTION(BlueprintCallable, Category = UINavController)
-		FORCEINLINE EInputType GetCurrentInputType() const { return CurrentInputType; }
+	FORCEINLINE EInputType GetCurrentInputType() const { return CurrentInputType; }
 
 	UFUNCTION(BlueprintCallable, Category = UINavController)
-        FORCEINLINE bool IsUsingMouse() const { return CurrentInputType == EInputType::Mouse; }
+    FORCEINLINE bool IsUsingMouse() const { return CurrentInputType == EInputType::Mouse; }
 
 	UFUNCTION(BlueprintCallable, Category = UINavController)
-        FORCEINLINE bool IsUsingKeyboard() const { return CurrentInputType == EInputType::Keyboard; }
+    FORCEINLINE bool IsUsingKeyboard() const { return CurrentInputType == EInputType::Keyboard; }
 	
 	UFUNCTION(BlueprintCallable, Category = UINavController)
-        FORCEINLINE bool IsUsingGamepad() const { return CurrentInputType == EInputType::Gamepad; }
+    FORCEINLINE bool IsUsingGamepad() const { return CurrentInputType == EInputType::Gamepad; }
 
 	UFUNCTION(BlueprintCallable, Category = UINavController)
-		FORCEINLINE UUINavWidget* GetActiveWidget() const { return ActiveWidget; }
+	FORCEINLINE UUINavWidget* GetActiveWidget() const { return ActiveWidget; }
 
 	UFUNCTION(BlueprintCallable, Category = UINavController)
-        FORCEINLINE FVector2D GetLeftStickDelta() const { return LeftStickDelta; }
+    FORCEINLINE FVector2D GetLeftStickDelta() const { return LeftStickDelta; }
 
 	UFUNCTION(BlueprintCallable, Category = UINavController)
-        FORCEINLINE bool IsMovingLeftStick() const { return LeftStickDelta.X != 0.0f || LeftStickDelta.Y != 0.0f; }
+    FORCEINLINE bool IsMovingLeftStick() const { return LeftStickDelta.X != 0.0f || LeftStickDelta.Y != 0.0f; }
 		
 };

@@ -24,14 +24,14 @@ class UINAVIGATION_API UUINavSettings : public UObject
 public:
 
 	UPROPERTY(config, EditAnywhere, Category = "UINavSettings")
-		bool bIgnoreDisabledUINavButton;
+	bool bIgnoreDisabledUINavButton;
 	
 	UPROPERTY(config, EditAnywhere, Category = "UINavSettings")
-		bool bRemoveWidgetOnReturn;
+	bool bRemoveWidgetOnReturn;
 
 	UPROPERTY(config, EditAnywhere, Category = "Bindings")
-		TArray<struct FInputActionKeyMapping> ActionMappings;
+	TArray<struct FInputActionKeyMapping> ActionMappings;
 
 	UPROPERTY(config, EditAnywhere, Category = "Bindings")
-		TArray<struct FInputAxisKeyMapping> AxisMappings;
+	TArray<struct FInputAxisKeyMapping> AxisMappings;
 };
