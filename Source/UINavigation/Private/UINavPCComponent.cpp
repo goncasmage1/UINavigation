@@ -731,7 +731,7 @@ void UUINavPCComponent::GetInputRebindData(const FName InputName, FInputRebindDa
 {
 	if (InputRebindDataTable != nullptr && InputRebindDataTable->GetRowMap().Contains(InputName))
 	{
-		FInputRebindData* InputRebindData = Cast<FInputRebindData>(InputRebindDataTable->GetRowMap()[InputName]);
+		FInputRebindData* InputRebindData = reinterpret_cast<FInputRebindData*>(InputRebindDataTable->GetRowMap()[InputName]);
 		if (InputRebindData != nullptr)
 		{
 			OutData = *InputRebindData;
