@@ -149,7 +149,7 @@ public:
 
 	//The UserWidget object that will move along the Widget
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget, OptionalWidget = true), Category = UINavWidget)
-	UUserWidget* TheSelector = nullptr;
+		UUserWidget* TheSelector = nullptr;
 
 	//All the animation in this widget
 	UPROPERTY(BlueprintReadWrite, Category = UINavWidget)
@@ -165,7 +165,7 @@ public:
 
 	//The UINavInputContainer in this Widget
 	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
-	class UUINavInputContainer* UINavInputContainer = nullptr;
+		class UUINavInputContainer* UINavInputContainer = nullptr;
 
 	//All the UINavInputBoxes in this Widget
 	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
@@ -188,26 +188,26 @@ public:
 
 	//Reference to the parent widget that created this widget
 	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
-	UUINavWidget* ParentWidget = nullptr;
+		UUINavWidget* ParentWidget = nullptr;
 
 	//Reference to the widget that encapsulates this widget
 	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
-	UUINavWidget* OuterUINavWidget = nullptr;
+		UUINavWidget* OuterUINavWidget = nullptr;
 
 	//Current player controller
 	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
-	class UUINavPCComponent* UINavPC = nullptr;
+		class UUINavPCComponent* UINavPC = nullptr;
 
 	//Widget that created this widget (if returned from a child)
 	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
-	UUINavWidget* ReturnedFromWidget = nullptr;
+		UUINavWidget* ReturnedFromWidget = nullptr;
 
 	//Nested widget that created this widget (if returned from a child)
 	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
-	UUINavWidget* PreviousNestedWidget = nullptr;
+		UUINavWidget* PreviousNestedWidget = nullptr;
 
 	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
-	class UUINavWidgetComponent* WidgetComp = nullptr;
+		class UUINavWidgetComponent* WidgetComp = nullptr;
 
 	//Should this widget remove its parent from the viewport when created?
 	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
@@ -269,7 +269,7 @@ public:
 		bool bForceUsePlayerScreen = false;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UINavigation Selector")
-	UCurveFloat* MoveCurve=nullptr;
+		UCurveFloat* MoveCurve=nullptr;
 
 	//The position the selector will be in relative to the button
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UINavigation Selector")

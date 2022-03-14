@@ -41,10 +41,10 @@ protected:
 	};
 
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget), Category = "UINav Input")
-	class UPanelWidget* InputBoxesPanel = nullptr;
+		class UPanelWidget* InputBoxesPanel = nullptr;
 	
 	UPROPERTY(BlueprintReadOnly, Category = "UINav Input")
-	class UUINavWidget* ParentWidget = nullptr;
+		class UUINavWidget* ParentWidget = nullptr;
 
 public:
 

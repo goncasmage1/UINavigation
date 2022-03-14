@@ -16,10 +16,10 @@ class UINAVIGATION_API UUINavSlider : public UUINavHorizontalComponent
 protected:
 
 	UPROPERTY(BlueprintReadWrite, Category = UINavSlider, meta = (BindWidget))
-	class USlider* Slider = nullptr;
+		class USlider* Slider = nullptr;
 
 	UPROPERTY(BlueprintReadWrite, Category = UINavSlider, meta = (BindWidget, OptionalWidget = true))
-	class USpinBox* NavSpinBox = nullptr;
+		class USpinBox* NavSpinBox = nullptr;
 
 	UFUNCTION()
 		void HandleOnSliderValueChanged(const float InValue);

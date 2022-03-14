@@ -1,4 +1,4 @@
-// Copyright (C) 2019 Gonçalo Marques - All Rights Reserved
+// Copyright (C) 2019 GonÃ§alo Marques - All Rights Reserved
 
 #pragma once
 
@@ -16,7 +16,7 @@ class UINAVIGATION_API UUINavSliderBox : public UUINavComponentBox
 protected:
 
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget), Category = UINavSliderBox)
-	class UProgressBar* SliderBar = nullptr;
+		class UProgressBar* SliderBar = nullptr;
 
 	virtual void Update() override;
 	
