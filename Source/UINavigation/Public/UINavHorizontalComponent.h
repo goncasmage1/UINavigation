@@ -25,7 +25,7 @@ public:
 
 	int LastOptionIndex = -1;
 
-	class UUINavWidget* ParentWidget;
+	class UUINavWidget* ParentWidget = nullptr;
 
 	UFUNCTION(BlueprintCallable, Category = UINavHorizontalComponent)
 		virtual void Update();

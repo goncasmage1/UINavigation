@@ -45,9 +45,9 @@ public:
 		bool IsValid(const bool bIgnoreDisabledUINavButton = true) const;
 
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget), Category = UINavComponent)
-		class UUINavButton* NavButton;
+		class UUINavButton* NavButton = nullptr;
 
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, OptionalWidget = true), Category = UINavComponent)
-		class UTextBlock* NavText;
+		class UTextBlock* NavText = nullptr;
 
 };
