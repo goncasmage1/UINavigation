@@ -678,14 +678,14 @@ UTexture2D * UUINavPCComponent::GetKeyIcon(const FKey Key) const
 	{
 		if (GamepadKeyIconData != nullptr && GamepadKeyIconData->GetRowMap().Contains(Key.GetFName()))
 		{
-			KeyIcon = (FInputIconMapping*)GamepadKeyIconData->GetRowMap()[Key.GetFName()];
+			KeyIcon = reinterpret_cast<FInputIconMapping*>(GamepadKeyIconData->GetRowMap()[Key.GetFName()]);
 		}
 	}
 	else
 	{
 		if (KeyboardMouseKeyIconData != nullptr && KeyboardMouseKeyIconData->GetRowMap().Contains(Key.GetFName()))
 		{
-			KeyIcon = (FInputIconMapping*)KeyboardMouseKeyIconData->GetRowMap()[Key.GetFName()];
+			KeyIcon = reinterpret_cast<FInputIconMapping*>(KeyboardMouseKeyIconData->GetRowMap()[Key.GetFName()]);
 		}
 	}
 
@@ -711,14 +711,14 @@ FText UUINavPCComponent::GetKeyText(const FKey Key) const
 	{
 		if (GamepadKeyNameData != nullptr && GamepadKeyNameData->GetRowMap().Contains(Key.GetFName()))
 		{
-			Keyname = (FInputNameMapping*)GamepadKeyNameData->GetRowMap()[Key.GetFName()];
+			Keyname = reinterpret_cast<FInputNameMapping*>(GamepadKeyNameData->GetRowMap()[Key.GetFName()]);
 		}
 	}
 	else
 	{
 		if (KeyboardMouseKeyNameData != nullptr && KeyboardMouseKeyNameData->GetRowMap().Contains(Key.GetFName()))
 		{
-			Keyname = (FInputNameMapping*)KeyboardMouseKeyNameData->GetRowMap()[Key.GetFName()];
+			Keyname = reinterpret_cast<FInputNameMapping*>(KeyboardMouseKeyNameData->GetRowMap()[Key.GetFName()]);
 		}
 	}
 
@@ -729,10 +729,9 @@ FText UUINavPCComponent::GetKeyText(const FKey Key) const
 
 void UUINavPCComponent::GetInputRebindData(const FName InputName, FInputRebindData& OutData, bool& bSuccess) const
 {
-	FInputRebindData* InputRebindData;
 	if (InputRebindDataTable != nullptr && InputRebindDataTable->GetRowMap().Contains(InputName))
 	{
-		InputRebindData = (FInputRebindData*)InputRebindDataTable->GetRowMap()[InputName];
+		FInputRebindData* InputRebindData = Cast<FInputRebindData>(InputRebindDataTable->GetRowMap()[InputName]);
 		if (InputRebindData != nullptr)
 		{
 			OutData = *InputRebindData;
