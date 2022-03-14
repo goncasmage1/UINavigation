@@ -48,7 +48,7 @@ class UINAVIGATION_API UUINavPCComponent : public UActorComponent
 protected:
 
 	UPROPERTY(BlueprintReadOnly, Category = UINavController)
-	class UUINavWidget* ActiveWidget = nullptr;
+		class UUINavWidget* ActiveWidget = nullptr;
 
 	//Indicates whether the player can navigate the widget
 	bool bAllowDirectionalInput = true;
@@ -184,29 +184,29 @@ public:
 	Holds the key icons for gamepad
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavController)
-	UDataTable* GamepadKeyIconData = nullptr;
+		UDataTable* GamepadKeyIconData = nullptr;
 	/*
 	Holds the key icons for mouse and keyboard
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavController)
-	UDataTable* KeyboardMouseKeyIconData = nullptr;
+		UDataTable* KeyboardMouseKeyIconData = nullptr;
 
 	/*
 	Holds the key names for gamepad
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavController)
-	UDataTable* GamepadKeyNameData = nullptr;
+		UDataTable* GamepadKeyNameData = nullptr;
 	/*
 	Holds the key names for mouse and keyboard
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavController)
-	UDataTable* KeyboardMouseKeyNameData = nullptr;
+		UDataTable* KeyboardMouseKeyNameData = nullptr;
 
 	/*
 	Holds all the data for each rebindable input
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavController)
-	UDataTable* InputRebindDataTable = nullptr;
+		UDataTable* InputRebindDataTable = nullptr;
 
 	TMap<FKey, FAxis2D_Keys> Axis2DToKeyMap = {
 		{EKeys::Gamepad_LeftX, {EKeys::Gamepad_LeftStick_Right, EKeys::Gamepad_LeftStick_Left}},

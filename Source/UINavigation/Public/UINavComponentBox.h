@@ -1,4 +1,4 @@
-// Copyright (C) 2019 Gonçalo Marques - All Rights Reserved
+// Copyright (C) 2019 Gonï¿½alo Marques - All Rights Reserved
 
 #pragma once
 
@@ -16,10 +16,10 @@ class UINAVIGATION_API UUINavComponentBox : public UUINavHorizontalComponent
 protected:
 
 	UPROPERTY(BlueprintReadWrite, Category = UINavComponentBox, meta = (BindWidget))
-	class UButton* LeftButton = nullptr;
+		class UButton* LeftButton = nullptr;
 	
 	UPROPERTY(BlueprintReadWrite, Category = UINavComponentBox, meta = (BindWidget))
-	class UButton* RightButton = nullptr;
+		class UButton* RightButton = nullptr;
 
 	virtual void CheckLeftLimit();
 	virtual void CheckRightLimit();
