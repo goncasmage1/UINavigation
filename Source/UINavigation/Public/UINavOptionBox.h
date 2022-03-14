@@ -26,13 +26,13 @@ public:
 	/*If set to false, will use StringOptions, otherwise will use
 	all integers in designated range (from MinRange to MaxRange, inclusive)*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavOptionBox)
-		bool bUseNumberRange = false;
+	bool bUseNumberRange = false;
 
 	//The list of Names to display as options in this slider
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavOptionBox, meta = (EditCondition = "!bUseNumberRange"))
-		TArray<FText> StringOptions;
+	TArray<FText> StringOptions;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavOptionBox)
-		FORCEINLINE FText GetCurrentString() const { return StringOptions.IsValidIndex(OptionIndex) ? StringOptions[OptionIndex] : FText(); }
+	FORCEINLINE FText GetCurrentString() const { return StringOptions.IsValidIndex(OptionIndex) ? StringOptions[OptionIndex] : FText(); }
 
 };

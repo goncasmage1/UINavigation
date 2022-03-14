@@ -61,16 +61,18 @@ public:
 	EAxisType AxisType = EAxisType::None;
 
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget), Category = "UINav Input")
-		class UUINavInputComponent* InputButton1 = nullptr;
+	class UUINavInputComponent* InputButton1 = nullptr;
+		
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget), Category = "UINav Input")
-		class UUINavInputComponent* InputButton2 = nullptr;
+	class UUINavInputComponent* InputButton2 = nullptr;
+		
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget), Category = "UINav Input")
-		class UUINavInputComponent* InputButton3 = nullptr;
+	class UUINavInputComponent* InputButton3 = nullptr;
 
 	TArray<class UUINavInputComponent*> InputButtons;
 
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget), Category = "UINav Input")
-		class UTextBlock* InputText = nullptr;
+	class UTextBlock* InputText = nullptr;
 
 	class UUINavInputContainer* Container = nullptr;
 

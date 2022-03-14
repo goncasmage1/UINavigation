@@ -35,32 +35,37 @@ public:
 	UUINavButton();
 
 	UPROPERTY()
-		FCustomHoverDelegate CustomHover;
+	FCustomHoverDelegate CustomHover;
+
 	UPROPERTY()
-		FCustomUnhoverDelegate CustomUnhover;
+	FCustomUnhoverDelegate CustomUnhover;
+
 	UPROPERTY()
-		FCustomUnhoverDelegate CustomClick;
+	FCustomUnhoverDelegate CustomClick;
+
 	UPROPERTY()
-		FCustomPressDelegate CustomPress;
+	FCustomPressDelegate CustomPress;
+
 	UPROPERTY()
-		FCustomReleaseDelegate CustomRelease;
+	FCustomReleaseDelegate CustomRelease;
 
 	/*
 	WARNING: Edit this index manually at your own risk. If the indices are
 	not correctly aligned with the automatically set indices several bugs may appear.
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavButton)
-		int ButtonIndex = -1;
+	int ButtonIndex = -1;
 
 	//The index of the grid this button is in
 	UPROPERTY(BlueprintReadOnly, Category = UINavButton)
-		int GridIndex = - 1;
+	int GridIndex = - 1;
+
 	//This button's index in its associated grid
 	UPROPERTY(BlueprintReadOnly, Category = UINavButton)
-		int IndexInGrid = - 1;
+	int IndexInGrid = - 1;
 
 	UPROPERTY(BlueprintReadOnly, Category = UINavButton)
-		UUINavComponent* NavComp = nullptr;
+	UUINavComponent* NavComp = nullptr;
 
 	EButtonStyle CurrentStyle = EButtonStyle::Normal;
 
@@ -69,17 +74,21 @@ public:
 	bool bAutoCollapse = false;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavButton)
-		bool IsValid(const bool bIgnoreDisabledUINavButton = true) const;
+	bool IsValid(const bool bIgnoreDisabledUINavButton = true) const;
 
 	UFUNCTION()
-		void OnHover();
+	void OnHover();
+
 	UFUNCTION()
-		void OnUnhover();
+	void OnUnhover();
+
 	UFUNCTION()
-		void OnClick();
+	void OnClick();
+
 	UFUNCTION()
-		void OnPress();
+	void OnPress();
+
 	UFUNCTION()
-		void OnRelease();
+	void OnRelease();
 	
 };
