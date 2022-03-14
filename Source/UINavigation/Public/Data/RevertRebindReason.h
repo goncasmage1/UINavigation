@@ -1,4 +1,4 @@
-// Copyright (C) 2019 Gon�alo Marques - All Rights Reserved
+// Copyright (C) 2019 Gonçalo Marques - All Rights Reserved
 
 #pragma once
 #include "RevertRebindReason.generated.h"
