@@ -77,6 +77,7 @@ protected:
 
 	TArray<FDynamicEdgeNavigation> DynamicEdgeNavigations;
 
+	UPROPERTY()
 	TMap<class UWidget*, int> GridIndexMap;
 
 	TArray<int> UINavWidgetPath;
