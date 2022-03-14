@@ -11,8 +11,7 @@ class UINAVIGATION_API FUINavInputProcessor : public IInputProcessor
 {
 
 protected:
-
-	class UUINavPCComponent* UINavPC;
+	class UUINavPCComponent* UINavPC = nullptr;
 
 public:
 
