@@ -204,7 +204,7 @@ void UUINavPCComponent::CallCustomInput(const FName ActionName, const bool bPres
 		const int CustomInputIndex = CustomInputs.Find(ActionName);
 		if (CustomInputIndex < 0) return;
 
-		uint8* Buffer = (uint8*)FMemory_Alloca(sizeof(bool));
+		uint8* Buffer = static_cast<uint8*>(FMemory_Alloca(sizeof(bool)));
 		FMemory::Memcpy(Buffer, &bPressed, sizeof(bool));
 
 		ActiveWidget->CallCustomInput(ActionName, Buffer);

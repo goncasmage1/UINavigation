@@ -2233,7 +2233,7 @@ void UUINavWidget::OnPromptDecided(const TSubclassOf<UUINavPromptWidget> PromptC
 	{
 		if (CustomFunction->ParmsSize == sizeof(int))
 		{
-			uint8* Buffer = (uint8*)FMemory_Alloca(sizeof(int));
+			uint8* Buffer = static_cast<uint8*>(FMemory_Alloca(sizeof(int)));
 			FMemory::Memcpy(Buffer, &Index, sizeof(int));
 			ProcessEvent(CustomFunction, Buffer);
 		}
