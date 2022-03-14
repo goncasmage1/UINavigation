@@ -10,5 +10,5 @@ struct FInputIconMapping : public FTableRowBase
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UINav Input")
-		TSoftObjectPtr<class UTexture2D> InputIcon;
+	TSoftObjectPtr<class UTexture2D> InputIcon;
 };

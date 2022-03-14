@@ -13,12 +13,13 @@ class UINAVIGATION_API UUINavPromptWidget : public UUINavWidget
 public:
 
 	UPROPERTY(EditDefaultsOnly, Category = UINavPromptWidget)
-		int ReturnSelectedIndex = 0;
+	int ReturnSelectedIndex = 0;
 
 	virtual void OnSelect_Implementation(int Index) override;
+
 	virtual void OnReturn_Implementation() override;
 
 	UFUNCTION(BlueprintCallable, Category = UINavPromptWidget)
-		void ProcessPromptWidgetSelected(int Index);
+	void ProcessPromptWidgetSelected(int Index);
 	
 };

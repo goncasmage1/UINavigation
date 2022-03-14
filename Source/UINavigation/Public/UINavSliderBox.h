@@ -16,7 +16,7 @@ class UINAVIGATION_API UUINavSliderBox : public UUINavComponentBox
 protected:
 
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget), Category = UINavSliderBox)
-		class UProgressBar* SliderBar = nullptr;
+	class UProgressBar* SliderBar = nullptr;
 
 	virtual void Update() override;
 	

@@ -9,8 +9,8 @@ struct FGridButton
 	GENERATED_BODY()
 
 	UPROPERTY(BlueprintReadWrite, Category = GridButton)
-		int GridIndex = 0;
+	int GridIndex = 0;
 
 	UPROPERTY(BlueprintReadWrite, Category = GridButton)
-		int IndexInGrid = 0;
+	int IndexInGrid = 0;
 };

@@ -19,8 +19,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = SwapKeysWidget)
 	void NotifySwapResult(const int Index);
-
-
+	
 	UPROPERTY(BlueprintReadOnly, Category = SwapKeysWidget)
 	FInputCollisionData InputCollisionData;
 

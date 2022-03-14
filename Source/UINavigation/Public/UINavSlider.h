@@ -16,19 +16,22 @@ class UINAVIGATION_API UUINavSlider : public UUINavHorizontalComponent
 protected:
 
 	UPROPERTY(BlueprintReadWrite, Category = UINavSlider, meta = (BindWidget))
-		class USlider* Slider = nullptr;
+	class USlider* Slider = nullptr;
 
 	UPROPERTY(BlueprintReadWrite, Category = UINavSlider, meta = (BindWidget, OptionalWidget = true))
-		class USpinBox* NavSpinBox = nullptr;
+	class USpinBox* NavSpinBox = nullptr;
 
 	UFUNCTION()
-		void HandleOnSliderValueChanged(const float InValue);
+	void HandleOnSliderValueChanged(const float InValue);
+
 	UFUNCTION()
-		void HandleOnMouseCaptureBegin();
+	void HandleOnMouseCaptureBegin();
+
 	UFUNCTION()
-		void HandleOnMouseCaptureEnd();
+	void HandleOnMouseCaptureEnd();
+
 	UFUNCTION()
-		void HandleOnSpinBoxValueChanged(float InValue, ETextCommit::Type CommitMethod);
+	void HandleOnSpinBoxValueChanged(float InValue, ETextCommit::Type CommitMethod);
 
 	float IndexFromPercent(const float Value);
 	float IndexFromValue(const float Value);
@@ -36,26 +39,33 @@ protected:
 public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavSlider)
-		float MinValue = 0.0f;
+	float MinValue = 0.0f;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavSlider)
-		float MaxValue = 1.0f;
+	float MaxValue = 1.0f;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavSlider, meta = (ClampMin="0"))
-		float Interval = 0.1f;
+	float Interval = 0.1f;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavSlider, meta = (ClampMin="0"))
-		int MaxDecimalDigits = 1;
+	int MaxDecimalDigits = 1;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavSlider, meta = (ClampMin="0"))
-		int MinDecimalDigits = 0;
+	int MinDecimalDigits = 0;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavSlider)
-		bool bUseComma = false;
+	bool bUseComma = false;
 
 	float Difference = 0.0f;
 
 	FLinearColor HandleDefaultColor = FColor::Black;
 	FLinearColor BarDefaultColor = FColor::White;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavSlider, meta = (ClampMin = "0"))
-		FLinearColor HandleHoverColor;
+	FLinearColor HandleHoverColor;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavSlider, meta = (ClampMin = "0"))
-		FLinearColor BarHoverColor;
+	FLinearColor BarHoverColor;
 
 	virtual void NativeConstruct() override;
 
@@ -71,16 +81,17 @@ public:
 
 	//Get Current Value inserted in the specified number range (not 0 to 1)
 	UFUNCTION(BlueprintPure, BlueprintCallable, Category = UINavSlider)
-		FORCEINLINE float GetCurrentValue() const { return (MinValue + OptionIndex * Interval); }
+	FORCEINLINE float GetCurrentValue() const { return (MinValue + OptionIndex * Interval); }
 
 	UFUNCTION(BlueprintCallable, Category = UINavSlider)
-		void SetValueClamped(const float Value);
+	void SetValueClamped(const float Value);
 
 	//Get Current Slider value (0 to 1)
 	UFUNCTION(BlueprintPure, BlueprintCallable, Category = UINavSlider)
-		float GetSliderValue() const;
+	float GetSliderValue() const;
 
 	virtual void NavigateLeft() override;
+	
 	virtual void NavigateRight() override;
 
 };

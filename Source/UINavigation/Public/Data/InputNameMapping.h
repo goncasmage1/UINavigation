@@ -10,5 +10,5 @@ struct FInputNameMapping : public FTableRowBase
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UINav Input")
-		FText InputText;
+	FText InputText;
 };

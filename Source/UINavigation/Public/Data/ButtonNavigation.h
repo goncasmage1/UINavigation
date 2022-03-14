@@ -22,11 +22,14 @@ struct FButtonNavigation
 	}
 
 	UPROPERTY(BlueprintReadWrite, Category = ButtonNavigation)
-		class UUINavButton* UpButton = nullptr;
+	class UUINavButton* UpButton = nullptr;
+	
 	UPROPERTY(BlueprintReadWrite, Category = ButtonNavigation)
-		class UUINavButton* DownButton = nullptr;
+	class UUINavButton* DownButton = nullptr;
+	
 	UPROPERTY(BlueprintReadWrite, Category = ButtonNavigation)
-		class UUINavButton* LeftButton = nullptr;
+	class UUINavButton* LeftButton = nullptr;
+	
 	UPROPERTY(BlueprintReadWrite, Category = ButtonNavigation)
-		class UUINavButton* RightButton = nullptr;
+	class UUINavButton* RightButton = nullptr;
 };
