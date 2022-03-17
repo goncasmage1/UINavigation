@@ -93,8 +93,7 @@ void UUINavPCComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAct
 				TimerCounter -= NavigationChainFrequency;
 			}
 			break;
-	}
-	
+	}	
 }
 
 void UUINavPCComponent::BindMenuInputs()
