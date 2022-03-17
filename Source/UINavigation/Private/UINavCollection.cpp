@@ -164,7 +164,7 @@ void UUINavCollection::UpdateCollectionLastIndex(const int GridIndex, const bool
 	LastButtonIndex--;
 }
 
-void UUINavCollection::SetEdgeNavigation(const int GridIndex, FButtonNavigation const NewEdgeNavigation)
+void UUINavCollection::SetEdgeNavigation(const int GridIndex, const FButtonNavigation NewEdgeNavigation)
 {
 	ParentWidget->SetEdgeNavigation(FirstGridIndex + GridIndex, NewEdgeNavigation);
 }

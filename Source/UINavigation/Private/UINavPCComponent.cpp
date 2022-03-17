@@ -221,7 +221,7 @@ void UUINavPCComponent::VerifyDefaultInputs()
 	UUINavSettings *MySettings = GetMutableDefault<UUINavSettings>();
 	if (MySettings->ActionMappings.Num() == 0 && MySettings->AxisMappings.Num() == 0)
 	{
-		UInputSettings* Settings = const_cast<UInputSettings*>(GetDefault<UInputSettings>());
+		const UInputSettings* Settings = const_cast<UInputSettings*>(GetDefault<UInputSettings>());
 		MySettings->ActionMappings = Settings->GetActionMappings();
 		MySettings->AxisMappings = Settings->GetAxisMappings();
 		MySettings->SaveConfig();
@@ -512,7 +512,7 @@ void UUINavPCComponent::HandleMouseWheelOrGestureEvent(FSlateApplication& SlateA
 void UUINavPCComponent::SimulateMousePress()
 {
 	FSlateApplication& SlateApp = FSlateApplication::Get();
-	FPointerEvent MouseDownEvent(
+	const FPointerEvent MouseDownEvent(
 		0,
 		SlateApp.CursorPointerIndex,
 		SlateApp.GetCursorPos(),
@@ -522,14 +522,14 @@ void UUINavPCComponent::SimulateMousePress()
 		0,
 		SlateApp.GetPlatformApplication()->GetModifierKeys()
 	);
-	TSharedPtr<FGenericWindow> GenWindow;
+	const TSharedPtr<FGenericWindow> GenWindow;
 	SlateApp.ProcessMouseButtonDownEvent(GenWindow, MouseDownEvent);
 }
 
 void UUINavPCComponent::SimulateMouseRelease()
 {
 	FSlateApplication& SlateApp = FSlateApplication::Get();
-	FPointerEvent MouseUpEvent(
+	const FPointerEvent MouseUpEvent(
 		0,
 		SlateApp.CursorPointerIndex,
 		SlateApp.GetCursorPos(),
@@ -980,8 +980,8 @@ EInputMode UUINavPCComponent::GetInputMode() const
 	{
 		UGameViewportClient* GameViewportClient = PC->GetWorld()->GetGameViewport();
 
-		bool bIgnore = GameViewportClient->IgnoreInput();
-		EMouseCaptureMode Capt = GameViewportClient->GetMouseCaptureMode();
+		const bool bIgnore = GameViewportClient->IgnoreInput();
+		const EMouseCaptureMode Capt = GameViewportClient->GetMouseCaptureMode();
 
 		if (bIgnore == false && Capt == EMouseCaptureMode::CaptureDuringMouseDown)
 		{
