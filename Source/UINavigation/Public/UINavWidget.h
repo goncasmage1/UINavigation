@@ -702,7 +702,7 @@ public:
 	/**
 	*	Returns the button that will be navigated to according to the given direction, starting at the given button
 	*
-	*	@param Button  Required button type for the UI Navigation plugin
+	*	@param Button  Target UINavButton
 	*	@param	Direction  Direction of navigation
 	*	@return UUINavButton* The button that will be navigated to
 	*/
@@ -713,7 +713,7 @@ public:
 	*	Returns the next button to navigate to
 	*
 	*	@param	Direction  Direction of navigation
-	*	@param  Button  Required button type for the UI Navigation plugin
+	*	@param  Button  Target UINavButton
 	*/
 	class UUINavButton* FetchButtonByDirection(const ENavigationDirection Direction, UUINavButton* Button);
 
