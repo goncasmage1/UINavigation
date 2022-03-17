@@ -63,6 +63,7 @@ protected:
 
 	TArray<bool> bAllowCustomInputs;
 
+	UPROPERTY()
 	class APlayerController* PC = nullptr;
 
 	TSharedPtr<class FUINavInputProcessor> SharedInputProcessor = nullptr;
