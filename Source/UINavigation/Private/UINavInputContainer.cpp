@@ -88,8 +88,8 @@ void UUINavInputContainer::SetupInputBoxes(const int GridIndex)
 			BottomButtonIndex = LastButtonIndex -(TargetColumn != ETargetColumn::Right);
 			break;
 		case 3:
-			TopButtonIndex = FirstButtonIndex + (int)TargetColumn;
-			BottomButtonIndex = LastButtonIndex - (2 - (int)TargetColumn);
+			TopButtonIndex = FirstButtonIndex + static_cast<int>(TargetColumn);
+			BottomButtonIndex = LastButtonIndex - (2 - static_cast<int>(TargetColumn));
 			break;
 	}
 
@@ -222,8 +222,8 @@ int UUINavInputContainer::GetOffsetFromTargetColumn(bool bTop)
 			else return -(TargetColumn != ETargetColumn::Right);
 			break;
 		case 3:
-			if (bTop) return (int)TargetColumn;
-			else return (-2 - (int)TargetColumn);
+			if (bTop) return static_cast<int>(TargetColumn);
+			else return (-2 - static_cast<int>(TargetColumn));
 			break;
 	}
 	return 0;
