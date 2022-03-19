@@ -1,6 +1,8 @@
 ﻿// Copyright (C) 2019 Gonçalo Marques - All Rights Reserved
 
 #include "UINavWidgetComponent.h"
+
+#include "UINavMacros.h"
 #include "UINavWidget.h"
 
 UUINavWidgetComponent::UUINavWidgetComponent()

@@ -66,6 +66,3 @@ void UUINavButton::OnRelease()
 {
 	CustomRelease.Broadcast(ButtonIndex);
 }
-
-
-

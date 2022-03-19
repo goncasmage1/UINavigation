@@ -184,7 +184,7 @@ void UUINavInputBox::UpdateInputKey(const FKey NewKey, const int Index, const bo
 
 void UUINavInputBox::FinishUpdateInputKey()
 {
-	FKey NewKey = AwaitingNewKey;
+	const FKey NewKey = AwaitingNewKey;
 	const int Index = AwaitingIndex;
 
 	UInputSettings* Settings = const_cast<UInputSettings*>(GetDefault<UInputSettings>());

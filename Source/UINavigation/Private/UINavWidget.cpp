@@ -49,7 +49,7 @@ void UUINavWidget::NativeConstruct()
 	}
 	if (World != nullptr)
 	{
-		if (UGameViewportClient* ViewportClient = World->GetGameViewport())
+		if (const UGameViewportClient* ViewportClient = World->GetGameViewport())
 		{
 			bUsingSplitScreen = ViewportClient->GetCurrentSplitscreenConfiguration() != ESplitScreenType::None;
 		}
@@ -917,7 +917,7 @@ void UUINavWidget::HandleSelectorMovement(const float DeltaTime)
 	TheSelector->SetRenderTranslation(SelectorOrigin + Distance*MoveCurve->GetFloatValue(MovementCounter));
 }
 
-void UUINavWidget::AddUINavButton(UUINavButton * NewButton, int const TargetGridIndex, int IndexInGrid)
+void UUINavWidget::AddUINavButton(UUINavButton* NewButton, const int TargetGridIndex, int IndexInGrid)
 {
 	if (!IsValid(NewButton) || !NavigationGrids.IsValidIndex(TargetGridIndex)) return;
 
@@ -984,7 +984,7 @@ void UUINavWidget::AddUINavComponents(TArray<UUINavComponent*> NewComponents, co
 	if (IndexInGrid >= NavigationGrids[TargetGridIndex].GetDimension()) IndexInGrid = -1;
 	const bool bIncrementIndexInGrid = IndexInGrid > -1;
 
-	for (UUINavComponent* NewComponent : NewComponents)
+	for (const UUINavComponent* NewComponent : NewComponents)
 	{
 		AddUINavButton(NewComponent->NavButton, TargetGridIndex, IndexInGrid);
 		if (bIncrementIndexInGrid) IndexInGrid++;
@@ -1561,8 +1561,8 @@ void UUINavWidget::AddSingleGridDynamicEdgeNavigation(const int GridIndex, const
 		return;
 	}
 
-	FGrid& CurrentGrid = NavigationGrids[GridIndex];
-	FGrid& TargetGrid = NavigationGrids[TargetGridIndex];
+	const FGrid& CurrentGrid = NavigationGrids[GridIndex];
+	const FGrid& TargetGrid = NavigationGrids[TargetGridIndex];
 
 	const bool bHorizontal = Direction == ENavigationDirection::Left || Direction == ENavigationDirection::Right;
 
@@ -1660,7 +1660,7 @@ void UUINavWidget::AddMultiGridDynamicEdgeNavigation(const int GridIndex, TArray
 		return;
 	}
 
-	FGrid& CurrentGrid = NavigationGrids[GridIndex];
+	const FGrid& CurrentGrid = NavigationGrids[GridIndex];
 	const bool bIsHorizontal = Direction == ENavigationDirection::Left || Direction == ENavigationDirection::Right;
 	if (bIsHorizontal && CurrentGrid.GridType == EGridType::Horizontal)
 	{
@@ -1708,7 +1708,7 @@ void UUINavWidget::UpdateDynamicEdgeNavigations(const int UpdatedGridIndex)
 	{
 		if (DynamicEdgeNavigation.TargetGridIndex == UpdatedGridIndex)
 		{
-			FGrid& CurrentGrid = NavigationGrids[DynamicEdgeNavigation.GridIndex];
+			const FGrid& CurrentGrid = NavigationGrids[DynamicEdgeNavigation.GridIndex];
 			FGrid& TargetGrid = NavigationGrids[DynamicEdgeNavigation.TargetGridIndex];
 			const bool bHorizontal = DynamicEdgeNavigation.Direction == ENavigationDirection::Left || DynamicEdgeNavigation.Direction == ENavigationDirection::Right;
 
@@ -1853,7 +1853,7 @@ void UUINavWidget::UpdateSelectorLocation(const int Index)
 FVector2D UUINavWidget::GetButtonLocation(const int Index)
 {
 	const FGeometry Geom = UINavButtons[Index]->GetCachedGeometry();
-	FVector2D LocalSize = Geom.GetLocalSize();
+	const FVector2D LocalSize = Geom.GetLocalSize();
 	FVector2D LocalPosition;
 	switch (SelectorPositioning)
 	{
@@ -2233,7 +2233,7 @@ void UUINavWidget::OnPromptDecided(const TSubclassOf<UUINavPromptWidget> PromptC
 	{
 		if (CustomFunction->ParmsSize == sizeof(int))
 		{
-			uint8* Buffer = (uint8*)FMemory_Alloca(sizeof(int));
+			uint8* Buffer = static_cast<uint8*>(FMemory_Alloca(sizeof(int)));
 			FMemory::Memcpy(Buffer, &Index, sizeof(int));
 			ProcessEvent(CustomFunction, Buffer);
 		}
@@ -2252,7 +2252,7 @@ void UUINavWidget::ProcessDynamicEdgeNavigation(FDynamicEdgeNavigation& DynamicE
 	const ENavigationDirection Dir = DynamicEdgeNavigation.Direction;
 	const bool bHorizontal = Dir == ENavigationDirection::Left || Dir == ENavigationDirection::Right;
 
-	FGrid& CurrentGrid = NavigationGrids[CurrentGridIndex];
+	const FGrid& CurrentGrid = NavigationGrids[CurrentGridIndex];
 	if (CurrentGrid.GridType == EGridType::Grid2D)
 	{
 		int XCoord, YCoord;
@@ -2287,7 +2287,7 @@ void UUINavWidget::ProcessDynamicEdgeNavigation(FDynamicEdgeNavigation& DynamicE
 			{
 				if (CurrentIndexInGrid == DynamicEdgeNavigation.TargetButtonIndices[i])
 				{
-					FGrid& TargetGrid = NavigationGrids[DynamicEdgeNavigation.GridIndex];
+					const FGrid& TargetGrid = NavigationGrids[DynamicEdgeNavigation.GridIndex];
 					if (TargetGrid.GridType == EGridType::Grid2D)
 					{
 						if (Dir == ENavigationDirection::Left) IndexInGrid = i * TargetGrid.DimensionX;
@@ -2375,7 +2375,7 @@ void UUINavWidget::ProcessDynamicEdgeNavigation(FDynamicEdgeNavigation& DynamicE
 				if (GridButton.GridIndex == CurrentGridIndex &&
 					GridButton.IndexInGrid == CurrentIndexInGrid)
 				{
-					FGrid& TargetGrid = NavigationGrids[DynamicEdgeNavigation.GridIndex];
+					const FGrid& TargetGrid = NavigationGrids[DynamicEdgeNavigation.GridIndex];
 					if (TargetGrid.GridType == EGridType::Grid2D)
 					{
 						if (Dir == ENavigationDirection::Left) IndexInGrid = i * TargetGrid.DimensionX;
@@ -2452,9 +2452,9 @@ void UUINavWidget::DispatchNavigation(const int Index, const bool bBypassForcedN
 
 		UUINavComponent* FromComponent = GetUINavComponentAtIndex(ButtonIndex);
 		UUINavComponent* ToComponent = GetUINavComponentAtIndex(Index);
+		
 		if (FromComponent != nullptr) FromComponent->OnNavigatedFrom();
 		if (ToComponent != nullptr) ToComponent->OnNavigatedTo();
-		
 		if (UINavAnimations.Num() > 0) ExecuteAnimations(ButtonIndex, Index);
 	}
 }
@@ -3280,7 +3280,7 @@ void UUINavWidget::UnhoverEvent(int Index)
 
 	if (bUseButtonStates && bForcingNavigation)
 	{
-		UUINavButton* ToButton = UINavButtons[Index];
+		const UUINavButton* ToButton = UINavButtons[Index];
 		if (SelectedButtonIndex != ButtonIndex)
 		{
 			SwitchButtonStyle(ButtonIndex == Index ? EButtonStyle::Hovered : EButtonStyle::Normal, Index);

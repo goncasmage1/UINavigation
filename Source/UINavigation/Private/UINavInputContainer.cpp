@@ -88,8 +88,8 @@ void UUINavInputContainer::SetupInputBoxes(const int GridIndex)
 			BottomButtonIndex = LastButtonIndex -(TargetColumn != ETargetColumn::Right);
 			break;
 		case 3:
-			TopButtonIndex = FirstButtonIndex + (int)TargetColumn;
-			BottomButtonIndex = LastButtonIndex - (2 - (int)TargetColumn);
+			TopButtonIndex = FirstButtonIndex + static_cast<int>(TargetColumn);
+			BottomButtonIndex = LastButtonIndex - (2 - static_cast<int>(TargetColumn));
 			break;
 	}
 
@@ -100,9 +100,9 @@ void UUINavInputContainer::CreateInputBoxes(const int GridIndex)
 {
 	if (InputBox_BP == nullptr) return;
 
-	int TempFirstButtonIndex = ParentWidget->UINavButtons.Num();
+	const int TempFirstButtonIndex = ParentWidget->UINavButtons.Num();
 
-	int Iterations = InputNames.Num();
+	const int Iterations = InputNames.Num();
 
 	APlayerController* PC = Cast<APlayerController>(UINavPC->GetOwner());
 	for (int i = 0; i < Iterations; ++i)
@@ -126,7 +126,7 @@ void UUINavInputContainer::CreateInputBoxes(const int GridIndex)
 		{
 			ParentWidget->UINavButtons.Add(nullptr);
 
-			int NewButtonIndex = TempFirstButtonIndex + i * KeysPerInput + j;
+			const int NewButtonIndex = TempFirstButtonIndex + i * KeysPerInput + j;
 			ParentWidget->UINavButtons[NewButtonIndex] = NewInputBox->InputButtons[j]->NavButton;
 			NewInputBox->InputButtons[j]->NavButton->ButtonIndex = NewButtonIndex;
 			if (GridIndex != -1)
@@ -159,7 +159,7 @@ bool UUINavInputContainer::CanUseKey(const UUINavInputBox* InputBox, FKey Compar
 	{
 		if (InputBox == ParentWidget->UINavInputBoxes[i]) continue;
 
-		int KeyIndex = ParentWidget->UINavInputBoxes[i]->ContainsKey(CompareKey);
+		const int KeyIndex = ParentWidget->UINavInputBoxes[i]->ContainsKey(CompareKey);
 		if (KeyIndex != INDEX_NONE)
 		{
 			TArray<int> CollidingInputGroups = ParentWidget->UINavInputBoxes[i]->InputData.InputGroups;
@@ -189,7 +189,7 @@ bool UUINavInputContainer::CanUseKey(const UUINavInputBox* InputBox, FKey Compar
 
 bool UUINavInputContainer::RespectsRestriction(FKey CompareKey, int Index)
 {
-	EInputRestriction Restriction = InputRestrictions[Index];
+	const EInputRestriction Restriction = InputRestrictions[Index];
 
 	return UUINavBlueprintFunctionLibrary::RespectsRestriction(CompareKey, Restriction);
 }
@@ -222,8 +222,8 @@ int UUINavInputContainer::GetOffsetFromTargetColumn(bool bTop)
 			else return -(TargetColumn != ETargetColumn::Right);
 			break;
 		case 3:
-			if (bTop) return (int)TargetColumn;
-			else return (-2 - (int)TargetColumn);
+			if (bTop) return static_cast<int>(TargetColumn);
+			else return (-2 - static_cast<int>(TargetColumn));
 			break;
 	}
 	return 0;
