@@ -2537,7 +2537,7 @@ void UUINavWidget::OnPreSelect(const int Index, const bool bMouseClick)
 		if (SelectCount > 0) SelectCount--;
 		if (SelectCount == 0) SelectedButtonIndex = -1;
 	}
-	else
+	else if (UINavButtons.IsValidIndex(Index))
 	{
 		SwitchButtonStyle(UINavButtons[Index]->IsPressed() || SelectCount > 1 ? EButtonStyle::Pressed : (Index == ButtonIndex ? EButtonStyle::Hovered : EButtonStyle::Normal), ButtonIndex);
 
