@@ -12,6 +12,7 @@ void UUINavOptionBox::NativeConstruct()
 
 	if (!LeftButton->OnClicked.IsBound())
 		LeftButton->OnClicked.AddDynamic(this, &UUINavOptionBox::NavigateLeft);
+	
 	if (!RightButton->OnClicked.IsBound())
 		RightButton->OnClicked.AddDynamic(this, &UUINavOptionBox::NavigateRight);
 }
