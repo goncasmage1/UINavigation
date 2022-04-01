@@ -263,12 +263,12 @@ void UUINavPCComponent::BindMenuEnhancedInputs()
 		EnhancedInputComponent->BindAction(InputActions->IA_MenuNext, ETriggerEvent::Started, this, &UUINavPCComponent::MenuNext);
 		EnhancedInputComponent->BindAction(InputActions->IA_MenuPrevious, ETriggerEvent::Started, this, &UUINavPCComponent::MenuPrevious);
 
-		EnhancedInputComponent->BindAction(InputActions->IA_MenuUp, ETriggerEvent::Canceled, this, &UUINavPCComponent::MenuUpRelease);
-		EnhancedInputComponent->BindAction(InputActions->IA_MenuDown, ETriggerEvent::Canceled, this, &UUINavPCComponent::MenuDownRelease);
-		EnhancedInputComponent->BindAction(InputActions->IA_MenuLeft, ETriggerEvent::Canceled, this, &UUINavPCComponent::MenuLeftRelease);
-		EnhancedInputComponent->BindAction(InputActions->IA_MenuRight, ETriggerEvent::Canceled, this, &UUINavPCComponent::MenuRightRelease);
-		EnhancedInputComponent->BindAction(InputActions->IA_MenuSelect, ETriggerEvent::Canceled, this, &UUINavPCComponent::MenuSelectRelease);
-		EnhancedInputComponent->BindAction(InputActions->IA_MenuReturn, ETriggerEvent::Canceled, this, &UUINavPCComponent::MenuReturnRelease);
+		EnhancedInputComponent->BindAction(InputActions->IA_MenuUp, ETriggerEvent::Completed, this, &UUINavPCComponent::MenuUpRelease);
+		EnhancedInputComponent->BindAction(InputActions->IA_MenuDown, ETriggerEvent::Completed, this, &UUINavPCComponent::MenuDownRelease);
+		EnhancedInputComponent->BindAction(InputActions->IA_MenuLeft, ETriggerEvent::Completed, this, &UUINavPCComponent::MenuLeftRelease);
+		EnhancedInputComponent->BindAction(InputActions->IA_MenuRight, ETriggerEvent::Completed, this, &UUINavPCComponent::MenuRightRelease);
+		EnhancedInputComponent->BindAction(InputActions->IA_MenuSelect, ETriggerEvent::Completed, this, &UUINavPCComponent::MenuSelectRelease);
+		EnhancedInputComponent->BindAction(InputActions->IA_MenuReturn, ETriggerEvent::Completed, this, &UUINavPCComponent::MenuReturnRelease);
 		
 		if (CustomEnhancedInputs.Num() > 0)
 		{
