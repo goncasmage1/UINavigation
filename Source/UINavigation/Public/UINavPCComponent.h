@@ -12,7 +12,7 @@
 #include "Data/NavigationDirection.h"
 #include "InputCoreTypes.h"
 #include "Input/Reply.h"
-#include "Misc/CoreMiscDefines.h"
+#include "InputAction.h"
 #include "UINavPCComponent.generated.h"
 
 DECLARE_DELEGATE_OneParam(FMouseKeyDelegate, FKey);
@@ -125,6 +125,9 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = UINavController)
 	void UnbindMenuInputs();
 
+	UFUNCTION(BlueprintCallable, Category = UINavController)
+	void BindMenuEnhancedInputs();
+
 	UFUNCTION()
 	void OnCustomInput(const int InputIndex, const bool bPressed);
 
@@ -160,6 +163,18 @@ public:
 	float NavigationChainFrequency = 0.2f;
 
 	/*
+	Indicates whether to automatically add and remove the UINav Input Context
+	*/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavController)
+	bool bAutoAddUINavInputContext = true;
+
+	/*
+	Indicates the desired priority of the UINav Input Context
+	*/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavController)
+	int UINavInputContextPriority = 0;
+
+	/*
 	Indicates whether the controller should use the left stick as mouse.
 	If the active UINavWidget has this set to false, this will override that.
 	*/
@@ -184,6 +199,9 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = UINavController)
 	TArray<FName> CustomInputs;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavController)
+		TArray<UInputAction*> CustomEnhancedInputs;
 
 	/*
 	Holds the key icons for gamepad
@@ -271,9 +289,17 @@ public:
 	}
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
+	FORCEINLINE bool AllowsCustomInputByAction(UInputAction* InputAction) const
+	{ 
+		const int CustomInputIndex = CustomEnhancedInputs.Find(InputAction);
+		if (CustomInputIndex < 0) return false;
+		return bAllowCustomInputs[CustomInputIndex];
+	}
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
 	FORCEINLINE bool AllowsCustomInputByIndex(const int InputIndex) const
 	{
-		if (InputIndex < 0 || InputIndex >= CustomInputs.Num()) return false;
+		if (!CustomInputs.IsValidIndex(InputIndex)) return false;
 		return bAllowCustomInputs[InputIndex];
 	}
 	
@@ -295,6 +321,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = UINavController)
 	void SetAllowCustomInputByName(const FName InputName, const bool bAllowInput);
+
+	UFUNCTION(BlueprintCallable, Category = UINavController)
+	void SetAllowCustomInputByAction(UInputAction* InputAction, const bool bAllowInput);
 
 	UFUNCTION(BlueprintCallable, Category = UINavController)
 	void SetAllowCustomInputByIndex(const int InputIndex, const bool bAllowInput);
@@ -388,6 +417,10 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
 	FKey GetInputKey(FName ActionName, const EInputRestriction InputRestriction) const;
 
+	//Receives the action and returns the first key that respects the given restriction.
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
+		FKey GetEnhancedInputKey(const UInputAction* Action, const EInputRestriction InputRestriction) const;
+
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
 	class UTexture2D* GetKeyIcon(const FKey Key) const;
 
@@ -395,6 +428,11 @@ public:
 	//Will search the icon table
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
 	class UTexture2D* GetInputIcon(const FName ActionName, const EInputRestriction InputRestriction) const;
+
+	//Get first found Icon associated with the given enhanced input action
+	//Will search the icon table
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
+		class UTexture2D* GetEnhancedInputIcon(const UInputAction* Action, const EInputRestriction InputRestriction) const;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
 	FText GetKeyText(const FKey Key) const;
@@ -414,7 +452,14 @@ public:
 	//Receives the name of the action, or axis with a + or - suffix, and returns
 	//all the keys associated with that input.
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
-	void GetInputKeys(FName ActionName, TArray<FKey>& OutKeys);
+	void GetInputKeys(FName InputName, TArray<FKey>& OutKeys);
+
+	//Receives the name of the enhanced input action and returns all the keys associated with that action
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
+	void GetEnhancedInputKeys(const UInputAction* Action, TArray<FKey>& OutKeys);
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
+	UEnhancedInputComponent* GetEnhancedInputComponent() const;
 
 	UFUNCTION(BlueprintCallable, Category = UINavController)
 	void SetActiveWidget(class UUINavWidget* NewActiveWidget);

@@ -8,6 +8,8 @@
 #include "UINavButton.h"
 #include "UINavBlueprintFunctionLibrary.generated.h"
 
+class UInputAction;
+
 /**
  * 
  */
@@ -32,7 +34,7 @@ public:
 
 	// Resets the input settings to their default state
 	UFUNCTION(BlueprintCallable, Category = UINavInput)
-	static void ResetInputSettings();
+	static void ResetInputSettings(APlayerController* PC = nullptr);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "UINav Input")
 	static bool RespectsRestriction(const FKey CompareKey, const EInputRestriction Restriction);
@@ -41,6 +43,9 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavigationLibrary)
 	static bool IsGamepadConnected();
 
+	UFUNCTION(BlueprintCallable, Category = UINavInput)
+	static bool IsUINavInputAction(const UInputAction* const InputAction);
+	
 	template <typename T>
 	static bool ContainsArray(const TArray<T>& Array1, const TArray<T>& Array2)
 	{

@@ -4,6 +4,8 @@
 
 #include "UObject/NoExportTypes.h"
 #include "GameFramework/PlayerInput.h"
+#include "InputMappingContext.h"
+#include "Data/UINavEnhancedInputActions.h"
 #include "UINavSettings.generated.h"
 
 /**
@@ -23,15 +25,25 @@ class UINAVIGATION_API UUINavSettings : public UObject
 	
 public:
 
-	UPROPERTY(config, EditAnywhere, Category = "UINavSettings")
+	UPROPERTY(config, EditAnywhere, Category = "Settings")
 	bool bIgnoreDisabledUINavButton;
 	
-	UPROPERTY(config, EditAnywhere, Category = "UINavSettings")
+	UPROPERTY(config, EditAnywhere, Category = "Settings")
 	bool bRemoveWidgetOnReturn;
 
 	UPROPERTY(config, EditAnywhere, Category = "Bindings")
-	TArray<struct FInputActionKeyMapping> ActionMappings;
+	TAssetPtr<UInputMappingContext> EnhancedInputContext;
 
 	UPROPERTY(config, EditAnywhere, Category = "Bindings")
+	TAssetPtr<UUINavEnhancedInputActions> EnhancedInputActions;
+
+	UPROPERTY(config)
+	TArray<struct FInputActionKeyMapping> ActionMappings;
+
+	UPROPERTY(config)
 	TArray<struct FInputAxisKeyMapping> AxisMappings;
+
+	// A map for each Input Context in your game and its respective Default Input Context Mappings
+	UPROPERTY(config, EditAnywhere, Category = "Bindings")
+		TMap<TAssetPtr<UInputMappingContext>, TAssetPtr<UInputMappingContext>> DefaultInputContexts;
 };
