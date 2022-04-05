@@ -32,10 +32,10 @@ public:
 	bool bRemoveWidgetOnReturn;
 
 	UPROPERTY(config, EditAnywhere, Category = "Bindings")
-	TAssetPtr<UInputMappingContext> EnhancedInputContext;
+	TSoftObjectPtr<UInputMappingContext> EnhancedInputContext;
 
 	UPROPERTY(config, EditAnywhere, Category = "Bindings")
-	TAssetPtr<UUINavEnhancedInputActions> EnhancedInputActions;
+	TSoftObjectPtr<UUINavEnhancedInputActions> EnhancedInputActions;
 
 	UPROPERTY(config)
 	TArray<struct FInputActionKeyMapping> ActionMappings;
@@ -45,5 +45,5 @@ public:
 
 	// A map for each Input Context in your game and its respective Default Input Context Mappings
 	UPROPERTY(config, EditAnywhere, Category = "Bindings")
-		TMap<TAssetPtr<UInputMappingContext>, TAssetPtr<UInputMappingContext>> DefaultInputContexts;
+		TMap<TSoftObjectPtr<UInputMappingContext>, TSoftObjectPtr<UInputMappingContext>> DefaultInputContexts;
 };
