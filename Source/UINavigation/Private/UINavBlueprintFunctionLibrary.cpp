@@ -80,7 +80,9 @@ void UUINavBlueprintFunctionLibrary::ResetInputSettings(APlayerController* PC)
 				}
 			}
 
-			Subsystem->RequestRebuildControlMappings(true);
+			FModifyContextOptions ModifyOptions;
+			ModifyOptions.bForceImmediately = true;
+			Subsystem->RequestRebuildControlMappings(ModifyOptions);
 			
 			return;
 		}
