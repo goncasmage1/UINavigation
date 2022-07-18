@@ -1020,7 +1020,7 @@ void UUINavWidget::DeleteUINavElement(const int Index, const bool bAutoNavigate)
 		bool bValid = false;
 
 		UUINavButton* Temp = CurrentButton;
-		while (!bValid)
+		while (!bValid && IsValid(Temp))
 		{
 			int NewIndex = Temp->ButtonIndex + 1;
 			if (NewIndex >= UINavButtons.Num()) NewIndex = 0;
@@ -3089,7 +3089,7 @@ void UUINavWidget::GetButtonGrid(const int InButtonIndex, FGrid & ButtonGrid, bo
 	}
 	else
 	{
-		if (NavigationGrids.Num() > UINavButtons[InButtonIndex]->GridIndex)
+		if (NavigationGrids.IsValidIndex(UINavButtons[InButtonIndex]->GridIndex))
 		{
 			IsValid = true;
 			ButtonGrid = NavigationGrids[UINavButtons[InButtonIndex]->GridIndex];
@@ -3148,7 +3148,7 @@ int UUINavWidget::GetGridStartingIndex(const int GridIndex)
 
 UUINavButton * UUINavWidget::GetButtonAtGridIndex(const int GridIndex, int IndexInGrid)
 {
-	if (!NavigationGrids.IsValidIndex(GridIndex)) return nullptr;
+	if (!NavigationGrids.IsValidIndex(GridIndex) || IndexInGrid < 0) return nullptr;
 
 	const FGrid& ButtonGrid = NavigationGrids[GridIndex];
 	if (ButtonGrid.FirstButton == nullptr) return nullptr;
