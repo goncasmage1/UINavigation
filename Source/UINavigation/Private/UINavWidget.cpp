@@ -29,6 +29,7 @@
 #include "Components/CanvasPanelSlot.h"
 #include "Components/UniformGridSlot.h"
 #include "Components/ActorComponent.h"
+#include "Components/ListView.h"
 #if IS_VR_PLATFORM
 #include "HeadMountedDisplayFunctionLibrary.h"
 #endif
@@ -402,67 +403,19 @@ void UUINavWidget::TraverseHierarquy(UUINavWidget* UINavWidget, UUserWidget* Wid
 			continue;
 		}
 
-		UUINavButton* NewNavButton = Cast<UUINavButton>(Widget);
-		if (NewNavButton == nullptr)
+		UListView* ListView = Cast<UListView>(Widget);
+		if (ListView != nullptr)
 		{
-			UUINavComponent* UIComp = Cast<UUINavComponent>(Widget);
-			if (UIComp == nullptr)
+			TArray<UObject*> ListItems = ListView->GetListItems();
+			for (UObject* ListItem : ListItems)
 			{
-				UUINavComponentWrapper* UICompWrapper = Cast<UUINavComponentWrapper>(Widget);
-				if (UICompWrapper != nullptr)
-				{
-					UIComp = UICompWrapper->GetUINavComponent();
-				}
+				SearchForUINavElements(UINavWidget, WidgetToTraverse, Cast<UWidget>(ListItem), TraversingCollection, GridDepth);
 			}
 
-			if (UIComp != nullptr)
-			{
-				NewNavButton = Cast<UUINavButton>(UIComp->NavButton);
-
-				UUINavHorizontalComponent* HorizComp = Cast<UUINavHorizontalComponent>(UIComp);
-				if (HorizComp != nullptr)
-				{
-					HorizComp->ParentWidget = UINavWidget;
-				}
-			}
+			continue;
 		}
 
-		if (NewNavButton == nullptr) continue;
-
-		if (NewNavButton->ButtonIndex == -1) NewNavButton->ButtonIndex = UINavWidget->UINavButtons.Num();
-
-		UINavWidget->SetupUINavButtonDelegates(NewNavButton);
-
-		NewNavButton->bAutoCollapse = NewNavButton->bIsEnabled;
-		UINavWidget->UINavButtons.Add(NewNavButton);
-		UINavWidget->RevertButtonStyle(UINavWidget->UINavButtons.Num() - 1);
-
-		if (UINavWidget->bAutoAppended && TraversingCollection != nullptr)
-		{
-			if (TraversingCollection->FirstButtonIndex == -1) TraversingCollection->FirstButtonIndex = NewNavButton->ButtonIndex;
-			TraversingCollection->SetLastButtonIndex(NewNavButton->ButtonIndex);
-		}
-
-		if (GridDepth != -1)
-		{
-			FGrid& LastGrid = UINavWidget->NavigationGrids.Last();
-			UINavWidget->NumberOfButtonsInGrids++;
-			NewNavButton->GridIndex = UINavWidget->NavigationGrids.Num() - 1;
-			if (LastGrid.FirstButton == nullptr) LastGrid.FirstButton = NewNavButton;
-
-			switch (LastGrid.GridType)
-			{
-			case EGridType::Horizontal:
-				NewNavButton->IndexInGrid = LastGrid.DimensionX++;
-				break;
-			case EGridType::Vertical:
-				NewNavButton->IndexInGrid = LastGrid.DimensionY++;
-				break;
-			case EGridType::Grid2D:
-				NewNavButton->IndexInGrid = LastGrid.NumGrid2DButtons++;
-				break;
-			}
-		}
+		SearchForUINavElements(UINavWidget, WidgetToTraverse, Widget, TraversingCollection, GridDepth);
 	}
 
 	if (WidgetToTraverse->IsA<UUINavWidget>())
@@ -477,6 +430,73 @@ void UUINavWidget::TraverseHierarquy(UUINavWidget* UINavWidget, UUserWidget* Wid
 	{
 		const TArray<FButtonNavigation> EdgeNavigations;
 		TraversingCollection->SetupNavigation(EdgeNavigations);
+	}
+}
+
+void UUINavWidget::SearchForUINavElements(UUINavWidget* UINavWidget, UUserWidget* WidgetToTraverse, UWidget* Widget, UUINavCollection* TraversingCollection, const int GridDepth)
+{
+	if (Widget == nullptr) return;
+
+	UUINavButton* NewNavButton = Cast<UUINavButton>(Widget);
+	if (NewNavButton == nullptr)
+	{
+		UUINavComponent* UIComp = Cast<UUINavComponent>(Widget);
+		if (UIComp == nullptr)
+		{
+			UUINavComponentWrapper* UICompWrapper = Cast<UUINavComponentWrapper>(Widget);
+			if (UICompWrapper != nullptr)
+			{
+				UIComp = UICompWrapper->GetUINavComponent();
+			}
+		}
+
+		if (UIComp != nullptr)
+		{
+			NewNavButton = Cast<UUINavButton>(UIComp->NavButton);
+
+			UUINavHorizontalComponent* HorizComp = Cast<UUINavHorizontalComponent>(UIComp);
+			if (HorizComp != nullptr)
+			{
+				HorizComp->ParentWidget = UINavWidget;
+			}
+		}
+	}
+
+	if (NewNavButton == nullptr) return;
+
+	if (NewNavButton->ButtonIndex == -1) NewNavButton->ButtonIndex = UINavWidget->UINavButtons.Num();
+
+	UINavWidget->SetupUINavButtonDelegates(NewNavButton);
+
+	NewNavButton->bAutoCollapse = NewNavButton->bIsEnabled;
+	UINavWidget->UINavButtons.Add(NewNavButton);
+	UINavWidget->RevertButtonStyle(UINavWidget->UINavButtons.Num() - 1);
+
+	if (UINavWidget->bAutoAppended && TraversingCollection != nullptr)
+	{
+		if (TraversingCollection->FirstButtonIndex == -1) TraversingCollection->FirstButtonIndex = NewNavButton->ButtonIndex;
+		TraversingCollection->SetLastButtonIndex(NewNavButton->ButtonIndex);
+	}
+
+	if (GridDepth != -1)
+	{
+		FGrid& LastGrid = UINavWidget->NavigationGrids.Last();
+		UINavWidget->NumberOfButtonsInGrids++;
+		NewNavButton->GridIndex = UINavWidget->NavigationGrids.Num() - 1;
+		if (LastGrid.FirstButton == nullptr) LastGrid.FirstButton = NewNavButton;
+
+		switch (LastGrid.GridType)
+		{
+		case EGridType::Horizontal:
+			NewNavButton->IndexInGrid = LastGrid.DimensionX++;
+			break;
+		case EGridType::Vertical:
+			NewNavButton->IndexInGrid = LastGrid.DimensionY++;
+			break;
+		case EGridType::Grid2D:
+			NewNavButton->IndexInGrid = LastGrid.NumGrid2DButtons++;
+			break;
+		}
 	}
 }
 

@@ -303,6 +303,8 @@ public:
 	*/
 	static void TraverseHierarquy(UUINavWidget* UINavWidget, UUserWidget* WidgetToTraverse);
 
+	static void SearchForUINavElements(UUINavWidget* UINavWidget, UUserWidget* WidgetToTraverse, UWidget* Widget, UUINavCollection* TraversingCollection, const int GridDepth);
+
 	/**
 	*	Reconfigures the blueprint if it has already been setup
 	*/
