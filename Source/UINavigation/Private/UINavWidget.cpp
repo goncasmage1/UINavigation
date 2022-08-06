@@ -3148,11 +3148,13 @@ int UUINavWidget::GetGridStartingIndex(const int GridIndex)
 
 UUINavButton * UUINavWidget::GetButtonAtGridIndex(const int GridIndex, int IndexInGrid)
 {
-	if (!NavigationGrids.IsValidIndex(GridIndex) || IndexInGrid < 0) return nullptr;
+	if (!NavigationGrids.IsValidIndex(GridIndex) || IndexInGrid < -1) return nullptr;
 
 	const FGrid& ButtonGrid = NavigationGrids[GridIndex];
 	if (ButtonGrid.FirstButton == nullptr) return nullptr;
-	if (IndexInGrid == -1) IndexInGrid = ButtonGrid.GetDimension() - 1;
+	const int ButtonGridDimension = ButtonGrid.GetDimension();
+	if (IndexInGrid >= ButtonGridDimension) return nullptr;
+	if (IndexInGrid == -1) IndexInGrid = ButtonGridDimension - 1;
 	const int NewIndex = ButtonGrid.FirstButton->ButtonIndex + IndexInGrid;
 
 	if (NewIndex >= UINavButtons.Num()) return nullptr;
