@@ -837,7 +837,7 @@ FReply UUINavWidget::NativeOnKeyUp(const FGeometry & InGeometry, const FKeyEvent
 {
 	if (UINavPC->GetInputMode() != EInputMode::UI)
 	{
-		if (ReceiveInputType != EReceiveInputType::None)
+		if (IsRebindingInput())
 		{
 			FKey Key = InKeyEvent.GetKey();
 
