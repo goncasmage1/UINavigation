@@ -119,8 +119,6 @@ void UUINavInputBox::CreateInputKeyWidgets()
 	TArray<FInputActionKeyMapping> Actions;
 	TArray<FInputAxisKeyMapping> Axes;
 
-	ProcessInputName();
-
 	if (IS_AXIS) Settings->GetAxisMappingByName(InputName, Axes);
 	else Settings->GetActionMappingByName(InputName, Actions);
 
@@ -490,7 +488,10 @@ void UUINavInputBox::ProcessInputName()
 {
 	if (IS_ENHANCED_INPUT)
 	{
-		AxisType = InputActionData.bPositive ? EAxisType::Positive : EAxisType::Negative;
+		if (InputActionData.Action->ValueType != EInputActionValueType::Boolean)
+		{
+			AxisType = InputActionData.bPositive ? EAxisType::Positive : EAxisType::Negative;
+		}
 		InputName = InputActionData.Action->GetFName();
 		if (InputActionData.DisplayName.IsEmpty())
 		{
