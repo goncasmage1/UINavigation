@@ -21,7 +21,7 @@ struct FInputContainerEnhancedActionData
 	FText DisplayName;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = EnhancedInput)
-	UInputAction* Action;
+	UInputAction* Action = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = EnhancedInput)
 	bool bPositive = true;

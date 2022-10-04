@@ -160,9 +160,7 @@ void UUINavInputContainer::CreateInputBoxes(const int GridIndex)
 			if (bSuccess) NewInputBox->InputData = InputRebindData;
 		}
 
-		OnAddInputBox(NewInputBox);
 		NewInputBox->CreateKeyWidgets();
-
 		ParentWidget->UINavInputBoxes.Add(NewInputBox);
 
 		for (int j = 0; j < KeysPerInput; j++)
@@ -179,6 +177,8 @@ void UUINavInputContainer::CreateInputBoxes(const int GridIndex)
 			}
 			ParentWidget->SetupUINavButtonDelegates(NewInputBox->InputButtons[j]->NavButton);
 		}
+		
+		OnAddInputBox(NewInputBox);
 	}
 }
 

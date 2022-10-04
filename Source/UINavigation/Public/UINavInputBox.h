@@ -79,6 +79,7 @@ public:
 	UPROPERTY()
 	class UUINavInputContainer* Container = nullptr;
 
+	UPROPERTY(BlueprintReadOnly, Category = "Input")
 	FName InputName;
 	int32 FirstMappingIndex = -1;
 	TArray<int> EnhancedInputGroups;
