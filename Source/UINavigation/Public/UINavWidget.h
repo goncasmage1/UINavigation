@@ -286,8 +286,9 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UINavigation Text", meta = (EditCondition = "bUseTextColor"))
 	FLinearColor TextNavigatedColor = FColor::Green;
 
-
-
+	//Prevent the widget to be deleted, useful if you want the main menu to be handle differently than the other menus
+	UPROPERTY(EditDefaultsOnly, Category = UINavWidget)
+	bool bCanBeRemovedFromParent = true;
 	/*********************************************************************************/
 
 	
