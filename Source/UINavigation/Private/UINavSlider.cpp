@@ -105,6 +105,7 @@ void UUINavSlider::NavigateLeft()
 	Update();
 
 	OnNavigateLeft();
+	if(ParentWrapper != nullptr) ParentWrapper->NavComponentUpdated(); 
 }
 
 void UUINavSlider::NavigateRight()
@@ -118,12 +119,14 @@ void UUINavSlider::NavigateRight()
 	Update();
 
 	OnNavigateRight();
+	if(ParentWrapper != nullptr) ParentWrapper->NavComponentUpdated(); 
 }
 
 void UUINavSlider::HandleOnSliderValueChanged(float InValue)
 {
 	OptionIndex = IndexFromPercent(InValue);
 	Update();
+	if(ParentWrapper != nullptr) ParentWrapper->NavComponentUpdated();
 }
 
 void UUINavSlider::HandleOnMouseCaptureBegin()

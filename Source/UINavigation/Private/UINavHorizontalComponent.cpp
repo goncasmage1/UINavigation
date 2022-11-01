@@ -2,6 +2,7 @@
 
 
 #include "UINavHorizontalComponent.h"
+#include "UINavComponentWrapper.h"
 #include "Components/TextBlock.h"
 #include "UINavWidget.h"
 
@@ -11,6 +12,8 @@ void UUINavHorizontalComponent::NavigateLeft()
 	OnUpdated();
 	ParentWidget->OnHorizCompNavigateLeft(NavButton->ButtonIndex);
 	ParentWidget->OnHorizCompUpdated(NavButton->ButtonIndex);
+
+	if(ParentWrapper != nullptr) ParentWrapper->NavComponentUpdated(); 
 }
 
 void UUINavHorizontalComponent::NavigateRight()
@@ -19,6 +22,8 @@ void UUINavHorizontalComponent::NavigateRight()
 	OnUpdated();
 	ParentWidget->OnHorizCompNavigateRight(NavButton->ButtonIndex);
 	ParentWidget->OnHorizCompUpdated(NavButton->ButtonIndex);
+
+	if(ParentWrapper != nullptr) ParentWrapper->NavComponentUpdated();
 }
 
 void UUINavHorizontalComponent::Update()

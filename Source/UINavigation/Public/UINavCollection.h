@@ -131,5 +131,9 @@ public:
 	void GetGridAtIndex(const int GridIndex, FGrid& Grid, bool& bIsValid);
 
 	UUINavCollection* GetCollectionByIndex(const int Index);
+
+	//Get the notification of a child component being updated, this can be useful to apply settings
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnNavComponentUpdated();
 	
 };

@@ -2,8 +2,10 @@
 
 
 #include "UINavCollection.h"
+#include "UINavComponentWrapper.h"
 #include "UINavWidget.h"
 #include "UINavMacros.h"
+#include "Blueprint/WidgetTree.h"
 
 void UUINavCollection::SetupNavigation_Implementation(const TArray<FButtonNavigation>& EdgeNavigations)
 {
@@ -70,6 +72,19 @@ void UUINavCollection::Init(int StartIndex)
 				ParentWidget->UINavAnimations.Insert(UINavAnimations, Index);
 			}
 			UINavAnimations.Empty();
+		}
+	}
+
+	TArray<UWidget*> Widgets;
+	this->WidgetTree->GetAllWidgets(Widgets);
+	
+	// Transfer Collection from the UINavCollection to it's wrapper.
+	for (UWidget* Widget : Widgets)
+	{		
+		UUINavComponentWrapper* Wrapper = Cast<UUINavComponentWrapper>(Widget);
+		if(Wrapper != nullptr)
+		{
+			Wrapper->ParentCollection = this;
 		}
 	}
 }

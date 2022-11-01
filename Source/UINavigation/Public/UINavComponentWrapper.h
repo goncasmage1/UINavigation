@@ -28,6 +28,11 @@ protected:
 
 public:
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavComponentWrapper)
+	class UUINavCollection* ParentCollection = nullptr;
+	
+	virtual void NativePreConstruct() override;
+	
 	UFUNCTION(BlueprintCallable, Category = UINavComponentWrapper)
 	FORCEINLINE UUINavComponent* GetUINavComponent() const
 	{
@@ -67,5 +72,12 @@ public:
 	{
 		return Cast<UUINavSliderBox>(GetUINavComponent());
 	}
+
+	
+	UFUNCTION(BlueprintCallable, Category = UINavComponentWrapper)
+	void NavComponentUpdated();
+	
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnNavComponentUpdated();
 	
 };

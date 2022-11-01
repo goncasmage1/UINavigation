@@ -17,6 +17,9 @@ public:
 
 	UUINavComponent(const FObjectInitializer& ObjectInitializer);
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavComponentBox)
+	class UUINavComponentWrapper* ParentWrapper = nullptr;
+
 	virtual void NativeConstruct() override;
 	
 	void CallCustomInput(FName ActionName, uint8* Buffer);
