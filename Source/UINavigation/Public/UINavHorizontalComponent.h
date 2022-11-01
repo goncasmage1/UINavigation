@@ -63,4 +63,6 @@ public:
 
 	virtual void OnUpdated_Implementation();
 	
+	UFUNCTION(BlueprintNativeEvent, Category = UINavHorizontalComponent)
+	void OnRefreshIndex();
 };

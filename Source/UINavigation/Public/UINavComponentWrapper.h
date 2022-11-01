@@ -76,6 +76,11 @@ public:
 		return Cast<UUINavSliderBox>(GetUINavComponent());
 	}
 
+	UFUNCTION(BlueprintCallable, Category = UINavComponentWrapper)
+	void RefreshNavComponent();
+	
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnRefreshNavComponent();
 	
 	UFUNCTION(BlueprintCallable, Category = UINavComponentWrapper)
 	void NavComponentUpdated();
