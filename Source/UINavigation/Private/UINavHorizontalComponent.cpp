@@ -41,6 +41,7 @@ void UUINavHorizontalComponent::UpdateTextToIndex(int NewIndex)
 {
 	OptionIndex = NewIndex;
 	Update();
+	OnRefreshIndex();
 }
 
 void UUINavHorizontalComponent::ChangeText(const FText NewText)
@@ -53,6 +54,10 @@ void UUINavHorizontalComponent::OnNavigateLeft_Implementation()
 }
 
 void UUINavHorizontalComponent::OnNavigateRight_Implementation()
+{
+}
+
+void UUINavHorizontalComponent::OnRefreshIndex_Implementation()
 {
 }
 
