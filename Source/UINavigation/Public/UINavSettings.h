@@ -45,5 +45,5 @@ public:
 
 	// A map for each Input Context in your game and its respective Default Input Context Mappings
 	UPROPERTY(config, EditAnywhere, Category = "Bindings")
-		TMap<TSoftObjectPtr<UInputMappingContext>, TSoftObjectPtr<UInputMappingContext>> DefaultInputContexts;
+	TMap<TSoftObjectPtr<UInputMappingContext>, TSoftObjectPtr<UInputMappingContext>> DefaultInputContexts;
 };
