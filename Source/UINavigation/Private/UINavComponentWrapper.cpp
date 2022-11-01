@@ -15,9 +15,23 @@ void UUINavComponentWrapper::NativePreConstruct()
 	}
 }
 
+void UUINavComponentWrapper::RefreshNavComponent()
+{
+	OnRefreshNavComponent();
+}
+
 void UUINavComponentWrapper::NavComponentUpdated()
 {
 	OnNavComponentUpdated();
+
+	// Loop over all the Linked UINavWrapper declared in the UINavCollection
+	for (UUINavComponentWrapper* NavWrapper : LinkedUINavWrapperToRefresh)
+	{
+		if(NavWrapper != nullptr)
+		{
+			NavWrapper->RefreshNavComponent();			
+		}
+	}
 
 	if(ParentCollection != nullptr)
 		ParentCollection->OnNavComponentUpdated();
