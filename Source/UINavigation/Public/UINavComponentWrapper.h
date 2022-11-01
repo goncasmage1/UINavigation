@@ -26,7 +26,7 @@ protected:
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget, OptionalWidget = true), Category = UINavComponentWrapper)
 	UUINavComponentWrapper* UINavWrapper = nullptr;
 
-	// This setting is used to update multiple Component once one of them is refresh, for instance using a global quality setting refershing all the other settings.
+	// This setting is used to update multiple Components once one of them is refreshed, for instance using a global quality setting and refreshing all the other settings.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<UUINavComponentWrapper*> LinkedUINavWrapperToRefresh;
 public:
