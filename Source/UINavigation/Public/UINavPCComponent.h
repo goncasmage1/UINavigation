@@ -469,6 +469,7 @@ public:
 	void MenuInput(const ENavigationDirection Direction);
 	void MenuSelect();
 	void MenuReturn();
+	void MenuCancel();
 	void MenuNext();
 	void MenuPrevious();
 
@@ -478,6 +479,7 @@ public:
 	void MenuRightRelease();
 	void MenuSelectRelease();
 	void MenuReturnRelease();
+	void MenuCancelRelease();
 
 	void MouseKeyPressed(const FKey MouseKey);
 

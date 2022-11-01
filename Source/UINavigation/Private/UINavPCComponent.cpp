@@ -184,6 +184,12 @@ void UUINavPCComponent::BindMenuInputs()
 		FInputActionBinding& Action6_2 = InputComponent->BindAction("MenuReturn", IE_Released, this, &UUINavPCComponent::MenuReturnRelease);
 		Action6_2.bExecuteWhenPaused = true;
 		Action6_2.bConsumeInput = false;
+		FInputActionBinding& Action6_3 = InputComponent->BindAction("MenuCancel", IE_Pressed, this, &UUINavPCComponent::MenuCancel);
+		Action6_3.bExecuteWhenPaused = true;
+		Action6_3.bConsumeInput = false;
+		FInputActionBinding& Action6_4 = InputComponent->BindAction("MenuCancel", IE_Released, this, &UUINavPCComponent::MenuCancelRelease);
+		Action6_4.bExecuteWhenPaused = true;
+		Action6_4.bConsumeInput = false;
 
 		if (CustomInputs.Num() > 0)
 		{
@@ -1196,6 +1202,11 @@ void UUINavPCComponent::ExecuteActionByName(const FString Action, const bool bPr
 		if (bPressed) MenuReturn();
 		else MenuReturnRelease();
 	}
+	else if (Action.Contains("MenuCancel"))
+	{
+		if (bPressed) MenuCancel();
+		else MenuCancelRelease();
+	}
 	else if (Action.Contains("MenuNext") && bPressed)
 	{
 		MenuNext();
@@ -1280,6 +1291,24 @@ void UUINavPCComponent::MenuReturnRelease()
 
 	ClearTimer();
 	ActiveWidget->MenuReturnRelease();
+}
+
+void UUINavPCComponent::MenuCancel()
+{
+	if (ActiveWidget == nullptr || !bAllowReturnInput) return;
+
+	ClearTimer();
+	ActiveWidget->MenuCancelPress();
+}
+
+void UUINavPCComponent::MenuCancelRelease()
+{
+	IUINavPCReceiver::Execute_OnReturn(GetOwner());
+
+	if (ActiveWidget == nullptr || !bAllowReturnInput) return;
+
+	ClearTimer();
+	ActiveWidget->MenuCancelRelease();
 }
 
 void UUINavPCComponent::MenuNext()
