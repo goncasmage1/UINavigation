@@ -1,6 +1,7 @@
 // Copyright (C) 2019 Gonçalo Marques - All Rights Reserved
 
 #include "UINavSlider.h"
+#include "UINavComponentWrapper.h"
 #include "UINavMacros.h"
 #include "UINavWidget.h"
 #include "Components/Slider.h"
