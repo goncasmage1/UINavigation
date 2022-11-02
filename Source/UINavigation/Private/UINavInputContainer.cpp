@@ -301,11 +301,9 @@ int UUINavInputContainer::GetOffsetFromTargetColumn(const bool bTop) const
 		case 2:
 			if (bTop) return (TargetColumn == ETargetColumn::Right);
 			else return -(TargetColumn != ETargetColumn::Right);
-			break;
 		case 3:
 			if (bTop) return static_cast<int>(TargetColumn);
 			else return (-2 - static_cast<int>(TargetColumn));
-			break;
 	}
 	return 0;
 }
