@@ -52,7 +52,7 @@ void UUINavComponent::OnStopSelected_Implementation()
 
 bool UUINavComponent::IsValid(const bool bIgnoreDisabledUINavButton) const
 {
-	return (Visibility != ESlateVisibility::Collapsed &&
-			Visibility != ESlateVisibility::Hidden &&
-			(!bIgnoreDisabledUINavButton || bIsEnabled));
+	return (GetVisibility() != ESlateVisibility::Collapsed &&
+		GetVisibility() != ESlateVisibility::Hidden &&
+		(!bIgnoreDisabledUINavButton || GetIsEnabled()));
 }

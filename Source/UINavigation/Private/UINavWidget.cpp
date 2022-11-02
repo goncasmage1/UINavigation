@@ -257,13 +257,13 @@ void UUINavWidget::TraverseHierarquy(UUINavWidget* UINavWidget, UUserWidget* Wid
 				const UUniformGridSlot* GridSlot = Cast<UUniformGridSlot>(Widget->Slot);
 				if (GridSlot != nullptr)
 				{
-					if (LastGrid.DimensionX < GridSlot->Column + 1)
+					if (LastGrid.DimensionX < GridSlot->GetColumn() + 1)
 					{
-						LastGrid.DimensionX = GridSlot->Column + 1;
+						LastGrid.DimensionX = GridSlot->GetColumn() + 1;
 					}
-					if (LastGrid.DimensionY < GridSlot->Row + 1)
+					if (LastGrid.DimensionY < GridSlot->GetRow() + 1)
 					{
-						LastGrid.DimensionY = GridSlot->Row + 1;
+						LastGrid.DimensionY = GridSlot->GetRow() + 1;
 					}
 				}
 			}
@@ -468,7 +468,7 @@ void UUINavWidget::SearchForUINavElements(UUINavWidget* UINavWidget, UUserWidget
 
 	UINavWidget->SetupUINavButtonDelegates(NewNavButton);
 
-	NewNavButton->bAutoCollapse = NewNavButton->bIsEnabled;
+	NewNavButton->bAutoCollapse = NewNavButton->GetIsEnabled();
 	UINavWidget->UINavButtons.Add(NewNavButton);
 	UINavWidget->RevertButtonStyle(UINavWidget->UINavButtons.Num() - 1);
 
@@ -2105,7 +2105,7 @@ void UUINavWidget::SwapPadding(UUINavButton* TargetButton)
 	const FMargin PressedPadding = Style.PressedPadding - Style.NormalPadding;
 	if (OverlaySlot != nullptr)
 	{
-		OverlaySlot->SetPadding(OverlaySlot->Padding == PressedPadding ? FMargin(0.0f) : PressedPadding);
+		OverlaySlot->SetPadding(OverlaySlot->GetPadding() == PressedPadding ? FMargin(0.0f) : PressedPadding);
 	}
 }
 
@@ -2483,7 +2483,7 @@ void UUINavWidget::BeginSelectorMovement(const int PrevButtonIndex, const int Ne
 {
 	if (MoveCurve == nullptr) return;
 
-	SelectorOrigin = bMovingSelector ? TheSelector->RenderTransform.Translation : GetButtonLocation(PrevButtonIndex);
+	SelectorOrigin = bMovingSelector ? TheSelector->GetRenderTransform().Translation : GetButtonLocation(PrevButtonIndex);
 	SelectorDestination = GetButtonLocation(NextButtonIndex);
 	Distance = SelectorDestination - SelectorOrigin;
 
@@ -2879,7 +2879,7 @@ UUINavWidget* UUINavWidget::GetChildUINavWidget(const int ChildIndex)
 
 bool UUINavWidget::IsSelectorValid()
 {
-	return  TheSelector != nullptr && TheSelector->bIsEnabled;
+	return  TheSelector != nullptr && TheSelector->GetIsEnabled();
 }
 
 UUINavButton* UUINavWidget::FindNextButton(UUINavButton* Button, const ENavigationDirection Direction)

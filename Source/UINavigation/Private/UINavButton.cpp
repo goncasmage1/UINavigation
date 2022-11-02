@@ -37,9 +37,9 @@ UUINavButton::UUINavButton()
 
 bool UUINavButton::IsValid(const bool bIgnoreDisabledUINavButton) const
 {
-	return (Visibility != ESlateVisibility::Collapsed &&
-			Visibility != ESlateVisibility::Hidden &&
-			(!bIgnoreDisabledUINavButton || bIsEnabled));
+	return (GetVisibility() != ESlateVisibility::Collapsed &&
+		GetVisibility() != ESlateVisibility::Hidden &&
+		(!bIgnoreDisabledUINavButton || GetIsEnabled()));
 }
 
 void UUINavButton::OnHover()
