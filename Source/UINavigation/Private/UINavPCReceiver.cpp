@@ -11,7 +11,7 @@ void IUINavPCReceiver::OnInputChanged_Implementation(EInputType From, EInputType
 {
 }
 
-void IUINavPCReceiver::OnControllerConnectionChanged_Implementation(bool bConnected, int32 UserId, int32 UserIndex)
+void IUINavPCReceiver::OnControllerConnectionChanged_Implementation(EInputDeviceConnectionState InputDeviceConnectionState, FPlatformUserId PlatformUserId, FInputDeviceId InputDeviceId)
 {
 }
 
