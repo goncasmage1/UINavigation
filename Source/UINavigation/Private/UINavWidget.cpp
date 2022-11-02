@@ -801,11 +801,13 @@ void UUINavWidget::RemoveFromParent()
 	Super::RemoveFromParent();
 }
 
+#if ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION < 1
 void UUINavWidget::OnLevelRemovedFromWorld(ULevel* InLevel, UWorld* InWorld)
 {
 	bDestroying = true;
 	Super::OnLevelRemovedFromWorld(InLevel, InWorld);
 }
+#endif
 
 FReply UUINavWidget::NativeOnKeyDown(const FGeometry & InGeometry, const FKeyEvent & InKeyEvent)
 {
