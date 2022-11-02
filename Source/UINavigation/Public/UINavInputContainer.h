@@ -122,6 +122,7 @@ public:
 
 	//-----------------------------------------------------------------------
 
+	UPROPERTY()
 	class UUINavPCComponent* UINavPC = nullptr;
 
 	UPROPERTY(BlueprintReadOnly, Category = "UINav Input")
