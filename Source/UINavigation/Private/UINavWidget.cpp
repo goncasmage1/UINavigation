@@ -181,7 +181,7 @@ void UUINavWidget::CleanSetup()
 
 void UUINavWidget::FetchButtonsInHierarchy()
 {
-	TraverseHierarquy(this, this);
+	TraverseHierarchy(this, this);
 
 	const int ButtonsNum = UINavButtons.Num();
 	if (FirstButtonIndex >= ButtonsNum && ButtonsNum > 0)
@@ -236,7 +236,7 @@ void UUINavWidget::ConfigureUINavPC()
 	}
 }
 
-void UUINavWidget::TraverseHierarquy(UUINavWidget* UINavWidget, UUserWidget* WidgetToTraverse)
+void UUINavWidget::TraverseHierarchy(UUINavWidget* UINavWidget, UUserWidget* WidgetToTraverse)
 {
 	//Find UINavButtons in the widget hierarchy
 	TArray<UWidget*> Widgets;
