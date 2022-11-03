@@ -133,7 +133,7 @@ protected:
 
 	void CallCustomInput(const FName ActionName, const bool bPressed);
 
-	virtual void OnControllerConnectionChanged(EInputDeviceConnectionState NewConnectionState, FPlatformUserId PlatformUserId, FInputDeviceId InputDeviceId);
+	void OnControllerConnectionChanged(EInputDeviceConnectionState NewConnectionState, FPlatformUserId PlatformUserId, FInputDeviceId InputDeviceId);
 
 public:
 
