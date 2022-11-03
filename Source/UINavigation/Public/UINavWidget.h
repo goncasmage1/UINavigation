@@ -16,6 +16,7 @@
 #define SELECT_INDEX -101
 #define RETURN_INDEX -202
 
+class UUINavHorizontalComponent;
 enum class EButtonStyle : uint8;
 
 /**
