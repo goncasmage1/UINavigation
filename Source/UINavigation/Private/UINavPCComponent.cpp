@@ -13,6 +13,8 @@
 #include "UINavBlueprintFunctionLibrary.h"
 #include "UINavInputProcessor.h"
 #include "Framework/Application/SlateApplication.h"
+#include "GenericPlatform/GenericApplication.h"
+#include "GenericPlatform/GenericPlatformInputDeviceMapper.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedPlayerInput.h"
@@ -77,9 +79,11 @@ void UUINavPCComponent::BeginPlay()
 		VerifyDefaultInputs();
 		FetchUINavActionKeys();
 		BindMenuEnhancedInputs();
-		if (!FCoreDelegates::OnControllerConnectionChange.IsBoundToObject(this))
+
+		IPlatformInputDeviceMapper& PlatformInputMapper = IPlatformInputDeviceMapper::Get();
+		if (!PlatformInputMapper.GetOnInputDeviceConnectionChange().IsBoundToObject(this))
 		{
-			FCoreDelegates::OnControllerConnectionChange.AddUObject(this, &UUINavPCComponent::OnControllerConnectionChanged);
+			PlatformInputMapper.GetOnInputDeviceConnectionChange().AddUObject(this, &UUINavPCComponent::OnControllerConnectionChanged);
 		}
 	}
 }
@@ -91,7 +95,7 @@ void UUINavPCComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 		FSlateApplication::Get().UnregisterInputPreProcessor(SharedInputProcessor);
 	}
 	
-	FCoreDelegates::OnControllerConnectionChange.RemoveAll(this);
+	IPlatformInputDeviceMapper::Get().GetOnInputDeviceConnectionChange().RemoveAll(this); 
 
 	Super::EndPlay(EndPlayReason);
 }
@@ -303,9 +307,9 @@ void UUINavPCComponent::CallCustomInput(const FName ActionName, const bool bPres
 	}
 }
 
-void UUINavPCComponent::OnControllerConnectionChanged(bool bConnected, FPlatformUserId UserId, int32 UserIndex)
+void UUINavPCComponent::OnControllerConnectionChanged(EInputDeviceConnectionState InputDeviceConnectionState, FPlatformUserId PlatformUserId, FInputDeviceId InputDeviceId)
 {
-	IUINavPCReceiver::Execute_OnControllerConnectionChanged(GetOwner(), bConnected, static_cast<int32>(UserId), UserIndex);
+	IUINavPCReceiver::Execute_OnControllerConnectionChanged(GetOwner(), InputDeviceConnectionState, PlatformUserId, InputDeviceId);
 }
 
 void UUINavPCComponent::VerifyDefaultInputs()

@@ -24,6 +24,7 @@ public class UINavigation : ModuleRules
 			new string[]
 			{
 				"CoreUObject",
+				"ApplicationCore",
 				"Engine",
                 "UMG",
                 "Slate",
