@@ -7,6 +7,7 @@
 #include "Data/InputContainerEnhancedActionData.h"
 #include "Data/InputRebindData.h"
 #include "Data/RevertRebindReason.h"
+#include "EnhancedActionKeyMapping.h"
 #include "UINavInputBox.generated.h"
 
 #define IS_AXIS (AxisType != EAxisType::None)
@@ -37,6 +38,9 @@ protected:
 	void UpdateKeyDisplay(const int Index);
 	FKey GetKeyFromAxis(FKey AxisKey) const;
 	void ProcessInputName();
+	int GetNumValidKeys() const;
+
+	void GetActionMappingsForAction(const UInputAction* Action, const EInputAxis& Axis, TArray<int32>& OutMappingIndices);
 
 public:
 
@@ -51,6 +55,10 @@ public:
 	void FinishUpdateNewKey();
 	void FinishUpdateNewEnhancedInputKey(FKey NewKey, int Index);
 	void FinishUpdateNewInputKey(FKey NewKey, int Index);
+	void TryMapAxisKey(const FKey& NewKey, const FKey& ActionMappingKey, const int32 Index);
+	void TryMap2DAxisKey(const FKey& NewMappingKey);
+	void UnmapAxisKey(const FKey& NewAxisKey, const FKey& OldAxisKey, const FKey& NewKey, const FKey& ActionMappingKey, const int32 Index);
+	void AddRelevantModifiers(const FInputContainerEnhancedActionData& ActionData, FEnhancedActionKeyMapping& Mapping);
 	void CancelUpdateInputKey(const ERevertRebindReason Reason);
 	void RevertToKeyText(const int Index);
 
@@ -58,6 +66,7 @@ public:
 
 	int ContainsKey(const FKey CompareKey) const;
 	FORCEINLINE bool IsAxis() const { return IS_AXIS; }
+	FORCEINLINE bool WantsAxisKey() const;
 	FORCEINLINE FKey GetKey(const int Index) { return Index >= 0 && Index < Keys.Num() ? Keys[Index] : FKey(); }
 
 	EAxisType AxisType = EAxisType::None;
@@ -81,7 +90,6 @@ public:
 
 	UPROPERTY(BlueprintReadOnly, Category = "Input")
 	FName InputName;
-	int32 FirstMappingIndex = -1;
 	TArray<int> EnhancedInputGroups;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Enhanced Input")

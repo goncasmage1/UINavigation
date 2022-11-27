@@ -841,7 +841,9 @@ FReply UUINavWidget::NativeOnKeyUp(const FGeometry & InGeometry, const FKeyEvent
 		{
 			FKey Key = InKeyEvent.GetKey();
 
-			if (ReceiveInputType == EReceiveInputType::Axis)
+			const int KeysPerInput = UINavInputContainer->KeysPerInput;
+			UUINavInputBox* const UINavInputBox = UINavInputBoxes[InputBoxIndex / KeysPerInput];
+			if (ReceiveInputType == EReceiveInputType::Axis && UINavInputBox->WantsAxisKey())
 			{
 				Key = UINavInputContainer->GetAxisFromKey(Key);
 			}
@@ -866,7 +868,9 @@ FReply UUINavWidget::NativeOnMouseWheel(const FGeometry & InGeometry, const FPoi
 	if (IsRebindingInput())
 	{
 		FKey PressedMouseKey = InMouseEvent.GetWheelDelta() > 0.f ? EKeys::MouseScrollUp : EKeys::MouseScrollDown;
-		if (ReceiveInputType == EReceiveInputType::Axis) PressedMouseKey = EKeys::MouseWheelAxis;
+		const int KeysPerInput = UINavInputContainer->KeysPerInput;
+		UUINavInputBox* const UINavInputBox = UINavInputBoxes[InputBoxIndex / KeysPerInput];
+		if (ReceiveInputType == EReceiveInputType::Axis && UINavInputBox->WantsAxisKey()) PressedMouseKey = EKeys::MouseWheelAxis;
 		ProcessKeybind(PressedMouseKey);
 		return FReply::Handled();
 	}

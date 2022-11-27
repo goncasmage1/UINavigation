@@ -13,6 +13,7 @@
 #include "InputCoreTypes.h"
 #include "Input/Reply.h"
 #include "InputAction.h"
+#include "Data/InputContainerEnhancedActionData.h"
 #include "UINavPCComponent.generated.h"
 
 DECLARE_DELEGATE_OneParam(FMouseKeyDelegate, FKey);
@@ -231,23 +232,21 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavController)
 	UDataTable* InputRebindDataTable = nullptr;
 
-	TMap<FKey, FAxis2D_Keys> Axis2DToKeyMap = {
+	TMap<FKey, FAxis2D_Keys> Axis2DToAxis1DMap = {
+		{EKeys::Gamepad_Left2D, {EKeys::Gamepad_LeftX, EKeys::Gamepad_LeftY}},
+		{EKeys::Gamepad_Right2D, {EKeys::Gamepad_RightX, EKeys::Gamepad_RightY}},
+	};
+	
+	TMap<FKey, FAxis2D_Keys> AxisToKeyMap = {
 		{EKeys::Gamepad_LeftX, {EKeys::Gamepad_LeftStick_Right, EKeys::Gamepad_LeftStick_Left}},
 		{EKeys::Gamepad_LeftY, {EKeys::Gamepad_LeftStick_Up, EKeys::Gamepad_LeftStick_Down}},
 		{EKeys::Gamepad_RightX, {EKeys::Gamepad_RightStick_Right, EKeys::Gamepad_RightStick_Left}},
 		{EKeys::Gamepad_RightY, {EKeys::Gamepad_RightStick_Up, EKeys::Gamepad_RightStick_Down}},
-		/*{EKeys::Daydream_Left_Thumbstick_X, {EKeys::Daydream_Left_Thumbstick_Right, EKeys::Daydream_Left_Thumbstick_Left}},
-		{EKeys::Daydream_Left_Thumbstick_Y, {EKeys::Daydream_Left_Thumbstick_Up, EKeys::Daydream_Left_Thumbstick_Down}},
-		{EKeys::Daydream_Right_Thumbstick_X, {EKeys::Daydream_Right_Thumbstick_Right, EKeys::Daydream_Right_Thumbstick_Left}},
-		{EKeys::Daydream_Right_Thumbstick_Y, {EKeys::Daydream_Right_Thumbstick_Up, EKeys::Daydream_Right_Thumbstick_Down}},*/
+		{EKeys::MouseWheelAxis, {EKeys::MouseScrollUp, EKeys::MouseScrollDown}},
 		{EKeys::MixedReality_Left_Thumbstick_X, {EKeys::MixedReality_Left_Thumbstick_Right, EKeys::MixedReality_Left_Thumbstick_Left}},
 		{EKeys::MixedReality_Left_Thumbstick_Y, {EKeys::MixedReality_Left_Thumbstick_Up, EKeys::MixedReality_Left_Thumbstick_Down}},
 		{EKeys::MixedReality_Right_Thumbstick_X, {EKeys::MixedReality_Right_Thumbstick_Right, EKeys::MixedReality_Right_Thumbstick_Left}},
 		{EKeys::MixedReality_Right_Thumbstick_Y, {EKeys::MixedReality_Right_Thumbstick_Up, EKeys::MixedReality_Right_Thumbstick_Down}},
-		/*{EKeys::OculusGo_Left_Thumbstick_X, {EKeys::OculusGo_Left_Thumbstick_Right, EKeys::OculusGo_Left_Thumbstick_Left}},
-		{EKeys::OculusGo_Left_Thumbstick_Y, {EKeys::OculusGo_Left_Thumbstick_Up, EKeys::OculusGo_Left_Thumbstick_Down}},
-		{EKeys::OculusGo_Right_Thumbstick_X, {EKeys::OculusGo_Right_Thumbstick_Right, EKeys::OculusGo_Right_Thumbstick_Left}},
-		{EKeys::OculusGo_Right_Thumbstick_Y, {EKeys::OculusGo_Right_Thumbstick_Up, EKeys::OculusGo_Right_Thumbstick_Down}},*/
 		{EKeys::OculusTouch_Left_Thumbstick_X, {EKeys::OculusTouch_Left_Thumbstick_Right, EKeys::OculusTouch_Left_Thumbstick_Left}},
 		{EKeys::OculusTouch_Left_Thumbstick_Y, {EKeys::OculusTouch_Left_Thumbstick_Up, EKeys::OculusTouch_Left_Thumbstick_Down}},
 		{EKeys::OculusTouch_Right_Thumbstick_X, {EKeys::OculusTouch_Right_Thumbstick_Right, EKeys::OculusTouch_Right_Thumbstick_Left}},
@@ -333,6 +332,7 @@ public:
 	void HandleAnalogInputEvent(FSlateApplication& SlateApp, const FAnalogInputEvent& InAnalogInputEvent);
 	void HandleMouseMoveEvent(FSlateApplication& SlateApp, const FPointerEvent& MouseEvent);
 	void HandleMouseButtonDownEvent(FSlateApplication& SlateApp, const FPointerEvent& MouseEvent);
+	void HandleMouseButtonUpEvent(FSlateApplication& SlateApp, const FPointerEvent& MouseEvent);
 	void HandleMouseWheelOrGestureEvent(FSlateApplication& SlateApp, const FPointerEvent& InWheelEvent, const FPointerEvent* InGesture);
 
 	UFUNCTION(BlueprintCallable, Category = UINavController)
@@ -407,10 +407,28 @@ public:
 	FORCEINLINE bool ShouldIgnoreHoverEvents() const { return bShouldIgnoreHoverEvents; }
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
-	FKey GetKeyFromAxis(FKey Key, bool bPositive) const;
+	FKey GetKeyFromAxis(FKey Key, bool bPositive, const EInputAxis Axis = EInputAxis::X) const;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
-	bool Is2DAxis(const FKey Key) const;
+	FKey GetAxisFromKey(FKey Key, bool& OutbPositive) const;
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
+	FKey GetAxis1DFromAxis2D(FKey Key, const EInputAxis Axis) const;
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
+	FKey GetAxis2DFromAxis1D(FKey Key) const;
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
+	FKey GetOppositeAxisKey(FKey Key) const;
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
+	FKey GetOppositeAxis2DAxis(FKey Key) const;
+	
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
+	bool IsAxis2D(const FKey Key) const;
+	
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
+	bool IsAxis(const FKey Key) const;
 
 	//Receives the name of the action, or axis with a + or - suffix, and returns
 	//the first key that respects the given restriction.
