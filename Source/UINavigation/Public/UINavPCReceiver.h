@@ -47,9 +47,9 @@ public:
 	*	Called when a controller is connected and disconnected
 	*/
 	UFUNCTION(BlueprintNativeEvent, Category = UINavController)
-	void OnControllerConnectionChanged(bool bConnected, int32 UserId, int32 UserIndex);
+	void OnControllerConnectionChanged(EInputDeviceConnectionState InputDeviceConnectionState, FPlatformUserId PlatformUserId, FInputDeviceId InputDeviceId);
 
-	virtual void OnControllerConnectionChanged_Implementation(bool bConnected, int32 UserId, int32 UserIndex);
+	virtual void OnControllerConnectionChanged_Implementation(EInputDeviceConnectionState InputDeviceConnectionState, FPlatformUserId PlatformUserId, FInputDeviceId InputDeviceId);
 
 	/**
 	*	Called when the active widget changes

@@ -24,7 +24,7 @@ struct FInputContainerEnhancedActionData
 	UInputAction* Action = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = EnhancedInput)
-	bool bPositive = true;
+	EAxisType AxisScale = EAxisType::None;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = EnhancedInput)
 	EInputAxis Axis = EInputAxis::X;
