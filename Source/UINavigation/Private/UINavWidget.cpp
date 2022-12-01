@@ -833,13 +833,7 @@ FReply UUINavWidget::NativeOnKeyUp(const FGeometry & InGeometry, const FKeyEvent
 	{
 		if (IsRebindingInput())
 		{
-			FKey Key = InKeyEvent.GetKey();
-
-			if (ReceiveInputType == EReceiveInputType::Axis)
-			{
-				Key = UINavInputContainer->GetAxisFromKey(Key);
-			}
-
+			const FKey Key = InKeyEvent.GetKey();
 			ProcessKeybind(Key);
 			return FReply::Handled();
 		}
@@ -859,8 +853,7 @@ FReply UUINavWidget::NativeOnMouseWheel(const FGeometry & InGeometry, const FPoi
 {
 	if (IsRebindingInput())
 	{
-		FKey PressedMouseKey = InMouseEvent.GetWheelDelta() > 0.f ? EKeys::MouseScrollUp : EKeys::MouseScrollDown;
-		if (ReceiveInputType == EReceiveInputType::Axis) PressedMouseKey = EKeys::MouseWheelAxis;
+		const FKey PressedMouseKey = InMouseEvent.GetWheelDelta() > 0.f ? EKeys::MouseScrollUp : EKeys::MouseScrollDown;
 		ProcessKeybind(PressedMouseKey);
 		return FReply::Handled();
 	}

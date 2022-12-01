@@ -160,25 +160,30 @@ void UUINavInputContainer::CreateInputBoxes(const int GridIndex)
 			if (bSuccess) NewInputBox->InputData = InputRebindData;
 		}
 
-		NewInputBox->CreateKeyWidgets();
 		ParentWidget->UINavInputBoxes.Add(NewInputBox);
+	}
+
+	for (int i = 0; i < NumberOfInputs; ++i)
+	{
+		UUINavInputBox* const InputBox = ParentWidget->UINavInputBoxes[i];
+		InputBox->CreateKeyWidgets();
 
 		for (int j = 0; j < KeysPerInput; j++)
 		{
 			ParentWidget->UINavButtons.Add(nullptr);
 
 			const int NewButtonIndex = TempFirstButtonIndex + i * KeysPerInput + j;
-			ParentWidget->UINavButtons[NewButtonIndex] = NewInputBox->InputButtons[j]->NavButton;
-			NewInputBox->InputButtons[j]->NavButton->ButtonIndex = NewButtonIndex;
+			ParentWidget->UINavButtons[NewButtonIndex] = InputBox->InputButtons[j]->NavButton;
+			InputBox->InputButtons[j]->NavButton->ButtonIndex = NewButtonIndex;
 			if (GridIndex != -1)
 			{
-				NewInputBox->InputButtons[j]->NavButton->GridIndex = GridIndex;
-				NewInputBox->InputButtons[j]->NavButton->IndexInGrid = (i * KeysPerInput) + j;
+				InputBox->InputButtons[j]->NavButton->GridIndex = GridIndex;
+				InputBox->InputButtons[j]->NavButton->IndexInGrid = (i * KeysPerInput) + j;
 			}
-			ParentWidget->SetupUINavButtonDelegates(NewInputBox->InputButtons[j]->NavButton);
+			ParentWidget->SetupUINavButtonDelegates(InputBox->InputButtons[j]->NavButton);
 		}
-		
-		OnAddInputBox(NewInputBox);
+
+		OnAddInputBox(InputBox);
 	}
 }
 
@@ -188,6 +193,7 @@ ERevertRebindReason UUINavInputContainer::CanRegisterKey(const UUINavInputBox * 
 	if (KeyWhitelist.Num() > 0 && !KeyWhitelist.Contains(NewKey)) return ERevertRebindReason::NonWhitelistedKey;
 	if (KeyBlacklist.Contains(NewKey)) return ERevertRebindReason::BlacklistedKey;
 	if (!RespectsRestriction(NewKey, Index)) return ERevertRebindReason::RestrictionMismatch;
+	if (InputBox->ContainsKey(NewKey) != INDEX_NONE) return ERevertRebindReason::UsedBySameInput;
 	if (!CanUseKey(InputBox, NewKey, OutCollidingActionIndex, OutCollidingKeyIndex)) return ERevertRebindReason::UsedBySameInputGroup;
 
 	return ERevertRebindReason::None;
@@ -250,13 +256,47 @@ void UUINavInputContainer::ResetInputBox(const FName InputName, const EAxisType 
 	}
 }
 
+UUINavInputBox* UUINavInputContainer::GetOppositeInputBox(const FInputContainerEnhancedActionData& ActionData)
+{
+	for (UUINavInputBox* InputBox : ParentWidget->UINavInputBoxes)
+	{
+		if (InputBox->InputActionData.Action == ActionData.Action &&
+			InputBox->InputActionData.Axis == ActionData.Axis &&
+			(InputBox->InputActionData.AxisScale == EAxisType::Positive && ActionData.AxisScale == EAxisType::Negative ||
+			InputBox->InputActionData.AxisScale == EAxisType::Negative && ActionData.AxisScale == EAxisType::Positive))
+		{
+			return InputBox;
+		}
+	}
+
+	return nullptr;
+}
+
+UUINavInputBox* UUINavInputContainer::GetOppositeInputBox(const FName& InputName, const EAxisType AxisType)
+{
+	for (UUINavInputBox* InputBox : ParentWidget->UINavInputBoxes)
+	{
+		if (InputBox->InputName == InputName &&
+			(InputBox->AxisType == EAxisType::Positive && AxisType == EAxisType::Negative ||
+			InputBox->AxisType == EAxisType::Negative && AxisType == EAxisType::Positive))
+		{
+			return InputBox;
+		}
+	}
+
+	return nullptr;
+}
+
 void UUINavInputContainer::GetAxisPropertiesFromMapping(const FEnhancedActionKeyMapping& ActionMapping,
 	bool& bOutPositive, EInputAxis& OutAxis) const
 {
 	TArray<UInputModifier*> Modifiers(ActionMapping.Modifiers);
 	Modifiers.Append(ActionMapping.Action->Modifiers);
 	bOutPositive = true;
-	OutAxis = EInputAxis::X;
+	if (!UINavPC->IsAxis2D(ActionMapping.Key))
+	{
+		OutAxis = EInputAxis::X;
+	}
 	
 	for (const UInputModifier* Modifier : Modifiers)
 	{
@@ -270,7 +310,7 @@ void UUINavInputContainer::GetAxisPropertiesFromMapping(const FEnhancedActionKey
 		// TODO: Add support for Scalar input modifier
 		
 		const UInputModifierSwizzleAxis* Swizzle = Cast<UInputModifierSwizzleAxis>(Modifier);
-		if (Swizzle != nullptr)
+		if (Swizzle != nullptr && !UINavPC->IsAxis2D(ActionMapping.Key))
 		{
 			switch(Swizzle->Order)
 			{

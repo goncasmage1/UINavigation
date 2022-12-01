@@ -23,8 +23,7 @@
 			"WhitelistPlatforms": [
 				"Win64",
 				"Linux",
-				"Mac",
-				"Switch"
+				"Mac"
 			],
 			"BlacklistPlatforms": [
 				"IOS",

@@ -102,6 +102,9 @@ public:
 
 	void ResetInputBox(const FName InputName, const EAxisType AxisType);
 
+	UUINavInputBox* GetOppositeInputBox(const FInputContainerEnhancedActionData& ActionData);
+	UUINavInputBox* GetOppositeInputBox(const FName& InputName, const EAxisType AxisType);
+
 	void GetAxisPropertiesFromMapping(const FEnhancedActionKeyMapping& ActionMapping, bool& bOutPositive, EInputAxis& OutAxis) const;
 
 	//Fetches the index offset from the TargetColumn variable for both the top and bottom of the Input Container
