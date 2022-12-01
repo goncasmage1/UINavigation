@@ -49,7 +49,7 @@ void UUINavCollection::Init(int StartIndex)
 	LastButtonIndex = StartIndex - 1;
 	PreSetup();
 
-	UUINavWidget::TraverseHierarquy(ParentWidget, this);
+	UUINavWidget::TraverseHierarchy(ParentWidget, this);
 
 	if (UINavAnimations.Num() > 0)
 	{

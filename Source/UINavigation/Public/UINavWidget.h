@@ -16,6 +16,7 @@
 #define SELECT_INDEX -101
 #define RETURN_INDEX -202
 
+class UUINavHorizontalComponent;
 enum class EButtonStyle : uint8;
 
 /**
@@ -301,7 +302,7 @@ public:
 	/**
 	*	Traverses this widget's hierarchy to setup all the UIUINavButtons
 	*/
-	static void TraverseHierarquy(UUINavWidget* UINavWidget, UUserWidget* WidgetToTraverse);
+	static void TraverseHierarchy(UUINavWidget* UINavWidget, UUserWidget* WidgetToTraverse);
 
 	static void SearchForUINavElements(UUINavWidget* UINavWidget, UUserWidget* WidgetToTraverse, UWidget* Widget, UUINavCollection* TraversingCollection, const int GridDepth);
 
