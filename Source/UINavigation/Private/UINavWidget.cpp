@@ -2574,7 +2574,7 @@ void UUINavWidget::OnPreSelect(const int Index, const bool bMouseClick)
 			OnStopSelect(Index);
 			CollectionOnStopSelect(Index);
 
-			if (!bMouseClick)
+			if (!bMouseClick && CurrentButton != nullptr)
 			{
 				bIgnoreMouseEvent = true;
 				CurrentButton->OnReleased.Broadcast();
