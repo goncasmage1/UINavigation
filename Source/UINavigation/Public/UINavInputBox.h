@@ -15,6 +15,7 @@
 class UUINavInputComponent;
 class UInputAction;
 class UInputMappingContext;
+class UInputSettings;
 
 /**
 * This class contains the logic for rebinding input keys to their respective actions
@@ -38,9 +39,11 @@ protected:
 	void UpdateKeyDisplay(const int Index);
 	FKey GetKeyFromAxis(FKey AxisKey) const;
 	void ProcessInputName();
-	int GetNumValidKeys() const;
+	int GetNumValidKeys(const int Index) const;
 
-	void GetActionMappingsForAction(const UInputAction* Action, const EInputAxis& Axis, TArray<int32>& OutMappingIndices);
+	void GetEnhancedMappingsForAction(const UInputAction* Action, const EInputAxis& Axis, const int Index, TArray<int32>& OutMappingIndices);
+	void GetMappingsForAction(const UInputSettings* const Settings, const FName ActionName, const int Index, TArray<int32>& OutMappingIndices);
+	void GetMappingsForAxis(const UInputSettings* const Settings, const FName AxisName, const bool bPositive, const int Index, TArray<int32>& OutMappingIndices);
 
 public:
 
@@ -53,11 +56,13 @@ public:
 	void ResetKeyWidgets();
 	void UpdateInputKey(const FKey NewKey, const int Index, const bool bSkipChecks = false);
 	void FinishUpdateNewKey();
-	void FinishUpdateNewEnhancedInputKey(FKey NewKey, int Index);
-	void FinishUpdateNewInputKey(FKey NewKey, int Index);
-	void TryMapAxisKey(const FKey& NewKey, const FKey& ActionMappingKey, const int32 Index);
-	void TryMap2DAxisKey(const FKey& NewMappingKey);
-	void UnmapAxisKey(const FKey& NewAxisKey, const FKey& OldAxisKey, const FKey& NewKey, const FKey& ActionMappingKey, const int32 Index);
+	void FinishUpdateNewEnhancedInputKey(const FKey PressedKey, int Index);
+	void FinishUpdateNewInputKey(const FKey PressedKey, int Index);
+	void TryMapEnhancedAxisKey(const FKey& NewKey, const int32 Index);
+	void TryMapInputAxisKey(UInputSettings* Settings, const FKey& NewKey, const int32 Index);
+	void TryMap2DAxisKey(const FKey& NewMappingKey, const int Index);
+	void UnmapEnhancedAxisKey(const FKey& NewAxisKey, const FKey& OldAxisKey, const FKey& NewKey, const int32 Index);
+	void UnmapInputAxisKey(UInputSettings* Settings, const FKey& NewAxisKey, const FKey& OldAxisKey, const FInputAxisKeyMapping& AxisMapping, const int32 Index);
 	void AddRelevantModifiers(const FInputContainerEnhancedActionData& ActionData, FEnhancedActionKeyMapping& Mapping);
 	void CancelUpdateInputKey(const ERevertRebindReason Reason);
 	void RevertToKeyText(const int Index);

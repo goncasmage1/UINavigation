@@ -193,6 +193,7 @@ ERevertRebindReason UUINavInputContainer::CanRegisterKey(const UUINavInputBox * 
 	if (KeyWhitelist.Num() > 0 && !KeyWhitelist.Contains(NewKey)) return ERevertRebindReason::NonWhitelistedKey;
 	if (KeyBlacklist.Contains(NewKey)) return ERevertRebindReason::BlacklistedKey;
 	if (!RespectsRestriction(NewKey, Index)) return ERevertRebindReason::RestrictionMismatch;
+	if (InputBox->ContainsKey(NewKey) != INDEX_NONE) return ERevertRebindReason::UsedBySameInput;
 	if (!CanUseKey(InputBox, NewKey, OutCollidingActionIndex, OutCollidingKeyIndex)) return ERevertRebindReason::UsedBySameInputGroup;
 
 	return ERevertRebindReason::None;
