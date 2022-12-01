@@ -262,8 +262,8 @@ UUINavInputBox* UUINavInputContainer::GetOppositeInputBox(const FInputContainerE
 	{
 		if (InputBox->InputActionData.Action == ActionData.Action &&
 			InputBox->InputActionData.Axis == ActionData.Axis &&
-			(InputBox->InputActionData.AxisScale == EAxisType::Positive && ActionData.AxisScale == EAxisType::Negative ||
-			InputBox->InputActionData.AxisScale == EAxisType::Negative && ActionData.AxisScale == EAxisType::Positive))
+			((InputBox->InputActionData.AxisScale == EAxisType::Positive && ActionData.AxisScale == EAxisType::Negative) ||
+			(InputBox->InputActionData.AxisScale == EAxisType::Negative && ActionData.AxisScale == EAxisType::Positive)))
 		{
 			return InputBox;
 		}
@@ -277,8 +277,8 @@ UUINavInputBox* UUINavInputContainer::GetOppositeInputBox(const FName& InputName
 	for (UUINavInputBox* InputBox : ParentWidget->UINavInputBoxes)
 	{
 		if (InputBox->InputName == InputName &&
-			(InputBox->AxisType == EAxisType::Positive && AxisType == EAxisType::Negative ||
-			InputBox->AxisType == EAxisType::Negative && AxisType == EAxisType::Positive))
+			((InputBox->AxisType == EAxisType::Positive && AxisType == EAxisType::Negative) ||
+			(InputBox->AxisType == EAxisType::Negative && AxisType == EAxisType::Positive)))
 		{
 			return InputBox;
 		}
