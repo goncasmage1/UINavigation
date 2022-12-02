@@ -43,10 +43,10 @@ void UUINavSlider::NativeConstruct()
 
 	Difference = MaxValue - MinValue;
 	Slider->IsFocusable = false;
-	Slider->StepSize = Interval / Difference;
+	Slider->SetStepSize(Interval / Difference);
 
-	HandleDefaultColor = Slider->SliderHandleColor;
-	BarDefaultColor = Slider->SliderBarColor;
+	HandleDefaultColor = Slider->GetSliderHandleColor();
+	BarDefaultColor = Slider->GetSliderBarColor();
 
 	Update();
 }
@@ -60,7 +60,7 @@ void UUINavSlider::Update()
 	FormatOptions.MaximumFractionalDigits = MaxDecimalDigits;
 	FormatOptions.MinimumFractionalDigits = MinDecimalDigits;
 
-	const float Value = MinValue + Slider->Value * Difference;
+	const float Value = MinValue + Slider->GetValue() * Difference;
 	FText ValueText = FText::AsNumber(Value, &FormatOptions);
 	if (!bUseComma) ValueText = FText::FromString(ValueText.ToString().Replace(TEXT(","),TEXT(".")));
 
@@ -149,7 +149,7 @@ void UUINavSlider::HandleOnSpinBoxValueChanged(float InValue, ETextCommit::Type 
 
 float UUINavSlider::IndexFromPercent(const float Value)
 {
-	float Div = Value / Slider->StepSize;
+	float Div = Value / Slider->GetStepSize();
 	const int MaxOptionIndex = GetMaxOptionIndex();
 	if (Div > MaxOptionIndex) Div = MaxOptionIndex;
 

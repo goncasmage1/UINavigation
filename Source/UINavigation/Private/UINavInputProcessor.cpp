@@ -57,6 +57,16 @@ bool FUINavInputProcessor::HandleMouseButtonDownEvent(FSlateApplication& SlateAp
 	return IInputProcessor::HandleMouseButtonDownEvent(SlateApp, MouseEvent);
 }
 
+bool FUINavInputProcessor::HandleMouseButtonUpEvent(FSlateApplication& SlateApp, const FPointerEvent& MouseEvent)
+{
+	if (UINavPC != nullptr)
+	{
+		UINavPC->HandleMouseButtonUpEvent(SlateApp, MouseEvent);
+	}
+
+	return IInputProcessor::HandleMouseButtonUpEvent(SlateApp, MouseEvent);
+}
+
 bool FUINavInputProcessor::HandleMouseWheelOrGestureEvent(FSlateApplication& SlateApp, const FPointerEvent& InWheelEvent, const FPointerEvent* InGesture)
 {
 	if (UINavPC != nullptr)
