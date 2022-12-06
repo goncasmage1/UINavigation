@@ -1043,6 +1043,7 @@ void UUINavWidget::DeleteUINavElement(const int Index, const bool bAutoNavigate)
 		ButtonIndex = CurrentButton->ButtonIndex;
 	}
 
+	NumberOfButtonsInGrids--;
 	UUINavButton* Button = UINavButtons[Index];
 	DecrementGrid(NavigationGrids[Button->GridIndex], Button->IndexInGrid);
 
@@ -1329,6 +1330,8 @@ void UUINavWidget::ClearGrid(const int GridIndex, const bool bAutoNavigate)
 	const int FirstIndex = Grid.FirstButton->ButtonIndex;
 	const int LastIndex = FirstIndex + Grid.GetDimension() - 1;
 	const int Difference = LastIndex - FirstIndex + 1;
+
+	NumberOfButtonsInGrids -= Grid.GetDimension();
 
 	const bool bShouldNavigate = bAutoNavigate && ButtonIndex >= FirstIndex && ButtonIndex <= LastIndex;
 	if (bShouldNavigate)
