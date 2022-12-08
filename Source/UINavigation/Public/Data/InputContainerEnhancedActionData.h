@@ -2,6 +2,7 @@
 
 #pragma once
 #include "InputAction.h"
+#include "Data/AxisType.h"
 #include "InputContainerEnhancedActionData.generated.h"
 
 UENUM(BlueprintType, meta = (ScriptName = "UINavAxis"))
