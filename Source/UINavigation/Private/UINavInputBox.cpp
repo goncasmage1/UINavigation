@@ -330,7 +330,8 @@ void UUINavInputBox::FinishUpdateNewEnhancedInputKey(const FKey PressedKey, cons
 			if (InputActionData.Axis == Axis)
 			{
 				const FKey& MappingKey = GetKeyFromAxis(ActionMapping.Key);
-				if (Container->RespectsRestriction(NewKey, Index))
+				if (Container->RespectsRestriction(NewKey, Index) &&
+					Container->RespectsRestriction(MappingKey, Index))
 				{
 					if (MappingKey == Keys[Index])
 					{
@@ -466,9 +467,10 @@ void UUINavInputBox::FinishUpdateNewInputKey(const FKey PressedKey, const int In
 		if ((IS_AXIS && Axes[i].AxisName.IsEqual(InputName)) ||
 			(!IS_AXIS && Actions[i].ActionName.IsEqual(InputName)))
 		{
-			if (Container->RespectsRestriction(NewKey, Index))
+			const FKey MappingKey = IS_AXIS ? GetKeyFromAxis(Axes[i].Key) : Actions[i].Key;
+			if (Container->RespectsRestriction(NewKey, Index) &&
+				Container->RespectsRestriction(MappingKey, Index))
 			{
-				const FKey MappingKey = IS_AXIS ? GetKeyFromAxis(Axes[i].Key) : Actions[i].Key;
 				if (MappingKey == Keys[Index])
 				{
 					if (IS_AXIS)
