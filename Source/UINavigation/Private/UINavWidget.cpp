@@ -367,8 +367,12 @@ void UUINavWidget::TraverseHierarchy(UUINavWidget* UINavWidget, UUserWidget* Wid
 		{
 			Collection->ParentWidget = UINavWidget;
 			Collection->ParentCollection = Cast<UUINavCollection>(WidgetToTraverse);
-			Collection->Init(UINavWidget->UINavButtons.Num());
 			UINavWidget->UINavCollections.Add(Collection);
+			if (TraversingCollection != nullptr)
+			{
+				TraversingCollection->UINavCollections.Add(Collection);
+			}
+			Collection->Init(UINavWidget->UINavButtons.Num());
 			continue;
 		}
 
