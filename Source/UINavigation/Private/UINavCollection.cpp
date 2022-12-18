@@ -5,6 +5,45 @@
 #include "UINavWidget.h"
 #include "UINavMacros.h"
 
+void UUINavCollection::NativeConstruct()
+{
+	Super::NativeConstruct();
+
+	BeginDynamicSetup();
+}
+
+void UUINavCollection::BeginDynamicSetup()
+{
+	if (ParentWidget == nullptr)
+	{
+		ParentWidget = UUINavWidget::GetOuterUINavWidget(this);
+	}
+
+	if (ParentWidget == nullptr || !ParentWidget->bSetupStarted)
+	{
+		return;
+	}
+
+	Init(ParentWidget->UINavButtons.Num());
+	if (!ParentWidget->bAutoAppended)
+	{
+		const TArray<FButtonNavigation> EdgeNavigations;
+		SetupNavigation(EdgeNavigations);
+	}
+
+	if (ParentWidget->NumberOfButtonsInGrids != ParentWidget->UINavButtons.Num())
+	{
+		DISPLAYERROR("Not all UINavButtons have a grid setup. Double check the Append Navigation functions.");
+		return;
+	}
+
+	if (ParentWidget->UINavAnimations.Num() > 0 && ParentWidget->UINavAnimations.Num() != ParentWidget->UINavButtons.Num())
+	{
+		DISPLAYERROR("Number of animations doesn't match number of UINavButtons.");
+		return;
+	}
+}
+
 void UUINavCollection::SetupNavigation_Implementation(const TArray<FButtonNavigation>& EdgeNavigations)
 {
 }
@@ -115,14 +154,26 @@ void UUINavCollection::CallCustomInput(const FName ActionName, uint8* Buffer)
 
 void UUINavCollection::AppendNavigationGrid1D(const EGridType GridType, const int Dimension, const FButtonNavigation EdgeNavigation, const bool bWrap)
 {
+	const int OldGridsNum = ParentWidget->NavigationGrids.Num();
 	ParentWidget->AppendNavigationGrid1D(GridType, Dimension, EdgeNavigation, bWrap);
-	IncrementGrids(Dimension);
+	const int NewGridsNum = ParentWidget->NavigationGrids.Num();
+
+	if (OldGridsNum != NewGridsNum)
+	{
+		IncrementGrids(Dimension);
+	}
 }
 
 void UUINavCollection::AppendNavigationGrid2D(const int DimensionX, const int DimensionY, const FButtonNavigation EdgeNavigation, const bool bWrap, const int ButtonsInGrid)
 {
+	const int OldGridsNum = ParentWidget->NavigationGrids.Num();
 	ParentWidget->AppendNavigationGrid2D(DimensionX, DimensionY, EdgeNavigation, bWrap, ButtonsInGrid);
-	IncrementGrids((ButtonsInGrid == -1 ? (DimensionX * DimensionY) : ButtonsInGrid));
+	const int NewGridsNum = ParentWidget->NavigationGrids.Num();
+
+	if (OldGridsNum != NewGridsNum)
+	{
+		IncrementGrids((ButtonsInGrid == -1 ? (DimensionX * DimensionY) : ButtonsInGrid));
+	}
 }
 
 void UUINavCollection::AppendCollection(const TArray<FButtonNavigation> EdgeNavigations)
@@ -162,6 +213,14 @@ void UUINavCollection::UpdateCollectionLastIndex(const int GridIndex, const bool
 		}
 	}
 	LastButtonIndex--;
+}
+
+void UUINavCollection::SetParentWidget(UUINavWidget* NewParentWidget)
+{
+	if (ParentWidget == nullptr)
+	{
+		ParentWidget = NewParentWidget;
+	}
 }
 
 void UUINavCollection::SetEdgeNavigation(const int GridIndex, const FButtonNavigation NewEdgeNavigation)

@@ -16,6 +16,10 @@ class UINAVIGATION_API UUINavCollection : public UUserWidget
 
 public:
 
+	virtual void NativeConstruct() override;
+
+	void BeginDynamicSetup();
+
 	UFUNCTION(BlueprintNativeEvent, Category = UINavCollection)
 	void SetupNavigation(const TArray<FButtonNavigation>& EdgeNavigations);
 
@@ -117,6 +121,9 @@ public:
 	
 	void UpdateCollectionLastIndex(const int GridIndex, const bool bAdded);
 
+	UFUNCTION(BlueprintCallable, Category = UINavCollection)
+	void SetParentWidget(UUINavWidget* NewParentWidget);
+	
 	UFUNCTION(BlueprintCallable, Category = UINavCollection)
 	void SetEdgeNavigation(const int GridIndex, const FButtonNavigation NewEdgeNavigation);
 
