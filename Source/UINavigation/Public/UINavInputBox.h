@@ -16,6 +16,7 @@ class UUINavInputComponent;
 class UInputAction;
 class UInputMappingContext;
 class UInputSettings;
+struct FInputAxisKeyMapping;
 
 /**
 * This class contains the logic for rebinding input keys to their respective actions
