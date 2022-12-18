@@ -30,9 +30,6 @@ class UINAVIGATION_API UUINavWidget : public UUserWidget
 
 protected:
 
-	bool bCompletedSetup = false;
-	bool bSetupStarted = false;
-
 	bool bMovingSelector = false;
 	bool bIgnoreMouseEvent = false;
 	bool bReturning = false;
@@ -47,7 +44,6 @@ protected:
 
 	bool bReturningToParent = false;
 
-	bool bAutoAppended = false;
 	bool bDestroying = false;
 	bool bHasNavigation = false;
 	bool bForcingNavigation = true;
@@ -67,7 +63,6 @@ protected:
 	uint8 SelectCount = 0;
 
 	int InputBoxIndex = -1;
-	int NumberOfButtonsInGrids = 0;
 
 	float MovementCounter;
 	float MovementTime;
@@ -270,6 +265,13 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = UINavWidget)
 	bool bForceUsePlayerScreen = false;
 
+	int NumberOfButtonsInGrids = 0;
+
+	bool bCompletedSetup = false;
+	bool bSetupStarted = false;
+
+	bool bAutoAppended = false;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UINavigation Selector")
 	UCurveFloat* MoveCurve=nullptr;
 
@@ -302,6 +304,8 @@ public:
 	*	Traverses this widget's hierarchy to setup all the UIUINavButtons
 	*/
 	static void TraverseHierarchy(UUINavWidget* UINavWidget, UUserWidget* WidgetToTraverse);
+
+	static bool WidgetHasUINPrefix(const UWidget* Widget);
 
 	static void SearchForUINavElements(UUINavWidget* UINavWidget, UUserWidget* WidgetToTraverse, UWidget* Widget, UUINavCollection* TraversingCollection, const int GridDepth);
 
@@ -385,6 +389,12 @@ public:
 	*/
 	UFUNCTION(BlueprintCallable, Category = UINavWidget, meta = (AutoCreateRefTerm = "EdgeNavigations"))
 	void AppendCollection(const TArray<FButtonNavigation>& EdgeNavigations);
+
+	/**
+	*	Deletes the navigation grid with the given index.
+	*/
+	UFUNCTION(BlueprintCallable, Category = UINavWidget)
+	void DeleteGrid(const int GridIndex);
 
 	/**
 	*	Replaces the edge navigation of the grid at the specified index with the given edge navigation
@@ -688,6 +698,8 @@ public:
 	virtual void OnHorizCompUpdated_Implementation(const int Index);
 
 	virtual void MenuNavigate(const ENavigationDirection Direction);
+
+	static UUINavWidget* GetOuterUINavWidget(const UObject* const Object);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
 	UUINavWidget* GetMostOuterUINavWidget();

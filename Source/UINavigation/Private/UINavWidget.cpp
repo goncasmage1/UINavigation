@@ -89,10 +89,10 @@ void UUINavWidget::NativeConstruct()
 		ReturnedFromWidget = nullptr;
 	}
 
+	Super::NativeConstruct();
+
 	PreSetup(!bCompletedSetup);
 	InitialSetup();
-
-	Super::NativeConstruct();
 }
 
 void UUINavWidget::InitialSetup(const bool bRebuilding)
@@ -277,7 +277,7 @@ void UUINavWidget::TraverseHierarchy(UUINavWidget* UINavWidget, UUserWidget* Wid
 			if (ScrollBox != nullptr)
 			{
 				UINavWidget->ScrollBoxes.Add(ScrollBox);
-				if (ScrollBox->GetFName().ToString().Left(4).Equals(TEXT("UIN_")))
+				if (WidgetHasUINPrefix(ScrollBox))
 				{
 					if (!UINavWidget->bAutoAppended) UINavWidget->bAutoAppended = true;
 					const bool bIsHorizontal = ScrollBox->Orientation == EOrientation::Orient_Horizontal;
@@ -296,59 +296,50 @@ void UUINavWidget::TraverseHierarchy(UUINavWidget* UINavWidget, UUserWidget* Wid
 			}
 			
 			UHorizontalBox * HorizontalBox = Cast<UHorizontalBox>(Panel);
-			if (HorizontalBox != nullptr)
+			if (HorizontalBox != nullptr && WidgetHasUINPrefix(HorizontalBox))
 			{
-				if (HorizontalBox->GetFName().ToString().Left(4).Equals(TEXT("UIN_")))
+				if (!UINavWidget->bAutoAppended) UINavWidget->bAutoAppended = true;
+				UINavWidget->GridIndexMap.Add(HorizontalBox, UINavWidget->NavigationGrids.Num());
+				GridDepth = UINavWidget->GetWidgetHierarchyDepth(HorizontalBox);
+				UINavWidget->Add1DGrid(EGridType::Horizontal, nullptr, UINavWidget->NavigationGrids.Num(), 0, FButtonNavigation(), true);
+				if (TraversingCollection != nullptr)
 				{
-					if (!UINavWidget->bAutoAppended) UINavWidget->bAutoAppended = true;
-					UINavWidget->GridIndexMap.Add(HorizontalBox, UINavWidget->NavigationGrids.Num());
-					GridDepth = UINavWidget->GetWidgetHierarchyDepth(HorizontalBox);
-					UINavWidget->Add1DGrid(EGridType::Horizontal, nullptr, UINavWidget->NavigationGrids.Num(), 0, FButtonNavigation(), true);
-					if (TraversingCollection != nullptr)
-					{
-						TraversingCollection->IncrementGridCount();
-					}
+					TraversingCollection->IncrementGridCount();
 				}
 			}
 			else
 			{
 				UVerticalBox* VerticalBox = Cast<UVerticalBox>(Panel);
-				if (VerticalBox != nullptr)
+				if (VerticalBox != nullptr && WidgetHasUINPrefix(VerticalBox))
 				{
-					if (VerticalBox->GetFName().ToString().Left(4).Equals(TEXT("UIN_")))
+					if (!UINavWidget->bAutoAppended) UINavWidget->bAutoAppended = true;
+					UINavWidget->GridIndexMap.Add(VerticalBox, UINavWidget->NavigationGrids.Num());
+					GridDepth = UINavWidget->GetWidgetHierarchyDepth(VerticalBox);
+					UINavWidget->Add1DGrid(EGridType::Vertical, nullptr, UINavWidget->NavigationGrids.Num(), 0, FButtonNavigation(), true);
+					if (TraversingCollection != nullptr)
 					{
-						if (!UINavWidget->bAutoAppended) UINavWidget->bAutoAppended = true;
-						UINavWidget->GridIndexMap.Add(VerticalBox, UINavWidget->NavigationGrids.Num());
-						GridDepth = UINavWidget->GetWidgetHierarchyDepth(VerticalBox);
-						UINavWidget->Add1DGrid(EGridType::Vertical, nullptr, UINavWidget->NavigationGrids.Num(), 0, FButtonNavigation(), true);
-						if (TraversingCollection != nullptr)
-						{
-							TraversingCollection->IncrementGridCount();
-						}
+						TraversingCollection->IncrementGridCount();
 					}
 				}
 				else
 				{
 					UUniformGridPanel* GridPanel = Cast<UUniformGridPanel>(Panel);
-					if (GridPanel != nullptr)
+					if (GridPanel != nullptr && WidgetHasUINPrefix(GridPanel))
 					{
-						if (GridPanel->GetFName().ToString().Left(4).Equals(TEXT("UIN_")))
+						if (!UINavWidget->bAutoAppended) UINavWidget->bAutoAppended = true;
+						UINavWidget->GridIndexMap.Add(GridPanel, UINavWidget->NavigationGrids.Num());
+						GridDepth = UINavWidget->GetWidgetHierarchyDepth(GridPanel);
+						UINavWidget->NavigationGrids.Add(FGrid(EGridType::Grid2D,
+													nullptr,
+													UINavWidget->NavigationGrids.Num(),
+													0,
+													0,
+													FButtonNavigation(),
+													true,
+													0));
+						if (TraversingCollection != nullptr)
 						{
-							if (!UINavWidget->bAutoAppended) UINavWidget->bAutoAppended = true;
-							UINavWidget->GridIndexMap.Add(GridPanel, UINavWidget->NavigationGrids.Num());
-							GridDepth = UINavWidget->GetWidgetHierarchyDepth(GridPanel);
-							UINavWidget->NavigationGrids.Add(FGrid(EGridType::Grid2D,
-														nullptr,
-														UINavWidget->NavigationGrids.Num(),
-														0,
-														0,
-														FButtonNavigation(),
-														true,
-														0));
-							if (TraversingCollection != nullptr)
-							{
-								TraversingCollection->IncrementGridCount();
-							}
+							TraversingCollection->IncrementGridCount();
 						}
 					}
 				}
@@ -430,11 +421,16 @@ void UUINavWidget::TraverseHierarchy(UUINavWidget* UINavWidget, UUserWidget* Wid
 			});
 	}
 
-	if (UINavWidget->bAutoAppended && TraversingCollection != nullptr)
+	if (TraversingCollection != nullptr && (UINavWidget->bAutoAppended || WidgetHasUINPrefix(TraversingCollection)))
 	{
 		const TArray<FButtonNavigation> EdgeNavigations;
 		TraversingCollection->SetupNavigation(EdgeNavigations);
 	}
+}
+
+bool UUINavWidget::WidgetHasUINPrefix(const UWidget* Widget)
+{
+	return Widget->GetFName().ToString().Left(4).Equals(TEXT("UIN_"));
 }
 
 void UUINavWidget::SearchForUINavElements(UUINavWidget* UINavWidget, UUserWidget* WidgetToTraverse, UWidget* Widget, UUINavCollection* TraversingCollection, const int GridDepth)
@@ -930,7 +926,7 @@ void UUINavWidget::HandleSelectorMovement(const float DeltaTime)
 
 void UUINavWidget::AddUINavButton(UUINavButton* NewButton, const int TargetGridIndex, int IndexInGrid)
 {
-	if (!IsValid(NewButton) || !NavigationGrids.IsValidIndex(TargetGridIndex)) return;
+	if (!IsValid(NewButton) || !NavigationGrids.IsValidIndex(TargetGridIndex) || !bSetupStarted) return;
 
 	if (UINavAnimations.Num() > 0)
 	{
@@ -963,7 +959,8 @@ void UUINavWidget::AddUINavButton(UUINavButton* NewButton, const int TargetGridI
 
 void UUINavWidget::AddUINavButtons(TArray<UUINavButton*> NewButtons, const int TargetGridIndex, int IndexInGrid)
 {
-	if (!NavigationGrids.IsValidIndex(TargetGridIndex)) return;
+	if (!NavigationGrids.IsValidIndex(TargetGridIndex) || !bSetupStarted) return;
+
 	if (UINavAnimations.Num() > 0)
 	{
 		DISPLAYERROR("Runtime manipulation not supported with navigation using animations.");
@@ -986,7 +983,7 @@ void UUINavWidget::AddUINavComponent(UUINavComponent * NewComponent, const int T
 
 void UUINavWidget::AddUINavComponents(TArray<UUINavComponent*> NewComponents, const int TargetGridIndex, int IndexInGrid)
 {
-	if (!NavigationGrids.IsValidIndex(TargetGridIndex)) return;
+	if (!NavigationGrids.IsValidIndex(TargetGridIndex) || !bSetupStarted) return;
 	if (UINavAnimations.Num() > 0)
 	{
 		DISPLAYERROR("Runtime manipulation not supported with navigation using animations.");
@@ -1801,6 +1798,35 @@ void UUINavWidget::AppendCollection(const TArray<FButtonNavigation>& EdgeNavigat
 	}
 
 	CollectionIndex++;
+}
+
+void UUINavWidget::DeleteGrid(const int GridIndex)
+{
+	if (!NavigationGrids.IsValidIndex(GridIndex)) return;
+
+	const int NumRemainingGrids = NavigationGrids.Num() - (GridIndex + 1);
+
+	if (NumRemainingGrids > 0)
+	{
+		int NextGridIndex = GridIndex + 1;
+		while (NavigationGrids.IsValidIndex(NextGridIndex))
+		{
+			if (NavigationGrids[NextGridIndex].FirstButton != nullptr)
+			{
+				int NextButtonIndex = NavigationGrids[NextGridIndex].FirstButton->ButtonIndex;
+				while (UINavButtons.IsValidIndex(NextButtonIndex))
+				{
+					UINavButtons[NextButtonIndex++]->GridIndex--;
+				}
+
+				break;
+			}
+
+			++NextGridIndex;
+		}
+	}
+
+	NavigationGrids.RemoveAt(GridIndex);
 }
 
 void UUINavWidget::SetEdgeNavigation(const int GridIndex, const FButtonNavigation NewEdgeNavigation)
@@ -2853,6 +2879,23 @@ void UUINavWidget::MenuNavigate(const ENavigationDirection Direction)
 	UUINavButton* NewButton = FindNextButton(CurrentButton, Direction);
 	if (NewButton == nullptr) return;
 	NavigateTo(NewButton->ButtonIndex);
+}
+
+UUINavWidget* UUINavWidget::GetOuterUINavWidget(const UObject* const Object)
+{
+	UObject* OuterObject = Object->GetOuter();
+	if (OuterObject == nullptr)
+	{
+		return nullptr;
+	}
+
+	UUINavWidget* OuterUINavWidget = Cast<UUINavWidget>(OuterObject);
+	if (OuterUINavWidget != nullptr)
+	{
+		return OuterUINavWidget;
+	}
+
+	return GetOuterUINavWidget(OuterObject);
 }
 
 UUINavWidget* UUINavWidget::GetMostOuterUINavWidget()
