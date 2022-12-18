@@ -1,7 +1,8 @@
-// Copyright (C) 2019 Gon�alo Marques - All Rights Reserved
+// Copyright (C) 2019 Gonçalo Marques - All Rights Reserved
 
 #pragma once
 #include "InputAction.h"
+#include "Data/AxisType.h"
 #include "InputContainerEnhancedActionData.generated.h"
 
 UENUM(BlueprintType, meta = (ScriptName = "UINavAxis"))
@@ -21,10 +22,15 @@ struct FInputContainerEnhancedActionData
 	FText DisplayName;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = EnhancedInput)
-	UInputAction* Action;
+	UInputAction* Action = nullptr;
 
+	/*
+	Specifies whether you want this input to be treated as a normal axis or as a positive / negative axis.
+	(Only applies to Input Actions with a ValueType different than Boolean).
+	If you set it to a value different than none, you should always have a 2nd box with the opposite value.
+	*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = EnhancedInput)
-	bool bPositive = true;
+	EAxisType AxisScale = EAxisType::None;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = EnhancedInput)
 	EInputAxis Axis = EInputAxis::X;

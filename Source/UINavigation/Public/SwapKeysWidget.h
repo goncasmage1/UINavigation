@@ -1,4 +1,4 @@
-﻿// Copyright (C) 2019 Gon�alo Marques - All Rights Reserved
+﻿// Copyright (C) 2019 Gonçalo Marques - All Rights Reserved
 
 #pragma once
 
@@ -19,12 +19,13 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = SwapKeysWidget)
 	void NotifySwapResult(const int Index);
-
-
+	
 	UPROPERTY(BlueprintReadOnly, Category = SwapKeysWidget)
 	FInputCollisionData InputCollisionData;
 
-	class UUINavInputBox* CurrentInputBox;
-	class UUINavInputBox* CollidingInputBox;
+	UPROPERTY()
+	class UUINavInputBox* CurrentInputBox = nullptr;
 	
+	UPROPERTY()
+	class UUINavInputBox* CollidingInputBox = nullptr;
 };

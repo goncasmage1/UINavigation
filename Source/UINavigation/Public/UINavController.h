@@ -1,4 +1,4 @@
-// Copyright (C) 2019 Gon�alo Marques - All Rights Reserved
+// Copyright (C) 2019 Gonçalo Marques - All Rights Reserved
 
 #pragma once
 
@@ -23,7 +23,7 @@ class UINAVIGATION_API AUINavController : public APlayerController, public IUINa
 protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = UINavController)
-		class UUINavPCComponent* UINavPCComp;
+	class UUINavPCComponent* UINavPCComp = nullptr;
 
 public:
 

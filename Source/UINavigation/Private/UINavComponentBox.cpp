@@ -1,4 +1,4 @@
-// Copyright (C) 2019 Gonçalo Marques - All Rights Reserved
+// Copyright (C) 2019 GonÃ§alo Marques - All Rights Reserved
 
 #include "UINavComponentBox.h"
 #include "UINavMacros.h"
@@ -10,7 +10,7 @@ void UUINavComponentBox::NativeConstruct()
 	BaseConstruct();
 
 	if (!LeftButton->OnClicked.IsBound())
-		LeftButton->OnClicked.AddDynamic(this, &UUINavComponentBox::NavigateLeft);
+		LeftButton->OnClicked.AddDynamic(this, &UUINavComponentBox::NavigateLeft);	
 	if (!RightButton->OnClicked.IsBound())
 		RightButton->OnClicked.AddDynamic(this, &UUINavComponentBox::NavigateRight);
 }

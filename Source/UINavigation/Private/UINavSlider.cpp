@@ -1,4 +1,4 @@
-// Copyright (C) 2019 Gon�alo Marques - All Rights Reserved
+// Copyright (C) 2019 Gonçalo Marques - All Rights Reserved
 
 #include "UINavSlider.h"
 #include "UINavMacros.h"
@@ -55,7 +55,7 @@ void UUINavSlider::Update()
 {
 	Super::Update();
 
-	Slider->SetValue((float)OptionIndex / (float)GetMaxOptionIndex());
+	Slider->SetValue(static_cast<float>(OptionIndex) / static_cast<float>(GetMaxOptionIndex()));
 	FNumberFormattingOptions FormatOptions = FNumberFormattingOptions();
 	FormatOptions.MaximumFractionalDigits = MaxDecimalDigits;
 	FormatOptions.MinimumFractionalDigits = MinDecimalDigits;

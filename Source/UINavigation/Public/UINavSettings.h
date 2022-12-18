@@ -1,4 +1,4 @@
-﻿// Copyright (C) 2019 Gon�alo Marques - All Rights Reserved
+﻿// Copyright (C) 2019 Gonçalo Marques - All Rights Reserved
 
 #pragma once
 
@@ -26,24 +26,24 @@ class UINAVIGATION_API UUINavSettings : public UObject
 public:
 
 	UPROPERTY(config, EditAnywhere, Category = "Settings")
-		bool bIgnoreDisabledUINavButton;
+	bool bIgnoreDisabledUINavButton;
 	
 	UPROPERTY(config, EditAnywhere, Category = "Settings")
-		bool bRemoveWidgetOnReturn;
+	bool bRemoveWidgetOnReturn;
 
 	UPROPERTY(config, EditAnywhere, Category = "Bindings")
-		TAssetPtr<UInputMappingContext> EnhancedInputContext;
+	TSoftObjectPtr<UInputMappingContext> EnhancedInputContext;
 
 	UPROPERTY(config, EditAnywhere, Category = "Bindings")
-		TAssetPtr<UUINavEnhancedInputActions> EnhancedInputActions;
+	TSoftObjectPtr<UUINavEnhancedInputActions> EnhancedInputActions;
 
 	UPROPERTY(config)
-		TArray<struct FInputActionKeyMapping> ActionMappings;
+	TArray<struct FInputActionKeyMapping> ActionMappings;
 
 	UPROPERTY(config)
-		TArray<struct FInputAxisKeyMapping> AxisMappings;
+	TArray<struct FInputAxisKeyMapping> AxisMappings;
 
 	// A map for each Input Context in your game and its respective Default Input Context Mappings
 	UPROPERTY(config, EditAnywhere, Category = "Bindings")
-		TMap<TAssetPtr<UInputMappingContext>, TAssetPtr<UInputMappingContext>> DefaultInputContexts;
+	TMap<TSoftObjectPtr<UInputMappingContext>, TSoftObjectPtr<UInputMappingContext>> DefaultInputContexts;
 };

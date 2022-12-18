@@ -1,4 +1,4 @@
-// Copyright (C) 2019 Gonçalo Marques - All Rights Reserved
+// Copyright (C) 2019 GonÃ§alo Marques - All Rights Reserved
 
 #pragma once
 
@@ -16,9 +16,10 @@ class UINAVIGATION_API UUINavComponentBox : public UUINavHorizontalComponent
 protected:
 
 	UPROPERTY(BlueprintReadWrite, Category = UINavComponentBox, meta = (BindWidget))
-		class UButton* LeftButton;
+	class UButton* LeftButton = nullptr;
+	
 	UPROPERTY(BlueprintReadWrite, Category = UINavComponentBox, meta = (BindWidget))
-		class UButton* RightButton;
+	class UButton* RightButton = nullptr;
 
 	virtual void CheckLeftLimit();
 	virtual void CheckRightLimit();
@@ -32,21 +33,21 @@ public:
 	void BaseConstruct();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavComponentBox)
-		int MinRange = 0;
+	int MinRange = 0;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavComponentBox)
-		int MaxRange = 1;
+	int MaxRange = 1;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavComponentBox, meta = (ClampMin="1"))
-		int Interval = 1;
+	int Interval = 1;
 
 	//If set to true, will disable buttons if the slider runs out of options on either side
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavComponentBox)
-		bool bDisableButtons = true;
+	bool bDisableButtons = true;
 
 	//Returns the currently selected number resulting from the number range
 	UFUNCTION(BlueprintPure, BlueprintCallable, Category = UINavComponentBox)
-		FORCEINLINE int GetCurrentNumber() const { return (MinRange + OptionIndex * Interval); }
+	FORCEINLINE int GetCurrentNumber() const { return (MinRange + OptionIndex * Interval); }
 
 	virtual void NavigateLeft() override;
 	virtual void NavigateRight() override;

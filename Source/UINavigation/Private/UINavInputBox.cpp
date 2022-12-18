@@ -1,4 +1,4 @@
-﻿// Copyright (C) 2019 Gon�alo Marques - All Rights Reserved
+﻿// Copyright (C) 2019 Gonçalo Marques - All Rights Reserved
 
 #include "UINavInputBox.h"
 #include "UINavInputComponent.h"
@@ -62,15 +62,20 @@ void UUINavInputBox::CreateEnhancedInputKeyWidgets()
 				}
 
 				bool bPositive;
-				EInputAxis Axis;
+				EInputAxis Axis = InputActionData.Axis;
 				Container->GetAxisPropertiesFromMapping(ActionMapping, bPositive, Axis);
+				TArray<int32> MappingsForAction;
+				GetEnhancedMappingsForAction(ActionMapping.Action, InputActionData.Axis, j, MappingsForAction);
+				UUINavInputBox* OppositeInputBox = Container->GetOppositeInputBox(InputActionData);
+				FKey NewKey = ActionMapping.Key;
 
-				if (InputActionData.Axis == Axis && (Container->UINavPC->Is2DAxis(ActionMapping.Key) || InputActionData.bPositive == bPositive))
+				if ((InputActionData.Axis == Axis || Container->UINavPC->IsAxis2D(NewKey)) &&
+					(OppositeInputBox == nullptr || !OppositeInputBox->Keys.IsValidIndex(j) || OppositeInputBox->Keys[j] != ActionMapping.Key) &&
+					(MappingsForAction.Num() < 2 || GetNumValidKeys(j) < (MappingsForAction.Num() / 2)))
 				{
-					FKey NewKey = ActionMapping.Key;
-					if (Container->UINavPC->Is2DAxis(NewKey))
+					if (Container->UINavPC->IsAxis(NewKey) && InputActionData.AxisScale != EAxisType::None)
 					{
-						NewKey = Container->UINavPC->GetKeyFromAxis(NewKey, bPositive);
+						NewKey = Container->UINavPC->GetKeyFromAxis(NewKey, bPositive ? IS_POSITIVE_AXIS : !IS_POSITIVE_AXIS, InputActionData.Axis);
 					}
 						
 					if (!Container->RespectsRestriction(NewKey, j))
@@ -80,10 +85,6 @@ void UUINavInputBox::CreateEnhancedInputKeyWidgets()
 
 					if (TrySetupNewKey(NewKey, j, NewInputButton))
 					{
-						if (FirstMappingIndex < 0)
-						{
-							FirstMappingIndex = i;
-						}
 						break;
 					}
 				}
@@ -119,8 +120,6 @@ void UUINavInputBox::CreateInputKeyWidgets()
 	TArray<FInputActionKeyMapping> Actions;
 	TArray<FInputAxisKeyMapping> Axes;
 
-	ProcessInputName();
-
 	if (IS_AXIS) Settings->GetAxisMappingByName(InputName, Axes);
 	else Settings->GetActionMappingByName(InputName, Actions);
 
@@ -146,6 +145,17 @@ void UUINavInputBox::CreateInputKeyWidgets()
 				if ((IS_AXIS && !PotentialAxisKey.IsValid() && IS_RIGHT_SCALE(Axes[i])) ||
 					(!IS_AXIS))
 				{
+					if (IS_AXIS)
+					{
+						TArray<int32> Mappings;
+						GetMappingsForAxis(Settings, InputName, IS_POSITIVE_AXIS, j, Mappings);
+
+						if (Mappings.Num() >= 2 && GetNumValidKeys(j) >= (Mappings.Num() / 2))
+						{
+							continue;
+						}
+					}
+
 					const FKey NewKey = IS_AXIS ? GetKeyFromAxis(Axes[i].Key) : Actions[i].Key;
 					if (!Container->RespectsRestriction(NewKey, j))
 					{
@@ -157,9 +167,7 @@ void UUINavInputBox::CreateInputKeyWidgets()
 						break;
 					}
 				}
-				else if (IS_AXIS &&
-					!PotentialAxisKey.IsValid() &&
-					Container->RespectsRestriction(Axes[i].Key, j))
+				else if (IS_AXIS && !PotentialAxisKey.IsValid() && Container->RespectsRestriction(Axes[i].Key, j))
 				{
 					FKey NewPotentialKey = Container->UINavPC->GetKeyFromAxis(Axes[i].Key, AxisType == EAxisType::Positive);
 					if (!Keys.Contains(NewPotentialKey))
@@ -208,7 +216,6 @@ bool UUINavInputBox::TrySetupNewKey(const FKey NewKey, const int KeyIndex, const
 void UUINavInputBox::ResetKeyWidgets()
 {
 	Keys.Empty();
-	FirstMappingIndex = -1;
 	bUsingKeyImage = { false, false, false };
 	InputButtons.Empty();
 	CreateKeyWidgets();
@@ -274,11 +281,6 @@ void UUINavInputBox::UpdateInputKey(const FKey NewKey, const int Index, const bo
 
 			return;
 		}
-		else if (Keys.Contains(NewKey))
-		{
-			CancelUpdateInputKey(ERevertRebindReason::UsedBySameInput);
-			return;
-		}
 		else if (RevertReason != ERevertRebindReason::None)
 		{
 			CancelUpdateInputKey(RevertReason);
@@ -304,63 +306,126 @@ void UUINavInputBox::FinishUpdateNewKey()
 	}
 }
 
-void UUINavInputBox::FinishUpdateNewEnhancedInputKey(const FKey NewKey, const int Index)
+void UUINavInputBox::FinishUpdateNewEnhancedInputKey(const FKey PressedKey, const int Index)
 {
 	const TArray<FEnhancedActionKeyMapping>& ActionMappings = InputContext->GetMappings();
 
+	bool bPositive;
+	const FKey PressedAxisKey = Container->UINavPC->GetAxisFromKey(PressedKey, bPositive);
+	const FKey NewKey = WantsAxisKey() && PressedAxisKey.IsValid() ? PressedAxisKey : PressedKey;
+
 	FKey NewAxisKey;
+	FKey OldAxisKey;
 	bool bFound = false;
 	bool bRemoved2DAxis = false;
 	const int Iterations = ActionMappings.Num();
-	for (int i = Iterations - 1; i >= 0; --i)
+	int i = Iterations - 1;
+	for (; i >= 0; --i)
 	{
 		FEnhancedActionKeyMapping& ActionMapping = InputContext->GetMapping(i);
 		if (ActionMapping.Action == InputActionData.Action)
 		{
-			bool bPositive;
-			EInputAxis Axis;
+			EInputAxis Axis = InputActionData.Axis;
 			Container->GetAxisPropertiesFromMapping(ActionMapping, bPositive, Axis);
 			if (InputActionData.Axis == Axis)
 			{
-				const FKey InputKey = GetKeyFromAxis(ActionMapping.Key);
-				if (InputKey == Keys[Index] &&
-					Container->RespectsRestriction(NewKey, Index))
+				const FKey& MappingKey = GetKeyFromAxis(ActionMapping.Key);
+				if (Container->RespectsRestriction(NewKey, Index) &&
+					Container->RespectsRestriction(MappingKey, Index))
 				{
-					if (IS_AXIS)
+					if (MappingKey == Keys[Index])
 					{
-						if (InputKey != ActionMapping.Key &&
-							InputActionData.bPositive != bPositive)
+						if (IS_AXIS)
 						{
-							NewAxisKey = NewKey;
+							if (Container->UINavPC->IsAxis(ActionMapping.Key) &&
+								InputActionData.AxisScale != EAxisType::None)
+							{
+								bool bNewKeyPositive = true;
+								if (Container->UINavPC->GetAxisFromKey(NewKey, bNewKeyPositive).IsValid())
+								{
+									NewAxisKey = NewKey;
+								}
+								else
+								{
+									OldAxisKey = ActionMapping.Key;
+								}
+								break;
+							}
+
+							ActionMapping.Key = NewKey;
+						}
+						else
+						{
+							ActionMapping.Key = NewKey;
+						}
+						Keys[Index] = NewKey;
+						InputButtons[Index]->NavText->SetText(GetKeyText(Index));
+						bFound = true;
+						break;
+					}
+					else if (!Container->UINavPC->IsAxis(ActionMapping.Key) &&
+						Container->GetOppositeInputBox(InputActionData) != nullptr)
+					{
+						bool bOtherKeyPositive = true;
+						const FKey OtherKeyAxis = Container->UINavPC->GetAxisFromKey(ActionMapping.Key, bOtherKeyPositive);
+						bool bNewKeyPositive = true;
+						const FKey NewKeyAxis = Container->UINavPC->GetAxisFromKey(NewKey, bNewKeyPositive);
+
+						if (OtherKeyAxis == NewKeyAxis &&
+							bOtherKeyPositive != bNewKeyPositive &&
+							InputActionData.AxisScale != EAxisType::None &&
+							(InputActionData.AxisScale == EAxisType::Positive) == bNewKeyPositive)
+						{
+							NewAxisKey = NewKeyAxis;
 							break;
 						}
-
-						//Remove indirect axis in opposite scale input
-						if (Container->UINavPC->Is2DAxis(ActionMapping.Key))
-						{
-							bRemoved2DAxis = true;
-						}
-
-						ActionMapping.Key = NewKey;
 					}
-					else ActionMapping.Key = NewKey;
-					Keys[Index] = NewKey;
-					InputButtons[Index]->NavText->SetText(GetKeyText(Index));
-					bFound = true;
-					break;
+					else
+					{
+						break;
+					}
 				}
 			}
 		}
 	}
+
 	if (!bFound)
 	{
+		// Remove old key
+		if (InputActionData.AxisScale == EAxisType::Positive)
+		{
+			UnmapEnhancedAxisKey(NewAxisKey, OldAxisKey, NewKey, Index);
+			bRemoved2DAxis = true;
+		}
+
+		// Add new key
 		const FKey Key = NewAxisKey.IsValid() ? NewAxisKey : NewKey;
-		FEnhancedActionKeyMapping& NewMapping =  InputContext->MapKey(InputActionData.Action, Key);
-		const FEnhancedActionKeyMapping& FirstMapping = InputContext->GetMapping(FirstMappingIndex);
-		NewMapping.Modifiers.Append(FirstMapping.Modifiers);
-		NewMapping.Triggers.Append(FirstMapping.Triggers);
-		Keys[Index] = Key;
+		FEnhancedActionKeyMapping& NewMapping = InputContext->MapKey(InputActionData.Action, Key);
+		if (OldAxisKey.IsValid())
+		{
+			AddRelevantModifiers(InputActionData, NewMapping);
+		}
+		if (NewAxisKey.IsValid())
+		{
+			InputContext->UnmapKey(InputActionData.Action, Keys[Index]);
+		}
+
+		// Remove old key
+		if (InputActionData.AxisScale == EAxisType::Negative)
+		{
+			UnmapEnhancedAxisKey(NewAxisKey, OldAxisKey, NewKey, Index);
+			bRemoved2DAxis = true;
+		}
+
+		Keys[Index] = NewKey;
 		InputButtons[Index]->NavText->SetText(GetKeyText(Index));
+
+		TryMap2DAxisKey(NewMapping.Key, Index);
+	}
+	else
+	{
+		// Check if the current setup allows replacing 2 keys with an axis key
+		TryMapEnhancedAxisKey(NewKey, Index);
 	}
 
 	if (Container->UINavPC != nullptr)
@@ -381,60 +446,113 @@ void UUINavInputBox::FinishUpdateNewEnhancedInputKey(const FKey NewKey, const in
 	}
 }
 
-void UUINavInputBox::FinishUpdateNewInputKey(const FKey NewKey, const int Index)
+void UUINavInputBox::FinishUpdateNewInputKey(const FKey PressedKey, const int Index)
 {
 	UInputSettings* Settings = const_cast<UInputSettings*>(GetDefault<UInputSettings>());
 	TArray<FInputActionKeyMapping>& Actions = const_cast<TArray<FInputActionKeyMapping>&>(Settings->GetActionMappings());
 	TArray<FInputAxisKeyMapping>& Axes = const_cast<TArray<FInputAxisKeyMapping>&>(Settings->GetAxisMappings());
 
+	bool bPositive;
+	const FKey PressedAxisKey = Container->UINavPC->GetAxisFromKey(PressedKey, bPositive);
+	const FKey NewKey = WantsAxisKey() && PressedAxisKey.IsValid() ? PressedAxisKey : PressedKey;
+
 	FKey NewAxisKey;
+	FKey OldAxisKey;
 	bool bFound = false;
 	bool bRemoved2DAxis = false;
 	const int Iterations = IS_AXIS ? Axes.Num() : Actions.Num();
-	for (int i = Iterations - 1; i >= 0; --i)
+	int i = Iterations - 1;
+	for (; i >= 0; --i)
 	{
 		if ((IS_AXIS && Axes[i].AxisName.IsEqual(InputName)) ||
 			(!IS_AXIS && Actions[i].ActionName.IsEqual(InputName)))
 		{
-			FKey InputKey = IS_AXIS ? GetKeyFromAxis(Axes[i].Key) : Actions[i].Key;
-			if (InputKey == Keys[Index] &&
-				Container->RespectsRestriction(NewKey, Index))
+			const FKey MappingKey = IS_AXIS ? GetKeyFromAxis(Axes[i].Key) : Actions[i].Key;
+			if (Container->RespectsRestriction(NewKey, Index) &&
+				Container->RespectsRestriction(MappingKey, Index))
 			{
-				if (IS_AXIS)
+				if (MappingKey == Keys[Index])
 				{
-					if (InputKey != Axes[i].Key &&
-						!IS_RIGHT_SCALE(Axes[i]))
+					if (IS_AXIS)
 					{
-						NewAxisKey = NewKey;
+						if (Container->UINavPC->IsAxis(Axes[i].Key))
+						{
+							bool bNewKeyPositive = true;
+							if (Container->UINavPC->GetAxisFromKey(NewKey, bNewKeyPositive).IsValid())
+							{
+								NewAxisKey = NewKey;
+							}
+							else
+							{
+								OldAxisKey = Axes[i].Key;
+							}
+							break;
+						}
+
+						Axes[i].Key = NewKey;
+					}
+					else
+					{
+						Actions[i].Key = NewKey;
+					}
+					Keys[Index] = NewKey;
+					InputButtons[Index]->NavText->SetText(GetKeyText(Index));
+					bFound = true;
+					break;
+				}
+				else if (!Container->UINavPC->IsAxis(Axes[i].Key) &&
+					Container->GetOppositeInputBox(InputName, AxisType) != nullptr)
+				{
+					bool bOtherKeyPositive = true;
+					const FKey OtherKeyAxis = Container->UINavPC->GetAxisFromKey(Axes[i].Key, bOtherKeyPositive);
+					bool bNewKeyPositive = true;
+					const FKey NewKeyAxis = Container->UINavPC->GetAxisFromKey(NewKey, bNewKeyPositive);
+
+					if (OtherKeyAxis == NewKeyAxis &&
+						bOtherKeyPositive != bNewKeyPositive &&
+						AxisType != EAxisType::None &&
+						(AxisType == EAxisType::Positive) == bNewKeyPositive)
+					{
+						NewAxisKey = NewKeyAxis;
 						break;
 					}
-
-					//Remove indirect axis in opposite scale input
-					if (Container->UINavPC->Is2DAxis(Axes[i].Key))
-					{
-						bRemoved2DAxis = true;
-					}
-
-					Axes[i].Key = NewKey;
 				}
-				else Actions[i].Key = NewKey;
-				Keys[Index] = NewKey;
-				InputButtons[Index]->NavText->SetText(GetKeyText(Index));
-				bFound = true;
-				break;
+				else
+				{
+					break;
+				}
 			}
 		}
 	}
+
 	if (!bFound)
 	{
 		if (IS_AXIS)
 		{
+			const float AxisScale = Axes[i].Scale;
+			if (AxisScale > 0.0f)
+			{
+				UnmapInputAxisKey(Settings, NewAxisKey, OldAxisKey, Axes[i], Index);
+			}
+
 			const FKey AxisKey = NewAxisKey.IsValid() ? NewAxisKey : NewKey;
+			if (NewAxisKey.IsValid())
+			{
+				Settings->RemoveAxisMapping(Axes[i]);
+				bRemoved2DAxis = true;
+			}
+
 			FInputAxisKeyMapping Axis;
 			Axis.Key = AxisKey;
 			Axis.AxisName = InputName;
-			Axis.Scale = AxisType == EAxisType::Positive ? 1.0f : -1.0f;
+			Axis.Scale = NewAxisKey.IsValid() ? 1.0f : (AxisType == EAxisType::Positive ? 1.0f : -1.0f);
 			Settings->AddAxisMapping(Axis, true);
+
+			if (AxisScale < 0.0f)
+			{
+				UnmapInputAxisKey(Settings, NewAxisKey, OldAxisKey, Axes[i], Index);
+			}
+
 			Keys[Index] = AxisKey;
 			InputButtons[Index]->NavText->SetText(GetKeyText(Index));
 		}
@@ -447,6 +565,11 @@ void UUINavInputBox::FinishUpdateNewInputKey(const FKey NewKey, const int Index)
 			Keys[Index] = NewKey;
 			InputButtons[Index]->NavText->SetText(GetKeyText(Index));
 		}
+	}
+	else if (IS_AXIS)
+	{
+		// Check if the current setup allows replacing 2 keys with an axis key
+		TryMapInputAxisKey(Settings, NewKey, Index);
 	}
 
 	if (Container->UINavPC != nullptr)
@@ -470,6 +593,162 @@ void UUINavInputBox::FinishUpdateNewInputKey(const FKey NewKey, const int Index)
 	}
 }
 
+void UUINavInputBox::TryMapEnhancedAxisKey(const FKey& NewKey, const int32 Index)
+{
+	UUINavInputBox* OppositeInputBox = Container->GetOppositeInputBox(InputActionData);
+	if (OppositeInputBox != nullptr)
+	{
+		const FKey OppositeInputBoxKey = OppositeInputBox->Keys.IsValidIndex(Index) ? OppositeInputBox->Keys[Index] : FKey();
+		const FKey NewOppositeKey = Container->UINavPC->GetOppositeAxisKey(NewKey);
+		if (NewOppositeKey == OppositeInputBoxKey)
+		{
+			InputContext->UnmapKey(InputActionData.Action, NewOppositeKey);
+			InputContext->UnmapKey(InputActionData.Action, NewKey);
+			bool bPositive;
+			FEnhancedActionKeyMapping& NewMapping = InputContext->MapKey(InputActionData.Action, Container->UINavPC->GetAxisFromKey(NewKey, bPositive));
+			AddRelevantModifiers(InputActionData, NewMapping);
+
+			TryMap2DAxisKey(NewMapping.Key, Index);
+		}
+	}
+}
+
+void UUINavInputBox::TryMapInputAxisKey(UInputSettings* Settings, const FKey& NewKey, const int32 Index)
+{
+	UUINavInputBox* OppositeInputBox = Container->GetOppositeInputBox(InputName, AxisType);
+	if (OppositeInputBox != nullptr)
+	{
+		const FKey OppositeInputBoxKey = OppositeInputBox->Keys.IsValidIndex(Index) ? OppositeInputBox->Keys[Index] : FKey();
+		const FKey NewOppositeKey = Container->UINavPC->GetOppositeAxisKey(NewKey);
+		if (NewOppositeKey == OppositeInputBoxKey)
+		{
+			TArray<FInputAxisKeyMapping> AxisMappingsByName;
+			Settings->GetAxisMappingByName(InputName, AxisMappingsByName);
+			for (const FInputAxisKeyMapping& AxisMappingByName : AxisMappingsByName)
+			{
+				if (AxisMappingByName.Key == OppositeInputBox->Keys[Index] ||
+					AxisMappingByName.Key == NewKey)
+				{
+					Settings->RemoveAxisMapping(AxisMappingByName);
+				}
+			}
+			FInputAxisKeyMapping Axis;
+			bool bPositive;
+			Axis.Key = Container->UINavPC->GetAxisFromKey(NewKey, bPositive);
+			Axis.AxisName = InputName;
+			Axis.Scale = 1.0f;
+			Settings->AddAxisMapping(Axis, true);
+		}
+	}
+}
+
+void UUINavInputBox::TryMap2DAxisKey(const FKey& NewMappingKey, const int Index)
+{
+	const FKey OppositeAxis = Container->UINavPC->GetOppositeAxis2DAxis(NewMappingKey);
+	if (OppositeAxis.IsValid())
+	{
+		TArray<int32> MappingsForAction;
+		const EInputAxis Axis = InputActionData.Axis == EInputAxis::X ? EInputAxis::Y : EInputAxis::X;
+		GetEnhancedMappingsForAction(InputActionData.Action, Axis, Index, MappingsForAction);
+		for (const int32 MappingIndex : MappingsForAction)
+		{
+			if (InputContext->GetMapping(MappingIndex).Key == OppositeAxis)
+			{
+				InputContext->UnmapKey(InputActionData.Action, NewMappingKey);
+				InputContext->UnmapKey(InputActionData.Action, OppositeAxis);
+				InputContext->MapKey(InputActionData.Action, Container->UINavPC->GetAxis2DFromAxis1D(OppositeAxis));
+				break;
+			}
+		}
+	}
+}
+
+void UUINavInputBox::UnmapEnhancedAxisKey(const FKey& NewAxisKey, const FKey& OldAxisKey, const FKey& NewKey, const int32 Index)
+{
+	UUINavInputBox* OppositeInputBox = Container->GetOppositeInputBox(InputActionData);
+	if (OppositeInputBox != nullptr)
+	{
+		if (OldAxisKey.IsValid())
+		{
+			InputContext->UnmapKey(InputActionData.Action, OldAxisKey);
+			const FKey OppositeInputBoxKey = OppositeInputBox->Keys.IsValidIndex(Index) ? OppositeInputBox->Keys[Index] : FKey();
+			FEnhancedActionKeyMapping& NewMapping = InputContext->MapKey(InputActionData.Action, OppositeInputBoxKey);
+			AddRelevantModifiers(OppositeInputBox->InputActionData, NewMapping);
+
+			if (Container->UINavPC->IsAxis2D(OldAxisKey))
+			{
+				const EInputAxis OppositeAxis = InputActionData.Axis == EInputAxis::X ? EInputAxis::Y : EInputAxis::X;
+				const FKey NewAxis1D = Container->UINavPC->GetAxis1DFromAxis2D(OldAxisKey, OppositeAxis);
+				if (NewAxis1D.IsValid())
+				{
+					FEnhancedActionKeyMapping& NewAxis1DMapping = InputContext->MapKey(InputActionData.Action, NewAxis1D);
+					if (OppositeAxis == EInputAxis::Y)
+					{
+						UInputModifierSwizzleAxis* SwizzleModifier = NewObject<UInputModifierSwizzleAxis>();
+						NewAxis1DMapping.Modifiers.Add(SwizzleModifier);
+					}
+				}
+			}
+		}
+		else if (NewAxisKey.IsValid())
+		{
+			InputContext->UnmapKey(InputActionData.Action, Container->UINavPC->GetOppositeAxisKey(NewKey));
+		}
+	}
+}
+
+void UUINavInputBox::UnmapInputAxisKey(UInputSettings* Settings, const FKey& NewAxisKey, const FKey& OldAxisKey, const FInputAxisKeyMapping& AxisMapping, const int32 Index)
+{
+	UUINavInputBox* OppositeInputBox = Container->GetOppositeInputBox(InputName, AxisType);
+	if (OppositeInputBox != nullptr)
+	{
+		if (OldAxisKey.IsValid())
+		{
+			Settings->RemoveAxisMapping(AxisMapping);
+			const FKey OppositeInputBoxKey = OppositeInputBox->Keys.IsValidIndex(Index) ? OppositeInputBox->Keys[Index] : FKey();
+			FInputAxisKeyMapping Axis;
+			Axis.Key = OppositeInputBoxKey;
+			Axis.AxisName = InputName;
+			Axis.Scale = OppositeInputBox->AxisType == EAxisType::Positive ? 1.0f : -1.0f;
+			Settings->AddAxisMapping(Axis, true);
+		}
+		else if (NewAxisKey.IsValid() && OppositeInputBox->Keys.IsValidIndex(Index))
+		{
+			TArray<FInputAxisKeyMapping> AxisMappingsByName;
+			Settings->GetAxisMappingByName(InputName, AxisMappingsByName);
+			for (const FInputAxisKeyMapping& AxisMappingByName : AxisMappingsByName)
+			{
+				if (AxisMappingByName.Key == OppositeInputBox->Keys[Index])
+				{
+					Settings->RemoveAxisMapping(AxisMappingByName);
+				}
+			}
+		}
+	}
+}
+
+void UUINavInputBox::AddRelevantModifiers(const FInputContainerEnhancedActionData& ActionData, FEnhancedActionKeyMapping& Mapping)
+{
+	if (ActionData.AxisScale == EAxisType::Negative)
+	{
+		UInputModifierNegate* NegateModifier = NewObject<UInputModifierNegate>();
+		NegateModifier->bX = ActionData.Axis == EInputAxis::X;
+		NegateModifier->bY = ActionData.Axis == EInputAxis::Y;
+		NegateModifier->bZ = ActionData.Axis == EInputAxis::Z;
+		Mapping.Modifiers.Add(NegateModifier);
+	}
+
+	if (ActionData.Axis != EInputAxis::X)
+	{
+		UInputModifierSwizzleAxis* SwizzleModifier = NewObject<UInputModifierSwizzleAxis>();
+		if (ActionData.Axis == EInputAxis::Z)
+		{
+			SwizzleModifier->Order = EInputAxisSwizzle::ZXY;
+		}
+		Mapping.Modifiers.Add(SwizzleModifier);
+	}
+}
+
 void UUINavInputBox::CancelUpdateInputKey(const ERevertRebindReason Reason)
 {
 	Container->OnRebindCancelled(Reason, AwaitingNewKey);
@@ -478,6 +757,11 @@ void UUINavInputBox::CancelUpdateInputKey(const ERevertRebindReason Reason)
 
 FKey UUINavInputBox::GetKeyFromAxis(const FKey AxisKey) const
 {
+	if (IS_ENHANCED_INPUT && IS_AXIS && InputActionData.AxisScale == EAxisType::None)
+	{
+		return AxisKey;
+	}
+
 	FKey NewKey = Container->UINavPC->GetKeyFromAxis(AxisKey, AxisType == EAxisType::Positive);
 	if (!NewKey.IsValid())
 	{
@@ -490,7 +774,10 @@ void UUINavInputBox::ProcessInputName()
 {
 	if (IS_ENHANCED_INPUT)
 	{
-		AxisType = InputActionData.bPositive ? EAxisType::Positive : EAxisType::Negative;
+		if (InputActionData.Action->ValueType != EInputActionValueType::Boolean)
+		{
+			AxisType = InputActionData.AxisScale == EAxisType::Negative ? EAxisType::Negative : EAxisType::Positive;
+		}
 		InputName = InputActionData.Action->GetFName();
 		if (InputActionData.DisplayName.IsEmpty())
 		{
@@ -520,6 +807,70 @@ void UUINavInputBox::ProcessInputName()
 			InputData.InputText = FText::FromName(InputName);
 		}
 		InputText->SetText(InputData.InputText);
+	}
+}
+
+int UUINavInputBox::GetNumValidKeys(const int Index) const
+{
+	int ValidKeys = 0;
+	for (const FKey& Key : Keys)
+	{
+		if (Key.IsValid() && Container->RespectsRestriction(Key, Index))
+		{
+			++ValidKeys;
+		}
+	}
+	return ValidKeys;
+}
+
+void UUINavInputBox::GetEnhancedMappingsForAction(const UInputAction* Action, const EInputAxis& Axis, const int Index, TArray<int32>& OutMappingIndices)
+{
+	const TArray<FEnhancedActionKeyMapping>& ActionMappings = InputContext->GetMappings();
+	for (int i = ActionMappings.Num() - 1; i >= 0; --i)
+	{
+		const FEnhancedActionKeyMapping& ActionMapping = ActionMappings[i];
+		if (ActionMapping.Action == Action)
+		{
+			bool bPositive;
+			EInputAxis ActionAxis = InputActionData.Axis;
+			Container->GetAxisPropertiesFromMapping(ActionMapping, bPositive, ActionAxis);
+			if (ActionAxis == Axis && Container->RespectsRestriction(ActionMapping.Key, Index))
+			{
+				OutMappingIndices.Add(i);
+			}
+		}
+	}
+}
+
+void UUINavInputBox::GetMappingsForAction(const UInputSettings* const Settings, const FName ActionName, const int Index, TArray<int32>& OutMappingIndices)
+{
+	const TArray<FInputActionKeyMapping>& ActionMappings = Settings->GetActionMappings();
+	for (int i = ActionMappings.Num() - 1; i >= 0; --i)
+	{
+		const FInputActionKeyMapping& ActionMapping = ActionMappings[i];
+		if (ActionMapping.ActionName == ActionName)
+		{
+			if (Container->RespectsRestriction(ActionMapping.Key, Index))
+			{
+				OutMappingIndices.Add(i);
+			}
+		}
+	}
+}
+
+void UUINavInputBox::GetMappingsForAxis(const UInputSettings* const Settings, const FName AxisName, const bool bPositive, const int Index, TArray<int32>& OutMappingIndices)
+{
+	const TArray<FInputAxisKeyMapping>& AxisMappings = Settings->GetAxisMappings();
+	for (int i = AxisMappings.Num() - 1; i >= 0; --i)
+	{
+		const FInputAxisKeyMapping& AxisMapping = AxisMappings[i];
+		if (AxisMapping.AxisName == AxisName)
+		{
+			if (AxisMapping.Scale > 0.0f == bPositive && Container->RespectsRestriction(AxisMapping.Key, Index))
+			{
+				OutMappingIndices.Add(i);
+			}
+		}
 	}
 }
 
@@ -588,5 +939,12 @@ void UUINavInputBox::NotifySelected(const int Index)
 int UUINavInputBox::ContainsKey(const FKey CompareKey) const
 {
 	return Keys.IndexOfByKey(CompareKey);
+}
+
+bool UUINavInputBox::WantsAxisKey() const
+{
+	return IS_AXIS &&
+		((!IS_ENHANCED_INPUT && Container->GetOppositeInputBox(InputName, AxisType) == nullptr) ||
+		(IS_ENHANCED_INPUT && InputActionData.AxisScale == EAxisType::None));
 }
 

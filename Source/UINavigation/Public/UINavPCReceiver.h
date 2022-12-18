@@ -1,4 +1,4 @@
-﻿// Copyright (C) 2019 Gon�alo Marques - All Rights Reserved
+﻿// Copyright (C) 2019 Gonçalo Marques - All Rights Reserved
 
 #pragma once
 
@@ -28,7 +28,8 @@ public:
 	*	Called when the root UINavWidget is removed from the viewport
 	*/
 	UFUNCTION(BlueprintNativeEvent, Category = UINavController)
-		void OnRootWidgetRemoved();
+	void OnRootWidgetRemoved();
+
 	virtual void OnRootWidgetRemoved_Implementation();
 
 	/**
@@ -38,14 +39,16 @@ public:
 	*	@param To The input type being used now
 	*/
 	UFUNCTION(BlueprintNativeEvent, Category = UINavController)
-		void OnInputChanged(EInputType From, EInputType To);
+	void OnInputChanged(EInputType From, EInputType To);
+
 	virtual void OnInputChanged_Implementation(EInputType From, EInputType To);
 
 	/**
 	*	Called when a controller is connected and disconnected
 	*/
 	UFUNCTION(BlueprintNativeEvent, Category = UINavController)
-		void OnControllerConnectionChanged(bool bConnected, int32 UserId, int32 UserIndex);
+	void OnControllerConnectionChanged(bool bConnected, int32 UserId, int32 UserIndex);
+
 	virtual void OnControllerConnectionChanged_Implementation(bool bConnected, int32 UserId, int32 UserIndex);
 
 	/**
@@ -55,7 +58,8 @@ public:
 	*	@param NewActiveWidget The new active widget
 	*/
 	UFUNCTION(BlueprintNativeEvent, Category = UINavController)
-		void OnActiveWidgetChanged(UUINavWidget* OldActiveWidget, UUINavWidget* NewActiveWidget);
+	void OnActiveWidgetChanged(UUINavWidget* OldActiveWidget, UUINavWidget* NewActiveWidget);
+
 	virtual void OnActiveWidgetChanged_Implementation(UUINavWidget* OldActiveWidget, UUINavWidget* NewActiveWidget);
 
 	/**
@@ -64,35 +68,40 @@ public:
 	*	@param NavigationDirection The direction of navigation
 	*/
 	UFUNCTION(BlueprintNativeEvent, Category = UINavController)
-		void OnNavigated(ENavigationDirection NavigationDirection);
+	void OnNavigated(ENavigationDirection NavigationDirection);
+
 	virtual void OnNavigated_Implementation(ENavigationDirection NavigationDirection);
 
 	/**
 	*	Called when the player selects the current option
 	*/
 	UFUNCTION(BlueprintNativeEvent, Category = UINavController)
-		void OnSelect();
+	void OnSelect();
+
 	virtual void OnSelect_Implementation();
 
 	/**
 	*	Called when the player returns to the previous widget
 	*/
 	UFUNCTION(BlueprintNativeEvent, Category = UINavController)
-		void OnReturn();
+	void OnReturn();
+
 	virtual void OnReturn_Implementation();
 
 	/**
 	*	Called when the player navigates to the next section
 	*/
 	UFUNCTION(BlueprintNativeEvent, Category = UINavController)
-		void OnNext();
+	void OnNext();
+
 	virtual void OnNext_Implementation();
 
 	/**
 	*	Called when the player navigates to the previous section
 	*/
 	UFUNCTION(BlueprintNativeEvent, Category = UINavController)
-		void OnPrevious();
+	void OnPrevious();
+
 	virtual void OnPrevious_Implementation();
 
 };

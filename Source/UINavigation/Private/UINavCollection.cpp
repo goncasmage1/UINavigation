@@ -1,4 +1,4 @@
-﻿// Copyright (C) 2019 Gon�alo Marques - All Rights Reserved
+﻿// Copyright (C) 2019 Gonçalo Marques - All Rights Reserved
 
 
 #include "UINavCollection.h"
@@ -49,7 +49,7 @@ void UUINavCollection::Init(int StartIndex)
 	LastButtonIndex = StartIndex - 1;
 	PreSetup();
 
-	UUINavWidget::TraverseHierarquy(ParentWidget, this);
+	UUINavWidget::TraverseHierarchy(ParentWidget, this);
 
 	if (UINavAnimations.Num() > 0)
 	{
@@ -164,7 +164,7 @@ void UUINavCollection::UpdateCollectionLastIndex(const int GridIndex, const bool
 	LastButtonIndex--;
 }
 
-void UUINavCollection::SetEdgeNavigation(const int GridIndex, FButtonNavigation const NewEdgeNavigation)
+void UUINavCollection::SetEdgeNavigation(const int GridIndex, const FButtonNavigation NewEdgeNavigation)
 {
 	ParentWidget->SetEdgeNavigation(FirstGridIndex + GridIndex, NewEdgeNavigation);
 }

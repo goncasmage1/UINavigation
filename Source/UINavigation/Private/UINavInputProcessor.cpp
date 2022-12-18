@@ -1,4 +1,4 @@
-﻿// Copyright (C) 2019 Gon�alo Marques - All Rights Reserved
+﻿// Copyright (C) 2019 Gonçalo Marques - All Rights Reserved
 
 #include "UINavInputProcessor.h"
 #include "UINavPCComponent.h"
@@ -55,6 +55,16 @@ bool FUINavInputProcessor::HandleMouseButtonDownEvent(FSlateApplication& SlateAp
 	}
 
 	return IInputProcessor::HandleMouseButtonDownEvent(SlateApp, MouseEvent);
+}
+
+bool FUINavInputProcessor::HandleMouseButtonUpEvent(FSlateApplication& SlateApp, const FPointerEvent& MouseEvent)
+{
+	if (UINavPC != nullptr)
+	{
+		UINavPC->HandleMouseButtonUpEvent(SlateApp, MouseEvent);
+	}
+
+	return IInputProcessor::HandleMouseButtonUpEvent(SlateApp, MouseEvent);
 }
 
 bool FUINavInputProcessor::HandleMouseWheelOrGestureEvent(FSlateApplication& SlateApp, const FPointerEvent& InWheelEvent, const FPointerEvent* InGesture)

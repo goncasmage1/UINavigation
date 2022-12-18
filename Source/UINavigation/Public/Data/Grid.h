@@ -1,4 +1,4 @@
-// Copyright (C) 2019 Gonçalo Marques - All Rights Reserved
+// Copyright (C) 2019 GonÃ§alo Marques - All Rights Reserved
 
 #pragma once
 #include "GridType.h"
@@ -102,26 +102,27 @@ struct FGrid
 	}
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = ButtonGrid)
-		EGridType GridType = EGridType::Horizontal;
+	EGridType GridType = EGridType::Horizontal;
 
 	UPROPERTY(BlueprintReadWrite, Category = ButtonGrid)
-		UUINavButton* FirstButton = nullptr;
+	UUINavButton* FirstButton = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = ButtonGrid)
-		FButtonNavigation EdgeNavigation;
+	FButtonNavigation EdgeNavigation;
 
 	UPROPERTY(BlueprintReadWrite, Category = ButtonGrid)
-		bool bWrap = false;
+	bool bWrap = false;
 
 	UPROPERTY(BlueprintReadWrite, Category = ButtonGrid)
-		int GridIndex = -1;
+	int GridIndex = -1;
 
 	UPROPERTY(BlueprintReadWrite, Category = ButtonGrid)
-		int DimensionX = -1;
-	UPROPERTY(BlueprintReadWrite, Category = ButtonGrid)
-		int DimensionY = -1;
+	int DimensionX = -1;
 
 	UPROPERTY(BlueprintReadWrite, Category = ButtonGrid)
-		int NumGrid2DButtons = -1;
+	int DimensionY = -1;
+
+	UPROPERTY(BlueprintReadWrite, Category = ButtonGrid)
+	int NumGrid2DButtons = -1;
 
 };

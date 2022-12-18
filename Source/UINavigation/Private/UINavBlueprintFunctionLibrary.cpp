@@ -12,6 +12,8 @@
 #if IS_VR_PLATFORM
 #include "IXRTrackingSystem.h"
 #endif
+#include "EnhancedInputComponent.h"
+#include "Components/InputComponent.h"
 
 void UUINavBlueprintFunctionLibrary::SetSoundClassVolume(USoundClass * TargetClass, const float NewVolume)
 {
@@ -58,11 +60,11 @@ void UUINavBlueprintFunctionLibrary::ResetInputSettings(APlayerController* PC)
 {
 	if (IsValid(PC))
 	{
-		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PC->GetLocalPlayer()))
-		if (Subsystem != nullptr)
+		UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PC->GetLocalPlayer());
+		if (PC->InputComponent->IsA<UEnhancedInputComponent>() && Subsystem != nullptr)
 		{
 			const UUINavSettings* UINavSettings = GetDefault<UUINavSettings>();
-			for (const TPair<TAssetPtr<UInputMappingContext>, TAssetPtr<UInputMappingContext>>& Entry : UINavSettings->DefaultInputContexts)
+			for (const TPair<TSoftObjectPtr<UInputMappingContext>, TSoftObjectPtr<UInputMappingContext>>& Entry : UINavSettings->DefaultInputContexts)
 			{
 				UInputMappingContext* CurrentContext = Entry.Key.LoadSynchronous();
 				UInputMappingContext* DefaultContext = Entry.Value.LoadSynchronous();
@@ -80,7 +82,7 @@ void UUINavBlueprintFunctionLibrary::ResetInputSettings(APlayerController* PC)
 				}
 			}
 
-			Subsystem->RequestRebuildControlMappings(true);
+			Subsystem->RequestRebuildControlMappings();
 			
 			return;
 		}

@@ -119,9 +119,7 @@ void UUINavPCComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAct
 				TimerCounter -= NavigationChainFrequency;
 			}
 			break;
-	}
-	
-
+	}	
 }
 
 void UUINavPCComponent::BindMenuInputs()
@@ -298,16 +296,16 @@ void UUINavPCComponent::CallCustomInput(const FName ActionName, const bool bPres
 		const int CustomInputIndex = CustomInputs.Find(ActionName);
 		if (CustomInputIndex < 0) return;
 
-		uint8* Buffer = (uint8*)FMemory_Alloca(sizeof(bool));
+		uint8* Buffer = static_cast<uint8*>(FMemory_Alloca(sizeof(bool)));
 		FMemory::Memcpy(Buffer, &bPressed, sizeof(bool));
 
 		ActiveWidget->CallCustomInput(ActionName, Buffer);
 	}
 }
 
-void UUINavPCComponent::OnControllerConnectionChanged(bool bConnected, int32 UserId, int32 UserIndex)
+void UUINavPCComponent::OnControllerConnectionChanged(bool bConnected, FPlatformUserId UserId, int32 UserIndex)
 {
-	IUINavPCReceiver::Execute_OnControllerConnectionChanged(GetOwner(), bConnected, UserId, UserIndex);
+	IUINavPCReceiver::Execute_OnControllerConnectionChanged(GetOwner(), bConnected, static_cast<int32>(UserId), UserIndex);
 }
 
 void UUINavPCComponent::VerifyDefaultInputs()
@@ -596,14 +594,32 @@ void UUINavPCComponent::HandleMouseMoveEvent(FSlateApplication& SlateApp, const 
 
 void UUINavPCComponent::HandleMouseButtonDownEvent(FSlateApplication& SlateApp, const FPointerEvent& MouseEvent)
 {
+	if (ActiveWidget != nullptr)
+	{
+		ActiveWidget->NativeOnMouseButtonDown(ActiveWidget->GetCachedGeometry(), MouseEvent);
+	}
+
 	if (CurrentInputType != EInputType::Mouse)
 	{
 		NotifyInputTypeChange(EInputType::Mouse);
 	}
 }
 
+void UUINavPCComponent::HandleMouseButtonUpEvent(FSlateApplication& SlateApp, const FPointerEvent& MouseEvent)
+{
+	if (ActiveWidget != nullptr)
+	{
+		ActiveWidget->NativeOnMouseButtonUp(ActiveWidget->GetCachedGeometry(), MouseEvent);
+	}
+}
+
 void UUINavPCComponent::HandleMouseWheelOrGestureEvent(FSlateApplication& SlateApp, const FPointerEvent& InWheelEvent, const FPointerEvent* InGesture)
 {
+	if (ActiveWidget != nullptr)
+	{
+		ActiveWidget->NativeOnMouseWheel(ActiveWidget->GetCachedGeometry(), InWheelEvent);
+	}
+
 	if (CurrentInputType != EInputType::Mouse && InWheelEvent.GetWheelDelta() != 0.0f)
 	{
 		NotifyInputTypeChange(EInputType::Mouse);
@@ -829,14 +845,14 @@ UTexture2D * UUINavPCComponent::GetKeyIcon(const FKey Key) const
 	{
 		if (GamepadKeyIconData != nullptr && GamepadKeyIconData->GetRowMap().Contains(Key.GetFName()))
 		{
-			KeyIcon = (FInputIconMapping*)GamepadKeyIconData->GetRowMap()[Key.GetFName()];
+			KeyIcon = reinterpret_cast<FInputIconMapping*>(GamepadKeyIconData->GetRowMap()[Key.GetFName()]);
 		}
 	}
 	else
 	{
 		if (KeyboardMouseKeyIconData != nullptr && KeyboardMouseKeyIconData->GetRowMap().Contains(Key.GetFName()))
 		{
-			KeyIcon = (FInputIconMapping*)KeyboardMouseKeyIconData->GetRowMap()[Key.GetFName()];
+			KeyIcon = reinterpret_cast<FInputIconMapping*>(KeyboardMouseKeyIconData->GetRowMap()[Key.GetFName()]);
 		}
 	}
 
@@ -867,14 +883,14 @@ FText UUINavPCComponent::GetKeyText(const FKey Key) const
 	{
 		if (GamepadKeyNameData != nullptr && GamepadKeyNameData->GetRowMap().Contains(Key.GetFName()))
 		{
-			Keyname = (FInputNameMapping*)GamepadKeyNameData->GetRowMap()[Key.GetFName()];
+			Keyname = reinterpret_cast<FInputNameMapping*>(GamepadKeyNameData->GetRowMap()[Key.GetFName()]);
 		}
 	}
 	else
 	{
 		if (KeyboardMouseKeyNameData != nullptr && KeyboardMouseKeyNameData->GetRowMap().Contains(Key.GetFName()))
 		{
-			Keyname = (FInputNameMapping*)KeyboardMouseKeyNameData->GetRowMap()[Key.GetFName()];
+			Keyname = reinterpret_cast<FInputNameMapping*>(KeyboardMouseKeyNameData->GetRowMap()[Key.GetFName()]);
 		}
 	}
 
@@ -887,7 +903,7 @@ void UUINavPCComponent::GetInputRebindData(const FName InputName, FInputRebindDa
 {
 	if (InputRebindDataTable != nullptr && InputRebindDataTable->GetRowMap().Contains(InputName))
 	{
-		FInputRebindData* InputRebindData = (FInputRebindData*)InputRebindDataTable->GetRowMap()[InputName];
+		FInputRebindData* InputRebindData = reinterpret_cast<FInputRebindData*>(InputRebindDataTable->GetRowMap()[InputName]);
 		if (InputRebindData != nullptr)
 		{
 			OutData = *InputRebindData;
@@ -1019,17 +1035,82 @@ EInputType UUINavPCComponent::GetMenuActionInputType(const FString Action) const
 	return CurrentInputType;
 }
 
-FKey UUINavPCComponent::GetKeyFromAxis(const FKey Key, const bool bPositive) const
+FKey UUINavPCComponent::GetKeyFromAxis(const FKey Key, const bool bPositive, const EInputAxis Axis) const
 {
-	const FAxis2D_Keys* Axis2DKeys = Axis2DToKeyMap.Find(Key);
-	if (Axis2DKeys == nullptr) return FKey();
+	const FAxis2D_Keys* Axis2DKeys = Axis2DToAxis1DMap.Find(Key);
+	const FKey CheckedKey = Axis2DKeys == nullptr ? Key : (Axis == EInputAxis::X ? Axis2DKeys->PositiveKey : Axis2DKeys->NegativeKey);
 
-	return bPositive ? Axis2DKeys->PositiveKey : Axis2DKeys->NegativeKey;
+	const FAxis2D_Keys* AxisKeys = AxisToKeyMap.Find(CheckedKey);
+	if (AxisKeys == nullptr) return FKey();
+
+	return bPositive ? AxisKeys->PositiveKey : AxisKeys->NegativeKey;
 }
 
-bool UUINavPCComponent::Is2DAxis(const FKey Key) const
+FKey UUINavPCComponent::GetAxisFromKey(FKey Key, bool& OutbPositive) const
 {
-	return Axis2DToKeyMap.Contains(Key);
+	for (const TPair<FKey, FAxis2D_Keys>& AxisKeys : AxisToKeyMap)
+	{
+		if (AxisKeys.Value.PositiveKey == Key)
+		{
+			OutbPositive = true;
+			return AxisKeys.Key;
+		}
+		
+		if (AxisKeys.Value.NegativeKey == Key)
+		{
+			OutbPositive = false;
+			return AxisKeys.Key;
+		}
+	}
+	return FKey();
+}
+
+FKey UUINavPCComponent::GetAxis1DFromAxis2D(FKey Key, const EInputAxis Axis) const
+{
+	const FAxis2D_Keys* Axis2DKeys = Axis2DToAxis1DMap.Find(Key);
+	if (Axis2DKeys == nullptr) return FKey();
+
+	return Axis == EInputAxis::X ? Axis2DKeys->PositiveKey : Axis2DKeys->NegativeKey;
+}
+
+FKey UUINavPCComponent::GetAxis2DFromAxis1D(FKey Key) const
+{
+	for (const TPair<FKey, FAxis2D_Keys>& AxisKeys : Axis2DToAxis1DMap)
+	{
+		if (AxisKeys.Value.PositiveKey == Key) return AxisKeys.Key;
+		if (AxisKeys.Value.NegativeKey == Key) return AxisKeys.Key;
+	}
+	return FKey();
+}
+
+FKey UUINavPCComponent::GetOppositeAxisKey(FKey Key) const
+{
+	for (const TPair<FKey, FAxis2D_Keys>& AxisKeys : AxisToKeyMap)
+	{
+		if (AxisKeys.Value.PositiveKey == Key) return AxisKeys.Value.NegativeKey;
+		if (AxisKeys.Value.NegativeKey == Key) return AxisKeys.Value.PositiveKey;
+	}
+	return FKey();
+}
+
+FKey UUINavPCComponent::GetOppositeAxis2DAxis(FKey Key) const
+{
+	for (const TPair<FKey, FAxis2D_Keys>& Axis2DAxes : Axis2DToAxis1DMap)
+	{
+		if (Axis2DAxes.Value.PositiveKey == Key) return Axis2DAxes.Value.NegativeKey;
+		if (Axis2DAxes.Value.NegativeKey == Key) return Axis2DAxes.Value.PositiveKey;
+	}
+	return FKey();
+}
+
+bool UUINavPCComponent::IsAxis2D(const FKey Key) const
+{
+	return Axis2DToAxis1DMap.Contains(Key);
+}
+
+bool UUINavPCComponent::IsAxis(const FKey Key) const
+{
+	return IsAxis2D(Key) || AxisToKeyMap.Contains(Key);
 }
 
 void UUINavPCComponent::VerifyInputTypeChangeByKey(const FKey Key)

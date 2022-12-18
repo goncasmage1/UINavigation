@@ -1,4 +1,4 @@
-// Copyright (C) 2019 Gonçalo Marques - All Rights Reserved
+// Copyright (C) 2019 GonÃ§alo Marques - All Rights Reserved
 
 #pragma once
 #include "Data/NavigationEvent.h"
@@ -33,24 +33,24 @@ struct FDynamicEdgeNavigation
 	}
 
 	UPROPERTY(BlueprintReadWrite, Category = DynamicEdgeNavigation)
-		int GridIndex = -1;
+	int GridIndex = -1;
 
 	UPROPERTY(BlueprintReadWrite, Category = DynamicEdgeNavigation)
-		int TargetGridIndex = -1;
+	int TargetGridIndex = -1;
 
 	UPROPERTY(BlueprintReadWrite, Category = DynamicEdgeNavigation)
-		TArray<int> TargetButtonIndices;
+	TArray<int> TargetButtonIndices;
 
 	UPROPERTY(BlueprintReadWrite, Category = DynamicEdgeNavigation)
-		TArray<FGridButton> TargetButtons;
+	TArray<FGridButton> TargetButtons;
 
 	UPROPERTY(BlueprintReadWrite, Category = DynamicEdgeNavigation)
-		ENavigationEvent Event = ENavigationEvent::OnSelect;
+	ENavigationEvent Event = ENavigationEvent::OnSelect;
 
 	UPROPERTY(BlueprintReadWrite, Category = DynamicEdgeNavigation)
-		ENavigationDirection Direction = ENavigationDirection::None;
+	ENavigationDirection Direction = ENavigationDirection::None;
 	
 	UPROPERTY(BlueprintReadWrite, Category = DynamicEdgeNavigation)
-		bool bTwoWayConnection = true;
+	bool bTwoWayConnection = true;
 
 };
