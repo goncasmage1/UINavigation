@@ -1061,6 +1061,12 @@ void UUINavWidget::DeleteUINavElementFromGrid(const int GridIndex, int IndexInGr
 		return;
 	}
 	const FGrid& TargetGrid = NavigationGrids[GridIndex];
+
+	if (TargetGrid.GetDimension() == 0)
+	{
+		return;
+	}
+
 	IndexInGrid = IndexInGrid >= 0 && IndexInGrid < TargetGrid.GetDimension() ? IndexInGrid : TargetGrid.GetDimension() - 1;
 
 	DeleteUINavElement(TargetGrid.FirstButton->ButtonIndex + IndexInGrid, bAutoNavigate);
