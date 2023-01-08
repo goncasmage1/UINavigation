@@ -1039,10 +1039,6 @@ void UUINavWidget::DeleteUINavElement(const int Index, const bool bAutoNavigate)
 			NavigateTo(Temp->ButtonIndex);
 		}
 	}
-	else
-	{
-		ButtonIndex = CurrentButton->ButtonIndex;
-	}
 
 	NumberOfButtonsInGrids--;
 	UUINavButton* Button = UINavButtons[Index];
@@ -1153,6 +1149,11 @@ void UUINavWidget::DecrementUINavButtonIndices(const int StartingIndex, const in
 		}
 	}
 	UINavButtons.RemoveAt(UINavButtons.Num()-1, 1, true);
+
+	if (StartingIndex <= ButtonIndex && ButtonIndex > 0)
+	{
+		--ButtonIndex;
+	}
 }
 
 void UUINavWidget::MoveUINavElementToGrid(const int Index, const int TargetGridIndex, int IndexInGrid)
