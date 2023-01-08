@@ -1039,10 +1039,6 @@ void UUINavWidget::DeleteUINavElement(const int Index, const bool bAutoNavigate)
 			NavigateTo(Temp->ButtonIndex);
 		}
 	}
-	else
-	{
-		ButtonIndex = CurrentButton->ButtonIndex;
-	}
 
 	NumberOfButtonsInGrids--;
 	UUINavButton* Button = UINavButtons[Index];
@@ -1061,6 +1057,12 @@ void UUINavWidget::DeleteUINavElementFromGrid(const int GridIndex, int IndexInGr
 		return;
 	}
 	const FGrid& TargetGrid = NavigationGrids[GridIndex];
+
+	if (TargetGrid.GetDimension() == 0)
+	{
+		return;
+	}
+
 	IndexInGrid = IndexInGrid >= 0 && IndexInGrid < TargetGrid.GetDimension() ? IndexInGrid : TargetGrid.GetDimension() - 1;
 
 	DeleteUINavElement(TargetGrid.FirstButton->ButtonIndex + IndexInGrid, bAutoNavigate);
@@ -1147,6 +1149,11 @@ void UUINavWidget::DecrementUINavButtonIndices(const int StartingIndex, const in
 		}
 	}
 	UINavButtons.RemoveAt(UINavButtons.Num()-1, 1, true);
+
+	if (StartingIndex <= ButtonIndex && ButtonIndex > 0)
+	{
+		--ButtonIndex;
+	}
 }
 
 void UUINavWidget::MoveUINavElementToGrid(const int Index, const int TargetGridIndex, int IndexInGrid)
