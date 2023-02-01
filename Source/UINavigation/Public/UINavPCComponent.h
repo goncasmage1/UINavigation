@@ -133,6 +133,7 @@ protected:
 	void OnCustomInput(const int InputIndex, const bool bPressed);
 
 	void CallCustomInput(const FName ActionName, const bool bPressed);
+	void CallCustomEnhancedInput(UInputAction* Action, const bool bPressed);
 
 	void OnControllerConnectionChanged(bool bConnected, FPlatformUserId UserId, int32 UserIndex);
 
