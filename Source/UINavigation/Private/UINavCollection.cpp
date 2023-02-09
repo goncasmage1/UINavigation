@@ -16,7 +16,12 @@ void UUINavCollection::BeginDynamicSetup()
 {
 	if (ParentWidget == nullptr)
 	{
-		ParentWidget = UUINavWidget::GetOuterUINavWidget(this);
+		ParentWidget = UUINavWidget::GetOuterWidget<UUINavWidget>(this);
+	}
+
+	if (ParentCollection == nullptr)
+	{
+		ParentCollection = UUINavWidget::GetOuterWidget<UUINavCollection>(this);
 	}
 
 	if (ParentWidget == nullptr || !ParentWidget->bSetupStarted)
@@ -28,7 +33,7 @@ void UUINavCollection::BeginDynamicSetup()
 	if (!ParentWidget->bAutoAppended)
 	{
 		const TArray<FButtonNavigation> EdgeNavigations;
-		SetupNavigation(EdgeNavigations);
+		ParentWidget->AppendCollection(EdgeNavigations);
 	}
 
 	if (ParentWidget->NumberOfButtonsInGrids != ParentWidget->UINavButtons.Num())

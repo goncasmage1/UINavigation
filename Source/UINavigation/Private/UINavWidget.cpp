@@ -2888,7 +2888,8 @@ void UUINavWidget::MenuNavigate(const ENavigationDirection Direction)
 	NavigateTo(NewButton->ButtonIndex);
 }
 
-UUINavWidget* UUINavWidget::GetOuterUINavWidget(const UObject* const Object)
+template<typename T>
+T* UUINavWidget::GetOuterUINavWidget(const UObject* const Object)
 {
 	UObject* OuterObject = Object->GetOuter();
 	if (OuterObject == nullptr)
@@ -2896,13 +2897,13 @@ UUINavWidget* UUINavWidget::GetOuterUINavWidget(const UObject* const Object)
 		return nullptr;
 	}
 
-	UUINavWidget* OuterUINavWidget = Cast<UUINavWidget>(OuterObject);
+	T* OuterObject = Cast<T>(OuterObject);
 	if (OuterUINavWidget != nullptr)
 	{
 		return OuterUINavWidget;
 	}
 
-	return GetOuterUINavWidget(OuterObject);
+	return GetOuterUINavWidget<T>(OuterObject);
 }
 
 UUINavWidget* UUINavWidget::GetMostOuterUINavWidget()

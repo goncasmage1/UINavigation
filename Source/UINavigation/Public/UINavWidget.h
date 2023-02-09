@@ -699,7 +699,8 @@ public:
 
 	virtual void MenuNavigate(const ENavigationDirection Direction);
 
-	static UUINavWidget* GetOuterUINavWidget(const UObject* const Object);
+	template<typename T>
+	static T* GetOuterWidget(const UObject* const Object);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
 	UUINavWidget* GetMostOuterUINavWidget();

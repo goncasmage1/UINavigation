@@ -287,8 +287,7 @@ UUINavInputBox* UUINavInputContainer::GetOppositeInputBox(const FName& InputName
 	return nullptr;
 }
 
-void UUINavInputContainer::GetAxisPropertiesFromMapping(const FEnhancedActionKeyMapping& ActionMapping,
-	bool& bOutPositive, EInputAxis& OutAxis) const
+void UUINavInputContainer::GetAxisPropertiesFromMapping(const FEnhancedActionKeyMapping& ActionMapping, bool& bOutPositive, EInputAxis& OutAxis) const
 {
 	TArray<UInputModifier*> Modifiers(ActionMapping.Modifiers);
 	Modifiers.Append(ActionMapping.Action->Modifiers);

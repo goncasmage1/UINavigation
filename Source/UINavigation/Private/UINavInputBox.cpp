@@ -77,6 +77,12 @@ void UUINavInputBox::CreateEnhancedInputKeyWidgets()
 					{
 						NewKey = Container->UINavPC->GetKeyFromAxis(NewKey, bPositive ? IS_POSITIVE_AXIS : !IS_POSITIVE_AXIS, InputActionData.Axis);
 					}
+					else if (OppositeInputBox != nullptr &&
+						InputActionData.AxisScale != EAxisType::None &&
+						(InputActionData.AxisScale == EAxisType::Positive) != bPositive)
+					{
+						continue;
+					}
 						
 					if (!Container->RespectsRestriction(NewKey, j))
 					{

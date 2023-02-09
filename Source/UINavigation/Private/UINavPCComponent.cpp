@@ -290,7 +290,15 @@ void UUINavPCComponent::BindMenuEnhancedInputs()
 
 void UUINavPCComponent::OnCustomInput(const int InputIndex, const bool bPressed)
 {
-	CallCustomInput(CustomInputs[InputIndex], bPressed);
+	UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PC->InputComponent);
+	if (IsValid(EnhancedInputComponent))
+	{
+		CallCustomEnhancedInput(CustomEnhancedInputs[InputIndex], bPressed);
+	}
+	else
+	{
+		CallCustomInput(CustomInputs[InputIndex], bPressed);
+	}
 }
 
 void UUINavPCComponent::CallCustomInput(const FName ActionName, const bool bPressed)
@@ -304,6 +312,20 @@ void UUINavPCComponent::CallCustomInput(const FName ActionName, const bool bPres
 		FMemory::Memcpy(Buffer, &bPressed, sizeof(bool));
 
 		ActiveWidget->CallCustomInput(ActionName, Buffer);
+	}
+}
+
+void UUINavPCComponent::CallCustomEnhancedInput(UInputAction* Action, const bool bPressed)
+{
+	if (ActiveWidget != nullptr && AllowsCustomInputByAction(Action))
+	{
+		const int CustomInputIndex = CustomEnhancedInputs.Find(Action);
+		if (CustomInputIndex < 0) return;
+
+		uint8* Buffer = static_cast<uint8*>(FMemory_Alloca(sizeof(bool)));
+		FMemory::Memcpy(Buffer, &bPressed, sizeof(bool));
+
+		ActiveWidget->CallCustomInput(Action->GetFName(), Buffer);
 	}
 }
 
