@@ -2895,21 +2895,15 @@ void UUINavWidget::MenuNavigate(const ENavigationDirection Direction)
 }
 
 template<typename T>
-T* UUINavWidget::GetOuterUINavWidget(const UObject* const Object)
+T* UUINavWidget::GetOuterObject(const UObject* const Object)
 {
-	UObject* OuterObject = Object->GetOuter();
-	if (OuterObject == nullptr)
+	T* OuterObject = Cast<T>(Object->GetOuter());
+	if (OuterObject != nullptr)
 	{
-		return nullptr;
+		return OuterObject;
 	}
 
-	T* OuterObject = Cast<T>(OuterObject);
-	if (OuterUINavWidget != nullptr)
-	{
-		return OuterUINavWidget;
-	}
-
-	return GetOuterUINavWidget<T>(OuterObject);
+	return GetOuterObject<T>(OuterObject);
 }
 
 UUINavWidget* UUINavWidget::GetMostOuterUINavWidget()
