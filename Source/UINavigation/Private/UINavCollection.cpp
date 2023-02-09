@@ -16,12 +16,12 @@ void UUINavCollection::BeginDynamicSetup()
 {
 	if (ParentWidget == nullptr)
 	{
-		ParentWidget = UUINavWidget::GetOuterWidget<UUINavWidget>(this);
+		ParentWidget = UUINavWidget::GetOuterObject<UUINavWidget>(this);
 	}
 
 	if (ParentCollection == nullptr)
 	{
-		ParentCollection = UUINavWidget::GetOuterWidget<UUINavCollection>(this);
+		ParentCollection = UUINavWidget::GetOuterObject<UUINavCollection>(this);
 	}
 
 	if (ParentWidget == nullptr || !ParentWidget->bSetupStarted)
