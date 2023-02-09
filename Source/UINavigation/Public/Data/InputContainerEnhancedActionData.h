@@ -24,6 +24,9 @@ struct FInputContainerEnhancedActionData
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = EnhancedInput)
 	UInputAction* Action = nullptr;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = EnhancedInput)
+	EInputAxis Axis = EInputAxis::X;
+
 	/*
 	Specifies whether you want this input to be treated as a normal axis or as a positive / negative axis.
 	(Only applies to Input Actions with a ValueType different than Boolean).
@@ -31,9 +34,6 @@ struct FInputContainerEnhancedActionData
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = EnhancedInput)
 	EAxisType AxisScale = EAxisType::None;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = EnhancedInput)
-	EInputAxis Axis = EInputAxis::X;
 };
 
 USTRUCT(BlueprintType)
