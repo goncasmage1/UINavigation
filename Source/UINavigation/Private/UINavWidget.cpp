@@ -2908,7 +2908,7 @@ T* UUINavWidget::GetOuterObject(const UObject* const Object)
 		return OuterObject;
 	}
 
-	return GetOuterObject<T>(OuterObject);
+	return GetOuterObject<T>(Object->GetOuter());
 }
 
 UUINavWidget* UUINavWidget::GetMostOuterUINavWidget()
