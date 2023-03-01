@@ -438,7 +438,7 @@ public:
 
 	//Receives the action and returns the first key that respects the given restriction.
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
-	FKey GetEnhancedInputKey(const UInputAction* Action, const EInputRestriction InputRestriction) const;
+	FKey GetEnhancedInputKey(const UInputAction* Action, const EInputAxis Axis = EInputAxis::X, const EAxisType Scale = EAxisType::None, const EInputRestriction InputRestriction = EInputRestriction::None) const;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
 	class UTexture2D* GetKeyIcon(const FKey Key) const;
@@ -451,7 +451,7 @@ public:
 	//Get first found Icon associated with the given enhanced input action
 	//Will search the icon table
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
-	class UTexture2D* GetEnhancedInputIcon(const UInputAction* Action, const EInputRestriction InputRestriction) const;
+	class UTexture2D* GetEnhancedInputIcon(const UInputAction* Action, const EInputAxis Axis = EInputAxis::X, const EAxisType Scale = EAxisType::None, const EInputRestriction InputRestriction = EInputRestriction::None) const;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
 	FText GetKeyText(const FKey Key) const;
