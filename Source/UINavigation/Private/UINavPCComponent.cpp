@@ -820,7 +820,7 @@ FKey UUINavPCComponent::GetInputKey(FName InputName, const EInputRestriction Inp
 	}
 }
 
-FKey UUINavPCComponent::GetEnhancedInputKey(const UInputAction* Action, const EInputRestriction InputRestriction) const
+FKey UUINavPCComponent::GetEnhancedInputKey(const UInputAction* Action, const EInputAxis Axis, const EAxisType Scale, const EInputRestriction InputRestriction) const
 {
 	if (const UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PC->GetLocalPlayer()))
 	{
@@ -829,28 +829,13 @@ FKey UUINavPCComponent::GetEnhancedInputKey(const UInputAction* Action, const EI
 		{
 			if (UUINavBlueprintFunctionLibrary::RespectsRestriction(Key, InputRestriction))
 			{
-				if (Action->ValueType == EInputActionValueType::Boolean)
+				if (Action->ValueType == EInputActionValueType::Boolean || Scale == EAxisType::None)
 				{
 					return Key;
 				}
 				else
 				{
-					return Key;
-					
-					// TODO: Must fetch Input Context modifiers somehow
-					/*if ((AxisMappings[i].Scale > 0.0f && AxisType == EAxisType::Positive) ||
-						(AxisMappings[i].Scale < 0.0f && AxisType == EAxisType::Negative))
-					{
-						return Key;
-					}
-					else
-					{
-						const FKey PotentialAxisKey = GetKeyFromAxis(Key, AxisType == EAxisType::Positive);
-						if (PotentialAxisKey.IsValid())
-						{
-							return PotentialAxisKey;
-						}
-					}*/
+					return GetKeyFromAxis(Key, Scale == EAxisType::Positive, Axis);
 				}
 			}
 		}
@@ -889,10 +874,9 @@ UTexture2D * UUINavPCComponent::GetInputIcon(const FName ActionName, const EInpu
 	return GetKeyIcon(GetInputKey(ActionName, InputRestriction));
 }
 
-UTexture2D* UUINavPCComponent::GetEnhancedInputIcon(const UInputAction* Action,
-	const EInputRestriction InputRestriction) const
+UTexture2D* UUINavPCComponent::GetEnhancedInputIcon(const UInputAction* Action, const EInputAxis Axis, const EAxisType Scale, const EInputRestriction InputRestriction) const
 {
-	return GetKeyIcon(GetEnhancedInputKey(Action, InputRestriction));
+	return GetKeyIcon(GetEnhancedInputKey(Action, Axis, Scale, InputRestriction));
 }
 
 FText UUINavPCComponent::GetKeyText(const FKey Key) const
