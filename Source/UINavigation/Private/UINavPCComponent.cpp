@@ -18,6 +18,7 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedPlayerInput.h"
+#include "AssetRegistry/AssetRegistryModule.h"
 
 UUINavPCComponent::UUINavPCComponent()
 {
@@ -336,13 +337,31 @@ void UUINavPCComponent::OnControllerConnectionChanged(EInputDeviceConnectionStat
 
 void UUINavPCComponent::VerifyDefaultInputs()
 {
-	UUINavSettings *MySettings = GetMutableDefault<UUINavSettings>();
-	if (MySettings->ActionMappings.Num() == 0 && MySettings->AxisMappings.Num() == 0)
+	UUINavDefaultInputSettings* DefaultInputSettings = GetMutableDefault<UUINavDefaultInputSettings>();
+	if (DefaultInputSettings->DefaultActionMappings.Num() == 0 && DefaultInputSettings->DefaultAxisMappings.Num() == 0)
 	{
 		const UInputSettings* Settings = GetDefault<UInputSettings>();
-		MySettings->ActionMappings = Settings->GetActionMappings();
-		MySettings->AxisMappings = Settings->GetAxisMappings();
-		MySettings->SaveConfig();
+		DefaultInputSettings->DefaultActionMappings = Settings->GetActionMappings();
+		DefaultInputSettings->DefaultAxisMappings = Settings->GetAxisMappings();
+		DefaultInputSettings->SaveConfig();
+	}
+
+	if (DefaultInputSettings->DefaultEnhancedInputMappings.Num() == 0)
+	{
+		FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
+		TArray<FAssetData> AssetsData;
+		AssetRegistryModule.Get().GetAssetsByClass(UInputMappingContext::StaticClass()->GetFName(), AssetsData);
+		for (const FAssetData& AssetData : AssetsData)
+		{
+			const UInputMappingContext* const InputContext = Cast<UInputMappingContext>(AssetData.GetAsset());
+			if (!IsValid(InputContext))
+			{
+				continue;
+			}
+
+			DefaultInputSettings->DefaultEnhancedInputMappings.Add(TSoftObjectPtr<UInputMappingContext>(AssetData.ToSoftObjectPath()), InputContext->GetMappings());
+		}
+		DefaultInputSettings->SaveConfig();
 	}
 }
 

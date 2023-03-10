@@ -63,22 +63,21 @@ void UUINavBlueprintFunctionLibrary::ResetInputSettings(APlayerController* PC)
 		UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PC->GetLocalPlayer());
 		if (PC->InputComponent->IsA<UEnhancedInputComponent>() && Subsystem != nullptr)
 		{
-			const UUINavSettings* UINavSettings = GetDefault<UUINavSettings>();
-			for (const TPair<TSoftObjectPtr<UInputMappingContext>, TSoftObjectPtr<UInputMappingContext>>& Entry : UINavSettings->DefaultInputContexts)
+			const UUINavDefaultInputSettings* DefaultUINavInputSettings = GetDefault<UUINavDefaultInputSettings>();
+			for (const TPair<TSoftObjectPtr<UInputMappingContext>, FInputMappingArray>& Entry : DefaultUINavInputSettings->DefaultEnhancedInputMappings)
 			{
-				UInputMappingContext* CurrentContext = Entry.Key.LoadSynchronous();
-				UInputMappingContext* DefaultContext = Entry.Value.LoadSynchronous();
+				UInputMappingContext* InputContext = Entry.Key.LoadSynchronous();
 				
-				const TArray<FEnhancedActionKeyMapping>& DefaultMappings = DefaultContext->GetMappings();
-				if (DefaultMappings.Num() == 0) continue;
+				const FInputMappingArray& DefaultMappings = Entry.Value;
+				if (DefaultMappings.DefaultInputMappings.Num() == 0) continue;
 
-				CurrentContext->UnmapAll();
+				InputContext->UnmapAll();
 
-				for (const FEnhancedActionKeyMapping& DefaultMapping : DefaultMappings)
+				for (const FEnhancedActionKeyMapping& DefaultInputMapping : DefaultMappings.DefaultInputMappings)
 				{
-					FEnhancedActionKeyMapping& NewMapping = CurrentContext->MapKey(DefaultMapping.Action, DefaultMapping.Key);
-					NewMapping.Modifiers = DefaultMapping.Modifiers;
-					NewMapping.Triggers = DefaultMapping.Triggers;
+					FEnhancedActionKeyMapping& NewMapping = InputContext->MapKey(DefaultInputMapping.Action, DefaultInputMapping.Key);
+					NewMapping.Modifiers = DefaultInputMapping.Modifiers;
+					NewMapping.Triggers = DefaultInputMapping.Triggers;
 				}
 			}
 
@@ -90,7 +89,7 @@ void UUINavBlueprintFunctionLibrary::ResetInputSettings(APlayerController* PC)
 		}
 	}
 	UInputSettings* Settings = const_cast<UInputSettings*>(GetDefault<UInputSettings>());
-	UUINavSettings *MySettings = GetMutableDefault<UUINavSettings>();
+	UUINavDefaultInputSettings* DefaultUINavInputSettings = GetMutableDefault<UUINavDefaultInputSettings>();
 
 	//Remove old mappings
 	TArray<FInputActionKeyMapping> OldActionMappings = Settings->GetActionMappings();
@@ -105,11 +104,11 @@ void UUINavBlueprintFunctionLibrary::ResetInputSettings(APlayerController* PC)
 	}
 
 	//Add new ones
-	for (FInputActionKeyMapping Mapping : MySettings->ActionMappings)
+	for (FInputActionKeyMapping Mapping : DefaultUINavInputSettings->DefaultActionMappings)
 	{
 		Settings->AddActionMapping(Mapping, false);
 	}
-	for (FInputAxisKeyMapping Mapping : MySettings->AxisMappings)
+	for (FInputAxisKeyMapping Mapping : DefaultUINavInputSettings->DefaultAxisMappings)
 	{
 		Settings->AddAxisMapping(Mapping, false);
 	}
