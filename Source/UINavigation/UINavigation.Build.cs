@@ -31,7 +31,8 @@ public class UINavigation : ModuleRules
                 "InputCore",
                 "EnhancedInput",
                 "RHI",
-                "HeadMountedDisplay"
+                "HeadMountedDisplay",
+				"AssetRegistry"
 			}
 			);
 		
