@@ -444,6 +444,8 @@ void UUINavInputBox::FinishUpdateNewEnhancedInputKey(const FKey PressedKey, cons
 		Container->UINavPC->UnbindMouseWorkaround();
 	}
 
+	Container->UINavPC->RequestRebuildMappings();
+
 	UpdateKeyDisplay(Index);
 
 	if (bRemoved2DAxis)
