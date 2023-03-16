@@ -328,6 +328,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = UINavController)
 	void SetAllowCustomInputByIndex(const int InputIndex, const bool bAllowInput);
 
+	void RequestRebuildMappings();
+
 	void HandleKeyDownEvent(FSlateApplication& SlateApp, const FKeyEvent& InKeyEvent);
 	void HandleKeyUpEvent(FSlateApplication& SlateApp, const FKeyEvent& InKeyEvent);
 	void HandleAnalogInputEvent(FSlateApplication& SlateApp, const FAnalogInputEvent& InAnalogInputEvent);
