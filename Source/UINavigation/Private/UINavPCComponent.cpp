@@ -3,6 +3,7 @@
 #include "UINavPCComponent.h"
 #include "UINavWidget.h"
 #include "UINavSettings.h"
+#include "UINavDefaultInputSettings.h"
 #include "UINavPCReceiver.h"
 #include "UINavInputContainer.h"
 #include "UINavMacros.h"
@@ -17,6 +18,7 @@
 #include "GenericPlatform/GenericPlatformInputDeviceMapper.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "EnhancedInputLibrary.h"
 #include "EnhancedPlayerInput.h"
 #include "AssetRegistry/AssetRegistryModule.h"
 
@@ -287,6 +289,17 @@ void UUINavPCComponent::BindMenuEnhancedInputs()
 			}
 		}
 	}
+}
+
+void UUINavPCComponent::RequestRebuildMappings()
+{
+	UEnhancedInputLibrary::ForEachSubsystem([](IEnhancedInputSubsystemInterface* Subsystem)
+	{
+		if (Subsystem)
+		{
+			Subsystem->RequestRebuildControlMappings(true);
+		}
+	});
 }
 
 void UUINavPCComponent::OnCustomInput(const int InputIndex, const bool bPressed)

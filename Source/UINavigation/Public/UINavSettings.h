@@ -8,44 +8,6 @@
 #include "Data/UINavEnhancedInputActions.h"
 #include "UINavSettings.generated.h"
 
-USTRUCT(BlueprintType)
-struct FInputMappingArray
-{
-	GENERATED_BODY()
-
-	FInputMappingArray() {}
-
-	FInputMappingArray(const TArray<FEnhancedActionKeyMapping>& InputMappings)
-	: DefaultInputMappings(InputMappings) {}
-
-	UPROPERTY(config)
-	TArray<FEnhancedActionKeyMapping> DefaultInputMappings;
-};
-
-/**
- *
- */
-UCLASS(config = UINavDefaultInputSettings)
-class UINAVIGATION_API UUINavDefaultInputSettings : public UObject
-{
-	GENERATED_BODY()
-
-	UUINavDefaultInputSettings(const FObjectInitializer& ObjectInitializer)
-	: Super(ObjectInitializer) {}
-
-public:
-
-	UPROPERTY(config)
-	TArray<struct FInputActionKeyMapping> DefaultActionMappings;
-
-	UPROPERTY(config)
-	TArray<struct FInputAxisKeyMapping> DefaultAxisMappings;
-
-	// A map for each Input Context in your game and its respective Default Input Context Mappings
-	UPROPERTY(config)
-	TMap<TSoftObjectPtr<UInputMappingContext>, FInputMappingArray> DefaultEnhancedInputMappings;
-};
-
 /**
  * 
  */
