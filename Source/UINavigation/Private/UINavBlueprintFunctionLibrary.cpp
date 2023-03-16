@@ -5,6 +5,7 @@
 #include "GameFramework/GameUserSettings.h"
 #include "GameFramework/InputSettings.h"
 #include "UINavSettings.h"
+#include "UINavDefaultInputSettings.h"
 #include "UINavComponent.h"
 #include "UINavMacros.h"
 #include "InputAction.h"

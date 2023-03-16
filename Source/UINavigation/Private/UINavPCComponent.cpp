@@ -3,6 +3,7 @@
 #include "UINavPCComponent.h"
 #include "UINavWidget.h"
 #include "UINavSettings.h"
+#include "UINavDefaultInputSettings.h"
 #include "UINavPCReceiver.h"
 #include "UINavInputContainer.h"
 #include "UINavMacros.h"
