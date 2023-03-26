@@ -68,6 +68,11 @@ void UUINavBlueprintFunctionLibrary::ResetInputSettings(APlayerController* PC)
 			for (const TPair<TSoftObjectPtr<UInputMappingContext>, FInputMappingArray>& Entry : DefaultUINavInputSettings->DefaultEnhancedInputMappings)
 			{
 				UInputMappingContext* InputContext = Entry.Key.LoadSynchronous();
+
+				if (InputContext == nullptr)
+				{
+					continue;
+				}
 				
 				const FInputMappingArray& DefaultMappings = Entry.Value;
 				if (DefaultMappings.DefaultInputMappings.Num() == 0) continue;
