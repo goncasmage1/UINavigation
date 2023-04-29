@@ -6,7 +6,7 @@
 #include "GameFramework/PlayerInput.h"
 #include "InputMappingContext.h"
 #include "Data/UINavEnhancedInputActions.h"
-#include "EnhancedActionKeyMapping.h"
+#include "Data/UINavEnhancedActionKeyMapping.h"
 #include "UINavDefaultInputSettings.generated.h"
 
 USTRUCT(BlueprintType)
@@ -20,7 +20,7 @@ struct FInputMappingArray
 	: DefaultInputMappings(InputMappings) {}
 
 	UPROPERTY()
-	TArray<FEnhancedActionKeyMapping> DefaultInputMappings;
+	TArray<FUINavEnhancedActionKeyMapping> DefaultInputMappings;
 };
 
 /**
