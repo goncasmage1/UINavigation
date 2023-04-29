@@ -944,6 +944,8 @@ void UUINavWidget::AddUINavButton(UUINavButton* NewButton, const int TargetGridI
 
 	if (IndexInGrid >= TargetGrid.GetDimension() || IndexInGrid <= -1) IndexInGrid = TargetGrid.GetDimension();
 
+	if (TargetGrid.FirstButton == nullptr) NewButton->ButtonIndex = -1;
+
 	IncrementGrid(NewButton, TargetGrid, IndexInGrid);
 
 	NewButton->ButtonIndex = TargetGrid.FirstButton->ButtonIndex + IndexInGrid;
@@ -1830,6 +1832,18 @@ void UUINavWidget::DeleteGrid(const int GridIndex)
 				while (UINavButtons.IsValidIndex(NextButtonIndex))
 				{
 					UINavButtons[NextButtonIndex++]->GridIndex--;
+				}
+
+				for (UUINavCollection* Collection : UINavCollections)
+				{
+					if (Collection->FirstGridIndex > GridIndex)
+					{
+						Collection->FirstGridIndex--;
+					}
+				}
+				if (NavigationGrids[NextGridIndex].GridIndex > GridIndex)
+				{
+					NavigationGrids[NextGridIndex].GridIndex--;
 				}
 
 				break;
