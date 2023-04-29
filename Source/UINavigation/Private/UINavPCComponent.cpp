@@ -7,6 +7,8 @@
 #include "UINavPCReceiver.h"
 #include "UINavInputContainer.h"
 #include "UINavMacros.h"
+#include "UINavInputBox.h"
+#include "UINavigationConfig.h"
 #include "GameFramework/InputSettings.h"
 #include "Data/AxisType.h"
 #include "Data/InputIconMapping.h"
@@ -51,6 +53,8 @@ void UUINavPCComponent::BeginPlay()
 
 	if (PC != nullptr && PC->IsLocalPlayerController() && !SharedInputProcessor.IsValid())
 	{
+		RefreshNavigationKeys();
+
 		if (IsValid(GetEnhancedInputComponent()))
 		{
 			const UUINavSettings* const UINavSettings = GetDefault<UUINavSettings>();
@@ -77,9 +81,7 @@ void UUINavPCComponent::BeginPlay()
 		SharedInputProcessor->SetUINavPC(this);
 		FSlateApplication::Get().RegisterInputPreProcessor(SharedInputProcessor);
 
-		VerifyDefaultInputs();
-		FetchUINavActionKeys();
-		BindMenuEnhancedInputs();
+		TryResetDefaultInputs();
 		if (!FCoreDelegates::OnControllerConnectionChange.IsBoundToObject(this))
 		{
 			FCoreDelegates::OnControllerConnectionChange.AddUObject(this, &UUINavPCComponent::OnControllerConnectionChanged);
@@ -125,168 +127,6 @@ void UUINavPCComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAct
 	}	
 }
 
-void UUINavPCComponent::BindMenuInputs()
-{
-	UInputComponent* InputComponent = PC->InputComponent;
-	if (InputComponent == nullptr) return;
-
-	UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(InputComponent);
-	if (IsValid(EnhancedInputComponent))
-	{
-		// Get the Enhanced Input Local Player Subsystem from the Local Player related to our Player Controller.
-		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PC->GetLocalPlayer()))
-		{
-			if (bAutoAddUINavInputContext)
-			{
-				Subsystem->AddMappingContext(GetDefault<UUINavSettings>()->EnhancedInputContext.LoadSynchronous(), UINavInputContextPriority);
-			}
-		}
-	}
-	else
-	{
-		FInputActionBinding& Action1_1 = InputComponent->BindAction("MenuUp", IE_Pressed, this, &UUINavPCComponent::StartMenuUp);
-		Action1_1.bExecuteWhenPaused = true;
-		Action1_1.bConsumeInput = false;
-		FInputActionBinding& Action2_1 = InputComponent->BindAction("MenuDown", IE_Pressed, this, &UUINavPCComponent::StartMenuDown);
-		Action2_1.bExecuteWhenPaused = true;
-		Action2_1.bConsumeInput = false;
-		FInputActionBinding& Action3_1 = InputComponent->BindAction("MenuLeft", IE_Pressed, this, &UUINavPCComponent::StartMenuLeft);
-		Action3_1.bExecuteWhenPaused = true;
-		Action3_1.bConsumeInput = false;
-		FInputActionBinding& Action4_1 = InputComponent->BindAction("MenuRight", IE_Pressed, this, &UUINavPCComponent::StartMenuRight);
-		Action4_1.bExecuteWhenPaused = true;
-		Action4_1.bConsumeInput = false;
-		FInputActionBinding& Action5_1 = InputComponent->BindAction("MenuSelect", IE_Pressed, this, &UUINavPCComponent::MenuSelect);
-		Action5_1.bExecuteWhenPaused = true;
-		Action5_1.bConsumeInput = false;
-		FInputActionBinding& Action6_1 = InputComponent->BindAction("MenuReturn", IE_Pressed, this, &UUINavPCComponent::MenuReturn);
-		Action6_1.bExecuteWhenPaused = true;
-		Action6_1.bConsumeInput = false;
-		FInputActionBinding& Action7_1 = InputComponent->BindAction("MenuNext", IE_Pressed, this, &UUINavPCComponent::MenuNext);
-		Action7_1.bExecuteWhenPaused = true;
-		Action7_1.bConsumeInput = false;
-		FInputActionBinding& Action8_1 = InputComponent->BindAction("MenuPrevious", IE_Pressed, this, &UUINavPCComponent::MenuPrevious);
-		Action8_1.bExecuteWhenPaused = true;
-		Action8_1.bConsumeInput = false;
-
-		FInputActionBinding& Action1_2 = InputComponent->BindAction("MenuUp", IE_Released, this, &UUINavPCComponent::MenuUpRelease);
-		Action1_2.bExecuteWhenPaused = true;
-		Action1_2.bConsumeInput = false;
-		FInputActionBinding& Action2_2 = InputComponent->BindAction("MenuDown", IE_Released, this, &UUINavPCComponent::MenuDownRelease);
-		Action2_2.bExecuteWhenPaused = true;
-		Action2_2.bConsumeInput = false;
-		FInputActionBinding& Action3_2 = InputComponent->BindAction("MenuLeft", IE_Released, this, &UUINavPCComponent::MenuLeftRelease);
-		Action3_2.bExecuteWhenPaused = true;
-		Action3_2.bConsumeInput = false;
-		FInputActionBinding& Action4_2 = InputComponent->BindAction("MenuRight", IE_Released, this, &UUINavPCComponent::MenuRightRelease);
-		Action4_2.bExecuteWhenPaused = true;
-		Action4_2.bConsumeInput = false;
-		FInputActionBinding& Action5_2 = InputComponent->BindAction("MenuSelect", IE_Released, this, &UUINavPCComponent::MenuSelectRelease);
-		Action5_2.bExecuteWhenPaused = true;
-		Action5_2.bConsumeInput = false;
-		FInputActionBinding& Action6_2 = InputComponent->BindAction("MenuReturn", IE_Released, this, &UUINavPCComponent::MenuReturnRelease);
-		Action6_2.bExecuteWhenPaused = true;
-		Action6_2.bConsumeInput = false;
-
-		if (CustomInputs.Num() > 0)
-		{
-			bAllowCustomInputs.Empty();
-			bAllowCustomInputs.Init(true, CustomInputs.Num());
-
-			int i = 0;
-			for (const FName CustomInput : CustomInputs)
-			{
-				FInputActionHandlerSignature PressedActionHandler;
-				PressedActionHandler.BindUFunction(this, TEXT("OnCustomInput"), i, true);
-				FInputActionBinding PressedActionBinding(CustomInput, IE_Pressed);
-				PressedActionBinding.ActionDelegate = PressedActionHandler;
-				FInputActionBinding& CustomPressedInput = InputComponent->AddActionBinding(PressedActionBinding);
-				CustomPressedInput.bExecuteWhenPaused = true;
-				CustomPressedInput.bConsumeInput = false;
-
-				FInputActionHandlerSignature ReleasedActionHandler;
-				ReleasedActionHandler.BindUFunction(this, TEXT("OnCustomInput"), i, false);
-				FInputActionBinding ReleasedActionBinding(CustomInput, IE_Released);
-				ReleasedActionBinding.ActionDelegate = ReleasedActionHandler;
-				FInputActionBinding& CustomReleasedInput = InputComponent->AddActionBinding(ReleasedActionBinding);
-				CustomReleasedInput.bExecuteWhenPaused = true;
-				CustomReleasedInput.bConsumeInput = false;
-
-				i++;
-			}
-		}
-	}
-}
-
-void UUINavPCComponent::UnbindMenuInputs()
-{
-	UInputComponent* InputComponent = PC->InputComponent;
-	if (InputComponent == nullptr) return;
-
-	const UEnhancedInputComponent* const EnhancedInputComponent = Cast<UEnhancedInputComponent>(InputComponent);
-	if (IsValid(EnhancedInputComponent))
-	{
-		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PC->GetLocalPlayer()))
-		{
-			if (bAutoAddUINavInputContext)
-			{
-				Subsystem->RemoveMappingContext(GetDefault<UUINavSettings>()->EnhancedInputContext.LoadSynchronous());
-			}
-		}
-	}
-	else
-	{
-		const int NumActionBindings = InputComponent->GetNumActionBindings();
-		for (int i = NumActionBindings - 1; i >= 0; i--)
-		{
-			if (InputComponent->GetActionBinding(i).ActionDelegate.IsBoundToObject(this))
-			{
-				InputComponent->RemoveActionBinding(i);
-			}
-		}
-	}
-}
-
-void UUINavPCComponent::BindMenuEnhancedInputs()
-{
-	UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PC->InputComponent);
-	if (IsValid(EnhancedInputComponent))
-	{
-		const UUINavEnhancedInputActions* const InputActions = GetDefault<UUINavSettings>()->EnhancedInputActions.LoadSynchronous();
-
-		// TODO: Fix input crazyness when alt+tabbing while navigating the widget
-		EnhancedInputComponent->BindAction(InputActions->IA_MenuUp, ETriggerEvent::Started, this, &UUINavPCComponent::StartMenuUp);
-		EnhancedInputComponent->BindAction(InputActions->IA_MenuDown, ETriggerEvent::Started, this, &UUINavPCComponent::StartMenuDown);
-		EnhancedInputComponent->BindAction(InputActions->IA_MenuLeft, ETriggerEvent::Started, this, &UUINavPCComponent::StartMenuLeft);
-		EnhancedInputComponent->BindAction(InputActions->IA_MenuRight, ETriggerEvent::Started, this, &UUINavPCComponent::StartMenuRight);
-		EnhancedInputComponent->BindAction(InputActions->IA_MenuSelect, ETriggerEvent::Started, this, &UUINavPCComponent::MenuSelect);
-		EnhancedInputComponent->BindAction(InputActions->IA_MenuReturn, ETriggerEvent::Started, this, &UUINavPCComponent::MenuReturn);
-		EnhancedInputComponent->BindAction(InputActions->IA_MenuNext, ETriggerEvent::Started, this, &UUINavPCComponent::MenuNext);
-		EnhancedInputComponent->BindAction(InputActions->IA_MenuPrevious, ETriggerEvent::Started, this, &UUINavPCComponent::MenuPrevious);
-
-		EnhancedInputComponent->BindAction(InputActions->IA_MenuUp, ETriggerEvent::Completed, this, &UUINavPCComponent::MenuUpRelease);
-		EnhancedInputComponent->BindAction(InputActions->IA_MenuDown, ETriggerEvent::Completed, this, &UUINavPCComponent::MenuDownRelease);
-		EnhancedInputComponent->BindAction(InputActions->IA_MenuLeft, ETriggerEvent::Completed, this, &UUINavPCComponent::MenuLeftRelease);
-		EnhancedInputComponent->BindAction(InputActions->IA_MenuRight, ETriggerEvent::Completed, this, &UUINavPCComponent::MenuRightRelease);
-		EnhancedInputComponent->BindAction(InputActions->IA_MenuSelect, ETriggerEvent::Completed, this, &UUINavPCComponent::MenuSelectRelease);
-		EnhancedInputComponent->BindAction(InputActions->IA_MenuReturn, ETriggerEvent::Completed, this, &UUINavPCComponent::MenuReturnRelease);
-		
-		if (CustomEnhancedInputs.Num() > 0)
-		{
-			bAllowCustomInputs.Empty();
-			bAllowCustomInputs.Init(true, CustomEnhancedInputs.Num());
-
-			int i = 0;
-			for (const UInputAction* CustomInput : CustomEnhancedInputs)
-			{
-				EnhancedInputComponent->BindAction(CustomInput, ETriggerEvent::Started, this, &UUINavPCComponent::OnCustomInput, i, true);
-				EnhancedInputComponent->BindAction(CustomInput, ETriggerEvent::Completed, this, &UUINavPCComponent::OnCustomInput, i, false);
-				++i;
-			}
-		}
-	}
-}
-
 void UUINavPCComponent::RequestRebuildMappings()
 {
 	UEnhancedInputLibrary::ForEachSubsystem([](IEnhancedInputSubsystemInterface* Subsystem)
@@ -298,53 +138,12 @@ void UUINavPCComponent::RequestRebuildMappings()
 	});
 }
 
-void UUINavPCComponent::OnCustomInput(const int InputIndex, const bool bPressed)
-{
-	UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PC->InputComponent);
-	if (IsValid(EnhancedInputComponent))
-	{
-		CallCustomEnhancedInput(CustomEnhancedInputs[InputIndex], bPressed);
-	}
-	else
-	{
-		CallCustomInput(CustomInputs[InputIndex], bPressed);
-	}
-}
-
-void UUINavPCComponent::CallCustomInput(const FName ActionName, const bool bPressed)
-{
-	if (ActiveWidget != nullptr && AllowsCustomInputByName(ActionName))
-	{
-		const int CustomInputIndex = CustomInputs.Find(ActionName);
-		if (CustomInputIndex < 0) return;
-
-		uint8* Buffer = static_cast<uint8*>(FMemory_Alloca(sizeof(bool)));
-		FMemory::Memcpy(Buffer, &bPressed, sizeof(bool));
-
-		ActiveWidget->CallCustomInput(ActionName, Buffer);
-	}
-}
-
-void UUINavPCComponent::CallCustomEnhancedInput(UInputAction* Action, const bool bPressed)
-{
-	if (ActiveWidget != nullptr && AllowsCustomInputByAction(Action))
-	{
-		const int CustomInputIndex = CustomEnhancedInputs.Find(Action);
-		if (CustomInputIndex < 0) return;
-
-		uint8* Buffer = static_cast<uint8*>(FMemory_Alloca(sizeof(bool)));
-		FMemory::Memcpy(Buffer, &bPressed, sizeof(bool));
-
-		ActiveWidget->CallCustomInput(Action->GetFName(), Buffer);
-	}
-}
-
 void UUINavPCComponent::OnControllerConnectionChanged(bool bConnected, FPlatformUserId UserId, int32 UserIndex)
 {
 	IUINavPCReceiver::Execute_OnControllerConnectionChanged(GetOwner(), bConnected, static_cast<int32>(UserId), UserIndex);
 }
 
-void UUINavPCComponent::VerifyDefaultInputs()
+void UUINavPCComponent::TryResetDefaultInputs()
 {
 	UUINavDefaultInputSettings* DefaultInputSettings = GetMutableDefault<UUINavDefaultInputSettings>();
 	if (DefaultInputSettings->DefaultActionMappings.Num() == 0 && DefaultInputSettings->DefaultAxisMappings.Num() == 0)
@@ -374,104 +173,97 @@ void UUINavPCComponent::VerifyDefaultInputs()
 	}
 }
 
-void UUINavPCComponent::BindMouseWorkaround()
+void UUINavPCComponent::ProcessRebind(const FKey Key)
 {
-	UInputComponent* InputComponent = PC->InputComponent;
-	if (InputComponent == nullptr) return;
-
-	TArray<FKey> MouseKeys =
+	if (!IsValid(ListeningInputBox))
 	{
-		EKeys::LeftMouseButton,
-		EKeys::RightMouseButton,
-		EKeys::MiddleMouseButton,
-		EKeys::MouseScrollUp,
-		EKeys::MouseScrollDown,
-		EKeys::ThumbMouseButton,
-		EKeys::ThumbMouseButton2
-	};
-
-	for (FKey MouseKey : MouseKeys)
-	{
-		FInputKeyBinding NewKey;
-		NewKey.KeyDelegate.BindDelegate<FMouseKeyDelegate>(this, &UUINavPCComponent::MouseKeyPressed, EKeys::AnyKey);
-		NewKey.bConsumeInput = true;
-		NewKey.bExecuteWhenPaused = true;
-		InputComponent->KeyBindings.Add(NewKey);
+		return;
 	}
+
+	if (Key == EKeys::LeftMouseButton)
+	{
+		bIgnoreSelectRelease = true;
+	}
+
+	ListeningInputBox->UpdateInputKey(Key);
+	ListeningInputBox = nullptr;
 }
 
-void UUINavPCComponent::UnbindMouseWorkaround()
+void UUINavPCComponent::CancelRebind()
 {
-	UInputComponent* InputComponent = PC->InputComponent;
-	if (InputComponent == nullptr) return;
-
-	const int KeyBindingsNum = InputComponent->KeyBindings.Num();
-	for (int i = KeyBindingsNum - 1; i >= 0; i--)
+	if (IsValid(ListeningInputBox))
 	{
-		if (InputComponent->KeyBindings[i].KeyDelegate.IsBoundToObject(this))
-		{
-			InputComponent->KeyBindings.RemoveAt(i);
-		}
+		ListeningInputBox->CancelUpdateInputKey(ERevertRebindReason::None);
+		ListeningInputBox = nullptr;
 	}
 }
 
 void UUINavPCComponent::SetActiveWidget(UUINavWidget * NewActiveWidget)
 {
 	if (NewActiveWidget == ActiveWidget) return;
+
+	UUINavWidget* CommonParent = ActiveWidget != nullptr ? ActiveWidget->GetMostOuterUINavWidget() : NewActiveWidget->GetMostOuterUINavWidget();
 	
 	if (ActiveWidget != nullptr)
 	{
+		ActiveWidget->PropagateLoseNavigation(NewActiveWidget, ActiveWidget, CommonParent);
+
 		if (NewActiveWidget == nullptr)
 		{
-			UnbindMenuInputs();
-			PressedActions.Empty();
-		}
-
-		if (ActiveWidget->OuterUINavWidget == nullptr)
-		{
-			ActiveWidget->LoseNavigation(NewActiveWidget);
+			IUINavPCReceiver::Execute_OnRootWidgetRemoved(GetOwner());
 		}
 	}
-	else if (NewActiveWidget != nullptr)
-	{
-		BindMenuInputs();
-		NewActiveWidget->GainNavigation(nullptr);
-	}
-
-	IUINavPCReceiver::Execute_OnActiveWidgetChanged(GetOwner(), ActiveWidget, NewActiveWidget);	
-	ActiveWidget = NewActiveWidget;
-}
-
-void UUINavPCComponent::SetActiveNestedWidget(UUINavWidget* NewActiveWidget)
-{
-	if (NewActiveWidget == ActiveWidget || ActiveWidget == nullptr) return;
-
-	UUINavWidget* OldActiveWidget = ActiveWidget;
-
+	
 	if (NewActiveWidget != nullptr)
 	{
-		NewActiveWidget->SetUserFocus(PC);
-		if (GetInputMode() == EInputMode::UI)
-		{
-			NewActiveWidget->SetKeyboardFocus();
-		}
+		NewActiveWidget->PropagateGainNavigation(ActiveWidget, NewActiveWidget, CommonParent);
 
-		SetActiveWidget(NewActiveWidget);
+		if (ActiveWidget == nullptr)
+		{
+			IUINavPCReceiver::Execute_OnRootWidgetAdded(GetOwner());
+		}
 	}
 
-	UUINavWidget* MostOuter = OldActiveWidget != nullptr ? OldActiveWidget->GetMostOuterUINavWidget() : NewActiveWidget->GetMostOuterUINavWidget();
-	if (MostOuter == nullptr) return;
-	
-	UUINavWidget* CommonParent = MostOuter;
-	
+	IUINavPCReceiver::Execute_OnActiveWidgetChanged(GetOwner(), ActiveWidget, NewActiveWidget);
+	ActiveWidget = NewActiveWidget;
+	ActiveSubWidget = nullptr;
+}
+
+void UUINavPCComponent::NotifyNavigatedTo(UUINavWidget* NavigatedWidget)
+{
+	if (!IsValid(NavigatedWidget) || NavigatedWidget == ActiveSubWidget)
+	{
+		return;
+	}
+
+	if (NavigatedWidget == ActiveWidget && !IsValid(ActiveSubWidget))
+	{
+		return;
+	}
+
+	UUINavWidget* OldActiveWidget = ActiveSubWidget != nullptr ? ActiveSubWidget : ActiveWidget;
+	UUINavWidget* OldActiveSubWidget = ActiveSubWidget;
+
+	if (!IsValid(ActiveWidget))
+	{
+		SetActiveWidget(NavigatedWidget);
+	}
+
+	UUINavWidget* CommonParent = OldActiveWidget != nullptr ? OldActiveWidget->GetMostOuterUINavWidget() : NavigatedWidget->GetMostOuterUINavWidget();
+	if (CommonParent == nullptr)
+	{
+		return;
+	}
+
+	ActiveSubWidget = CommonParent != NavigatedWidget ? NavigatedWidget : nullptr;
+
 	uint8 Depth = 0;
 	const TArray<int>& OldPath = OldActiveWidget != nullptr ? OldActiveWidget->GetUINavWidgetPath() : TArray<int>();
-	const TArray<int>& NewPath = NewActiveWidget != nullptr ? NewActiveWidget->GetUINavWidgetPath() : TArray<int>();
+	const TArray<int>& NewPath = NavigatedWidget != nullptr ? NavigatedWidget->GetUINavWidgetPath() : TArray<int>();
 
-	if (OldPath.Num() == Depth && OldActiveWidget != nullptr) OldActiveWidget->LoseNavigation(NewActiveWidget);
-	if (NewPath.Num() == Depth && NewActiveWidget != nullptr) NewActiveWidget->GainNavigation(OldActiveWidget);
-	
-	bShouldIgnoreHoverEvents = true;
+	if (OldPath.Num() == Depth && OldActiveWidget != nullptr) OldActiveWidget->LoseNavigation(NavigatedWidget);
+	if (NewPath.Num() == Depth && NavigatedWidget != nullptr) NavigatedWidget->GainNavigation(OldActiveWidget);
+
 	while (true)
 	{
 		const int OldIndex = OldPath.Num() > Depth ? OldPath[Depth] : -1;
@@ -484,21 +276,50 @@ void UUINavPCComponent::SetActiveNestedWidget(UUINavWidget* NewActiveWidget)
 		{
 			if (Depth == FMath::Max(OldPath.Num(), NewPath.Num()))
 			{
-				if (OldIndex != -1 && OldActiveWidget != nullptr) OldActiveWidget->PropagateLoseNavigation(NewActiveWidget, OldActiveWidget, CommonParent);
-				if (NewIndex != -1 && NewActiveWidget != nullptr) NewActiveWidget->PropagateGainNavigation(OldActiveWidget, NewActiveWidget, CommonParent);
+				if (OldIndex != -1 && OldActiveWidget != nullptr) OldActiveWidget->PropagateLoseNavigation(NavigatedWidget, OldActiveWidget, CommonParent);
+				if (NewIndex != -1 && NavigatedWidget != nullptr) NavigatedWidget->PropagateGainNavigation(OldActiveWidget, NavigatedWidget, CommonParent);
 				break;
 			}
 		}
 		else
 		{
-		    CommonParent = CommonParent->GetChildUINavWidget(OldIndex);
+			CommonParent = CommonParent->GetChildUINavWidget(OldIndex);
 		}
-		
-		if (OldPath.Num() == Depth && OldActiveWidget != nullptr) OldActiveWidget->LoseNavigation(NewActiveWidget);
-		if (NewPath.Num() == Depth && NewActiveWidget != nullptr) NewActiveWidget->GainNavigation(OldActiveWidget);
+
+		if (OldPath.Num() == Depth && OldActiveWidget != nullptr) OldActiveWidget->LoseNavigation(NavigatedWidget);
+		if (NewPath.Num() == Depth && NavigatedWidget != nullptr) NavigatedWidget->GainNavigation(OldActiveWidget);
+	}
+}
+
+UUINavWidget* UUINavPCComponent::GoToWidget(TSubclassOf<UUINavWidget> NewWidgetClass, const bool bRemoveParent, const bool bDestroyParent, const int ZOrder)
+{
+	if (NewWidgetClass == nullptr)
+	{
+		DISPLAYERROR("GoToWidget: No Widget Class found");
+		return nullptr;
 	}
 
-	bShouldIgnoreHoverEvents = false;
+	UUINavWidget* NewWidget = CreateWidget<UUINavWidget>(PC, NewWidgetClass);
+	return GoToBuiltWidget(NewWidget, bRemoveParent, bDestroyParent, ZOrder);
+}
+
+UUINavWidget* UUINavPCComponent::GoToBuiltWidget(UUINavWidget* NewWidget, const bool bRemoveParent, const bool bDestroyParent, const int ZOrder)
+{
+	if (NewWidget == nullptr) return nullptr;
+
+	if (ActiveWidget == nullptr)
+	{
+		NewWidget->AddToViewport();
+		NewWidget->SetFocus();
+		return NewWidget;
+	}
+
+	return ActiveWidget->GoToBuiltWidget(NewWidget, bRemoveParent, bDestroyParent, ZOrder);
+}
+
+void UUINavPCComponent::RefreshNavigationKeys()
+{
+	FSlateApplication::Get().SetNavigationConfig(MakeShared<FUINavigationConfig>());
 }
 
 void UUINavPCComponent::SetAllowAllMenuInput(const bool bAllowInput)
@@ -507,10 +328,6 @@ void UUINavPCComponent::SetAllowAllMenuInput(const bool bAllowInput)
 	bAllowSelectInput = bAllowInput;
 	bAllowReturnInput = bAllowInput;
 	bAllowSectionInput = bAllowInput;
-	for (bool& allowCustomInput : bAllowCustomInputs)
-	{
-		allowCustomInput = bAllowInput;
-	}
 }
 
 void UUINavPCComponent::SetAllowDirectionalInput(const bool bAllowInput)
@@ -533,62 +350,22 @@ void UUINavPCComponent::SetAllowSectionInput(const bool bAllowInput)
 	bAllowSectionInput = bAllowInput;
 }
 
-void UUINavPCComponent::SetAllowCustomInputByName(const FName InputName, const bool bAllowInput)
-{
-	const int CustomInputIndex = CustomInputs.Find(InputName);
-	if (!bAllowCustomInputs.IsValidIndex(CustomInputIndex)) return;
-	bAllowCustomInputs[CustomInputIndex] = bAllowInput;
-}
-
-void UUINavPCComponent::SetAllowCustomInputByAction(UInputAction* InputAction, const bool bAllowInput)
-{
-	const int CustomInputIndex = CustomEnhancedInputs.Find(InputAction);
-	if (CustomInputIndex < 0) return;
-	bAllowCustomInputs[CustomInputIndex] = bAllowInput;
-}
-
-void UUINavPCComponent::SetAllowCustomInputByIndex(const int InputIndex, const bool bAllowInput)
-{
-	if (!CustomInputs.IsValidIndex(InputIndex) || !bAllowCustomInputs.IsValidIndex(InputIndex)) return;
-	bAllowCustomInputs[InputIndex] = bAllowInput;
-}
-
 void UUINavPCComponent::HandleKeyDownEvent(FSlateApplication& SlateApp, const FKeyEvent& InKeyEvent)
 {
 	VerifyInputTypeChangeByKey(InKeyEvent.GetKey());
-
-	if (ActiveWidget != nullptr && GetInputMode() == EInputMode::UI)
-	{
-		if (!ActiveWidget->IsRebindingInput())
-		{
-			//Allow fullscreen by pressing F11 or Alt+Enter
-			if (!GEngine->GameViewport->TryToggleFullscreenOnInputKey(InKeyEvent.GetKey(), IE_Pressed))
-			{
-				OnKeyPressed(InKeyEvent.GetKey());
-			}
-		}
-	}
 }
 
 void UUINavPCComponent::HandleKeyUpEvent(FSlateApplication& SlateApp, const FKeyEvent& InKeyEvent)
 {
-	if (ActiveWidget != nullptr && GetInputMode() == EInputMode::UI)
+	if (IsValid(ListeningInputBox))
 	{
-		if (ActiveWidget->IsRebindingInput())
-		{
-			FKey Key = InKeyEvent.GetKey();
+		FKey Key = InKeyEvent.GetKey();
 
-			if (ActiveWidget->ReceiveInputType == EReceiveInputType::Axis)
-			{
-				Key = ActiveWidget->UINavInputContainer->GetAxisFromKey(Key);
-			}
-
-			ActiveWidget->ProcessKeybind(Key);
-		}
-		else
+		if (ListeningInputBox->IsAxis())
 		{
-			OnKeyReleased(InKeyEvent.GetKey());
+			Key = GetAxisFromKey(Key);
 		}
+		ProcessRebind(InKeyEvent.GetKey());
 	}
 }
 
@@ -648,9 +425,13 @@ void UUINavPCComponent::HandleMouseMoveEvent(FSlateApplication& SlateApp, const 
 
 void UUINavPCComponent::HandleMouseButtonDownEvent(FSlateApplication& SlateApp, const FPointerEvent& MouseEvent)
 {
-	if (ActiveWidget != nullptr)
+	if (IsValid(ListeningInputBox))
 	{
-		ActiveWidget->NativeOnMouseButtonDown(ActiveWidget->GetCachedGeometry(), MouseEvent);
+		if (ListeningInputBox->IsAxis())
+		{
+			CancelRebind();
+		}
+		ProcessRebind(MouseEvent.GetEffectingButton());
 	}
 
 	if (CurrentInputType != EInputType::Mouse)
@@ -661,17 +442,17 @@ void UUINavPCComponent::HandleMouseButtonDownEvent(FSlateApplication& SlateApp, 
 
 void UUINavPCComponent::HandleMouseButtonUpEvent(FSlateApplication& SlateApp, const FPointerEvent& MouseEvent)
 {
-	if (ActiveWidget != nullptr)
+	if (CurrentInputType != EInputType::Mouse)
 	{
-		ActiveWidget->NativeOnMouseButtonUp(ActiveWidget->GetCachedGeometry(), MouseEvent);
+		NotifyInputTypeChange(EInputType::Mouse);
 	}
 }
 
 void UUINavPCComponent::HandleMouseWheelOrGestureEvent(FSlateApplication& SlateApp, const FPointerEvent& InWheelEvent, const FPointerEvent* InGesture)
 {
-	if (ActiveWidget != nullptr)
+	if (IsValid(ListeningInputBox))
 	{
-		ActiveWidget->NativeOnMouseWheel(ActiveWidget->GetCachedGeometry(), InWheelEvent);
+		ProcessRebind(InWheelEvent.GetWheelDelta() > 0.f ? EKeys::MouseScrollUp : EKeys::MouseScrollDown);
 	}
 
 	if (CurrentInputType != EInputType::Mouse && InWheelEvent.GetWheelDelta() != 0.0f)
@@ -739,64 +520,6 @@ void UUINavPCComponent::ClearTimer()
 	TimerCounter = 0.f;
 	CallbackDirection = ENavigationDirection::None;
 	CountdownPhase = ECountdownPhase::None;
-}
-
-void UUINavPCComponent::FetchUINavActionKeys()
-{
-	if (IsValid(GetEnhancedInputComponent()))
-	{
-		const UUINavSettings* const UINavSettings = GetDefault<UUINavSettings>();
-		const UInputMappingContext* InputContext = UINavSettings->EnhancedInputContext.LoadSynchronous();
-
-		for (const FEnhancedActionKeyMapping& Action : InputContext->GetMappings())
-		{
-			const FString NewName = Action.Action->GetName();
-			TArray<FKey>* KeyArray = KeyMap.Find(NewName);
-			if (KeyArray == nullptr)
-			{
-				KeyMap.Add(NewName, { Action.Key });
-			}
-			else
-			{
-				KeyArray->Add(Action.Key);
-			}
-		}
-	}
-	else
-	{
-		const UInputSettings* Settings = GetDefault<UInputSettings>();
-		const TArray<FInputActionKeyMapping> Actions = Settings->GetActionMappings();
-
-		for (FInputActionKeyMapping Action : Actions)
-		{
-			FString NewName = Action.ActionName.ToString();
-			if (NewName.Left(4).Compare(TEXT("Menu")) != 0)
-				continue;
-
-			TArray<FKey>* KeyArray = KeyMap.Find(NewName);
-			if (KeyArray == nullptr)
-			{
-				KeyMap.Add(NewName, { Action.Key });
-			}
-			else
-			{
-				KeyArray->Add(Action.Key);
-			}
-		}
-		
-		TArray<FString> keys;
-		KeyMap.GetKeys(keys);
-		if (keys.Num() < 6)
-		{
-			DISPLAYERROR("Not all Menu Inputs have been setup!");
-		}
-		else if (keys.Num() < 8)
-		{
-			DISPLAYWARNING("You can add them from the UINavInput.ini file in the plugin's Content folder to your project's DefaultInput.ini file.");
-			DISPLAYWARNING("Keep in mind that the MenuNext and MenuPrevious inputs have been added recently.");
-			DISPLAYWARNING("Not all Menu Inputs have been setup!");
-		}
-	}
 }
 
 FKey UUINavPCComponent::GetInputKey(FName InputName, const EInputRestriction InputRestriction) const
@@ -1064,16 +787,7 @@ EInputType UUINavPCComponent::GetKeyInputType(const FKey Key)
 	}
 }
 
-EInputType UUINavPCComponent::GetMenuActionInputType(const FString Action) const
-{
-	for (const FKey& Key : KeyMap[Action])
-	{
-		if (PC->WasInputKeyJustPressed(Key)) return GetKeyInputType(Key);
-	}
-	return CurrentInputType;
-}
-
-FKey UUINavPCComponent::GetKeyFromAxis(const FKey Key, const bool bPositive, const EInputAxis Axis) const
+const FKey UUINavPCComponent::GetKeyFromAxis(const FKey Key, const bool bPositive, const EInputAxis Axis) const
 {
 	const FAxis2D_Keys* Axis2DKeys = Axis2DToAxis1DMap.Find(Key);
 	const FKey CheckedKey = Axis2DKeys == nullptr ? Key : (Axis == EInputAxis::X ? Axis2DKeys->PositiveKey : Axis2DKeys->NegativeKey);
@@ -1084,7 +798,7 @@ FKey UUINavPCComponent::GetKeyFromAxis(const FKey Key, const bool bPositive, con
 	return bPositive ? AxisKeys->PositiveKey : AxisKeys->NegativeKey;
 }
 
-FKey UUINavPCComponent::GetAxisFromKey(FKey Key, bool& OutbPositive) const
+const FKey UUINavPCComponent::GetAxisFromScaledKey(const FKey Key, bool& OutbPositive) const
 {
 	for (const TPair<FKey, FAxis2D_Keys>& AxisKeys : AxisToKeyMap)
 	{
@@ -1103,7 +817,13 @@ FKey UUINavPCComponent::GetAxisFromKey(FKey Key, bool& OutbPositive) const
 	return FKey();
 }
 
-FKey UUINavPCComponent::GetAxis1DFromAxis2D(FKey Key, const EInputAxis Axis) const
+const FKey UUINavPCComponent::GetAxisFromKey(const FKey Key) const
+{
+	const FKey* AxisKey = KeyToAxisMap.Find(Key);
+	return AxisKey == nullptr ? Key : *AxisKey;
+}
+
+const FKey UUINavPCComponent::GetAxis1DFromAxis2D(const FKey Key, const EInputAxis Axis) const
 {
 	const FAxis2D_Keys* Axis2DKeys = Axis2DToAxis1DMap.Find(Key);
 	if (Axis2DKeys == nullptr) return FKey();
@@ -1111,7 +831,7 @@ FKey UUINavPCComponent::GetAxis1DFromAxis2D(FKey Key, const EInputAxis Axis) con
 	return Axis == EInputAxis::X ? Axis2DKeys->PositiveKey : Axis2DKeys->NegativeKey;
 }
 
-FKey UUINavPCComponent::GetAxis2DFromAxis1D(FKey Key) const
+const FKey UUINavPCComponent::GetAxis2DFromAxis1D(const FKey Key) const
 {
 	for (const TPair<FKey, FAxis2D_Keys>& AxisKeys : Axis2DToAxis1DMap)
 	{
@@ -1121,7 +841,7 @@ FKey UUINavPCComponent::GetAxis2DFromAxis1D(FKey Key) const
 	return FKey();
 }
 
-FKey UUINavPCComponent::GetOppositeAxisKey(FKey Key) const
+const FKey UUINavPCComponent::GetOppositeAxisKey(const FKey Key) const
 {
 	for (const TPair<FKey, FAxis2D_Keys>& AxisKeys : AxisToKeyMap)
 	{
@@ -1131,7 +851,7 @@ FKey UUINavPCComponent::GetOppositeAxisKey(FKey Key) const
 	return FKey();
 }
 
-FKey UUINavPCComponent::GetOppositeAxis2DAxis(FKey Key) const
+const FKey UUINavPCComponent::GetOppositeAxis2DAxis(const FKey Key) const
 {
 	for (const TPair<FKey, FAxis2D_Keys>& Axis2DAxes : Axis2DToAxis1DMap)
 	{
@@ -1161,101 +881,6 @@ void UUINavPCComponent::VerifyInputTypeChangeByKey(const FKey Key)
 	}
 }
 
-void UUINavPCComponent::NotifyKeyPressed(const FKey PressedKey)
-{
-	ExecuteActionByKey(PressedKey, true);
-}
-
-void UUINavPCComponent::NotifyKeyReleased(const FKey ReleasedKey)
-{
-	ExecuteActionByKey(ReleasedKey, false);
-}
-
-void UUINavPCComponent::ExecuteActionByKey(const FKey ActionKey, const bool bPressed)
-{
-	TArray<FString> ActionNames = FindActionByKey(ActionKey);
-	if (ActionNames.Num() == 0) return;
-
-	for (const FString& ActionName : ActionNames)
-	{
-		ExecuteActionByName(ActionName, bPressed);
-	}
-}
-
-TArray<FString> UUINavPCComponent::FindActionByKey(const FKey ActionKey) const
-{
-	TArray<FString> Actions;
-	TArray<FString> TriggeredActions;
-	KeyMap.GenerateKeyArray(Actions);
-	for (FString Action : Actions)
-	{
-		for (const FKey& Key : KeyMap[Action])
-		{
-			if (Key == ActionKey)
-			{
-				TriggeredActions.Add(Action);
-			}
-		}
-	}
-	return TriggeredActions;
-}
-
-FReply UUINavPCComponent::OnKeyPressed(const FKey PressedKey)
-{
-	const TArray<FString> ActionNames = FindActionByKey(PressedKey);
-	if (ActionNames.Num() == 0) return FReply::Unhandled();
-
-	FReply Reply = FReply::Unhandled();
-	for (const FString& ActionName : ActionNames)
-	{
-		if (OnActionPressed(ActionName, PressedKey).IsEventHandled())
-		{
-			Reply = FReply::Handled();
-		}
-	}
-
-	return Reply;
-}
-
-FReply UUINavPCComponent::OnKeyReleased(const FKey PressedKey)
-{
-	const TArray<FString> ActionNames = FindActionByKey(PressedKey);
-	if (ActionNames.Num() == 0) return FReply::Unhandled();
-
-	FReply Reply = FReply::Unhandled();
-	for (const FString& ActionName : ActionNames)
-	{
-		if (OnActionReleased(ActionName, PressedKey).IsEventHandled())
-		{
-			Reply = FReply::Handled();
-		}
-	}
-
-	return Reply;
-}
-
-FReply UUINavPCComponent::OnActionPressed(const FString ActionName, const FKey Key)
-{
-	if (!PressedActions.Contains(ActionName))
-	{
-		PressedActions.AddUnique(ActionName);
-		ExecuteActionByName(ActionName, true);
-		return FReply::Handled();
-	}
-	else return FReply::Unhandled();
-}
-
-FReply UUINavPCComponent::OnActionReleased(const FString ActionName, const FKey Key)
-{
-	if (PressedActions.Contains(ActionName))
-	{
-		PressedActions.Remove(ActionName);
-		ExecuteActionByName(ActionName, false);
-		return FReply::Handled();
-	}
-	else return FReply::Unhandled();
-}
-
 EInputMode UUINavPCComponent::GetInputMode() const
 {
 	if (PC != nullptr)
@@ -1281,62 +906,29 @@ EInputMode UUINavPCComponent::GetInputMode() const
 	return EInputMode::None;
 }
 
-void UUINavPCComponent::ExecuteActionByName(const FString Action, const bool bPressed)
-{
-	if (Action.Contains("MenuUp"))
-	{
-		if (bPressed) StartMenuUp();
-		else MenuUpRelease();
-	}
-	else if (Action.Contains("MenuDown"))
-	{
-		if (bPressed) StartMenuDown();
-		else MenuDownRelease();
-	}
-	else if (Action.Contains("MenuLeft"))
-	{
-		if (bPressed) StartMenuLeft();
-		else MenuLeftRelease();
-	}
-	else if (Action.Contains("MenuRight"))
-	{
-		if (bPressed) StartMenuRight();
-		else MenuRightRelease();
-	}
-	else if (Action.Contains("MenuSelect"))
-	{
-		if (bPressed) MenuSelect();
-		else
-		{
-			if (ActiveWidget->GetSelectCount() > 1) PressedActions.Add(Action);
-			MenuSelectRelease();
-		}
-	}
-	else if (Action.Contains("MenuReturn"))
-	{
-		if (bPressed) MenuReturn();
-		else MenuReturnRelease();
-	}
-	else if (Action.Contains("MenuNext") && bPressed)
-	{
-		MenuNext();
-	}
-	else if (Action.Contains("MenuPrevious") && bPressed)
-	{
-		MenuPrevious();
-	}
-	else
-	{
-		CallCustomInput(FName(*Action), bPressed);
-	}
-}
-
 void UUINavPCComponent::NotifyMouseInputType()
 {
 	if (EInputType::Mouse != CurrentInputType)
 	{
 		NotifyInputTypeChange(EInputType::Mouse);
 	}
+}
+
+void UUINavPCComponent::ListenToInputRebind(UUINavInputBox* InputBox)
+{
+	ListeningInputBox = InputBox;
+}
+
+bool UUINavPCComponent::GetAndConsumeIgnoreSelectRelease()
+{
+	const bool bIgnore = bIgnoreSelectRelease;
+	bIgnoreSelectRelease = false;
+	return bIgnore;
+}
+
+bool UUINavPCComponent::IsListeningToInputRebind() const
+{
+	return IsValid(ListeningInputBox);
 }
 
 void UUINavPCComponent::NotifyInputTypeChange(const EInputType NewInputType)
@@ -1348,6 +940,7 @@ void UUINavPCComponent::NotifyInputTypeChange(const EInputType NewInputType)
 	if (ActiveWidget != nullptr)
 	{
 		ActiveWidget->AttemptUnforceNavigation(CurrentInputType);
+		// TODO: Propagate this!
 		ActiveWidget->OnInputChanged(OldInputType, CurrentInputType);
 	}
 	InputTypeChangedDelegate.Broadcast(CurrentInputType);
@@ -1362,151 +955,38 @@ void UUINavPCComponent::MenuInput(const ENavigationDirection InDirection)
 {
 	IUINavPCReceiver::Execute_OnNavigated(GetOwner(), InDirection);
 
-	if (ActiveWidget == nullptr || !bAllowDirectionalInput) return;
-
-	ActiveWidget->NavigateInDirection(InDirection);
+	//if (ActiveWidget == nullptr || !bAllowDirectionalInput) return;
 }
 
 void UUINavPCComponent::MenuSelect()
 {
-	if (ActiveWidget == nullptr || !bAllowSelectInput) return;
+	/*if (ActiveWidget == nullptr || !bAllowSelectInput) return;
 
-	ClearTimer();
-	ActiveWidget->MenuSelectPress();
-}
-
-void UUINavPCComponent::MenuSelectRelease()
-{
-	IUINavPCReceiver::Execute_OnSelect(GetOwner());
-
-	if (ActiveWidget == nullptr || !bAllowSelectInput) return;
-
-	ClearTimer();
-	ActiveWidget->MenuSelectRelease();
+	ClearTimer();*/
 }
 
 void UUINavPCComponent::MenuReturn()
 {
-	if (ActiveWidget == nullptr || !bAllowReturnInput) return;
+	if (ActiveWidget == nullptr /*|| !bAllowReturnInput*/) return;
 
-	ClearTimer();
-	ActiveWidget->MenuReturnPress();
-}
+	//ClearTimer();
 
-void UUINavPCComponent::MenuReturnRelease()
-{
-	IUINavPCReceiver::Execute_OnReturn(GetOwner());
-
-	if (ActiveWidget == nullptr || !bAllowReturnInput) return;
-
-	ClearTimer();
-	ActiveWidget->MenuReturnRelease();
 }
 
 void UUINavPCComponent::MenuNext()
 {
 	IUINavPCReceiver::Execute_OnNext(GetOwner());
 
-	if (ActiveWidget == nullptr || !bAllowSectionInput) return;
+	/*if (ActiveWidget == nullptr || !bAllowSectionInput) return;
 
-	ClearTimer();
-	ActiveWidget->OnNext();
+	ClearTimer();*/
 }
 
 void UUINavPCComponent::MenuPrevious()
 {
 	IUINavPCReceiver::Execute_OnPrevious(GetOwner());
 
-	if (ActiveWidget == nullptr || !bAllowSectionInput) return;
+	/*if (ActiveWidget == nullptr || !bAllowSectionInput) return;
 
-	ClearTimer();
-	ActiveWidget->OnPrevious();
-}
-
-void UUINavPCComponent::MenuUpRelease()
-{
-	if (Direction != ENavigationDirection::Up) return;
-	Direction = ENavigationDirection::None;
-
-	ClearTimer();
-}
-
-void UUINavPCComponent::MenuDownRelease()
-{
-	if (Direction != ENavigationDirection::Down) return;
-	Direction = ENavigationDirection::None;
-
-	ClearTimer();
-}
-
-void UUINavPCComponent::MenuLeftRelease()
-{
-	if (Direction != ENavigationDirection::Left) return;
-	Direction = ENavigationDirection::None;
-
-	ClearTimer();
-}
-
-void UUINavPCComponent::MenuRightRelease()
-{
-	if (Direction != ENavigationDirection::Right) return;
-	Direction = ENavigationDirection::None;
-
-	ClearTimer();
-}
-
-void UUINavPCComponent::MouseKeyPressed(const FKey MouseKey)
-{
-	if (ActiveWidget != nullptr && ActiveWidget->IsRebindingInput())
-	{
-		ActiveWidget->ProcessKeybind(MouseKey);
-	}
-}
-
-void UUINavPCComponent::StartMenuUp()
-{
-	if (Direction == ENavigationDirection::Up) return;
-
-	MenuInput(ENavigationDirection::Up);
-	Direction = ENavigationDirection::Up;
-
-	if (!bChainNavigation || !bAllowDirectionalInput) return;
-
-	SetTimer(ENavigationDirection::Up);
-}
-
-void UUINavPCComponent::StartMenuDown()
-{
-	if (Direction == ENavigationDirection::Down) return;
-
-	MenuInput(ENavigationDirection::Down);
-	Direction = ENavigationDirection::Down;
-
-	if (!bChainNavigation || !bAllowDirectionalInput) return;
-
-	SetTimer(ENavigationDirection::Down);
-}
-
-void UUINavPCComponent::StartMenuLeft()
-{
-	if (Direction == ENavigationDirection::Left) return;
-
-	MenuInput(ENavigationDirection::Left);
-	Direction = ENavigationDirection::Left;
-
-	if (!bChainNavigation || !bAllowDirectionalInput) return;
-
-	SetTimer(ENavigationDirection::Left);
-}
-
-void UUINavPCComponent::StartMenuRight()
-{
-	if (Direction == ENavigationDirection::Right) return;
-
-	MenuInput(ENavigationDirection::Right);
-	Direction = ENavigationDirection::Right;
-
-	if (!bChainNavigation || !bAllowDirectionalInput) return;
-
-	SetTimer(ENavigationDirection::Right);
+	ClearTimer();*/
 }

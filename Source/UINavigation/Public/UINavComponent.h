@@ -3,7 +3,25 @@
 #pragma once
 
 #include "Blueprint/UserWidget.h"
+#include "Components/Button.h"
+#include "Delegates/DelegateCombinations.h"
+#include "Fonts/SlateFontInfo.h"
 #include "UINavComponent.generated.h"
+
+class UUINavWidget;
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnClickedEvent);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPressedEvent);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnReleasedEvent);
+
+UENUM(BlueprintType, meta = (ScriptName = "UINavButtonStyle"))
+enum class EButtonStyle : uint8
+{
+	None UMETA(DisplayName = "None"),
+	Normal UMETA(DisplayName = "Normal"),
+	Hovered UMETA(DisplayName = "Hovered"),
+	Pressed UMETA(DisplayName = "Pressed")
+};
 
 /**
  * 
@@ -17,7 +35,16 @@ public:
 
 	UUINavComponent(const FObjectInitializer& ObjectInitializer);
 
+	virtual FReply NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent) override;
+	virtual FReply NativeOnKeyUp(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent) override;
+
+	virtual FReply NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
+
+	virtual FReply NativeOnMouseButtonDoubleClick(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
+
 	virtual void NativeConstruct() override;
+
+	virtual bool Initialize() override;
 	
 	void CallCustomInput(FName ActionName, uint8* Buffer);
 
@@ -31,28 +58,119 @@ public:
 
 	virtual void OnNavigatedFrom_Implementation();
 
-	UFUNCTION(BlueprintNativeEvent, Category = UINavComponent)
-	void OnSelected();
+	void HandleFocusReceived();
+	void HandleFocusLost();
 
-	virtual void OnSelected_Implementation();
+	UFUNCTION()
+	void OnButtonClicked();
+	UFUNCTION()
+	void OnButtonPressed();
+	UFUNCTION()
+	void OnButtonReleased();
+	UFUNCTION()
+	void OnButtonHovered();
+	UFUNCTION()
+	void OnButtonUnhovered();
+
+	UFUNCTION(BlueprintCallable, Category = UINavComponent)
+	void SetText(const FText& Text);
 	
-	UFUNCTION(BlueprintNativeEvent, Category = UINavComponent)
-	void OnStartSelected();
+	UFUNCTION(BlueprintCallable, Category = UINavComponent)
+	void SwitchButtonStyle(const EButtonStyle NewStyle, const bool bRevertStyle = true);
 
-	virtual void OnStartSelected_Implementation();
+	void RevertButtonStyle();
 
-	UFUNCTION(BlueprintNativeEvent, Category = UINavComponent)
-	void OnStopSelected();
+	/**
+	*	Changes the color of the text with the specified index to the specified color
+	*
+	*	@param	Index  The new button's index in the Button's array
+	*	@param	Color  The text's new color
+	*/
+	UFUNCTION(BlueprintCallable, Category = UINavComponent)
+	void SwitchTextColorTo(FLinearColor Color);
 
-	virtual void OnStopSelected_Implementation();
+	UFUNCTION(BlueprintCallable, Category = UINavComponent)
+	void SwitchTextColorToDefault();
+
+	UFUNCTION(BlueprintCallable, Category = UINavComponent)
+	void SwitchTextColorToNavigated();
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavComponent)
-	bool IsValid(const bool bIgnoreDisabledUINavButton = true) const;
+	bool IsComponentValid(const bool bIgnoreDisabledUINavButton = true) const;
 
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget), Category = UINavComponent)
-	class UUINavButton* NavButton = nullptr;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavComponent)
+	bool IsButtonValid(const bool bIgnoreDisabledUINavButton = true) const;
 
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, OptionalWidget = true), Category = UINavComponent)
+protected:
+
+	virtual FReply NativeOnFocusReceived(const FGeometry& InGeometry, const FFocusEvent& InFocusEvent) override;
+	virtual void NativeOnFocusLost(const FFocusEvent& InFocusEvent) override;
+
+	virtual void NativeOnFocusChanging(const FWeakWidgetPath& PreviousFocusPath, const FWidgetPath& NewWidgetPath, const FFocusEvent& InFocusEvent) override;
+	virtual FNavigationReply NativeOnNavigation(const FGeometry& MyGeometry, const FNavigationEvent& InNavigationEvent, const FNavigationReply& InDefaultReply) override;
+
+	virtual void NativePreConstruct();
+
+	void SwapStyle(EButtonStyle Style1, EButtonStyle Style2);
+
+	void SwapPadding();
+
+	EButtonStyle GetStyleFromButtonState();
+
+public:
+
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget), Category = UINavComponent)
+	UButton* NavButton = nullptr;
+
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget, OptionalWidget = true), Category = UINavComponent)
 	class UTextBlock* NavText = nullptr;
+
+	UPROPERTY()
+	UUINavWidget* ParentWidget = nullptr;
+
+	UPROPERTY(BlueprintAssignable, Category = "Appearance|Event")
+	FOnClickedEvent OnClicked;
+	DECLARE_EVENT(UUserWidget, FNativeOnClickedEvent);
+	FNativeOnClickedEvent OnNativeClicked;
+
+	UPROPERTY(BlueprintAssignable, Category = "Appearance|Event")
+	FOnPressedEvent OnPressed;
+	DECLARE_EVENT(UUserWidget, FNativeOnPressedEvent);
+	FNativeOnPressedEvent OnNativePressed;
+
+	UPROPERTY(BlueprintAssignable, Category = "Appearance|Event")
+	FOnReleasedEvent OnReleased;
+	DECLARE_EVENT(UUserWidget, FNativeOnReleasedEvent);
+	FNativeOnReleasedEvent OnNativeReleased;
+
+	EButtonStyle CurrentStyle = EButtonStyle::Normal;
+
+	EButtonStyle ForcedStyle = EButtonStyle::None;
+
+protected:
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavComponent)
+	FText ComponentText;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavComponent)
+	bool bUseTextColor = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavComponent, meta = (editcondition = "bUseTextColor"))
+	FLinearColor TextDefaultColor = FColor::Blue;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavComponent, meta = (editcondition = "bUseTextColor"))
+	FLinearColor TextNavigatedColor = FColor::Green;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavComponent, meta = (editcondition = "bOverride_Font"))
+	FSlateFontInfo FontOverride;
+
+	UPROPERTY(EditAnywhere, Category = UINavComponent, meta = (InlineEditConditionToggle))
+	uint8 bOverride_Font : 1;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavComponent, meta = (editcondition = "bOverride_Style"))
+	FButtonStyle StyleOverride;
+
+	UPROPERTY(EditAnywhere, Category = UINavComponent, meta = (InlineEditConditionToggle))
+	uint8 bOverride_Style : 1;
 
 };

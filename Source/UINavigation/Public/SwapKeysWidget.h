@@ -13,12 +13,12 @@ class UINAVIGATION_API USwapKeysWidget : public UUINavPromptWidget
 
 public:
 
-	virtual void OnSelect_Implementation(int Index) override;
+	virtual void OnSelect_Implementation(UUINavComponent* Component) override;
 
 	virtual void OnReturn_Implementation() override;
 
 	UFUNCTION(BlueprintCallable, Category = SwapKeysWidget)
-	void NotifySwapResult(const int Index);
+	void NotifySwapResult(UPromptDataBinary* const InPromptData);
 	
 	UPROPERTY(BlueprintReadOnly, Category = SwapKeysWidget)
 	FInputCollisionData InputCollisionData;

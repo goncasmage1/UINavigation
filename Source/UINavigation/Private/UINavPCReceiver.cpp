@@ -3,6 +3,10 @@
 
 #include "UINavPCReceiver.h"
 
+void IUINavPCReceiver::OnRootWidgetAdded_Implementation()
+{
+}
+
 void IUINavPCReceiver::OnRootWidgetRemoved_Implementation()
 {
 }

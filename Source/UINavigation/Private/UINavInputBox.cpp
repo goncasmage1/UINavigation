@@ -23,12 +23,25 @@
 
 #define IS_ENHANCED_INPUT IsValid(InputContext) && IsValid(InputActionData.Action)
 
+UUINavInputBox::UUINavInputBox(const FObjectInitializer& ObjectInitializer)
+	:Super(ObjectInitializer)
+{
+	bIsFocusable = false;
+}
+
 void UUINavInputBox::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	bIsFocusable = false;
-}
+	InputButton1->OnClicked.RemoveAll(this);
+	InputButton1->OnClicked.AddDynamic(this, &UUINavInputBox::InputComponent1Clicked);
+
+	InputButton2->OnClicked.RemoveAll(this);
+	InputButton2->OnClicked.AddDynamic(this, &UUINavInputBox::InputComponent2Clicked);
+
+	InputButton3->OnClicked.RemoveAll(this);
+	InputButton3->OnClicked.AddDynamic(this, &UUINavInputBox::InputComponent3Clicked);
+;}
 
 void UUINavInputBox::CreateKeyWidgets()
 {
@@ -225,17 +238,21 @@ void UUINavInputBox::ResetKeyWidgets()
 	bUsingKeyImage = { false, false, false };
 	InputButtons.Empty();
 	CreateKeyWidgets();
-
-	if (Container->UINavPC != nullptr && Container->UINavPC->KeyMap.Contains(InputName.ToString()))
-	{
-		Container->UINavPC->KeyMap.Add(InputName.ToString(), Keys);
-	}
 }
 
-void UUINavInputBox::UpdateInputKey(const FKey NewKey, const int Index, const bool bSkipChecks)
+void UUINavInputBox::UpdateInputKey(const FKey NewKey, int Index, const bool bSkipChecks)
 {
+	if (Index < 0)
+	{
+		Index = AwaitingIndex;
+	}
+
 	AwaitingNewKey = NewKey;
-	AwaitingIndex = Index;
+	if (Index < 0)
+	{
+		CancelUpdateInputKey(ERevertRebindReason::None);
+		return;
+	}
 
 	if (!bSkipChecks)
 	{
@@ -256,7 +273,7 @@ void UUINavInputBox::UpdateInputKey(const FKey NewKey, const int Index, const bo
 			{
 				FInputRebindData CollidingInputData;
 				Container->GetEnhancedInputRebindData(CollidingActionIndex, CollidingInputData);
-				if (!Container->GetParentWidget()->UINavInputBoxes.Find(this, SelfIndex) ||
+				if (!Container->InputBoxes.Find(this, SelfIndex) ||
 					!Container->RequestKeySwap(FInputCollisionData(InputText->GetText(),
 																   CollidingInputData.InputText,
 																   CollidingKeyIndex,
@@ -272,7 +289,7 @@ void UUINavInputBox::UpdateInputKey(const FKey NewKey, const int Index, const bo
 			{
 				FInputRebindData CollidingInputData;
 				Container->GetInputRebindData(CollidingActionIndex, CollidingInputData);
-				if (!Container->GetParentWidget()->UINavInputBoxes.Find(this, SelfIndex) ||
+				if (!Container->InputBoxes.Find(this, SelfIndex) ||
 					!Container->RequestKeySwap(FInputCollisionData(InputData.InputText,
 																   CollidingInputData.InputText,
 																   CollidingKeyIndex,
@@ -299,17 +316,20 @@ void UUINavInputBox::UpdateInputKey(const FKey NewKey, const int Index, const bo
 
 void UUINavInputBox::FinishUpdateNewKey()
 {
-	const FKey NewKey = AwaitingNewKey;
-	const int Index = AwaitingIndex;
+	const FKey OldKey = Keys[AwaitingIndex];
 
 	if (IS_ENHANCED_INPUT)
 	{
-		FinishUpdateNewEnhancedInputKey(NewKey, Index);
+		FinishUpdateNewEnhancedInputKey(AwaitingNewKey, AwaitingIndex);
 	}
 	else
 	{
-		FinishUpdateNewInputKey(NewKey, Index);
+		FinishUpdateNewInputKey(AwaitingNewKey, AwaitingIndex);
 	}
+
+	Container->OnKeyRebinded(InputName, OldKey, Keys[AwaitingIndex]);
+	Container->UINavPC->RefreshNavigationKeys();
+	AwaitingIndex = -1;
 }
 
 void UUINavInputBox::FinishUpdateNewEnhancedInputKey(const FKey PressedKey, const int Index)
@@ -317,7 +337,7 @@ void UUINavInputBox::FinishUpdateNewEnhancedInputKey(const FKey PressedKey, cons
 	const TArray<FEnhancedActionKeyMapping>& ActionMappings = InputContext->GetMappings();
 
 	bool bPositive;
-	const FKey PressedAxisKey = Container->UINavPC->GetAxisFromKey(PressedKey, bPositive);
+	const FKey PressedAxisKey = Container->UINavPC->GetAxisFromScaledKey(PressedKey, bPositive);
 	const FKey NewKey = WantsAxisKey() && PressedAxisKey.IsValid() ? PressedAxisKey : PressedKey;
 
 	FKey NewAxisKey;
@@ -347,7 +367,7 @@ void UUINavInputBox::FinishUpdateNewEnhancedInputKey(const FKey PressedKey, cons
 								InputActionData.AxisScale != EAxisType::None)
 							{
 								bool bNewKeyPositive = true;
-								if (Container->UINavPC->GetAxisFromKey(NewKey, bNewKeyPositive).IsValid())
+								if (Container->UINavPC->GetAxisFromScaledKey(NewKey, bNewKeyPositive).IsValid())
 								{
 									NewAxisKey = NewKey;
 								}
@@ -373,9 +393,9 @@ void UUINavInputBox::FinishUpdateNewEnhancedInputKey(const FKey PressedKey, cons
 						Container->GetOppositeInputBox(InputActionData) != nullptr)
 					{
 						bool bOtherKeyPositive = true;
-						const FKey OtherKeyAxis = Container->UINavPC->GetAxisFromKey(ActionMapping.Key, bOtherKeyPositive);
+						const FKey OtherKeyAxis = Container->UINavPC->GetAxisFromScaledKey(ActionMapping.Key, bOtherKeyPositive);
 						bool bNewKeyPositive = true;
-						const FKey NewKeyAxis = Container->UINavPC->GetAxisFromKey(NewKey, bNewKeyPositive);
+						const FKey NewKeyAxis = Container->UINavPC->GetAxisFromScaledKey(NewKey, bNewKeyPositive);
 
 						if (OtherKeyAxis == NewKeyAxis &&
 							bOtherKeyPositive != bNewKeyPositive &&
@@ -434,16 +454,6 @@ void UUINavInputBox::FinishUpdateNewEnhancedInputKey(const FKey PressedKey, cons
 		TryMapEnhancedAxisKey(NewKey, Index);
 	}
 
-	if (Container->UINavPC != nullptr)
-	{
-		Container->UINavPC->PressedActions.Empty();
-		if (Container->UINavPC->KeyMap.Contains(InputName.ToString()))
-		{
-			Container->UINavPC->KeyMap.Add(InputName.ToString(), Keys);
-		}
-		Container->UINavPC->UnbindMouseWorkaround();
-	}
-
 	Container->UINavPC->RequestRebuildMappings();
 
 	UpdateKeyDisplay(Index);
@@ -461,7 +471,7 @@ void UUINavInputBox::FinishUpdateNewInputKey(const FKey PressedKey, const int In
 	TArray<FInputAxisKeyMapping>& Axes = const_cast<TArray<FInputAxisKeyMapping>&>(Settings->GetAxisMappings());
 
 	bool bPositive;
-	const FKey PressedAxisKey = Container->UINavPC->GetAxisFromKey(PressedKey, bPositive);
+	const FKey PressedAxisKey = Container->UINavPC->GetAxisFromScaledKey(PressedKey, bPositive);
 	const FKey NewKey = WantsAxisKey() && PressedAxisKey.IsValid() ? PressedAxisKey : PressedKey;
 
 	FKey NewAxisKey;
@@ -486,7 +496,7 @@ void UUINavInputBox::FinishUpdateNewInputKey(const FKey PressedKey, const int In
 						if (Container->UINavPC->IsAxis(Axes[i].Key))
 						{
 							bool bNewKeyPositive = true;
-							if (Container->UINavPC->GetAxisFromKey(NewKey, bNewKeyPositive).IsValid())
+							if (Container->UINavPC->GetAxisFromScaledKey(NewKey, bNewKeyPositive).IsValid())
 							{
 								NewAxisKey = NewKey;
 							}
@@ -512,9 +522,9 @@ void UUINavInputBox::FinishUpdateNewInputKey(const FKey PressedKey, const int In
 					Container->GetOppositeInputBox(InputName, AxisType) != nullptr)
 				{
 					bool bOtherKeyPositive = true;
-					const FKey OtherKeyAxis = Container->UINavPC->GetAxisFromKey(Axes[i].Key, bOtherKeyPositive);
+					const FKey OtherKeyAxis = Container->UINavPC->GetAxisFromScaledKey(Axes[i].Key, bOtherKeyPositive);
 					bool bNewKeyPositive = true;
-					const FKey NewKeyAxis = Container->UINavPC->GetAxisFromKey(NewKey, bNewKeyPositive);
+					const FKey NewKeyAxis = Container->UINavPC->GetAxisFromScaledKey(NewKey, bNewKeyPositive);
 
 					if (OtherKeyAxis == NewKeyAxis &&
 						bOtherKeyPositive != bNewKeyPositive &&
@@ -580,16 +590,6 @@ void UUINavInputBox::FinishUpdateNewInputKey(const FKey PressedKey, const int In
 		TryMapInputAxisKey(Settings, NewKey, Index);
 	}
 
-	if (Container->UINavPC != nullptr)
-	{
-		Container->UINavPC->PressedActions.Empty();
-		if (Container->UINavPC->KeyMap.Contains(InputName.ToString()))
-		{
-			Container->UINavPC->KeyMap.Add(InputName.ToString(), Keys);
-		}
-		Container->UINavPC->UnbindMouseWorkaround();
-	}
-
 	UpdateKeyDisplay(Index);
 
 	Settings->SaveConfig();
@@ -613,7 +613,7 @@ void UUINavInputBox::TryMapEnhancedAxisKey(const FKey& NewKey, const int32 Index
 			InputContext->UnmapKey(InputActionData.Action, NewOppositeKey);
 			InputContext->UnmapKey(InputActionData.Action, NewKey);
 			bool bPositive;
-			FEnhancedActionKeyMapping& NewMapping = InputContext->MapKey(InputActionData.Action, Container->UINavPC->GetAxisFromKey(NewKey, bPositive));
+			FEnhancedActionKeyMapping& NewMapping = InputContext->MapKey(InputActionData.Action, Container->UINavPC->GetAxisFromScaledKey(NewKey, bPositive));
 			AddRelevantModifiers(InputActionData, NewMapping);
 
 			TryMap2DAxisKey(NewMapping.Key, Index);
@@ -642,7 +642,7 @@ void UUINavInputBox::TryMapInputAxisKey(UInputSettings* Settings, const FKey& Ne
 			}
 			FInputAxisKeyMapping Axis;
 			bool bPositive;
-			Axis.Key = Container->UINavPC->GetAxisFromKey(NewKey, bPositive);
+			Axis.Key = Container->UINavPC->GetAxisFromScaledKey(NewKey, bPositive);
 			Axis.AxisName = InputName;
 			Axis.Scale = 1.0f;
 			Settings->AddAxisMapping(Axis, true);
@@ -761,6 +761,7 @@ void UUINavInputBox::CancelUpdateInputKey(const ERevertRebindReason Reason)
 {
 	Container->OnRebindCancelled(Reason, AwaitingNewKey);
 	RevertToKeyText(AwaitingIndex);
+	AwaitingIndex = -1;
 }
 
 FKey UUINavInputBox::GetKeyFromAxis(const FKey AxisKey) const
@@ -831,6 +832,41 @@ int UUINavInputBox::GetNumValidKeys(const int Index) const
 	return ValidKeys;
 }
 
+void UUINavInputBox::InputComponent1Clicked()
+{
+	InputComponentClicked(0);
+}
+
+void UUINavInputBox::InputComponent2Clicked()
+{
+	InputComponentClicked(1);
+}
+
+void UUINavInputBox::InputComponent3Clicked()
+{
+	InputComponentClicked(2);
+}
+
+void UUINavInputBox::InputComponentClicked(const int Index)
+{
+	if (Container->UINavPC->GetAndConsumeIgnoreSelectRelease())
+	{
+		return;
+	}
+
+	AwaitingIndex = Index;
+
+	InputButtons[Index]->NavText->SetText(Container->PressKeyText);
+
+	if (bUsingKeyImage[Index])
+	{
+		InputButtons[Index]->InputImage->SetVisibility(ESlateVisibility::Collapsed);
+		InputButtons[Index]->NavText->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+	}
+
+	Container->UINavPC->ListenToInputRebind(this);
+}
+
 void UUINavInputBox::GetEnhancedMappingsForAction(const UInputAction* Action, const EInputAxis& Axis, const int Index, TArray<int32>& OutMappingIndices)
 {
 	const TArray<FEnhancedActionKeyMapping>& ActionMappings = InputContext->GetMappings();
@@ -882,6 +918,40 @@ void UUINavInputBox::GetMappingsForAxis(const UInputSettings* const Settings, co
 	}
 }
 
+FNavigationReply UUINavInputBox::NativeOnNavigation(const FGeometry& MyGeometry, const FNavigationEvent& InNavigationEvent, const FNavigationReply& InDefaultReply)
+{
+	FNavigationReply Reply = Super::NativeOnNavigation(MyGeometry, InNavigationEvent, InDefaultReply);
+
+	if (!IsValid(Container))
+	{
+		return Reply;
+	}
+
+	UUINavInputBox* TargetInputBox = Container->GetInputBoxInDirection(this, InNavigationEvent.GetNavigationType());
+	if (!IsValid(TargetInputBox))
+	{
+		return Reply;
+	}
+
+	int TargetIndex = -1;
+	for (int i = 0; i < InputButtons.Num(); ++i)
+	{
+		const UUINavInputComponent* const InputButton = InputButtons[i];
+		if (InputButton->ForcedStyle == EButtonStyle::Hovered)
+		{
+			TargetIndex = i;
+			break;
+		}
+	}
+
+	if (!TargetInputBox->InputButtons.IsValidIndex(TargetIndex))
+	{
+		return Reply;
+	}
+
+	return FNavigationReply::Explicit(TargetInputBox->InputButtons[TargetIndex]->TakeWidget());
+}
+
 bool UUINavInputBox::UpdateKeyIconForKey(const int Index)
 {
 	UTexture2D* NewTexture = Container->UINavPC->GetKeyIcon(Keys[Index]);
@@ -923,25 +993,6 @@ void UUINavInputBox::RevertToKeyText(const int Index)
 	}
 
 	InputButtons[Index]->NavText->SetText(OldName);
-
-	if (Container->UINavPC != nullptr)
-	{
-		Container->UINavPC->PressedActions.Empty();
-		Container->UINavPC->UnbindMouseWorkaround();
-	}
-}
-
-void UUINavInputBox::NotifySelected(const int Index)
-{
-	InputButtons[Index]->NavText->SetText(Container->PressKeyText);
-
-	if (Container->UINavPC != nullptr) Container->UINavPC->BindMouseWorkaround();
-
-	if (bUsingKeyImage[Index])
-	{
-		InputButtons[Index]->InputImage->SetVisibility(ESlateVisibility::Collapsed);
-		InputButtons[Index]->NavText->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
-	}
 }
 
 int UUINavInputBox::ContainsKey(const FKey CompareKey) const

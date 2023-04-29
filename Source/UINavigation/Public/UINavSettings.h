@@ -19,6 +19,7 @@ class UINAVIGATION_API UUINavSettings : public UObject
 	UUINavSettings(const FObjectInitializer& ObjectInitializer)
 	:Super(ObjectInitializer)
 	{
+		bForceNavigation = true;
 		bIgnoreDisabledUINavButton = true;
 		bRemoveWidgetOnReturn = true;
 	}
@@ -26,14 +27,17 @@ class UINAVIGATION_API UUINavSettings : public UObject
 public:
 
 	UPROPERTY(config, EditAnywhere, Category = "Settings")
-	bool bIgnoreDisabledUINavButton;
+	bool bForceNavigation = true;
+
+	UPROPERTY(config, EditAnywhere, Category = "Settings")
+	bool bIgnoreDisabledUINavButton = true;
 	
 	UPROPERTY(config, EditAnywhere, Category = "Settings")
-	bool bRemoveWidgetOnReturn;
+	bool bRemoveWidgetOnReturn = true;
 
-	UPROPERTY(config, EditAnywhere, Category = "Bindings")
+	UPROPERTY(config, EditAnywhere, Category = "Settings")
 	TSoftObjectPtr<UInputMappingContext> EnhancedInputContext = TSoftObjectPtr<UInputMappingContext>(FSoftObjectPath("/UINavigation/Input/IC_UINav.IC_UINav"));
 
-	UPROPERTY(config, EditAnywhere, Category = "Bindings")
+	UPROPERTY(config, EditAnywhere, Category = "Settings")
 	TSoftObjectPtr<UUINavEnhancedInputActions> EnhancedInputActions = TSoftObjectPtr<UUINavEnhancedInputActions>(FSoftObjectPath("/UINavigation/Input/UINavEnhancedInputActions.UINavEnhancedInputActions"));
 };

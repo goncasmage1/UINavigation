@@ -24,41 +24,17 @@ class UINAVIGATION_API UUINavInputContainer : public UUserWidget
 	
 protected:
 
-	void SetupInputBoxes(const int GridIndex);
-	void CreateInputBoxes(const int GridIndex);
-
-	//-----------------------------------------------------------------------
-
-	TMap<FKey, FKey> KeyToAxisMap = {
-		{EKeys::Gamepad_LeftTrigger, EKeys::Gamepad_LeftTriggerAxis},
-		{EKeys::Gamepad_RightTrigger, EKeys::Gamepad_RightTriggerAxis},
-		{EKeys::MixedReality_Left_Trigger_Click, EKeys::MixedReality_Left_Trigger_Axis},
-		{EKeys::MixedReality_Right_Trigger_Click, EKeys::MixedReality_Right_Trigger_Axis},
-		{EKeys::OculusTouch_Left_Grip_Click, EKeys::OculusTouch_Left_Grip_Axis},
-		{EKeys::OculusTouch_Right_Grip_Click, EKeys::OculusTouch_Right_Grip_Axis},
-		{EKeys::ValveIndex_Left_Trigger_Click, EKeys::ValveIndex_Left_Trigger_Axis},
-		{EKeys::ValveIndex_Right_Trigger_Click, EKeys::ValveIndex_Right_Trigger_Axis},
-		{EKeys::Vive_Left_Trigger_Click, EKeys::Vive_Left_Trigger_Axis},
-		{EKeys::Vive_Right_Trigger_Click, EKeys::Vive_Right_Trigger_Axis},
-	};
+	void SetupInputBoxes();
+	void CreateInputBoxes();
 
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget), Category = "UINav Input")
 	class UPanelWidget* InputBoxesPanel = nullptr;
-	
-	UPROPERTY(BlueprintReadOnly, Category = "UINav Input")
+
 	class UUINavWidget* ParentWidget = nullptr;
 
 public:
 
-	void Init(class UUINavWidget* NewParent, const int GridIndex);
-
-	/**
-	*	Called when this widget completed setting up InputBoxes
-	*/
-	UFUNCTION(BlueprintNativeEvent, Category = UINavWidget)
-	void OnSetupCompleted();
-
-	virtual void OnSetupCompleted_Implementation();
+	virtual void NativeConstruct() override;
 
 	/**
 	*	Called when a new input box is added
@@ -102,6 +78,8 @@ public:
 
 	void ResetInputBox(const FName InputName, const EAxisType AxisType);
 
+	UUINavInputBox* GetInputBoxInDirection(UUINavInputBox* InputBox, const EUINavigation Direction);
+	
 	UUINavInputBox* GetOppositeInputBox(const FInputContainerEnhancedActionData& ActionData);
 	UUINavInputBox* GetOppositeInputBox(const FName& InputName, const EAxisType AxisType);
 
@@ -115,13 +93,7 @@ public:
 	void GetEnhancedInputRebindData(const int InputIndex, FInputRebindData& RebindData) const;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "UINav Input")
-	FKey GetAxisFromKey(FKey Key);
-
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "UINav Input")
 	FORCEINLINE ETargetColumn GetTargetColumn() const { return TargetColumn; }
-
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "UINav Input")
-	FORCEINLINE class UUINavWidget* GetParentWidget() const { return ParentWidget; }
 
 	//-----------------------------------------------------------------------
 
@@ -133,23 +105,8 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = "UINav Input")
 	int KeysPerInput = 0;
 
-	//The index of the button in the top left corner of the grid
 	UPROPERTY(BlueprintReadOnly, Category = "UINav Input")
-	int FirstButtonIndex = -1;
-
-	//The index of the button in the bottom right corner of the grid
-	UPROPERTY(BlueprintReadOnly, Category = "UINav Input")
-	int LastButtonIndex = -1;
-
-	/*The index of the button at the top of the grid that should be navigated to
-	when entering this grid*/
-	UPROPERTY(BlueprintReadOnly, Category = "UINav Input")
-	int TopButtonIndex = -1;
-
-	/*The index of the button at the bottom of the grid that should be navigated to
-	when entering this grid*/
-	UPROPERTY(BlueprintReadOnly, Category = "UINav Input")
-	int BottomButtonIndex = -1;
+	TArray<UUINavInputBox*> InputBoxes;
 
 	/*
 	The names of the desired actions and axes to allow for rebinding.

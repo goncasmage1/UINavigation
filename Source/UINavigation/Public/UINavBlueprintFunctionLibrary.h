@@ -3,12 +3,12 @@
 #pragma once
 
 #include "Kismet/BlueprintFunctionLibrary.h"
-#include "Data/Grid.h"
 #include "Data/InputRestriction.h"
 #include "UINavButton.h"
 #include "UINavBlueprintFunctionLibrary.generated.h"
 
 class UInputAction;
+class UPromptDataBinary;
 
 /**
  * 
@@ -45,6 +45,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = UINavInput)
 	static bool IsUINavInputAction(const UInputAction* const InputAction);
+
+	UFUNCTION(BlueprintCallable, Category = UINavigationLibrary)
+	static UPromptDataBinary* CreateBinaryPromptData(const bool bAccept);
 	
 	template <typename T>
 	static bool ContainsArray(const TArray<T>& Array1, const TArray<T>& Array2)
@@ -59,25 +62,10 @@ public:
 		return true;
 	}
 
-	// Returns the desired grid's dimension
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
-	static int GetGridDimension(const FGrid Grid);
 
 	// Returns whether the given button is valid (isn't hidden, collaped or disabled)
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
 	static bool IsButtonValid(UUINavButton* Button);
-
-	UFUNCTION(BlueprintPure, meta = (DisplayName = "UINavButton To Index", CompactNodeTitle = "->", BlueprintAutocast), Category = "UINavButton")
-	static int Conv_UINavButtonToInt(UUINavButton* Button);
-
-	UFUNCTION(BlueprintPure, meta = (DisplayName = "UINavComponent To Index", CompactNodeTitle = "->", BlueprintAutocast), Category = "UINavComponent")
-	static int Conv_UINavComponentToInt(class UUINavComponent* Component);
-
-	UFUNCTION(BlueprintPure, meta = (DisplayName = "UINavComponent To UINavButton", CompactNodeTitle = "->", BlueprintAutocast), Category = "UINavComponent")
-	static UUINavButton* Conv_UINavComponentToUINavButton(class UUINavComponent* Component);
-
-	UFUNCTION(BlueprintPure, meta = (DisplayName = "Grid To Index", CompactNodeTitle = "->", BlueprintAutocast), Category = "Navigation Grid")
-	static int Conv_GridToInt(const FGrid Grid);
 
 	UFUNCTION(BlueprintPure, Category = UINavigationLibrary)
 	static bool IsVRKey(const FKey Key);

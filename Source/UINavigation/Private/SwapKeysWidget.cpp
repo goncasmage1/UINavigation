@@ -3,22 +3,23 @@
 #include "SwapKeysWidget.h"
 #include "UINavInputBox.h"
 #include "Data/RevertRebindReason.h"
+#include "UINavBlueprintFunctionLibrary.h"
 
-void USwapKeysWidget::OnSelect_Implementation(int Index)
+void USwapKeysWidget::OnSelect_Implementation(UUINavComponent* Component)
 {
-	NotifySwapResult(Index);
+	NotifySwapResult(UUINavBlueprintFunctionLibrary::CreateBinaryPromptData((Component == FirstComponent) == FirstComponentIsAccept));
 }
 
 void USwapKeysWidget::OnReturn_Implementation()
 {
-	NotifySwapResult(ReturnSelectedIndex);
+	NotifySwapResult(UUINavBlueprintFunctionLibrary::CreateBinaryPromptData(FirstComponentIsAccept));
 }
 
-void USwapKeysWidget::NotifySwapResult(const int Index)
+void USwapKeysWidget::NotifySwapResult(UPromptDataBinary* const InPromptData)
 {
 	if (CurrentInputBox != nullptr && CollidingInputBox != nullptr)
 	{
-		if (Index > 0)
+		if (InPromptData->bAccept)
 		{
 			CurrentInputBox->FinishUpdateNewKey();
 			CollidingInputBox->UpdateInputKey(InputCollisionData.CurrentInputKey,
@@ -31,5 +32,5 @@ void USwapKeysWidget::NotifySwapResult(const int Index)
 		}
 	}
 
-	ProcessPromptWidgetSelected(Index);
+	ProcessPromptWidgetSelected(InPromptData);
 }

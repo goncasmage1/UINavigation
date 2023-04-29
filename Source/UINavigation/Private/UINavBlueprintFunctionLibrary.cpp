@@ -8,6 +8,7 @@
 #include "UINavDefaultInputSettings.h"
 #include "UINavComponent.h"
 #include "UINavMacros.h"
+#include "Data/PromptData.h"
 #include "InputAction.h"
 #include "EnhancedInputSubsystems.h"
 #if IS_VR_PLATFORM
@@ -177,44 +178,22 @@ bool UUINavBlueprintFunctionLibrary::IsUINavInputAction(const UInputAction* cons
 			InputAction == InputActions->IA_MenuPrevious);
 }
 
-int UUINavBlueprintFunctionLibrary::GetGridDimension(const FGrid Grid)
+UPromptDataBinary* UUINavBlueprintFunctionLibrary::CreateBinaryPromptData(const bool bAccept)
 {
-	switch (Grid.GridType)
+	UPromptDataBinary* PromptData = NewObject<UPromptDataBinary>();
+	if (!IsValid(PromptData))
 	{
-		case EGridType::Horizontal:
-			return Grid.DimensionX;
-		case EGridType::Vertical:
-			return Grid.DimensionY;
-		case EGridType::Grid2D:
-			return Grid.NumGrid2DButtons;
+		return nullptr;
 	}
-	return 0;
+	PromptData->bAccept = bAccept;
+
+	return PromptData;
 }
 
 bool UUINavBlueprintFunctionLibrary::IsButtonValid(UUINavButton * Button)
 {
 	if (Button == nullptr) return false;
 	return Button->IsValid();
-}
-
-int UUINavBlueprintFunctionLibrary::Conv_UINavButtonToInt(UUINavButton * Button)
-{
-	return Button->ButtonIndex;
-}
-
-int UUINavBlueprintFunctionLibrary::Conv_UINavComponentToInt(UUINavComponent * Component)
-{
-	return Component->NavButton->ButtonIndex;
-}
-
-UUINavButton* UUINavBlueprintFunctionLibrary::Conv_UINavComponentToUINavButton(UUINavComponent * Component)
-{
-	return Component->NavButton;
-}
-
-int UUINavBlueprintFunctionLibrary::Conv_GridToInt(const FGrid Grid)
-{
-	return Grid.GridIndex;
 }
 
 bool UUINavBlueprintFunctionLibrary::IsVRKey(const FKey Key)

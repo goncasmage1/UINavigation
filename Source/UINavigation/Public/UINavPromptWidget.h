@@ -11,15 +11,15 @@ class UINAVIGATION_API UUINavPromptWidget : public UUINavWidget
 	GENERATED_BODY()
 
 public:
-
-	UPROPERTY(EditDefaultsOnly, Category = UINavPromptWidget)
-	int ReturnSelectedIndex = 0;
-
-	virtual void OnSelect_Implementation(int Index) override;
+	virtual void OnSelect_Implementation(UUINavComponent* Component) override;
 
 	virtual void OnReturn_Implementation() override;
 
-	UFUNCTION(BlueprintCallable, Category = UINavPromptWidget)
-	void ProcessPromptWidgetSelected(int Index);
+	UFUNCTION(BlueprintCallable, Category = "UINavPromptWidget")
+	void ProcessPromptWidgetSelected(UPromptDataBase* const InPromptData);
+
+protected:
+	UPROPERTY(EditDefaultsOnly, Category = "UINavPromptWidget")
+	bool FirstComponentIsAccept = false;
 	
 };

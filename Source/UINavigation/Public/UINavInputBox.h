@@ -32,8 +32,10 @@ protected:
 
 	TArray<bool> bUsingKeyImage = { false, false, false };
 
-	FKey AwaitingNewKey;
-	int AwaitingIndex;
+	FKey AwaitingNewKey = FKey();
+	int8 AwaitingIndex = -1;
+
+	virtual FNavigationReply NativeOnNavigation(const FGeometry& MyGeometry, const FNavigationEvent& InNavigationEvent, const FNavigationReply& InDefaultReply) override;
 
 	bool UpdateKeyIconForKey(const int Index);
 	FText GetKeyText(const int Index);
@@ -42,11 +44,22 @@ protected:
 	void ProcessInputName();
 	int GetNumValidKeys(const int Index) const;
 
+	UFUNCTION()
+	void InputComponent1Clicked();
+	UFUNCTION()
+	void InputComponent2Clicked();
+	UFUNCTION()
+	void InputComponent3Clicked();
+		
+	void InputComponentClicked(const int Index);
+
 	void GetEnhancedMappingsForAction(const UInputAction* Action, const EInputAxis& Axis, const int Index, TArray<int32>& OutMappingIndices);
 	void GetMappingsForAction(const UInputSettings* const Settings, const FName ActionName, const int Index, TArray<int32>& OutMappingIndices);
 	void GetMappingsForAxis(const UInputSettings* const Settings, const FName AxisName, const bool bPositive, const int Index, TArray<int32>& OutMappingIndices);
 
 public:
+
+	UUINavInputBox(const FObjectInitializer& ObjectInitializer);
 
 	virtual void NativeConstruct() override;
 	void CreateEnhancedInputKeyWidgets();
@@ -55,7 +68,7 @@ public:
 	void CreateKeyWidgets();
 	bool TrySetupNewKey(const FKey NewKey, const int KeyIndex, const UUINavInputComponent* const NewInputButton);
 	void ResetKeyWidgets();
-	void UpdateInputKey(const FKey NewKey, const int Index, const bool bSkipChecks = false);
+	void UpdateInputKey(const FKey NewKey, int Index = -1, const bool bSkipChecks = false);
 	void FinishUpdateNewKey();
 	void FinishUpdateNewEnhancedInputKey(const FKey PressedKey, int Index);
 	void FinishUpdateNewInputKey(const FKey PressedKey, int Index);
@@ -67,8 +80,6 @@ public:
 	void AddRelevantModifiers(const FInputContainerEnhancedActionData& ActionData, FEnhancedActionKeyMapping& Mapping);
 	void CancelUpdateInputKey(const ERevertRebindReason Reason);
 	void RevertToKeyText(const int Index);
-
-	void NotifySelected(const int Index);
 
 	int ContainsKey(const FKey CompareKey) const;
 	FORCEINLINE bool IsAxis() const { return IS_AXIS; }

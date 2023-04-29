@@ -28,6 +28,14 @@ public:
 	*	Called when the root UINavWidget is removed from the viewport
 	*/
 	UFUNCTION(BlueprintNativeEvent, Category = UINavController)
+	void OnRootWidgetAdded();
+
+	virtual void OnRootWidgetAdded_Implementation();
+
+	/**
+	*	Called when the root UINavWidget is removed from the viewport
+	*/
+	UFUNCTION(BlueprintNativeEvent, Category = UINavController)
 	void OnRootWidgetRemoved();
 
 	virtual void OnRootWidgetRemoved_Implementation();

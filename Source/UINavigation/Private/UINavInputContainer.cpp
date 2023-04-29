@@ -12,6 +12,7 @@
 #include "Blueprint/UserWidget.h"
 #include "Blueprint/WidgetTree.h"
 #include "Engine/DataTable.h"
+#include "GameFramework/PlayerController.h"
 #include "Components/PanelWidget.h"
 #include "Components/TextBlock.h"
 #include "IImageWrapper.h"
@@ -20,10 +21,10 @@
 
 #define USING_ENHANCED_INPUT IsValid(UINavPC->GetEnhancedInputComponent())
 
-void UUINavInputContainer::Init(UUINavWidget * NewParent, const int GridIndex)
+void UUINavInputContainer::NativeConstruct()
 {
-	ParentWidget = NewParent;
-	UINavPC = NewParent->UINavPC;
+	ParentWidget = UUINavWidget::GetOuterObject<UUINavWidget>(this);
+	UINavPC = Cast<APlayerController>(GetOwningPlayer())->FindComponentByClass<UUINavPCComponent>();
 
 	bIsFocusable = false;
 
@@ -31,11 +32,9 @@ void UUINavInputContainer::Init(UUINavWidget * NewParent, const int GridIndex)
 	else if (InputRestrictions.Num() > 3) InputRestrictions.SetNum(3);
 	KeysPerInput = InputRestrictions.Num();
 
-	SetupInputBoxes(GridIndex);
-}
+	SetupInputBoxes();
 
-void UUINavInputContainer::OnSetupCompleted_Implementation()
-{
+	Super::NativeConstruct();
 }
 
 void UUINavInputContainer::OnAddInputBox_Implementation(class UUINavInputBox* NewInputBox)
@@ -61,10 +60,10 @@ bool UUINavInputContainer::RequestKeySwap(const FInputCollisionData& InputCollis
 	{
 		APlayerController* PC = Cast<APlayerController>(UINavPC->GetOwner());
 		USwapKeysWidget* SwapKeysWidget = CreateWidget<USwapKeysWidget>(PC, SwapKeysWidgetClass);
-		SwapKeysWidget->CollidingInputBox = ParentWidget->UINavInputBoxes[CollidingInputIndex];
-		SwapKeysWidget->CurrentInputBox = ParentWidget->UINavInputBoxes[CurrentInputIndex];
+		SwapKeysWidget->CollidingInputBox = InputBoxes[CollidingInputIndex];
+		SwapKeysWidget->CurrentInputBox = InputBoxes[CurrentInputIndex];
 		SwapKeysWidget->InputCollisionData = InputCollisionData;
-		ParentWidget->GoToBuiltWidget(SwapKeysWidget, false, false, SpawnKeysWidgetZOrder);
+		UINavPC->GoToBuiltWidget(SwapKeysWidget, false, false, SpawnKeysWidgetZOrder);
 		return true;
 	}
 	return false;
@@ -73,12 +72,14 @@ bool UUINavInputContainer::RequestKeySwap(const FInputCollisionData& InputCollis
 void UUINavInputContainer::ResetKeyMappings()
 {
 	UUINavBlueprintFunctionLibrary::ResetInputSettings(Cast<APlayerController>(UINavPC->GetOwner()));
-	for (UUINavInputBox* InputBox : ParentWidget->UINavInputBoxes) InputBox->ResetKeyWidgets();
+	for (UUINavInputBox* InputBox : InputBoxes) InputBox->ResetKeyWidgets();
 }
 
-void UUINavInputContainer::SetupInputBoxes(const int GridIndex)
+void UUINavInputContainer::SetupInputBoxes()
 {
 	if (InputBox_BP == nullptr) return;
+
+	InputBoxes.Reset();
 
 	if (USING_ENHANCED_INPUT)
 	{
@@ -99,13 +100,9 @@ void UUINavInputContainer::SetupInputBoxes(const int GridIndex)
 		NumberOfInputs = InputNames.Num();
 	}
 	
-	FirstButtonIndex = ParentWidget->UINavButtons.Num();
+	CreateInputBoxes();
 
-	CreateInputBoxes(GridIndex);
-
-	LastButtonIndex = ParentWidget->UINavButtons.Num() != FirstButtonIndex ? ParentWidget->UINavButtons.Num() - 1 : FirstButtonIndex;
-
-	switch (KeysPerInput)
+	/*switch (KeysPerInput)
 	{
 		case 2:
 			TopButtonIndex = FirstButtonIndex + (TargetColumn == ETargetColumn::Right);
@@ -115,21 +112,18 @@ void UUINavInputContainer::SetupInputBoxes(const int GridIndex)
 			TopButtonIndex = FirstButtonIndex + static_cast<int>(TargetColumn);
 			BottomButtonIndex = LastButtonIndex - (2 - static_cast<int>(TargetColumn));
 			break;
-	}
-
-	OnSetupCompleted();
+	}*/
 }
 
-void UUINavInputContainer::CreateInputBoxes(const int GridIndex)
+void UUINavInputContainer::CreateInputBoxes()
 {
 	if (InputBox_BP == nullptr) return;
-
-	const int TempFirstButtonIndex = ParentWidget->UINavButtons.Num();
 
 	APlayerController* PC = Cast<APlayerController>(UINavPC->GetOwner());
 	for (int i = 0; i < NumberOfInputs; ++i)
 	{
-		UUINavInputBox* NewInputBox = CreateWidget<UUINavInputBox>(PC, InputBox_BP);
+		UUINavInputBox* NewInputBox = CreateWidget<UUINavInputBox>(this, InputBox_BP);
+		InputBoxes.Add(NewInputBox);
 		NewInputBox->Container = this;
 		NewInputBox->KeysPerInput = KeysPerInput;
 		if (USING_ENHANCED_INPUT)
@@ -159,30 +153,12 @@ void UUINavInputContainer::CreateInputBoxes(const int GridIndex)
 			UINavPC->GetInputRebindData(InputNames[i], InputRebindData, bSuccess);
 			if (bSuccess) NewInputBox->InputData = InputRebindData;
 		}
-
-		ParentWidget->UINavInputBoxes.Add(NewInputBox);
 	}
 
 	for (int i = 0; i < NumberOfInputs; ++i)
 	{
-		UUINavInputBox* const InputBox = ParentWidget->UINavInputBoxes[i];
+		UUINavInputBox* const InputBox = InputBoxes[i];
 		InputBox->CreateKeyWidgets();
-
-		for (int j = 0; j < KeysPerInput; j++)
-		{
-			ParentWidget->UINavButtons.Add(nullptr);
-
-			const int NewButtonIndex = TempFirstButtonIndex + i * KeysPerInput + j;
-			ParentWidget->UINavButtons[NewButtonIndex] = InputBox->InputButtons[j]->NavButton;
-			InputBox->InputButtons[j]->NavButton->ButtonIndex = NewButtonIndex;
-			if (GridIndex != -1)
-			{
-				InputBox->InputButtons[j]->NavButton->GridIndex = GridIndex;
-				InputBox->InputButtons[j]->NavButton->IndexInGrid = (i * KeysPerInput) + j;
-			}
-			ParentWidget->SetupUINavButtonDelegates(InputBox->InputButtons[j]->NavButton);
-		}
-
 		OnAddInputBox(InputBox);
 	}
 }
@@ -204,14 +180,14 @@ bool UUINavInputContainer::CanUseKey(const UUINavInputBox* InputBox, const FKey 
 	TArray<int> InputGroups = USING_ENHANCED_INPUT ? InputBox->EnhancedInputGroups : InputBox->InputData.InputGroups;
 	if (InputGroups.Num() == 0) InputGroups.Add(-1);
 
-	for (int i = 0; i < ParentWidget->UINavInputBoxes.Num(); ++i)
+	for (int i = 0; i < InputBoxes.Num(); ++i)
 	{
-		if (InputBox == ParentWidget->UINavInputBoxes[i]) continue;
+		if (InputBox == InputBoxes[i]) continue;
 
-		const int KeyIndex = ParentWidget->UINavInputBoxes[i]->ContainsKey(CompareKey);
+		const int KeyIndex = InputBoxes[i]->ContainsKey(CompareKey);
 		if (KeyIndex != INDEX_NONE)
 		{
-			TArray<int> CollidingInputGroups = USING_ENHANCED_INPUT ? ParentWidget->UINavInputBoxes[i]->EnhancedInputGroups : ParentWidget->UINavInputBoxes[i]->InputData.InputGroups;
+			TArray<int> CollidingInputGroups = USING_ENHANCED_INPUT ? InputBoxes[i]->EnhancedInputGroups : InputBoxes[i]->InputData.InputGroups;
 
 			if (InputGroups.Contains(-1) ||
 				CollidingInputGroups.Contains(-1))
@@ -245,7 +221,7 @@ bool UUINavInputContainer::RespectsRestriction(const FKey CompareKey, const int 
 
 void UUINavInputContainer::ResetInputBox(const FName InputName, const EAxisType AxisType)
 {
-	for (UUINavInputBox* InputBox : ParentWidget->UINavInputBoxes)
+	for (UUINavInputBox* InputBox : InputBoxes)
 	{
 		if (InputBox->InputName.IsEqual(InputName) &&
 			InputBox->AxisType == AxisType)
@@ -256,9 +232,37 @@ void UUINavInputContainer::ResetInputBox(const FName InputName, const EAxisType 
 	}
 }
 
+UUINavInputBox* UUINavInputContainer::GetInputBoxInDirection(UUINavInputBox* InputBox, const EUINavigation Direction)
+{
+	if (!IsValid(InputBox))
+	{
+		return nullptr;
+	}
+
+	int Index;
+	if (!InputBoxes.Find(InputBox, Index))
+	{
+		return nullptr;
+	}
+
+	switch (Direction)
+	{
+		case EUINavigation::Up:
+			--Index;
+			break;
+		case EUINavigation::Down:
+			++Index;
+			break;
+		default:
+			return nullptr;
+	}
+
+	return InputBoxes.IsValidIndex(Index) ? InputBoxes[Index] : nullptr;
+}
+
 UUINavInputBox* UUINavInputContainer::GetOppositeInputBox(const FInputContainerEnhancedActionData& ActionData)
 {
-	for (UUINavInputBox* InputBox : ParentWidget->UINavInputBoxes)
+	for (UUINavInputBox* InputBox : InputBoxes)
 	{
 		if (InputBox->InputActionData.Action == ActionData.Action &&
 			InputBox->InputActionData.Axis == ActionData.Axis &&
@@ -274,7 +278,7 @@ UUINavInputBox* UUINavInputContainer::GetOppositeInputBox(const FInputContainerE
 
 UUINavInputBox* UUINavInputContainer::GetOppositeInputBox(const FName& InputName, const EAxisType AxisType)
 {
-	for (UUINavInputBox* InputBox : ParentWidget->UINavInputBoxes)
+	for (UUINavInputBox* InputBox : InputBoxes)
 	{
 		if (InputBox->InputName == InputName &&
 			((InputBox->AxisType == EAxisType::Positive && AxisType == EAxisType::Negative) ||
@@ -327,12 +331,6 @@ void UUINavInputContainer::GetAxisPropertiesFromMapping(const FEnhancedActionKey
 	}
 }
 
-FKey UUINavInputContainer::GetAxisFromKey(FKey Key)
-{
-	FKey* AxisKey = KeyToAxisMap.Find(Key);
-	return AxisKey == nullptr ? Key : *AxisKey;
-}
-
 int UUINavInputContainer::GetOffsetFromTargetColumn(const bool bTop) const
 {
 	switch (KeysPerInput)
@@ -351,17 +349,17 @@ int UUINavInputContainer::GetOffsetFromTargetColumn(const bool bTop) const
 
 void UUINavInputContainer::GetInputRebindData(const int InputIndex, FInputRebindData& RebindData) const
 {
-	if (ParentWidget->UINavInputBoxes.IsValidIndex(InputIndex))
+	if (InputBoxes.IsValidIndex(InputIndex))
 	{
-		RebindData = ParentWidget->UINavInputBoxes[InputIndex]->InputData;
+		RebindData = InputBoxes[InputIndex]->InputData;
 	}
 }
 
 void UUINavInputContainer::GetEnhancedInputRebindData(const int InputIndex, FInputRebindData& RebindData) const
 {
-	if (ParentWidget->UINavInputBoxes.IsValidIndex(InputIndex))
+	if (InputBoxes.IsValidIndex(InputIndex))
 	{
-		RebindData.InputText = ParentWidget->UINavInputBoxes[InputIndex]->InputText->GetText();
-		RebindData.InputGroups = ParentWidget->UINavInputBoxes[InputIndex]->EnhancedInputGroups;
+		RebindData.InputText = InputBoxes[InputIndex]->InputText->GetText();
+		RebindData.InputGroups = InputBoxes[InputIndex]->EnhancedInputGroups;
 	}
 }

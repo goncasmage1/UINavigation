@@ -50,9 +50,9 @@ void UUINavComponentBox::CheckRightLimit()
 	if (OptionIndex >= GetMaxOptionIndex()) RightButton->SetIsEnabled(false);
 }
 
-void UUINavComponentBox::UpdateTextToIndex(const int NewIndex)
+void UUINavComponentBox::SetOptionIndex(const int NewIndex)
 {
-	Super::UpdateTextToIndex(NewIndex);
+	Super::SetOptionIndex(NewIndex);
 
 	if (!bDisableButtons || bLoopOptions) return;
 	if (!RightButton->bIsEnabled) RightButton->SetIsEnabled(true);

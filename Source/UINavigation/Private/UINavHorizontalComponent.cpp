@@ -5,20 +5,41 @@
 #include "Components/TextBlock.h"
 #include "UINavWidget.h"
 
+FNavigationReply UUINavHorizontalComponent::NativeOnNavigation(const FGeometry& MyGeometry, const FNavigationEvent& InNavigationEvent, const FNavigationReply& InDefaultReply)
+{
+	FNavigationReply Reply = Super::NativeOnNavigation(MyGeometry, InNavigationEvent, InDefaultReply);
+
+	if (InNavigationEvent.GetNavigationType() == EUINavigation::Left)
+	{
+		NavigateLeft();
+		return FNavigationReply::Stop();
+	}
+
+	if (InNavigationEvent.GetNavigationType() == EUINavigation::Right)
+	{
+		NavigateRight();
+		return FNavigationReply::Stop();
+	}
+
+	return Reply;
+}
+
 void UUINavHorizontalComponent::NavigateLeft()
 {
 	OnNavigateLeft();
 	OnUpdated();
-	ParentWidget->OnHorizCompNavigateLeft(NavButton->ButtonIndex);
-	ParentWidget->OnHorizCompUpdated(NavButton->ButtonIndex);
+	OnValueChanged.Broadcast();
+	OnNativeValueChanged.Broadcast();
+	ParentWidget->OnHorizCompNavigateLeft(this);
+	ParentWidget->OnHorizCompUpdated(this);
 }
 
 void UUINavHorizontalComponent::NavigateRight()
 {
 	OnNavigateRight();
 	OnUpdated();
-	ParentWidget->OnHorizCompNavigateRight(NavButton->ButtonIndex);
-	ParentWidget->OnHorizCompUpdated(NavButton->ButtonIndex);
+	ParentWidget->OnHorizCompNavigateRight(this);
+	ParentWidget->OnHorizCompUpdated(this);
 }
 
 void UUINavHorizontalComponent::Update()
@@ -32,15 +53,10 @@ void UUINavHorizontalComponent::Update()
 	LastOptionIndex = OptionIndex;
 }
 
-void UUINavHorizontalComponent::UpdateTextToIndex(int NewIndex)
+void UUINavHorizontalComponent::SetOptionIndex(int NewIndex)
 {
 	OptionIndex = NewIndex;
 	Update();
-}
-
-void UUINavHorizontalComponent::ChangeText(const FText NewText)
-{
-	if (NavText != nullptr) NavText->SetText(NewText);
 }
 
 void UUINavHorizontalComponent::OnNavigateLeft_Implementation()

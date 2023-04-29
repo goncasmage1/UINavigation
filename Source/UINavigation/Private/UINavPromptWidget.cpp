@@ -1,23 +1,28 @@
 ﻿// Copyright (C) 2019 Gonçalo Marques - All Rights Reserved
 
 #include "UINavPromptWidget.h"
+#include "UINavBlueprintFunctionLibrary.h"
 
-void UUINavPromptWidget::OnSelect_Implementation(int Index)
+void UUINavPromptWidget::OnSelect_Implementation(UUINavComponent* Component)
 {
-	ProcessPromptWidgetSelected(Index);
 }
 
 void UUINavPromptWidget::OnReturn_Implementation()
 {
-	ProcessPromptWidgetSelected(ReturnSelectedIndex);
+	ProcessPromptWidgetSelected(UUINavBlueprintFunctionLibrary::CreateBinaryPromptData(FirstComponentIsAccept));
 }
 
-void UUINavPromptWidget::ProcessPromptWidgetSelected(int Index)
+void UUINavPromptWidget::ProcessPromptWidgetSelected(UPromptDataBase* const InPromptData)
 {
+	if (!IsValid(InPromptData))
+	{
+		return;
+	}
+
 	if (ParentWidget != nullptr)
 	{
 		ParentWidget->PromptWidgetClass = GetClass();
-		ParentWidget->PromptSelectedIndex = Index;
+		ParentWidget->PromptData = InPromptData;
 	}
 	ReturnToParent();
 }

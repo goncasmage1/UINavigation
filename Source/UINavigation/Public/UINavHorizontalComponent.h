@@ -3,7 +3,10 @@
 #pragma once
 
 #include "UINavComponent.h"
+#include "Delegates/DelegateCombinations.h"
 #include "UINavHorizontalComponent.generated.h"
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnValueChangedEvent);
 
 /**
  * 
@@ -12,6 +15,9 @@ UCLASS()
 class UINAVIGATION_API UUINavHorizontalComponent : public UUINavComponent
 {
 	GENERATED_BODY()
+
+protected:
+	virtual FNavigationReply NativeOnNavigation(const FGeometry& MyGeometry, const FNavigationEvent& InNavigationEvent, const FNavigationReply& InDefaultReply) override;
 
 public:
 
@@ -25,19 +31,17 @@ public:
 
 	int LastOptionIndex = -1;
 
-	UPROPERTY()
-	class UUINavWidget* ParentWidget = nullptr;
+	UPROPERTY(BlueprintAssignable, Category = "Appearance|Event")
+	FOnValueChangedEvent OnValueChanged;
+	DECLARE_EVENT(UUserWidget, FNativeOnClickedEvent);
+	FOnValueChangedEvent OnNativeValueChanged;
 
 	UFUNCTION(BlueprintCallable, Category = UINavHorizontalComponent)
 	virtual void Update();
 
 	//Changes the text displayed to match the specified option index
-	UFUNCTION(BlueprintCallable, Category = UINavComponentBox, meta = (DisplayName = "Set Option Index"))
-	virtual void UpdateTextToIndex(int NewIndex);
-
-	//Changes the text displayed in the NavText element
 	UFUNCTION(BlueprintCallable, Category = UINavComponentBox)
-	void ChangeText(const FText NewText);
+	virtual void SetOptionIndex(int NewIndex);
 
 	UFUNCTION(BlueprintCallable, Category = UINavComponentBox)
 	virtual FORCEINLINE int GetMaxOptionIndex() const { return 0; }

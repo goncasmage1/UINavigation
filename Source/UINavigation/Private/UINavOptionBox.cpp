@@ -10,11 +10,14 @@ void UUINavOptionBox::NativeConstruct()
 {
 	Super::BaseConstruct();
 
+	LeftButton->IsFocusable = false;
+	RightButton->IsFocusable = false;
+
 	if (!LeftButton->OnClicked.IsBound())
-		LeftButton->OnClicked.AddDynamic(this, &UUINavOptionBox::NavigateLeft);
+		LeftButton->OnClicked.AddDynamic(this, &UUINavHorizontalComponent::NavigateLeft);
 	
 	if (!RightButton->OnClicked.IsBound())
-		RightButton->OnClicked.AddDynamic(this, &UUINavOptionBox::NavigateRight);
+		RightButton->OnClicked.AddDynamic(this, &UUINavHorizontalComponent::NavigateRight);
 }
 
 int UUINavOptionBox::GetMaxOptionIndex() const
