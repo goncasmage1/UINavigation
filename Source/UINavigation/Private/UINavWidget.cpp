@@ -338,17 +338,18 @@ void UUINavWidget::PropagateLoseNavigation(UUINavWidget* NewActiveWidget, UUINav
 void UUINavWidget::LoseNavigation(UUINavWidget* NewActiveWidget)
 {
 	if (!bHasNavigation) return;
-	
+
 	const bool bNewWidgetIsChild = NewActiveWidget != nullptr ?
-									UUINavBlueprintFunctionLibrary::ContainsArray<int>(NewActiveWidget->GetUINavWidgetPath(), UINavWidgetPath) :
-									false;
+		UUINavBlueprintFunctionLibrary::ContainsArray<int>(NewActiveWidget->GetUINavWidgetPath(), UINavWidgetPath) :
+		false;
 
 	if (bNewWidgetIsChild && !bMaintainNavigationForChild)
 	{
 		return;
 	}
 
-	if (!bNewWidgetIsChild)
+	if (NewActiveWidget == nullptr ||
+		(!bNewWidgetIsChild && NewActiveWidget->bMaintainNavigationForChild))
 	{
 		UpdateNavigationVisuals(nullptr);
 	}
@@ -356,6 +357,9 @@ void UUINavWidget::LoseNavigation(UUINavWidget* NewActiveWidget)
 	CallOnNavigate(CurrentComponent, nullptr);
 
 	bHasNavigation = false;
+
+	if (!bNewWidgetIsChild) CurrentComponent = nullptr;
+
 	OnLostNavigation(NewActiveWidget, bNewWidgetIsChild);
 }
 
@@ -544,36 +548,30 @@ FVector2D UUINavWidget::GetButtonLocation(UUINavComponent* Component) const
 
 void UUINavWidget::ExecuteAnimations(UUINavComponent* FromComponent, UUINavComponent* ToComponent)
 {
-	UUserWidget* TargetFromWidget = this;
-	UUserWidget* TargetToWidget = this;
-
-	/*if (From != -1 && From != To &&
-		UINavAnimations.Num() > From && From < UINavAnimations.Num() &&
-		UINavAnimations[From] != nullptr)
+	if (IsValid(FromComponent) && FromComponent != ToComponent &&
+		IsValid(FromComponent->GetComponentAnimation()))
 	{
-		if (TargetFromWidget->IsAnimationPlaying(UINavAnimations[From]))
+		if (FromComponent->IsAnimationPlaying(FromComponent->GetComponentAnimation()))
 		{
-			TargetFromWidget->ReverseAnimation(UINavAnimations[From]);
+			FromComponent->ReverseAnimation(FromComponent->GetComponentAnimation());
 		}
 		else
 		{
-			TargetFromWidget->PlayAnimation(UINavAnimations[From], 0.0f, 1, EUMGSequencePlayMode::Reverse, AnimationPlaybackSpeed);
+			FromComponent->PlayAnimation(FromComponent->GetComponentAnimation(), 0.0f, 1, EUMGSequencePlayMode::Reverse);
 		}
 	}
 
-	if (UINavAnimations.IsValidIndex(To))
+	if (IsValid(ToComponent) && IsValid(ToComponent->GetComponentAnimation()))
 	{
-		if (UINavAnimations.Num() <= To || UINavAnimations[To] == nullptr) return;
-
-		if (TargetToWidget->IsAnimationPlaying(UINavAnimations[To]))
+		if (ToComponent->IsAnimationPlaying(ToComponent->GetComponentAnimation()))
 		{
-			TargetToWidget->ReverseAnimation(UINavAnimations[To]);
+			ToComponent->ReverseAnimation(ToComponent->GetComponentAnimation());
 		}
 		else
 		{
-			TargetToWidget->PlayAnimation(UINavAnimations[To], 0.0f, 1, EUMGSequencePlayMode::Forward, AnimationPlaybackSpeed);
+			ToComponent->PlayAnimation(ToComponent->GetComponentAnimation(), 0.0f, 1, EUMGSequencePlayMode::Forward);
 		}
-	}*/
+	}
 }
 
 void UUINavWidget::UpdateTextColor(UUINavComponent* Component)
@@ -717,7 +715,7 @@ void UUINavWidget::UpdateNavigationVisuals(UUINavComponent* Component, const boo
 
 	UpdateTextColor(Component);
 
-	if (UINavAnimations.Num() > 0) ExecuteAnimations(CurrentComponent, Component);
+	ExecuteAnimations(CurrentComponent, Component);
 }
 
 void UUINavWidget::BeginSelectorMovement(UUINavComponent* FromComponent, UUINavComponent* ToComponent)
@@ -1022,7 +1020,10 @@ void UUINavWidget::NavigatedTo(UUINavComponent* NavigatedToComponent, const bool
 		return;
 	}
 
-	UpdateNavigationVisuals(NavigatedToComponent);
+	if (CurrentComponent != NavigatedToComponent)
+	{
+		UpdateNavigationVisuals(NavigatedToComponent);
+	}
 
 	// TODO: Propagate this!
 	CallOnNavigate(CurrentComponent, NavigatedToComponent);

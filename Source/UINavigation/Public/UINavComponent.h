@@ -6,6 +6,7 @@
 #include "Components/Button.h"
 #include "Delegates/DelegateCombinations.h"
 #include "Fonts/SlateFontInfo.h"
+#include "Animation/WidgetAnimation.h"
 #include "UINavComponent.generated.h"
 
 class UUINavWidget;
@@ -46,8 +47,6 @@ public:
 
 	virtual bool Initialize() override;
 	
-	void CallCustomInput(FName ActionName, uint8* Buffer);
-
 	UFUNCTION(BlueprintNativeEvent, Category = UINavComponent)
 	void OnNavigatedTo();
 
@@ -94,6 +93,8 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = UINavComponent)
 	void SwitchTextColorToNavigated();
+
+	UWidgetAnimation* GetComponentAnimation() const { return ComponentAnimation; }
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavComponent)
 	bool IsComponentValid(const bool bIgnoreDisabledUINavButton = true) const;
@@ -160,6 +161,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavComponent, meta = (editcondition = "bUseTextColor"))
 	FLinearColor TextNavigatedColor = FColor::Green;
+
+	UPROPERTY(BlueprintReadOnly, Transient, Category = UINavComponent, meta = (BindWidgetAnimOptional))
+	UWidgetAnimation* ComponentAnimation = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavComponent, meta = (editcondition = "bOverride_Font"))
 	FSlateFontInfo FontOverride;

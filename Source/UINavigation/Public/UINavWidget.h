@@ -121,10 +121,6 @@ public:
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget, OptionalWidget = true), Category = UINavWidget)
 	UUserWidget* TheSelector = nullptr;
 
-	//All the animation in this widget
-	UPROPERTY(BlueprintReadWrite, Category = UINavWidget)
-	TArray<class UWidgetAnimation*> UINavAnimations;
-
 	//All the child UINavWidgets in this Widget
 	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
 	TArray<UUINavWidget*> ChildUINavWidgets;
@@ -169,10 +165,6 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = UINavWidget)
 	bool bAllowRemoveIfRoot = true;
 
-	//UINavAnimations Playback Speed
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = UINavWidget)
-	float AnimationPlaybackSpeed = 1.f;
-		
     /*If set to true, the widget will be set to fullscreen even when using split screen */
     UPROPERTY(EditDefaultsOnly, Category = UINavWidget)
 	bool bUseFullscreenWhenSplitscreen = false;
@@ -509,14 +501,6 @@ public:
 
 	void OnPressedComponent(UUINavComponent* Component);
 	void OnReleasedComponent(UUINavComponent* Component);
-
-	/**
-	*	Notifies this widget to navigate in the specified direction
-	*
-	*	@param	Direction  The direction of navigation
-	*/
-	UFUNCTION(BlueprintCallable, Category = UINavWidget)
-	virtual void NavigateInDirection(const ENavigationDirection Direction);
 
 	UFUNCTION(BlueprintCallable, Category = UINavWidget)
 	virtual void MenuSelect();
