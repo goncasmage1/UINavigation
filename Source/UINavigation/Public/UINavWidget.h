@@ -249,8 +249,6 @@ public:
 	void SetHoveredComponent(UUINavComponent* Component);
 	void SetSelectedComponent(UUINavComponent* Component);
 
-	void CallCustomInput(const FName ActionName, uint8* Buffer);
-
 	void OnPromptDecided(const TSubclassOf<class UUINavPromptWidget> PromptClass, const UPromptDataBase* const InPromptData);
 
 	void UpdateNavigationVisuals(UUINavComponent* Component, const bool bBypassForcedNavigation = false);

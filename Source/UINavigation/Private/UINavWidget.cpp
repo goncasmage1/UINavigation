@@ -118,12 +118,6 @@ void UUINavWidget::InitialSetup(const bool bRebuilding)
 
 	TraverseHierarchy();
 
-	/*if (UINavAnimations.Num() > 0 && UINavAnimations.Num() != UINavButtons.Num())
-	{
-		DISPLAYERROR("Number of animations doesn't match number of UINavButtons.");
-		return;
-	}*/
-
 	//If this widget doesn't need to create the selector, skip to setup
 	if (!IsSelectorValid())
 	{
@@ -657,27 +651,6 @@ void UUINavWidget::PropagateOnStopSelect(UUINavComponent* Component)
 	}
 }
 
-void UUINavWidget::CallCustomInput(const FName ActionName, uint8* Buffer)
-{
-	UFunction* CustomFunction = FindFunction(ActionName);
-	if (CustomFunction != nullptr)
-	{
-		if (CustomFunction->ParmsSize == sizeof(bool))
-		{
-			ProcessEvent(CustomFunction, Buffer);
-		}
-		else
-		{
-			DISPLAYERROR(FString::Printf(TEXT("%s Custom Event should have one boolean parameter!"), *ActionName.ToString()));
-		}
-	}
-
-	/*if (CurrentComponent != nullptr)
-	{
-		CurrentComponent->CallCustomInput(ActionName, Buffer);
-	}*/
-}
-
 void UUINavWidget::OnPromptDecided(const TSubclassOf<UUINavPromptWidget> PromptClass, const UPromptDataBase* const InPromptData)
 {
 	PromptWidgetClass = nullptr;
@@ -1005,6 +978,8 @@ void UUINavWidget::NavigatedTo(UUINavComponent* NavigatedToComponent, const bool
 		return;
 	}
 
+	const bool bHadNavigation = bHasNavigation;
+
 	if (bNotifyUINavPC)
 	{
 		UINavPC->NotifyNavigatedTo(this);
@@ -1025,8 +1000,7 @@ void UUINavWidget::NavigatedTo(UUINavComponent* NavigatedToComponent, const bool
 		UpdateNavigationVisuals(NavigatedToComponent);
 	}
 
-	// TODO: Propagate this!
-	CallOnNavigate(CurrentComponent, NavigatedToComponent);
+	CallOnNavigate(bHadNavigation == bHasNavigation ? CurrentComponent : nullptr, NavigatedToComponent);
 
 	SetCurrentComponent(NavigatedToComponent);
 }
@@ -1216,7 +1190,6 @@ void UUINavWidget::OnPressedComponent(UUINavComponent* Component)
 
 	SetSelectedComponent(Component);
 
-	// TODO: Propagate this!
 	SelectCount++;
 
 	PropagateOnStartSelect(CurrentComponent);
@@ -1234,8 +1207,6 @@ void UUINavWidget::OnReleasedComponent(UUINavComponent* Component)
 
 	if (!Component->NavButton->IsHovered()) Component->RevertButtonStyle();
 
-	//if (!UINavPC->AllowsSelectInput()) return;
-
 	if (CurrentComponent == nullptr || SelectedComponent == nullptr || !IsValid(Component)) return;
 
 	const bool bIsSelectedButton = SelectedComponent == Component && (Component->NavButton->IsHovered());
@@ -1244,7 +1215,6 @@ void UUINavWidget::OnReleasedComponent(UUINavComponent* Component)
 	{
 		Component->SwitchButtonStyle(Component->NavButton->IsPressed() || SelectCount > 1 ? EButtonStyle::Pressed : (Component == CurrentComponent ? EButtonStyle::Hovered : EButtonStyle::Normal));
 
-		// TODO: Propagate this!
 		if (SelectCount > 0) SelectCount--;
 		if (SelectCount == 0)
 		{
