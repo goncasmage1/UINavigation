@@ -1224,13 +1224,3 @@ void UUINavWidget::OnReleasedComponent(UUINavComponent* Component)
 
 	if (Component != CurrentComponent) Component->SetFocus();
 }
-
-void UUINavWidget::MenuSelect()
-{
-
-}
-
-void UUINavWidget::MenuReturn()
-{
-
-}

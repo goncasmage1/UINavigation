@@ -176,8 +176,6 @@ public:
 	bool bCompletedSetup = false;
 	bool bSetupStarted = false;
 
-	bool bAutoAppended = false;
-
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UINavigation Selector")
 	UCurveFloat* MoveCurve = nullptr;
 
@@ -412,8 +410,6 @@ public:
 	
 	virtual void OnHorizCompUpdated_Implementation(UUINavComponent* Component);
 
-	void MenuNavigate(const ENavigationDirection Direction);
-
 	virtual void NavigatedTo(UUINavComponent* NavigatedToComponent, const bool bNotifyUINavPC = true);
 
 	void CallOnNavigate(UUINavComponent* FromComponent, UUINavComponent* ToComponent);
@@ -489,11 +485,5 @@ public:
 
 	void OnPressedComponent(UUINavComponent* Component);
 	void OnReleasedComponent(UUINavComponent* Component);
-
-	UFUNCTION(BlueprintCallable, Category = UINavWidget)
-	virtual void MenuSelect();
-	
-	UFUNCTION(BlueprintCallable, Category = UINavWidget)
-	virtual void MenuReturn();
 
 };
