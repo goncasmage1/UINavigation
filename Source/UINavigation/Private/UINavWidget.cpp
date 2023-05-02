@@ -542,8 +542,7 @@ FVector2D UUINavWidget::GetButtonLocation(UUINavComponent* Component) const
 
 void UUINavWidget::ExecuteAnimations(UUINavComponent* FromComponent, UUINavComponent* ToComponent)
 {
-	if (IsValid(FromComponent) && FromComponent != ToComponent &&
-		IsValid(FromComponent->GetComponentAnimation()))
+	if (IsValid(FromComponent) && FromComponent != ToComponent && IsValid(FromComponent->GetComponentAnimation()) && FromComponent->UseComponentAnimation())
 	{
 		if (FromComponent->IsAnimationPlaying(FromComponent->GetComponentAnimation()))
 		{
@@ -555,7 +554,7 @@ void UUINavWidget::ExecuteAnimations(UUINavComponent* FromComponent, UUINavCompo
 		}
 	}
 
-	if (IsValid(ToComponent) && IsValid(ToComponent->GetComponentAnimation()))
+	if (IsValid(ToComponent) && IsValid(ToComponent->GetComponentAnimation()) && ToComponent->UseComponentAnimation())
 	{
 		if (ToComponent->IsAnimationPlaying(ToComponent->GetComponentAnimation()))
 		{

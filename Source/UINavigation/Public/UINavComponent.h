@@ -96,6 +96,8 @@ public:
 
 	UWidgetAnimation* GetComponentAnimation() const { return ComponentAnimation; }
 
+	bool UseComponentAnimation() const { return bUseComponentAnimation; }
+
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavComponent)
 	bool IsComponentValid(const bool bIgnoreDisabledUINavButton = true) const;
 
@@ -155,6 +157,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavComponent)
 	bool bUseTextColor = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavComponent)
+	bool bUseComponentAnimation = true;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavComponent, meta = (editcondition = "bUseTextColor"))
 	FLinearColor TextDefaultColor = FColor::Blue;
