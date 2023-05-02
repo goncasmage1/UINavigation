@@ -30,6 +30,9 @@ public:
 	bool bForceNavigation = true;
 
 	UPROPERTY(config, EditAnywhere, Category = "Settings")
+	bool bStopNextPreviousNavigation = true;
+
+	UPROPERTY(config, EditAnywhere, Category = "Settings")
 	bool bIgnoreDisabledUINavButton = true;
 	
 	UPROPERTY(config, EditAnywhere, Category = "Settings")

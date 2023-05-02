@@ -310,16 +310,6 @@ public:
 	virtual void OnNavigate_Implementation(UUINavComponent* FromComponent, UUINavComponent* TomComponent);
 
 	/**
-	*	Notifies that the player navigated in the specified direction
-	*
-	*	@param	Direction  The direction of navigation
-	*/
-	UFUNCTION(BlueprintNativeEvent, Category = UINavWidget)
-	void OnNavigatedDirection(const ENavigationDirection Direction);
-	
-	virtual void OnNavigatedDirection_Implementation(const ENavigationDirection Direction);
-
-	/**
 	*	Notifies that a button was selected, and indicates its index
 	*
 	*	@param	Index  The index of the button that was selected

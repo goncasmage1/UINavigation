@@ -8,6 +8,7 @@
 #include "Framework/Application/SlateApplication.h"
 #include "Internationalization/Internationalization.h"
 #include "UINavMacros.h"
+#include "UINavSettings.h"
 
 UUINavComponent::UUINavComponent(const FObjectInitializer& ObjectInitializer)
 	:Super(ObjectInitializer)
@@ -298,14 +299,34 @@ FNavigationReply UUINavComponent::NativeOnNavigation(const FGeometry& MyGeometry
 {
 	FNavigationReply Reply = Super::NativeOnNavigation(MyGeometry, InNavigationEvent, InDefaultReply);
 
-	if (!IsValid(ParentWidget))
+	if (!IsValid(ParentWidget) || !IsValid(ParentWidget->UINavPC))
 	{
 		return Reply;
+	}
+
+	if (!ParentWidget->UINavPC->AllowsDirectionalInput())
+	{
+		return FNavigationReply::Stop();
 	}
 
 	if (ParentWidget->TryConsumeNavigation())
 	{
 		return FNavigationReply::Stop();
+	}
+
+	if (GetDefault<UUINavSettings>()->bStopNextPreviousNavigation)
+	{
+		if (InNavigationEvent.GetNavigationType() == EUINavigation::Next)
+		{
+			ParentWidget->OnNext();
+			return FNavigationReply::Stop();
+		}
+		
+		if (InNavigationEvent.GetNavigationType() == EUINavigation::Previous)
+		{
+			ParentWidget->OnPrevious();
+			return FNavigationReply::Stop();
+		}
 	}
 
 	return Reply;

@@ -604,11 +604,6 @@ void UUINavWidget::OnNavigate_Implementation(UUINavComponent* FromComponent, UUI
 
 }
 
-void UUINavWidget::OnNavigatedDirection_Implementation(const ENavigationDirection Direction)
-{
-
-}
-
 void UUINavWidget::OnSelect_Implementation(UUINavComponent* Component)
 {
 
