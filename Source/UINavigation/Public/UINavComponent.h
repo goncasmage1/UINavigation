@@ -128,7 +128,7 @@ public:
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget, OptionalWidget = true), Category = UINavComponent)
 	class UTextBlock* NavText = nullptr;
 
-	UPROPERTY()
+	UPROPERTY(BlueprintReadOnly, Category = UINavComponent)
 	UUINavWidget* ParentWidget = nullptr;
 
 	UPROPERTY(BlueprintAssignable, Category = "Appearance|Event")

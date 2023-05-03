@@ -9,6 +9,7 @@
 
 class UInputAction;
 class UPromptDataBinary;
+class UWidget;
 
 /**
  * 
@@ -62,10 +63,21 @@ public:
 		return true;
 	}
 
-
-	// Returns whether the given button is valid (isn't hidden, collaped or disabled)
+	// Returns the child of the given panel widget at the given index
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
-	static bool IsButtonValid(UUINavButton* Button);
+	static UWidget* GetPanelWidgetChild(const UWidget* const Widget, const int ChildIndex);
+
+	// Returns the child of the given uniform grid panel widget with the given column and row
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
+	static UWidget* GetUniformGridChild(const UWidget* const Widget, const int Column, const int Row);
+
+	// Returns the index of the given widget in its parent panel widget
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
+	static int GetIndexInPanelWidget(const UWidget* const Widget, const TSubclassOf<UPanelWidget> PanelWidgetSubclass);
+
+	// Returns the index of the given widget in its parent panel widget
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
+	static void GetIndexInUniformGridWidget(const UWidget* const Widget, int& Column, int& Row);
 
 	UFUNCTION(BlueprintPure, Category = UINavigationLibrary)
 	static bool IsVRKey(const FKey Key);

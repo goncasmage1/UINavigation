@@ -12,6 +12,9 @@
 #include "InputAction.h"
 #include "EnhancedInputSubsystems.h"
 #include "Data/UINavEnhancedActionKeyMapping.h"
+#include "Components/PanelWidget.h"
+#include "Components/UniformGridPanel.h"
+#include "Components/UniformGridSlot.h"
 #if IS_VR_PLATFORM
 #include "IXRTrackingSystem.h"
 #endif
@@ -191,10 +194,110 @@ UPromptDataBinary* UUINavBlueprintFunctionLibrary::CreateBinaryPromptData(const 
 	return PromptData;
 }
 
-bool UUINavBlueprintFunctionLibrary::IsButtonValid(UUINavButton * Button)
+UWidget* UUINavBlueprintFunctionLibrary::GetPanelWidgetChild(const UWidget* const Widget, const int ChildIndex)
 {
-	if (Button == nullptr) return false;
-	return Button->IsValid();
+	const UPanelWidget* const PanelWidget = Cast<UPanelWidget>(Widget);
+	if (!IsValid(PanelWidget))
+	{
+		return nullptr;
+	}
+
+	return PanelWidget->GetChildAt(ChildIndex);
+}
+
+UWidget* UUINavBlueprintFunctionLibrary::GetUniformGridChild(const UWidget* const Widget, const int Column, const int Row)
+{
+	const UUniformGridPanel* const GridPanelWidget = Cast<UUniformGridPanel>(Widget);
+	if (!IsValid(GridPanelWidget))
+	{
+		return nullptr;
+	}
+
+	for (int i = 0; i < GridPanelWidget->GetChildrenCount(); ++i)
+	{
+		UWidget* const Child = GridPanelWidget->GetChildAt(i);
+		if (!IsValid(Child))
+		{
+			continue;
+		}
+
+		const UUniformGridSlot* const GridSlot = Cast<UUniformGridSlot>(Child->Slot);
+		if (!IsValid(GridSlot))
+		{
+			continue;
+		}
+
+		if (GridSlot->Column == Column && GridSlot->Row == Row)
+		{
+			return Child;
+		}
+	}
+
+	return nullptr;
+}
+
+int UUINavBlueprintFunctionLibrary::GetIndexInPanelWidget(const UWidget* const Widget, const TSubclassOf<UPanelWidget> PanelWidgetSubclass)
+{
+	if (!IsValid(Widget))
+	{
+		return INDEX_NONE;
+	}
+
+	const UPanelWidget* const PanelWidget = Widget->GetParent();
+	if (!IsValid(PanelWidget))
+	{
+		return INDEX_NONE;
+	}
+
+	if (!PanelWidget->IsA(PanelWidgetSubclass))
+	{
+		return GetIndexInPanelWidget(PanelWidget, PanelWidgetSubclass);
+	}
+
+	return PanelWidget->GetChildIndex(Widget);
+}
+
+void UUINavBlueprintFunctionLibrary::GetIndexInUniformGridWidget(const UWidget* const Widget, int& Column, int& Row)
+{
+	Column = -1;
+	Row = -1;
+
+	if (!IsValid(Widget))
+	{
+		return;
+	}
+
+	if (!IsValid(Widget->GetParent()))
+	{
+		return;
+	}
+
+	const UUniformGridPanel* const GridPanelWidget = Cast<UUniformGridPanel>(Widget->GetParent());
+	if (!IsValid(GridPanelWidget))
+	{
+		return GetIndexInUniformGridWidget(GridPanelWidget, Column, Row);
+	}
+
+	for (int i = 0; i < GridPanelWidget->GetChildrenCount(); ++i)
+	{
+		UWidget* const Child = GridPanelWidget->GetChildAt(i);
+		if (!IsValid(Child))
+		{
+			continue;
+		}
+
+		const UUniformGridSlot* const GridSlot = Cast<UUniformGridSlot>(Child->Slot);
+		if (!IsValid(GridSlot))
+		{
+			continue;
+		}
+
+		if (Child == Widget)
+		{
+			Column = GridSlot->Column;
+			Row = GridSlot->Row;
+		}
+	}
 }
 
 bool UUINavBlueprintFunctionLibrary::IsVRKey(const FKey Key)

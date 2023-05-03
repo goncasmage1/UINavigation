@@ -464,23 +464,11 @@ void UUINavWidget::HandleSelectorMovement(const float DeltaTime)
 
 	MovementCounter += DeltaTime;
 
-	//Movement is finished
 	if (MovementCounter >= MovementTime)
 	{
 		MovementCounter = 0.f;
 		bMovingSelector = false;
 		TheSelector->SetRenderTranslation(SelectorDestination);
-		/*if (HaltedIndex != -1)
-		{
-			if (HaltedIndex == SELECT_INDEX) OnPreSelect(ButtonIndex);
-			else if (HaltedIndex == RETURN_INDEX)
-			{
-				OnReturn();
-			}
-			else NavigateTo(HaltedIndex);
-
-			HaltedIndex = -1;
-		}*/
 		return;
 	}
 
@@ -960,10 +948,6 @@ int UUINavWidget::GetWidgetHierarchyDepth(UWidget* Widget) const
 	return DepthCount;
 }
 
-void UUINavWidget::MenuNavigate(const ENavigationDirection Direction)
-{
-}
-
 void UUINavWidget::NavigatedTo(UUINavComponent* NavigatedToComponent, const bool bNotifyUINavPC /*= true*/)
 {
 	if (!IsValid(UINavPC) ||
@@ -1192,12 +1176,6 @@ void UUINavWidget::OnPressedComponent(UUINavComponent* Component)
 void UUINavWidget::OnReleasedComponent(UUINavComponent* Component)
 {
 	if (!IsValid(Component) || (!bHasNavigation && SelectCount == 0) || UINavPC == nullptr) return;
-
-	/*if (bMovingSelector)
-	{
-		HaltedIndex = SELECT_INDEX;
-		return;
-	}*/
 
 	if (!Component->NavButton->IsHovered()) Component->RevertButtonStyle();
 
