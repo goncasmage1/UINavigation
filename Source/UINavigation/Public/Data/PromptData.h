@@ -4,7 +4,7 @@
 #include "UObject/Object.h"
 #include "PromptData.generated.h"
 
-UCLASS()
+UCLASS(BlueprintType, Blueprintable)
 class UINAVIGATION_API UPromptDataBase : public UObject
 {
 	GENERATED_BODY()
@@ -13,7 +13,7 @@ public:
 	UPromptDataBase() {}
 };
 
-UCLASS()
+UCLASS(BlueprintType, Blueprintable)
 class UPromptDataBinary : public UPromptDataBase
 {
 	GENERATED_BODY()

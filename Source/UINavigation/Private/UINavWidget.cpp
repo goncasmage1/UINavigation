@@ -655,9 +655,9 @@ void UUINavWidget::OnPromptDecided(const TSubclassOf<UUINavPromptWidget> PromptC
 	UFunction* CustomFunction = FindFunction(EventName);
 	if (CustomFunction != nullptr)
 	{
-		if (CustomFunction->ParmsSize == sizeof(int))
+		if (CustomFunction->ParmsSize == sizeof(UPromptDataBase*))
 		{
-			uint8* Buffer = static_cast<uint8*>(FMemory_Alloca(sizeof(int)));
+			uint8* Buffer = static_cast<uint8*>(FMemory_Alloca(sizeof(UPromptDataBase*)));
 			FMemory::Memcpy(Buffer, &InPromptData, sizeof(InPromptData));
 			ProcessEvent(CustomFunction, Buffer);
 		}
