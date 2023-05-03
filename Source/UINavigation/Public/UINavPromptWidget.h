@@ -18,6 +18,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "UINavPromptWidget")
 	void ProcessPromptWidgetSelected(UPromptDataBase* const InPromptData);
 
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "UINavPromptWidget")
+	bool IsAcceptComponent(UUINavComponent* Component) const;
+
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = "UINavPromptWidget")
 	bool FirstComponentIsAccept = false;
