@@ -1847,7 +1847,7 @@ void UUINavWidget::DeleteGrid(const int GridIndex)
 
 		for (UUINavCollection* Collection : UINavCollections)
 		{
-			if (Collection->FirstGridIndex = GridIndex)
+			if (Collection->FirstGridIndex == GridIndex)
 			{
 				Collection->FirstGridIndex = -1;
 			}
