@@ -938,6 +938,8 @@ void UUINavWidget::AddUINavButton(UUINavButton* NewButton, const int TargetGridI
 
 	if (IndexInGrid >= TargetGrid.GetDimension() || IndexInGrid <= -1) IndexInGrid = TargetGrid.GetDimension();
 
+	if (TargetGrid.FirstButton == nullptr) NewButton->ButtonIndex = -1;
+
 	IncrementGrid(NewButton, TargetGrid, IndexInGrid);
 
 	NewButton->ButtonIndex = TargetGrid.FirstButton->ButtonIndex + IndexInGrid;
@@ -1828,8 +1830,26 @@ void UUINavWidget::DeleteGrid(const int GridIndex)
 
 				break;
 			}
+			
+			if (NavigationGrids[NextGridIndex].GridIndex > GridIndex)
+			{
+				NavigationGrids[NextGridIndex].GridIndex--;
+			}
 
 			++NextGridIndex;
+		}
+
+		for (UUINavCollection* Collection : UINavCollections)
+		{
+			if (Collection->FirstGridIndex == GridIndex)
+			{
+				Collection->FirstGridIndex = -1;
+			}
+
+			if (Collection->FirstGridIndex > GridIndex)
+			{
+				Collection->FirstGridIndex--;
+			}
 		}
 	}
 
@@ -3406,6 +3426,8 @@ void UUINavWidget::ReleaseEvent(int Index)
 
 void UUINavWidget::FinishPress(const bool bMouse)
 {
+	if (!IsValid(CurrentButton)) return;
+
 	SelectedButtonIndex = ButtonIndex;
 	SelectCount++;
 
