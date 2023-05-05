@@ -10,6 +10,7 @@
 #include "UINavMacros.h"
 #include "InputAction.h"
 #include "EnhancedInputSubsystems.h"
+#include "Data/UINavEnhancedActionKeyMapping.h"
 #if IS_VR_PLATFORM
 #include "IXRTrackingSystem.h"
 #endif
@@ -79,9 +80,9 @@ void UUINavBlueprintFunctionLibrary::ResetInputSettings(APlayerController* PC)
 
 				InputContext->UnmapAll();
 
-				for (const FEnhancedActionKeyMapping& DefaultInputMapping : DefaultMappings.DefaultInputMappings)
+				for (const FUINavEnhancedActionKeyMapping& DefaultInputMapping : DefaultMappings.DefaultInputMappings)
 				{
-					FEnhancedActionKeyMapping& NewMapping = InputContext->MapKey(DefaultInputMapping.Action, DefaultInputMapping.Key);
+					FEnhancedActionKeyMapping& NewMapping = InputContext->MapKey(DefaultInputMapping.Action.LoadSynchronous(), DefaultInputMapping.Key);
 					NewMapping.Modifiers = DefaultInputMapping.Modifiers;
 					NewMapping.Triggers = DefaultInputMapping.Triggers;
 				}
