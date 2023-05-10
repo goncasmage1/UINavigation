@@ -1153,9 +1153,13 @@ void UUINavWidget::OnUnhoveredComponent(UUINavComponent* Component)
 			Component->SwitchButtonStyle(Component == CurrentComponent ? EButtonStyle::Hovered : EButtonStyle::Normal);
 		}
 
-		if (Component->ForcedStyle != EButtonStyle::None)
+		if (CurrentComponent == Component)
 		{
 			Component->SetFocus();
+		}
+		else
+		{
+			Component->RevertButtonStyle();
 		}
 	}
 }
