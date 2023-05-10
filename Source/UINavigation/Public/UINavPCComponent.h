@@ -9,7 +9,7 @@
 #include "Data/InputRebindData.h"
 #include "Data/InputRestriction.h"
 #include "Data/InputType.h"
-#include "Data/NavigationDirection.h"
+#include "Types/SlateEnums.h"
 #include "InputCoreTypes.h"
 #include "Input/Reply.h"
 #include "InputAction.h"
@@ -72,22 +72,23 @@ protected:
 
 	TSharedPtr<class FUINavInputProcessor> SharedInputProcessor = nullptr;
 
-	ENavigationDirection Direction = ENavigationDirection::None;
-
 	FVector2D LeftStickDelta = FVector2D::ZeroVector;
 
 	ECountdownPhase CountdownPhase = ECountdownPhase::None;
 
+	EUINavigation AllowDirection = EUINavigation::Invalid;
+
 	UPROPERTY()
 	UUINavInputBox* ListeningInputBox = nullptr;
 
-	ENavigationDirection CallbackDirection;
+	EUINavigation CallbackDirection;
 	float TimerCounter = 0.f;
+
+	bool bIgnoreNavigationKey = true;
 
 	/*************************************************************************/
 
-	void TimerCallback();
-	void SetTimer(const ENavigationDirection NavigationDirection);
+	void SetTimer(const EUINavigation NavigationDirection);
 
 	void TryResetDefaultInputs();
 
@@ -173,6 +174,8 @@ public:
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavController)
 	float RebindThreshold = 0.5f;
+
+	TMap<EUINavigation, TArray<FKey>> PressedNavigationDirections;
 
 	/*
 	Holds the key icons for gamepad
@@ -261,6 +264,8 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
 	FORCEINLINE bool AllowsSectionInput() const { return bAllowSectionInput; }
+
+	FORCEINLINE bool AllowsNavigatingDirection(const EUINavigation Direction) const { return AllowsDirectionalInput() || (Direction != EUINavigation::Invalid && AllowDirection != Direction); }
 	
 	UFUNCTION(BlueprintCallable, Category = UINavController)
 	void RefreshNavigationKeys();
@@ -296,6 +301,11 @@ public:
 	void SimulateMouseRelease();
 	UFUNCTION(BlueprintCallable, Category = UINavController)
 	void SimulateMouseClick();
+
+	FKey GetKeyUsedForNavigation(const EUINavigation Direction) const;
+	const TArray<FKey> GetNavigationConfigKeys(const EUINavigation Direction) const;
+	float GetKeyPressedTime(const FKey& Key) const;
+	FKey GetMostRecentlyPressedKey(const TArray<FKey> Keys) const;
 
 	void ProcessRebind(const FKey Key);
 	void CancelRebind();
@@ -426,13 +436,16 @@ public:
 	UFUNCTION(BlueprintCallable, Category = UINavWidget, meta = (AdvancedDisplay = 2))
 	UUINavWidget* GoToBuiltWidget(UUINavWidget* NewWidget, const bool bRemoveParent, const bool bDestroyParent = false, const int ZOrder = 0);
 
-	void MenuInput(const ENavigationDirection Direction);
-	void MenuSelect();
-	void MenuReturn();
+	void NavigateInDirection(const EUINavigation Direction);
 	void MenuNext();
 	void MenuPrevious();
 
-	void ClearTimer();
+	void NotifyNavigationKeyPressed(const FKey& Key, const EUINavigation Direction);
+	void NotifyNavigationKeyReleased(const FKey& Key, const EUINavigation Direction);
+
+	bool TryNavigateInDirection(const EUINavigation Direction);
+
+	void ClearNavigationTimer();
 
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)

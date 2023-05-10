@@ -23,7 +23,7 @@ void IUINavPCReceiver::OnActiveWidgetChanged_Implementation(UUINavWidget* OldAct
 {
 }
 
-void IUINavPCReceiver::OnNavigated_Implementation(ENavigationDirection NewDirection)
+void IUINavPCReceiver::OnNavigated_Implementation(EUINavigation NewDirection)
 {
 }
 

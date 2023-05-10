@@ -3,12 +3,8 @@
 #pragma once
 
 #include "GameFramework/PlayerController.h"
+#include "UINavPCComponent.h"
 #include "UINavPCReceiver.h"
-#include "Engine/DataTable.h"
-#include "Data/CountdownPhase.h"
-#include "Data/InputRestriction.h"
-#include "Data/InputType.h"
-#include "Data/NavigationDirection.h"
 #include "UINavController.generated.h"
 
 

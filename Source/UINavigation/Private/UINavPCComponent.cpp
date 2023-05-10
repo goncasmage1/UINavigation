@@ -16,11 +16,13 @@
 #include "UINavBlueprintFunctionLibrary.h"
 #include "UINavInputProcessor.h"
 #include "Framework/Application/SlateApplication.h"
+#include "InputCoreTypes.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputLibrary.h"
 #include "EnhancedPlayerInput.h"
 #include "AssetRegistry/AssetRegistryModule.h"
+#include "Templates/SharedPointer.h"
 
 UUINavPCComponent::UUINavPCComponent()
 {
@@ -111,7 +113,7 @@ void UUINavPCComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAct
 			TimerCounter += DeltaTime;
 			if (TimerCounter >= InputHeldWaitTime)
 			{
-				TimerCallback();
+				NavigateInDirection(CallbackDirection);
 				TimerCounter -= InputHeldWaitTime;
 				CountdownPhase = ECountdownPhase::Looping;
 			}
@@ -120,7 +122,7 @@ void UUINavPCComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAct
 			TimerCounter += DeltaTime;
 			if (TimerCounter >= NavigationChainFrequency)
 			{
-				TimerCallback();
+				NavigateInDirection(CallbackDirection);
 				TimerCounter -= NavigationChainFrequency;
 			}
 			break;
@@ -501,24 +503,70 @@ void UUINavPCComponent::SimulateMouseClick()
 	SimulateMouseRelease();
 }
 
-void UUINavPCComponent::TimerCallback()
+FKey UUINavPCComponent::GetKeyUsedForNavigation(const EUINavigation Direction) const
 {
-	MenuInput(CallbackDirection);
+	if (Direction == EUINavigation::Invalid)
+	{
+		return FKey();
+	}
+
+	const TArray<FKey>* const DirectionKeys = PressedNavigationDirections.Find(Direction);
+	if (DirectionKeys == nullptr || DirectionKeys->Num() == 0)
+	{
+		return FKey();
+	}
+
+	return DirectionKeys->Last();
 }
 
-void UUINavPCComponent::SetTimer(const ENavigationDirection TimerDirection)
+const TArray<FKey> UUINavPCComponent::GetNavigationConfigKeys(const EUINavigation Direction) const
+{
+	const TSharedRef<FUINavigationConfig> NavConfig = StaticCastSharedRef<FUINavigationConfig>(FSlateApplication::Get().GetNavigationConfig());
+	return NavConfig->GetKeysForDirection(Direction);
+}
+
+float UUINavPCComponent::GetKeyPressedTime(const FKey& Key) const
+{
+	const UPlayerInput* const PlayerInput = PC->PlayerInput;
+	if (!IsValid(PlayerInput))
+	{
+		return 0.0f;
+	}
+
+	return PlayerInput->GetTimeDown(Key);
+}
+
+FKey UUINavPCComponent::GetMostRecentlyPressedKey(const TArray<FKey> Keys) const
+{
+	FKey RecentKey;
+	float BestTime = MAX_FLT;
+
+	for (const FKey& Key : Keys)
+	{
+		const float KeyPressTime = GetKeyPressedTime(Key);
+		if (KeyPressTime < BestTime)
+		{
+			RecentKey = Key;
+			BestTime = KeyPressTime;
+		}
+	}
+
+	return RecentKey;
+}
+
+void UUINavPCComponent::SetTimer(const EUINavigation TimerDirection)
 {
 	TimerCounter = 0.f;
 	CallbackDirection = TimerDirection;
 	CountdownPhase = ECountdownPhase::First;
 }
 
-void UUINavPCComponent::ClearTimer()
+void UUINavPCComponent::ClearNavigationTimer()
 {
-	if (CallbackDirection == ENavigationDirection::None) return;
+	if (CallbackDirection == EUINavigation::Invalid) return;
 
 	TimerCounter = 0.f;
-	CallbackDirection = ENavigationDirection::None;
+	CallbackDirection = EUINavigation::Invalid;
 	CountdownPhase = ECountdownPhase::None;
 }
 
@@ -951,26 +999,28 @@ UEnhancedInputComponent* UUINavPCComponent::GetEnhancedInputComponent() const
 	return IsValid(PC) ? Cast<UEnhancedInputComponent>(PC->InputComponent) : nullptr;
 }
 
-void UUINavPCComponent::MenuInput(const ENavigationDirection InDirection)
+void UUINavPCComponent::NavigateInDirection(const EUINavigation InDirection)
 {
 	IUINavPCReceiver::Execute_OnNavigated(GetOwner(), InDirection);
 
-	//if (ActiveWidget == nullptr || !bAllowDirectionalInput) return;
-}
+	TArray<FKey>* DirectionKeys = PressedNavigationDirections.Find(InDirection);
+	if (DirectionKeys == nullptr)
+	{
+		return;
+	}
 
-void UUINavPCComponent::MenuSelect()
-{
-	/*if (ActiveWidget == nullptr || !bAllowSelectInput) return;
+	AllowDirection = InDirection;
 
-	ClearTimer();*/
-}
+	const FKey NavigationKey = DirectionKeys->Last();
+	if (!NavigationKey.IsValid())
+	{
+		return;
+	}
 
-void UUINavPCComponent::MenuReturn()
-{
-	if (ActiveWidget == nullptr /*|| !bAllowReturnInput*/) return;
-
-	//ClearTimer();
-
+	const uint32* KeyCodePtr;
+	const uint32* CharacterCodePtr;
+	FInputKeyManager::Get().GetCodesFromKey(NavigationKey, KeyCodePtr, CharacterCodePtr);
+	FSlateApplication::Get().OnKeyDown(KeyCodePtr != nullptr ? *KeyCodePtr : -1, *CharacterCodePtr, true);
 }
 
 void UUINavPCComponent::MenuNext()
@@ -979,7 +1029,7 @@ void UUINavPCComponent::MenuNext()
 
 	/*if (ActiveWidget == nullptr || !bAllowSectionInput) return;
 
-	ClearTimer();*/
+	ClearNavigationTimer();*/
 }
 
 void UUINavPCComponent::MenuPrevious()
@@ -988,5 +1038,93 @@ void UUINavPCComponent::MenuPrevious()
 
 	/*if (ActiveWidget == nullptr || !bAllowSectionInput) return;
 
-	ClearTimer();*/
+	ClearNavigationTimer();*/
+}
+
+void UUINavPCComponent::NotifyNavigationKeyPressed(const FKey& Key, const EUINavigation Direction)
+{
+	TArray<FKey>* DirectionKeys = PressedNavigationDirections.Find(Direction);
+	if (DirectionKeys != nullptr)
+	{
+		ClearNavigationTimer();
+		if (DirectionKeys->Contains(Key))
+		{
+			bIgnoreNavigationKey = true;
+		}
+		else
+		{
+			DirectionKeys->AddUnique(Key);
+		}
+	}
+	else
+	{
+		PressedNavigationDirections.Add(Direction, { Key });
+	}
+
+	bIgnoreNavigationKey = false;
+
+	ClearNavigationTimer();
+}
+
+void UUINavPCComponent::NotifyNavigationKeyReleased(const FKey& Key, const EUINavigation Direction)
+{
+	TArray<FKey>* DirectionKeys = PressedNavigationDirections.Find(Direction);
+	if (DirectionKeys == nullptr)
+	{
+		return;
+	}
+
+	DirectionKeys->Remove(Key);
+
+	if (DirectionKeys->Num() == 0)
+	{
+		PressedNavigationDirections.Remove(Direction);
+	}
+
+	ClearNavigationTimer();
+}
+
+bool UUINavPCComponent::TryNavigateInDirection(const EUINavigation Direction)
+{
+	FKey PressedKey = GetKeyUsedForNavigation(Direction);
+	if (!PressedKey.IsValid())
+	{
+		PressedKey = GetMostRecentlyPressedKey(GetNavigationConfigKeys(Direction));
+		if (!PressedKey.IsValid())
+		{
+			return false;
+		}
+
+		NotifyNavigationKeyPressed(PressedKey, Direction);
+	}
+
+	if (Direction == EUINavigation::Invalid)
+	{
+		return true;
+	}
+
+	if (IsValid(ListeningInputBox))
+	{
+		return false;
+	}
+
+	if (AllowDirection == Direction)
+	{
+		AllowDirection = EUINavigation::Invalid;
+		return true;
+	}
+
+	TArray<FKey>* DirectionKeys = PressedNavigationDirections.Find(Direction);
+	if ((DirectionKeys == nullptr || DirectionKeys->Contains(PressedKey)) && bIgnoreNavigationKey)
+	{
+		return false;
+	}
+
+	bIgnoreNavigationKey = true;
+
+	IUINavPCReceiver::Execute_OnNavigated(GetOwner(), Direction);
+
+	SetTimer(Direction);
+
+	return true;
 }

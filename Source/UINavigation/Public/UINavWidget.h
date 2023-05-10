@@ -3,7 +3,6 @@
 #pragma once
 
 #include "Blueprint/UserWidget.h"
-#include "Data/NavigationDirection.h"
 #include "Data/InputType.h"
 #include "Data/ReceiveInputType.h"
 #include "Data/SelectorPosition.h"

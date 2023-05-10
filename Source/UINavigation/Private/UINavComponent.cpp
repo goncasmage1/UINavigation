@@ -72,6 +72,12 @@ FReply UUINavComponent::NativeOnKeyDown(const FGeometry& InGeometry, const FKeyE
 		}
 	}
 
+	const EUINavigation Direction = FSlateApplication::Get().GetNavigationDirectionFromKey(InKeyEvent);
+	if (Direction != EUINavigation::Invalid)
+	{
+		ParentWidget->UINavPC->NotifyNavigationKeyPressed(InKeyEvent.GetKey(), Direction);
+	}
+
 	return Reply;
 }
 
@@ -96,6 +102,14 @@ FReply UUINavComponent::NativeOnKeyUp(const FGeometry& InGeometry, const FKeyEve
 		if (!ParentWidget->TryConsumeNavigation())
 		{
 			ParentWidget->StoppedReturn();
+		}
+	}
+	else
+	{
+		const EUINavigation Direction = FSlateApplication::Get().GetNavigationDirectionFromKey(InKeyEvent);
+		if (Direction != EUINavigation::Invalid)
+		{
+			ParentWidget->UINavPC->NotifyNavigationKeyReleased(InKeyEvent.GetKey(), Direction);
 		}
 	}
 
@@ -304,12 +318,17 @@ FNavigationReply UUINavComponent::NativeOnNavigation(const FGeometry& MyGeometry
 		return Reply;
 	}
 
-	if (!ParentWidget->UINavPC->AllowsDirectionalInput())
+	if (!ParentWidget->UINavPC->AllowsNavigatingDirection(InNavigationEvent.GetNavigationType()))
 	{
 		return FNavigationReply::Stop();
 	}
 
 	if (ParentWidget->TryConsumeNavigation())
+	{
+		return FNavigationReply::Stop();
+	}
+
+	if (!ParentWidget->UINavPC->TryNavigateInDirection(InNavigationEvent.GetNavigationType()))
 	{
 		return FNavigationReply::Stop();
 	}

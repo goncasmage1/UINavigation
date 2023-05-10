@@ -13,5 +13,7 @@ public:
 
 	virtual EUINavigationAction GetNavigationActionForKey(const FKey& InKey) const override;
 
+	TArray<FKey> GetKeysForDirection(const EUINavigation Direction) const;
+
 	TMap<FKey, EUINavigationAction> KeyActionRules;
 };

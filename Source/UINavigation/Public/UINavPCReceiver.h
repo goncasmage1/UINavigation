@@ -4,7 +4,7 @@
 
 #include "UObject/Interface.h"
 #include "Data/InputType.h"
-#include "Data/NavigationDirection.h"
+#include "Types/SlateEnums.h"
 #include "UINavPCReceiver.generated.h"
 
 class UUINavWidget;
@@ -76,9 +76,9 @@ public:
 	*	@param NavigationDirection The direction of navigation
 	*/
 	UFUNCTION(BlueprintNativeEvent, Category = UINavController)
-	void OnNavigated(ENavigationDirection NavigationDirection);
+	void OnNavigated(EUINavigation NavigationDirection);
 
-	virtual void OnNavigated_Implementation(ENavigationDirection NavigationDirection);
+	virtual void OnNavigated_Implementation(EUINavigation NavigationDirection);
 
 	/**
 	*	Called when the player selects the current option

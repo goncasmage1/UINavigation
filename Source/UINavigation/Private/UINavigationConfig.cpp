@@ -69,3 +69,16 @@ EUINavigationAction FUINavigationConfig::GetNavigationActionForKey(const FKey& I
 	const EUINavigationAction* NavAction = KeyActionRules.Find(InKey);
 	return NavAction == nullptr ? EUINavigationAction::Invalid : *NavAction;
 }
+
+TArray<FKey> FUINavigationConfig::GetKeysForDirection(const EUINavigation Direction) const
+{
+	TArray<FKey> DirectionsKeys;
+	for (const TPair<FKey, EUINavigation>& KeyEventRule : KeyEventRules)
+	{
+		if (KeyEventRule.Value == Direction)
+		{
+			DirectionsKeys.Add(KeyEventRule.Key);
+		}
+	}
+	return DirectionsKeys;
+}
