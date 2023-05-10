@@ -22,11 +22,11 @@ struct FUINavEnhancedActionKeyMapping
 	GENERATED_BODY()
 
 	/** Action to be affected by the key  */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+	UPROPERTY(EditAnywhere, Category = "Input")
 	TSoftObjectPtr<UInputAction> Action = nullptr;
 
 	/** Key that affect the action. */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+	UPROPERTY(EditAnywhere, Category = "Input")
 	FKey Key = EKeys::Invalid;
 
 	/**
@@ -34,15 +34,15 @@ struct FUINavEnhancedActionKeyMapping
 	* If there are any Explicit triggers in this list at least one of them must be met.
 	* All Implicit triggers in this list must be met.
 	*/
-	UPROPERTY(EditAnywhere, Instanced, BlueprintReadWrite, Category = "Input")
-	TArray<class UInputTrigger*> Triggers;
+	UPROPERTY(EditAnywhere, Category = "Input")
+	TArray<TSoftObjectPtr<class UInputTrigger>> Triggers;
 
 	/**
 	* Modifiers applied to the raw key value.
 	* These are applied sequentially in array order.
 	*/
-	UPROPERTY(EditAnywhere, Instanced, BlueprintReadWrite, Category = "Input")
-	TArray<class UInputModifier*> Modifiers;
+	UPROPERTY(EditAnywhere, Category = "Input")
+	TArray<TSoftObjectPtr<class UInputModifier>> Modifiers;
 
 	FUINavEnhancedActionKeyMapping()
 		: Action(nullptr)

@@ -87,8 +87,20 @@ void UUINavBlueprintFunctionLibrary::ResetInputSettings(APlayerController* PC)
 				for (const FUINavEnhancedActionKeyMapping& DefaultInputMapping : DefaultMappings.DefaultInputMappings)
 				{
 					FEnhancedActionKeyMapping& NewMapping = InputContext->MapKey(DefaultInputMapping.Action.LoadSynchronous(), DefaultInputMapping.Key);
-					NewMapping.Modifiers = DefaultInputMapping.Modifiers;
-					NewMapping.Triggers = DefaultInputMapping.Triggers;
+
+					TArray<UInputModifier*> InputModifiers;
+					for (const TSoftObjectPtr<UInputModifier>& Modifier : DefaultInputMapping.Modifiers)
+					{
+						InputModifiers.Add(Modifier.LoadSynchronous());
+					}
+					NewMapping.Modifiers = InputModifiers;
+
+					TArray<UInputTrigger*> InputTriggers;
+					for (const TSoftObjectPtr<UInputTrigger>& Trigger : DefaultInputMapping.Triggers)
+					{
+						InputTriggers.Add(Trigger.LoadSynchronous());
+					}
+					NewMapping.Triggers = InputTriggers;
 				}
 			}
 
