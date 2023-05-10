@@ -737,9 +737,27 @@ void UUINavWidget::OnNext_Implementation()
 
 }
 
+void UUINavWidget::PropagateOnNext()
+{
+	OnNext();
+	if (IsValid(OuterUINavWidget) && !OuterUINavWidget->bMaintainNavigationForChild)
+	{
+		OuterUINavWidget->PropagateOnNext();
+	}
+}
+
 void UUINavWidget::OnPrevious_Implementation()
 {
 
+}
+
+void UUINavWidget::PropagateOnPrevious()
+{
+	OnPrevious();
+	if (IsValid(OuterUINavWidget) && !OuterUINavWidget->bMaintainNavigationForChild)
+	{
+		OuterUINavWidget->PropagateOnPrevious();
+	}
 }
 
 void UUINavWidget::OnInputChanged_Implementation(const EInputType From, const EInputType To)

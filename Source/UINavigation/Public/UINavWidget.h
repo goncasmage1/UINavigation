@@ -353,6 +353,8 @@ public:
 	
 	virtual void OnNext_Implementation();
 
+	void PropagateOnNext();
+
 	/**
 	*	Called when player navigates to the previous section
 	*/
@@ -360,6 +362,8 @@ public:
 	void OnPrevious();
 	
 	virtual void OnPrevious_Implementation();
+
+	void PropagateOnPrevious();
 
 	/**
 	*	Called when the input type changed

@@ -76,6 +76,14 @@ FReply UUINavComponent::NativeOnKeyDown(const FGeometry& InGeometry, const FKeyE
 	if (Direction != EUINavigation::Invalid)
 	{
 		ParentWidget->UINavPC->NotifyNavigationKeyPressed(InKeyEvent.GetKey(), Direction);
+		if (Direction == EUINavigation::Next)
+		{
+			ParentWidget->PropagateOnNext();
+		}
+		else if (Direction == EUINavigation::Previous)
+		{
+			ParentWidget->PropagateOnPrevious();
+		}
 	}
 
 	return Reply;
