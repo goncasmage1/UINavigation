@@ -105,7 +105,7 @@ void UUINavBlueprintFunctionLibrary::ResetInputSettings(APlayerController* PC)
 			return;
 		}
 	}
-	UInputSettings* Settings = const_cast<UInputSettings*>(GetDefault<UInputSettings>());
+	UInputSettings* Settings = GetMutableDefault<UInputSettings>();
 	UUINavDefaultInputSettings* DefaultUINavInputSettings = GetMutableDefault<UUINavDefaultInputSettings>();
 
 	//Remove old mappings
