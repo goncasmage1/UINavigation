@@ -54,8 +54,6 @@ protected:
 	void InputComponentClicked(const int Index);
 
 	void GetEnhancedMappingsForAction(const UInputAction* Action, const EInputAxis& Axis, const int Index, TArray<int32>& OutMappingIndices);
-	void GetMappingsForAction(const UInputSettings* const Settings, const FName ActionName, const int Index, TArray<int32>& OutMappingIndices);
-	void GetMappingsForAxis(const UInputSettings* const Settings, const FName AxisName, const bool bPositive, const int Index, TArray<int32>& OutMappingIndices);
 
 public:
 
@@ -63,7 +61,6 @@ public:
 
 	virtual void NativeConstruct() override;
 	void CreateEnhancedInputKeyWidgets();
-	void CreateInputKeyWidgets();
 
 	void CreateKeyWidgets();
 	bool TrySetupNewKey(const FKey NewKey, const int KeyIndex, const UUINavInputComponent* const NewInputButton);
@@ -71,12 +68,9 @@ public:
 	void UpdateInputKey(const FKey NewKey, int Index = -1, const bool bSkipChecks = false);
 	void FinishUpdateNewKey();
 	void FinishUpdateNewEnhancedInputKey(const FKey PressedKey, int Index);
-	void FinishUpdateNewInputKey(const FKey PressedKey, int Index);
 	void TryMapEnhancedAxisKey(const FKey& NewKey, const int32 Index);
-	void TryMapInputAxisKey(UInputSettings* Settings, const FKey& NewKey, const int32 Index);
 	void TryMap2DAxisKey(const FKey& NewMappingKey, const int Index);
 	void UnmapEnhancedAxisKey(const FKey& NewAxisKey, const FKey& OldAxisKey, const FKey& NewKey, const int32 Index);
-	void UnmapInputAxisKey(UInputSettings* Settings, const FKey& NewAxisKey, const FKey& OldAxisKey, const FInputAxisKeyMapping& AxisMapping, const int32 Index);
 	void AddRelevantModifiers(const FInputContainerEnhancedActionData& ActionData, FEnhancedActionKeyMapping& Mapping);
 	void CancelUpdateInputKey(const ERevertRebindReason Reason);
 	void RevertToKeyText(const int Index);

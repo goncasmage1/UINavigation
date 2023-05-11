@@ -19,8 +19,6 @@
 #include "EnhancedInputComponent.h"
 #include "UINavMacros.h"
 
-#define USING_ENHANCED_INPUT IsValid(UINavPC->GetEnhancedInputComponent())
-
 void UUINavInputContainer::NativeConstruct()
 {
 	ParentWidget = UUINavWidget::GetOuterObject<UUINavWidget>(this);
@@ -81,38 +79,19 @@ void UUINavInputContainer::SetupInputBoxes()
 
 	InputBoxes.Reset();
 
-	if (USING_ENHANCED_INPUT)
+	NumberOfInputs = 0;
+	for (const TPair<UInputMappingContext*, FInputContainerEnhancedActionDataArray>& Context : EnhancedInputs)
 	{
-		NumberOfInputs = 0;
-		for (const TPair<UInputMappingContext*, FInputContainerEnhancedActionDataArray>& Context : EnhancedInputs)
-		{
-			NumberOfInputs += Context.Value.Actions.Num();
-		}
-
-		if (NumberOfInputs == 0)
-		{
-			DISPLAYERROR(TEXT("Input Container has no Enhanced Input data!"));
-			return;
-		}
+		NumberOfInputs += Context.Value.Actions.Num();
 	}
-	else
+
+	if (NumberOfInputs == 0)
 	{
-		NumberOfInputs = InputNames.Num();
+		DISPLAYERROR(TEXT("Input Container has no Enhanced Input data!"));
+		return;
 	}
 	
 	CreateInputBoxes();
-
-	/*switch (KeysPerInput)
-	{
-		case 2:
-			TopButtonIndex = FirstButtonIndex + (TargetColumn == ETargetColumn::Right);
-			BottomButtonIndex = LastButtonIndex -(TargetColumn != ETargetColumn::Right);
-			break;
-		case 3:
-			TopButtonIndex = FirstButtonIndex + static_cast<int>(TargetColumn);
-			BottomButtonIndex = LastButtonIndex - (2 - static_cast<int>(TargetColumn));
-			break;
-	}*/
 }
 
 void UUINavInputContainer::CreateInputBoxes()
@@ -126,32 +105,21 @@ void UUINavInputContainer::CreateInputBoxes()
 		InputBoxes.Add(NewInputBox);
 		NewInputBox->Container = this;
 		NewInputBox->KeysPerInput = KeysPerInput;
-		if (USING_ENHANCED_INPUT)
-		{
-			int Index = i;
-			for (const TPair<UInputMappingContext*, FInputContainerEnhancedActionDataArray>&Context : EnhancedInputs)
-			{
-				if (Index >= Context.Value.Actions.Num())
-				{
-					Index -= Context.Value.Actions.Num();
-				}
-				else
-				{
-					NewInputBox->InputContext = Context.Key;
-					NewInputBox->InputActionData = Context.Value.Actions[Index];
-					NewInputBox->EnhancedInputGroups = Context.Value.InputGroups;
-					break;
-				}
-			}
-		}
-		else
-		{
-			NewInputBox->InputName = InputNames[i];
 
-			FInputRebindData InputRebindData;
-			bool bSuccess = false;
-			UINavPC->GetInputRebindData(InputNames[i], InputRebindData, bSuccess);
-			if (bSuccess) NewInputBox->InputData = InputRebindData;
+		int Index = i;
+		for (const TPair<UInputMappingContext*, FInputContainerEnhancedActionDataArray>& Context : EnhancedInputs)
+		{
+			if (Index >= Context.Value.Actions.Num())
+			{
+				Index -= Context.Value.Actions.Num();
+			}
+			else
+			{
+				NewInputBox->InputContext = Context.Key;
+				NewInputBox->InputActionData = Context.Value.Actions[Index];
+				NewInputBox->EnhancedInputGroups = Context.Value.InputGroups;
+				break;
+			}
 		}
 	}
 
@@ -163,7 +131,7 @@ void UUINavInputContainer::CreateInputBoxes()
 	}
 }
 
-ERevertRebindReason UUINavInputContainer::CanRegisterKey(const UUINavInputBox * InputBox, const FKey NewKey, const int Index, int& OutCollidingActionIndex, int& OutCollidingKeyIndex)
+ERevertRebindReason UUINavInputContainer::CanRegisterKey(UUINavInputBox * InputBox, const FKey NewKey, const int Index, int& OutCollidingActionIndex, int& OutCollidingKeyIndex)
 {
 	if (!NewKey.IsValid()) return ERevertRebindReason::BlacklistedKey;
 	if (KeyWhitelist.Num() > 0 && !KeyWhitelist.Contains(NewKey)) return ERevertRebindReason::NonWhitelistedKey;
@@ -175,10 +143,9 @@ ERevertRebindReason UUINavInputContainer::CanRegisterKey(const UUINavInputBox * 
 	return ERevertRebindReason::None;
 }
 
-bool UUINavInputContainer::CanUseKey(const UUINavInputBox* InputBox, const FKey CompareKey, int& OutCollidingActionIndex, int& OutCollidingKeyIndex) const
+bool UUINavInputContainer::CanUseKey(UUINavInputBox* InputBox, const FKey CompareKey, int& OutCollidingActionIndex, int& OutCollidingKeyIndex) const
 {
-	TArray<int> InputGroups = USING_ENHANCED_INPUT ? InputBox->EnhancedInputGroups : InputBox->InputData.InputGroups;
-	if (InputGroups.Num() == 0) InputGroups.Add(-1);
+	if (InputBox->EnhancedInputGroups.Num() == 0) InputBox->EnhancedInputGroups.Add(-1);
 
 	for (int i = 0; i < InputBoxes.Num(); ++i)
 	{
@@ -187,19 +154,17 @@ bool UUINavInputContainer::CanUseKey(const UUINavInputBox* InputBox, const FKey 
 		const int KeyIndex = InputBoxes[i]->ContainsKey(CompareKey);
 		if (KeyIndex != INDEX_NONE)
 		{
-			TArray<int> CollidingInputGroups = USING_ENHANCED_INPUT ? InputBoxes[i]->EnhancedInputGroups : InputBoxes[i]->InputData.InputGroups;
-
-			if (InputGroups.Contains(-1) ||
-				CollidingInputGroups.Contains(-1))
+			if (InputBox->EnhancedInputGroups.Contains(-1) ||
+				InputBoxes[i]->EnhancedInputGroups.Contains(-1))
 			{
 				OutCollidingActionIndex = i;
 				OutCollidingKeyIndex = KeyIndex;
 				return false;
 			}
 
-			for (int InputGroup : InputGroups)
+			for (int InputGroup : InputBox->EnhancedInputGroups)
 			{
-				if (CollidingInputGroups.Contains(InputGroup))
+				if (InputBoxes[i]->EnhancedInputGroups.Contains(InputGroup))
 				{
 					OutCollidingActionIndex = i;
 					OutCollidingKeyIndex = KeyIndex;

@@ -359,22 +359,12 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
 	bool IsAxis(const FKey Key) const;
 
-	//Receives the name of the action, or axis with a + or - suffix, and returns
-	//the first key that respects the given restriction.
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
-	FKey GetInputKey(FName ActionName, const EInputRestriction InputRestriction) const;
-
 	//Receives the action and returns the first key that respects the given restriction.
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
 	FKey GetEnhancedInputKey(const UInputAction* Action, const EInputAxis Axis = EInputAxis::X, const EAxisType Scale = EAxisType::None, const EInputRestriction InputRestriction = EInputRestriction::None) const;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
 	class UTexture2D* GetKeyIcon(const FKey Key) const;
-
-	//Get first found Icon associated with the given input name
-	//Will search the icon table
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
-	class UTexture2D* GetInputIcon(const FName ActionName, const EInputRestriction InputRestriction) const;
 
 	//Get first found Icon associated with the given enhanced input action
 	//Will search the icon table
@@ -384,24 +374,7 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
 	FText GetKeyText(const FKey Key) const;
 
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
-	void GetInputRebindData(const FName InputName, FInputRebindData& OutData, bool& bSuccess) const;
-
-	//Get first found name associated with the given input name
-	//Will search the name table, if name can't be found will return the key's display name
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
-	FText GetInputText(const FName InputName) const;
-
-	//Get all keys associated with the input with the given name
-	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DeprecatedFunction, DeprecationMessage = "Please use GetInputKeys instead") , Category = UINavController)
-	TArray<FKey> GetInputKeysFromName(const FName InputName) const;
-
-	//Receives the name of the action, or axis with a + or - suffix, and returns
-	//all the keys associated with that input.
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
-	void GetInputKeys(FName InputName, TArray<FKey>& OutKeys);
-
-	//Receives the name of the enhanced input action and returns all the keys associated with that action
+	//Receives the enhanced input action and returns all the keys associated with that action
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
 	void GetEnhancedInputKeys(const UInputAction* Action, TArray<FKey>& OutKeys);
 

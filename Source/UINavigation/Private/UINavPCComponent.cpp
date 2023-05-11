@@ -148,14 +148,6 @@ void UUINavPCComponent::OnControllerConnectionChanged(bool bConnected, FPlatform
 void UUINavPCComponent::TryResetDefaultInputs()
 {
 	UUINavDefaultInputSettings* DefaultInputSettings = GetMutableDefault<UUINavDefaultInputSettings>();
-	if (DefaultInputSettings->DefaultActionMappings.Num() == 0 && DefaultInputSettings->DefaultAxisMappings.Num() == 0)
-	{
-		const UInputSettings* Settings = GetDefault<UInputSettings>();
-		DefaultInputSettings->DefaultActionMappings = Settings->GetActionMappings();
-		DefaultInputSettings->DefaultAxisMappings = Settings->GetAxisMappings();
-		DefaultInputSettings->SaveConfig();
-	}
-
 	if (DefaultInputSettings->DefaultEnhancedInputMappings.Num() == 0)
 	{
 		FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
@@ -570,59 +562,6 @@ void UUINavPCComponent::ClearNavigationTimer()
 	CountdownPhase = ECountdownPhase::None;
 }
 
-FKey UUINavPCComponent::GetInputKey(FName InputName, const EInputRestriction InputRestriction) const
-{
-	const FString InputString = InputName.ToString();
-	const FString AxisScale = InputString.Right(1);
-	EAxisType AxisType = EAxisType::None;
-	if (AxisScale.Equals(TEXT("+"))) AxisType = EAxisType::Positive;
-	else if (AxisScale.Equals(TEXT("-"))) AxisType = EAxisType::Negative;
-	
-	const UInputSettings* Settings = GetDefault<UInputSettings>();
-
-	if (AxisType == EAxisType::None)
-	{
-		TArray<FInputActionKeyMapping> ActionMappings;
-		Settings->GetActionMappingByName(InputName, ActionMappings);
-
-		const int Iterations = ActionMappings.Num();
-		for (int i = Iterations - 1; i >= 0; --i)
-		{
-			if (UUINavBlueprintFunctionLibrary::RespectsRestriction(ActionMappings[i].Key, InputRestriction))
-				return ActionMappings[i].Key;
-		}
-		return FKey();
-	}
-	else
-	{
-		InputName = FName(*InputString.Left(InputString.Len() - 1));
-		TArray<FInputAxisKeyMapping> AxisMappings;
-		Settings->GetAxisMappingByName(InputName, AxisMappings);
-
-		const int Iterations = AxisMappings.Num();
-		for (int i = Iterations - 1; i >= 0; --i)
-		{
-			if (UUINavBlueprintFunctionLibrary::RespectsRestriction(AxisMappings[i].Key, InputRestriction))
-			{
-				if ((AxisMappings[i].Scale > 0.0f && AxisType == EAxisType::Positive) ||
-					(AxisMappings[i].Scale < 0.0f && AxisType == EAxisType::Negative))
-				{
-					return AxisMappings[i].Key;
-				}
-				else
-				{
-					const FKey PotentialAxisKey = GetKeyFromAxis(AxisMappings[i].Key, AxisType == EAxisType::Positive);
-					if (PotentialAxisKey.IsValid())
-					{
-						return PotentialAxisKey;
-					}
-				}
-			}
-		}
-		return FKey();
-	}
-}
-
 FKey UUINavPCComponent::GetEnhancedInputKey(const UInputAction* Action, const EInputAxis Axis, const EAxisType Scale, const EInputRestriction InputRestriction) const
 {
 	if (const UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PC->GetLocalPlayer()))
@@ -672,11 +611,6 @@ UTexture2D * UUINavPCComponent::GetKeyIcon(const FKey Key) const
 	return NewTexture;
 }
 
-UTexture2D * UUINavPCComponent::GetInputIcon(const FName ActionName, const EInputRestriction InputRestriction) const
-{
-	return GetKeyIcon(GetInputKey(ActionName, InputRestriction));
-}
-
 UTexture2D* UUINavPCComponent::GetEnhancedInputIcon(const UInputAction* Action, const EInputAxis Axis, const EAxisType Scale, const EInputRestriction InputRestriction) const
 {
 	return GetKeyIcon(GetEnhancedInputKey(Action, Axis, Scale, InputRestriction));
@@ -706,109 +640,6 @@ FText UUINavPCComponent::GetKeyText(const FKey Key) const
 	if (Keyname == nullptr) return Key.GetDisplayName();
 
 	return Keyname->InputText;
-}
-
-void UUINavPCComponent::GetInputRebindData(const FName InputName, FInputRebindData& OutData, bool& bSuccess) const
-{
-	if (InputRebindDataTable != nullptr && InputRebindDataTable->GetRowMap().Contains(InputName))
-	{
-		FInputRebindData* InputRebindData = reinterpret_cast<FInputRebindData*>(InputRebindDataTable->GetRowMap()[InputName]);
-		if (InputRebindData != nullptr)
-		{
-			OutData = *InputRebindData;
-			bSuccess = true;
-			return;
-		}
-	}
-	bSuccess = false;
-}
-
-FText UUINavPCComponent::GetInputText(const FName InputName) const
-{
-	FInputRebindData InputRebindData;
-	bool bSuccess = false;
-	GetInputRebindData(InputName, InputRebindData, bSuccess);
-
-	return bSuccess ? InputRebindData.InputText : FText();
-}
-
-TArray<FKey> UUINavPCComponent::GetInputKeysFromName(const FName InputName) const
-{
-	TArray<FKey> KeyArray = TArray<FKey>();
-
-	const UInputSettings* Settings = GetDefault<UInputSettings>();
-
-	TArray<FInputActionKeyMapping> ActionMappings;
-	Settings->GetActionMappingByName(InputName, ActionMappings);
-
-	if (ActionMappings.Num() > 0)
-	{
-		for (FInputActionKeyMapping Mapping : ActionMappings)
-		{
-			KeyArray.Add(Mapping.Key);
-		}
-	}
-	else
-	{
-		TArray<FInputAxisKeyMapping> AxisMappings;
-		Settings->GetAxisMappingByName(InputName, AxisMappings);
-		if (AxisMappings.Num() > 0)
-		{
-			for (FInputAxisKeyMapping Mapping : AxisMappings)
-			{
-				KeyArray.Add(Mapping.Key);
-			}
-		}
-	}
-	return KeyArray;
-}
-
-void UUINavPCComponent::GetInputKeys(FName InputName, TArray<FKey>& OutKeys)
-{
-	OutKeys.Empty();
-	const FString InputString = InputName.ToString();
-	const FString AxisScale = InputString.Right(1);
-	EAxisType AxisType = EAxisType::None;
-	if (AxisScale.Equals(TEXT("+"))) AxisType = EAxisType::Positive;
-	else if (AxisScale.Equals(TEXT("-"))) AxisType = EAxisType::Negative;
-
-	const UInputSettings* Settings = GetDefault<UInputSettings>();
-
-	if (AxisType == EAxisType::None)
-	{
-		TArray<FInputActionKeyMapping> ActionMappings;
-		Settings->GetActionMappingByName(InputName, ActionMappings);
-
-		const int Iterations = ActionMappings.Num();
-		for (int i = Iterations - 1; i >= 0; --i)
-		{
-			OutKeys.Add(ActionMappings[i].Key);
-		}
-	}
-	else
-	{
-		InputName = FName(*InputString.Left(InputString.Len() - 1));
-		TArray<FInputAxisKeyMapping> AxisMappings;
-		Settings->GetAxisMappingByName(InputName, AxisMappings);
-
-		const int Iterations = AxisMappings.Num();
-		for (int i = Iterations - 1; i >= 0; --i)
-		{
-			if ((AxisMappings[i].Scale > 0.0f && AxisType == EAxisType::Positive) ||
-				(AxisMappings[i].Scale < 0.0f && AxisType == EAxisType::Negative))
-			{
-				OutKeys.Add(AxisMappings[i].Key);
-			}
-			else
-			{
-				const FKey PotentialAxisKey = GetKeyFromAxis(AxisMappings[i].Key, AxisType == EAxisType::Positive);
-				if (PotentialAxisKey.IsValid())
-				{
-					OutKeys.Add(PotentialAxisKey);
-				}
-			}
-		}
-	}
 }
 
 void UUINavPCComponent::GetEnhancedInputKeys(const UInputAction* Action, TArray<FKey>& OutKeys)
@@ -1046,10 +877,10 @@ void UUINavPCComponent::NotifyNavigationKeyPressed(const FKey& Key, const EUINav
 	TArray<FKey>* DirectionKeys = PressedNavigationDirections.Find(Direction);
 	if (DirectionKeys != nullptr)
 	{
-		ClearNavigationTimer();
 		if (DirectionKeys->Contains(Key))
 		{
 			bIgnoreNavigationKey = true;
+			return;
 		}
 		else
 		{

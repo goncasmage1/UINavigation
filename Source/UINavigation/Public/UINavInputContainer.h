@@ -68,10 +68,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "UINav Input")
 	void ResetKeyMappings();
 
-	ERevertRebindReason CanRegisterKey(const class UUINavInputBox* InputBox, const FKey NewKey, const int Index, int& OutCollidingActionIndex, int& OutCollidingKeyIndex);
+	ERevertRebindReason CanRegisterKey(class UUINavInputBox* InputBox, const FKey NewKey, const int Index, int& OutCollidingActionIndex, int& OutCollidingKeyIndex);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "UINav Input")
-	bool CanUseKey(const class UUINavInputBox* InputBox, const FKey CompareKey, int& OutCollidingActionIndex, int& OutCollidingKeyIndex) const;
+	bool CanUseKey(class UUINavInputBox* InputBox, const FKey CompareKey, int& OutCollidingActionIndex, int& OutCollidingKeyIndex) const;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "UINav Input")
 	bool RespectsRestriction(const FKey CompareKey, const int Index);
@@ -107,15 +107,6 @@ public:
 
 	UPROPERTY(BlueprintReadOnly, Category = "UINav Input")
 	TArray<UUINavInputBox*> InputBoxes;
-
-	/*
-	The names of the desired actions and axes to allow for rebinding.
-	If you want to rebind axes, you have to specify whether they're
-	the positive or negative axis by suffixing the axis name with
-	either "+" or "-"
-	*/
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Input")
-	TArray<FName> InputNames;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Input")
 	TMap<UInputMappingContext*, FInputContainerEnhancedActionDataArray> EnhancedInputs;

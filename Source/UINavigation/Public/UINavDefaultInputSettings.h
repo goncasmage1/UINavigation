@@ -35,13 +35,6 @@ class UINAVIGATION_API UUINavDefaultInputSettings : public UObject
 	: Super(ObjectInitializer) {}
 
 public:
-
-	UPROPERTY(config)
-	TArray<struct FInputActionKeyMapping> DefaultActionMappings;
-
-	UPROPERTY(config)
-	TArray<struct FInputAxisKeyMapping> DefaultAxisMappings;
-
 	// A map for each Input Context in your game and its respective Default Input Context Mappings
 	UPROPERTY(config)
 	TMap<TSoftObjectPtr<UInputMappingContext>, FInputMappingArray> DefaultEnhancedInputMappings;

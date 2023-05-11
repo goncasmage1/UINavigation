@@ -105,37 +105,8 @@ void UUINavBlueprintFunctionLibrary::ResetInputSettings(APlayerController* PC)
 			}
 
 			Subsystem->RequestRebuildControlMappings();
-			
-			return;
 		}
 	}
-	UInputSettings* Settings = const_cast<UInputSettings*>(GetDefault<UInputSettings>());
-	UUINavDefaultInputSettings* DefaultUINavInputSettings = GetMutableDefault<UUINavDefaultInputSettings>();
-
-	//Remove old mappings
-	TArray<FInputActionKeyMapping> OldActionMappings = Settings->GetActionMappings();
-	for (FInputActionKeyMapping Mapping : OldActionMappings)
-	{
-		Settings->RemoveActionMapping(Mapping, false);
-	}
-	TArray<FInputAxisKeyMapping> OldAxisMappings = Settings->GetAxisMappings();
-	for (FInputAxisKeyMapping Mapping : OldAxisMappings)
-	{
-		Settings->RemoveAxisMapping(Mapping, false);
-	}
-
-	//Add new ones
-	for (FInputActionKeyMapping Mapping : DefaultUINavInputSettings->DefaultActionMappings)
-	{
-		Settings->AddActionMapping(Mapping, false);
-	}
-	for (FInputAxisKeyMapping Mapping : DefaultUINavInputSettings->DefaultAxisMappings)
-	{
-		Settings->AddAxisMapping(Mapping, false);
-	}
-
-	Settings->SaveConfig();
-	Settings->ForceRebuildKeymaps();
 }
 
 bool UUINavBlueprintFunctionLibrary::RespectsRestriction(const FKey Key, const EInputRestriction Restriction)
