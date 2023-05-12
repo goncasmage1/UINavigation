@@ -27,7 +27,7 @@ void UUINavInputBox::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	bIsFocusable = false;
+	SetIsFocusable(false);
 }
 
 void UUINavInputBox::CreateKeyWidgets()

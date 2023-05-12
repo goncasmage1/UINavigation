@@ -363,7 +363,7 @@ void UUINavPCComponent::VerifyDefaultInputs()
 	{
 		FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
 		TArray<FAssetData> AssetsData;
-		AssetRegistryModule.Get().GetAssetsByClass(UInputMappingContext::StaticClass()->GetFName(), AssetsData);
+		AssetRegistryModule.Get().GetAssetsByClass(FTopLevelAssetPath(UInputMappingContext::StaticClass()->GetPathName()), AssetsData);
 		for (const FAssetData& AssetData : AssetsData)
 		{
 			const UInputMappingContext* const InputContext = Cast<UInputMappingContext>(AssetData.GetAsset());

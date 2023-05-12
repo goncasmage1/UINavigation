@@ -37,7 +37,7 @@
 UUINavWidget::UUINavWidget(const FObjectInitializer& ObjectInitializer)
 	:Super(ObjectInitializer)
 {
-	bIsFocusable = true;
+	SetIsFocusable(true);
 }
 
 void UUINavWidget::NativeConstruct()
@@ -280,7 +280,7 @@ void UUINavWidget::TraverseHierarchy(UUINavWidget* UINavWidget, UUserWidget* Wid
 				if (WidgetHasUINPrefix(ScrollBox))
 				{
 					if (!UINavWidget->bAutoAppended) UINavWidget->bAutoAppended = true;
-					const bool bIsHorizontal = ScrollBox->Orientation == EOrientation::Orient_Horizontal;
+					const bool bIsHorizontal = ScrollBox->GetOrientation() == EOrientation::Orient_Horizontal;
 					UINavWidget->GridIndexMap.Add(ScrollBox, UINavWidget->NavigationGrids.Num());
 					GridDepth = UINavWidget->GetWidgetHierarchyDepth(ScrollBox);
 					UINavWidget->Add1DGrid(bIsHorizontal ? EGridType::Horizontal : EGridType::Vertical, nullptr, UINavWidget->NavigationGrids.Num(), 0, FButtonNavigation(), true);
@@ -2071,7 +2071,7 @@ void UUINavWidget::SwitchButtonStyle(const EButtonStyle NewStyle, const int Inde
 	
 	if (NewStyle == EButtonStyle::Hovered && Index != ButtonIndex)
 	{
-		USoundBase* HoverSound = Cast<USoundBase>(TheButton->WidgetStyle.HoveredSlateSound.GetResourceObject());
+		USoundBase* HoverSound = Cast<USoundBase>(TheButton->GetStyle().HoveredSlateSound.GetResourceObject());
 		if (HoverSound != nullptr)
 		{
 			PlaySound(HoverSound);
@@ -2093,7 +2093,7 @@ void UUINavWidget::RevertButtonStyle(const int Index)
 
 void UUINavWidget::SwapStyle(UUINavButton* TargetButton, EButtonStyle Style1, EButtonStyle Style2)
 {
-	FButtonStyle Style = TargetButton->WidgetStyle;
+	FButtonStyle Style = TargetButton->GetStyle();
 	FSlateBrush TempState;
 
 	switch (Style1)
@@ -2147,7 +2147,7 @@ void UUINavWidget::SwapStyle(UUINavButton* TargetButton, EButtonStyle Style1, EB
 
 void UUINavWidget::SwapPadding(UUINavButton* TargetButton)
 {
-	const FButtonStyle Style = TargetButton->WidgetStyle;
+	const FButtonStyle Style = TargetButton->GetStyle();
 	UOverlaySlot* OverlaySlot = Cast<UOverlaySlot>(TargetButton->Slot);
 	const FMargin PressedPadding = Style.PressedPadding - Style.NormalPadding;
 	if (OverlaySlot != nullptr)
@@ -3584,7 +3584,7 @@ void UUINavWidget::MenuSelectPress()
 
 		if (SelectCount == 1)
 		{
-			USoundBase* PressSound = Cast<USoundBase>(CurrentButton->WidgetStyle.PressedSlateSound.GetResourceObject());
+			USoundBase* PressSound = Cast<USoundBase>(CurrentButton->GetStyle().PressedSlateSound.GetResourceObject());
 			if (PressSound != nullptr) PlaySound(PressSound);
 			bIgnoreMouseEvent = true;
 			CurrentButton->OnPressed.Broadcast();
