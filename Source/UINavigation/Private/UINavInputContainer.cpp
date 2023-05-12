@@ -25,7 +25,7 @@ void UUINavInputContainer::Init(UUINavWidget * NewParent, const int GridIndex)
 	ParentWidget = NewParent;
 	UINavPC = NewParent->UINavPC;
 
-	bIsFocusable = false;
+	SetIsFocusable(false);
 
 	if (InputRestrictions.Num() == 0) InputRestrictions.Add(EInputRestriction::None);
 	else if (InputRestrictions.Num() > 3) InputRestrictions.SetNum(3);

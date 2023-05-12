@@ -27,7 +27,7 @@ int FGrid::GetLastButtonIndex() const
 
 UUINavButton::UUINavButton()
 {
-	IsFocusable = false;
+	InitIsFocusable(false);
 	OnHovered.AddDynamic(this, &UUINavButton::OnHover);
 	OnUnhovered.AddDynamic(this, &UUINavButton::OnUnhover);
 	OnClicked.AddDynamic(this, &UUINavButton::OnClick);

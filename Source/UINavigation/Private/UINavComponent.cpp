@@ -6,7 +6,7 @@
 UUINavComponent::UUINavComponent(const FObjectInitializer& ObjectInitializer)
 	:Super(ObjectInitializer)
 {
-	bIsFocusable = false;
+	SetIsFocusable(false);
 }
 
 void UUINavComponent::NativeConstruct()
