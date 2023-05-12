@@ -15,6 +15,7 @@
 #include "Components/PanelWidget.h"
 #include "Components/UniformGridPanel.h"
 #include "Components/UniformGridSlot.h"
+#include "Framework/Application/SlateApplication.h"
 #if IS_VR_PLATFORM
 #include "IXRTrackingSystem.h"
 #endif
