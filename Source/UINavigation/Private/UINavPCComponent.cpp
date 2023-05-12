@@ -22,6 +22,7 @@
 #include "EnhancedInputLibrary.h"
 #include "EnhancedPlayerInput.h"
 #include "AssetRegistry/AssetRegistryModule.h"
+#include "Engine/Texture2D.h"
 
 UUINavPCComponent::UUINavPCComponent()
 {

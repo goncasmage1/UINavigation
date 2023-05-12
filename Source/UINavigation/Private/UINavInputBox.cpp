@@ -15,6 +15,7 @@
 #include "Blueprint/WidgetBlueprintLibrary.h"
 #include "InputAction.h"
 #include "InputMappingContext.h"
+#include "Engine/Texture2D.h"
 
 #define IS_POSITIVE_AXIS (AxisType == EAxisType::Positive)
 #define IS_NEGATIVE_AXIS (AxisType == EAxisType::Negative)
