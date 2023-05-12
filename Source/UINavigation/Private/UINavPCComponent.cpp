@@ -14,6 +14,7 @@
 #include "UINavBlueprintFunctionLibrary.h"
 #include "UINavInputProcessor.h"
 #include "Framework/Application/SlateApplication.h"
+#include "Framework/Application/SlateUser.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputLibrary.h"
