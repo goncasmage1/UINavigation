@@ -30,6 +30,7 @@
 #include "Components/UniformGridSlot.h"
 #include "Components/ActorComponent.h"
 #include "Components/ListView.h"
+#include "Sound/SoundBase.h"
 #if IS_VR_PLATFORM
 #include "HeadMountedDisplayFunctionLibrary.h"
 #endif
