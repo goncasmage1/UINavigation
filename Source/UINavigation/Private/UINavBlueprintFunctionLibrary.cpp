@@ -11,6 +11,7 @@
 #include "InputAction.h"
 #include "EnhancedInputSubsystems.h"
 #include "Data/UINavEnhancedActionKeyMapping.h"
+#include "Framework/Application/SlateApplication.h"
 #if IS_VR_PLATFORM
 #include "IXRTrackingSystem.h"
 #endif
