@@ -87,11 +87,12 @@ void UUINavWidget::NativeConstruct()
 		}
 
 		if (WidgetComp == nullptr) ReturnedFromWidget->Destruct();
-		ReturnedFromWidget = nullptr;
 	}
 
 	PreSetup(!bCompletedSetup);
 	InitialSetup();
+	
+	ReturnedFromWidget = nullptr;
 
 	Super::NativeConstruct();
 }
@@ -252,13 +253,24 @@ void UUINavWidget::UINavSetup()
 
 	bCompletedSetup = true;
 
-	UUINavComponent* InitialComponent = GetInitialFocusComponent();
-	if (IsValid(InitialComponent))
+	if (ReturnedFromWidget != nullptr && IsValid(CurrentComponent))
 	{
-		InitialComponent->SetFocus();
+		CurrentComponent->SetFocus();
 		if (!GetDefault<UUINavSettings>()->bForceNavigation && !IsValid(HoveredComponent))
 		{
 			UnforceNavigation();
+		}
+	}
+	else
+	{
+		UUINavComponent* InitialComponent = GetInitialFocusComponent();
+		if (IsValid(InitialComponent))
+		{
+			InitialComponent->SetFocus();
+			if (!GetDefault<UUINavSettings>()->bForceNavigation && !IsValid(HoveredComponent))
+			{
+				UnforceNavigation();
+			}
 		}
 	}
 
@@ -555,6 +567,18 @@ void UUINavWidget::ExecuteAnimations(UUINavComponent* FromComponent, UUINavCompo
 	}
 }
 
+void UUINavWidget::UpdateButtonStates(UUINavComponent* Component)
+{
+	if (IsValid(CurrentComponent))
+	{
+		CurrentComponent->SwitchButtonStyle(EButtonStyle::Normal);
+	}
+	if (IsValid(Component))
+	{
+		Component->SwitchButtonStyle(EButtonStyle::Hovered);
+	}
+}
+
 void UUINavWidget::UpdateTextColor(UUINavComponent* Component)
 {
 	if (IsValid(CurrentComponent))
@@ -669,6 +693,8 @@ void UUINavWidget::UpdateNavigationVisuals(UUINavComponent* Component, const boo
 	}
 
 	UpdateTextColor(Component);
+
+	UpdateButtonStates(Component);
 
 	ExecuteAnimations(CurrentComponent, Component);
 }
@@ -923,7 +949,9 @@ void UUINavWidget::ReturnToParent(const bool bRemoveAllParents, const int ZOrder
 				{
 					UUINavWidget* ParentOuter = ParentWidget->GetMostOuterUINavWidget();
 					UINavPC->SetActiveWidget(ParentOuter);
+					ParentWidget->ReturnedFromWidget = this;
 					ParentWidget->ReconfigureSetup();
+					ParentWidget->ReturnedFromWidget = nullptr;
 					/*if (ParentWidget->PreviousNestedWidget != nullptr)
 					{
 						UINavPC->SetActiveNestedWidget(ParentWidget->PreviousNestedWidget);

@@ -53,7 +53,6 @@ void UUINavInputContainer::OnRebindCancelled_Implementation(ERevertRebindReason 
 
 bool UUINavInputContainer::RequestKeySwap(const FInputCollisionData& InputCollisionData, const int CurrentInputIndex, const int CollidingInputIndex) const
 {
-	// TODO: Fix for enhanced input
 	if (SwapKeysWidgetClass != nullptr)
 	{
 		APlayerController* PC = Cast<APlayerController>(UINavPC->GetOwner());

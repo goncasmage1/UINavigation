@@ -271,6 +271,13 @@ public:
 	*
 	*	@param	Index  The new button's index in the Button's array
 	*/
+	void UpdateButtonStates(UUINavComponent* Component);
+
+	/**
+	*	Changes the new text and previous text's colors to the desired colors
+	*
+	*	@param	Index  The new button's index in the Button's array
+	*/
 	void UpdateTextColor(UUINavComponent* Component);
 
 	/**
@@ -302,9 +309,9 @@ public:
 	*	@param	To  The index of the button that was navigated to
 	*/
 	UFUNCTION(BlueprintNativeEvent, Category = UINavWidget)
-	void OnNavigate(UUINavComponent* FromComponent, UUINavComponent* TomComponent);
+	void OnNavigate(UUINavComponent* FromComponent, UUINavComponent* ToComponent);
 	
-	virtual void OnNavigate_Implementation(UUINavComponent* FromComponent, UUINavComponent* TomComponent);
+	virtual void OnNavigate_Implementation(UUINavComponent* FromComponent, UUINavComponent* ToComponent);
 
 	/**
 	*	Notifies that a button was selected, and indicates its index

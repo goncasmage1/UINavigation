@@ -169,11 +169,6 @@ void UUINavComponent::HandleFocusReceived()
 		return;
 	}
 
-	if (ParentWidget->IsForcingNavigation() && !NavButton->IsPressed())
-	{
-		SwitchButtonStyle(EButtonStyle::Hovered);
-	}
-
 	if (IsValid(ParentWidget))
 	{
 		ParentWidget->NavigatedTo(this);
@@ -182,12 +177,6 @@ void UUINavComponent::HandleFocusReceived()
 
 void UUINavComponent::HandleFocusLost()
 {
-	if (!IsComponentValid(true) || !IsButtonValid() || NavButton->IsPressed())
-	{
-		return;
-	}
-
-	SwitchButtonStyle(EButtonStyle::Normal);
 }
 
 void UUINavComponent::OnButtonClicked()

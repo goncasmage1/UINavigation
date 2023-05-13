@@ -112,7 +112,7 @@ protected:
 	virtual void NativeOnFocusChanging(const FWeakWidgetPath& PreviousFocusPath, const FWidgetPath& NewWidgetPath, const FFocusEvent& InFocusEvent) override;
 	virtual FNavigationReply NativeOnNavigation(const FGeometry& MyGeometry, const FNavigationEvent& InNavigationEvent, const FNavigationReply& InDefaultReply) override;
 
-	virtual void NativePreConstruct();
+	virtual void NativePreConstruct() override;
 
 	void SwapStyle(EButtonStyle Style1, EButtonStyle Style2);
 

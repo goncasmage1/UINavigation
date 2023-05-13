@@ -151,10 +151,9 @@ void UUINavInputBox::ResetKeyWidgets()
 
 void UUINavInputBox::UpdateInputKey(const FKey NewKey, int Index, const bool bSkipChecks)
 {
-	if (Index < 0)
-	{
-		Index = AwaitingIndex;
-	}
+	if (Index < 0) Index = AwaitingIndex;
+
+	if (AwaitingIndex < 0) AwaitingIndex = Index;
 
 	AwaitingNewKey = NewKey;
 	if (Index < 0)
