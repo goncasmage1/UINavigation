@@ -15,6 +15,8 @@
 #include "Components/PanelWidget.h"
 #include "Components/UniformGridPanel.h"
 #include "Components/UniformGridSlot.h"
+#include "Components/GridPanel.h"
+#include "Components/GridSlot.h"
 #include "Framework/Application/SlateApplication.h"
 #if IS_VR_PLATFORM
 #include "IXRTrackingSystem.h"
@@ -246,7 +248,34 @@ int UUINavBlueprintFunctionLibrary::GetIndexInPanelWidget(const UWidget* const W
 	return PanelWidget->GetChildIndex(Widget);
 }
 
-void UUINavBlueprintFunctionLibrary::GetIndexInUniformGridWidget(const UWidget* const Widget, int& Column, int& Row)
+UPanelWidget* UUINavBlueprintFunctionLibrary::GetParentPanelWidget(const UWidget* const Widget, TSubclassOf<UPanelWidget> PanelWidgetSubclass)
+{
+	if (!IsValid(Widget))
+	{
+		return nullptr;
+	}
+
+	if (!IsValid(PanelWidgetSubclass))
+	{
+		PanelWidgetSubclass = UPanelWidget::StaticClass();
+	}
+
+	UPanelWidget* const PanelWidget = Widget->GetParent();
+	if (!IsValid(PanelWidget))
+	{
+		return nullptr;
+	}
+
+
+	if (!PanelWidget->IsA(PanelWidgetSubclass))
+	{
+		return GetParentPanelWidget(PanelWidget, PanelWidgetSubclass);
+	}
+
+	return PanelWidget;
+}
+
+void UUINavBlueprintFunctionLibrary::GetIndexInGridWidget(const UWidget* const Widget, int& Column, int& Row)
 {
 	Column = -1;
 	Row = -1;
@@ -261,10 +290,14 @@ void UUINavBlueprintFunctionLibrary::GetIndexInUniformGridWidget(const UWidget* 
 		return;
 	}
 
-	const UUniformGridPanel* const GridPanelWidget = Cast<UUniformGridPanel>(Widget->GetParent());
+	const UPanelWidget* GridPanelWidget = Cast<UUniformGridPanel>(Widget->GetParent());
 	if (!IsValid(GridPanelWidget))
 	{
-		return GetIndexInUniformGridWidget(GridPanelWidget, Column, Row);
+		GridPanelWidget = Cast<UGridPanel>(Widget->GetParent());
+		if (!IsValid(GridPanelWidget))
+		{
+			return GetIndexInGridWidget(GridPanelWidget, Column, Row);
+		}
 	}
 
 	for (int i = 0; i < GridPanelWidget->GetChildrenCount(); ++i)
@@ -275,16 +308,26 @@ void UUINavBlueprintFunctionLibrary::GetIndexInUniformGridWidget(const UWidget* 
 			continue;
 		}
 
-		const UUniformGridSlot* const GridSlot = Cast<UUniformGridSlot>(Child->Slot);
-		if (!IsValid(GridSlot))
+		const UUniformGridSlot* const UniformGridSlot = Cast<UUniformGridSlot>(Child->Slot);
+		if (IsValid(UniformGridSlot))
 		{
-			continue;
+			if (Child == Widget)
+			{
+				Column = UniformGridSlot->Column;
+				Row = UniformGridSlot->Row;
+			}
+			return;
 		}
 
-		if (Child == Widget)
+		const UGridSlot* const GridSlot = Cast<UGridSlot>(Child->Slot);
+		if (IsValid(GridSlot))
 		{
-			Column = GridSlot->Column;
-			Row = GridSlot->Row;
+			if (Child == Widget)
+			{
+				Column = GridSlot->Column;
+				Row = GridSlot->Row;
+			}
+			return;
 		}
 	}
 }
