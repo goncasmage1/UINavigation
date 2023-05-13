@@ -72,8 +72,9 @@ public:
 	static UWidget* GetUniformGridChild(const UWidget* const Widget, const int Column, const int Row);
 
 	// Returns the index of the given widget in its parent panel widget
+	// Will assume UPanelWidget if PanelWidgetSubclass is null
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
-	static int GetIndexInPanelWidget(const UWidget* const Widget, const TSubclassOf<UPanelWidget> PanelWidgetSubclass);
+	static int GetIndexInPanelWidget(const UWidget* const Widget, TSubclassOf<UPanelWidget> PanelWidgetSubclass);
 
 	// Returns the index of the given widget in its parent panel widget
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)

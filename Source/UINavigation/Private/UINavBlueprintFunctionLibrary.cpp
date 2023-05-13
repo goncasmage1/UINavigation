@@ -220,11 +220,16 @@ UWidget* UUINavBlueprintFunctionLibrary::GetUniformGridChild(const UWidget* cons
 	return nullptr;
 }
 
-int UUINavBlueprintFunctionLibrary::GetIndexInPanelWidget(const UWidget* const Widget, const TSubclassOf<UPanelWidget> PanelWidgetSubclass)
+int UUINavBlueprintFunctionLibrary::GetIndexInPanelWidget(const UWidget* const Widget, TSubclassOf<UPanelWidget> PanelWidgetSubclass)
 {
 	if (!IsValid(Widget))
 	{
 		return INDEX_NONE;
+	}
+
+	if (!IsValid(PanelWidgetSubclass))
+	{
+		PanelWidgetSubclass = UPanelWidget::StaticClass();
 	}
 
 	const UPanelWidget* const PanelWidget = Widget->GetParent();
