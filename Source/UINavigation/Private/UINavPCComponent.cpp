@@ -617,6 +617,11 @@ UTexture2D* UUINavPCComponent::GetEnhancedInputIcon(const UInputAction* Action, 
 	return GetKeyIcon(GetEnhancedInputKey(Action, Axis, Scale, InputRestriction));
 }
 
+FText UUINavPCComponent::GetEnhancedInputText(const UInputAction* Action, const EInputAxis Axis, const EAxisType Scale, const EInputRestriction InputRestriction) const
+{
+	return GetKeyText(GetEnhancedInputKey(Action, Axis, Scale, InputRestriction));
+}
+
 FText UUINavPCComponent::GetKeyText(const FKey Key) const
 {
 	if (!Key.IsValid()) return FText();

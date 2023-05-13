@@ -17,7 +17,12 @@
 #include "Delegates/DelegateCombinations.h"
 #include "UINavPCComponent.generated.h"
 
+class APlayerController;
+class FUINavInputProcessor;
 class UUINavInputBox;
+class UTexture2D;
+class UUINavWidget;
+
 DECLARE_DELEGATE_OneParam(FMouseKeyDelegate, FKey);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FInputTypeChangedDelegate, EInputType, InputType);
 
@@ -51,10 +56,10 @@ class UINAVIGATION_API UUINavPCComponent : public UActorComponent
 protected:
 
 	UPROPERTY(BlueprintReadOnly, Category = UINavController)
-	class UUINavWidget* ActiveWidget = nullptr;
+	UUINavWidget* ActiveWidget = nullptr;
 
 	UPROPERTY(BlueprintReadOnly, Category = UINavController)
-	class UUINavWidget* ActiveSubWidget = nullptr;
+	UUINavWidget* ActiveSubWidget = nullptr;
 
 	//Indicates whether the player can navigate the widget
 	bool bAllowDirectionalInput = true;
@@ -68,9 +73,9 @@ protected:
 	bool bIgnoreSelectRelease = false;
 
 	UPROPERTY()
-	class APlayerController* PC = nullptr;
+	APlayerController* PC = nullptr;
 
-	TSharedPtr<class FUINavInputProcessor> SharedInputProcessor = nullptr;
+	TSharedPtr<FUINavInputProcessor> SharedInputProcessor = nullptr;
 
 	FVector2D LeftStickDelta = FVector2D::ZeroVector;
 
@@ -364,12 +369,17 @@ public:
 	FKey GetEnhancedInputKey(const UInputAction* Action, const EInputAxis Axis = EInputAxis::X, const EAxisType Scale = EAxisType::None, const EInputRestriction InputRestriction = EInputRestriction::None) const;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
-	class UTexture2D* GetKeyIcon(const FKey Key) const;
+	UTexture2D* GetKeyIcon(const FKey Key) const;
 
 	//Get first found Icon associated with the given enhanced input action
 	//Will search the icon table
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
-	class UTexture2D* GetEnhancedInputIcon(const UInputAction* Action, const EInputAxis Axis = EInputAxis::X, const EAxisType Scale = EAxisType::None, const EInputRestriction InputRestriction = EInputRestriction::None) const;
+	UTexture2D* GetEnhancedInputIcon(const UInputAction* Action, const EInputAxis Axis = EInputAxis::X, const EAxisType Scale = EAxisType::None, const EInputRestriction InputRestriction = EInputRestriction::None) const;
+
+	//Get first found Icon associated with the given enhanced input action
+	//Will search the icon table
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
+	FText GetEnhancedInputText(const UInputAction* Action, const EInputAxis Axis = EInputAxis::X, const EAxisType Scale = EAxisType::None, const EInputRestriction InputRestriction = EInputRestriction::None) const;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
 	FText GetKeyText(const FKey Key) const;
@@ -382,10 +392,10 @@ public:
 	UEnhancedInputComponent* GetEnhancedInputComponent() const;
 
 	UFUNCTION(BlueprintCallable, Category = UINavController)
-	void SetActiveWidget(class UUINavWidget* NewActiveWidget);
+	void SetActiveWidget(UUINavWidget* NewActiveWidget);
 
 	UFUNCTION(BlueprintCallable, Category = UINavController)
-	void NotifyNavigatedTo(class UUINavWidget* NavigatedWidget);
+	void NotifyNavigatedTo(UUINavWidget* NavigatedWidget);
 
 	/**
 	*	Adds given widget to screen (strongly recommended over manual alternative)
