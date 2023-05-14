@@ -127,10 +127,7 @@ void UUINavWidget::InitialSetup(const bool bRebuilding)
 	else
 	{
 		SetupSelector();
-		GetWorld()->GetTimerManager().SetTimerForNextTick([this]()
-		{
-			UINavSetup();
-		});
+		UINavSetupWaitForTick = 0;
 	}
 }
 
@@ -145,10 +142,7 @@ void UUINavWidget::ReconfigureSetup()
 	else
 	{
 		SetupSelector();
-		GetWorld()->GetTimerManager().SetTimerForNextTick([this]()
-		{
-			UINavSetup();
-		});
+		UINavSetupWaitForTick = 0;
 	}
 
 	for (UUINavWidget* ChildUINavWidget : ChildUINavWidgets)
@@ -409,11 +403,31 @@ void UUINavWidget::NativeTick(const FGeometry & MyGeometry, float DeltaTime)
 
 	if (IsSelectorValid())
 	{
-		if (bShouldTickUpdateSelector)
+		if (UINavSetupWaitForTick >= 0)
 		{
-			if (MoveCurve != nullptr) BeginSelectorMovement(UpdateSelectorPrevComponent, UpdateSelectorNextComponent);
-			else UpdateSelectorLocation(UpdateSelectorNextComponent);
-			bShouldTickUpdateSelector = false;
+			if (UINavSetupWaitForTick >= 1)
+			{
+				UINavSetup();
+				UINavSetupWaitForTick = -1;
+			}
+			else
+			{
+				UINavSetupWaitForTick++;
+			}
+		}
+
+		if (UpdateSelectorWaitForTick >= 0)
+		{
+			if (UpdateSelectorWaitForTick >= 1)
+			{
+				if (MoveCurve != nullptr) BeginSelectorMovement(UpdateSelectorPrevComponent, UpdateSelectorNextComponent);
+				else UpdateSelectorLocation(UpdateSelectorNextComponent);
+				UpdateSelectorWaitForTick = -1;
+			}
+			else
+			{
+				UpdateSelectorWaitForTick++;
+			}
 		}
 
 		if (bMovingSelector)
@@ -686,10 +700,7 @@ void UUINavWidget::UpdateNavigationVisuals(UUINavComponent* Component, const boo
 	{
 		UpdateSelectorPrevComponent = CurrentComponent;
 		UpdateSelectorNextComponent = Component;
-		GetWorld()->GetTimerManager().SetTimerForNextTick([this]()
-		{
-			bShouldTickUpdateSelector = true;
-		});
+		UpdateSelectorWaitForTick = 0;
 	}
 
 	UpdateTextColor(Component);

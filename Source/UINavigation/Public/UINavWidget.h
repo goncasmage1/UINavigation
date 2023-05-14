@@ -28,13 +28,13 @@ protected:
 	bool bMovingSelector = false;
 	bool bReturning = false;
 		
-	bool bShouldTickUpdateSelector = false;
 	UPROPERTY()
 	UUINavComponent* UpdateSelectorPrevComponent = nullptr;
 	UPROPERTY()
 	UUINavComponent* UpdateSelectorNextComponent = nullptr;
 	
-	int UpdateSelectorWaitForTick=0;
+	int8 UINavSetupWaitForTick = -1;
+	int8 UpdateSelectorWaitForTick = -1;
 
 	bool bReturningToParent = false;
 
