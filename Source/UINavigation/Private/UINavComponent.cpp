@@ -43,7 +43,7 @@ void UUINavComponent::NativeConstruct()
 		{
 			DISPLAYERROR("UI Nav Component isn't in a UINavWidget!");
 		}
-		else if (!IsValid(ParentWidget->GetFirstComponent()))
+		else if (!IsValid(ParentWidget->GetFirstComponent()) && CanBeNavigated())
 		{
 			ParentWidget->SetFirstComponent(this);
 		}
@@ -164,7 +164,7 @@ void UUINavComponent::OnNavigatedFrom_Implementation()
 
 void UUINavComponent::HandleFocusReceived()
 {
-	if (!IsComponentValid(true) || !IsButtonValid())
+	if (!CanBeNavigated())
 	{
 		return;
 	}
@@ -251,18 +251,15 @@ void UUINavComponent::SwitchTextColorToNavigated()
 	SwitchTextColorTo(TextNavigatedColor);
 }
 
-bool UUINavComponent::IsComponentValid(const bool bIgnoreDisabledUINavButton) const
+bool UUINavComponent::CanBeNavigated() const
 {
+	const bool bIgnoreDisabled = GetDefault<UUINavSettings>()->bIgnoreDisabledButton;
 	return (Visibility != ESlateVisibility::Collapsed &&
-			Visibility != ESlateVisibility::Hidden &&
-			(!bIgnoreDisabledUINavButton || bIsEnabled));
-}
-
-bool UUINavComponent::IsButtonValid(const bool bIgnoreDisabledUINavButton) const
-{
-	return (NavButton->Visibility != ESlateVisibility::Collapsed &&
-			NavButton->Visibility != ESlateVisibility::Hidden &&
-			(!bIgnoreDisabledUINavButton || NavButton->bIsEnabled));
+		Visibility != ESlateVisibility::Hidden &&
+		(bIsEnabled || !bIgnoreDisabled) &&
+		NavButton->Visibility != ESlateVisibility::Collapsed &&
+		NavButton->Visibility != ESlateVisibility::Hidden &&
+		(NavButton->bIsEnabled || !bIgnoreDisabled));
 }
 
 FReply UUINavComponent::NativeOnFocusReceived(const FGeometry& InGeometry, const FFocusEvent& InFocusEvent)

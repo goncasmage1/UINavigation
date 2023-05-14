@@ -20,7 +20,7 @@ class UINAVIGATION_API UUINavSettings : public UObject
 	:Super(ObjectInitializer)
 	{
 		bForceNavigation = true;
-		bIgnoreDisabledUINavButton = true;
+		bIgnoreDisabledButton = true;
 		bRemoveWidgetOnReturn = true;
 	}
 	
@@ -32,8 +32,9 @@ public:
 	UPROPERTY(config, EditAnywhere, Category = "Settings")
 	bool bStopNextPreviousNavigation = true;
 
+	// Whether disables buttons should be ignored for navigation
 	UPROPERTY(config, EditAnywhere, Category = "Settings")
-	bool bIgnoreDisabledUINavButton = true;
+	bool bIgnoreDisabledButton = true;
 	
 	UPROPERTY(config, EditAnywhere, Category = "Settings")
 	bool bRemoveWidgetOnReturn = true;

@@ -99,10 +99,7 @@ public:
 	bool UseComponentAnimation() const { return bUseComponentAnimation; }
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavComponent)
-	bool IsComponentValid(const bool bIgnoreDisabledUINavButton = true) const;
-
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavComponent)
-	bool IsButtonValid(const bool bIgnoreDisabledUINavButton = true) const;
+	bool CanBeNavigated() const;
 
 protected:
 
