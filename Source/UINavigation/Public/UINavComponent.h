@@ -7,6 +7,7 @@
 #include "Delegates/DelegateCombinations.h"
 #include "Fonts/SlateFontInfo.h"
 #include "Animation/WidgetAnimation.h"
+#include "ComponentActions/UINavComponentAction.h"
 #include "UINavComponent.generated.h"
 
 class UUINavWidget;
@@ -94,6 +95,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = UINavComponent)
 	void SwitchTextColorToNavigated();
 
+	void ExecuteComponentActions(const EComponentAction Action);
+
 	UWidgetAnimation* GetComponentAnimation() const { return ComponentAnimation; }
 
 	bool UseComponentAnimation() const { return bUseComponentAnimation; }
@@ -157,6 +160,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavComponent)
 	bool bUseComponentAnimation = true;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavComponent)
+	TMap<EComponentAction, FComponentActions> ComponentActions;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavComponent, meta = (editcondition = "bUseTextColor"))
 	FLinearColor TextDefaultColor = FColor::Blue;

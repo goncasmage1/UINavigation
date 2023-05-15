@@ -11,6 +11,7 @@
 #include "UINavWidgetComponent.h"
 #include "UINavBlueprintFunctionLibrary.h"
 #include "UINavMacros.h"
+#include "ComponentActions/UINavComponentAction.h"
 #include "Blueprint/UserWidget.h"
 #include "Blueprint/WidgetTree.h"
 #include "Blueprint/SlateBlueprintLibrary.h"
@@ -1040,11 +1041,13 @@ void UUINavWidget::CallOnNavigate(UUINavComponent* FromComponent, UUINavComponen
 	if (IsValid(FromComponent))
 	{
 		FromComponent->OnNavigatedFrom();
+		FromComponent->ExecuteComponentActions(EComponentAction::OnNavigatedFrom);
 	}
 
 	if (IsValid(ToComponent))
 	{
 		ToComponent->OnNavigatedTo();
+		ToComponent->ExecuteComponentActions(EComponentAction::OnNavigatedTo);
 	}
 }
 

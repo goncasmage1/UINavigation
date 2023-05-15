@@ -183,6 +183,8 @@ void UUINavComponent::OnButtonClicked()
 {
 	OnNativeClicked.Broadcast();
 	OnClicked.Broadcast();
+
+	ExecuteComponentActions(EComponentAction::OnClicked);
 }
 
 void UUINavComponent::OnButtonPressed()
@@ -194,6 +196,8 @@ void UUINavComponent::OnButtonPressed()
 	{
 		ParentWidget->OnPressedComponent(this);
 	}
+
+	ExecuteComponentActions(EComponentAction::OnPressed);
 }
 
 void UUINavComponent::OnButtonReleased()
@@ -205,6 +209,8 @@ void UUINavComponent::OnButtonReleased()
 	{
 		ParentWidget->OnReleasedComponent(this);
 	}
+
+	ExecuteComponentActions(EComponentAction::OnReleased);
 }
 
 void UUINavComponent::OnButtonHovered()
@@ -249,6 +255,31 @@ void UUINavComponent::SwitchTextColorToDefault()
 void UUINavComponent::SwitchTextColorToNavigated()
 {
 	SwitchTextColorTo(TextNavigatedColor);
+}
+
+void UUINavComponent::ExecuteComponentActions(const EComponentAction Action)
+{
+	const FComponentActions* const ActionObjects = ComponentActions.Find(Action);
+	if (ActionObjects == nullptr)
+	{
+		return;
+	}
+
+	for (const UUINavComponentAction* const ActionObject : ActionObjects->Actions)
+	{
+		if (!IsValid(ActionObject))
+		{
+			continue;
+		}
+
+		UUINavComponentAction* DuplicatedAction = DuplicateObject<UUINavComponentAction>(ActionObject, ActionObject->GetOuter());
+		if (!IsValid(DuplicatedAction))
+		{
+			continue;
+		}
+
+		DuplicatedAction->ExecuteAction(this);
+	}
 }
 
 bool UUINavComponent::CanBeNavigated() const
