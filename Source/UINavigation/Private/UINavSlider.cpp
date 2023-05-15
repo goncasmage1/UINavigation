@@ -11,8 +11,6 @@ void UUINavSlider::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	bIsFocusable = false;
-
 	if (MinValue >= MaxValue)
 	{
 		DISPLAYERROR(TEXT("MaxValue should be greater than MinValue"));

@@ -152,7 +152,7 @@ public:
 	The amount of time that passes before the navigation chains further
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavController)
-	float NavigationChainFrequency = 0.2f;
+	float NavigationChainFrequency = 0.15f;
 
 	/*
 	Indicates whether to automatically add and remove the UINav Input Context
