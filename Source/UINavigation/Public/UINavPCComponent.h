@@ -91,9 +91,14 @@ protected:
 
 	bool bIgnoreNavigationKey = true;
 
+	UPROPERTY()
+	TArray<const UInputMappingContext*> CachedInputContexts;
+
 	/*************************************************************************/
 
 	void SetTimer(const EUINavigation NavigationDirection);
+
+	void CacheGameInputContexts();
 
 	void TryResetDefaultInputs();
 
@@ -436,6 +441,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
 	FORCEINLINE EInputType GetCurrentInputType() const { return CurrentInputType; }
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
+	bool IsUINavInputAction(const UInputAction* Action) const;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
     FORCEINLINE bool IsUsingMouse() const { return CurrentInputType == EInputType::Mouse; }

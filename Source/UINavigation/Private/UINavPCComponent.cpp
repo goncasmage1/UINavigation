@@ -84,6 +84,7 @@ void UUINavPCComponent::BeginPlay()
 		SharedInputProcessor->SetUINavPC(this);
 		FSlateApplication::Get().RegisterInputPreProcessor(SharedInputProcessor);
 
+		CacheGameInputContexts();
 		TryResetDefaultInputs();
 		if (!FCoreDelegates::OnControllerConnectionChange.IsBoundToObject(this))
 		{
@@ -146,10 +147,9 @@ void UUINavPCComponent::OnControllerConnectionChanged(bool bConnected, FPlatform
 	IUINavPCReceiver::Execute_OnControllerConnectionChanged(GetOwner(), bConnected, static_cast<int32>(UserId), UserIndex);
 }
 
-void UUINavPCComponent::TryResetDefaultInputs()
+void UUINavPCComponent::CacheGameInputContexts()
 {
-	UUINavDefaultInputSettings* DefaultInputSettings = GetMutableDefault<UUINavDefaultInputSettings>();
-	if (DefaultInputSettings->DefaultEnhancedInputMappings.Num() == 0)
+	if (CachedInputContexts.Num() == 0)
 	{
 		FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
 		TArray<FAssetData> AssetsData;
@@ -162,7 +162,19 @@ void UUINavPCComponent::TryResetDefaultInputs()
 				continue;
 			}
 
-			DefaultInputSettings->DefaultEnhancedInputMappings.Add(TSoftObjectPtr<UInputMappingContext>(AssetData.ToSoftObjectPath()), InputContext->GetMappings());
+			CachedInputContexts.Add(InputContext);
+		}
+	}
+}
+
+void UUINavPCComponent::TryResetDefaultInputs()
+{
+	UUINavDefaultInputSettings* DefaultInputSettings = GetMutableDefault<UUINavDefaultInputSettings>();
+	if (DefaultInputSettings->DefaultEnhancedInputMappings.Num() == 0)
+	{
+		for (const UInputMappingContext* const InputContext : CachedInputContexts)
+		{
+			DefaultInputSettings->DefaultEnhancedInputMappings.Add(TSoftObjectPtr<UInputMappingContext>(FAssetData(InputContext).ToSoftObjectPath()), InputContext->GetMappings());
 		}
 		DefaultInputSettings->SaveConfig();
 	}
@@ -563,9 +575,45 @@ void UUINavPCComponent::ClearNavigationTimer()
 	CountdownPhase = ECountdownPhase::None;
 }
 
+bool UUINavPCComponent::IsUINavInputAction(const UInputAction* Action) const
+{
+	const UUINavEnhancedInputActions* const InputActions = GetDefault<UUINavSettings>()->EnhancedInputActions.LoadSynchronous();
+	if (InputActions == nullptr)
+	{
+		return false;
+	}
+
+	return (Action == InputActions->IA_MenuUp ||
+			Action == InputActions->IA_MenuDown ||
+			Action == InputActions->IA_MenuLeft || 
+			Action == InputActions->IA_MenuRight || 
+			Action == InputActions->IA_MenuSelect || 
+			Action == InputActions->IA_MenuReturn || 
+			Action == InputActions->IA_MenuNext || 
+			Action == InputActions->IA_MenuPrevious);
+}
+
 FKey UUINavPCComponent::GetEnhancedInputKey(const UInputAction* Action, const EInputAxis Axis, const EAxisType Scale, const EInputRestriction InputRestriction) const
 {
-	if (const UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PC->GetLocalPlayer()))
+	if (IsUINavInputAction(Action))
+	{
+		const UInputMappingContext* const UINavInputContext = GetDefault<UUINavSettings>()->EnhancedInputContext.LoadSynchronous();
+		for (const FEnhancedActionKeyMapping& Mapping : UINavInputContext->GetMappings())
+		{
+			if (Mapping.Action == Action && UUINavBlueprintFunctionLibrary::RespectsRestriction(Mapping.Key, InputRestriction))
+			{
+				if (Action->ValueType == EInputActionValueType::Boolean || Scale == EAxisType::None)
+				{
+					return Mapping.Key;
+				}
+				else
+				{
+					return GetKeyFromAxis(Mapping.Key, Scale == EAxisType::Positive, Axis);
+				}
+			}
+		}
+	}
+	else if (const UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PC->GetLocalPlayer()))
 	{
 		const TArray<FKey> ActionKeys = Subsystem->QueryKeysMappedToAction(Action);
 		for (const FKey& Key : ActionKeys)
@@ -579,6 +627,24 @@ FKey UUINavPCComponent::GetEnhancedInputKey(const UInputAction* Action, const EI
 				else
 				{
 					return GetKeyFromAxis(Key, Scale == EAxisType::Positive, Axis);
+				}
+			}
+		}
+	}
+
+	for (const UInputMappingContext* const InputContext : CachedInputContexts)
+	{
+		for (const FEnhancedActionKeyMapping& Mapping : InputContext->GetMappings())
+		{
+			if (Mapping.Action == Action && UUINavBlueprintFunctionLibrary::RespectsRestriction(Mapping.Key, InputRestriction))
+			{
+				if (Action->ValueType == EInputActionValueType::Boolean || Scale == EAxisType::None)
+				{
+					return Mapping.Key;
+				}
+				else
+				{
+					return GetKeyFromAxis(Mapping.Key, Scale == EAxisType::Positive, Axis);
 				}
 			}
 		}
