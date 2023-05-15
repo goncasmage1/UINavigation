@@ -1,7 +1,6 @@
 // Copyright (C) 2019 Gonçalo Marques - All Rights Reserved
 
 #include "UINavWidget.h"
-#include "UINavButton.h"
 #include "UINavHorizontalComponent.h"
 #include "UINavComponent.h"
 #include "UINavInputBox.h"
@@ -192,12 +191,6 @@ void UUINavWidget::TraverseHierarchy()
 		{
 			ChildUINavWidget->AddParentToPath(ChildUINavWidgets.Num());
 			ChildUINavWidgets.Add(ChildUINavWidget);
-		}
-
-		UUINavButton* UINavButton = Cast<UUINavButton>(Widget);
-		if (UINavButton != nullptr)
-		{
-			DISPLAYERROR_STATIC(this, "This widget has UINavButtons outside a UINavComponent!");
 		}
 	}
 }

@@ -4,7 +4,6 @@
 #include "UINavWidget.h"
 #include "SwapKeysWidget.h"
 #include "UINavPCComponent.h"
-#include "UINavButton.h"
 #include "UINavInputBox.h"
 #include "UINavComponent.h"
 #include "UINavInputComponent.h"

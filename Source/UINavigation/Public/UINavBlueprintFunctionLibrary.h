@@ -4,7 +4,6 @@
 
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "Data/InputRestriction.h"
-#include "UINavButton.h"
 #include "UINavBlueprintFunctionLibrary.generated.h"
 
 class UInputAction;

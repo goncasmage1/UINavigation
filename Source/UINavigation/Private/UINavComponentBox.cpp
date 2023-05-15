@@ -2,7 +2,6 @@
 
 #include "UINavComponentBox.h"
 #include "UINavMacros.h"
-#include "UINavButton.h"
 #include "Components/TextBlock.h"
 
 void UUINavComponentBox::NativeConstruct()
