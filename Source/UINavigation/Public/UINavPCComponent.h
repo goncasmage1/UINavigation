@@ -215,6 +215,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavController)
 	UDataTable* InputRebindDataTable = nullptr;
 
+	FKey LastPressedKey;
+	int32 LastPressedKeyUserIndex;
+
 	TMap<FKey, FAxis2D_Keys> Axis2DToAxis1DMap = {
 		{EKeys::Gamepad_Left2D, {EKeys::Gamepad_LeftX, EKeys::Gamepad_LeftY}},
 		{EKeys::Gamepad_Right2D, {EKeys::Gamepad_RightX, EKeys::Gamepad_RightY}},
@@ -313,9 +316,7 @@ public:
 	void SimulateMouseClick();
 
 	FKey GetKeyUsedForNavigation(const EUINavigation Direction) const;
-	const TArray<FKey> GetNavigationConfigKeys(const EUINavigation Direction) const;
-	float GetKeyPressedTime(const FKey& Key) const;
-	FKey GetMostRecentlyPressedKey(const TArray<FKey> Keys) const;
+	FKey GetMostRecentlyPressedKey(const ENavigationGenesis Genesis) const;
 
 	void ProcessRebind(const FKey Key);
 	void CancelRebind();
@@ -431,10 +432,9 @@ public:
 	void NotifyNavigationKeyPressed(const FKey& Key, const EUINavigation Direction);
 	void NotifyNavigationKeyReleased(const FKey& Key, const EUINavigation Direction);
 
-	bool TryNavigateInDirection(const EUINavigation Direction);
+	bool TryNavigateInDirection(const EUINavigation Direction, const ENavigationGenesis Genesis);
 
 	void ClearNavigationTimer();
-
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
 	FORCEINLINE APlayerController* GetPC() const { return PC; }

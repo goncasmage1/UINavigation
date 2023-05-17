@@ -79,7 +79,7 @@ void UUINavInputDisplay::UpdateInputVisuals()
 		return;
 	}
 
-	UTexture2D* NewTexture = UINavPC->GetEnhancedInputIcon(InputAction, Axis, Scale);
+	UTexture2D* NewTexture = UINavPC->GetEnhancedInputIcon(InputAction, Axis, Scale, UINavPC->IsUsingGamepad() ? EInputRestriction::Gamepad : EInputRestriction::Keyboard_Mouse);
 	if (NewTexture != nullptr)
 	{
 		InputImage->SetBrushFromTexture(NewTexture, bMatchIconSize);

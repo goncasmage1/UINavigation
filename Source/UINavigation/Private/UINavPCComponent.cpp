@@ -359,6 +359,8 @@ void UUINavPCComponent::SetAllowSectionInput(const bool bAllowInput)
 
 void UUINavPCComponent::HandleKeyDownEvent(FSlateApplication& SlateApp, const FKeyEvent& InKeyEvent)
 {
+	LastPressedKey = InKeyEvent.GetKey();
+	LastPressedKeyUserIndex = InKeyEvent.GetUserIndex();
 	VerifyInputTypeChangeByKey(InKeyEvent.GetKey());
 }
 
@@ -524,39 +526,14 @@ FKey UUINavPCComponent::GetKeyUsedForNavigation(const EUINavigation Direction) c
 	return DirectionKeys->Last();
 }
 
-const TArray<FKey> UUINavPCComponent::GetNavigationConfigKeys(const EUINavigation Direction) const
+FKey UUINavPCComponent::GetMostRecentlyPressedKey(const ENavigationGenesis Genesis) const
 {
-	const TSharedRef<FUINavigationConfig> NavConfig = StaticCastSharedRef<FUINavigationConfig>(FSlateApplication::Get().GetNavigationConfig());
-	return NavConfig->GetKeysForDirection(Direction);
-}
-
-float UUINavPCComponent::GetKeyPressedTime(const FKey& Key) const
-{
-	const UPlayerInput* const PlayerInput = PC->PlayerInput;
-	if (!IsValid(PlayerInput))
+	if (LastPressedKey.IsValid() && (Genesis == ENavigationGenesis::Controller) == LastPressedKey.IsGamepadKey())
 	{
-		return 0.0f;
+		return LastPressedKey;
 	}
 
-	return PlayerInput->GetTimeDown(Key);
-}
-
-FKey UUINavPCComponent::GetMostRecentlyPressedKey(const TArray<FKey> Keys) const
-{
-	FKey RecentKey;
-	float BestTime = MAX_FLT;
-
-	for (const FKey& Key : Keys)
-	{
-		const float KeyPressTime = GetKeyPressedTime(Key);
-		if (KeyPressTime < BestTime)
-		{
-			RecentKey = Key;
-			BestTime = KeyPressTime;
-		}
-	}
-
-	return RecentKey;
+	return FKey();
 }
 
 void UUINavPCComponent::SetTimer(const EUINavigation TimerDirection)
@@ -920,10 +897,24 @@ void UUINavPCComponent::NavigateInDirection(const EUINavigation InDirection)
 		return;
 	}
 
-	const uint32* KeyCodePtr;
-	const uint32* CharacterCodePtr;
-	FInputKeyManager::Get().GetCodesFromKey(NavigationKey, KeyCodePtr, CharacterCodePtr);
-	FSlateApplication::Get().OnKeyDown(KeyCodePtr != nullptr ? *KeyCodePtr : -1, *CharacterCodePtr, true);
+	FKeyEvent KeyEvent;
+	FSlateApplication& SlateApplication = FSlateApplication::Get();
+	if (!NavigationKey.IsGamepadKey())
+	{
+		const uint32* KeyCodePtr;
+		const uint32* CharacterCodePtr;
+		FInputKeyManager::Get().GetCodesFromKey(NavigationKey, KeyCodePtr, CharacterCodePtr);
+		const int32 KeyCode = KeyCodePtr != nullptr ? *KeyCodePtr : -1;
+
+		FKey const Key = FInputKeyManager::Get().GetKeyFromCodes(KeyCode, *CharacterCodePtr);
+		KeyEvent = FKeyEvent(Key, SlateApplication.GetPlatformApplication()->GetModifierKeys(), SlateApplication.GetUserIndexForKeyboard(), true, *CharacterCodePtr, KeyCode);
+	}
+	else
+	{
+		KeyEvent = FKeyEvent(NavigationKey, SlateApplication.GetPlatformApplication()->GetModifierKeys(), LastPressedKeyUserIndex, true, 0, 0);
+	}
+
+	SlateApplication.ProcessKeyDownEvent(KeyEvent);
 }
 
 void UUINavPCComponent::MenuNext()
@@ -987,12 +978,12 @@ void UUINavPCComponent::NotifyNavigationKeyReleased(const FKey& Key, const EUINa
 	ClearNavigationTimer();
 }
 
-bool UUINavPCComponent::TryNavigateInDirection(const EUINavigation Direction)
+bool UUINavPCComponent::TryNavigateInDirection(const EUINavigation Direction, const ENavigationGenesis Genesis)
 {
 	FKey PressedKey = GetKeyUsedForNavigation(Direction);
 	if (!PressedKey.IsValid())
 	{
-		PressedKey = GetMostRecentlyPressedKey(GetNavigationConfigKeys(Direction));
+		PressedKey = GetMostRecentlyPressedKey(Genesis);
 		if (!PressedKey.IsValid())
 		{
 			return false;

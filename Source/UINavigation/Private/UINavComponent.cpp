@@ -353,7 +353,7 @@ FNavigationReply UUINavComponent::NativeOnNavigation(const FGeometry& MyGeometry
 		return FNavigationReply::Stop();
 	}
 
-	if (!ParentWidget->UINavPC->TryNavigateInDirection(InNavigationEvent.GetNavigationType()))
+	if (!ParentWidget->UINavPC->TryNavigateInDirection(InNavigationEvent.GetNavigationType(), InNavigationEvent.GetNavigationGenesis()))
 	{
 		return FNavigationReply::Stop();
 	}
