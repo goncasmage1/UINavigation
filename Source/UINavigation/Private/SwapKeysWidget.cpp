@@ -4,6 +4,7 @@
 #include "UINavInputBox.h"
 #include "Data/RevertRebindReason.h"
 #include "UINavBlueprintFunctionLibrary.h"
+#include "Data/PromptData.h"
 
 void USwapKeysWidget::OnSelect_Implementation(UUINavComponent* Component)
 {

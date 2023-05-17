@@ -21,8 +21,13 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "UINavPromptWidget")
 	bool IsAcceptComponent(UUINavComponent* Component) const;
 
+	void SetCallback(const FPromptWidgetDecided& InCallback) { Callback = InCallback; }
+
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = "UINavPromptWidget")
 	bool FirstComponentIsAccept = false;
+
+	UPROPERTY(EditDefaultsOnly, Category = "UINavPromptWidget", meta (ExposeOnSpawn = true))
+	FPromptWidgetDecided Callback;
 	
 };

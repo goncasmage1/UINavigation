@@ -7,17 +7,20 @@
 #include "Data/ReceiveInputType.h"
 #include "Data/SelectorPosition.h"
 #include "Data/NavigationEvent.h"
-#include "Data/PromptData.h"
+#include "Delegates/DelegateCombinations.h"
 #include "UINavWidget.generated.h"
 
 class UUINavComponent;
 class UUINavHorizontalComponent;
+class UUINavPromptWidget;
 enum class EButtonStyle : uint8;
+
+DECLARE_DYNAMIC_DELEGATE_OneParam(FPromptWidgetDecided, const UPromptDataBase*, PromptData);
+
 
 /**
 * This class contains the logic for UserWidget navigation
 */
-
 UCLASS()
 class UINAVIGATION_API UUINavWidget : public UUserWidget
 {
@@ -110,11 +113,6 @@ protected:
 public:
 
 	EReceiveInputType ReceiveInputType = EReceiveInputType::None;
-
-	TSubclassOf<class UUINavPromptWidget> PromptWidgetClass;
-	
-	UPROPERTY()
-	UPromptDataBase* PromptData = nullptr;
 
 	//The UserWidget object that will move along the Widget
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget, OptionalWidget = true), Category = UINavWidget)
@@ -245,8 +243,6 @@ public:
 	void SetCurrentComponent(UUINavComponent* Component);
 	void SetHoveredComponent(UUINavComponent* Component);
 	void SetSelectedComponent(UUINavComponent* Component);
-
-	void OnPromptDecided(const TSubclassOf<class UUINavPromptWidget> PromptClass, const UPromptDataBase* const InPromptData);
 
 	void UpdateNavigationVisuals(UUINavComponent* Component, const bool bBypassForcedNavigation = false);
 
@@ -465,6 +461,17 @@ public:
 	*/
 	UFUNCTION(BlueprintCallable, Category = UINavWidget, meta = (AdvancedDisplay=2))
 	UUINavWidget* GoToWidget(TSubclassOf<UUINavWidget> NewWidgetClass, const bool bRemoveParent, const bool bDestroyParent = false, const int ZOrder = 0);
+
+	/**
+	*	Adds given widget to screen (strongly recommended over manual alternative)
+	*
+	*	@param	NewWidgetClass  The class of the widget to add to the screen
+	*	@param	bRemoveParent  Whether to remove the parent widget (this widget) from the viewport
+	*	@param  bDestroyParent  Whether to destruct the parent widget (this widget)
+	*	@param  ZOrder Order to display the widget
+	*/
+	UFUNCTION(BlueprintCallable, Category = UINavWidget, meta = (AdvancedDisplay = 2))
+	UUINavWidget* GoToPromptWidget(TSubclassOf<UUINavPromptWidget> NewWidgetClass, const FPromptWidgetDecided& Event, const bool bRemoveParent, const int ZOrder = 0);
 
 	/**
 	*	Adds given widget to screen (strongly recommended over manual alternative)

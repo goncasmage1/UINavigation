@@ -20,12 +20,9 @@ void UUINavPromptWidget::ProcessPromptWidgetSelected(UPromptDataBase* const InPr
 		return;
 	}
 
-	if (ParentWidget != nullptr)
-	{
-		ParentWidget->PromptWidgetClass = GetClass();
-		ParentWidget->PromptData = InPromptData;
-	}
 	ReturnToParent();
+
+	Callback.Execute(InPromptData);
 }
 
 bool UUINavPromptWidget::IsAcceptComponent(UUINavComponent* Component) const

@@ -263,11 +263,6 @@ void UUINavWidget::UINavSetup()
 	}
 
 	OnSetupCompleted();
-
-	if (PromptWidgetClass != nullptr)
-	{
-		OnPromptDecided(PromptWidgetClass, PromptData);
-	}
 }
 
 UUINavComponent* UUINavWidget::GetInitialFocusComponent_Implementation()
@@ -665,29 +660,6 @@ void UUINavWidget::PropagateOnStopSelect(UUINavComponent* Component)
 	}
 }
 
-void UUINavWidget::OnPromptDecided(const TSubclassOf<UUINavPromptWidget> PromptClass, const UPromptDataBase* const InPromptData)
-{
-	PromptWidgetClass = nullptr;
-
-	FString ClassString = PromptClass->GetFName().ToString();
-	ClassString.RemoveAt(ClassString.Len() - 2, 2);
-	const FName EventName = FName(*(ClassString.Append(TEXT("_Decided"))));
-	UFunction* CustomFunction = FindFunction(EventName);
-	if (CustomFunction != nullptr)
-	{
-		if (CustomFunction->ParmsSize == sizeof(UPromptDataBase*))
-		{
-			uint8* Buffer = static_cast<uint8*>(FMemory_Alloca(sizeof(UPromptDataBase*)));
-			FMemory::Memcpy(Buffer, &InPromptData, sizeof(InPromptData));
-			ProcessEvent(CustomFunction, Buffer);
-		}
-		else
-		{
-			DISPLAYERROR(FString::Printf(TEXT("%s Prompt Event could not be found!"), *EventName.ToString()));
-		}
-	}
-}
-
 void UUINavWidget::UpdateNavigationVisuals(UUINavComponent* Component, const bool bBypassForcedNavigation /*= false*/)
 {
 	if (IsValid(Component) && IsSelectorValid())
@@ -834,6 +806,26 @@ UUINavWidget* UUINavWidget::GoToWidget(TSubclassOf<UUINavWidget> NewWidgetClass,
 	return GoToBuiltWidget(NewWidget, bRemoveParent, bDestroyParent, ZOrder);
 }
 
+UUINavWidget* UUINavWidget::GoToPromptWidget(TSubclassOf<UUINavPromptWidget> NewWidgetClass, const FPromptWidgetDecided& Event, const bool bRemoveParent, const int ZOrder)
+{
+	if (NewWidgetClass == nullptr)
+	{
+		DISPLAYERROR("GoToPromptWidget: No Widget Class found");
+		return nullptr;
+	}
+
+	if (!Event.IsBound())
+	{
+		DISPLAYERROR("GoToPromptWidget: Event isn't bound");
+		return nullptr;
+	}
+
+	APlayerController* PC = Cast<APlayerController>(UINavPC->GetOwner());
+	UUINavPromptWidget* NewWidget = CreateWidget<UUINavPromptWidget>(PC, NewWidgetClass);
+	NewWidget->SetCallback(Event);
+	return GoToBuiltWidget(NewWidget, bRemoveParent, false, ZOrder);
+}
+
 UUINavWidget * UUINavWidget::GoToBuiltWidget(UUINavWidget* NewWidget, const bool bRemoveParent, const bool bDestroyParent, const int ZOrder)
 {
 	if (NewWidget == nullptr) return nullptr;
@@ -969,7 +961,7 @@ void UUINavWidget::ReturnToParent(const bool bRemoveAllParents, const int ZOrder
 		}
 		else
 		{
-			OuterUINavWidget->SetFocus();
+			OuterUINavWidget->ReturnToParent();
 		}
 	}
 }
