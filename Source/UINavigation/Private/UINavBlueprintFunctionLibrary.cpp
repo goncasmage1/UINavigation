@@ -315,8 +315,8 @@ void UUINavBlueprintFunctionLibrary::GetIndexInGridWidget(const UWidget* const W
 			{
 				Column = UniformGridSlot->Column;
 				Row = UniformGridSlot->Row;
+				return;
 			}
-			return;
 		}
 
 		const UGridSlot* const GridSlot = Cast<UGridSlot>(Child->Slot);
@@ -326,8 +326,8 @@ void UUINavBlueprintFunctionLibrary::GetIndexInGridWidget(const UWidget* const W
 			{
 				Column = GridSlot->Column;
 				Row = GridSlot->Row;
+				return;
 			}
-			return;
 		}
 	}
 }
