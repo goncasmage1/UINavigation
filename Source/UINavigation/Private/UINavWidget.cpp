@@ -37,6 +37,8 @@ UUINavWidget::UUINavWidget(const FObjectInitializer& ObjectInitializer)
 
 void UUINavWidget::NativeConstruct()
 {
+	bBeingRemoved = false;
+
 	const UWorld* const World = GetWorld();
 	OuterUINavWidget = GetOuterObject<UUINavWidget>(this);
 	if (OuterUINavWidget != nullptr)
@@ -228,11 +230,6 @@ void UUINavWidget::UINavSetup()
 {
 	if (UINavPC == nullptr) return;
 
-	if (OuterUINavWidget == nullptr)
-	{
-		UINavPC->SetActiveWidget(this);
-	}
-
 	//Re-enable all buttons (bug fix)
 	if (OuterUINavWidget == nullptr)
 	{
@@ -328,7 +325,7 @@ void UUINavWidget::LoseNavigation(UUINavWidget* NewActiveWidget)
 {
 	if (!bHasNavigation) return;
 
-	const bool bNewWidgetIsChild = NewActiveWidget != nullptr ?
+	const bool bNewWidgetIsChild = NewActiveWidget != nullptr && NewActiveWidget->GetUINavWidgetPath().Num() > 0 ?
 		UUINavBlueprintFunctionLibrary::ContainsArray<int>(NewActiveWidget->GetUINavWidgetPath(), UINavWidgetPath) :
 		false;
 
@@ -428,6 +425,7 @@ void UUINavWidget::NativeTick(const FGeometry & MyGeometry, float DeltaTime)
 
 void UUINavWidget::RemoveFromParent()
 {
+	bBeingRemoved = true;
 	if (OuterUINavWidget == nullptr && !bReturningToParent && !bDestroying && !GetFName().IsNone() && IsValid(this) &&
 	    (ParentWidget != nullptr || (bAllowRemoveIfRoot && UINavPC != nullptr)))
 	{
@@ -910,7 +908,6 @@ void UUINavWidget::ReturnToParent(const bool bRemoveAllParents, const int ZOrder
 			}
 			else
 			{
-				UINavPC->SetActiveWidget(ParentWidget);
 				ParentWidget->ReconfigureSetup();
 			}
 			WidgetComp->SetWidget(ParentWidget);
@@ -945,15 +942,9 @@ void UUINavWidget::ReturnToParent(const bool bRemoveAllParents, const int ZOrder
 				else
 				{
 					UUINavWidget* ParentOuter = ParentWidget->GetMostOuterUINavWidget();
-					UINavPC->SetActiveWidget(ParentOuter);
 					ParentWidget->ReturnedFromWidget = this;
 					ParentWidget->ReconfigureSetup();
 					ParentWidget->ReturnedFromWidget = nullptr;
-					/*if (ParentWidget->PreviousNestedWidget != nullptr)
-					{
-						UINavPC->SetActiveNestedWidget(ParentWidget->PreviousNestedWidget);
-						ParentWidget->PreviousNestedWidget = nullptr;
-					}*/
 				}
 				bReturningToParent = true;
 				RemoveFromParent();
@@ -1050,7 +1041,10 @@ void UUINavWidget::StartedSelect()
 
 void UUINavWidget::StoppedSelect()
 {
-	PropagateOnSelect(CurrentComponent);
+	if (SelectedComponent == CurrentComponent)
+	{
+		PropagateOnSelect(CurrentComponent);
+	}
 	PropagateOnStopSelect(CurrentComponent);
 }
 
@@ -1132,6 +1126,19 @@ void UUINavWidget::SetFirstComponent(UUINavComponent* Component)
 	if (IsValid(OuterUINavWidget) && !IsValid(OuterUINavWidget->GetFirstComponent()))
 	{
 		OuterUINavWidget->SetFirstComponent(Component);
+	}
+}
+
+void UUINavWidget::RemovedComponent(UUINavComponent* Component)
+{
+	if (IsValid(Component) && Component == CurrentComponent)
+	{
+		SetCurrentComponent(nullptr);
+	}
+	
+	if (IsValid(FirstComponent) && Component == FirstComponent)
+	{
+		FirstComponent = nullptr;
 	}
 }
 

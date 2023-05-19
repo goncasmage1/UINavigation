@@ -45,6 +45,7 @@ public:
 	virtual FReply NativeOnMouseButtonDoubleClick(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
 
 	virtual void NativeConstruct() override;
+	virtual void NativeDestruct() override;
 
 	virtual bool Initialize() override;
 	

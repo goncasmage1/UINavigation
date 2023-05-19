@@ -46,8 +46,21 @@ void UUINavComponent::NativeConstruct()
 		else if (!IsValid(ParentWidget->GetFirstComponent()) && CanBeNavigated())
 		{
 			ParentWidget->SetFirstComponent(this);
+			if (ParentWidget->bCompletedSetup)
+			{
+				SetFocus();
+			}
 		}
 	}
+}
+
+void UUINavComponent::NativeDestruct()
+{
+	if (IsValid(ParentWidget) && !ParentWidget->IsBeingRemoved())
+	{
+		ParentWidget->RemovedComponent(this);
+	}
+	Super::NativeDestruct();
 }
 
 bool UUINavComponent::Initialize()
@@ -315,6 +328,11 @@ void UUINavComponent::NativeOnFocusChanging(const FWeakWidgetPath& PreviousFocus
 
 	const bool bHadFocus = PreviousFocusPath.ContainsWidget(NavButton->TakeWidget());
 	const bool bHasFocus = NewWidgetPath.ContainsWidget(NavButton->TakeWidget());
+
+	if (NewWidgetPath.Widgets.Num() == 0)
+	{
+		return;
+	}
 
 	const FName WidgetType = NewWidgetPath.GetLastWidget()->GetType();
 	if (!WidgetType.IsEqual(FName(TEXT("SObjectWidget"))) &&

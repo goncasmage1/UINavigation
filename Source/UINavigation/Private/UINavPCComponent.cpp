@@ -243,7 +243,7 @@ void UUINavPCComponent::NotifyNavigatedTo(UUINavWidget* NavigatedWidget)
 		return;
 	}
 
-	if (NavigatedWidget == ActiveWidget && !IsValid(ActiveSubWidget))
+	if (NavigatedWidget == ActiveWidget && !IsValid(ActiveSubWidget) && IsValid(ActiveWidget->GetCurrentComponent()))
 	{
 		return;
 	}
@@ -295,6 +295,11 @@ void UUINavPCComponent::NotifyNavigatedTo(UUINavWidget* NavigatedWidget)
 
 		if (OldPath.Num() == Depth && OldActiveWidget != nullptr) OldActiveWidget->LoseNavigation(NavigatedWidget);
 		if (NewPath.Num() == Depth && NavigatedWidget != nullptr) NavigatedWidget->GainNavigation(OldActiveWidget);
+	}
+
+	if (ActiveWidget != NavigatedWidget)
+	{
+		SetActiveWidget(NavigatedWidget);
 	}
 }
 

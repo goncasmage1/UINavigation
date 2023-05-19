@@ -29,7 +29,7 @@ class UINAVIGATION_API UUINavWidget : public UUserWidget
 protected:
 
 	bool bMovingSelector = false;
-	bool bReturning = false;
+	bool bBeingRemoved = false;
 		
 	UPROPERTY()
 	UUINavComponent* UpdateSelectorPrevComponent = nullptr;
@@ -430,6 +430,10 @@ public:
 
 	bool IsForcingNavigation() const { return bForcingNavigation; }
 
+	bool IsBeingRemoved() const { return bBeingRemoved; }
+
+	UUINavComponent* GetCurrentComponent() const { return CurrentComponent; }
+
 	template<typename T>
 	static T* GetOuterObject(const UObject* const Object);
 
@@ -445,6 +449,8 @@ public:
 	UUINavComponent* GetFirstComponent() const { return FirstComponent; }
 
 	void SetFirstComponent(UUINavComponent* Component);
+
+	void RemovedComponent(UUINavComponent* Component);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
 	bool IsSelectorValid();
