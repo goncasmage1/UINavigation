@@ -2,6 +2,7 @@
 
 #include "UINavPCComponent.h"
 #include "UINavWidget.h"
+#include "UINavComponent.h"
 #include "UINavSettings.h"
 #include "UINavDefaultInputSettings.h"
 #include "UINavPCReceiver.h"
@@ -213,8 +214,6 @@ void UUINavPCComponent::SetActiveWidget(UUINavWidget * NewActiveWidget)
 	
 	if (ActiveWidget != nullptr)
 	{
-		ActiveWidget->PropagateLoseNavigation(NewActiveWidget, ActiveWidget, CommonParent);
-
 		if (NewActiveWidget == nullptr)
 		{
 			IUINavPCReceiver::Execute_OnRootWidgetRemoved(GetOwner());
@@ -223,8 +222,6 @@ void UUINavPCComponent::SetActiveWidget(UUINavWidget * NewActiveWidget)
 	
 	if (NewActiveWidget != nullptr)
 	{
-		NewActiveWidget->PropagateGainNavigation(ActiveWidget, NewActiveWidget, CommonParent);
-
 		if (ActiveWidget == nullptr)
 		{
 			IUINavPCReceiver::Execute_OnRootWidgetAdded(GetOwner());
