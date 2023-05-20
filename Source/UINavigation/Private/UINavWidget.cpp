@@ -1232,7 +1232,7 @@ void UUINavWidget::OnReleasedComponent(UUINavComponent* Component)
 
 	if (CurrentComponent == nullptr || SelectedComponent == nullptr || !IsValid(Component)) return;
 
-	const bool bIsSelectedButton = SelectedComponent == Component && (Component->NavButton->IsHovered());
+	const bool bIsSelectedButton = SelectedComponent == Component;
 
 	if (IsValid(Component))
 	{
