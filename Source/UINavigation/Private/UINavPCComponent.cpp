@@ -328,7 +328,7 @@ UUINavWidget* UUINavPCComponent::GoToBuiltWidget(UUINavWidget* NewWidget, const 
 
 void UUINavPCComponent::RefreshNavigationKeys()
 {
-	FSlateApplication::Get().SetNavigationConfig(MakeShared<FUINavigationConfig>());
+	FSlateApplication::Get().SetNavigationConfig(MakeShared<FUINavigationConfig>(bAllowSelectInput, bAllowReturnInput));
 }
 
 void UUINavPCComponent::SetAllowAllMenuInput(const bool bAllowInput)
@@ -337,6 +337,8 @@ void UUINavPCComponent::SetAllowAllMenuInput(const bool bAllowInput)
 	bAllowSelectInput = bAllowInput;
 	bAllowReturnInput = bAllowInput;
 	bAllowSectionInput = bAllowInput;
+
+	RefreshNavigationKeys();
 }
 
 void UUINavPCComponent::SetAllowDirectionalInput(const bool bAllowInput)
@@ -347,11 +349,13 @@ void UUINavPCComponent::SetAllowDirectionalInput(const bool bAllowInput)
 void UUINavPCComponent::SetAllowSelectInput(const bool bAllowInput)
 {
 	bAllowSelectInput = bAllowInput;
+	RefreshNavigationKeys();
 }
 
 void UUINavPCComponent::SetAllowReturnInput(const bool bAllowInput)
 {
 	bAllowReturnInput = bAllowInput;
+	RefreshNavigationKeys();
 }
 
 void UUINavPCComponent::SetAllowSectionInput(const bool bAllowInput)

@@ -89,14 +89,6 @@ FReply UUINavComponent::NativeOnKeyDown(const FGeometry& InGeometry, const FKeyE
 	if (Direction != EUINavigation::Invalid)
 	{
 		ParentWidget->UINavPC->NotifyNavigationKeyPressed(InKeyEvent.GetKey(), Direction);
-		if (Direction == EUINavigation::Next)
-		{
-			ParentWidget->PropagateOnNext();
-		}
-		else if (Direction == EUINavigation::Previous)
-		{
-			ParentWidget->PropagateOnPrevious();
-		}
 	}
 
 	return Reply;
@@ -376,17 +368,31 @@ FNavigationReply UUINavComponent::NativeOnNavigation(const FGeometry& MyGeometry
 		return FNavigationReply::Stop();
 	}
 
-	if (GetDefault<UUINavSettings>()->bStopNextPreviousNavigation)
+	const bool bStopNextPrevious = GetDefault<UUINavSettings>()->bStopNextPreviousNavigation;
+	const bool bAllowsSectionInput = ParentWidget->UINavPC->AllowsSectionInput();
+
+	if (InNavigationEvent.GetNavigationType() == EUINavigation::Next)
 	{
-		if (InNavigationEvent.GetNavigationType() == EUINavigation::Next)
+		if (bAllowsSectionInput)
 		{
-			ParentWidget->OnNext();
+			ParentWidget->PropagateOnNext();
+		}
+
+		if (bStopNextPrevious || !bAllowsSectionInput)
+		{
 			return FNavigationReply::Stop();
 		}
+	}
 		
-		if (InNavigationEvent.GetNavigationType() == EUINavigation::Previous)
+	if (InNavigationEvent.GetNavigationType() == EUINavigation::Previous)
+	{
+		if (bAllowsSectionInput)
 		{
-			ParentWidget->OnPrevious();
+			ParentWidget->PropagateOnPrevious();
+		}
+
+		if (bStopNextPrevious || !bAllowsSectionInput)
+		{
 			return FNavigationReply::Stop();
 		}
 	}

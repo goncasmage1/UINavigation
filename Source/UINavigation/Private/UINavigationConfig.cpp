@@ -5,7 +5,7 @@
 #include "Data/UINavEnhancedInputActions.h"
 #include "InputMappingContext.h"
 
-FUINavigationConfig::FUINavigationConfig()
+FUINavigationConfig::FUINavigationConfig(const bool bAllowAccept /*= true*/, const bool bAllowBack /*= true*/)
 {
 	KeyEventRules.Reset();
 	bTabNavigation = false;
@@ -46,11 +46,11 @@ FUINavigationConfig::FUINavigationConfig()
 		{
 			KeyEventRules.Emplace(Mapping.Key, EUINavigation::Previous);
 		}
-		else if (Mapping.Action == InputActions->IA_MenuSelect)
+		else if (Mapping.Action == InputActions->IA_MenuSelect && bAllowAccept)
 		{
 			KeyActionRules.Emplace(Mapping.Key, EUINavigationAction::Accept);
 		}
-		else if (Mapping.Action == InputActions->IA_MenuReturn)
+		else if (Mapping.Action == InputActions->IA_MenuReturn && bAllowBack)
 		{
 			KeyActionRules.Emplace(Mapping.Key, EUINavigationAction::Back);
 		}

@@ -7,7 +7,7 @@
 class UINAVIGATION_API FUINavigationConfig : public FNavigationConfig
 {
 public:
-	FUINavigationConfig();
+	FUINavigationConfig(const bool bAllowAccept = true, const bool bAllowBack = true);
 
 	virtual EUINavigation GetNavigationDirectionFromAnalog(const FAnalogInputEvent& InAnalogEvent) override;
 

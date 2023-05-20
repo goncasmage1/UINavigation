@@ -837,11 +837,6 @@ UUINavWidget * UUINavWidget::GoToBuiltWidget(UUINavWidget* NewWidget, const bool
 		{
 			return NewWidget;
 		}
-		
-		/*if (OuterUINavWidget != nullptr)
-		{
-			OldOuterUINavWidget->PreviousNestedWidget = this;
-		}*/
 	}
 	
 	NewWidget->ParentWidget = GetMostOuterUINavWidget();
