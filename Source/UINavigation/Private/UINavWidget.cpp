@@ -1068,7 +1068,7 @@ bool UUINavWidget::TryConsumeNavigation()
 		return true;
 	}
 
-	return false;
+	return IsValid(SelectedComponent);
 }
 
 template<typename T>
