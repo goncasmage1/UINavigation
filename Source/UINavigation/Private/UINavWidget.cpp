@@ -257,6 +257,10 @@ void UUINavWidget::UINavSetup()
 				UnforceNavigation();
 			}
 		}
+		else
+		{
+			UINavPC->NotifyNavigatedTo(this);
+		}
 	}
 
 	OnSetupCompleted();
@@ -381,6 +385,49 @@ void UUINavWidget::SetSelectedComponent(UUINavComponent* Component)
 	{
 		OuterUINavWidget->SetSelectedComponent(Component);
 	}
+}
+
+FReply UUINavWidget::NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent)
+{
+	FReply Reply = Super::NativeOnKeyDown(InGeometry, InKeyEvent);
+
+	if (!IsValid(CurrentComponent))
+	{
+		if (FSlateApplication::Get().GetNavigationActionFromKey(InKeyEvent) == EUINavigationAction::Accept)
+		{
+			if (!TryConsumeNavigation())
+			{
+				StartedSelect();
+			}
+		}
+	}
+
+	return Reply;
+}
+
+FReply UUINavWidget::NativeOnKeyUp(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent)
+{
+	FReply Reply = Super::NativeOnKeyUp(InGeometry, InKeyEvent);
+
+	if (!IsValid(CurrentComponent))
+	{
+		if (FSlateApplication::Get().GetNavigationActionFromKey(InKeyEvent) == EUINavigationAction::Accept)
+		{
+			if (!TryConsumeNavigation())
+			{
+				StoppedSelect();
+			}
+		}
+		else if (FSlateApplication::Get().GetNavigationActionFromKey(InKeyEvent) == EUINavigationAction::Back)
+		{
+			if (!TryConsumeNavigation())
+			{
+				StoppedReturn();
+			}
+		}
+	}
+
+	return Reply;
 }
 
 void UUINavWidget::NativeTick(const FGeometry & MyGeometry, float DeltaTime)
