@@ -804,7 +804,7 @@ UUINavWidget* UUINavWidget::GoToWidget(TSubclassOf<UUINavWidget> NewWidgetClass,
 	return GoToBuiltWidget(NewWidget, bRemoveParent, bDestroyParent, ZOrder);
 }
 
-UUINavWidget* UUINavWidget::GoToPromptWidget(TSubclassOf<UUINavPromptWidget> NewWidgetClass, const FPromptWidgetDecided& Event, const bool bRemoveParent, const int ZOrder)
+UUINavWidget* UUINavWidget::GoToPromptWidget(TSubclassOf<UUINavPromptWidget> NewWidgetClass, const FPromptWidgetDecided& Event, const FText Title, const FText Message, const bool bRemoveParent /*= false*/, const int ZOrder /*= 0*/)
 {
 	if (NewWidgetClass == nullptr)
 	{
@@ -820,6 +820,8 @@ UUINavWidget* UUINavWidget::GoToPromptWidget(TSubclassOf<UUINavPromptWidget> New
 
 	APlayerController* PC = Cast<APlayerController>(UINavPC->GetOwner());
 	UUINavPromptWidget* NewWidget = CreateWidget<UUINavPromptWidget>(PC, NewWidgetClass);
+	NewWidget->Title = Title;
+	NewWidget->Message = Message;
 	NewWidget->SetCallback(Event);
 	return GoToBuiltWidget(NewWidget, bRemoveParent, false, ZOrder);
 }

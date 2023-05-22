@@ -13,10 +13,10 @@
 class UUINavComponent;
 class UUINavHorizontalComponent;
 class UUINavPromptWidget;
+class UPromptDataBase;
 enum class EButtonStyle : uint8;
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FPromptWidgetDecided, const UPromptDataBase*, PromptData);
-
 
 /**
 * This class contains the logic for UserWidget navigation
@@ -476,8 +476,8 @@ public:
 	*	@param  bDestroyParent  Whether to destruct the parent widget (this widget)
 	*	@param  ZOrder Order to display the widget
 	*/
-	UFUNCTION(BlueprintCallable, Category = UINavWidget, meta = (AdvancedDisplay = 2))
-	UUINavWidget* GoToPromptWidget(TSubclassOf<UUINavPromptWidget> NewWidgetClass, const FPromptWidgetDecided& Event, const bool bRemoveParent, const int ZOrder = 0);
+	UFUNCTION(BlueprintCallable, Category = UINavWidget, meta = (AdvancedDisplay = 4))
+	UUINavWidget* GoToPromptWidget(TSubclassOf<UUINavPromptWidget> NewWidgetClass, const FPromptWidgetDecided& Event, const FText Title = FText(), const FText Message = FText(), const bool bRemoveParent = false, const int ZOrder = 0);
 
 	/**
 	*	Adds given widget to screen (strongly recommended over manual alternative)

@@ -4,34 +4,30 @@
 #include "UINavInputBox.h"
 #include "Data/RevertRebindReason.h"
 #include "UINavBlueprintFunctionLibrary.h"
-#include "Data/PromptData.h"
+#include "Data/PromptDataSwapKeys.h"
 
 void USwapKeysWidget::OnSelect_Implementation(UUINavComponent* Component)
 {
-	NotifySwapResult(UUINavBlueprintFunctionLibrary::CreateBinaryPromptData((Component == FirstComponent) == FirstComponentIsAccept));
+	NotifySwapResult((Component == FirstComponent) == FirstComponentIsAccept);
 }
 
 void USwapKeysWidget::OnReturn_Implementation()
 {
-	NotifySwapResult(UUINavBlueprintFunctionLibrary::CreateBinaryPromptData(FirstComponentIsAccept));
+	NotifySwapResult(FirstComponentIsAccept);
 }
 
-void USwapKeysWidget::NotifySwapResult(UPromptDataBinary* const InPromptData)
+void USwapKeysWidget::NotifySwapResult(const bool bSwap)
 {
-	if (CurrentInputBox != nullptr && CollidingInputBox != nullptr)
+	UPromptDataSwapKeys* SwapKeysPromptData = NewObject<UPromptDataSwapKeys>();
+	if (!IsValid(SwapKeysPromptData))
 	{
-		if (InPromptData->bAccept)
-		{
-			CurrentInputBox->FinishUpdateNewKey();
-			CollidingInputBox->UpdateInputKey(InputCollisionData.CurrentInputKey,
-											  InputCollisionData.CollidingKeyIndex,
-											  true);
-		}
-		else
-		{
-			CurrentInputBox->CancelUpdateInputKey(ERevertRebindReason::SwapRejected);
-		}
+		return;
 	}
 
-	ProcessPromptWidgetSelected(InPromptData);
+	SwapKeysPromptData->bShouldSwap = bSwap;
+	SwapKeysPromptData->InputCollisionData = InputCollisionData;
+	SwapKeysPromptData->CurrentInputBox = CurrentInputBox;
+	SwapKeysPromptData->CollidingInputBox = CollidingInputBox;
+
+	ProcessPromptWidgetSelected(SwapKeysPromptData);
 }

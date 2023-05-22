@@ -23,7 +23,7 @@ public:
 
 	UPromptDataBinary(const bool bInAccept) : bAccept(bInAccept) {}
 
-	UPROPERTY(BlueprintReadOnly, Category = "Prompt Data")
+	UPROPERTY(BlueprintReadWrite, Category = "Prompt Data")
 	bool bAccept = true;
 
 };

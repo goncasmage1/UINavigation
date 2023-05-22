@@ -7,11 +7,13 @@
 #include "Data/InputRebindData.h"
 #include "Data/InputRestriction.h"
 #include "Data/RevertRebindReason.h"
-#include "Data/TargetColumn.h"
 #include "Blueprint/UserWidget.h"
 #include "Data/InputContainerEnhancedActionData.h"
 #include "EnhancedActionKeyMapping.h"
+#include "UINavWidget.h"
 #include "UINavInputContainer.generated.h"
+
+class UPromptDataBase;
 
 /**
 * This class contains the logic for aggregating several input boxes
@@ -78,6 +80,9 @@ public:
 
 	void ResetInputBox(const FName InputName, const EAxisType AxisType);
 
+	UFUNCTION()
+	void SwapKeysDecided(const UPromptDataBase* const PromptData);
+
 	UUINavInputBox* GetInputBoxInDirection(UUINavInputBox* InputBox, const EUINavigation Direction);
 	
 	UUINavInputBox* GetOppositeInputBox(const FInputContainerEnhancedActionData& ActionData);
@@ -85,15 +90,9 @@ public:
 
 	void GetAxisPropertiesFromMapping(const FEnhancedActionKeyMapping& ActionMapping, bool& bOutPositive, EInputAxis& OutAxis) const;
 
-	//Fetches the index offset from the TargetColumn variable for both the top and bottom of the Input Container
-	int GetOffsetFromTargetColumn(const bool bTop) const;
-
 	void GetInputRebindData(const int InputIndex, FInputRebindData& RebindData) const;
 
 	void GetEnhancedInputRebindData(const int InputIndex, FInputRebindData& RebindData) const;
-
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "UINav Input")
-	FORCEINLINE ETargetColumn GetTargetColumn() const { return TargetColumn; }
 
 	//-----------------------------------------------------------------------
 
@@ -154,9 +153,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Input")
 	bool bCollapseInputBoxes = false;
 
-	//Indicates which column to navigate to when navigating to this Input Container
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Input")
-	ETargetColumn TargetColumn = ETargetColumn::Left;
+	FPromptWidgetDecided DecidedCallback;
 
 	//The text used for empty key buttons
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Input")
@@ -165,5 +162,13 @@ public:
 	//The text used for notifying the player to press a key
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Input")
 	FText PressKeyText = FText::FromString(TEXT("Press Any Key"));
+
+	//The title text used for the swap keys widget
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Input")
+	FText SwapKeysTitleText = FText::FromString(TEXT("Swap Keys"));
+
+	//The message text used for the swap keys widget
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Input")
+	FText SwapKeysMessageText = FText::FromString(TEXT("{CollidingKey} is already being used by {CollidingAction}.\nDo you want swap it with {OtherKey}? "));
 
 };

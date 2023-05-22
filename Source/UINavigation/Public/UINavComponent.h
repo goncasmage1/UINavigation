@@ -11,6 +11,7 @@
 #include "UINavComponent.generated.h"
 
 class UUINavWidget;
+class UTextBlock;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnClickedEvent);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPressedEvent);
@@ -127,7 +128,7 @@ public:
 	UButton* NavButton = nullptr;
 
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget, OptionalWidget = true), Category = UINavComponent)
-	class UTextBlock* NavText = nullptr;
+	UTextBlock* NavText = nullptr;
 
 	UPROPERTY(BlueprintReadOnly, Category = UINavComponent)
 	UUINavWidget* ParentWidget = nullptr;

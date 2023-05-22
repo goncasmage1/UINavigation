@@ -2,6 +2,22 @@
 
 #include "UINavPromptWidget.h"
 #include "UINavBlueprintFunctionLibrary.h"
+#include "Components/TextBlock.h"
+
+void UUINavPromptWidget::NativeConstruct()
+{
+	Super::NativeConstruct();
+
+	if (IsValid(TitleText) && !Title.IsEmpty())
+	{
+		TitleText->SetText(Title);
+	}
+
+	if (IsValid(MessageText) && !Message.IsEmpty())
+	{
+		MessageText->SetText(Message);
+	}
+}
 
 void UUINavPromptWidget::OnSelect_Implementation(UUINavComponent* Component)
 {

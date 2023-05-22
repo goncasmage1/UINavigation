@@ -18,7 +18,7 @@ public:
 	virtual void OnReturn_Implementation() override;
 
 	UFUNCTION(BlueprintCallable, Category = SwapKeysWidget)
-	void NotifySwapResult(UPromptDataBinary* const InPromptData);
+	void NotifySwapResult(const bool bSwap);
 	
 	UPROPERTY(BlueprintReadOnly, Category = SwapKeysWidget)
 	FInputCollisionData InputCollisionData;

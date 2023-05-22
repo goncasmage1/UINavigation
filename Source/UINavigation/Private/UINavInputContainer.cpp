@@ -17,6 +17,10 @@
 #include "IImageWrapper.h"
 #include "EnhancedInputComponent.h"
 #include "UINavMacros.h"
+#include "Internationalization/Internationalization.h"
+#include "HAL/Platform.h"
+#include "Delegates/Delegate.h"
+#include "Data/PromptDataSwapKeys.h"
 
 void UUINavInputContainer::NativeConstruct()
 {
@@ -28,6 +32,8 @@ void UUINavInputContainer::NativeConstruct()
 	if (InputRestrictions.Num() == 0) InputRestrictions.Add(EInputRestriction::None);
 	else if (InputRestrictions.Num() > 3) InputRestrictions.SetNum(3);
 	KeysPerInput = InputRestrictions.Num();
+
+	DecidedCallback.BindUFunction(this, FName("SwapKeysDecided"));
 
 	SetupInputBoxes();
 
@@ -56,9 +62,16 @@ bool UUINavInputContainer::RequestKeySwap(const FInputCollisionData& InputCollis
 	{
 		APlayerController* PC = Cast<APlayerController>(UINavPC->GetOwner());
 		USwapKeysWidget* SwapKeysWidget = CreateWidget<USwapKeysWidget>(PC, SwapKeysWidgetClass);
+		SwapKeysWidget->Title = SwapKeysTitleText;
+		FFormatNamedArguments MessageArgs;
+		MessageArgs.Add(TEXT("CollidingKey"), UINavPC->GetKeyText(InputCollisionData.PressedKey));
+		MessageArgs.Add(TEXT("CollidingAction"), InputCollisionData.CollidingInputText);
+		MessageArgs.Add(TEXT("OtherKey"), UINavPC->GetKeyText(InputCollisionData.CurrentInputKey));
+		SwapKeysWidget->Message = FText::Format(SwapKeysMessageText, MessageArgs);
 		SwapKeysWidget->CollidingInputBox = InputBoxes[CollidingInputIndex];
 		SwapKeysWidget->CurrentInputBox = InputBoxes[CurrentInputIndex];
 		SwapKeysWidget->InputCollisionData = InputCollisionData;
+		SwapKeysWidget->SetCallback(DecidedCallback);
 		UINavPC->GoToBuiltWidget(SwapKeysWidget, false, false, SpawnKeysWidgetZOrder);
 		return true;
 	}
@@ -195,6 +208,25 @@ void UUINavInputContainer::ResetInputBox(const FName InputName, const EAxisType 
 	}
 }
 
+void UUINavInputContainer::SwapKeysDecided(const UPromptDataBase* const PromptData)
+{
+	const UPromptDataSwapKeys* const SwapKeysPromptData = Cast<UPromptDataSwapKeys>(PromptData);
+	if (SwapKeysPromptData->CurrentInputBox != nullptr && SwapKeysPromptData->CollidingInputBox != nullptr)
+	{
+		if (SwapKeysPromptData->bShouldSwap)
+		{
+			SwapKeysPromptData->CurrentInputBox->FinishUpdateNewKey();
+			SwapKeysPromptData->CollidingInputBox->UpdateInputKey(SwapKeysPromptData->InputCollisionData.CurrentInputKey,
+				SwapKeysPromptData->InputCollisionData.CollidingKeyIndex,
+				true);
+		}
+		else
+		{
+			SwapKeysPromptData->CurrentInputBox->CancelUpdateInputKey(ERevertRebindReason::SwapRejected);
+		}
+	}
+}
+
 UUINavInputBox* UUINavInputContainer::GetInputBoxInDirection(UUINavInputBox* InputBox, const EUINavigation Direction)
 {
 	if (!IsValid(InputBox))
@@ -292,22 +324,6 @@ void UUINavInputContainer::GetAxisPropertiesFromMapping(const FEnhancedActionKey
 			continue;
 		}
 	}
-}
-
-int UUINavInputContainer::GetOffsetFromTargetColumn(const bool bTop) const
-{
-	switch (KeysPerInput)
-	{
-		case 2:
-			if (bTop) return (TargetColumn == ETargetColumn::Right);
-			else return -(TargetColumn != ETargetColumn::Right);
-			break;
-		case 3:
-			if (bTop) return static_cast<int>(TargetColumn);
-			else return (-2 - static_cast<int>(TargetColumn));
-			break;
-	}
-	return 0;
 }
 
 void UUINavInputContainer::GetInputRebindData(const int InputIndex, FInputRebindData& RebindData) const
