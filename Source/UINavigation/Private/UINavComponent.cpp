@@ -290,11 +290,9 @@ void UUINavComponent::ExecuteComponentActions(const EComponentAction Action)
 bool UUINavComponent::CanBeNavigated() const
 {
 	const bool bIgnoreDisabled = GetDefault<UUINavSettings>()->bIgnoreDisabledButton;
-	return (Visibility != ESlateVisibility::Collapsed &&
-		Visibility != ESlateVisibility::Hidden &&
+	return ((Visibility == ESlateVisibility::Visible || Visibility == ESlateVisibility::SelfHitTestInvisible) &&
 		(bIsEnabled || !bIgnoreDisabled) &&
-		NavButton->Visibility != ESlateVisibility::Collapsed &&
-		NavButton->Visibility != ESlateVisibility::Hidden &&
+		NavButton->Visibility == ESlateVisibility::Visible &&
 		(NavButton->bIsEnabled || !bIgnoreDisabled));
 }
 
@@ -303,6 +301,7 @@ FReply UUINavComponent::NativeOnFocusReceived(const FGeometry& InGeometry, const
 	FReply Reply = Super::NativeOnFocusReceived(InGeometry, InFocusEvent);
 
 	HandleFocusReceived();
+	NavButton->SetFocus();
 
 	return Reply;
 }
