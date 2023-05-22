@@ -91,6 +91,8 @@ protected:
 
 	bool bIgnoreNavigationKey = true;
 
+	bool bReceivedLeftAnalogInput = false;
+
 	UPROPERTY()
 	TArray<const UInputMappingContext*> CachedInputContexts;
 
@@ -280,6 +282,8 @@ public:
 
 	FORCEINLINE bool AllowsNavigatingDirection(const EUINavigation Direction) const { return AllowsDirectionalInput() || (AllowDirection != EUINavigation::Invalid && AllowDirection != Direction); }
 	
+	FORCEINLINE bool UsingLeftStickAsMouse() const { return bUseLeftThumbstickAsMouse || !IsValid(ActiveWidget) || ActiveWidget->bUseLeftThumbstickAsMouse; }
+
 	UFUNCTION(BlueprintCallable, Category = UINavController)
 	void RefreshNavigationKeys();
 

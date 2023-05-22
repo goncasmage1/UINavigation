@@ -129,7 +129,16 @@ void UUINavPCComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAct
 				TimerCounter -= NavigationChainFrequency;
 			}
 			break;
-	}	
+	}
+
+	if (!bReceivedLeftAnalogInput)
+	{
+		LeftStickDelta = FVector2D::ZeroVector;
+	}
+	else
+	{
+		bReceivedLeftAnalogInput = false;
+	}
 }
 
 void UUINavPCComponent::RequestRebuildMappings()
@@ -386,23 +395,24 @@ void UUINavPCComponent::HandleKeyUpEvent(FSlateApplication& SlateApp, const FKey
 
 void UUINavPCComponent::HandleAnalogInputEvent(FSlateApplication& SlateApp, const FAnalogInputEvent& InAnalogInputEvent)
 {
-	if (CurrentInputType != EInputType::Gamepad && InAnalogInputEvent.GetAnalogValue() > 0.5f)
+	if (CurrentInputType != EInputType::Gamepad && InAnalogInputEvent.GetAnalogValue() > 0.1f)
 	{
 		NotifyInputTypeChange(EInputType::Gamepad);
 	}
 
-	if ((ActiveWidget != nullptr && ActiveWidget->bUseLeftThumbstickAsMouse) ||
-		bUseLeftThumbstickAsMouse)
+	if (UsingLeftStickAsMouse())
 	{
+		bReceivedLeftAnalogInput = true;
+
 		const FKey Key = InAnalogInputEvent.GetKey();
 		if (Key == EKeys::Gamepad_LeftX || Key == EKeys::Gamepad_LeftY)
 		{
 			const bool bIsHorizontal = Key == EKeys::Gamepad_LeftX;
 			const float Value = InAnalogInputEvent.GetAnalogValue() / 3.0f;
-			if (bIsHorizontal) LeftStickDelta.X = Value;
-			else LeftStickDelta.Y = Value;
+			if (bIsHorizontal) LeftStickDelta.X = FMath::Abs(Value) > 0.001f ? Value : 0.0f;
+			else LeftStickDelta.Y = FMath::Abs(Value) > 0.001f ? Value : 0.0f;
 
-			if (Value == 0.0f) return;
+			if (LeftStickDelta.SizeSquared() < 0.01f) return;
 
 			const FVector2D OldPosition = SlateApp.GetCursorPos();
 			const FVector2D NewPosition(OldPosition.X + (bIsHorizontal ? Value * LeftStickCursorSensitivity : 0.0f),
@@ -431,8 +441,7 @@ void UUINavPCComponent::HandleAnalogInputEvent(FSlateApplication& SlateApp, cons
 
 void UUINavPCComponent::HandleMouseMoveEvent(FSlateApplication& SlateApp, const FPointerEvent& MouseEvent)
 {
-	const bool bShouldUseLeftThumbstickAsMouse = (ActiveWidget != nullptr && ActiveWidget->bUseLeftThumbstickAsMouse) || bUseLeftThumbstickAsMouse;
-	if (CurrentInputType != EInputType::Mouse && MouseEvent.GetCursorDelta().SizeSquared() > 0.0f && (!bShouldUseLeftThumbstickAsMouse || !IsMovingLeftStick()))
+	if (CurrentInputType != EInputType::Mouse && MouseEvent.GetCursorDelta().SizeSquared() > 0.0f && (!UsingLeftStickAsMouse() || !IsMovingLeftStick()))
 	{
 		NotifyInputTypeChange(EInputType::Mouse);
 	}
