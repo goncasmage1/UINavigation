@@ -25,6 +25,9 @@
 #include "Components/CanvasPanelSlot.h"
 #include "Components/ActorComponent.h"
 #include "Components/ListView.h"
+#include "Engine/GameViewportClient.h"
+#include "Engine/ViewportSplitScreen.h"
+#include "Curves/CurveFloat.h"
 #if IS_VR_PLATFORM
 #include "HeadMountedDisplayFunctionLibrary.h"
 #endif
@@ -32,7 +35,7 @@
 UUINavWidget::UUINavWidget(const FObjectInitializer& ObjectInitializer)
 	:Super(ObjectInitializer)
 {
-	bIsFocusable = true;
+	SetIsFocusable(true);
 }
 
 void UUINavWidget::NativeConstruct()

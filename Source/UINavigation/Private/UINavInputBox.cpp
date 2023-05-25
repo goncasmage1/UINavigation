@@ -24,7 +24,7 @@
 UUINavInputBox::UUINavInputBox(const FObjectInitializer& ObjectInitializer)
 	:Super(ObjectInitializer)
 {
-	bIsFocusable = false;
+	SetIsFocusable(false);
 }
 
 void UUINavInputBox::NativeConstruct()

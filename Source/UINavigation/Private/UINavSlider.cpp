@@ -30,7 +30,7 @@ void UUINavSlider::NativeConstruct()
 		NavSpinBox->SetMinValue(MinValue);
 		NavSpinBox->SetMaxSliderValue(MaxValue);
 		NavSpinBox->SetMaxValue(MaxValue);
-		NavSpinBox->ClearKeyboardFocusOnCommit = true;
+		NavSpinBox->SetClearKeyboardFocusOnCommit(true);
 		if (!NavSpinBox->OnValueChanged.IsBound())
 			NavSpinBox->OnValueCommitted.AddDynamic(this, &UUINavSlider::HandleOnSpinBoxValueChanged);
 	}

@@ -14,7 +14,7 @@
 UUINavComponent::UUINavComponent(const FObjectInitializer& ObjectInitializer)
 	:Super(ObjectInitializer)
 {
-	bIsFocusable = true;
+	SetIsFocusable(true);
 
 	ComponentText = FText::FromString(TEXT("Button Text"));
 }
@@ -429,7 +429,7 @@ void UUINavComponent::NativePreConstruct()
 		}
 		else
 		{
-			StyleOverride = NavButton->WidgetStyle;
+			StyleOverride = NavButton->GetStyle();
 		}
 	}
 }
@@ -469,7 +469,7 @@ void UUINavComponent::SwitchButtonStyle(const EButtonStyle NewStyle, const bool 
 
 	if (NewStyle == EButtonStyle::Hovered && !HasAnyUserFocus())
 	{
-		USoundBase* HoverSound = Cast<USoundBase>(NavButton->WidgetStyle.HoveredSlateSound.GetResourceObject());
+		USoundBase* HoverSound = Cast<USoundBase>(NavButton->GetStyle().HoveredSlateSound.GetResourceObject());
 		if (HoverSound != nullptr)
 		{
 			PlaySound(HoverSound);
@@ -488,7 +488,7 @@ void UUINavComponent::RevertButtonStyle()
 
 void UUINavComponent::SwapStyle(EButtonStyle Style1, EButtonStyle Style2)
 {
-	FButtonStyle Style = NavButton->WidgetStyle;
+	FButtonStyle Style = NavButton->GetStyle();
 	FSlateBrush TempState;
 
 	switch (Style1)
@@ -542,7 +542,7 @@ void UUINavComponent::SwapStyle(EButtonStyle Style1, EButtonStyle Style2)
 
 void UUINavComponent::SwapPadding()
 {
-	const FButtonStyle Style = NavButton->WidgetStyle;
+	const FButtonStyle Style = NavButton->GetStyle();
 	UOverlaySlot* OverlaySlot = Cast<UOverlaySlot>(NavButton->Slot);
 	const FMargin PressedPadding = Style.PressedPadding - Style.NormalPadding;
 	if (OverlaySlot != nullptr)

@@ -27,7 +27,7 @@ void UUINavInputContainer::NativeConstruct()
 	ParentWidget = UUINavWidget::GetOuterObject<UUINavWidget>(this);
 	UINavPC = Cast<APlayerController>(GetOwningPlayer())->FindComponentByClass<UUINavPCComponent>();
 
-	bIsFocusable = false;
+	SetIsFocusable(false);
 
 	if (InputRestrictions.Num() == 0) InputRestrictions.Add(EInputRestriction::None);
 	else if (InputRestrictions.Num() > 3) InputRestrictions.SetNum(3);

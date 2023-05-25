@@ -23,6 +23,7 @@
 #endif
 #include "EnhancedInputComponent.h"
 #include "Components/InputComponent.h"
+#include "Misc/ConfigCacheIni.h"
 
 void UUINavBlueprintFunctionLibrary::SetSoundClassVolume(USoundClass * TargetClass, const float NewVolume)
 {

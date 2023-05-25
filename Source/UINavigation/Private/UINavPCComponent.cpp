@@ -26,6 +26,7 @@
 #include "EnhancedPlayerInput.h"
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "Templates/SharedPointer.h"
+#include "Engine/GameViewportClient.h"
 
 UUINavPCComponent::UUINavPCComponent()
 {

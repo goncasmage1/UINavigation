@@ -10,8 +10,10 @@ void UUINavSliderBox::NativeConstruct()
 {
 	Super::BaseConstruct();
 
+	PRAGMA_DISABLE_DEPRECATION_WARNINGS
 	LeftButton->IsFocusable = false;
 	RightButton->IsFocusable = false;
+	PRAGMA_ENABLE_DEPRECATION_WARNINGS
 
 	if (!LeftButton->OnClicked.IsBound())
 		LeftButton->OnClicked.AddDynamic(this, &UUINavSliderBox::NavigateLeft);
