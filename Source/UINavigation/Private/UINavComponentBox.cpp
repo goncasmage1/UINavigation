@@ -22,10 +22,8 @@ void UUINavComponentBox::BaseConstruct()
 	if (Interval <= 0) DISPLAYERROR(TEXT("Interval must be at least 1"));
 
 	if (LeftButton == nullptr) DISPLAYERROR(TEXT("Couldn't find Button named LeftButton in UINavOptionBox"));
-	else LeftButton->IsFocusable = false;
 
 	if (RightButton == nullptr) DISPLAYERROR(TEXT("Couldn't find Button named RightButton in UINavOptionBox"));
-	else RightButton->IsFocusable = false;
 
 	if (NavText == nullptr) DISPLAYERROR(TEXT("Couldn't find TextBlock named NavText in UINavOptionBox"));
 
