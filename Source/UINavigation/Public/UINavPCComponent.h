@@ -15,6 +15,7 @@
 #include "InputAction.h"
 #include "Data/InputContainerEnhancedActionData.h"
 #include "Delegates/DelegateCombinations.h"
+#include "Misc/CoreMiscDefines.h"
 #include "UINavPCComponent.generated.h"
 
 class APlayerController;
@@ -127,7 +128,7 @@ protected:
 	
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-	void OnControllerConnectionChanged(bool bConnected, FPlatformUserId UserId, int32 UserIndex);
+	void OnControllerConnectionChanged(EInputDeviceConnectionState NewConnectionState, FPlatformUserId UserId, FInputDeviceId UserIndex);
 
 public:
 

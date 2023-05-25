@@ -196,7 +196,6 @@ public:
 	virtual void NativeTick(const FGeometry & MyGeometry, float DeltaTime) override;
 
 	virtual void RemoveFromParent() override;
-	virtual void OnLevelRemovedFromWorld(ULevel* InLevel, UWorld* InWorld) override;
 
 	virtual FReply NativeOnFocusReceived(const FGeometry& InGeometry, const FFocusEvent& InFocusEvent) override;
 	virtual void NativeOnFocusLost(const FFocusEvent& InFocusEvent) override;
