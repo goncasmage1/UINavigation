@@ -63,7 +63,7 @@ protected:
 	bool bMatchIconSize = false;
 
 	UPROPERTY(EditAnywhere, Category = "InputDisplay", meta = (editcondition = "!bMatchIconSize"))
-	FVector2D IconSize = false;
+	FVector2D IconSize = FVector2D(24.0f, 24.0f);
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavComponent, meta = (editcondition = "bOverride_TextColor"))
 	FSlateColor TextColorOverride;

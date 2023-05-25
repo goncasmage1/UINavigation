@@ -1,6 +1,8 @@
 // Copyright (C) 2019 Gonçalo Marques - All Rights Reserved
 
 #pragma once
+#include "InputCoreTypes.h"
+#include "Internationalization/Text.h"
 #include "InputCollisionData.generated.h"
 
 USTRUCT(BlueprintType)

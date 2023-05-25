@@ -2,6 +2,7 @@
 
 #pragma once
 #include "Data/PromptData.h"
+#include "Data/InputCollisionData.h"
 #include "PromptDataSwapKeys.generated.h"
 
 class UUINavInputBox;

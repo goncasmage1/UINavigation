@@ -7,6 +7,7 @@
 #include "Components/TextBlock.h"
 #include "Framework/Application/SlateApplication.h"
 #include "Internationalization/Internationalization.h"
+#include "Sound/SoundBase.h"
 #include "UINavMacros.h"
 #include "UINavSettings.h"
 
@@ -14,8 +15,6 @@ UUINavComponent::UUINavComponent(const FObjectInitializer& ObjectInitializer)
 	:Super(ObjectInitializer)
 {
 	bIsFocusable = true;
-
-	PaletteCategory = NSLOCTEXT("UMG", "UINav", "UINav");
 
 	ComponentText = FText::FromString(TEXT("Button Text"));
 }
