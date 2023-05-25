@@ -10,9 +10,6 @@ void UUINavOptionBox::NativeConstruct()
 {
 	Super::BaseConstruct();
 
-	LeftButton->IsFocusable = false;
-	RightButton->IsFocusable = false;
-
 	if (!LeftButton->OnClicked.IsBound())
 		LeftButton->OnClicked.AddDynamic(this, &UUINavHorizontalComponent::NavigateLeft);
 	

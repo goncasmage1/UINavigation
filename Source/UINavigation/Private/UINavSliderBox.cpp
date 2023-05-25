@@ -10,9 +10,6 @@ void UUINavSliderBox::NativeConstruct()
 {
 	Super::BaseConstruct();
 
-	LeftButton->IsFocusable = false;
-	RightButton->IsFocusable = false;
-
 	if (!LeftButton->OnClicked.IsBound())
 		LeftButton->OnClicked.AddDynamic(this, &UUINavSliderBox::NavigateLeft);
 	if (!RightButton->OnClicked.IsBound())
