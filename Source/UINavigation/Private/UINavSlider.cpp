@@ -40,7 +40,6 @@ void UUINavSlider::NativeConstruct()
 	if (!Slider->OnMouseCaptureEnd.IsBound()) Slider->OnMouseCaptureEnd.AddDynamic(this, &UUINavSlider::HandleOnMouseCaptureEnd);
 
 	Difference = MaxValue - MinValue;
-	Slider->IsFocusable = false;
 	Slider->SetStepSize(Interval / Difference);
 
 	HandleDefaultColor = Slider->GetSliderHandleColor();
