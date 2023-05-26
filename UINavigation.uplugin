@@ -8,7 +8,7 @@
 	"CreatedBy": "Goncalo Marques",
 	"CreatedByURL": "https://goncasmage1.github.io/",
 	"DocsURL": "",
-	"MarketplaceURL": "com.epicgames.launcher://ue/marketplace/content/4601ff4d12fc4ed1a7418e1585374a48",
+	"MarketplaceURL": "com.epicgames.launcher://ue/marketplace/product/b9ee9669c98146cd8433a62ea7f23699",
 	"SupportURL": "",
 	"EngineVersion": "4.27.0",
 	"CanContainContent": true,
@@ -29,8 +29,7 @@
 				"Switch"
 			],
 			"BlacklistPlatforms": [
-				"IOS",
-				"Android"
+				"IOS"
 			]
 		},
 		{
