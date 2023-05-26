@@ -1,4 +1,4 @@
-﻿// Copyright (C) 2019 Gonçalo Marques - All Rights Reserved
+﻿// Copyright (C) 2023 Gonçalo Marques - All Rights Reserved
 
 #include "UINavPCComponent.h"
 #include "UINavWidget.h"
@@ -567,27 +567,9 @@ void UUINavPCComponent::ClearNavigationTimer()
 	CountdownPhase = ECountdownPhase::None;
 }
 
-bool UUINavPCComponent::IsUINavInputAction(const UInputAction* Action) const
-{
-	const UUINavEnhancedInputActions* const InputActions = GetDefault<UUINavSettings>()->EnhancedInputActions.LoadSynchronous();
-	if (InputActions == nullptr)
-	{
-		return false;
-	}
-
-	return (Action == InputActions->IA_MenuUp ||
-			Action == InputActions->IA_MenuDown ||
-			Action == InputActions->IA_MenuLeft || 
-			Action == InputActions->IA_MenuRight || 
-			Action == InputActions->IA_MenuSelect || 
-			Action == InputActions->IA_MenuReturn || 
-			Action == InputActions->IA_MenuNext || 
-			Action == InputActions->IA_MenuPrevious);
-}
-
 FKey UUINavPCComponent::GetEnhancedInputKey(const UInputAction* Action, const EInputAxis Axis, const EAxisType Scale, const EInputRestriction InputRestriction) const
 {
-	if (IsUINavInputAction(Action))
+	if (UUINavBlueprintFunctionLibrary::IsUINavInputAction(Action))
 	{
 		const UInputMappingContext* const UINavInputContext = GetDefault<UUINavSettings>()->EnhancedInputContext.LoadSynchronous();
 		for (const FEnhancedActionKeyMapping& Mapping : UINavInputContext->GetMappings())

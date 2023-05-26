@@ -1,4 +1,4 @@
-// Copyright (C) 2019 Gonçalo Marques - All Rights Reserved
+// Copyright (C) 2023 Gonçalo Marques - All Rights Reserved
 
 #include "UINavComponent.h"
 #include "UINavWidget.h"
@@ -10,6 +10,7 @@
 #include "Sound/SoundBase.h"
 #include "UINavMacros.h"
 #include "UINavSettings.h"
+#include "UINavPCReceiver.h"
 
 UUINavComponent::UUINavComponent(const FObjectInitializer& ObjectInitializer)
 	:Super(ObjectInitializer)
@@ -97,7 +98,7 @@ FReply UUINavComponent::NativeOnKeyUp(const FGeometry& InGeometry, const FKeyEve
 {
 	FReply Reply = Super::NativeOnKeyUp(InGeometry, InKeyEvent);
 
-	if (!IsValid(ParentWidget))
+	if (!IsValid(ParentWidget) || !IsValid(ParentWidget->UINavPC))
 	{
 		return Reply;
 	}
@@ -114,6 +115,7 @@ FReply UUINavComponent::NativeOnKeyUp(const FGeometry& InGeometry, const FKeyEve
 		if (!ParentWidget->TryConsumeNavigation())
 		{
 			ParentWidget->StoppedReturn();
+			IUINavPCReceiver::Execute_OnReturn(ParentWidget->UINavPC->GetOwner());
 		}
 	}
 	else
@@ -189,6 +191,13 @@ void UUINavComponent::OnButtonClicked()
 	OnClicked.Broadcast();
 
 	ExecuteComponentActions(EComponentAction::OnClicked);
+
+	if (!IsValid(ParentWidget) || !IsValid(ParentWidget->UINavPC))
+	{
+		return;
+	}
+	
+	IUINavPCReceiver::Execute_OnSelect(ParentWidget->UINavPC->GetOwner());
 }
 
 void UUINavComponent::OnButtonPressed()
@@ -374,6 +383,8 @@ FNavigationReply UUINavComponent::NativeOnNavigation(const FGeometry& MyGeometry
 		if (bAllowsSectionInput)
 		{
 			ParentWidget->PropagateOnNext();
+
+			IUINavPCReceiver::Execute_OnNext(ParentWidget->UINavPC->GetOwner());
 		}
 
 		if (bStopNextPrevious || !bAllowsSectionInput)
@@ -386,6 +397,7 @@ FNavigationReply UUINavComponent::NativeOnNavigation(const FGeometry& MyGeometry
 	{
 		if (bAllowsSectionInput)
 		{
+			IUINavPCReceiver::Execute_OnPrevious(ParentWidget->UINavPC->GetOwner());
 			ParentWidget->PropagateOnPrevious();
 		}
 
@@ -393,6 +405,10 @@ FNavigationReply UUINavComponent::NativeOnNavigation(const FGeometry& MyGeometry
 		{
 			return FNavigationReply::Stop();
 		}
+	}
+	else if (InNavigationEvent.GetNavigationType() != EUINavigation::Invalid)
+	{
+		IUINavPCReceiver::Execute_OnNavigated(ParentWidget->UINavPC->GetOwner(), InNavigationEvent.GetNavigationType());
 	}
 
 	return Reply;
