@@ -81,7 +81,7 @@ public:
 
 	// Returns the index of the given widget in its parent panel widget
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
-	static void GetIndexInGridWidget(const UWidget* const Widget, int& Column, int& Row);
+	static void GetIndexInUniformGridWidget(const UWidget* const Widget, int& Column, int& Row);
 
 	UFUNCTION(BlueprintPure, Category = UINavigationLibrary)
 	static bool IsVRKey(const FKey Key);

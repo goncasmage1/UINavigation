@@ -275,7 +275,7 @@ UPanelWidget* UUINavBlueprintFunctionLibrary::GetParentPanelWidget(const UWidget
 	return PanelWidget;
 }
 
-void UUINavBlueprintFunctionLibrary::GetIndexInGridWidget(const UWidget* const Widget, int& Column, int& Row)
+void UUINavBlueprintFunctionLibrary::GetIndexInUniformGridWidget(const UWidget* const Widget, int& Column, int& Row)
 {
 	Column = -1;
 	Row = -1;
@@ -296,7 +296,7 @@ void UUINavBlueprintFunctionLibrary::GetIndexInGridWidget(const UWidget* const W
 		GridPanelWidget = Cast<UGridPanel>(Widget->GetParent());
 		if (!IsValid(GridPanelWidget))
 		{
-			return GetIndexInGridWidget(GridPanelWidget, Column, Row);
+			return GetIndexInUniformGridWidget(GridPanelWidget, Column, Row);
 		}
 	}
 

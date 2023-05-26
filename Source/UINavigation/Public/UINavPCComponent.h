@@ -211,12 +211,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavController)
 	UDataTable* KeyboardMouseKeyNameData = nullptr;
 
-	/*
-	Holds all the data for each rebindable input
-	*/
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavController)
-	UDataTable* InputRebindDataTable = nullptr;
-
 	FKey LastPressedKey;
 	int32 LastPressedKeyUserIndex;
 
@@ -445,9 +439,6 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
 	FORCEINLINE EInputType GetCurrentInputType() const { return CurrentInputType; }
-
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
-	bool IsUINavInputAction(const UInputAction* Action) const;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
     FORCEINLINE bool IsUsingMouse() const { return CurrentInputType == EInputType::Mouse; }
