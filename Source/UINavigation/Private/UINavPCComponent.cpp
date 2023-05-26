@@ -147,7 +147,7 @@ void UUINavPCComponent::RequestRebuildMappings()
 	{
 		if (Subsystem)
 		{
-			Subsystem->RequestRebuildControlMappings(true);
+			Subsystem->RequestRebuildControlMappings();
 		}
 	});
 }
