@@ -1,14 +1,14 @@
 {
 	"FileVersion": 3,
 	"Version": 1,
-	"VersionName": "3.0.0",
+	"VersionName": "3.0.1",
 	"FriendlyName": "UI Navigation",
 	"Description": "A plugin that allows you to easily setup mouse, keyboard and controller navigation in UMG, among other things.",
 	"Category": "User Interface",
 	"CreatedBy": "Goncalo Marques",
 	"CreatedByURL": "https://goncasmage1.github.io/",
 	"DocsURL": "",
-	"MarketplaceURL": "com.epicgames.launcher://ue/marketplace/content/4601ff4d12fc4ed1a7418e1585374a48",
+	"MarketplaceURL": "com.epicgames.launcher://ue/marketplace/product/b9ee9669c98146cd8433a62ea7f23699",
 	"SupportURL": "",
 	"EngineVersion": "5.2.0",
 	"CanContainContent": true,
@@ -26,8 +26,7 @@
 				"Mac",
 			],
 			"BlacklistPlatforms": [
-				"IOS",
-				"Android"
+				"IOS"
 			]
 		},
 		{

@@ -1,4 +1,4 @@
-﻿// Copyright (C) 2019 Gonçalo Marques - All Rights Reserved
+﻿// Copyright (C) 2023 Gonçalo Marques - All Rights Reserved
 
 #include "UINavBlueprintFunctionLibrary.h"
 #include "Sound/SoundClass.h"
@@ -276,7 +276,7 @@ UPanelWidget* UUINavBlueprintFunctionLibrary::GetParentPanelWidget(const UWidget
 	return PanelWidget;
 }
 
-void UUINavBlueprintFunctionLibrary::GetIndexInGridWidget(const UWidget* const Widget, int& Column, int& Row)
+void UUINavBlueprintFunctionLibrary::GetIndexInUniformGridWidget(const UWidget* const Widget, int& Column, int& Row)
 {
 	Column = -1;
 	Row = -1;
@@ -297,7 +297,7 @@ void UUINavBlueprintFunctionLibrary::GetIndexInGridWidget(const UWidget* const W
 		GridPanelWidget = Cast<UGridPanel>(Widget->GetParent());
 		if (!IsValid(GridPanelWidget))
 		{
-			return GetIndexInGridWidget(GridPanelWidget, Column, Row);
+			return GetIndexInUniformGridWidget(GridPanelWidget, Column, Row);
 		}
 	}
 
