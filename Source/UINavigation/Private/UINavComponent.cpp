@@ -337,7 +337,7 @@ void UUINavComponent::NativeOnFocusChanging(const FWeakWidgetPath& PreviousFocus
 	if (!WidgetType.IsEqual(FName(TEXT("SObjectWidget"))) &&
 		!WidgetType.IsEqual(FName(TEXT("SButton"))))
 	{
-		SetFocus();
+		NavButton->SetFocus();
 		return;
 	}
 
@@ -469,15 +469,6 @@ void UUINavComponent::SwitchButtonStyle(const EButtonStyle NewStyle, const bool 
 
 	SwapStyle(NewStyle, CurrentStyle);
 
-	if (NewStyle == EButtonStyle::Pressed && CurrentStyle != EButtonStyle::Pressed)
-	{
-		SwapPadding();
-	}
-	else if (bWasForcePressed)
-	{
-		SwapPadding();
-	}
-
 	if (NewStyle != CurrentStyle)
 	{
 		ForcedStyle = NewStyle;
@@ -554,17 +545,6 @@ void UUINavComponent::SwapStyle(EButtonStyle Style1, EButtonStyle Style2)
 	}
 
 	NavButton->SetStyle(Style);
-}
-
-void UUINavComponent::SwapPadding()
-{
-	const FButtonStyle Style = NavButton->WidgetStyle;
-	UOverlaySlot* OverlaySlot = Cast<UOverlaySlot>(NavButton->Slot);
-	const FMargin PressedPadding = Style.PressedPadding - Style.NormalPadding;
-	if (OverlaySlot != nullptr)
-	{
-		OverlaySlot->SetPadding(OverlaySlot->Padding == PressedPadding ? FMargin(0.0f) : PressedPadding);
-	}
 }
 
 EButtonStyle UUINavComponent::GetStyleFromButtonState()

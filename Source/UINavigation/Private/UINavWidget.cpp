@@ -1204,13 +1204,7 @@ void UUINavWidget::OnHoveredComponent(UUINavComponent* Component)
 
 	SetHoveredComponent(Component);
 
-	const bool bUsingLeftStickAsMouse = bUseLeftThumbstickAsMouse || UINavPC->bUseLeftThumbstickAsMouse || UINavPC->IsMovingLeftStick();
-#if IS_VR_PLATFORM 
-	const bool bIsVR = UHeadMountedDisplayFunctionLibrary::IsHeadMountedDisplayEnabled();
-#else
-	const bool bIsVR = false;
-#endif
-	if (!bUsingLeftStickAsMouse && !bIsVR && Component == CurrentComponent && UINavPC->GetActiveSubWidget() == this)
+	if (Component == CurrentComponent && UINavPC->GetActiveSubWidget() == this)
 	{
 		Component->RevertButtonStyle();
 	}
