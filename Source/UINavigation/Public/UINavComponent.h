@@ -118,8 +118,6 @@ protected:
 
 	void SwapStyle(EButtonStyle Style1, EButtonStyle Style2);
 
-	void SwapPadding();
-
 	EButtonStyle GetStyleFromButtonState();
 
 public:
