@@ -110,6 +110,10 @@ void UUINavBlueprintFunctionLibrary::ResetInputSettings(APlayerController* PC)
 			}
 
 			UUINavPCComponent* UINavPC = PC->FindComponentByClass<UUINavPCComponent>();
+			if (IsValid(UINavPC))
+			{
+				UINavPC->RefreshNavigationKeys();
+			}
 
 			Subsystem->RequestRebuildControlMappings();
 		}
