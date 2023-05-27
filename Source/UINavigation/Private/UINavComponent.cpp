@@ -337,7 +337,7 @@ void UUINavComponent::NativeOnFocusChanging(const FWeakWidgetPath& PreviousFocus
 	if (!WidgetType.IsEqual(FName(TEXT("SObjectWidget"))) &&
 		!WidgetType.IsEqual(FName(TEXT("SButton"))))
 	{
-		SetFocus();
+		NavButton->SetFocus();
 		return;
 	}
 
