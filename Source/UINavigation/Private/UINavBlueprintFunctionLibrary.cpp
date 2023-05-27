@@ -1,6 +1,7 @@
 ﻿// Copyright (C) 2023 Gonçalo Marques - All Rights Reserved
 
 #include "UINavBlueprintFunctionLibrary.h"
+#include "UINavPCComponent.h"
 #include "Sound/SoundClass.h"
 #include "GameFramework/GameUserSettings.h"
 #include "GameFramework/InputSettings.h"
@@ -106,6 +107,8 @@ void UUINavBlueprintFunctionLibrary::ResetInputSettings(APlayerController* PC)
 					NewMapping.Triggers = InputTriggers;
 				}
 			}
+
+			UUINavPCComponent* UINavPC = PC->FindComponentByClass<UUINavPCComponent>();
 
 			Subsystem->RequestRebuildControlMappings();
 		}
