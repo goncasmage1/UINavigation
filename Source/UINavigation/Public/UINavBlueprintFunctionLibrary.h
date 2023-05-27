@@ -9,6 +9,7 @@
 class UInputAction;
 class UPromptDataBinary;
 class UWidget;
+class UUserWidget;
 class UUINavSettings;
 
 /**
@@ -84,6 +85,9 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
 	static void GetIndexInUniformGridWidget(const UWidget* const Widget, int& Column, int& Row);
 
+	// Returns first widget of the given widget tree
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
+	static UWidget* GetFirstWidgetInUserWidget(const UUserWidget* const UserWidget);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
 	static const UUINavSettings* GetUINavSettings();

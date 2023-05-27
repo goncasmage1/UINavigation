@@ -70,6 +70,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "UINav Input")
 	void ResetKeyMappings();
 
+	UFUNCTION(BlueprintCallable, Category = "UINav Input")
+	UUINavInputBox* GetInputBoxAtIndex(const int Index) const;
+
 	ERevertRebindReason CanRegisterKey(class UUINavInputBox* InputBox, const FKey NewKey, const int Index, int& OutCollidingActionIndex, int& OutCollidingKeyIndex);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "UINav Input")

@@ -84,6 +84,21 @@ void UUINavInputContainer::ResetKeyMappings()
 	for (UUINavInputBox* InputBox : InputBoxes) InputBox->ResetKeyWidgets();
 }
 
+UUINavInputBox* UUINavInputContainer::GetInputBoxAtIndex(const int Index) const
+{
+	if (Index == -1 && InputBoxes.Num() > 0)
+	{
+		return InputBoxes.Last();
+	}
+
+	if (!InputBoxes.IsValidIndex(Index))
+	{
+		return nullptr;
+	}
+
+	return InputBoxes[Index];
+}
+
 void UUINavInputContainer::SetupInputBoxes()
 {
 	if (InputBox_BP == nullptr) return;
