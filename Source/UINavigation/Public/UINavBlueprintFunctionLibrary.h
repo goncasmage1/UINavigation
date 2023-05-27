@@ -9,6 +9,7 @@
 class UInputAction;
 class UPromptDataBinary;
 class UWidget;
+class UUINavSettings;
 
 /**
  * 
@@ -82,6 +83,10 @@ public:
 	// Returns the index of the given widget in its parent panel widget
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
 	static void GetIndexInUniformGridWidget(const UWidget* const Widget, int& Column, int& Row);
+
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
+	static const UUINavSettings* GetUINavSettings();
 
 	UFUNCTION(BlueprintPure, Category = UINavigationLibrary)
 	static bool IsVRKey(const FKey Key);

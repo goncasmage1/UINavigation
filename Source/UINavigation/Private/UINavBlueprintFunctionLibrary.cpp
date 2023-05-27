@@ -339,6 +339,12 @@ void UUINavBlueprintFunctionLibrary::GetIndexInUniformGridWidget(const UWidget* 
 	}
 }
 
+
+const UUINavSettings* UUINavBlueprintFunctionLibrary::GetUINavSettings()
+{
+	return GetDefault<UUINavSettings>();
+}
+
 bool UUINavBlueprintFunctionLibrary::IsVRKey(const FKey Key)
 {
 	return IsKeyInCategory(Key, "Oculus") || IsKeyInCategory(Key, "Vive") ||
