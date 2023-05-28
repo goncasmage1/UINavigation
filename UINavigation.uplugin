@@ -22,8 +22,7 @@
 			"LoadingPhase": "PreDefault",
 			"WhitelistPlatforms": [
 				"Win64",
-				"Linux",
-				"Switch"
+				"Linux"
 			],
 			"BlacklistPlatforms": [
 				"IOS"
