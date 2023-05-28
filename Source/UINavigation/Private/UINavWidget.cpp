@@ -488,6 +488,11 @@ FReply UUINavWidget::NativeOnFocusReceived(const FGeometry& InGeometry, const FF
 {
 	FReply Reply = Super::NativeOnFocusReceived(InGeometry, InFocusEvent);
 
+	if (OuterUINavWidget != nullptr)
+	{
+		return Reply;
+	}
+
 	if (IsValid(CurrentComponent))
 	{
 		CurrentComponent->SetFocus();
