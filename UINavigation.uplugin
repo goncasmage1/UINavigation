@@ -23,7 +23,6 @@
 			"WhitelistPlatforms": [
 				"Win64",
 				"Linux",
-				"Mac",
 				"PS4",
 				"XboxOne",
 				"Switch"
