@@ -25,6 +25,8 @@
 #include "EnhancedInputComponent.h"
 #include "Components/InputComponent.h"
 #include "Misc/ConfigCacheIni.h"
+#include "Blueprint/UserWidget.h"
+#include "Blueprint/WidgetTree.h"
 
 void UUINavBlueprintFunctionLibrary::SetSoundClassVolume(USoundClass * TargetClass, const float NewVolume)
 {
@@ -338,6 +340,21 @@ void UUINavBlueprintFunctionLibrary::GetIndexInUniformGridWidget(const UWidget* 
 			}
 		}
 	}
+}
+
+UWidget* UUINavBlueprintFunctionLibrary::GetFirstWidgetInUserWidget(const UUserWidget* const UserWidget)
+{
+	if (!IsValid(UserWidget))
+	{
+		return nullptr;
+	}
+
+	return UserWidget->WidgetTree->RootWidget;
+}
+
+const UUINavSettings* UUINavBlueprintFunctionLibrary::GetUINavSettings()
+{
+	return GetDefault<UUINavSettings>();
 }
 
 bool UUINavBlueprintFunctionLibrary::IsVRKey(const FKey Key)

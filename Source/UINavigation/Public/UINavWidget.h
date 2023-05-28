@@ -149,12 +149,15 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
 	bool bShouldDestroyParent = false;
 	
-	/*If set to true, the UINavWidget will maintain its navigated state when navigation moves to a child nested widget,
-	 otherwise, the button being navigated to at that moment will be navigated out of */
-	UPROPERTY(EditDefaultsOnly, Category = UINavWidget)
+	/*
+	* If set to true, the UINavWidget will maintain its navigated state when navigation moves to a child nested widget,
+	* otherwise, the button being navigated to at that moment will be navigated out of.
+	* Only applies when using nested UINavWidgets.
+	*/
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = UINavWidget)
 	bool bMaintainNavigationForChild = false;
 
-	/*If set to true, the gamepad's left thumbstick will be used to move the mouse */
+	/*If set to true, the gamepad's left thumbstick will be used to move the mouse when this widget is active */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = UINavWidget)
 	bool bUseLeftThumbstickAsMouse = false;
 
@@ -163,11 +166,11 @@ public:
 	bool bAllowRemoveIfRoot = true;
 
     /*If set to true, the widget will be set to fullscreen even when using split screen */
-    UPROPERTY(EditDefaultsOnly, Category = UINavWidget)
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = UINavWidget)
 	bool bUseFullscreenWhenSplitscreen = false;
 
 	// If set to true, will always use AddToPlayerScreen instead of AddToViewport, even if not in split screen
-	UPROPERTY(EditDefaultsOnly, Category = UINavWidget)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = UINavWidget)
 	bool bForceUsePlayerScreen = false;
 
 	bool bCompletedSetup = false;
