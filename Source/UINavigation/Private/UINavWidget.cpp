@@ -31,6 +31,9 @@
 #include "Components/ActorComponent.h"
 #include "Components/ListView.h"
 #include "Sound/SoundBase.h"
+#include "Engine/GameViewportClient.h"
+#include "Engine/ViewportSplitScreen.h"
+#include "Curves/CurveFloat.h"
 #if IS_VR_PLATFORM
 #include "HeadMountedDisplayFunctionLibrary.h"
 #endif
@@ -2907,23 +2910,6 @@ void UUINavWidget::MenuNavigate(const ENavigationDirection Direction)
 	UUINavButton* NewButton = FindNextButton(CurrentButton, Direction);
 	if (NewButton == nullptr) return;
 	NavigateTo(NewButton->ButtonIndex);
-}
-
-template<typename T>
-T* UUINavWidget::GetOuterObject(const UObject* const Object)
-{
-	if (!IsValid(Object))
-	{
-		return nullptr;
-	}
-
-	T* OuterObject = Cast<T>(Object->GetOuter());
-	if (OuterObject != nullptr)
-	{
-		return OuterObject;
-	}
-
-	return GetOuterObject<T>(Object->GetOuter());
 }
 
 UUINavWidget* UUINavWidget::GetMostOuterUINavWidget()
