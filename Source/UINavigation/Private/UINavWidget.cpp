@@ -31,6 +31,9 @@
 #include "Components/ActorComponent.h"
 #include "Components/ListView.h"
 #include "Sound/SoundBase.h"
+#include "Engine/GameViewportClient.h"
+#include "Engine/ViewportSplitScreen.h"
+#include "Curves/CurveFloat.h"
 #if IS_VR_PLATFORM
 #include "HeadMountedDisplayFunctionLibrary.h"
 #endif
