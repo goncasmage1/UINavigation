@@ -8,6 +8,7 @@
 #include "Data/SelectorPosition.h"
 #include "Data/NavigationEvent.h"
 #include "Delegates/DelegateCombinations.h"
+#include "UObject/Object.h"
 #include "UINavWidget.generated.h"
 
 class UUINavComponent;
@@ -440,7 +441,21 @@ public:
 	UUINavComponent* GetCurrentComponent() const { return CurrentComponent; }
 
 	template<typename T>
-	static T* GetOuterObject(const UObject* const Object);
+	static T* GetOuterObject(const UObject* const Object)
+	{
+		if (!IsValid(Object))
+		{
+			return nullptr;
+		}
+
+		T* OuterObject = Cast<T>(Object->GetOuter());
+		if (OuterObject != nullptr)
+		{
+			return OuterObject;
+		}
+
+		return GetOuterObject<T>(Object->GetOuter());
+	}
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
 	UUINavWidget* GetMostOuterUINavWidget();

@@ -1117,23 +1117,6 @@ bool UUINavWidget::TryConsumeNavigation()
 	return IsValid(SelectedComponent);
 }
 
-template<typename T>
-T* UUINavWidget::GetOuterObject(const UObject* const Object)
-{
-	if (!IsValid(Object))
-	{
-		return nullptr;
-	}
-
-	T* OuterObject = Cast<T>(Object->GetOuter());
-	if (OuterObject != nullptr)
-	{
-		return OuterObject;
-	}
-
-	return GetOuterObject<T>(Object->GetOuter());
-}
-
 UUINavWidget* UUINavWidget::GetMostOuterUINavWidget()
 {
 	UUINavWidget* MostOUter = this;

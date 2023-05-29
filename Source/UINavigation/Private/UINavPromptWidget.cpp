@@ -7,6 +7,8 @@
 
 void UUINavPromptWidget::NativeConstruct()
 {
+	SetAllNavigationRules(EUINavigationRule::Stop, NAME_None);
+
 	Super::NativeConstruct();
 
 	if (IsValid(TitleText) && !Title.IsEmpty())
