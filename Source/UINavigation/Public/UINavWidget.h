@@ -11,6 +11,7 @@
 #include "Data/NavigationEvent.h"
 #include "Data/GridButton.h"
 #include "Data/DynamicEdgeNavigation.h"
+#include "UObject/Object.h"
 #include "UINavWidget.generated.h"
 
 #define SELECT_INDEX -101
@@ -700,7 +701,21 @@ public:
 	virtual void MenuNavigate(const ENavigationDirection Direction);
 
 	template<typename T>
-	static T* GetOuterObject(const UObject* const Object);
+	static T* GetOuterObject(const UObject* const Object)
+	{
+		if (!IsValid(Object))
+		{
+			return nullptr;
+		}
+
+		T* OuterObject = Cast<T>(Object->GetOuter());
+		if (OuterObject != nullptr)
+		{
+			return OuterObject;
+		}
+
+		return GetOuterObject<T>(Object->GetOuter());
+	}
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
 	UUINavWidget* GetMostOuterUINavWidget();
