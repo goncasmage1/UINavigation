@@ -325,8 +325,9 @@ void UUINavComponent::NativeOnFocusChanging(const FWeakWidgetPath& PreviousFocus
 {
 	Super::NativeOnFocusChanging(PreviousFocusPath, NewWidgetPath, InFocusEvent);
 
-	const bool bHadFocus = PreviousFocusPath.ContainsWidget(&NavButton->TakeWidget().Get());
-	const bool bHasFocus = NewWidgetPath.ContainsWidget(&NavButton->TakeWidget().Get());
+	const bool bHadFocus = PreviousFocusPath.ContainsWidget(&TakeWidget().Get());
+	const bool bHasFocus = NewWidgetPath.ContainsWidget(&TakeWidget().Get());
+	const bool bHasButtonFocus = NewWidgetPath.ContainsWidget(&NavButton->TakeWidget().Get());
 
 	if (NewWidgetPath.Widgets.Num() == 0)
 	{
@@ -348,6 +349,11 @@ void UUINavComponent::NativeOnFocusChanging(const FWeakWidgetPath& PreviousFocus
 	else if (bHadFocus && !bHasFocus)
 	{
 		HandleFocusLost();
+	}
+
+	if (bHasFocus && !bHasButtonFocus)
+	{
+		NavButton->SetFocus();
 	}
 }
 
@@ -406,7 +412,9 @@ FNavigationReply UUINavComponent::NativeOnNavigation(const FGeometry& MyGeometry
 			return FNavigationReply::Stop();
 		}
 	}
-	else if (InNavigationEvent.GetNavigationType() != EUINavigation::Invalid)
+	else if (InNavigationEvent.GetNavigationType() != EUINavigation::Invalid &&
+			InNavigationEvent.GetNavigationType() != EUINavigation::Next &&
+			InNavigationEvent.GetNavigationType() != EUINavigation::Previous)
 	{
 		IUINavPCReceiver::Execute_OnNavigated(ParentWidget->UINavPC->GetOwner(), InNavigationEvent.GetNavigationType());
 	}
