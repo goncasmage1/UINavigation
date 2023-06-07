@@ -251,16 +251,7 @@ void UUINavWidget::UINavSetup()
 	}
 	else
 	{
-		UUINavComponent* InitialComponent = GetInitialFocusComponent();
-		if (IsValid(InitialComponent))
-		{
-			InitialComponent->SetFocus();
-			if (!GetDefault<UUINavSettings>()->bForceNavigation && !IsValid(HoveredComponent))
-			{
-				UnforceNavigation();
-			}
-		}
-		else
+		if (!TryFocusOnInitialComponent())
 		{
 			UINavPC->NotifyNavigatedTo(this);
 		}
@@ -272,6 +263,22 @@ void UUINavWidget::UINavSetup()
 UUINavComponent* UUINavWidget::GetInitialFocusComponent_Implementation()
 {
 	return FirstComponent;
+}
+
+bool UUINavWidget::TryFocusOnInitialComponent()
+{
+	UUINavComponent* InitialComponent = GetInitialFocusComponent();
+	if (IsValid(InitialComponent))
+	{
+		InitialComponent->SetFocus();
+		if (!GetDefault<UUINavSettings>()->bForceNavigation && !IsValid(HoveredComponent))
+		{
+			UnforceNavigation();
+		}
+		return true;
+	}
+
+	return false;
 }
 
 void UUINavWidget::PropagateGainNavigation(UUINavWidget* PreviousActiveWidget, UUINavWidget* NewActiveWidget, const UUINavWidget* const CommonParent)
@@ -493,6 +500,15 @@ FReply UUINavWidget::NativeOnFocusReceived(const FGeometry& InGeometry, const FF
 
 	if (OuterUINavWidget != nullptr)
 	{
+		if (IsValid(CurrentComponent))
+		{
+			CurrentComponent->SetFocus();
+		}
+		else
+		{
+			TryFocusOnInitialComponent();
+		}
+
 		return Reply;
 	}
 
@@ -502,15 +518,7 @@ FReply UUINavWidget::NativeOnFocusReceived(const FGeometry& InGeometry, const FF
 		return Reply;
 	}
 
-	UUINavComponent* InitialComponent = GetInitialFocusComponent();
-	if (IsValid(InitialComponent))
-	{
-		InitialComponent->SetFocus();
-		if (!GetDefault<UUINavSettings>()->bForceNavigation && !IsValid(HoveredComponent))
-		{
-			UnforceNavigation();
-		}
-	}
+	TryFocusOnInitialComponent();
 
 	return Reply;
 }
