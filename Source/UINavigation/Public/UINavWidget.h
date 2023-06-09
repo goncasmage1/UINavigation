@@ -68,6 +68,8 @@ protected:
 	FVector2D SelectorDestination;
 	FVector2D Distance;
 
+	UPROPERTY()
+	UUINavComponent* IgnoreHoverComponent;
 
 	TArray<int> UINavWidgetPath;
 
@@ -100,8 +102,6 @@ protected:
 	*	Configures the selector on event Construct
 	*/
 	void SetupSelector();
-
-	void SetEnableUINavButtons(const bool bEnable, const bool bRecursive);
 
 	/**
 	*	Returns the position of the UINavButton with the specified index
