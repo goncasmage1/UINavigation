@@ -11,6 +11,8 @@
 #include "UINavMacros.h"
 #include "UINavSettings.h"
 #include "UINavPCReceiver.h"
+#include "Slate/SObjectWidget.h"
+#include "Templates/SharedPointer.h"
 
 UUINavComponent::UUINavComponent(const FObjectInitializer& ObjectInitializer)
 	:Super(ObjectInitializer)
@@ -334,6 +336,22 @@ void UUINavComponent::NativeOnFocusChanging(const FWeakWidgetPath& PreviousFocus
 		return;
 	}
 
+	if (InFocusEvent.GetCause() == EFocusCause::Navigation && ParentWidget->UINavPC->IgnoreFocusByNavigation())
+	{
+		int WidgetIndex = PreviousFocusPath.Widgets.Num() - 1;
+		TSharedPtr<SWidget> PreviousWidget = PreviousFocusPath.Widgets[WidgetIndex].Pin();
+		if (PreviousWidget.IsValid())
+		{
+			while (!PreviousWidget->GetType().IsEqual(FName(TEXT("SObjectWidget"))) && --WidgetIndex > 0)
+			{
+				PreviousWidget = PreviousFocusPath.Widgets[WidgetIndex].Pin();
+				TSharedPtr<SObjectWidget> PreviousUserWidget = StaticCastSharedPtr<SObjectWidget>(PreviousWidget);
+				PreviousUserWidget->GetWidgetObject()->SetFocus();
+			}
+			return;
+		}
+	}
+
 	const FName WidgetType = NewWidgetPath.GetLastWidget()->GetType();
 	if (!WidgetType.IsEqual(FName(TEXT("SObjectWidget"))) &&
 		!WidgetType.IsEqual(FName(TEXT("SButton"))))
@@ -395,6 +413,7 @@ FNavigationReply UUINavComponent::NativeOnNavigation(const FGeometry& MyGeometry
 
 		if (bStopNextPrevious || !bAllowsSectionInput)
 		{
+			ParentWidget->UINavPC->SetIgnoreFocusByNavigation(true);
 			return FNavigationReply::Stop();
 		}
 	}
@@ -409,6 +428,7 @@ FNavigationReply UUINavComponent::NativeOnNavigation(const FGeometry& MyGeometry
 
 		if (bStopNextPrevious || !bAllowsSectionInput)
 		{
+			ParentWidget->UINavPC->SetIgnoreFocusByNavigation(true);
 			return FNavigationReply::Stop();
 		}
 	}

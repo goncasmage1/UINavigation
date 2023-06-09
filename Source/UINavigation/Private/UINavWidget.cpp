@@ -96,8 +96,6 @@ void UUINavWidget::NativeConstruct()
 
 	PreSetup(!bCompletedSetup);
 	InitialSetup();
-	
-	ReturnedFromWidget = nullptr;
 
 	Super::NativeConstruct();
 }
@@ -257,6 +255,8 @@ void UUINavWidget::UINavSetup()
 		}
 	}
 
+	ReturnedFromWidget = nullptr;
+
 	OnSetupCompleted();
 }
 
@@ -339,8 +339,10 @@ void UUINavWidget::LoseNavigation(UUINavWidget* NewActiveWidget)
 {
 	if (!bHasNavigation) return;
 
+	const bool bHaveSameOuter = NewActiveWidget->GetMostOuterUINavWidget() == GetMostOuterUINavWidget();
+
 	const bool bNewWidgetIsChild = NewActiveWidget != nullptr && NewActiveWidget->GetUINavWidgetPath().Num() > 0 ?
-		UUINavBlueprintFunctionLibrary::ContainsArray<int>(NewActiveWidget->GetUINavWidgetPath(), UINavWidgetPath) :
+		UUINavBlueprintFunctionLibrary::ContainsArray<int>(NewActiveWidget->GetUINavWidgetPath(), UINavWidgetPath) && bHaveSameOuter :
 		false;
 
 	if (bNewWidgetIsChild && !bMaintainNavigationForChild)
@@ -358,7 +360,7 @@ void UUINavWidget::LoseNavigation(UUINavWidget* NewActiveWidget)
 
 	bHasNavigation = false;
 
-	if (!bNewWidgetIsChild) CurrentComponent = nullptr;
+	if (!bNewWidgetIsChild && bHaveSameOuter) CurrentComponent = nullptr;
 
 	OnLostNavigation(NewActiveWidget, bNewWidgetIsChild);
 }
@@ -998,7 +1000,6 @@ void UUINavWidget::ReturnToParent(const bool bRemoveAllParents, const int ZOrder
 					UUINavWidget* ParentOuter = ParentWidget->GetMostOuterUINavWidget();
 					ParentWidget->ReturnedFromWidget = this;
 					ParentWidget->ReconfigureSetup();
-					ParentWidget->ReturnedFromWidget = nullptr;
 				}
 				bReturningToParent = true;
 				RemoveFromParent();
