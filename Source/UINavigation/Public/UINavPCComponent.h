@@ -94,6 +94,8 @@ protected:
 
 	bool bReceivedLeftAnalogInput = false;
 
+	bool bIgnoreFocusByNavigation = false;
+
 	UPROPERTY()
 	TArray<const UInputMappingContext*> CachedInputContexts;
 
@@ -296,6 +298,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = UINavController)
 	void SetAllowSectionInput(const bool bAllowInput);
+
+	void SetIgnoreFocusByNavigation(const bool bIgnore) { bIgnoreFocusByNavigation = bIgnore; }
+	bool IgnoreFocusByNavigation() const { return bIgnoreFocusByNavigation; }
 
 	void RequestRebuildMappings();
 		

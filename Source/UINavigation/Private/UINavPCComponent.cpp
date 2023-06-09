@@ -142,6 +142,11 @@ void UUINavPCComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAct
 	{
 		bReceivedLeftAnalogInput = false;
 	}
+
+	if (bIgnoreFocusByNavigation)
+	{
+		bIgnoreFocusByNavigation = false;
+	}
 }
 
 void UUINavPCComponent::RequestRebuildMappings()
