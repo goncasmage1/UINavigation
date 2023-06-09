@@ -160,18 +160,6 @@ public:
 	float NavigationChainFrequency = 0.15f;
 
 	/*
-	Indicates whether to automatically add and remove the UINav Input Context
-	*/
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavController)
-	bool bAutoAddUINavInputContext = true;
-
-	/*
-	Indicates the desired priority of the UINav Input Context
-	*/
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavController)
-	int UINavInputContextPriority = 0;
-
-	/*
 	Indicates whether the controller should use the left stick as mouse.
 	If the active UINavWidget has this set to false, this will override that.
 	*/
@@ -279,7 +267,7 @@ public:
 
 	FORCEINLINE bool AllowsNavigatingDirection(const EUINavigation Direction) const { return AllowsDirectionalInput() || (AllowDirection != EUINavigation::Invalid && AllowDirection != Direction); }
 	
-	FORCEINLINE bool UsingLeftStickAsMouse() const { return bUseLeftThumbstickAsMouse || !IsValid(ActiveWidget) || ActiveWidget->bUseLeftThumbstickAsMouse; }
+	FORCEINLINE bool UsingLeftStickAsMouse() const { return IsValid(ActiveWidget) && (bUseLeftThumbstickAsMouse || ActiveWidget->bUseLeftThumbstickAsMouse); }
 
 	UFUNCTION(BlueprintCallable, Category = UINavController)
 	void RefreshNavigationKeys();

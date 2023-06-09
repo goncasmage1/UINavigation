@@ -158,9 +158,6 @@ void UUINavWidget::CleanSetup()
 		ChildUINavWidget->CleanSetup();
 	}
 	
-	//Disable all buttons (bug fix)
-	SetEnableUINavButtons(false, false);
-	
 	bSetupStarted = false;
 }
 
@@ -196,24 +193,6 @@ void UUINavWidget::TraverseHierarchy()
 	}
 }
 
-void UUINavWidget::SetEnableUINavButtons(const bool bEnable, const bool bRecursive)
-{
-	/*for (UUINavButton* Button : UINavButtons)
-	{
-		if (Button->bAutoCollapse)
-		{
-			Button->SetIsEnabled(bEnable);
-		}
-	}*/
-
-	if (!bRecursive) return;
-	
-	for (UUINavWidget* ChildUINavWidget : ChildUINavWidgets)
-	{
-		ChildUINavWidget->SetEnableUINavButtons(bEnable, bRecursive);
-	}
-}
-
 void UUINavWidget::SetupSelector()
 {
 	TheSelector->SetVisibility(ESlateVisibility::Hidden);
@@ -227,12 +206,6 @@ void UUINavWidget::SetupSelector()
 void UUINavWidget::UINavSetup()
 {
 	if (UINavPC == nullptr) return;
-
-	//Re-enable all buttons (bug fix)
-	if (OuterUINavWidget == nullptr)
-	{
-		SetEnableUINavButtons(true, true);
-	}
 
 	bCompletedSetup = true;
 
@@ -253,6 +226,8 @@ void UUINavWidget::UINavSetup()
 	}
 
 	ReturnedFromWidget = nullptr;
+
+	IgnoreHoverComponent = nullptr;
 
 	OnSetupCompleted();
 }
@@ -888,6 +863,11 @@ UUINavWidget * UUINavWidget::GoToBuiltWidget(UUINavWidget* NewWidget, const bool
 
 	UUINavWidget* OldOuterUINavWidget = GetMostOuterUINavWidget();
 	UUINavWidget* NewOuterUINavWidget = NewWidget->GetMostOuterUINavWidget();
+
+	if (IsValid(HoveredComponent))
+	{
+		IgnoreHoverComponent = HoveredComponent;
+	}
 	
 	if (OuterUINavWidget != nullptr || NewOuterUINavWidget == this)
 	{
@@ -1184,12 +1164,7 @@ bool UUINavWidget::IsSelectorValid()
 
 void UUINavWidget::OnHoveredComponent(UUINavComponent* Component)
 {
-	if (!IsValid(Component)) return;
-
-	if (UINavPC == nullptr)
-	{
-		return;
-	}
+	if (!IsValid(Component) || UINavPC == nullptr) return;
 
 	UINavPC->CancelRebind();
 
@@ -1221,7 +1196,10 @@ void UUINavWidget::OnUnhoveredComponent(UUINavComponent* Component)
 
 	UINavPC->CancelRebind();
 
-	SetHoveredComponent(nullptr);
+	if (IgnoreHoverComponent == nullptr || IgnoreHoverComponent != Component)
+	{
+		SetHoveredComponent(nullptr);
+	}
 
 	if (!GetDefault<UUINavSettings>()->bForceNavigation)
 	{
@@ -1234,7 +1212,7 @@ void UUINavWidget::OnUnhoveredComponent(UUINavComponent* Component)
 			Component->SwitchButtonStyle(Component == CurrentComponent ? EButtonStyle::Hovered : EButtonStyle::Normal);
 		}
 
-		if (CurrentComponent == Component)
+		if (CurrentComponent == Component && (IgnoreHoverComponent == nullptr || IgnoreHoverComponent != Component))
 		{
 			Component->SetFocus();
 		}
