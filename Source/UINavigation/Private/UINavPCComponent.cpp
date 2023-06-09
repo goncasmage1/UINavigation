@@ -405,7 +405,7 @@ void UUINavPCComponent::HandleAnalogInputEvent(FSlateApplication& SlateApp, cons
 		NotifyInputTypeChange(EInputType::Gamepad);
 	}
 
-	if (UsingLeftStickAsMouse())
+	if (IsValid(ActiveWidget) && UsingLeftStickAsMouse())
 	{
 		bReceivedLeftAnalogInput = true;
 
