@@ -16,7 +16,8 @@ public class UINavigation : ModuleRules
 			new string[]
 			{
 				"Core",
-				"EnhancedInput"
+				"EnhancedInput",
+				"ApplicationCore"
 			}
 			);
 			

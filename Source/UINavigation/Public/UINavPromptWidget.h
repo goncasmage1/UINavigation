@@ -20,7 +20,7 @@ public:
 	virtual void OnReturn_Implementation() override;
 
 	UFUNCTION(BlueprintCallable, Category = "UINavPromptWidget")
-	void ProcessPromptWidgetSelected(UPromptDataBase* const InPromptData);
+	void ProcessPromptWidgetSelected(UPromptDataBase* InPromptData);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "UINavPromptWidget")
 	bool IsAcceptComponent(UUINavComponent* Component) const;

@@ -16,6 +16,7 @@
 #include "Data/InputNameMapping.h"
 #include "UINavBlueprintFunctionLibrary.h"
 #include "UINavInputProcessor.h"
+#include "GenericPlatform/GenericPlatformInputDeviceMapper.h"
 #include "Framework/Application/SlateApplication.h"
 #include "Framework/Application/SlateUser.h"
 #include "InputCoreTypes.h"
@@ -87,9 +88,11 @@ void UUINavPCComponent::BeginPlay()
 
 		CacheGameInputContexts();
 		TryResetDefaultInputs();
-		if (!FCoreDelegates::OnControllerConnectionChange.IsBoundToObject(this))
+
+		IPlatformInputDeviceMapper& PlatformInputMapper = IPlatformInputDeviceMapper::Get();
+		if (!PlatformInputMapper.GetOnInputDeviceConnectionChange().IsBoundToObject(this))
 		{
-			FCoreDelegates::OnControllerConnectionChange.AddUObject(this, &UUINavPCComponent::OnControllerConnectionChanged);
+			PlatformInputMapper.GetOnInputDeviceConnectionChange().AddUObject(this, &UUINavPCComponent::OnControllerConnectionChanged);
 		}
 	}
 }
@@ -101,7 +104,7 @@ void UUINavPCComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 		FSlateApplication::Get().UnregisterInputPreProcessor(SharedInputProcessor);
 	}
 	
-	FCoreDelegates::OnControllerConnectionChange.RemoveAll(this);
+	IPlatformInputDeviceMapper::Get().GetOnInputDeviceConnectionChange().RemoveAll(this);
 
 	Super::EndPlay(EndPlayReason);
 }
@@ -152,14 +155,14 @@ void UUINavPCComponent::RequestRebuildMappings()
 	{
 		if (Subsystem)
 		{
-			Subsystem->RequestRebuildControlMappings(true);
+			Subsystem->RequestRebuildControlMappings();
 		}
 	});
 }
 
-void UUINavPCComponent::OnControllerConnectionChanged(bool bConnected, FPlatformUserId UserId, int32 UserIndex)
+void UUINavPCComponent::OnControllerConnectionChanged(EInputDeviceConnectionState NewConnectionState, FPlatformUserId UserId, FInputDeviceId UserIndex)
 {
-	IUINavPCReceiver::Execute_OnControllerConnectionChanged(GetOwner(), bConnected, static_cast<int32>(UserId), UserIndex);
+	IUINavPCReceiver::Execute_OnControllerConnectionChanged(GetOwner(), NewConnectionState == EInputDeviceConnectionState::Connected, static_cast<int32>(UserId), static_cast<int32>(UserIndex.GetId()));
 }
 
 void UUINavPCComponent::CacheGameInputContexts()
@@ -168,7 +171,7 @@ void UUINavPCComponent::CacheGameInputContexts()
 	{
 		FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
 		TArray<FAssetData> AssetsData;
-		AssetRegistryModule.Get().GetAssetsByClass(UInputMappingContext::StaticClass()->GetFName(), AssetsData);
+		AssetRegistryModule.Get().GetAssetsByClass(UInputMappingContext::StaticClass()->GetClassPathName(), AssetsData);
 		for (const FAssetData& AssetData : AssetsData)
 		{
 			const UInputMappingContext* const InputContext = Cast<UInputMappingContext>(AssetData.GetAsset());
