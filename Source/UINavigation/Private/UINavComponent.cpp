@@ -300,10 +300,10 @@ void UUINavComponent::ExecuteComponentActions(const EComponentAction Action)
 bool UUINavComponent::CanBeNavigated() const
 {
 	const bool bIgnoreDisabled = GetDefault<UUINavSettings>()->bIgnoreDisabledButton;
-	return ((GetVisibility() == ESlateVisibility::Visible || GetVisibility() == ESlateVisibility::SelfHitTestInvisible) &&
-		(GetIsEnabled() || !bIgnoreDisabled) &&
-		NavButton->GetVisibility() == ESlateVisibility::Visible &&
-		(NavButton->GetIsEnabled() || !bIgnoreDisabled));
+	return ((Visibility == ESlateVisibility::Visible || Visibility == ESlateVisibility::SelfHitTestInvisible) &&
+		(bIsEnabled || !bIgnoreDisabled) &&
+		NavButton->Visibility == ESlateVisibility::Visible &&
+		(NavButton->bIsEnabled || !bIgnoreDisabled));
 }
 
 FReply UUINavComponent::NativeOnFocusReceived(const FGeometry& InGeometry, const FFocusEvent& InFocusEvent)
@@ -327,9 +327,9 @@ void UUINavComponent::NativeOnFocusChanging(const FWeakWidgetPath& PreviousFocus
 {
 	Super::NativeOnFocusChanging(PreviousFocusPath, NewWidgetPath, InFocusEvent);
 
-	const bool bHadFocus = PreviousFocusPath.ContainsWidget(&TakeWidget().Get());
-	const bool bHasFocus = NewWidgetPath.ContainsWidget(&TakeWidget().Get());
-	const bool bHasButtonFocus = NewWidgetPath.ContainsWidget(&NavButton->TakeWidget().Get());
+	const bool bHadFocus = PreviousFocusPath.ContainsWidget(TakeWidget());
+	const bool bHasFocus = NewWidgetPath.ContainsWidget(TakeWidget());
+	const bool bHasButtonFocus = NewWidgetPath.ContainsWidget(NavButton->TakeWidget());
 
 	if (NewWidgetPath.Widgets.Num() == 0)
 	{
@@ -456,7 +456,7 @@ void UUINavComponent::NativePreConstruct()
 		}
 		else
 		{
-			FontOverride = NavText->GetFont();
+			FontOverride = NavText->Font;
 		}
 
 		if (bUseTextColor)

@@ -468,6 +468,12 @@ void UUINavWidget::RemoveFromParent()
 	Super::RemoveFromParent();
 }
 
+void UUINavWidget::OnLevelRemovedFromWorld(ULevel* InLevel, UWorld* InWorld)
+{
+	bDestroying = true;
+	Super::OnLevelRemovedFromWorld(InLevel, InWorld);
+}
+
 FReply UUINavWidget::NativeOnFocusReceived(const FGeometry& InGeometry, const FFocusEvent& InFocusEvent)
 {
 	FReply Reply = Super::NativeOnFocusReceived(InGeometry, InFocusEvent);
@@ -709,7 +715,7 @@ void UUINavWidget::BeginSelectorMovement(UUINavComponent* FromComponent, UUINavC
 {
 	if (MoveCurve == nullptr) return;
 
-	SelectorOrigin = (bMovingSelector || !IsValid(FromComponent)) ? TheSelector->GetRenderTransform().Translation : GetButtonLocation(FromComponent);
+	SelectorOrigin = (bMovingSelector || !IsValid(FromComponent)) ? TheSelector->RenderTransform.Translation : GetButtonLocation(FromComponent);
 	SelectorDestination = GetButtonLocation(ToComponent);
 	Distance = SelectorDestination - SelectorOrigin;
 
@@ -1159,7 +1165,7 @@ void UUINavWidget::RemovedComponent(UUINavComponent* Component)
 
 bool UUINavWidget::IsSelectorValid()
 {
-	return TheSelector != nullptr && TheSelector->GetIsEnabled();
+	return  TheSelector != nullptr && TheSelector->bIsEnabled;
 }
 
 void UUINavWidget::OnHoveredComponent(UUINavComponent* Component)

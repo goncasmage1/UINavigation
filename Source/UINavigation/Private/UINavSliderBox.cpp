@@ -29,5 +29,5 @@ void UUINavSliderBox::Update()
 
 float UUINavSliderBox::GetSliderPercent() const
 {
-	return SliderBar->GetPercent();
+	return SliderBar->Percent;
 }
