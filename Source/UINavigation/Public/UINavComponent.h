@@ -158,17 +158,14 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavComponent)
 	bool bUseTextColor = false;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavComponent)
-	bool bUseComponentAnimation = true;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavComponent)
-	TMap<EComponentAction, FComponentActions> ComponentActions;
-
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavComponent, meta = (editcondition = "bUseTextColor"))
 	FLinearColor TextDefaultColor = FColor::Blue;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavComponent, meta = (editcondition = "bUseTextColor"))
 	FLinearColor TextNavigatedColor = FColor::Green;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavComponent)
+	bool bUseComponentAnimation = true;
 
 	UPROPERTY(BlueprintReadOnly, Transient, Category = UINavComponent, meta = (BindWidgetAnimOptional))
 	UWidgetAnimation* ComponentAnimation = nullptr;
@@ -184,5 +181,8 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = UINavComponent, meta = (InlineEditConditionToggle))
 	uint8 bOverride_Style : 1;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavComponent)
+	TMap<EComponentAction, FComponentActions> ComponentActions;
 
 };

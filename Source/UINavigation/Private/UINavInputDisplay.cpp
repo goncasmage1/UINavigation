@@ -68,7 +68,7 @@ void UUINavInputDisplay::NativePreConstruct()
 
 	if (IsValid(InputImage) && !bMatchIconSize)
 	{
-		InputImage->SetDesiredSizeOverride(IconSize);
+		InputImage->SetBrushSize(IconSize);
 	}
 }
 
@@ -85,7 +85,7 @@ void UUINavInputDisplay::UpdateInputVisuals()
 		InputImage->SetBrushFromTexture(NewTexture, bMatchIconSize);
 		if (!bMatchIconSize)
 		{
-			InputImage->SetDesiredSizeOverride(IconSize);
+			InputImage->SetBrushSize(IconSize);
 		}
 
 		InputText->SetVisibility(ESlateVisibility::Collapsed);
