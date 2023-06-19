@@ -3,7 +3,6 @@
 #include "UINavPromptWidget.h"
 #include "UINavBlueprintFunctionLibrary.h"
 #include "Components/TextBlock.h"
-#include "Data/PromptData.h"
 
 void UUINavPromptWidget::NativeConstruct()
 {
@@ -32,7 +31,7 @@ void UUINavPromptWidget::OnReturn_Implementation()
 	ProcessPromptWidgetSelected(UUINavBlueprintFunctionLibrary::CreateBinaryPromptData(false));
 }
 
-void UUINavPromptWidget::ProcessPromptWidgetSelected(UPromptDataBase* InPromptData)
+void UUINavPromptWidget::ProcessPromptWidgetSelected(UPromptDataBase* const InPromptData)
 {
 	if (!IsValid(InPromptData))
 	{

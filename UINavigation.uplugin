@@ -10,7 +10,7 @@
 	"DocsURL": "",
 	"MarketplaceURL": "com.epicgames.launcher://ue/marketplace/product/b9ee9669c98146cd8433a62ea7f23699",
 	"SupportURL": "",
-	"EngineVersion": "5.1.0",
+	"EngineVersion": "4.27.0",
 	"CanContainContent": true,
 	"IsBetaVersion": false,
 	"IsExperimentalVersion": false,
@@ -22,7 +22,10 @@
 			"LoadingPhase": "PreDefault",
 			"WhitelistPlatforms": [
 				"Win64",
-				"Linux"
+				"Linux",
+				"PS4",
+				"XboxOne",
+				"Switch"
 			],
 			"BlacklistPlatforms": [
 				"IOS"

@@ -149,6 +149,10 @@ public:
 	//Should this widget destroy its parent
 	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
 	bool bShouldDestroyParent = false;
+
+	//If set to true, this widget will be removed if it has no ParentWidget and is returned from
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = UINavWidget)
+	bool bAllowRemoveIfRoot = true;
 	
 	/*
 	* If set to true, the UINavWidget will maintain its navigated state when navigation moves to a child nested widget,
@@ -161,10 +165,6 @@ public:
 	/*If set to true, the gamepad's left thumbstick will be used to move the mouse when this widget is active */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = UINavWidget)
 	bool bUseLeftThumbstickAsMouse = false;
-
-	//If set to true, this widget will be removed if it has no ParentWidget and is returned from
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = UINavWidget)
-	bool bAllowRemoveIfRoot = true;
 
     /*If set to true, the widget will be set to fullscreen even when using split screen */
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = UINavWidget)
@@ -200,6 +200,7 @@ public:
 	virtual void NativeTick(const FGeometry & MyGeometry, float DeltaTime) override;
 
 	virtual void RemoveFromParent() override;
+	virtual void OnLevelRemovedFromWorld(ULevel* InLevel, UWorld* InWorld) override;
 
 	virtual FReply NativeOnFocusReceived(const FGeometry& InGeometry, const FFocusEvent& InFocusEvent) override;
 	virtual void NativeOnFocusLost(const FFocusEvent& InFocusEvent) override;

@@ -222,7 +222,7 @@ UWidget* UUINavBlueprintFunctionLibrary::GetUniformGridChild(const UWidget* cons
 			continue;
 		}
 
-		if (GridSlot->GetColumn() == Column && GridSlot->GetRow() == Row)
+		if (GridSlot->Column == Column && GridSlot->Row == Row)
 		{
 			return Child;
 		}
@@ -322,8 +322,8 @@ void UUINavBlueprintFunctionLibrary::GetIndexInUniformGridWidget(const UWidget* 
 		{
 			if (Child == Widget)
 			{
-				Column = UniformGridSlot->GetColumn();
-				Row = UniformGridSlot->GetRow();
+				Column = UniformGridSlot->Column;
+				Row = UniformGridSlot->Row;
 				return;
 			}
 		}
@@ -333,8 +333,8 @@ void UUINavBlueprintFunctionLibrary::GetIndexInUniformGridWidget(const UWidget* 
 		{
 			if (Child == Widget)
 			{
-				Column = GridSlot->GetColumn();
-				Row = GridSlot->GetRow();
+				Column = GridSlot->Column;
+				Row = GridSlot->Row;
 				return;
 			}
 		}
