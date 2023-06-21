@@ -327,9 +327,9 @@ void UUINavComponent::NativeOnFocusChanging(const FWeakWidgetPath& PreviousFocus
 {
 	Super::NativeOnFocusChanging(PreviousFocusPath, NewWidgetPath, InFocusEvent);
 
-	const bool bHadFocus = PreviousFocusPath.ContainsWidget(TakeWidget());
-	const bool bHasFocus = NewWidgetPath.ContainsWidget(TakeWidget());
-	const bool bHasButtonFocus = NewWidgetPath.ContainsWidget(NavButton->TakeWidget());
+	const bool bHadFocus = PreviousFocusPath.ContainsWidget(&TakeWidget().Get());
+	const bool bHasFocus = NewWidgetPath.ContainsWidget(&TakeWidget().Get());
+	const bool bHasButtonFocus = NewWidgetPath.ContainsWidget(&NavButton->TakeWidget().Get());
 
 	if (NewWidgetPath.Widgets.Num() == 0)
 	{
