@@ -1042,7 +1042,7 @@ void UUINavWidget::NavigatedTo(UUINavComponent* NavigatedToComponent, const bool
 		return;
 	}
 
-	if (CurrentComponent != NavigatedToComponent)
+	if (CurrentComponent != NavigatedToComponent && (CurrentComponent != nullptr || bForcingNavigation))
 	{
 		UpdateNavigationVisuals(NavigatedToComponent);
 	}
