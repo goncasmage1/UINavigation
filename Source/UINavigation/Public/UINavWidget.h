@@ -47,6 +47,8 @@ protected:
 	bool bForcingNavigation = true;
 	bool bRestoreNavigation = false;
 
+	bool bHoverRestoredNavigation = false;
+
 	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
 	UUINavComponent* FirstComponent = nullptr;
 
@@ -252,7 +254,7 @@ public:
 	void SetHoveredComponent(UUINavComponent* Component);
 	void SetSelectedComponent(UUINavComponent* Component);
 
-	void UpdateNavigationVisuals(UUINavComponent* Component, const bool bBypassForcedNavigation = false);
+	void UpdateNavigationVisuals(UUINavComponent* Component, const bool bHadNavigation, const bool bBypassForcedNavigation = false);
 
 	/**
 	*	Changes the selector's location to that of the button with the given index in the Button's array
@@ -268,7 +270,7 @@ public:
 	*	@param	From  The index of the button that was navigated from
 	*	@param	To  The index of the button that was navigated to
 	*/
-	void ExecuteAnimations(UUINavComponent* FromComponent, UUINavComponent* ToComponent);
+	void ExecuteAnimations(UUINavComponent* FromComponent, UUINavComponent* ToComponent, const bool bHadNavigation);
 
 	/**
 	*	Changes the new text and previous text's colors to the desired colors
