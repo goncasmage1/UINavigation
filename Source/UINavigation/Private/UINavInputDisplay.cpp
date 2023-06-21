@@ -53,7 +53,7 @@ void UUINavInputDisplay::NativePreConstruct()
 		}
 		else
 		{
-			FontOverride = InputText->Font;
+			FontOverride = InputText->GetFont();
 		}
 
 		if (bOverride_TextColor)
@@ -62,13 +62,13 @@ void UUINavInputDisplay::NativePreConstruct()
 		}
 		else
 		{
-			TextColorOverride = InputText->ColorAndOpacity;
+			TextColorOverride = InputText->GetColorAndOpacity();
 		}
 	}
 
 	if (IsValid(InputImage) && !bMatchIconSize)
 	{
-		InputImage->SetBrushSize(IconSize);
+		InputImage->SetDesiredSizeOverride(IconSize);
 	}
 }
 
@@ -85,7 +85,7 @@ void UUINavInputDisplay::UpdateInputVisuals()
 		InputImage->SetBrushFromTexture(NewTexture, bMatchIconSize);
 		if (!bMatchIconSize)
 		{
-			InputImage->SetBrushSize(IconSize);
+			InputImage->SetDesiredSizeOverride(IconSize);
 		}
 
 		InputText->SetVisibility(ESlateVisibility::Collapsed);
