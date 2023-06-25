@@ -24,16 +24,11 @@ UUINavComponent::UUINavComponent(const FObjectInitializer& ObjectInitializer)
 
 void UUINavComponent::NativeConstruct()
 {
-	NavButton->OnClicked.RemoveAll(this);
-	NavButton->OnClicked.AddDynamic(this, &UUINavComponent::OnButtonClicked);
-	NavButton->OnPressed.RemoveAll(this);
-	NavButton->OnPressed.AddDynamic(this, &UUINavComponent::OnButtonPressed);
-	NavButton->OnReleased.RemoveAll(this);
-	NavButton->OnReleased.AddDynamic(this, &UUINavComponent::OnButtonReleased);
-	NavButton->OnHovered.RemoveAll(this);
-	NavButton->OnHovered.AddDynamic(this, &UUINavComponent::OnButtonHovered);
-	NavButton->OnUnhovered.RemoveAll(this);
-	NavButton->OnUnhovered.AddDynamic(this, &UUINavComponent::OnButtonUnhovered);
+	NavButton->OnClicked.AddUniqueDynamic(this, &UUINavComponent::OnButtonClicked);
+	NavButton->OnPressed.AddUniqueDynamic(this, &UUINavComponent::OnButtonPressed);
+	NavButton->OnReleased.AddUniqueDynamic(this, &UUINavComponent::OnButtonReleased);
+	NavButton->OnHovered.AddUniqueDynamic(this, &UUINavComponent::OnButtonHovered);
+	NavButton->OnUnhovered.AddUniqueDynamic(this, &UUINavComponent::OnButtonUnhovered);
 
 	Super::NativeConstruct();
 
