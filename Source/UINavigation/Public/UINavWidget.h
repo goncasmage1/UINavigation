@@ -153,8 +153,12 @@ public:
 	bool bShouldDestroyParent = false;
 
 	//If set to true, this widget will be removed if it has no ParentWidget and is returned from
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = UINavWidget)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = UINavWidget)
 	bool bAllowRemoveIfRoot = true;
+
+	//If set to true, this widget will show the selector it has, otherwise it will hide it.
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = UINavWidget)
+	bool bShowSelector = true;
 	
 	/*
 	* If set to true, the UINavWidget will maintain its navigated state when navigation moves to a child nested widget,
@@ -300,7 +304,9 @@ public:
 	*	@param	bVisible Whether the selector will be visible
 	*/
 	UFUNCTION(BlueprintCallable, Category = UINavWidget)
-	void SetSelectorVisibility(const bool bVisible);
+	void SetSelectorVisible(const bool bVisible);
+		
+	void ToggleSelectorVisibility(const bool bVisible);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
 	bool IsSelectorVisible();

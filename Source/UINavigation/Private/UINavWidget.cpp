@@ -198,8 +198,6 @@ void UUINavWidget::TraverseHierarchy()
 
 void UUINavWidget::SetupSelector()
 {
-	TheSelector->SetVisibility(ESlateVisibility::Hidden);
-
 	UCanvasPanelSlot* SelectorSlot = Cast<UCanvasPanelSlot>(TheSelector->Slot);
 
 	SelectorSlot->SetAlignment(FVector2D(0.5f, 0.5f));
@@ -278,11 +276,6 @@ void UUINavWidget::GainNavigation(UUINavWidget* PreviousActiveWidget)
 	if (IsValid(FirstComponent))
 	{
 		bHasNavigation = true;
-
-		if (IsSelectorValid())
-		{
-			TheSelector->SetVisibility(ESlateVisibility::HitTestInvisible);
-		}
 	}
 
 	const bool bPreviousWidgetIsChild = PreviousActiveWidget != nullptr ?
@@ -639,9 +632,16 @@ void UUINavWidget::SetSelectorScale(FVector2D NewScale)
 	TheSelector->SetRenderScale(NewScale);
 }
 
-void UUINavWidget::SetSelectorVisibility(const bool bVisible)
+void UUINavWidget::SetSelectorVisible(const bool bVisible)
 {
-	if (TheSelector == nullptr) return;
+	bShowSelector = bVisible;
+	ToggleSelectorVisibility(bVisible);
+}
+
+void UUINavWidget::ToggleSelectorVisibility(const bool bVisible)
+{
+	if (TheSelector == nullptr || (bVisible && !bShowSelector)) return;
+
 	const ESlateVisibility Vis = bVisible ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Hidden;
 	TheSelector->SetVisibility(Vis);
 }
@@ -649,7 +649,7 @@ void UUINavWidget::SetSelectorVisibility(const bool bVisible)
 bool UUINavWidget::IsSelectorVisible()
 {
 	if (TheSelector == nullptr) return false;
-	return TheSelector->GetVisibility() == ESlateVisibility::HitTestInvisible;
+	return bShowSelector && TheSelector->GetVisibility() == ESlateVisibility::HitTestInvisible;
 }
 
 void UUINavWidget::OnNavigate_Implementation(UUINavComponent* FromComponent, UUINavComponent* TomComponent)
@@ -701,6 +701,8 @@ void UUINavWidget::PropagateOnStopSelect(UUINavComponent* Component)
 
 void UUINavWidget::UpdateNavigationVisuals(UUINavComponent* Component, const bool bHadNavigation, const bool bBypassForcedNavigation /*= false*/)
 {
+	ToggleSelectorVisibility(IsValid(Component));
+
 	if (IsValid(Component) && IsSelectorValid())
 	{
 		UpdateSelectorPrevComponent = CurrentComponent;
@@ -1053,6 +1055,10 @@ void UUINavWidget::NavigatedTo(UUINavComponent* NavigatedToComponent, const bool
 	{
 		UpdateNavigationVisuals(NavigatedToComponent, !bHoverRestoredNavigation);
 	}
+	else
+	{
+		ToggleSelectorVisibility(bForcingNavigation || IsValid(HoveredComponent));
+	}
 
 	CallOnNavigate(bHadNavigation == bHasNavigation ? CurrentComponent : nullptr, NavigatedToComponent);
 
@@ -1174,7 +1180,7 @@ void UUINavWidget::RemovedComponent(UUINavComponent* Component)
 
 bool UUINavWidget::IsSelectorValid()
 {
-	return TheSelector != nullptr && TheSelector->GetIsEnabled();
+	return TheSelector != nullptr && TheSelector->GetIsEnabled() && bShowSelector;
 }
 
 void UUINavWidget::OnHoveredComponent(UUINavComponent* Component)
