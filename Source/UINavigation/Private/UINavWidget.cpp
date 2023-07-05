@@ -1090,6 +1090,11 @@ void UUINavWidget::NavigatedTo(UUINavComponent* NavigatedToComponent, const bool
 		RevertAnimation(CurrentComponent);
 	}
 
+	if (!bForcingNavigation)
+	{
+		bForcingNavigation = true;
+	}
+
 	CallOnNavigate(bHadNavigation == bHasNavigation ? CurrentComponent : nullptr, NavigatedToComponent);
 
 	SetCurrentComponent(NavigatedToComponent);
@@ -1145,7 +1150,7 @@ void UUINavWidget::StoppedReturn()
 
 bool UUINavWidget::TryConsumeNavigation()
 {
-	if (!GetDefault<UUINavSettings>()->bForceNavigation && !bForcingNavigation)
+	if (!bForcingNavigation && !GetDefault<UUINavSettings>()->bForceNavigation)
 	{
 		ForceNavigation();
 		return true;
