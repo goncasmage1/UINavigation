@@ -32,12 +32,12 @@ void UUINavSlider::NativeConstruct()
 		NavSpinBox->SetMaxValue(MaxValue);
 		NavSpinBox->SetClearKeyboardFocusOnCommit(true);
 		if (!NavSpinBox->OnValueChanged.IsBound())
-			NavSpinBox->OnValueCommitted.AddDynamic(this, &UUINavSlider::HandleOnSpinBoxValueChanged);
+			NavSpinBox->OnValueCommitted.AddUniqueDynamic(this, &UUINavSlider::HandleOnSpinBoxValueChanged);
 	}
 
-	if (!Slider->OnValueChanged.IsBound()) Slider->OnValueChanged.AddDynamic(this, &UUINavSlider::HandleOnSliderValueChanged);
-	if (!Slider->OnMouseCaptureBegin.IsBound()) Slider->OnMouseCaptureBegin.AddDynamic(this, &UUINavSlider::HandleOnMouseCaptureBegin);
-	if (!Slider->OnMouseCaptureEnd.IsBound()) Slider->OnMouseCaptureEnd.AddDynamic(this, &UUINavSlider::HandleOnMouseCaptureEnd);
+	if (!Slider->OnValueChanged.IsBound()) Slider->OnValueChanged.AddUniqueDynamic(this, &UUINavSlider::HandleOnSliderValueChanged);
+	if (!Slider->OnMouseCaptureBegin.IsBound()) Slider->OnMouseCaptureBegin.AddUniqueDynamic(this, &UUINavSlider::HandleOnMouseCaptureBegin);
+	if (!Slider->OnMouseCaptureEnd.IsBound()) Slider->OnMouseCaptureEnd.AddUniqueDynamic(this, &UUINavSlider::HandleOnMouseCaptureEnd);
 
 	Difference = MaxValue - MinValue;
 	Slider->SetStepSize(Interval / Difference);
