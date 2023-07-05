@@ -42,6 +42,8 @@ void UUINavWidget::NativeConstruct()
 {
 	bBeingRemoved = false;
 
+	bForcingNavigation = GetDefault<UUINavSettings>()->bForceNavigation;
+
 	const UWorld* const World = GetWorld();
 	OuterUINavWidget = GetOuterObject<UUINavWidget>(this);
 	if (OuterUINavWidget != nullptr)
@@ -215,7 +217,7 @@ void UUINavWidget::UINavSetup()
 		CurrentComponent->SetFocus();
 		if (!GetDefault<UUINavSettings>()->bForceNavigation && !IsValid(HoveredComponent))
 		{
-			UnforceNavigation();
+			UnforceNavigation(false);
 		}
 	}
 	else
@@ -246,7 +248,7 @@ bool UUINavWidget::TryFocusOnInitialComponent()
 		InitialComponent->SetFocus();
 		if (!GetDefault<UUINavSettings>()->bForceNavigation && !IsValid(HoveredComponent))
 		{
-			UnforceNavigation();
+			UnforceNavigation(false);
 		}
 		return true;
 	}
@@ -318,10 +320,9 @@ void UUINavWidget::LoseNavigation(UUINavWidget* NewActiveWidget)
 		return;
 	}
 
-	if (NewActiveWidget == nullptr ||
-		(!bNewWidgetIsChild && NewActiveWidget->bMaintainNavigationForChild))
+	if (!NewActiveWidget->bMaintainNavigationForChild || !bNewWidgetIsChild)
 	{
-		UpdateNavigationVisuals(nullptr, true);
+		UpdateNavigationVisuals(nullptr, true, false, true);
 	}
 
 	CallOnNavigate(CurrentComponent, nullptr);
@@ -568,7 +569,7 @@ FVector2D UUINavWidget::GetButtonLocation(UUINavComponent* Component) const
 	return ViewportPos;
 }
 
-void UUINavWidget::ExecuteAnimations(UUINavComponent* FromComponent, UUINavComponent* ToComponent, const bool bHadNavigation)
+void UUINavWidget::ExecuteAnimations(UUINavComponent* FromComponent, UUINavComponent* ToComponent, const bool bHadNavigation, const bool bFinishInstantly /*= false*/)
 {
 	if (IsValid(FromComponent) &&
 		FromComponent != ToComponent &&
@@ -579,11 +580,25 @@ void UUINavWidget::ExecuteAnimations(UUINavComponent* FromComponent, UUINavCompo
 	{
 		if (FromComponent->IsAnimationPlaying(FromComponent->GetComponentAnimation()))
 		{
-			FromComponent->ReverseAnimation(FromComponent->GetComponentAnimation());
+			if (bFinishInstantly)
+			{
+				FromComponent->StopAnimation(FromComponent->GetComponentAnimation());
+			}
+			else
+			{
+				FromComponent->ReverseAnimation(FromComponent->GetComponentAnimation());
+			}
 		}
 		else
 		{
-			FromComponent->PlayAnimation(FromComponent->GetComponentAnimation(), 0.0f, 1, EUMGSequencePlayMode::Reverse);
+			if (bFinishInstantly)
+			{
+				RevertAnimation(FromComponent);
+			}
+			else
+			{
+				FromComponent->PlayAnimation(FromComponent->GetComponentAnimation(), 0.0f, 1, EUMGSequencePlayMode::Reverse);
+			}
 		}
 	}
 
@@ -602,6 +617,15 @@ void UUINavWidget::ExecuteAnimations(UUINavComponent* FromComponent, UUINavCompo
 	}
 }
 
+void UUINavWidget::RevertAnimation(UUINavComponent* Component)
+{
+	if (IsValid(Component) && IsValid(Component->GetComponentAnimation()) && Component->UseComponentAnimation())
+	{
+		Component->PlayAnimation(Component->GetComponentAnimation(), 0.0f, 1, EUMGSequencePlayMode::Reverse);
+		Component->SetAnimationCurrentTime(Component->GetComponentAnimation(), 0.0f);
+	}
+}
+
 void UUINavWidget::UpdateButtonStates(UUINavComponent* Component)
 {
 	if (IsValid(CurrentComponent))
@@ -611,6 +635,10 @@ void UUINavWidget::UpdateButtonStates(UUINavComponent* Component)
 	if (IsValid(Component))
 	{
 		Component->SwitchButtonStyle(EButtonStyle::Hovered);
+	}
+	else
+	{
+		CurrentComponent->RevertButtonStyle();
 	}
 }
 
@@ -699,7 +727,7 @@ void UUINavWidget::PropagateOnStopSelect(UUINavComponent* Component)
 	}
 }
 
-void UUINavWidget::UpdateNavigationVisuals(UUINavComponent* Component, const bool bHadNavigation, const bool bBypassForcedNavigation /*= false*/)
+void UUINavWidget::UpdateNavigationVisuals(UUINavComponent* Component, const bool bHadNavigation, const bool bBypassForcedNavigation /*= false*/, const bool bFinishInstantly /*= false*/)
 {
 	ToggleSelectorVisibility(IsValid(Component));
 
@@ -714,7 +742,7 @@ void UUINavWidget::UpdateNavigationVisuals(UUINavComponent* Component, const boo
 
 	UpdateButtonStates(Component);
 
-	ExecuteAnimations(CurrentComponent, Component, bHadNavigation);
+	ExecuteAnimations(CurrentComponent, Component, bHadNavigation, bFinishInstantly);
 }
 
 void UUINavWidget::BeginSelectorMovement(UUINavComponent* FromComponent, UUINavComponent* ToComponent)
@@ -746,7 +774,7 @@ void UUINavWidget::AttemptUnforceNavigation(const EInputType NewInputType)
 		}
 		else
 		{
-			UnforceNavigation();
+			UnforceNavigation(true);
 		}
 	}
 }
@@ -761,10 +789,10 @@ void UUINavWidget::ForceNavigation()
 	}
 }
 
-void UUINavWidget::UnforceNavigation()
+void UUINavWidget::UnforceNavigation(const bool bHadNavigation)
 {
 	bForcingNavigation = false;
-	UpdateNavigationVisuals(nullptr, true);
+	UpdateNavigationVisuals(nullptr, bHadNavigation);
 	if (IsValid(CurrentComponent))
 	{
 		CurrentComponent->RevertButtonStyle();
@@ -834,7 +862,7 @@ void UUINavWidget::OnHorizCompUpdated_Implementation(UUINavComponent* Component)
 
 }
 
-UUINavWidget* UUINavWidget::GoToWidget(TSubclassOf<UUINavWidget> NewWidgetClass, const bool bRemoveParent, const bool bDestroyParent, const int ZOrder)
+UUINavWidget* UUINavWidget::GoToWidget(TSubclassOf<UUINavWidget> NewWidgetClass, const bool bRemoveParent /*= true*/, const bool bDestroyParent, const int ZOrder)
 {
 	if (NewWidgetClass == nullptr)
 	{
@@ -910,6 +938,7 @@ UUINavWidget * UUINavWidget::GoToBuiltWidget(UUINavWidget* NewWidget, const bool
 		}
 	}
 	OldOuterUINavWidget->CleanSetup();
+	SetHoveredComponent(nullptr);
 	
 	return NewWidget;
 }
@@ -1051,13 +1080,14 @@ void UUINavWidget::NavigatedTo(UUINavComponent* NavigatedToComponent, const bool
 		return;
 	}
 
-	if (CurrentComponent != NavigatedToComponent && (CurrentComponent != nullptr || bForcingNavigation))
+	if (bForcingNavigation || (CurrentComponent != NavigatedToComponent && CurrentComponent != nullptr))
 	{
 		UpdateNavigationVisuals(NavigatedToComponent, !bHoverRestoredNavigation);
 	}
 	else
 	{
 		ToggleSelectorVisibility(bForcingNavigation || IsValid(HoveredComponent));
+		RevertAnimation(CurrentComponent);
 	}
 
 	CallOnNavigate(bHadNavigation == bHasNavigation ? CurrentComponent : nullptr, NavigatedToComponent);
@@ -1225,7 +1255,7 @@ void UUINavWidget::OnUnhoveredComponent(UUINavComponent* Component)
 
 	if (!GetDefault<UUINavSettings>()->bForceNavigation)
 	{
-		UnforceNavigation();
+		UnforceNavigation(true);
 	}
 	else
 	{

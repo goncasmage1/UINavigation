@@ -258,7 +258,7 @@ public:
 	void SetHoveredComponent(UUINavComponent* Component);
 	void SetSelectedComponent(UUINavComponent* Component);
 
-	void UpdateNavigationVisuals(UUINavComponent* Component, const bool bHadNavigation, const bool bBypassForcedNavigation = false);
+	void UpdateNavigationVisuals(UUINavComponent* Component, const bool bHadNavigation, const bool bBypassForcedNavigation = false, const bool bFinishInstantly = false);
 
 	/**
 	*	Changes the selector's location to that of the button with the given index in the Button's array
@@ -274,7 +274,9 @@ public:
 	*	@param	From  The index of the button that was navigated from
 	*	@param	To  The index of the button that was navigated to
 	*/
-	void ExecuteAnimations(UUINavComponent* FromComponent, UUINavComponent* ToComponent, const bool bHadNavigation);
+	void ExecuteAnimations(UUINavComponent* FromComponent, UUINavComponent* ToComponent, const bool bHadNavigation, const bool bFinishInstantly = false);
+
+	void RevertAnimation(UUINavComponent* Component);
 
 	/**
 	*	Changes the new text and previous text's colors to the desired colors
@@ -354,7 +356,7 @@ public:
 	void AttemptUnforceNavigation(const EInputType NewInputType);
 
 	void ForceNavigation();
-	void UnforceNavigation();
+	void UnforceNavigation(const bool bHadNavigation);
 
 	/**
 	*	Called when ReturnToParent is called (i.e. the player wants to exit the menu)
@@ -496,7 +498,7 @@ public:
 	*	@param  ZOrder Order to display the widget
 	*/
 	UFUNCTION(BlueprintCallable, Category = UINavWidget, meta = (AdvancedDisplay=2))
-	UUINavWidget* GoToWidget(TSubclassOf<UUINavWidget> NewWidgetClass, const bool bRemoveParent, const bool bDestroyParent = false, const int ZOrder = 0);
+	UUINavWidget* GoToWidget(TSubclassOf<UUINavWidget> NewWidgetClass, const bool bRemoveParent = true, const bool bDestroyParent = false, const int ZOrder = 0);
 
 	/**
 	*	Adds given widget to screen (strongly recommended over manual alternative)
