@@ -11,6 +11,7 @@
 #include "Data/NavigationEvent.h"
 #include "Data/GridButton.h"
 #include "Data/DynamicEdgeNavigation.h"
+#include "Data/ThumbstickAsMouse.h"
 #include "UObject/Object.h"
 #include "UINavWidget.generated.h"
 
@@ -241,7 +242,7 @@ public:
 
 	/*If set to true, the gamepad's left thumbstick will be used to move the mouse */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = UINavWidget)
-	bool bUseLeftThumbstickAsMouse = false;
+	EThumbstickAsMouse UseThumbstickAsMouse = EThumbstickAsMouse::None;
 
 	//The index of the button to be first navigated to (when the widget is added to viewport)
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = UINavWidget)

@@ -10,6 +10,7 @@
 #include "Data/InputRestriction.h"
 #include "Data/InputType.h"
 #include "Data/NavigationDirection.h"
+#include "Data/ThumbstickAsMouse.h"
 #include "InputCoreTypes.h"
 #include "Input/Reply.h"
 #include "InputAction.h"
@@ -71,12 +72,14 @@ protected:
 
 	ENavigationDirection Direction = ENavigationDirection::None;
 
-	FVector2D LeftStickDelta = FVector2D::ZeroVector;
+	FVector2D ThumbstickDelta = FVector2D::ZeroVector;
 
 	ECountdownPhase CountdownPhase = ECountdownPhase::None;
 
 	ENavigationDirection CallbackDirection;
 	float TimerCounter = 0.f;
+
+	bool bReceivedAnalogInput = false;
 
 	/*************************************************************************/
 
@@ -181,13 +184,13 @@ public:
 	If the active UINavWidget has this set to false, this will override that.
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavController)
-	bool bUseLeftThumbstickAsMouse = false;
+	EThumbstickAsMouse UseThumbstickAsMouse = EThumbstickAsMouse::None;
 
 	/*
 	The sensitivity of the cursor when moved with the left stick
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavController)
-	float LeftStickCursorSensitivity = 10.0f;
+	float ThumbstickCursorSensitivity = 15.0f;
 
 	/*
 	The required value for an axis to be considered for rebinding
@@ -303,6 +306,7 @@ public:
 		return bAllowCustomInputs[InputIndex];
 	}
 	
+	EThumbstickAsMouse UsingThumbstickAsMouse() const;
 
 	UFUNCTION(BlueprintCallable, Category = UINavController)
 	void SetAllowAllMenuInput(const bool bAllowInput);
@@ -529,9 +533,9 @@ public:
 	FORCEINLINE UUINavWidget* GetActiveWidget() const { return ActiveWidget; }
 
 	UFUNCTION(BlueprintCallable, Category = UINavController)
-    FORCEINLINE FVector2D GetLeftStickDelta() const { return LeftStickDelta; }
+    FORCEINLINE FVector2D GetThumbstickDelta() const { return ThumbstickDelta; }
 
 	UFUNCTION(BlueprintCallable, Category = UINavController)
-    FORCEINLINE bool IsMovingLeftStick() const { return LeftStickDelta.X != 0.0f || LeftStickDelta.Y != 0.0f; }
+    FORCEINLINE bool IsMovingThumbstick() const { return ThumbstickDelta.X != 0.0f || ThumbstickDelta.Y != 0.0f; }
 		
 };
