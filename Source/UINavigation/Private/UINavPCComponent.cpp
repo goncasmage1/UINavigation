@@ -415,8 +415,8 @@ void UUINavPCComponent::HandleAnalogInputEvent(FSlateApplication& SlateApp, cons
 		bReceivedAnalogInput = true;
 
 		const FKey Key = InAnalogInputEvent.GetKey();
-		if (ThumbstickAsMouse == EThumbstickAsMouse::LeftThumbstick && (Key == EKeys::Gamepad_LeftX || Key == EKeys::Gamepad_LeftY) ||
-			ThumbstickAsMouse == EThumbstickAsMouse::RightThumbstick && (Key == EKeys::Gamepad_RightX || Key == EKeys::Gamepad_RightY))
+		if ((ThumbstickAsMouse == EThumbstickAsMouse::LeftThumbstick && (Key == EKeys::Gamepad_LeftX || Key == EKeys::Gamepad_LeftY)) ||
+			(ThumbstickAsMouse == EThumbstickAsMouse::RightThumbstick && (Key == EKeys::Gamepad_RightX || Key == EKeys::Gamepad_RightY)))
 		{
 			const bool bIsHorizontal = Key == EKeys::Gamepad_LeftX || Key == EKeys::Gamepad_RightX;
 			const float Value = InAnalogInputEvent.GetAnalogValue() / 3.0f;
