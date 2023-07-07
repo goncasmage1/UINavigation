@@ -9,6 +9,7 @@
 #include "Data/InputRebindData.h"
 #include "Data/InputRestriction.h"
 #include "Data/InputType.h"
+#include "Data/ThumbstickAsMouse.h"
 #include "Types/SlateEnums.h"
 #include "InputCoreTypes.h"
 #include "Input/Reply.h"
@@ -79,7 +80,7 @@ protected:
 
 	TSharedPtr<FUINavInputProcessor> SharedInputProcessor = nullptr;
 
-	FVector2D LeftStickDelta = FVector2D::ZeroVector;
+	FVector2D ThumbstickDelta = FVector2D::ZeroVector;
 
 	ECountdownPhase CountdownPhase = ECountdownPhase::None;
 
@@ -93,7 +94,7 @@ protected:
 
 	bool bIgnoreNavigationKey = true;
 
-	bool bReceivedLeftAnalogInput = false;
+	bool bReceivedAnalogInput = false;
 
 	bool bIgnoreFocusByNavigation = false;
 
@@ -165,13 +166,13 @@ public:
 	If the active UINavWidget has this set to false, this will override that.
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavController)
-	bool bUseLeftThumbstickAsMouse = false;
+	EThumbstickAsMouse UseThumbstickAsMouse = EThumbstickAsMouse::None;
 
 	/*
 	The sensitivity of the cursor when moved with the left stick
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavController)
-	float LeftStickCursorSensitivity = 10.0f;
+	float ThumbstickCursorSensitivity = 15.0f;
 
 	/*
 	The required value for an axis to be considered for rebinding
@@ -268,7 +269,7 @@ public:
 
 	FORCEINLINE bool AllowsNavigatingDirection(const EUINavigation Direction) const { return AllowsDirectionalInput() || (AllowDirection != EUINavigation::Invalid && AllowDirection != Direction); }
 	
-	FORCEINLINE bool UsingLeftStickAsMouse() const { return IsValid(ActiveWidget) && (bUseLeftThumbstickAsMouse || ActiveWidget->bUseLeftThumbstickAsMouse); }
+	FORCEINLINE EThumbstickAsMouse UsingThumbstickAsMouse() const { return IsValid(ActiveWidget) && ActiveWidget->UseThumbstickAsMouse != EThumbstickAsMouse::None ? ActiveWidget->UseThumbstickAsMouse : UseThumbstickAsMouse; }
 
 	UFUNCTION(BlueprintCallable, Category = UINavController)
 	void RefreshNavigationKeys();
@@ -451,9 +452,9 @@ public:
 	FORCEINLINE UUINavWidget* GetActiveSubWidget() const { return ActiveSubWidget != nullptr ? ActiveSubWidget : ActiveWidget; }
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
-    FORCEINLINE FVector2D GetLeftStickDelta() const { return LeftStickDelta; }
+    FORCEINLINE FVector2D GetThumbstickDelta() const { return ThumbstickDelta; }
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
-    FORCEINLINE bool IsMovingLeftStick() const { return LeftStickDelta.X != 0.0f || LeftStickDelta.Y != 0.0f; }
+    FORCEINLINE bool IsMovingThumbstick() const { return ThumbstickDelta.X != 0.0f || ThumbstickDelta.Y != 0.0f; }
 		
 };
