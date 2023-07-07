@@ -636,7 +636,7 @@ void UUINavWidget::UpdateButtonStates(UUINavComponent* Component)
 	{
 		Component->SwitchButtonStyle(EButtonStyle::Hovered);
 	}
-	else
+	else if (IsValid(CurrentComponent))
 	{
 		CurrentComponent->RevertButtonStyle();
 	}
