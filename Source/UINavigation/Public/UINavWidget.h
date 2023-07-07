@@ -7,6 +7,7 @@
 #include "Data/ReceiveInputType.h"
 #include "Data/SelectorPosition.h"
 #include "Data/NavigationEvent.h"
+#include "Data/ThumbstickAsMouse.h"
 #include "Delegates/DelegateCombinations.h"
 #include "UObject/Object.h"
 #include "UINavWidget.generated.h"
@@ -170,7 +171,7 @@ public:
 
 	/*If set to true, the gamepad's left thumbstick will be used to move the mouse when this widget is active */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = UINavWidget)
-	bool bUseLeftThumbstickAsMouse = false;
+	EThumbstickAsMouse UseThumbstickAsMouse = EThumbstickAsMouse::None;
 
     /*If set to true, the widget will be set to fullscreen even when using split screen */
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = UINavWidget)

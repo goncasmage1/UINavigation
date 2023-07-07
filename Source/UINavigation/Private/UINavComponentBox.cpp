@@ -63,6 +63,7 @@ void UUINavComponentBox::NavigateLeft()
 	//Make sure button still has options left to navigate
 	if (OptionIndex > 0) OptionIndex--;
 	else if (bLoopOptions) OptionIndex = GetMaxOptionIndex();
+	else return;
 
 	FinishNavigateLeft(LastOptionIndex != OptionIndex);
 }

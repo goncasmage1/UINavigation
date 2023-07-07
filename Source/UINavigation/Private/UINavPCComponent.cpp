@@ -135,13 +135,13 @@ void UUINavPCComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAct
 			break;
 	}
 
-	if (!bReceivedLeftAnalogInput)
+	if (!bReceivedAnalogInput)
 	{
-		LeftStickDelta = FVector2D::ZeroVector;
+		ThumbstickDelta = FVector2D::ZeroVector;
 	}
 	else
 	{
-		bReceivedLeftAnalogInput = false;
+		bReceivedAnalogInput = false;
 	}
 
 	if (bIgnoreFocusByNavigation)
@@ -409,23 +409,25 @@ void UUINavPCComponent::HandleAnalogInputEvent(FSlateApplication& SlateApp, cons
 		NotifyInputTypeChange(EInputType::Gamepad);
 	}
 
-	if (UsingLeftStickAsMouse())
+	const EThumbstickAsMouse ThumbstickAsMouse = UsingThumbstickAsMouse();
+	if (ThumbstickAsMouse != EThumbstickAsMouse::None)
 	{
-		bReceivedLeftAnalogInput = true;
+		bReceivedAnalogInput = true;
 
 		const FKey Key = InAnalogInputEvent.GetKey();
-		if (Key == EKeys::Gamepad_LeftX || Key == EKeys::Gamepad_LeftY)
+		if ((ThumbstickAsMouse == EThumbstickAsMouse::LeftThumbstick && (Key == EKeys::Gamepad_LeftX || Key == EKeys::Gamepad_LeftY)) ||
+			(ThumbstickAsMouse == EThumbstickAsMouse::RightThumbstick && (Key == EKeys::Gamepad_RightX || Key == EKeys::Gamepad_RightY)))
 		{
-			const bool bIsHorizontal = Key == EKeys::Gamepad_LeftX;
+			const bool bIsHorizontal = Key == EKeys::Gamepad_LeftX || Key == EKeys::Gamepad_RightX;
 			const float Value = InAnalogInputEvent.GetAnalogValue() / 3.0f;
-			if (bIsHorizontal) LeftStickDelta.X = FMath::Abs(Value) > 0.001f ? Value : 0.0f;
-			else LeftStickDelta.Y = FMath::Abs(Value) > 0.001f ? Value : 0.0f;
+			if (bIsHorizontal) ThumbstickDelta.X = FMath::Abs(Value) > 0.001f ? Value : 0.0f;
+			else ThumbstickDelta.Y = FMath::Abs(Value) > 0.001f ? Value : 0.0f;
 
-			if (LeftStickDelta.SizeSquared() < 0.01f) return;
+			if (ThumbstickDelta.SizeSquared() < 0.01f) return;
 
 			const FVector2D OldPosition = SlateApp.GetCursorPos();
-			const FVector2D NewPosition(OldPosition.X + (bIsHorizontal ? Value * LeftStickCursorSensitivity : 0.0f),
-										OldPosition.Y + (!bIsHorizontal ? -Value * LeftStickCursorSensitivity : 0.0f));
+			const FVector2D NewPosition(OldPosition.X + (bIsHorizontal ? Value * ThumbstickCursorSensitivity : 0.0f),
+										OldPosition.Y + (!bIsHorizontal ? -Value * ThumbstickCursorSensitivity : 0.0f));
 			SlateApp.SetCursorPos(NewPosition);
 			// Since the cursor may have been locked and its location clamped, get the actual new position
 			if (const TSharedPtr<FSlateUser> SlateUser = SlateApp.GetUser(SlateApp.CursorUserIndex))
@@ -450,7 +452,7 @@ void UUINavPCComponent::HandleAnalogInputEvent(FSlateApplication& SlateApp, cons
 
 void UUINavPCComponent::HandleMouseMoveEvent(FSlateApplication& SlateApp, const FPointerEvent& MouseEvent)
 {
-	if (CurrentInputType != EInputType::Mouse && MouseEvent.GetCursorDelta().SizeSquared() > 0.0f && (!UsingLeftStickAsMouse() || !IsMovingLeftStick()))
+	if (CurrentInputType != EInputType::Mouse && MouseEvent.GetCursorDelta().SizeSquared() > 0.0f && (UsingThumbstickAsMouse() == EThumbstickAsMouse::None || !IsMovingThumbstick()))
 	{
 		NotifyInputTypeChange(EInputType::Mouse);
 	}
