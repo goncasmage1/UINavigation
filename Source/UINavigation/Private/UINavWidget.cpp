@@ -201,9 +201,15 @@ void UUINavWidget::TraverseHierarchy()
 void UUINavWidget::SetupSelector()
 {
 	UCanvasPanelSlot* SelectorSlot = Cast<UCanvasPanelSlot>(TheSelector->Slot);
-
-	SelectorSlot->SetAlignment(FVector2D(0.5f, 0.5f));
-	SelectorSlot->SetPosition(FVector2D(0.f, 0.f));
+	if (IsValid(SelectorSlot))
+	{
+		SelectorSlot->SetAlignment(FVector2D(0.5f, 0.5f));
+		SelectorSlot->SetPosition(FVector2D(0.f, 0.f));
+	}
+	else
+	{
+		DISPLAYERROR("Selector must be a direct child of a Canvas Panel!");
+	}
 }
 
 void UUINavWidget::UINavSetup()
