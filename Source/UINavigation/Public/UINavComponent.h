@@ -8,6 +8,7 @@
 #include "Fonts/SlateFontInfo.h"
 #include "Animation/WidgetAnimation.h"
 #include "ComponentActions/UINavComponentAction.h"
+#include "Sound/SoundBase.h"
 #include "UINavComponent.generated.h"
 
 class UUINavWidget;
@@ -97,6 +98,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = UINavComponent)
 	void SwitchTextColorToNavigated();
 
+	USoundBase* GetOnNavigatedSound() const { return Cast<USoundBase>(NavigatedSlateSound.GetResourceObject()); }
+
 	void ExecuteComponentActions(const EComponentAction Action);
 
 	UWidgetAnimation* GetComponentAnimation() const { return ComponentAnimation; }
@@ -169,6 +172,12 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly, Transient, Category = UINavComponent, meta = (BindWidgetAnimOptional))
 	UWidgetAnimation* ComponentAnimation = nullptr;
+
+	/**
+	 * The sound the button should play when initially Navigated over
+	 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavComponent, meta = (DisplayName = "Navigated Sound"))
+	FSlateSound NavigatedSlateSound;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavComponent, meta = (editcondition = "bOverride_Font"))
 	FSlateFontInfo FontOverride;

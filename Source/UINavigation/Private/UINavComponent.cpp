@@ -496,15 +496,6 @@ void UUINavComponent::SwitchButtonStyle(const EButtonStyle NewStyle, const bool 
 	{
 		ForcedStyle = NewStyle;
 	}
-
-	if (NewStyle == EButtonStyle::Hovered && !HasAnyUserFocus())
-	{
-		USoundBase* HoverSound = Cast<USoundBase>(NavButton->GetStyle().HoveredSlateSound.GetResourceObject());
-		if (HoverSound != nullptr)
-		{
-			PlaySound(HoverSound);
-		}
-	}
 }
 
 void UUINavComponent::RevertButtonStyle()

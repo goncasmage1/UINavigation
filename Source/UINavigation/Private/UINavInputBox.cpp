@@ -290,6 +290,7 @@ void UUINavInputBox::FinishUpdateNewEnhancedInputKey(const FKey PressedKey, cons
 					}
 					else
 					{
+						OldAxisKey = ActionMapping.Key;
 						break;
 					}
 				}

@@ -48,7 +48,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = UINavInput)
 	static bool IsUINavInputAction(const UInputAction* const InputAction);
 
-	UFUNCTION(BlueprintCallable, Category = UINavigationLibrary)
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavigationLibrary)
 	static UPromptDataBinary* CreateBinaryPromptData(const bool bAccept);
 	
 	template <typename T>

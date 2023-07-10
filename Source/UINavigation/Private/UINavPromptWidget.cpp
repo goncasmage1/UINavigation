@@ -41,7 +41,7 @@ void UUINavPromptWidget::ProcessPromptWidgetSelected(UPromptDataBase* InPromptDa
 
 	ReturnToParent();
 
-	Callback.Execute(InPromptData);
+	Callback.ExecuteIfBound(InPromptData);
 }
 
 bool UUINavPromptWidget::IsAcceptComponent(UUINavComponent* Component) const

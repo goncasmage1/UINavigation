@@ -61,11 +61,11 @@ public:
 	FLinearColor HandleDefaultColor = FColor::Black;
 	FLinearColor BarDefaultColor = FColor::White;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavSlider, meta = (ClampMin = "0"))
-	FLinearColor HandleHoverColor;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavSlider)
+	FLinearColor HandleHoverColor = FColor::Red;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavSlider, meta = (ClampMin = "0"))
-	FLinearColor BarHoverColor;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavSlider)
+	FLinearColor BarHoverColor = FColor::Blue;
 
 	virtual void NativeConstruct() override;
 
