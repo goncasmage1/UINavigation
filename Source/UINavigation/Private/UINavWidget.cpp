@@ -1123,6 +1123,11 @@ void UUINavWidget::CallOnNavigate(UUINavComponent* FromComponent, UUINavComponen
 
 	if (IsValid(ToComponent))
 	{
+		USoundBase* NavigatedSound = ToComponent->GetOnNavigatedSound();
+		if (NavigatedSound != nullptr)
+		{
+			PlaySound(NavigatedSound);
+		}
 		ToComponent->OnNavigatedTo();
 		ToComponent->ExecuteComponentActions(EComponentAction::OnNavigatedTo);
 	}
