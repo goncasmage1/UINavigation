@@ -142,6 +142,12 @@ public:
 	EInputType CurrentInputType = EInputType::Mouse;
 
 	/*
+	Indicates whether the left analog stick should be used for directional navigation
+	*/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavController)
+	bool bUseAnalogDirectionalInput = true;
+
+	/*
 	Indicates whether navigation will occur periodically after the player
 	holds down a navigation key
 	*/

@@ -249,6 +249,7 @@ void UUINavPCComponent::SetActiveWidget(UUINavWidget * NewActiveWidget)
 	IUINavPCReceiver::Execute_OnActiveWidgetChanged(GetOwner(), ActiveWidget, NewActiveWidget);
 	ActiveWidget = NewActiveWidget;
 	ActiveSubWidget = nullptr;
+	RefreshNavigationKeys();
 }
 
 void UUINavPCComponent::NotifyNavigatedTo(UUINavWidget* NavigatedWidget)
@@ -346,7 +347,7 @@ UUINavWidget* UUINavPCComponent::GoToBuiltWidget(UUINavWidget* NewWidget, const 
 
 void UUINavPCComponent::RefreshNavigationKeys()
 {
-	FSlateApplication::Get().SetNavigationConfig(MakeShared<FUINavigationConfig>(bAllowSelectInput, bAllowReturnInput));
+	FSlateApplication::Get().SetNavigationConfig(MakeShared<FUINavigationConfig>(bAllowSelectInput, bAllowReturnInput, bUseAnalogDirectionalInput && UsingThumbstickAsMouse() == EThumbstickAsMouse::None));
 }
 
 void UUINavPCComponent::SetAllowAllMenuInput(const bool bAllowInput)
@@ -404,7 +405,7 @@ void UUINavPCComponent::HandleKeyUpEvent(FSlateApplication& SlateApp, const FKey
 
 void UUINavPCComponent::HandleAnalogInputEvent(FSlateApplication& SlateApp, const FAnalogInputEvent& InAnalogInputEvent)
 {
-	if (CurrentInputType != EInputType::Gamepad && InAnalogInputEvent.GetAnalogValue() > 0.1f)
+	if (CurrentInputType != EInputType::Gamepad && FMath::Abs(InAnalogInputEvent.GetAnalogValue()) > 0.1f)
 	{
 		NotifyInputTypeChange(EInputType::Gamepad);
 	}
@@ -412,12 +413,16 @@ void UUINavPCComponent::HandleAnalogInputEvent(FSlateApplication& SlateApp, cons
 	const EThumbstickAsMouse ThumbstickAsMouse = UsingThumbstickAsMouse();
 	if (ThumbstickAsMouse != EThumbstickAsMouse::None)
 	{
-		bReceivedAnalogInput = true;
-
 		const FKey Key = InAnalogInputEvent.GetKey();
 		if ((ThumbstickAsMouse == EThumbstickAsMouse::LeftThumbstick && (Key == EKeys::Gamepad_LeftX || Key == EKeys::Gamepad_LeftY)) ||
 			(ThumbstickAsMouse == EThumbstickAsMouse::RightThumbstick && (Key == EKeys::Gamepad_RightX || Key == EKeys::Gamepad_RightY)))
 		{
+			if (ThumbstickDelta == FVector2D::ZeroVector)
+			{
+				RefreshNavigationKeys();
+			}
+			bReceivedAnalogInput = true;
+
 			const bool bIsHorizontal = Key == EKeys::Gamepad_LeftX || Key == EKeys::Gamepad_RightX;
 			const float Value = InAnalogInputEvent.GetAnalogValue() / 3.0f;
 			if (bIsHorizontal) ThumbstickDelta.X = FMath::Abs(Value) > 0.001f ? Value : 0.0f;
