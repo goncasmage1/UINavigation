@@ -13,6 +13,7 @@
 #include "UINavPCReceiver.h"
 #include "Slate/SObjectWidget.h"
 #include "Templates/SharedPointer.h"
+#include "UINavigationConfig.h"
 
 UUINavComponent::UUINavComponent(const FObjectInitializer& ObjectInitializer)
 	:Super(ObjectInitializer)
@@ -82,7 +83,12 @@ FReply UUINavComponent::NativeOnKeyDown(const FGeometry& InGeometry, const FKeyE
 		}
 	}
 
-	const EUINavigation Direction = FSlateApplication::Get().GetNavigationDirectionFromKey(InKeyEvent);
+	TSharedRef<FUINavigationConfig> NavConfig = StaticCastSharedRef<FUINavigationConfig>(FSlateApplication::Get().GetNavigationConfig());
+	EUINavigation Direction = NavConfig->GetNavigationDirectionFromAnalogKey(InKeyEvent);
+	if (Direction == EUINavigation::Invalid)
+	{
+		Direction = NavConfig->GetNavigationDirectionFromAnalogKey(InKeyEvent);
+	}
 	if (Direction != EUINavigation::Invalid)
 	{
 		ParentWidget->UINavPC->NotifyNavigationKeyPressed(InKeyEvent.GetKey(), Direction);
@@ -117,7 +123,12 @@ FReply UUINavComponent::NativeOnKeyUp(const FGeometry& InGeometry, const FKeyEve
 	}
 	else
 	{
-		const EUINavigation Direction = FSlateApplication::Get().GetNavigationDirectionFromKey(InKeyEvent);
+		TSharedRef<FUINavigationConfig> NavConfig = StaticCastSharedRef<FUINavigationConfig>(FSlateApplication::Get().GetNavigationConfig());
+		EUINavigation Direction = NavConfig->GetNavigationDirectionFromAnalogKey(InKeyEvent);
+		if (Direction == EUINavigation::Invalid)
+		{
+			Direction = NavConfig->GetNavigationDirectionFromAnalogKey(InKeyEvent);
+		}
 		if (Direction != EUINavigation::Invalid)
 		{
 			ParentWidget->UINavPC->NotifyNavigationKeyReleased(InKeyEvent.GetKey(), Direction);

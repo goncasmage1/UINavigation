@@ -5,12 +5,12 @@
 #include "Data/UINavEnhancedInputActions.h"
 #include "InputMappingContext.h"
 
-FUINavigationConfig::FUINavigationConfig(const bool bAllowAccept /*= true*/, const bool bAllowBack /*= true*/)
+FUINavigationConfig::FUINavigationConfig(const bool bAllowAccept /*= true*/, const bool bAllowBack /*= true*/, const bool bUseAnalogDirectionalInput /*= true*/)
 {
 	KeyEventRules.Reset();
 	bTabNavigation = false;
 	bKeyNavigation = true;
-	bAnalogNavigation = false;
+	bAnalogNavigation = bUseAnalogDirectionalInput;
 
 	const UUINavSettings* const UINavSettings = GetDefault<UUINavSettings>();
 	const UUINavEnhancedInputActions* const InputActions = UINavSettings->EnhancedInputActions.LoadSynchronous();
@@ -57,17 +57,34 @@ FUINavigationConfig::FUINavigationConfig(const bool bAllowAccept /*= true*/, con
 	}
 }
 
-EUINavigation FUINavigationConfig::GetNavigationDirectionFromAnalog(const FAnalogInputEvent& InAnalogEvent)
-{
-	// Disable analog direction as thumbsticks can be assigned to action key mapping.
-	// However, feel free to put axis mappings to analog input yourself.
-	return EUINavigation::Invalid;
-}
-
 EUINavigationAction FUINavigationConfig::GetNavigationActionForKey(const FKey& InKey) const
 {
 	const EUINavigationAction* NavAction = KeyActionRules.Find(InKey);
 	return NavAction == nullptr ? EUINavigationAction::Invalid : *NavAction;
+}
+
+EUINavigation FUINavigationConfig::GetNavigationDirectionFromAnalogKey(const FKeyEvent& InKeyEvent) const
+{
+	if (!bAnalogNavigation) return EUINavigation::Invalid;
+
+	if (InKeyEvent.GetKey() == EKeys::Gamepad_LeftStick_Up)
+	{
+		return EUINavigation::Up;
+	}
+	if (InKeyEvent.GetKey() == EKeys::Gamepad_LeftStick_Down)
+	{
+		return EUINavigation::Down;
+	}
+	if (InKeyEvent.GetKey() == EKeys::Gamepad_LeftStick_Right)
+	{
+		return EUINavigation::Right;
+	}
+	if (InKeyEvent.GetKey() == EKeys::Gamepad_LeftStick_Left)
+	{
+		return EUINavigation::Left;
+	}
+
+	return EUINavigation::Invalid;
 }
 
 TArray<FKey> FUINavigationConfig::GetKeysForDirection(const EUINavigation Direction) const
