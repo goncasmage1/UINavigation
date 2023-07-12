@@ -347,7 +347,7 @@ UUINavWidget* UUINavPCComponent::GoToBuiltWidget(UUINavWidget* NewWidget, const 
 
 void UUINavPCComponent::RefreshNavigationKeys()
 {
-	FSlateApplication::Get().SetNavigationConfig(MakeShared<FUINavigationConfig>(bAllowSelectInput, bAllowReturnInput, bUseAnalogDirectionalInput && UsingThumbstickAsMouse() == EThumbstickAsMouse::None));
+	FSlateApplication::Get().SetNavigationConfig(MakeShared<FUINavigationConfig>(bAllowSelectInput, bAllowReturnInput, bUseAnalogDirectionalInput && UsingThumbstickAsMouse() != EThumbstickAsMouse::LeftThumbstick));
 }
 
 void UUINavPCComponent::SetAllowAllMenuInput(const bool bAllowInput)
