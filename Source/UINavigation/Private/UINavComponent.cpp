@@ -84,7 +84,7 @@ FReply UUINavComponent::NativeOnKeyDown(const FGeometry& InGeometry, const FKeyE
 	}
 
 	TSharedRef<FUINavigationConfig> NavConfig = StaticCastSharedRef<FUINavigationConfig>(FSlateApplication::Get().GetNavigationConfig());
-	EUINavigation Direction = NavConfig->GetNavigationDirectionFromAnalogKey(InKeyEvent);
+	EUINavigation Direction = NavConfig->GetNavigationDirectionFromKey(InKeyEvent);
 	if (Direction == EUINavigation::Invalid)
 	{
 		Direction = NavConfig->GetNavigationDirectionFromAnalogKey(InKeyEvent);
@@ -124,7 +124,7 @@ FReply UUINavComponent::NativeOnKeyUp(const FGeometry& InGeometry, const FKeyEve
 	else
 	{
 		TSharedRef<FUINavigationConfig> NavConfig = StaticCastSharedRef<FUINavigationConfig>(FSlateApplication::Get().GetNavigationConfig());
-		EUINavigation Direction = NavConfig->GetNavigationDirectionFromAnalogKey(InKeyEvent);
+		EUINavigation Direction = NavConfig->GetNavigationDirectionFromKey(InKeyEvent);
 		if (Direction == EUINavigation::Invalid)
 		{
 			Direction = NavConfig->GetNavigationDirectionFromAnalogKey(InKeyEvent);
