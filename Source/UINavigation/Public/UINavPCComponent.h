@@ -275,7 +275,7 @@ public:
 
 	FORCEINLINE bool AllowsNavigatingDirection(const EUINavigation Direction) const { return AllowsDirectionalInput() || (AllowDirection != EUINavigation::Invalid && AllowDirection != Direction); }
 	
-	FORCEINLINE EThumbstickAsMouse UsingThumbstickAsMouse() const { return IsValid(ActiveWidget) && ActiveWidget->UseThumbstickAsMouse != EThumbstickAsMouse::None ? ActiveWidget->UseThumbstickAsMouse : UseThumbstickAsMouse; }
+	EThumbstickAsMouse UsingThumbstickAsMouse() const;
 
 	UFUNCTION(BlueprintCallable, Category = UINavController)
 	void RefreshNavigationKeys();
