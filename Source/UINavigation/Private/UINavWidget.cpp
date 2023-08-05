@@ -737,7 +737,7 @@ void UUINavWidget::UpdateNavigationVisuals(UUINavComponent* Component, const boo
 {
 	ToggleSelectorVisibility(IsValid(Component));
 
-	if (IsValid(Component) && IsSelectorValid())
+	if (IsValid(Component) && TheSelector != nullptr && TheSelector->GetIsEnabled())
 	{
 		UpdateSelectorPrevComponent = CurrentComponent;
 		UpdateSelectorNextComponent = Component;
