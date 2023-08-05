@@ -860,7 +860,7 @@ const FKey UUINavPCComponent::GetOppositeAxis2DAxis(const FKey& Key) const
 	return FKey();
 }
 
-bool UUINavPCComponent::IsAxis2D(const FKey Key) const
+bool UUINavPCComponent::IsAxis2D(const FKey& Key) const
 {
 	return Axis2DToAxis1DMap.Contains(Key);
 }
@@ -870,7 +870,7 @@ bool UUINavPCComponent::IsAxis(const FKey& Key) const
 	return IsAxis2D(Key) || AxisToKeyMap.Contains(Key);
 }
 
-void UUINavPCComponent::VerifyInputTypeChangeByKey(const FKey Key)
+void UUINavPCComponent::VerifyInputTypeChangeByKey(const FKey& Key)
 {
 	const EInputType NewInputType = GetKeyInputType(Key);
 
