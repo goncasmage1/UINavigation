@@ -27,6 +27,13 @@
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "Templates/SharedPointer.h"
 #include "Engine/GameViewportClient.h"
+#include "Internationalization/Internationalization.h"
+
+const FKey UUINavPCComponent::MouseUp("MouseUp");
+const FKey UUINavPCComponent::MouseDown("MouseDown");
+const FKey UUINavPCComponent::MouseRight("MouseRight");
+const FKey UUINavPCComponent::MouseLeft("MouseLeft");
+bool UUINavPCComponent::bInitialized = false;
 
 UUINavPCComponent::UUINavPCComponent()
 {
@@ -35,6 +42,15 @@ UUINavPCComponent::UUINavPCComponent()
 
 	bAutoActivate = true;
 	bCanEverAffectNavigation = false;
+
+	if (!bInitialized)
+	{
+		bInitialized = true;
+		EKeys::AddKey(FKeyDetails(MouseUp, NSLOCTEXT("InputKeys", "MouseUp", "Mouse Up"), FKeyDetails::MouseButton));
+		EKeys::AddKey(FKeyDetails(MouseDown, NSLOCTEXT("InputKeys", "MouseDown", "Mouse Down"), FKeyDetails::MouseButton));
+		EKeys::AddKey(FKeyDetails(MouseRight, NSLOCTEXT("InputKeys", "MouseRight", "Mouse Right"), FKeyDetails::MouseButton));
+		EKeys::AddKey(FKeyDetails(MouseLeft, NSLOCTEXT("InputKeys", "MouseLeft", "Mouse Left"), FKeyDetails::MouseButton));
+	}
 }
 
 void UUINavPCComponent::Activate(bool bReset)
@@ -462,9 +478,38 @@ void UUINavPCComponent::HandleAnalogInputEvent(FSlateApplication& SlateApp, cons
 
 void UUINavPCComponent::HandleMouseMoveEvent(FSlateApplication& SlateApp, const FPointerEvent& MouseEvent)
 {
-	if (CurrentInputType != EInputType::Mouse && MouseEvent.GetCursorDelta().SizeSquared() > 0.0f && (UsingThumbstickAsMouse() == EThumbstickAsMouse::None || !IsMovingThumbstick()))
+	if (MouseEvent.GetCursorDelta().SizeSquared() > 0.0f && (UsingThumbstickAsMouse() == EThumbstickAsMouse::None || !IsMovingThumbstick()))
 	{
-		NotifyInputTypeChange(EInputType::Mouse);
+		if (CurrentInputType != EInputType::Mouse)
+		{
+			NotifyInputTypeChange(EInputType::Mouse);
+		}
+
+		if (IsValid(ListeningInputBox))
+		{
+			FKey MouseKey;
+			const float MouseMoveThreshold = GetDefault<UUINavSettings>()->MouseMoveRebindThreshold;
+			const FVector2D MovementDelta = MouseEvent.GetCursorDelta();
+
+			if (MovementDelta.Y > MouseMoveThreshold) 
+			{
+				MouseKey = MouseDown;
+			}
+			else if (MovementDelta.Y < -MouseMoveThreshold)
+			{
+				MouseKey = MouseUp;
+			}
+			else if (MovementDelta.X > MouseMoveThreshold)
+			{
+				MouseKey = MouseRight;
+			}
+			else if (MovementDelta.X < -MouseMoveThreshold)
+			{
+				MouseKey = MouseLeft;
+			}
+
+			ProcessRebind(MouseKey);
+		}
 	}
 }
 
@@ -717,7 +762,7 @@ void UUINavPCComponent::GetEnhancedInputKeys(const UInputAction* Action, TArray<
 	}
 }
 
-EInputType UUINavPCComponent::GetKeyInputType(const FKey Key)
+EInputType UUINavPCComponent::GetKeyInputType(const FKey& Key)
 {
 	if (Key.IsGamepadKey())
 	{
@@ -733,7 +778,7 @@ EInputType UUINavPCComponent::GetKeyInputType(const FKey Key)
 	}
 }
 
-const FKey UUINavPCComponent::GetKeyFromAxis(const FKey Key, const bool bPositive, const EInputAxis Axis) const
+const FKey UUINavPCComponent::GetKeyFromAxis(const FKey& Key, const bool bPositive, const EInputAxis Axis) const
 {
 	const FAxis2D_Keys* Axis2DKeys = Axis2DToAxis1DMap.Find(Key);
 	const FKey CheckedKey = Axis2DKeys == nullptr ? Key : (Axis == EInputAxis::X ? Axis2DKeys->PositiveKey : Axis2DKeys->NegativeKey);
@@ -744,7 +789,7 @@ const FKey UUINavPCComponent::GetKeyFromAxis(const FKey Key, const bool bPositiv
 	return bPositive ? AxisKeys->PositiveKey : AxisKeys->NegativeKey;
 }
 
-const FKey UUINavPCComponent::GetAxisFromScaledKey(const FKey Key, bool& OutbPositive) const
+const FKey UUINavPCComponent::GetAxisFromScaledKey(const FKey& Key, bool& OutbPositive) const
 {
 	for (const TPair<FKey, FAxis2D_Keys>& AxisKeys : AxisToKeyMap)
 	{
@@ -763,13 +808,13 @@ const FKey UUINavPCComponent::GetAxisFromScaledKey(const FKey Key, bool& OutbPos
 	return FKey();
 }
 
-const FKey UUINavPCComponent::GetAxisFromKey(const FKey Key) const
+const FKey UUINavPCComponent::GetAxisFromKey(const FKey& Key) const
 {
 	const FKey* AxisKey = KeyToAxisMap.Find(Key);
 	return AxisKey == nullptr ? Key : *AxisKey;
 }
 
-const FKey UUINavPCComponent::GetAxis1DFromAxis2D(const FKey Key, const EInputAxis Axis) const
+const FKey UUINavPCComponent::GetAxis1DFromAxis2D(const FKey& Key, const EInputAxis Axis) const
 {
 	const FAxis2D_Keys* Axis2DKeys = Axis2DToAxis1DMap.Find(Key);
 	if (Axis2DKeys == nullptr) return FKey();
@@ -777,7 +822,7 @@ const FKey UUINavPCComponent::GetAxis1DFromAxis2D(const FKey Key, const EInputAx
 	return Axis == EInputAxis::X ? Axis2DKeys->PositiveKey : Axis2DKeys->NegativeKey;
 }
 
-const FKey UUINavPCComponent::GetAxis2DFromAxis1D(const FKey Key) const
+const FKey UUINavPCComponent::GetAxis2DFromAxis1D(const FKey& Key) const
 {
 	for (const TPair<FKey, FAxis2D_Keys>& AxisKeys : Axis2DToAxis1DMap)
 	{
@@ -787,17 +832,25 @@ const FKey UUINavPCComponent::GetAxis2DFromAxis1D(const FKey Key) const
 	return FKey();
 }
 
-const FKey UUINavPCComponent::GetOppositeAxisKey(const FKey Key) const
+const FKey UUINavPCComponent::GetOppositeAxisKey(const FKey& Key, bool& bOutIsPositive) const
 {
 	for (const TPair<FKey, FAxis2D_Keys>& AxisKeys : AxisToKeyMap)
 	{
-		if (AxisKeys.Value.PositiveKey == Key) return AxisKeys.Value.NegativeKey;
-		if (AxisKeys.Value.NegativeKey == Key) return AxisKeys.Value.PositiveKey;
+		if (AxisKeys.Value.PositiveKey == Key)
+		{
+			bOutIsPositive = false;
+			return AxisKeys.Value.NegativeKey;
+		}
+		if (AxisKeys.Value.NegativeKey == Key)
+		{
+			bOutIsPositive = true;
+			return AxisKeys.Value.PositiveKey;
+		}
 	}
 	return FKey();
 }
 
-const FKey UUINavPCComponent::GetOppositeAxis2DAxis(const FKey Key) const
+const FKey UUINavPCComponent::GetOppositeAxis2DAxis(const FKey& Key) const
 {
 	for (const TPair<FKey, FAxis2D_Keys>& Axis2DAxes : Axis2DToAxis1DMap)
 	{
@@ -807,17 +860,17 @@ const FKey UUINavPCComponent::GetOppositeAxis2DAxis(const FKey Key) const
 	return FKey();
 }
 
-bool UUINavPCComponent::IsAxis2D(const FKey Key) const
+bool UUINavPCComponent::IsAxis2D(const FKey& Key) const
 {
 	return Axis2DToAxis1DMap.Contains(Key);
 }
 
-bool UUINavPCComponent::IsAxis(const FKey Key) const
+bool UUINavPCComponent::IsAxis(const FKey& Key) const
 {
 	return IsAxis2D(Key) || AxisToKeyMap.Contains(Key);
 }
 
-void UUINavPCComponent::VerifyInputTypeChangeByKey(const FKey Key)
+void UUINavPCComponent::VerifyInputTypeChangeByKey(const FKey& Key)
 {
 	const EInputType NewInputType = GetKeyInputType(Key);
 
@@ -924,8 +977,8 @@ void UUINavPCComponent::NavigateInDirection(const EUINavigation InDirection)
 		FInputKeyManager::Get().GetCodesFromKey(NavigationKey, KeyCodePtr, CharacterCodePtr);
 		const int32 KeyCode = KeyCodePtr != nullptr ? *KeyCodePtr : -1;
 
-		FKey const Key = FInputKeyManager::Get().GetKeyFromCodes(KeyCode, *CharacterCodePtr);
-		KeyEvent = FKeyEvent(Key, SlateApplication.GetPlatformApplication()->GetModifierKeys(), SlateApplication.GetUserIndexForKeyboard(), true, *CharacterCodePtr, KeyCode);
+		FKey const Key = FInputKeyManager::Get().GetKeyFromCodes(KeyCode, CharacterCodePtr != nullptr ? *CharacterCodePtr : 0);
+		KeyEvent = FKeyEvent(Key, SlateApplication.GetPlatformApplication()->GetModifierKeys(), SlateApplication.GetUserIndexForKeyboard(), true, CharacterCodePtr != nullptr ? *CharacterCodePtr : 0, KeyCode);
 	}
 	else
 	{

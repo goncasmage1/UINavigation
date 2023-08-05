@@ -48,6 +48,10 @@ public:
 	UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	bool bRemoveWidgetOnReturn = true;
 
+	// The amount of mouse movement delta that will trigger a rebind attempt when listening to a new key for input rebinding
+	UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = "Settings")
+	float MouseMoveRebindThreshold = 1.0f;
+
 	UPROPERTY(config, EditAnywhere, Category = "Settings")
 	TSoftObjectPtr<UInputMappingContext> EnhancedInputContext = TSoftObjectPtr<UInputMappingContext>(FSoftObjectPath("/UINavigation/Input/IC_UINav.IC_UINav"));
 

@@ -737,7 +737,7 @@ void UUINavWidget::UpdateNavigationVisuals(UUINavComponent* Component, const boo
 {
 	ToggleSelectorVisibility(IsValid(Component));
 
-	if (IsValid(Component) && IsSelectorValid())
+	if (IsValid(Component) && TheSelector != nullptr && TheSelector->GetIsEnabled())
 	{
 		UpdateSelectorPrevComponent = CurrentComponent;
 		UpdateSelectorNextComponent = Component;
@@ -1076,6 +1076,8 @@ void UUINavWidget::NavigatedTo(UUINavComponent* NavigatedToComponent, const bool
 		UINavPC->NotifyNavigatedTo(this);
 	}
 
+	UINavPC->CancelRebind();
+
 	if (IsValid(OuterUINavWidget) && !OuterUINavWidget->bMaintainNavigationForChild)
 	{
 		OnNavigate(CurrentComponent, NavigatedToComponent);
@@ -1261,8 +1263,6 @@ void UUINavWidget::OnHoveredComponent(UUINavComponent* Component)
 void UUINavWidget::OnUnhoveredComponent(UUINavComponent* Component)
 {
 	if (!IsValid(Component)) return;
-
-	UINavPC->CancelRebind();
 
 	if (IgnoreHoverComponent == nullptr || IgnoreHoverComponent != Component)
 	{

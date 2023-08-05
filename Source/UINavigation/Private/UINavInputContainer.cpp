@@ -313,15 +313,6 @@ void UUINavInputContainer::GetAxisPropertiesFromMapping(const FEnhancedActionKey
 	
 	for (const UInputModifier* Modifier : Modifiers)
 	{
-		const UInputModifierNegate* Negate = Cast<UInputModifierNegate>(Modifier);
-		if (Negate != nullptr)
-		{
-			bOutPositive = !bOutPositive;
-			continue;
-		}
-
-		// TODO: Add support for Scalar input modifier
-		
 		const UInputModifierSwizzleAxis* Swizzle = Cast<UInputModifierSwizzleAxis>(Modifier);
 		if (Swizzle != nullptr && !UINavPC->IsAxis2D(ActionMapping.Key))
 		{
@@ -338,6 +329,29 @@ void UUINavInputContainer::GetAxisPropertiesFromMapping(const FEnhancedActionKey
 			}
 			continue;
 		}
+	}
+
+	for (const UInputModifier* Modifier : Modifiers)
+	{
+		const UInputModifierNegate* Negate = Cast<UInputModifierNegate>(Modifier);
+		if (Negate != nullptr)
+		{
+			if (OutAxis == EInputAxis::X)
+			{
+				bOutPositive = !Negate->bX;
+			}
+			else if (OutAxis == EInputAxis::Y)
+			{
+				bOutPositive = !Negate->bY;
+			}
+			else if (OutAxis == EInputAxis::Z)
+			{
+				bOutPositive = !Negate->bZ;
+			}
+			continue;
+		}
+
+		// TODO: Add support for Scalar input modifier
 	}
 }
 

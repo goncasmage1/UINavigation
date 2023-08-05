@@ -54,6 +54,7 @@ protected:
 	void InputComponentClicked(const int Index);
 
 	void GetEnhancedMappingsForAction(const UInputAction* Action, const EInputAxis& Axis, const int Index, TArray<int32>& OutMappingIndices);
+	void GetKeyMappingNegateAxes(const FKey& OldAxisKey, bool& bNegateX, bool& bNegateY, bool& bNegateZ);
 
 public:
 
@@ -63,15 +64,16 @@ public:
 	void CreateEnhancedInputKeyWidgets();
 
 	void CreateKeyWidgets();
-	bool TrySetupNewKey(const FKey NewKey, const int KeyIndex, const UUINavInputComponent* const NewInputButton);
+	bool TrySetupNewKey(const FKey NewKey, const int KeyIndex, UUINavInputComponent* const NewInputButton);
 	void ResetKeyWidgets();
 	void UpdateInputKey(const FKey NewKey, int Index = -1, const bool bSkipChecks = false);
 	void FinishUpdateNewKey();
 	void FinishUpdateNewEnhancedInputKey(const FKey PressedKey, int Index);
 	void TryMapEnhancedAxisKey(const FKey& NewKey, const int32 Index);
 	void TryMap2DAxisKey(const FKey& NewMappingKey, const int Index);
-	void UnmapEnhancedAxisKey(const FKey& NewAxisKey, const FKey& OldAxisKey, const FKey& NewKey, const int32 Index);
+	void UnmapEnhancedAxisKey(const FKey& NewAxisKey, const FKey& OldAxisKey, const FKey& NewKey, const int32 Index, const bool bNegateX, const bool bNegateY, const bool bNegateZ);
 	void AddRelevantModifiers(const FInputContainerEnhancedActionData& ActionData, FEnhancedActionKeyMapping& Mapping);
+	void ApplyNegateModifiers(UUINavInputBox* InputBox, FEnhancedActionKeyMapping& Mapping, const bool bNegateX, const bool bNegateY, const bool bNegateZ);
 	void CancelUpdateInputKey(const ERevertRebindReason Reason);
 	void RevertToKeyText(const int Index);
 
