@@ -115,7 +115,7 @@ protected:
 	*	@param Key The specified key	
 	*	@return The input type of the given key
 	*/
-	static EInputType GetKeyInputType(const FKey Key);
+	static EInputType GetKeyInputType(const FKey& Key);
 
 	/**
 	*	Notifies to the active UUINavWidget that the input type changed
@@ -213,9 +213,17 @@ public:
 	FKey LastPressedKey;
 	int32 LastPressedKeyUserIndex;
 
+	static const FKey MouseUp;
+	static const FKey MouseDown;
+	static const FKey MouseRight;
+	static const FKey MouseLeft;
+
+	static bool bInitialized;
+
 	TMap<FKey, FAxis2D_Keys> Axis2DToAxis1DMap = {
 		{EKeys::Gamepad_Left2D, {EKeys::Gamepad_LeftX, EKeys::Gamepad_LeftY}},
 		{EKeys::Gamepad_Right2D, {EKeys::Gamepad_RightX, EKeys::Gamepad_RightY}},
+		{EKeys::Mouse2D, {EKeys::MouseX, EKeys::MouseY}},
 	};
 	
 	TMap<FKey, FAxis2D_Keys> AxisToKeyMap = {
@@ -223,6 +231,8 @@ public:
 		{EKeys::Gamepad_LeftY, {EKeys::Gamepad_LeftStick_Up, EKeys::Gamepad_LeftStick_Down}},
 		{EKeys::Gamepad_RightX, {EKeys::Gamepad_RightStick_Right, EKeys::Gamepad_RightStick_Left}},
 		{EKeys::Gamepad_RightY, {EKeys::Gamepad_RightStick_Up, EKeys::Gamepad_RightStick_Down}},
+		{EKeys::MouseX, {MouseRight, MouseLeft}},
+		{EKeys::MouseY, {MouseUp, MouseDown}},
 		{EKeys::MouseWheelAxis, {EKeys::MouseScrollUp, EKeys::MouseScrollDown}},
 		{EKeys::MixedReality_Left_Thumbstick_X, {EKeys::MixedReality_Left_Thumbstick_Right, EKeys::MixedReality_Left_Thumbstick_Left}},
 		{EKeys::MixedReality_Left_Thumbstick_Y, {EKeys::MixedReality_Left_Thumbstick_Up, EKeys::MixedReality_Left_Thumbstick_Down}},
@@ -326,7 +336,7 @@ public:
 	*
 	*	@param Key The specified key
 	*/
-	void VerifyInputTypeChangeByKey(const FKey Key);
+	void VerifyInputTypeChangeByKey(const FKey& Key);
 
 	/**
 	*	Notifies the controller that a mouse is being used
@@ -344,31 +354,31 @@ public:
 	EInputMode GetInputMode() const;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
-	const FKey GetKeyFromAxis(const FKey Key, bool bPositive, const EInputAxis Axis = EInputAxis::X) const;
+	const FKey GetKeyFromAxis(const FKey& Key, bool bPositive, const EInputAxis Axis = EInputAxis::X) const;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
-	const FKey GetAxisFromScaledKey(const FKey Key, bool& OutbPositive) const;
+	const FKey GetAxisFromScaledKey(const FKey& Key, bool& OutbPositive) const;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
-	const FKey GetAxisFromKey(const FKey Key) const;
+	const FKey GetAxisFromKey(const FKey& Key) const;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
-	const FKey GetAxis1DFromAxis2D(const FKey Key, const EInputAxis Axis) const;
+	const FKey GetAxis1DFromAxis2D(const FKey& Key, const EInputAxis Axis) const;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
-	const FKey GetAxis2DFromAxis1D(const FKey Key) const;
+	const FKey GetAxis2DFromAxis1D(const FKey& Key) const;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
-	const FKey GetOppositeAxisKey(const FKey Key) const;
+	const FKey GetOppositeAxisKey(const FKey& Key, bool& bOutIsPositive) const;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
-	const FKey GetOppositeAxis2DAxis(const FKey Key) const;
+	const FKey GetOppositeAxis2DAxis(const FKey& Key) const;
 	
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
-	bool IsAxis2D(const FKey Key) const;
+	bool IsAxis2D(const FKey& Key) const;
 	
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
-	bool IsAxis(const FKey Key) const;
+	bool IsAxis(const FKey& Key) const;
 
 	//Receives the action and returns the first key that respects the given restriction.
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)

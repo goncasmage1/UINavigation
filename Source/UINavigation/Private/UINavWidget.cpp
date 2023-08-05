@@ -1076,6 +1076,8 @@ void UUINavWidget::NavigatedTo(UUINavComponent* NavigatedToComponent, const bool
 		UINavPC->NotifyNavigatedTo(this);
 	}
 
+	UINavPC->CancelRebind();
+
 	if (IsValid(OuterUINavWidget) && !OuterUINavWidget->bMaintainNavigationForChild)
 	{
 		OnNavigate(CurrentComponent, NavigatedToComponent);
@@ -1261,8 +1263,6 @@ void UUINavWidget::OnHoveredComponent(UUINavComponent* Component)
 void UUINavWidget::OnUnhoveredComponent(UUINavComponent* Component)
 {
 	if (!IsValid(Component)) return;
-
-	UINavPC->CancelRebind();
 
 	if (IgnoreHoverComponent == nullptr || IgnoreHoverComponent != Component)
 	{
