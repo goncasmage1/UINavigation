@@ -74,6 +74,10 @@ protected:
 	bool bAllowSectionInput = true;
 
 	bool bIgnoreSelectRelease = false;
+	bool bIgnoreMousePress = false;
+	bool bIgnoreMouseRelease = false;
+
+	bool bUsingThumbstickAsMouse = false;
 
 	UPROPERTY()
 	APlayerController* PC = nullptr;
@@ -122,7 +126,7 @@ protected:
 	*
 	*	@param NewInputType The new input type that is being used
 	*/
-	void NotifyInputTypeChange(const EInputType NewInputType);
+	void NotifyInputTypeChange(const EInputType NewInputType, const bool bAttemptUnforceNavigation = true);
 
 	virtual void Activate(bool bReset) override;
 	
@@ -336,7 +340,7 @@ public:
 	*
 	*	@param Key The specified key
 	*/
-	void VerifyInputTypeChangeByKey(const FKey& Key);
+	void VerifyInputTypeChangeByKey(const FKey& Key, const bool bAttemptUnforceNavigation = true);
 
 	/**
 	*	Notifies the controller that a mouse is being used

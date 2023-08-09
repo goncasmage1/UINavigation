@@ -843,6 +843,15 @@ void UUINavWidget::OnInputChanged_Implementation(const EInputType From, const EI
 
 }
 
+void UUINavWidget::PropagateOnInputChanged(const EInputType From, const EInputType To)
+{
+	OnInputChanged(From, To);
+	if (IsValid(OuterUINavWidget) && !OuterUINavWidget->bMaintainNavigationForChild)
+	{
+		OuterUINavWidget->PropagateOnInputChanged(From, To);
+	}
+}
+
 void UUINavWidget::PreSetup_Implementation(const bool bFirstSetup)
 {
 

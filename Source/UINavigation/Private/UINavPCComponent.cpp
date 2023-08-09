@@ -164,6 +164,12 @@ void UUINavPCComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAct
 	{
 		bIgnoreFocusByNavigation = false;
 	}
+
+	if (UsingThumbstickAsMouse() != EThumbstickAsMouse::None != bUsingThumbstickAsMouse)
+	{
+		bUsingThumbstickAsMouse = !bUsingThumbstickAsMouse;
+		RefreshNavigationKeys();
+	}
 }
 
 void UUINavPCComponent::RequestRebuildMappings()
@@ -368,7 +374,12 @@ EThumbstickAsMouse UUINavPCComponent::UsingThumbstickAsMouse() const
 
 void UUINavPCComponent::RefreshNavigationKeys()
 {
-	FSlateApplication::Get().SetNavigationConfig(MakeShared<FUINavigationConfig>(bAllowSelectInput, bAllowReturnInput, bUseAnalogDirectionalInput && UsingThumbstickAsMouse() != EThumbstickAsMouse::LeftThumbstick));
+	FSlateApplication::Get().SetNavigationConfig(
+		MakeShared<FUINavigationConfig>(
+			bAllowSelectInput,
+			bAllowReturnInput,
+			bUseAnalogDirectionalInput && UsingThumbstickAsMouse() != EThumbstickAsMouse::LeftThumbstick,
+			UsingThumbstickAsMouse() != EThumbstickAsMouse::None));
 }
 
 void UUINavPCComponent::SetAllowAllMenuInput(const bool bAllowInput)
@@ -405,13 +416,27 @@ void UUINavPCComponent::SetAllowSectionInput(const bool bAllowInput)
 
 void UUINavPCComponent::HandleKeyDownEvent(FSlateApplication& SlateApp, const FKeyEvent& InKeyEvent)
 {
+	const bool bIsSelectKey = StaticCastSharedRef<FUINavigationConfig>(FSlateApplication::Get().GetNavigationConfig())->IsGamepadSelectKey(InKeyEvent.GetKey());
+	const bool bIsGamepadKey = InKeyEvent.GetKey().IsGamepadKey();
+	const bool bShouldUnforceNavigation = !bUsingThumbstickAsMouse || !bIsSelectKey || !bIsGamepadKey;
+
 	LastPressedKey = InKeyEvent.GetKey();
 	LastPressedKeyUserIndex = InKeyEvent.GetUserIndex();
-	VerifyInputTypeChangeByKey(InKeyEvent.GetKey());
+	VerifyInputTypeChangeByKey(InKeyEvent.GetKey(), bShouldUnforceNavigation);
+
+	if (!bShouldUnforceNavigation)
+	{
+		bIgnoreMousePress = true;
+		SimulateMousePress();
+	}
 }
 
 void UUINavPCComponent::HandleKeyUpEvent(FSlateApplication& SlateApp, const FKeyEvent& InKeyEvent)
 {
+	const bool bIsSelectKey = StaticCastSharedRef<FUINavigationConfig>(FSlateApplication::Get().GetNavigationConfig())->IsGamepadSelectKey(InKeyEvent.GetKey());
+	const bool bIsGamepadKey = InKeyEvent.GetKey().IsGamepadKey();
+	const bool bShouldUnforceNavigation = !bUsingThumbstickAsMouse || !bIsSelectKey || !bIsGamepadKey;
+
 	if (IsValid(ListeningInputBox))
 	{
 		FKey Key = InKeyEvent.GetKey();
@@ -421,6 +446,11 @@ void UUINavPCComponent::HandleKeyUpEvent(FSlateApplication& SlateApp, const FKey
 			Key = GetAxisFromKey(Key);
 		}
 		ProcessRebind(InKeyEvent.GetKey());
+	}
+	else if (!bShouldUnforceNavigation)
+	{
+		bIgnoreMouseRelease = true;
+		SimulateMouseRelease();
 	}
 }
 
@@ -526,7 +556,14 @@ void UUINavPCComponent::HandleMouseButtonDownEvent(FSlateApplication& SlateApp, 
 
 	if (CurrentInputType != EInputType::Mouse)
 	{
-		NotifyInputTypeChange(EInputType::Mouse);
+		if (bIgnoreMousePress && MouseEvent.GetEffectingButton() == EKeys::LeftMouseButton)
+		{
+			bIgnoreMousePress = false;
+		}
+		else
+		{
+			NotifyInputTypeChange(EInputType::Mouse);
+		}
 	}
 }
 
@@ -534,7 +571,14 @@ void UUINavPCComponent::HandleMouseButtonUpEvent(FSlateApplication& SlateApp, co
 {
 	if (CurrentInputType != EInputType::Mouse)
 	{
-		NotifyInputTypeChange(EInputType::Mouse);
+		if (bIgnoreMouseRelease && MouseEvent.GetEffectingButton() == EKeys::LeftMouseButton)
+		{
+			bIgnoreMouseRelease = false;
+		}
+		else
+		{
+			NotifyInputTypeChange(EInputType::Mouse);
+		}
 	}
 }
 
@@ -870,13 +914,13 @@ bool UUINavPCComponent::IsAxis(const FKey& Key) const
 	return IsAxis2D(Key) || AxisToKeyMap.Contains(Key);
 }
 
-void UUINavPCComponent::VerifyInputTypeChangeByKey(const FKey& Key)
+void UUINavPCComponent::VerifyInputTypeChangeByKey(const FKey& Key, const bool bAttemptUnforceNavigation /*= true*/)
 {
 	const EInputType NewInputType = GetKeyInputType(Key);
 
 	if (NewInputType != CurrentInputType)
 	{
-		NotifyInputTypeChange(NewInputType);
+		NotifyInputTypeChange(NewInputType, bAttemptUnforceNavigation);
 	}
 }
 
@@ -930,7 +974,7 @@ bool UUINavPCComponent::IsListeningToInputRebind() const
 	return IsValid(ListeningInputBox);
 }
 
-void UUINavPCComponent::NotifyInputTypeChange(const EInputType NewInputType)
+void UUINavPCComponent::NotifyInputTypeChange(const EInputType NewInputType, const bool bAttemptUnforceNavigation /*= true*/)
 {
 	IUINavPCReceiver::Execute_OnInputChanged(GetOwner(), CurrentInputType, NewInputType);
 
@@ -938,9 +982,11 @@ void UUINavPCComponent::NotifyInputTypeChange(const EInputType NewInputType)
 	CurrentInputType = NewInputType;
 	if (ActiveWidget != nullptr)
 	{
-		ActiveWidget->AttemptUnforceNavigation(CurrentInputType);
-		// TODO: Propagate this!
-		ActiveWidget->OnInputChanged(OldInputType, CurrentInputType);
+		if (bAttemptUnforceNavigation)
+		{
+			ActiveWidget->AttemptUnforceNavigation(CurrentInputType);
+		}
+		ActiveWidget->PropagateOnInputChanged(OldInputType, CurrentInputType);
 	}
 	InputTypeChangedDelegate.Broadcast(CurrentInputType);
 }

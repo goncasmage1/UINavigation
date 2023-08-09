@@ -395,6 +395,8 @@ public:
 	
 	virtual void OnInputChanged_Implementation(const EInputType From, const EInputType To);
 
+	void PropagateOnInputChanged(const EInputType From, const EInputType To);
+
 	/**
 	*	Called before this widget is setup for UINav logic
 	*/
