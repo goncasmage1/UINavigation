@@ -7,7 +7,7 @@
 class UINAVIGATION_API FUINavigationConfig : public FNavigationConfig
 {
 public:
-	FUINavigationConfig(const bool bAllowAccept = true, const bool bAllowBack = true, const bool bUseAnalogDirectionalInput = true);
+	FUINavigationConfig(const bool bAllowAccept = true, const bool bAllowBack = true, const bool bUseAnalogDirectionalInput = true, const bool bUsingThumbstickAsMouse = false);
 
 	virtual EUINavigationAction GetNavigationActionForKey(const FKey& InKey) const override;
 
@@ -18,5 +18,9 @@ public:
 	virtual bool IsAnalogHorizontalKey(const FKey& InKey) const override { return InKey == EKeys::Gamepad_LeftX || InKey == EKeys::Gamepad_RightX; }
 	virtual bool IsAnalogVerticalKey(const FKey& InKey) const override { return InKey == EKeys::Gamepad_LeftY || InKey == EKeys::Gamepad_RightY; }
 
+	bool IsGamepadSelectKey(const FKey& Key) const { return GamepadSelectKeys.Contains(Key); }
+
 	TMap<FKey, EUINavigationAction> KeyActionRules;
+
+	TArray<FKey> GamepadSelectKeys;
 };

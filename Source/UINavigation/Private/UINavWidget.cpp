@@ -48,6 +48,11 @@ void UUINavWidget::NativeConstruct()
 	OuterUINavWidget = GetOuterObject<UUINavWidget>(this);
 	if (OuterUINavWidget != nullptr)
 	{
+		if (!IsValid(OuterUINavWidget->GetFirstComponent()))
+		{
+			OuterUINavWidget->SetFirstComponent(FirstComponent);
+		}
+
 		ParentWidget = OuterUINavWidget;
 		PreSetup(!bCompletedSetup);
 
@@ -843,6 +848,15 @@ void UUINavWidget::OnInputChanged_Implementation(const EInputType From, const EI
 
 }
 
+void UUINavWidget::PropagateOnInputChanged(const EInputType From, const EInputType To)
+{
+	OnInputChanged(From, To);
+	if (IsValid(OuterUINavWidget) && !OuterUINavWidget->bMaintainNavigationForChild)
+	{
+		OuterUINavWidget->PropagateOnInputChanged(From, To);
+	}
+}
+
 void UUINavWidget::PreSetup_Implementation(const bool bFirstSetup)
 {
 
@@ -1186,6 +1200,21 @@ UUINavWidget* UUINavWidget::GetMostOuterUINavWidget()
 UUINavWidget* UUINavWidget::GetChildUINavWidget(const int ChildIndex) const
 {
 	return ChildIndex < ChildUINavWidgets.Num() ? ChildUINavWidgets[ChildIndex] : nullptr;
+}
+
+EThumbstickAsMouse UUINavWidget::GetUseThumbstickAsMouse() const
+{
+	if (UseThumbstickAsMouse != EThumbstickAsMouse::None)
+	{
+		return UseThumbstickAsMouse;
+	}
+
+	if (IsValid(OuterUINavWidget))
+	{
+		return OuterUINavWidget->GetUseThumbstickAsMouse();
+	}
+
+	return EThumbstickAsMouse::None;
 }
 
 void UUINavWidget::AddParentToPath(const int IndexInParent)

@@ -358,9 +358,11 @@ void UUINavComponent::NativeOnFocusChanging(const FWeakWidgetPath& PreviousFocus
 		}
 	}
 
-	const FName WidgetType = NewWidgetPath.GetLastWidget()->GetType();
-	if (!WidgetType.IsEqual(FName(TEXT("SObjectWidget"))) &&
-		!WidgetType.IsEqual(FName(TEXT("SButton"))))
+	const FString WidgetTypeString = NewWidgetPath.GetLastWidget()->GetType().ToString();
+	if (!WidgetTypeString.Contains(TEXT("SObjectWidget")) &&
+		!WidgetTypeString.Contains(TEXT("SButton")) &&
+		!WidgetTypeString.Contains(TEXT("SSpinBox")) &&
+		!WidgetTypeString.Contains(TEXT("SEditableText")))
 	{
 		NavButton->SetFocus();
 		return;
