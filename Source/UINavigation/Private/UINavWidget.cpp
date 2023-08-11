@@ -48,6 +48,11 @@ void UUINavWidget::NativeConstruct()
 	OuterUINavWidget = GetOuterObject<UUINavWidget>(this);
 	if (OuterUINavWidget != nullptr)
 	{
+		if (!IsValid(OuterUINavWidget->GetFirstComponent()))
+		{
+			OuterUINavWidget->SetFirstComponent(FirstComponent);
+		}
+
 		ParentWidget = OuterUINavWidget;
 		PreSetup(!bCompletedSetup);
 
