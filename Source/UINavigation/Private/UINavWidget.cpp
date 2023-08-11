@@ -1202,6 +1202,21 @@ UUINavWidget* UUINavWidget::GetChildUINavWidget(const int ChildIndex) const
 	return ChildIndex < ChildUINavWidgets.Num() ? ChildUINavWidgets[ChildIndex] : nullptr;
 }
 
+EThumbstickAsMouse UUINavWidget::GetUseThumbstickAsMouse() const
+{
+	if (UseThumbstickAsMouse != EThumbstickAsMouse::None)
+	{
+		return UseThumbstickAsMouse;
+	}
+
+	if (IsValid(OuterUINavWidget))
+	{
+		return OuterUINavWidget->GetUseThumbstickAsMouse();
+	}
+
+	return EThumbstickAsMouse::None;
+}
+
 void UUINavWidget::AddParentToPath(const int IndexInParent)
 {
 	UINavWidgetPath.EmplaceAt(0, IndexInParent);

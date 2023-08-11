@@ -369,7 +369,8 @@ UUINavWidget* UUINavPCComponent::GoToBuiltWidget(UUINavWidget* NewWidget, const 
 
 EThumbstickAsMouse UUINavPCComponent::UsingThumbstickAsMouse() const
 {
-	return IsValid(ActiveWidget) && ActiveWidget->UseThumbstickAsMouse != EThumbstickAsMouse::None ? ActiveWidget->UseThumbstickAsMouse : UseThumbstickAsMouse;
+	const EThumbstickAsMouse ActiveWidgetThumbstickAsMouse = IsValid(ActiveWidget) ? ActiveWidget->GetUseThumbstickAsMouse() : EThumbstickAsMouse::None;
+	return ActiveWidgetThumbstickAsMouse != EThumbstickAsMouse::None ? ActiveWidgetThumbstickAsMouse : UseThumbstickAsMouse;
 }
 
 void UUINavPCComponent::RefreshNavigationKeys()

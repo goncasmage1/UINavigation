@@ -172,8 +172,8 @@ public:
 	float NavigationChainFrequency = 0.15f;
 
 	/*
-	Indicates whether the controller should use the left stick as mouse.
-	If the active UINavWidget has this set to false, this will override that.
+	Indicates whether the controller should use the left or right stick as mouse.
+	If the active UINavWidget has this set to a value different than None, it will override this one.
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavController)
 	EThumbstickAsMouse UseThumbstickAsMouse = EThumbstickAsMouse::None;

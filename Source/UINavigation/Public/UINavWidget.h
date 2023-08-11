@@ -169,7 +169,7 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = UINavWidget)
 	bool bMaintainNavigationForChild = false;
 
-	/*If set to true, the gamepad's left thumbstick will be used to move the mouse when this widget is active */
+	/*If set to Left or Right, the gamepad's left or right thumbstick will be used to move the mouse when this widget is active */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = UINavWidget)
 	EThumbstickAsMouse UseThumbstickAsMouse = EThumbstickAsMouse::None;
 
@@ -478,6 +478,8 @@ public:
 	UUINavWidget* GetChildUINavWidget(const int ChildIndex) const;
 
 	FORCEINLINE TArray<int> GetUINavWidgetPath() const { return UINavWidgetPath; }
+
+	EThumbstickAsMouse GetUseThumbstickAsMouse() const;
 
 	void AddParentToPath(const int IndexInParent);
 
