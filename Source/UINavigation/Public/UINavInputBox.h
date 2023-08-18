@@ -40,7 +40,7 @@ protected:
 	bool UpdateKeyIconForKey(const int Index);
 	FText GetKeyText(const int Index);
 	void UpdateKeyDisplay(const int Index);
-	FKey GetKeyFromAxis(FKey AxisKey) const;
+	FKey GetKeyFromAxis(const FKey& AxisKey) const;
 	void ProcessInputName();
 	int GetNumValidKeys(const int Index) const;
 
@@ -64,11 +64,11 @@ public:
 	void CreateEnhancedInputKeyWidgets();
 
 	void CreateKeyWidgets();
-	bool TrySetupNewKey(const FKey NewKey, const int KeyIndex, UUINavInputComponent* const NewInputButton);
+	bool TrySetupNewKey(const FKey& NewKey, const int KeyIndex, UUINavInputComponent* const NewInputButton);
 	void ResetKeyWidgets();
-	void UpdateInputKey(const FKey NewKey, int Index = -1, const bool bSkipChecks = false);
-	void FinishUpdateNewKey();
-	void FinishUpdateNewEnhancedInputKey(const FKey PressedKey, int Index);
+	int32 UpdateInputKey(const FKey& NewKey, int Index = -1, const bool bSkipChecks = false, const int32 MappingIndexToIgnore = -1);
+	int32 FinishUpdateNewKey(const int32 MappingIndexToIgnore = -1);
+	int32 FinishUpdateNewEnhancedInputKey(const FKey& PressedKey, int Index, const int32 MappingIndexToIgnore = -1);
 	void TryMapEnhancedAxisKey(const FKey& NewKey, const int32 Index);
 	void TryMap2DAxisKey(const FKey& NewMappingKey, const int Index);
 	void UnmapEnhancedAxisKey(const FKey& NewAxisKey, const FKey& OldAxisKey, const FKey& NewKey, const int32 Index, const bool bNegateX, const bool bNegateY, const bool bNegateZ);
@@ -77,7 +77,7 @@ public:
 	void CancelUpdateInputKey(const ERevertRebindReason Reason);
 	void RevertToKeyText(const int Index);
 
-	int ContainsKey(const FKey CompareKey) const;
+	int ContainsKey(const FKey& CompareKey) const;
 	FORCEINLINE bool IsAxis() const { return IS_AXIS; }
 	FORCEINLINE bool WantsAxisKey() const;
 	FORCEINLINE FKey GetKey(const int Index) { return Index >= 0 && Index < Keys.Num() ? Keys[Index] : FKey(); }

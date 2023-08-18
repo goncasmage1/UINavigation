@@ -230,10 +230,11 @@ void UUINavInputContainer::SwapKeysDecided(const UPromptDataBase* const PromptDa
 	{
 		if (SwapKeysPromptData->bShouldSwap)
 		{
-			SwapKeysPromptData->CurrentInputBox->FinishUpdateNewKey();
+			int32 ModifiedActionMappingIndex = SwapKeysPromptData->CurrentInputBox->FinishUpdateNewKey();
 			SwapKeysPromptData->CollidingInputBox->UpdateInputKey(SwapKeysPromptData->InputCollisionData.CurrentInputKey,
 				SwapKeysPromptData->InputCollisionData.CollidingKeyIndex,
-				true);
+				true,
+				ModifiedActionMappingIndex);
 		}
 		else
 		{
