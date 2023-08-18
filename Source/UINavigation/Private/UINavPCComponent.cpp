@@ -28,6 +28,7 @@
 #include "Templates/SharedPointer.h"
 #include "Engine/GameViewportClient.h"
 #include "Internationalization/Internationalization.h"
+#include "SwapKeysWidget.h"
 
 const FKey UUINavPCComponent::MouseUp("MouseUp");
 const FKey UUINavPCComponent::MouseDown("MouseDown");
@@ -239,7 +240,7 @@ void UUINavPCComponent::ProcessRebind(const FKey Key)
 
 void UUINavPCComponent::CancelRebind()
 {
-	if (IsValid(ListeningInputBox))
+	if (IsValid(ListeningInputBox) && IsValid(ActiveWidget) && !ActiveWidget->IsA<USwapKeysWidget>())
 	{
 		ListeningInputBox->CancelUpdateInputKey(ERevertRebindReason::None);
 		ListeningInputBox = nullptr;
