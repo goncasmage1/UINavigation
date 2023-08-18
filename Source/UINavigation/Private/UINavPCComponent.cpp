@@ -260,19 +260,22 @@ void UUINavPCComponent::SetActiveWidget(UUINavWidget * NewActiveWidget)
 			FSlateApplication::Get().SetAllUserFocusToGameViewport();
 		}
 	}
+
+	UUINavWidget* OldActiveWidget = ActiveWidget;
+
+	ActiveWidget = NewActiveWidget;
+	ActiveSubWidget = nullptr;
+	RefreshNavigationKeys();
 	
-	if (NewActiveWidget != nullptr)
+	IUINavPCReceiver::Execute_OnActiveWidgetChanged(GetOwner(), OldActiveWidget, ActiveWidget);
+	
+	if (ActiveWidget != nullptr)
 	{
-		if (ActiveWidget == nullptr)
+		if (OldActiveWidget == nullptr)
 		{
 			IUINavPCReceiver::Execute_OnRootWidgetAdded(GetOwner());
 		}
 	}
-
-	IUINavPCReceiver::Execute_OnActiveWidgetChanged(GetOwner(), ActiveWidget, NewActiveWidget);
-	ActiveWidget = NewActiveWidget;
-	ActiveSubWidget = nullptr;
-	RefreshNavigationKeys();
 }
 
 void UUINavPCComponent::NotifyNavigatedTo(UUINavWidget* NavigatedWidget)

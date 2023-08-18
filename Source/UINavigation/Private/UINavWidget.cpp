@@ -392,6 +392,20 @@ FReply UUINavWidget::NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEven
 				StartedSelect();
 			}
 		}
+		else if (FSlateApplication::Get().GetNavigationDirectionFromKey(InKeyEvent) == EUINavigation::Next)
+		{
+			if (!TryConsumeNavigation())
+			{
+				PropagateOnNext();
+			}
+		}
+		else if (FSlateApplication::Get().GetNavigationDirectionFromKey(InKeyEvent) == EUINavigation::Previous)
+		{
+			if (!TryConsumeNavigation())
+			{
+				PropagateOnPrevious();
+			}
+		}
 	}
 
 	return Reply;
