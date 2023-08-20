@@ -39,9 +39,16 @@ void UUINavComponent::NativeConstruct()
 
 		if (!IsValid(ParentWidget))
 		{
-			DISPLAYERROR("UI Nav Component isn't in a UINavWidget!");
+			ParentWidget = UUINavWidget::GetOuterObject<UUINavWidget>(Slot);
+			
+			if (!IsValid(ParentWidget))
+			{
+				DISPLAYERROR("UI Nav Component isn't in a UINavWidget!");
+				return;
+			}
 		}
-		else if (!IsValid(ParentWidget->GetFirstComponent()) && CanBeNavigated())
+		
+		if (!IsValid(ParentWidget->GetFirstComponent()) && CanBeNavigated())
 		{
 			ParentWidget->SetFirstComponent(this);
 			if (ParentWidget->bCompletedSetup)

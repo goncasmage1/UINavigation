@@ -124,7 +124,7 @@ void UUINavInputBox::CreateEnhancedInputKeyWidgets()
 	}
 }
 
-bool UUINavInputBox::TrySetupNewKey(const FKey NewKey, const int KeyIndex, UUINavInputComponent* const NewInputButton)
+bool UUINavInputBox::TrySetupNewKey(const FKey& NewKey, const int KeyIndex, UUINavInputComponent* const NewInputButton)
 {
 	if (!NewKey.IsValid() || Keys.IsValidIndex(KeyIndex) || Keys.Contains(NewKey)) return false;
 
@@ -149,7 +149,7 @@ void UUINavInputBox::ResetKeyWidgets()
 	CreateKeyWidgets();
 }
 
-void UUINavInputBox::UpdateInputKey(const FKey NewKey, int Index, const bool bSkipChecks)
+int32 UUINavInputBox::UpdateInputKey(const FKey& NewKey, int Index, const bool bSkipChecks, const int32 MappingIndexToIgnore /*= -1*/)
 {
 	if (Index < 0) Index = AwaitingIndex;
 
@@ -159,7 +159,7 @@ void UUINavInputBox::UpdateInputKey(const FKey NewKey, int Index, const bool bSk
 	if (Index < 0)
 	{
 		CancelUpdateInputKey(ERevertRebindReason::None);
-		return;
+		return -1;
 	}
 
 	if (!bSkipChecks)
@@ -172,7 +172,7 @@ void UUINavInputBox::UpdateInputKey(const FKey NewKey, int Index, const bool bSk
 			if (!Keys[Index].IsValid())
 			{
 				CancelUpdateInputKey(RevertReason);
-				return;
+				return -1;
 			}
 
 			int SelfIndex = INDEX_NONE;
@@ -191,33 +191,36 @@ void UUINavInputBox::UpdateInputKey(const FKey NewKey, int Index, const bool bSk
 				CancelUpdateInputKey(RevertReason);
 			}
 
-			return;
+			return -1;
 		}
 		else if (RevertReason != ERevertRebindReason::None)
 		{
 			CancelUpdateInputKey(RevertReason);
-			return;
+			return -1;
 		}
 	}
 
-	FinishUpdateNewKey();
+	return FinishUpdateNewKey(MappingIndexToIgnore);
 }
 
-void UUINavInputBox::FinishUpdateNewKey()
+int32 UUINavInputBox::FinishUpdateNewKey(const int32 MappingIndexToIgnore /*= -1*/)
 {
 	const FKey OldKey = Keys[AwaitingIndex];
 
-	FinishUpdateNewEnhancedInputKey(AwaitingNewKey, AwaitingIndex);
+	int32 ModifiedActionMappingIndex = FinishUpdateNewEnhancedInputKey(AwaitingNewKey, AwaitingIndex, MappingIndexToIgnore);
 
 	Container->OnKeyRebinded(InputName, OldKey, Keys[AwaitingIndex]);
 	Container->UINavPC->RefreshNavigationKeys();
 	AwaitingIndex = -1;
+
+	return ModifiedActionMappingIndex;
 }
 
-void UUINavInputBox::FinishUpdateNewEnhancedInputKey(const FKey PressedKey, const int Index)
+int32 UUINavInputBox::FinishUpdateNewEnhancedInputKey(const FKey& PressedKey, const int Index, const int32 MappingIndexToIgnore /*= -1*/)
 {
 	const TArray<FEnhancedActionKeyMapping>& ActionMappings = InputContext->GetMappings();
 
+	int32 ModifiedActionMappingIndex = -1;
 	bool bPositive;
 	const FKey PressedAxisKey = Container->UINavPC->GetAxisFromScaledKey(PressedKey, bPositive);
 	const FKey NewKey = WantsAxisKey() && PressedAxisKey.IsValid() ? PressedAxisKey : PressedKey;
@@ -231,7 +234,7 @@ void UUINavInputBox::FinishUpdateNewEnhancedInputKey(const FKey PressedKey, cons
 	for (; i >= 0; --i)
 	{
 		FEnhancedActionKeyMapping& ActionMapping = InputContext->GetMapping(i);
-		if (ActionMapping.Action == InputActionData.Action)
+		if (ActionMapping.Action == InputActionData.Action && i != MappingIndexToIgnore)
 		{
 			EInputAxis Axis = InputActionData.Axis;
 			Container->GetAxisPropertiesFromMapping(ActionMapping, bPositive, Axis);
@@ -243,6 +246,7 @@ void UUINavInputBox::FinishUpdateNewEnhancedInputKey(const FKey PressedKey, cons
 				{
 					if (MappingKey == Keys[Index])
 					{
+						ModifiedActionMappingIndex = i;
 						if (IS_AXIS)
 						{
 							if (Container->UINavPC->IsAxis(ActionMapping.Key) &&
@@ -353,6 +357,8 @@ void UUINavInputBox::FinishUpdateNewEnhancedInputKey(const FKey PressedKey, cons
 	{
 		Container->ResetInputBox(InputName, GET_REVERSE_AXIS);
 	}
+
+	return ModifiedActionMappingIndex;
 }
 
 void UUINavInputBox::TryMapEnhancedAxisKey(const FKey& NewKey, const int32 Index)
@@ -549,7 +555,7 @@ void UUINavInputBox::CancelUpdateInputKey(const ERevertRebindReason Reason)
 	AwaitingIndex = -1;
 }
 
-FKey UUINavInputBox::GetKeyFromAxis(const FKey AxisKey) const
+FKey UUINavInputBox::GetKeyFromAxis(const FKey& AxisKey) const
 {
 	if (IS_AXIS && InputActionData.AxisScale == EAxisType::None)
 	{
@@ -745,7 +751,7 @@ void UUINavInputBox::RevertToKeyText(const int Index)
 	InputButtons[Index]->SetText(OldName);
 }
 
-int UUINavInputBox::ContainsKey(const FKey CompareKey) const
+int UUINavInputBox::ContainsKey(const FKey& CompareKey) const
 {
 	return Keys.IndexOfByKey(CompareKey);
 }

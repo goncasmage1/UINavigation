@@ -28,6 +28,7 @@
 #include "Templates/SharedPointer.h"
 #include "Engine/GameViewportClient.h"
 #include "Internationalization/Internationalization.h"
+#include "SwapKeysWidget.h"
 
 const FKey UUINavPCComponent::MouseUp("MouseUp");
 const FKey UUINavPCComponent::MouseDown("MouseDown");
@@ -239,7 +240,7 @@ void UUINavPCComponent::ProcessRebind(const FKey Key)
 
 void UUINavPCComponent::CancelRebind()
 {
-	if (IsValid(ListeningInputBox))
+	if (IsValid(ListeningInputBox) && IsValid(ActiveWidget) && !ActiveWidget->IsA<USwapKeysWidget>())
 	{
 		ListeningInputBox->CancelUpdateInputKey(ERevertRebindReason::None);
 		ListeningInputBox = nullptr;
@@ -257,21 +258,25 @@ void UUINavPCComponent::SetActiveWidget(UUINavWidget * NewActiveWidget)
 		if (NewActiveWidget == nullptr)
 		{
 			IUINavPCReceiver::Execute_OnRootWidgetRemoved(GetOwner());
+			FSlateApplication::Get().SetAllUserFocusToGameViewport();
 		}
 	}
+
+	UUINavWidget* OldActiveWidget = ActiveWidget;
+
+	ActiveWidget = NewActiveWidget;
+	ActiveSubWidget = nullptr;
+	RefreshNavigationKeys();
 	
-	if (NewActiveWidget != nullptr)
+	IUINavPCReceiver::Execute_OnActiveWidgetChanged(GetOwner(), OldActiveWidget, ActiveWidget);
+	
+	if (ActiveWidget != nullptr)
 	{
-		if (ActiveWidget == nullptr)
+		if (OldActiveWidget == nullptr)
 		{
 			IUINavPCReceiver::Execute_OnRootWidgetAdded(GetOwner());
 		}
 	}
-
-	IUINavPCReceiver::Execute_OnActiveWidgetChanged(GetOwner(), ActiveWidget, NewActiveWidget);
-	ActiveWidget = NewActiveWidget;
-	ActiveSubWidget = nullptr;
-	RefreshNavigationKeys();
 }
 
 void UUINavPCComponent::NotifyNavigatedTo(UUINavWidget* NavigatedWidget)
