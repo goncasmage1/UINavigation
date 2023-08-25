@@ -466,7 +466,7 @@ void UUINavComponent::NativePreConstruct()
 {
 	Super::NativePreConstruct();
 
-	if (IsValid(NavText))
+	if (IsValid(NavText) && !NavText->TextDelegate.IsBound())
 	{
 		NavText->SetText(ComponentText);
 
