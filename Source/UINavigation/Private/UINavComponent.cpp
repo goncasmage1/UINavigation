@@ -340,6 +340,11 @@ void UUINavComponent::NativeOnFocusChanging(const FWeakWidgetPath& PreviousFocus
 {
 	Super::NativeOnFocusChanging(PreviousFocusPath, NewWidgetPath, InFocusEvent);
 
+	if (ParentWidget->UINavPC->GetInputMode() == EInputMode::Game)
+	{
+		return;
+	}
+
 	const bool bHadFocus = PreviousFocusPath.ContainsWidget(&TakeWidget().Get());
 	const bool bHasFocus = NewWidgetPath.ContainsWidget(&TakeWidget().Get());
 	const bool bHasButtonFocus = NewWidgetPath.ContainsWidget(&NavButton->TakeWidget().Get());
