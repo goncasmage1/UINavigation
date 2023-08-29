@@ -52,6 +52,8 @@ UUINavPCComponent::UUINavPCComponent()
 		EKeys::AddKey(FKeyDetails(MouseRight, NSLOCTEXT("InputKeys", "MouseRight", "Mouse Right"), FKeyDetails::MouseButton));
 		EKeys::AddKey(FKeyDetails(MouseLeft, NSLOCTEXT("InputKeys", "MouseLeft", "Mouse Left"), FKeyDetails::MouseButton));
 	}
+
+	EnhancedInputContext = GetDefault<UUINavSettings>()->EnhancedInputContext.Get();
 }
 
 void UUINavPCComponent::Activate(bool bReset)
