@@ -258,7 +258,7 @@ void UUINavPCComponent::SetActiveWidget(UUINavWidget * NewActiveWidget)
 		if (NewActiveWidget == nullptr)
 		{
 			IUINavPCReceiver::Execute_OnRootWidgetRemoved(GetOwner());
-			if (IsValid(PC))
+			if (IsValid(PC) && IsValid(PC->Player))
 			{
 				FSlateApplication::Get().SetAllUserFocusToGameViewport();
 			}
