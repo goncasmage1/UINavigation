@@ -45,7 +45,7 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavigationLibrary)
 	static bool IsGamepadConnected();
 
-	UFUNCTION(BlueprintCallable, Category = UINavInput)
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavInput)
 	static bool IsUINavInputAction(const UInputAction* const InputAction);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavigationLibrary)
@@ -92,7 +92,7 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
 	static const UUINavSettings* GetUINavSettings();
 
-	UFUNCTION(BlueprintPure, Category = UINavigationLibrary)
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavigationLibrary)
 	static bool IsVRKey(const FKey Key);
 
 	UFUNCTION(BlueprintPure, Category = UINavigationLibrary)
