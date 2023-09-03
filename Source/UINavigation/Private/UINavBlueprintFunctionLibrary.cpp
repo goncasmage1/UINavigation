@@ -166,9 +166,10 @@ bool UUINavBlueprintFunctionLibrary::IsUINavInputAction(const UInputAction* cons
 {
 	const UUINavSettings* const UINavSettings = GetDefault<UUINavSettings>();
 	const UUINavEnhancedInputActions* const InputActions = UINavSettings->EnhancedInputActions.LoadSynchronous();
+
+	if (InputActions == nullptr) return false;
 		
-	return (InputActions == nullptr ||
-			InputAction == InputActions->IA_MenuUp ||
+	return (InputAction == InputActions->IA_MenuUp ||
 			InputAction == InputActions->IA_MenuDown ||
 			InputAction == InputActions->IA_MenuLeft ||
 			InputAction == InputActions->IA_MenuRight ||
