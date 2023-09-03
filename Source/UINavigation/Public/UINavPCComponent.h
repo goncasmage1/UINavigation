@@ -214,6 +214,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavController)
 	UDataTable* KeyboardMouseKeyNameData = nullptr;
 
+	UPROPERTY(BlueprintReadOnly, Category = "Settings")
+	TObjectPtr<UInputMappingContext> EnhancedInputContext;
+
 	FKey LastPressedKey;
 	int32 LastPressedKeyUserIndex;
 

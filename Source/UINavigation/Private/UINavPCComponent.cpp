@@ -52,6 +52,8 @@ UUINavPCComponent::UUINavPCComponent()
 		EKeys::AddKey(FKeyDetails(MouseRight, NSLOCTEXT("InputKeys", "MouseRight", "Mouse Right"), FKeyDetails::MouseButton));
 		EKeys::AddKey(FKeyDetails(MouseLeft, NSLOCTEXT("InputKeys", "MouseLeft", "Mouse Left"), FKeyDetails::MouseButton));
 	}
+
+	EnhancedInputContext = GetDefault<UUINavSettings>()->EnhancedInputContext.Get();
 }
 
 void UUINavPCComponent::Activate(bool bReset)
@@ -258,7 +260,12 @@ void UUINavPCComponent::SetActiveWidget(UUINavWidget * NewActiveWidget)
 		if (NewActiveWidget == nullptr)
 		{
 			IUINavPCReceiver::Execute_OnRootWidgetRemoved(GetOwner());
-			FSlateApplication::Get().SetAllUserFocusToGameViewport();
+			// GetOwningPlayer will not be valid if SetActiveWidget is called during PlayerController EndPlay()
+			APlayerController *ActiveWidgetPC = ActiveWidget->GetOwningPlayer();
+			if (IsValid(ActiveWidgetPC) && IsValid(ActiveWidgetPC->Player))
+			{
+				FSlateApplication::Get().SetAllUserFocusToGameViewport();
+			}
 		}
 	}
 

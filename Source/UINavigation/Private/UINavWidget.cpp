@@ -1059,7 +1059,7 @@ void UUINavWidget::ReturnToParent(const bool bRemoveAllParents, const int ZOrder
 		}
 		else
 		{
-			OuterUINavWidget->ReturnToParent();
+			OuterUINavWidget->ReturnToParent(bRemoveAllParents, ZOrder);
 		}
 	}
 }
