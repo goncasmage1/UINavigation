@@ -260,7 +260,9 @@ void UUINavPCComponent::SetActiveWidget(UUINavWidget * NewActiveWidget)
 		if (NewActiveWidget == nullptr)
 		{
 			IUINavPCReceiver::Execute_OnRootWidgetRemoved(GetOwner());
-			if (IsValid(PC) && IsValid(PC->Player))
+			// GetOwningPlayer will not be valid if SetActiveWidget is called during PlayerController EndPlay()
+			APlayerController *ActiveWidgetPC = ActiveWidget->GetOwningPlayer();
+			if (IsValid(ActiveWidgetPC) && IsValid(ActiveWidgetPC->Player))
 			{
 				FSlateApplication::Get().SetAllUserFocusToGameViewport();
 			}
