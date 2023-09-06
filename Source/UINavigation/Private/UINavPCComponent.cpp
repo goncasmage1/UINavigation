@@ -813,7 +813,18 @@ FText UUINavPCComponent::GetKeyText(const FKey Key) const
 
 void UUINavPCComponent::GetEnhancedInputKeys(const UInputAction* Action, TArray<FKey>& OutKeys)
 {
-	if (const UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PC->GetLocalPlayer()))
+	if (UUINavBlueprintFunctionLibrary::IsUINavInputAction(Action))
+	{
+		const UInputMappingContext* const UINavInputContext = GetDefault<UUINavSettings>()->EnhancedInputContext.LoadSynchronous();
+		for (const FEnhancedActionKeyMapping& Mapping : UINavInputContext->GetMappings())
+		{
+			if (Mapping.Action == Action && UUINavBlueprintFunctionLibrary::RespectsRestriction(Mapping.Key, EInputRestriction::None))
+			{
+				OutKeys.Add(Mapping.Key);
+			}
+		}
+	}
+	else if (const UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PC->GetLocalPlayer()))
 	{
 		OutKeys = Subsystem->QueryKeysMappedToAction(Action);
 	}

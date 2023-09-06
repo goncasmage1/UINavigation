@@ -26,7 +26,6 @@ class UTexture2D;
 class UUINavWidget;
 class UInputMappingContext;
 
-DECLARE_DELEGATE_OneParam(FMouseKeyDelegate, FKey);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FInputTypeChangedDelegate, EInputType, InputType);
 
 USTRUCT(BlueprintType)

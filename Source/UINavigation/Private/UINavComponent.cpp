@@ -437,8 +437,7 @@ FNavigationReply UUINavComponent::NativeOnNavigation(const FGeometry& MyGeometry
 			return FNavigationReply::Stop();
 		}
 	}
-		
-	if (InNavigationEvent.GetNavigationType() == EUINavigation::Previous)
+	else if (InNavigationEvent.GetNavigationType() == EUINavigation::Previous)
 	{
 		if (bAllowsSectionInput)
 		{
@@ -452,9 +451,7 @@ FNavigationReply UUINavComponent::NativeOnNavigation(const FGeometry& MyGeometry
 			return FNavigationReply::Stop();
 		}
 	}
-	else if (InNavigationEvent.GetNavigationType() != EUINavigation::Invalid &&
-			InNavigationEvent.GetNavigationType() != EUINavigation::Next &&
-			InNavigationEvent.GetNavigationType() != EUINavigation::Previous)
+	else if (InNavigationEvent.GetNavigationType() != EUINavigation::Invalid)
 	{
 		IUINavPCReceiver::Execute_OnNavigated(ParentWidget->UINavPC->GetOwner(), InNavigationEvent.GetNavigationType());
 	}
