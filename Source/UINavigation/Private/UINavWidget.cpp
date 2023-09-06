@@ -28,9 +28,6 @@
 #include "Engine/GameViewportClient.h"
 #include "Engine/ViewportSplitScreen.h"
 #include "Curves/CurveFloat.h"
-#if IS_VR_PLATFORM
-#include "HeadMountedDisplayFunctionLibrary.h"
-#endif
 
 UUINavWidget::UUINavWidget(const FObjectInitializer& ObjectInitializer)
 	:Super(ObjectInitializer)
