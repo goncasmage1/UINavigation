@@ -450,6 +450,8 @@ public:
 
 	bool TryNavigateInDirection(const EUINavigation Direction, const ENavigationGenesis Genesis);
 
+	void ClearAnalogKeysFromPressedKeys(const FKey& PressedKey);
+
 	void ClearNavigationTimer();
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)

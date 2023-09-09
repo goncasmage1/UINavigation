@@ -474,6 +474,36 @@ void UUINavPCComponent::HandleAnalogInputEvent(FSlateApplication& SlateApp, cons
 		NotifyInputTypeChange(EInputType::Gamepad);
 	}
 
+	TSharedRef<FUINavigationConfig> UINavConfig = StaticCastSharedRef<FUINavigationConfig>(FSlateApplication::Get().GetNavigationConfig());
+	FKey UsedAnalogKey;
+	if (InAnalogInputEvent.GetKey() == EKeys::Gamepad_LeftX)
+	{
+		if (InAnalogInputEvent.GetAnalogValue() > UINavConfig->AnalogNavigationHorizontalThreshold)
+		{
+			UsedAnalogKey = EKeys::Gamepad_LeftStick_Right;
+		}
+		else if (InAnalogInputEvent.GetAnalogValue() < -UINavConfig->AnalogNavigationHorizontalThreshold)
+		{
+			UsedAnalogKey = EKeys::Gamepad_LeftStick_Left;
+		}
+	}
+	else if (InAnalogInputEvent.GetKey() == EKeys::Gamepad_LeftY)
+	{
+		if (InAnalogInputEvent.GetAnalogValue() > UINavConfig->AnalogNavigationVerticalThreshold)
+		{
+			UsedAnalogKey = EKeys::Gamepad_LeftStick_Up;
+		}
+		else if (InAnalogInputEvent.GetAnalogValue() < -UINavConfig->AnalogNavigationVerticalThreshold)
+		{
+			UsedAnalogKey = EKeys::Gamepad_LeftStick_Down;
+		}
+	}
+
+	if (UsedAnalogKey.IsValid() && LastPressedKey != UsedAnalogKey)
+	{
+		LastPressedKey = UsedAnalogKey;
+	}
+
 	const EThumbstickAsMouse ThumbstickAsMouse = UsingThumbstickAsMouse();
 	if (ThumbstickAsMouse != EThumbstickAsMouse::None)
 	{
@@ -1116,6 +1146,8 @@ void UUINavPCComponent::NotifyNavigationKeyReleased(const FKey& Key, const EUINa
 		PressedNavigationDirections.Remove(Direction);
 	}
 
+	ClearAnalogKeysFromPressedKeys(Key);
+
 	ClearNavigationTimer();
 }
 
@@ -1162,4 +1194,43 @@ bool UUINavPCComponent::TryNavigateInDirection(const EUINavigation Direction, co
 	SetTimer(Direction);
 
 	return true;
+}
+
+void UUINavPCComponent::ClearAnalogKeysFromPressedKeys(const FKey& PressedKey)
+{
+	auto IsLeftAnalogKey = [](const FKey& Key) -> bool
+	{
+		return Key == EKeys::Gamepad_LeftStick_Up ||
+			Key == EKeys::Gamepad_LeftStick_Down ||
+			Key == EKeys::Gamepad_LeftStick_Left ||
+			Key == EKeys::Gamepad_LeftStick_Right;
+	};
+
+	if (!IsLeftAnalogKey(PressedKey))
+	{
+		return;
+	}
+
+	TArray<EUINavigation> DirectionsToRemove;
+	for (TPair<EUINavigation, TArray<FKey>>& PressedDirection : PressedNavigationDirections)
+	{
+		for (int j = PressedDirection.Value.Num() - 1; j >= 0; --j)
+		{
+			const FKey& Key = PressedDirection.Value[j];
+			if (IsLeftAnalogKey(Key))
+			{
+				PressedDirection.Value.RemoveAt(j);
+				if (PressedDirection.Value.Num() == 0)
+				{
+					DirectionsToRemove.Add(PressedDirection.Key);
+				}
+			}
+		}
+	}
+
+	for (const EUINavigation DirectionToRemove : DirectionsToRemove)
+	{
+		PressedNavigationDirections.Remove(DirectionToRemove);
+	}
+
 }
