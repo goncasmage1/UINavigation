@@ -1052,58 +1052,37 @@ UEnhancedInputComponent* UUINavPCComponent::GetEnhancedInputComponent() const
 
 void UUINavPCComponent::NavigateInDirection(const EUINavigation InDirection)
 {
-	IUINavPCReceiver::Execute_OnNavigated(GetOwner(), InDirection);
-
-	TArray<FKey>* DirectionKeys = PressedNavigationDirections.Find(InDirection);
-	if (DirectionKeys == nullptr)
-	{
-		return;
-	}
-
 	AllowDirection = InDirection;
 
-	const FKey NavigationKey = DirectionKeys->Last();
-	if (!NavigationKey.IsValid())
+	if (!IsValid(ActiveWidget) || !IsValid(ActiveWidget->GetCurrentComponent()))
 	{
 		return;
 	}
 
-	FKeyEvent KeyEvent;
+	bAutomaticNavigation = true;
+
 	FSlateApplication& SlateApplication = FSlateApplication::Get();
-	if (!NavigationKey.IsGamepadKey())
-	{
-		const uint32* KeyCodePtr;
-		const uint32* CharacterCodePtr;
-		FInputKeyManager::Get().GetCodesFromKey(NavigationKey, KeyCodePtr, CharacterCodePtr);
-		const int32 KeyCode = KeyCodePtr != nullptr ? *KeyCodePtr : -1;
-
-		FKey const Key = FInputKeyManager::Get().GetKeyFromCodes(KeyCode, CharacterCodePtr != nullptr ? *CharacterCodePtr : 0);
-		KeyEvent = FKeyEvent(Key, SlateApplication.GetPlatformApplication()->GetModifierKeys(), SlateApplication.GetUserIndexForKeyboard(), true, CharacterCodePtr != nullptr ? *CharacterCodePtr : 0, KeyCode);
-	}
-	else
-	{
-		KeyEvent = FKeyEvent(NavigationKey, SlateApplication.GetPlatformApplication()->GetModifierKeys(), LastPressedKeyUserIndex, true, 0, 0);
-	}
-
-	SlateApplication.ProcessKeyDownEvent(KeyEvent);
+	FWidgetPath FocusPath;
+	SlateApplication.FindPathToWidget(ActiveWidget->GetCurrentComponent()->GetCachedWidget().ToSharedRef(), FocusPath);
+	const ENavigationGenesis Genesis = GetCurrentInputType() == EInputType::Gamepad ? ENavigationGenesis::Controller : ENavigationGenesis::Keyboard;
+	const FReply Reply = FReply::Handled().SetNavigation(InDirection, Genesis);
+	TSharedPtr<FSlateUser> SlateUser = SlateApplication.GetUser(SlateApplication.GetUserIndexForKeyboard());
+	SlateApplication.ProcessReply(
+		FocusPath,
+		Reply,
+		nullptr,
+		nullptr,
+		SlateApplication.GetUserIndexForKeyboard());
 }
 
 void UUINavPCComponent::MenuNext()
 {
 	IUINavPCReceiver::Execute_OnNext(GetOwner());
-
-	/*if (ActiveWidget == nullptr || !bAllowSectionInput) return;
-
-	ClearNavigationTimer();*/
 }
 
 void UUINavPCComponent::MenuPrevious()
 {
 	IUINavPCReceiver::Execute_OnPrevious(GetOwner());
-
-	/*if (ActiveWidget == nullptr || !bAllowSectionInput) return;
-
-	ClearNavigationTimer();*/
 }
 
 void UUINavPCComponent::NotifyNavigationKeyPressed(const FKey& Key, const EUINavigation Direction)
@@ -1159,7 +1138,14 @@ bool UUINavPCComponent::TryNavigateInDirection(const EUINavigation Direction, co
 		PressedKey = GetMostRecentlyPressedKey(Genesis);
 		if (!PressedKey.IsValid())
 		{
-			return false;
+			if (bAutomaticNavigation)
+			{
+				bAutomaticNavigation = false;
+			}
+			else
+			{
+				return false;
+			}
 		}
 
 		NotifyNavigationKeyPressed(PressedKey, Direction);
