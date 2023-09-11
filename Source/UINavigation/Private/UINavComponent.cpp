@@ -340,7 +340,8 @@ void UUINavComponent::NativeOnFocusChanging(const FWeakWidgetPath& PreviousFocus
 {
 	Super::NativeOnFocusChanging(PreviousFocusPath, NewWidgetPath, InFocusEvent);
 
-	if (ParentWidget->UINavPC->GetInputMode() == EInputMode::Game)
+	if (ParentWidget->UINavPC->GetInputMode() == EInputMode::Game ||
+		InFocusEvent.GetCause() == EFocusCause::Mouse)
 	{
 		return;
 	}
