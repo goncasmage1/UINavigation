@@ -475,11 +475,6 @@ void UUINavWidget::NativeTick(const FGeometry & MyGeometry, float DeltaTime)
 
 void UUINavWidget::RemoveFromParent()
 {
-	if (IsValid(SelectedComponent))
-	{
-		OnReleasedComponent(SelectedComponent);
-	}
-
 	bBeingRemoved = true;
 	if (OuterUINavWidget == nullptr && !bReturningToParent && !bDestroying && !GetFName().IsNone() && IsValid(this) &&
 	    (ParentWidget != nullptr || (bAllowRemoveIfRoot && UINavPC != nullptr)))
@@ -1260,9 +1255,17 @@ void UUINavWidget::SetFirstComponent(UUINavComponent* Component)
 
 void UUINavWidget::RemovedComponent(UUINavComponent* Component)
 {
-	if (IsValid(Component) && Component == CurrentComponent)
+	if (IsValid(Component))
 	{
-		SetCurrentComponent(nullptr);
+		if (Component == SelectedComponent)
+		{
+			OnReleasedComponent(SelectedComponent);
+		}
+
+		if (Component == CurrentComponent)
+		{
+			SetCurrentComponent(nullptr);
+		}
 	}
 	
 	if (IsValid(FirstComponent) && Component == FirstComponent)
