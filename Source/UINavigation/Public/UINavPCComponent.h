@@ -76,6 +76,8 @@ protected:
 	bool bIgnoreMousePress = false;
 	bool bIgnoreMouseRelease = false;
 
+	bool bAutomaticNavigation = false;
+
 	bool bUsingThumbstickAsMouse = false;
 
 	UPROPERTY()
@@ -427,7 +429,7 @@ public:
 	*	@param  bDestroyParent  Whether to destruct the parent widget (this widget)
 	*	@param  ZOrder Order to display the widget
 	*/
-	UFUNCTION(BlueprintCallable, Category = UINavWidget, meta = (AdvancedDisplay = 2))
+	UFUNCTION(BlueprintCallable, Category = UINavController, meta = (AdvancedDisplay = 2))
 	UUINavWidget* GoToWidget(TSubclassOf<UUINavWidget> NewWidgetClass, const bool bRemoveParent, const bool bDestroyParent = false, const int ZOrder = 0);
 
 	/**
@@ -438,9 +440,10 @@ public:
 	*	@param  bDestroyParent  Whether to destruct the parent widget (this widget)
 	*	@param  ZOrder Order to display the widget
 	*/
-	UFUNCTION(BlueprintCallable, Category = UINavWidget, meta = (AdvancedDisplay = 2))
+	UFUNCTION(BlueprintCallable, Category = UINavController, meta = (AdvancedDisplay = 2))
 	UUINavWidget* GoToBuiltWidget(UUINavWidget* NewWidget, const bool bRemoveParent, const bool bDestroyParent = false, const int ZOrder = 0);
 
+	UFUNCTION(BlueprintCallable, Category = UINavController)
 	void NavigateInDirection(const EUINavigation Direction);
 	void MenuNext();
 	void MenuPrevious();
@@ -449,6 +452,8 @@ public:
 	void NotifyNavigationKeyReleased(const FKey& Key, const EUINavigation Direction);
 
 	bool TryNavigateInDirection(const EUINavigation Direction, const ENavigationGenesis Genesis);
+
+	void ClearAnalogKeysFromPressedKeys(const FKey& PressedKey);
 
 	void ClearNavigationTimer();
 

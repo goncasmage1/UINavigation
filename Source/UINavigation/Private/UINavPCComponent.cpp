@@ -474,6 +474,36 @@ void UUINavPCComponent::HandleAnalogInputEvent(FSlateApplication& SlateApp, cons
 		NotifyInputTypeChange(EInputType::Gamepad);
 	}
 
+	TSharedRef<FUINavigationConfig> UINavConfig = StaticCastSharedRef<FUINavigationConfig>(FSlateApplication::Get().GetNavigationConfig());
+	FKey UsedAnalogKey;
+	if (InAnalogInputEvent.GetKey() == EKeys::Gamepad_LeftX)
+	{
+		if (InAnalogInputEvent.GetAnalogValue() > UINavConfig->AnalogNavigationHorizontalThreshold)
+		{
+			UsedAnalogKey = EKeys::Gamepad_LeftStick_Right;
+		}
+		else if (InAnalogInputEvent.GetAnalogValue() < -UINavConfig->AnalogNavigationHorizontalThreshold)
+		{
+			UsedAnalogKey = EKeys::Gamepad_LeftStick_Left;
+		}
+	}
+	else if (InAnalogInputEvent.GetKey() == EKeys::Gamepad_LeftY)
+	{
+		if (InAnalogInputEvent.GetAnalogValue() > UINavConfig->AnalogNavigationVerticalThreshold)
+		{
+			UsedAnalogKey = EKeys::Gamepad_LeftStick_Up;
+		}
+		else if (InAnalogInputEvent.GetAnalogValue() < -UINavConfig->AnalogNavigationVerticalThreshold)
+		{
+			UsedAnalogKey = EKeys::Gamepad_LeftStick_Down;
+		}
+	}
+
+	if (UsedAnalogKey.IsValid() && LastPressedKey != UsedAnalogKey)
+	{
+		LastPressedKey = UsedAnalogKey;
+	}
+
 	const EThumbstickAsMouse ThumbstickAsMouse = UsingThumbstickAsMouse();
 	if (ThumbstickAsMouse != EThumbstickAsMouse::None)
 	{
@@ -1022,58 +1052,37 @@ UEnhancedInputComponent* UUINavPCComponent::GetEnhancedInputComponent() const
 
 void UUINavPCComponent::NavigateInDirection(const EUINavigation InDirection)
 {
-	IUINavPCReceiver::Execute_OnNavigated(GetOwner(), InDirection);
-
-	TArray<FKey>* DirectionKeys = PressedNavigationDirections.Find(InDirection);
-	if (DirectionKeys == nullptr)
-	{
-		return;
-	}
-
 	AllowDirection = InDirection;
 
-	const FKey NavigationKey = DirectionKeys->Last();
-	if (!NavigationKey.IsValid())
+	if (!IsValid(ActiveWidget) || !IsValid(ActiveWidget->GetCurrentComponent()))
 	{
 		return;
 	}
 
-	FKeyEvent KeyEvent;
+	bAutomaticNavigation = true;
+
 	FSlateApplication& SlateApplication = FSlateApplication::Get();
-	if (!NavigationKey.IsGamepadKey())
-	{
-		const uint32* KeyCodePtr;
-		const uint32* CharacterCodePtr;
-		FInputKeyManager::Get().GetCodesFromKey(NavigationKey, KeyCodePtr, CharacterCodePtr);
-		const int32 KeyCode = KeyCodePtr != nullptr ? *KeyCodePtr : -1;
-
-		FKey const Key = FInputKeyManager::Get().GetKeyFromCodes(KeyCode, CharacterCodePtr != nullptr ? *CharacterCodePtr : 0);
-		KeyEvent = FKeyEvent(Key, SlateApplication.GetPlatformApplication()->GetModifierKeys(), SlateApplication.GetUserIndexForKeyboard(), true, CharacterCodePtr != nullptr ? *CharacterCodePtr : 0, KeyCode);
-	}
-	else
-	{
-		KeyEvent = FKeyEvent(NavigationKey, SlateApplication.GetPlatformApplication()->GetModifierKeys(), LastPressedKeyUserIndex, true, 0, 0);
-	}
-
-	SlateApplication.ProcessKeyDownEvent(KeyEvent);
+	FWidgetPath FocusPath;
+	SlateApplication.FindPathToWidget(ActiveWidget->GetCurrentComponent()->GetCachedWidget().ToSharedRef(), FocusPath);
+	const ENavigationGenesis Genesis = GetCurrentInputType() == EInputType::Gamepad ? ENavigationGenesis::Controller : ENavigationGenesis::Keyboard;
+	const FReply Reply = FReply::Handled().SetNavigation(InDirection, Genesis);
+	TSharedPtr<FSlateUser> SlateUser = SlateApplication.GetUser(SlateApplication.GetUserIndexForKeyboard());
+	SlateApplication.ProcessReply(
+		FocusPath,
+		Reply,
+		nullptr,
+		nullptr,
+		SlateApplication.GetUserIndexForKeyboard());
 }
 
 void UUINavPCComponent::MenuNext()
 {
 	IUINavPCReceiver::Execute_OnNext(GetOwner());
-
-	/*if (ActiveWidget == nullptr || !bAllowSectionInput) return;
-
-	ClearNavigationTimer();*/
 }
 
 void UUINavPCComponent::MenuPrevious()
 {
 	IUINavPCReceiver::Execute_OnPrevious(GetOwner());
-
-	/*if (ActiveWidget == nullptr || !bAllowSectionInput) return;
-
-	ClearNavigationTimer();*/
 }
 
 void UUINavPCComponent::NotifyNavigationKeyPressed(const FKey& Key, const EUINavigation Direction)
@@ -1116,6 +1125,8 @@ void UUINavPCComponent::NotifyNavigationKeyReleased(const FKey& Key, const EUINa
 		PressedNavigationDirections.Remove(Direction);
 	}
 
+	ClearAnalogKeysFromPressedKeys(Key);
+
 	ClearNavigationTimer();
 }
 
@@ -1127,7 +1138,14 @@ bool UUINavPCComponent::TryNavigateInDirection(const EUINavigation Direction, co
 		PressedKey = GetMostRecentlyPressedKey(Genesis);
 		if (!PressedKey.IsValid())
 		{
-			return false;
+			if (bAutomaticNavigation)
+			{
+				bAutomaticNavigation = false;
+			}
+			else
+			{
+				return false;
+			}
 		}
 
 		NotifyNavigationKeyPressed(PressedKey, Direction);
@@ -1162,4 +1180,43 @@ bool UUINavPCComponent::TryNavigateInDirection(const EUINavigation Direction, co
 	SetTimer(Direction);
 
 	return true;
+}
+
+void UUINavPCComponent::ClearAnalogKeysFromPressedKeys(const FKey& PressedKey)
+{
+	auto IsLeftAnalogKey = [](const FKey& Key) -> bool
+	{
+		return Key == EKeys::Gamepad_LeftStick_Up ||
+			Key == EKeys::Gamepad_LeftStick_Down ||
+			Key == EKeys::Gamepad_LeftStick_Left ||
+			Key == EKeys::Gamepad_LeftStick_Right;
+	};
+
+	if (!IsLeftAnalogKey(PressedKey))
+	{
+		return;
+	}
+
+	TArray<EUINavigation> DirectionsToRemove;
+	for (TPair<EUINavigation, TArray<FKey>>& PressedDirection : PressedNavigationDirections)
+	{
+		for (int j = PressedDirection.Value.Num() - 1; j >= 0; --j)
+		{
+			const FKey& Key = PressedDirection.Value[j];
+			if (IsLeftAnalogKey(Key))
+			{
+				PressedDirection.Value.RemoveAt(j);
+				if (PressedDirection.Value.Num() == 0)
+				{
+					DirectionsToRemove.Add(PressedDirection.Key);
+				}
+			}
+		}
+	}
+
+	for (const EUINavigation DirectionToRemove : DirectionsToRemove)
+	{
+		PressedNavigationDirections.Remove(DirectionToRemove);
+	}
+
 }

@@ -421,6 +421,8 @@ public:
 	
 	virtual void OnHorizCompNavigateLeft_Implementation(UUINavComponent* Component);
 
+	void PropagateOnHorizCompNavigateLeft(UUINavComponent* Component);
+
 	/**
 	*	Called when the user navigates right on a UINavComponentBox
 	*/
@@ -429,6 +431,8 @@ public:
 	
 	virtual void OnHorizCompNavigateRight_Implementation(UUINavComponent* Component);
 
+	void PropagateOnHorizCompNavigateRight(UUINavComponent* Component);
+
 	/**
 	* Called when a HorizontalComponent was updated
 	*/
@@ -436,6 +440,8 @@ public:
 	void OnHorizCompUpdated(UUINavComponent* Component);
 	
 	virtual void OnHorizCompUpdated_Implementation(UUINavComponent* Component);
+
+	void PropagateOnHorizCompUpdated(UUINavComponent* Component);
 
 	virtual void NavigatedTo(UUINavComponent* NavigatedToComponent, const bool bNotifyUINavPC = true);
 
