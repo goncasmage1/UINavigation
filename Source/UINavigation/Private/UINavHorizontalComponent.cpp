@@ -30,16 +30,18 @@ void UUINavHorizontalComponent::NavigateLeft()
 	OnUpdated();
 	OnValueChanged.Broadcast();
 	OnNativeValueChanged.Broadcast();
-	ParentWidget->OnHorizCompNavigateLeft(this);
-	ParentWidget->OnHorizCompUpdated(this);
+	ParentWidget->PropagateOnHorizCompNavigateLeft(this);
+	ParentWidget->PropagateOnHorizCompUpdated(this);
 }
 
 void UUINavHorizontalComponent::NavigateRight()
 {
 	OnNavigateRight();
 	OnUpdated();
-	ParentWidget->OnHorizCompNavigateRight(this);
-	ParentWidget->OnHorizCompUpdated(this);
+	OnValueChanged.Broadcast();
+	OnNativeValueChanged.Broadcast();
+	ParentWidget->PropagateOnHorizCompNavigateRight(this);
+	ParentWidget->PropagateOnHorizCompUpdated(this);
 }
 
 void UUINavHorizontalComponent::Update()
