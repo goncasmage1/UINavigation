@@ -101,7 +101,7 @@ void UUINavSlider::NavigateLeft()
 
 	Update();
 
-	OnNavigateLeft();
+	Super::NavigateLeft();
 }
 
 void UUINavSlider::NavigateRight()
@@ -114,7 +114,7 @@ void UUINavSlider::NavigateRight()
 
 	Update();
 
-	OnNavigateRight();
+	Super::NavigateRight();
 }
 
 void UUINavSlider::HandleOnSliderValueChanged(float InValue)
