@@ -101,7 +101,10 @@ void UUINavSlider::NavigateLeft()
 
 	Update();
 
-	Super::NavigateLeft();
+	if (LastOptionIndex != OptionIndex)
+	{
+		Super::NavigateLeft();
+	}
 }
 
 void UUINavSlider::NavigateRight()
@@ -114,7 +117,10 @@ void UUINavSlider::NavigateRight()
 
 	Update();
 
-	Super::NavigateRight();
+	if (LastOptionIndex != OptionIndex)
+	{
+		Super::NavigateRight();
+	}
 }
 
 void UUINavSlider::HandleOnSliderValueChanged(float InValue)
