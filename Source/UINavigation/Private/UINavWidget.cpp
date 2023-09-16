@@ -883,14 +883,41 @@ void UUINavWidget::OnHorizCompNavigateLeft_Implementation(UUINavComponent* Compo
 
 }
 
+void UUINavWidget::PropagateOnHorizCompNavigateLeft(UUINavComponent* Component)
+{
+	OnHorizCompNavigateLeft(Component);
+	if (IsValid(OuterUINavWidget) && !OuterUINavWidget->bMaintainNavigationForChild)
+	{
+		OuterUINavWidget->PropagateOnHorizCompNavigateLeft(Component);
+	}
+}
+
 void UUINavWidget::OnHorizCompNavigateRight_Implementation(UUINavComponent* Component)
 {
 
 }
 
+void UUINavWidget::PropagateOnHorizCompNavigateRight(UUINavComponent* Component)
+{
+	OnHorizCompNavigateRight(Component);
+	if (IsValid(OuterUINavWidget) && !OuterUINavWidget->bMaintainNavigationForChild)
+	{
+		OuterUINavWidget->PropagateOnHorizCompNavigateRight(Component);
+	}
+}
+
 void UUINavWidget::OnHorizCompUpdated_Implementation(UUINavComponent* Component)
 {
 
+}
+
+void UUINavWidget::PropagateOnHorizCompUpdated(UUINavComponent* Component)
+{
+	OnHorizCompUpdated(Component);
+	if (IsValid(OuterUINavWidget) && !OuterUINavWidget->bMaintainNavigationForChild)
+	{
+		OuterUINavWidget->PropagateOnHorizCompUpdated(Component);
+	}
 }
 
 UUINavWidget* UUINavWidget::GoToWidget(TSubclassOf<UUINavWidget> NewWidgetClass, const bool bRemoveParent /*= true*/, const bool bDestroyParent, const int ZOrder)
@@ -1255,9 +1282,17 @@ void UUINavWidget::SetFirstComponent(UUINavComponent* Component)
 
 void UUINavWidget::RemovedComponent(UUINavComponent* Component)
 {
-	if (IsValid(Component) && Component == CurrentComponent)
+	if (IsValid(Component))
 	{
-		SetCurrentComponent(nullptr);
+		if (Component == SelectedComponent)
+		{
+			OnReleasedComponent(SelectedComponent);
+		}
+
+		if (Component == CurrentComponent)
+		{
+			SetCurrentComponent(nullptr);
+		}
 	}
 	
 	if (IsValid(FirstComponent) && Component == FirstComponent)
