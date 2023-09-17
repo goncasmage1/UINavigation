@@ -1133,19 +1133,12 @@ void UUINavPCComponent::NotifyNavigationKeyReleased(const FKey& Key, const EUINa
 bool UUINavPCComponent::TryNavigateInDirection(const EUINavigation Direction, const ENavigationGenesis Genesis)
 {
 	FKey PressedKey = GetKeyUsedForNavigation(Direction);
-	if (!PressedKey.IsValid())
+	if (!PressedKey.IsValid() && !bAutomaticNavigation)
 	{
 		PressedKey = GetMostRecentlyPressedKey(Genesis);
 		if (!PressedKey.IsValid())
 		{
-			if (bAutomaticNavigation)
-			{
-				bAutomaticNavigation = false;
-			}
-			else
-			{
-				return false;
-			}
+			return false;
 		}
 
 		NotifyNavigationKeyPressed(PressedKey, Direction);
@@ -1161,24 +1154,28 @@ bool UUINavPCComponent::TryNavigateInDirection(const EUINavigation Direction, co
 		return false;
 	}
 
-	if (AllowDirection == Direction)
+	if (AllowDirection != Direction)
+	{
+		if (!bAutomaticNavigation)
+		{
+			TArray<FKey>* DirectionKeys = PressedNavigationDirections.Find(Direction);
+			if ((DirectionKeys == nullptr || DirectionKeys->Contains(PressedKey)) && bIgnoreNavigationKey)
+			{
+				return false;
+			}
+
+			bIgnoreNavigationKey = true;
+
+			SetTimer(Direction);
+		}
+	}
+	else
 	{
 		AllowDirection = EUINavigation::Invalid;
-		return true;
 	}
 
-	TArray<FKey>* DirectionKeys = PressedNavigationDirections.Find(Direction);
-	if ((DirectionKeys == nullptr || DirectionKeys->Contains(PressedKey)) && bIgnoreNavigationKey)
-	{
-		return false;
-	}
-
-	bIgnoreNavigationKey = true;
-
+	bAutomaticNavigation = false;
 	IUINavPCReceiver::Execute_OnNavigated(GetOwner(), Direction);
-
-	SetTimer(Direction);
-
 	return true;
 }
 
