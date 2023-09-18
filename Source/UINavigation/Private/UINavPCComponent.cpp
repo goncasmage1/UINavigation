@@ -10,6 +10,7 @@
 #include "UINavMacros.h"
 #include "UINavInputBox.h"
 #include "UINavigationConfig.h"
+#include "SwapKeysWidget.h"
 #include "GameFramework/InputSettings.h"
 #include "Data/AxisType.h"
 #include "Data/InputIconMapping.h"
@@ -27,8 +28,9 @@
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "Templates/SharedPointer.h"
 #include "Engine/GameViewportClient.h"
+#include "Engine/Texture2D.h"
+#include "UObject/SoftObjectPtr.h"
 #include "Internationalization/Internationalization.h"
-#include "SwapKeysWidget.h"
 
 const FKey UUINavPCComponent::MouseUp("MouseUp");
 const FKey UUINavPCComponent::MouseDown("MouseDown");
@@ -1133,19 +1135,12 @@ void UUINavPCComponent::NotifyNavigationKeyReleased(const FKey& Key, const EUINa
 bool UUINavPCComponent::TryNavigateInDirection(const EUINavigation Direction, const ENavigationGenesis Genesis)
 {
 	FKey PressedKey = GetKeyUsedForNavigation(Direction);
-	if (!PressedKey.IsValid())
+	if (!PressedKey.IsValid() && !bAutomaticNavigation)
 	{
 		PressedKey = GetMostRecentlyPressedKey(Genesis);
 		if (!PressedKey.IsValid())
 		{
-			if (bAutomaticNavigation)
-			{
-				bAutomaticNavigation = false;
-			}
-			else
-			{
-				return false;
-			}
+			return false;
 		}
 
 		NotifyNavigationKeyPressed(PressedKey, Direction);
@@ -1161,24 +1156,28 @@ bool UUINavPCComponent::TryNavigateInDirection(const EUINavigation Direction, co
 		return false;
 	}
 
-	if (AllowDirection == Direction)
+	if (AllowDirection != Direction)
+	{
+		if (!bAutomaticNavigation)
+		{
+			TArray<FKey>* DirectionKeys = PressedNavigationDirections.Find(Direction);
+			if ((DirectionKeys == nullptr || DirectionKeys->Contains(PressedKey)) && bIgnoreNavigationKey)
+			{
+				return false;
+			}
+
+			bIgnoreNavigationKey = true;
+
+			SetTimer(Direction);
+		}
+	}
+	else
 	{
 		AllowDirection = EUINavigation::Invalid;
-		return true;
 	}
 
-	TArray<FKey>* DirectionKeys = PressedNavigationDirections.Find(Direction);
-	if ((DirectionKeys == nullptr || DirectionKeys->Contains(PressedKey)) && bIgnoreNavigationKey)
-	{
-		return false;
-	}
-
-	bIgnoreNavigationKey = true;
-
+	bAutomaticNavigation = false;
 	IUINavPCReceiver::Execute_OnNavigated(GetOwner(), Direction);
-
-	SetTimer(Direction);
-
 	return true;
 }
 
