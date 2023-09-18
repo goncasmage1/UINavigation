@@ -10,6 +10,7 @@
 #include "UINavMacros.h"
 #include "UINavInputBox.h"
 #include "UINavigationConfig.h"
+#include "SwapKeysWidget.h"
 #include "GameFramework/InputSettings.h"
 #include "Data/AxisType.h"
 #include "Data/InputIconMapping.h"
@@ -27,8 +28,9 @@
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "Templates/SharedPointer.h"
 #include "Engine/GameViewportClient.h"
+#include "Engine/Texture2D.h"
+#include "UObject/SoftObjectPtr.h"
 #include "Internationalization/Internationalization.h"
-#include "SwapKeysWidget.h"
 
 const FKey UUINavPCComponent::MouseUp("MouseUp");
 const FKey UUINavPCComponent::MouseDown("MouseDown");
