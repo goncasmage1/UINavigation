@@ -89,11 +89,14 @@ void UUINavInputDisplay::UpdateInputVisuals()
 		}
 
 		InputText->SetVisibility(ESlateVisibility::Collapsed);
+		InputImage->SetVisibility(ESlateVisibility::Visible);
 	}
 	else
 	{
 		InputText->SetText(UINavPC->GetEnhancedInputText(InputAction, Axis, Scale));
+
 		InputImage->SetVisibility(ESlateVisibility::Collapsed);
+		InputText->SetVisibility(ESlateVisibility::Visible);
 	}
 }
 
