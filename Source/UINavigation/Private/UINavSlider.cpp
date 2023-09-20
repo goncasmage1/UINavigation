@@ -99,9 +99,11 @@ void UUINavSlider::NavigateLeft()
 	}
 	else if (bLoopOptions) OptionIndex = GetMaxOptionIndex();
 
+	const bool bShouldUpdate = LastOptionIndex != OptionIndex;
+
 	Update();
 
-	if (LastOptionIndex != OptionIndex)
+	if (bShouldUpdate)
 	{
 		Super::NavigateLeft();
 	}
@@ -115,9 +117,11 @@ void UUINavSlider::NavigateRight()
 	}
 	else if (bLoopOptions) OptionIndex = 0;
 
+	const bool bShouldUpdate = LastOptionIndex != OptionIndex;
+
 	Update();
 
-	if (LastOptionIndex != OptionIndex)
+	if (bShouldUpdate)
 	{
 		Super::NavigateRight();
 	}
