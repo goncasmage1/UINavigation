@@ -341,7 +341,9 @@ void UUINavComponent::NativeOnFocusChanging(const FWeakWidgetPath& PreviousFocus
 	Super::NativeOnFocusChanging(PreviousFocusPath, NewWidgetPath, InFocusEvent);
 
 	if (ParentWidget->UINavPC->GetInputMode() == EInputMode::Game ||
-		InFocusEvent.GetCause() == EFocusCause::Mouse)
+		(InFocusEvent.GetCause() == EFocusCause::Mouse &&
+		ParentWidget->UINavPC->GetInputMode() == EInputMode::GameUI &&
+		GetDefault<UUINavSettings>()->bAllowFocusOnViewportInGameAndUI))
 	{
 		return;
 	}

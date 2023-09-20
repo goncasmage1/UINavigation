@@ -48,6 +48,10 @@ public:
 	UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	bool bRemoveWidgetOnReturn = true;
 
+	// Whether to allow a UINavComponent to lose focus to the viewport when in Input Mode GameAndUI
+	UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = "Settings")
+	bool bAllowFocusOnViewportInGameAndUI = false;
+
 	// The amount of mouse movement delta that will trigger a rebind attempt when listening to a new key for input rebinding
 	UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	float MouseMoveRebindThreshold = 1.0f;
