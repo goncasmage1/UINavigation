@@ -93,7 +93,7 @@ void UUINavInputDisplay::UpdateInputVisuals()
 	}
 	else
 	{
-		InputText->SetText(UINavPC->GetEnhancedInputText(InputAction, Axis, Scale));
+		InputText->SetText(UINavPC->GetEnhancedInputText(InputAction, Axis, Scale, UINavPC->IsUsingGamepad() ? EInputRestriction::Gamepad : EInputRestriction::Keyboard_Mouse));
 
 		InputImage->SetVisibility(ESlateVisibility::Collapsed);
 		InputText->SetVisibility(ESlateVisibility::Visible);
