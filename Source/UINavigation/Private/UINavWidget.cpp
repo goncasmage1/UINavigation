@@ -823,7 +823,7 @@ void UUINavWidget::UnforceNavigation(const bool bHadNavigation)
 
 void UUINavWidget::OnReturn_Implementation()
 {
-	if(GetDefault<UUINavSettings>()->bRemoveWidgetOnReturn) ReturnToParent();
+	if(GetDefault<UUINavSettings>()->bRemoveWidgetOnReturn && OuterUINavWidget == nullptr) ReturnToParent();
 }
 
 void UUINavWidget::OnNext_Implementation()
@@ -1207,7 +1207,16 @@ void UUINavWidget::StartedReturn()
 
 void UUINavWidget::StoppedReturn()
 {
-	if (IsValid(UINavPC))
+	if (!IsValid(UINavPC))
+	{
+		return;
+	}
+	
+	if (OuterUINavWidget != nullptr)
+	{
+		OuterUINavWidget->StoppedReturn();
+	}
+	else
 	{
 		OnReturn();
 	}
