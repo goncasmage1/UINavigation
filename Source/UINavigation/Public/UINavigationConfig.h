@@ -11,6 +11,8 @@ public:
 
 	virtual EUINavigationAction GetNavigationActionForKey(const FKey& InKey) const override;
 
+	virtual EUINavigation GetNavigationDirectionFromAnalog(const FAnalogInputEvent& InAnalogEvent) override;
+
 	EUINavigation GetNavigationDirectionFromAnalogKey(const FKeyEvent& InKeyEvent) const;
 
 	TArray<FKey> GetKeysForDirection(const EUINavigation Direction) const;
