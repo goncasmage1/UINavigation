@@ -29,12 +29,17 @@ int UUINavOptionBox::GetMaxOptionIndex() const
 	}
 }
 
-void UUINavOptionBox::Update()
+bool UUINavOptionBox::Update(const bool bNotify /*= true*/)
 {
-	Super::Update();
+	if (!Super::Update(bNotify))
+	{
+		return false;
+	}
 
 	NavText->SetText(bUseNumberRange ? 
 		FText::FromString(FString::FromInt(MinRange + OptionIndex*Interval)) : 
 		StringOptions.IsValidIndex(OptionIndex) ? StringOptions[OptionIndex] : FText());
+
+	return true;
 }
 

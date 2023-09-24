@@ -36,7 +36,6 @@ void UUINavSlider::NativeConstruct()
 	}
 
 	if (!Slider->OnValueChanged.IsBound()) Slider->OnValueChanged.AddUniqueDynamic(this, &UUINavSlider::HandleOnSliderValueChanged);
-	if (!Slider->OnMouseCaptureBegin.IsBound()) Slider->OnMouseCaptureBegin.AddUniqueDynamic(this, &UUINavSlider::HandleOnMouseCaptureBegin);
 	if (!Slider->OnMouseCaptureEnd.IsBound()) Slider->OnMouseCaptureEnd.AddUniqueDynamic(this, &UUINavSlider::HandleOnMouseCaptureEnd);
 
 	Difference = MaxValue - MinValue;
@@ -48,9 +47,12 @@ void UUINavSlider::NativeConstruct()
 	Update();
 }
 
-void UUINavSlider::Update()
+bool UUINavSlider::Update(const bool bNotify /*= true*/)
 {
-	Super::Update();
+	if (!Super::Update(bNotify))
+	{
+		return false;
+	}
 
 	Slider->SetValue(static_cast<float>(OptionIndex) / static_cast<float>(GetMaxOptionIndex()));
 	FNumberFormattingOptions FormatOptions = FNumberFormattingOptions();
@@ -66,6 +68,8 @@ void UUINavSlider::Update()
 	{
 		NavSpinBox->SetValue(Value);
 	}
+
+	return true;
 }
 
 void UUINavSlider::OnNavigatedTo_Implementation()
@@ -83,7 +87,12 @@ void UUINavSlider::OnNavigatedFrom_Implementation()
 void UUINavSlider::SetValueClamped(const float Value)
 {
 	OptionIndex = IndexFromValue(Value);
-	Update();
+	if (Update())
+	{
+		OnUpdated();
+		OnValueChanged.Broadcast();
+		OnNativeValueChanged.Broadcast();
+	}
 }
 
 float UUINavSlider::GetSliderValue() const
@@ -99,11 +108,7 @@ void UUINavSlider::NavigateLeft()
 	}
 	else if (bLoopOptions) OptionIndex = GetMaxOptionIndex();
 
-	const bool bShouldUpdate = LastOptionIndex != OptionIndex;
-
-	Update();
-
-	if (bShouldUpdate)
+	if (Update())
 	{
 		Super::NavigateLeft();
 	}
@@ -130,28 +135,21 @@ void UUINavSlider::NavigateRight()
 void UUINavSlider::HandleOnSliderValueChanged(float InValue)
 {
 	OptionIndex = IndexFromPercent(InValue);
-	Update();
-}
-
-void UUINavSlider::HandleOnMouseCaptureBegin()
-{
-	LastOptionIndex = OptionIndex;
 }
 
 void UUINavSlider::HandleOnMouseCaptureEnd()
 {
-	if (OptionIndex != LastOptionIndex &&
-		ParentWidget != nullptr)
-	{
-		OnUpdated();
-		ParentWidget->OnHorizCompUpdated(this);
-	}
+	Update();
 }
 
 void UUINavSlider::HandleOnSpinBoxValueChanged(float InValue, ETextCommit::Type CommitMethod)
 {
 	OptionIndex = IndexFromValue(InValue);
-	Update();
+
+	if (Update())
+	{
+		Super::NavigateRight();
+	}
 }
 
 float UUINavSlider::IndexFromPercent(const float Value)
