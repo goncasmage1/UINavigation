@@ -453,6 +453,8 @@ public:
 	virtual void StartedReturn();
 	virtual void StoppedReturn();
 
+	virtual void ExecuteReturn();
+
 	bool TryConsumeNavigation();
 
 	bool IsForcingNavigation() const { return bForcingNavigation; }

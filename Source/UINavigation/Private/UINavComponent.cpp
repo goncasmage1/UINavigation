@@ -89,6 +89,13 @@ FReply UUINavComponent::NativeOnKeyDown(const FGeometry& InGeometry, const FKeyE
 			ParentWidget->StartedSelect();
 		}
 	}
+	else if (FSlateApplication::Get().GetNavigationActionFromKey(InKeyEvent) == EUINavigationAction::Back)
+	{
+		if (!ParentWidget->TryConsumeNavigation())
+		{
+			ParentWidget->StartedReturn();
+		}
+	}
 
 	TSharedRef<FUINavigationConfig> NavConfig = StaticCastSharedRef<FUINavigationConfig>(FSlateApplication::Get().GetNavigationConfig());
 	EUINavigation Direction = NavConfig->GetNavigationDirectionFromKey(InKeyEvent);
@@ -125,7 +132,6 @@ FReply UUINavComponent::NativeOnKeyUp(const FGeometry& InGeometry, const FKeyEve
 		if (!ParentWidget->TryConsumeNavigation())
 		{
 			ParentWidget->StoppedReturn();
-			IUINavPCReceiver::Execute_OnReturn(ParentWidget->UINavPC->GetOwner());
 		}
 	}
 	else

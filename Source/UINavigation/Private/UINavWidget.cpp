@@ -1203,15 +1203,27 @@ void UUINavWidget::StoppedSelect()
 
 void UUINavWidget::StartedReturn()
 {
+	if (GetDefault<UUINavSettings>()->bReturnOnPress)
+	{
+		ExecuteReturn();
+	}
 }
 
 void UUINavWidget::StoppedReturn()
+{
+	if (!GetDefault<UUINavSettings>()->bReturnOnPress)
+	{
+		ExecuteReturn();
+	}
+}
+
+void UUINavWidget::ExecuteReturn()
 {
 	if (!IsValid(UINavPC))
 	{
 		return;
 	}
-	
+
 	if (OuterUINavWidget != nullptr)
 	{
 		OuterUINavWidget->StoppedReturn();
@@ -1219,6 +1231,7 @@ void UUINavWidget::StoppedReturn()
 	else
 	{
 		OnReturn();
+		IUINavPCReceiver::Execute_OnReturn(UINavPC->GetOwner());
 	}
 }
 

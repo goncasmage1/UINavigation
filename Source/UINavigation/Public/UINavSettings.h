@@ -43,6 +43,10 @@ public:
 	// Whether disables buttons should be ignored for navigation
 	UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	bool bIgnoreDisabledButton = true;
+
+	// Whether to call the OnReturn event when you press or release the MenuReturn key
+	UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = "Settings")
+	bool bReturnOnPress = false;
 	
 	// Whether to call return to parent when using the Back/Return input
 	UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = "Settings")
