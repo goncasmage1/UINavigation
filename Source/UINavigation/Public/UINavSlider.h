@@ -25,9 +25,6 @@ protected:
 	void HandleOnSliderValueChanged(const float InValue);
 
 	UFUNCTION()
-	void HandleOnMouseCaptureBegin();
-
-	UFUNCTION()
 	void HandleOnMouseCaptureEnd();
 
 	UFUNCTION()
@@ -69,7 +66,7 @@ public:
 
 	virtual void NativeConstruct() override;
 
-	virtual void Update() override;
+	virtual bool Update(const bool bNotify = true) override;
 
 	virtual FORCEINLINE int GetMaxOptionIndex() const override
 	{

@@ -1203,22 +1203,42 @@ void UUINavWidget::StoppedSelect()
 
 void UUINavWidget::StartedReturn()
 {
+	if (GetDefault<UUINavSettings>()->bReturnOnPress)
+	{
+		ExecuteReturn(/*bPress*/ true);
+	}
 }
 
 void UUINavWidget::StoppedReturn()
+{
+	if (!GetDefault<UUINavSettings>()->bReturnOnPress)
+	{
+		ExecuteReturn(/*bPress*/ false);
+	}
+}
+
+void UUINavWidget::ExecuteReturn(const bool bPress)
 {
 	if (!IsValid(UINavPC))
 	{
 		return;
 	}
-	
+
 	if (OuterUINavWidget != nullptr)
 	{
-		OuterUINavWidget->StoppedReturn();
+		if (bPress)
+		{
+			OuterUINavWidget->StartedReturn();
+		}
+		else
+		{
+			OuterUINavWidget->StoppedReturn();
+		}
 	}
 	else
 	{
 		OnReturn();
+		IUINavPCReceiver::Execute_OnReturn(UINavPC->GetOwner());
 	}
 }
 

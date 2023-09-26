@@ -26,33 +26,58 @@ FNavigationReply UUINavHorizontalComponent::NativeOnNavigation(const FGeometry& 
 
 void UUINavHorizontalComponent::NavigateLeft()
 {
-	OnNavigateLeft();
-	OnUpdated();
-	OnValueChanged.Broadcast();
-	OnNativeValueChanged.Broadcast();
-	ParentWidget->PropagateOnHorizCompNavigateLeft(this);
-	ParentWidget->PropagateOnHorizCompUpdated(this);
+	NotifyNavigateLeft();
 }
 
 void UUINavHorizontalComponent::NavigateRight()
 {
-	OnNavigateRight();
-	OnUpdated();
-	OnValueChanged.Broadcast();
-	OnNativeValueChanged.Broadcast();
-	ParentWidget->PropagateOnHorizCompNavigateRight(this);
-	ParentWidget->PropagateOnHorizCompUpdated(this);
+	NotifyNavigateRight();
 }
 
-void UUINavHorizontalComponent::Update()
+void UUINavHorizontalComponent::NotifyNavigateLeft()
+{
+	OnNavigateLeft();
+	if (IsValid(ParentWidget))
+	{
+		ParentWidget->PropagateOnHorizCompNavigateLeft(this);
+	}
+}
+
+void UUINavHorizontalComponent::NotifyNavigateRight()
+{
+	OnNavigateRight();
+	if (IsValid(ParentWidget))
+	{
+		ParentWidget->PropagateOnHorizCompNavigateRight(this);
+	}
+}
+
+bool UUINavHorizontalComponent::Update(const bool bNotify /*= true*/)
 {
 	const int MaxOptionIndex = GetMaxOptionIndex();
-	if (MaxOptionIndex < 1) return;
+	if (MaxOptionIndex < 1) return false;
 	
 	if (OptionIndex > MaxOptionIndex) OptionIndex = MaxOptionIndex;
 	else if (OptionIndex < 0) OptionIndex = 0;
 
+	const bool bChangedIndex = LastOptionIndex != OptionIndex;
 	LastOptionIndex = OptionIndex;
+
+	if (bChangedIndex && bNotify)
+	{
+		NotifyUpdated();
+	}
+
+	return bChangedIndex;
+}
+
+void UUINavHorizontalComponent::NotifyUpdated()
+{
+	OnUpdated();
+	if (IsValid(ParentWidget))
+	{
+		ParentWidget->PropagateOnHorizCompUpdated(this);
+	}
 }
 
 void UUINavHorizontalComponent::SetOptionIndex(int NewIndex)

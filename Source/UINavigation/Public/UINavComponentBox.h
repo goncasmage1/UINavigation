@@ -51,7 +51,5 @@ public:
 
 	virtual void NavigateLeft() override;
 	virtual void NavigateRight() override;
-	virtual void FinishNavigateLeft(const bool bOptionChanged);
-	virtual void FinishNavigateRight(const bool bOptionChanged);
 
 };
