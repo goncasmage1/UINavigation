@@ -1205,7 +1205,7 @@ void UUINavWidget::StartedReturn()
 {
 	if (GetDefault<UUINavSettings>()->bReturnOnPress)
 	{
-		ExecuteReturn();
+		ExecuteReturn(/*bPress*/ true);
 	}
 }
 
@@ -1213,11 +1213,11 @@ void UUINavWidget::StoppedReturn()
 {
 	if (!GetDefault<UUINavSettings>()->bReturnOnPress)
 	{
-		ExecuteReturn();
+		ExecuteReturn(/*bPress*/ false);
 	}
 }
 
-void UUINavWidget::ExecuteReturn()
+void UUINavWidget::ExecuteReturn(const bool bPress)
 {
 	if (!IsValid(UINavPC))
 	{
@@ -1226,7 +1226,14 @@ void UUINavWidget::ExecuteReturn()
 
 	if (OuterUINavWidget != nullptr)
 	{
-		OuterUINavWidget->StoppedReturn();
+		if (bPress)
+		{
+			OuterUINavWidget->StartedReturn();
+		}
+		else
+		{
+			OuterUINavWidget->StoppedReturn();
+		}
 	}
 	else
 	{

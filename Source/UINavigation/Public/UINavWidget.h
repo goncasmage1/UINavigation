@@ -453,7 +453,7 @@ public:
 	virtual void StartedReturn();
 	virtual void StoppedReturn();
 
-	virtual void ExecuteReturn();
+	virtual void ExecuteReturn(const bool bPress);
 
 	bool TryConsumeNavigation();
 
