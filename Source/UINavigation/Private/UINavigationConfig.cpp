@@ -72,6 +72,16 @@ EUINavigationAction FUINavigationConfig::GetNavigationActionForKey(const FKey& I
 	return NavAction == nullptr ? EUINavigationAction::Invalid : *NavAction;
 }
 
+EUINavigation FUINavigationConfig::GetNavigationDirectionFromAnalog(const FAnalogInputEvent& InAnalogEvent)
+{
+	if (!bAnalogNavigation || (InAnalogEvent.GetKey() != EKeys::Gamepad_LeftX && InAnalogEvent.GetKey() != EKeys::Gamepad_LeftY))
+	{
+		return EUINavigation::Invalid;
+	}
+
+	return FNavigationConfig::GetNavigationDirectionFromAnalog(InAnalogEvent);
+}
+
 EUINavigation FUINavigationConfig::GetNavigationDirectionFromAnalogKey(const FKeyEvent& InKeyEvent) const
 {
 	if (!bAnalogNavigation) return EUINavigation::Invalid;

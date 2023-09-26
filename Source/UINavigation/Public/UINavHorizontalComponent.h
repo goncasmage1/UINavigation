@@ -37,7 +37,9 @@ public:
 	FOnValueChangedEvent OnNativeValueChanged;
 
 	UFUNCTION(BlueprintCallable, Category = UINavHorizontalComponent)
-	virtual void Update();
+	virtual bool Update(const bool bNotify = true);
+
+	virtual void NotifyUpdated();
 
 	//Changes the text displayed to match the specified option index
 	UFUNCTION(BlueprintCallable, Category = UINavComponentBox)
@@ -51,6 +53,10 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = UINavHorizontalComponent)
 	virtual void NavigateRight();
+
+	virtual void NotifyNavigateLeft();
+
+	virtual void NotifyNavigateRight();
 
 	UFUNCTION(BlueprintNativeEvent, Category = UINavHorizontalComponent)
 	void OnNavigateLeft();

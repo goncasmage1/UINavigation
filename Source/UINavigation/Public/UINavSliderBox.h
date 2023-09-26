@@ -18,7 +18,7 @@ protected:
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget), Category = UINavSliderBox)
 	class UProgressBar* SliderBar = nullptr;
 
-	virtual void Update() override;
+	virtual bool Update(const bool bNotify = true) override;
 	
 public:
 

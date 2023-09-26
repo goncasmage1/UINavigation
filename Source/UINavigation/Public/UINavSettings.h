@@ -28,7 +28,7 @@ class UINAVIGATION_API UUINavSettings : public UObject
 public:
 
 	/* 
-	* Whether to force a button to be visually always, even if it's not being hovered by the mouse.
+	* Whether to force a button to always be visually shown as navigated, even if it's not being hovered by the mouse when using the mouse.
 	* If set to true, when the mouse unhovers a button, it's button style will continue as hovered, and if you then use the keyboard or the mouse, navigation will happen.
 	* If set to false, when the mouse unhovers a button, it's button style will be set back to normal, and if you then use the keyboard or the mouse for the first time,
 	* the hovered button style will be set, and only after the second input will navigation happen.
@@ -43,6 +43,10 @@ public:
 	// Whether disables buttons should be ignored for navigation
 	UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	bool bIgnoreDisabledButton = true;
+
+	// Whether to call the OnReturn event when you press or release the MenuReturn key
+	UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = "Settings")
+	bool bReturnOnPress = false;
 	
 	// Whether to call return to parent when using the Back/Return input
 	UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = "Settings")

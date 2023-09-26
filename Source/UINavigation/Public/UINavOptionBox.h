@@ -15,7 +15,7 @@ class UINAVIGATION_API UUINavOptionBox : public UUINavComponentBox
 	
 protected:
 
-	virtual void Update() override;
+	virtual bool Update(const bool bNotify = true) override;
 
 public:
 

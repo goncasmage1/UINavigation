@@ -16,15 +16,17 @@ void UUINavSliderBox::NativeConstruct()
 		RightButton->OnClicked.AddDynamic(this, &UUINavSliderBox::NavigateRight);
 }
 
-void UUINavSliderBox::Update()
+bool UUINavSliderBox::Update(const bool bNotify /*= true*/)
 {
-	Super::Update();
+	const bool bChangedIndex = Super::Update(bNotify);
 	
 	if (NavText != nullptr)
 		NavText->SetText(FText::FromString(FString::FromInt(MinRange + OptionIndex * Interval)));
 
 	const float Percent = UKismetMathLibrary::NormalizeToRange(MinRange + OptionIndex * Interval, MinRange, MaxRange);
 	SliderBar->SetPercent(Percent);
+
+	return bChangedIndex;
 }
 
 float UUINavSliderBox::GetSliderPercent() const
