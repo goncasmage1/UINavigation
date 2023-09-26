@@ -49,10 +49,7 @@ void UUINavSlider::NativeConstruct()
 
 bool UUINavSlider::Update(const bool bNotify /*= true*/)
 {
-	if (!Super::Update(bNotify))
-	{
-		return false;
-	}
+	const bool bChangedIndex = Super::Update(bNotify);
 
 	Slider->SetValue(static_cast<float>(OptionIndex) / static_cast<float>(GetMaxOptionIndex()));
 	FNumberFormattingOptions FormatOptions = FNumberFormattingOptions();
@@ -69,7 +66,7 @@ bool UUINavSlider::Update(const bool bNotify /*= true*/)
 		NavSpinBox->SetValue(Value);
 	}
 
-	return true;
+	return bChangedIndex;
 }
 
 void UUINavSlider::OnNavigatedTo_Implementation()
