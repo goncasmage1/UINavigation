@@ -372,8 +372,12 @@ void UUINavComponent::NativeOnFocusChanging(const FWeakWidgetPath& PreviousFocus
 			while (!PreviousWidget->GetType().IsEqual(FName(TEXT("SObjectWidget"))) && --WidgetIndex > 0)
 			{
 				PreviousWidget = PreviousFocusPath.Widgets[WidgetIndex].Pin();
-				TSharedPtr<SObjectWidget> PreviousUserWidget = StaticCastSharedPtr<SObjectWidget>(PreviousWidget);
-				PreviousUserWidget->GetWidgetObject()->SetFocus();
+				TSharedPtr<SObjectWidget> PreviousUserWidgetPtr = StaticCastSharedPtr<SObjectWidget>(PreviousWidget);
+				UUserWidget* PreviousUserWidget = PreviousUserWidgetPtr->GetWidgetObject();
+				if (IsValid(PreviousUserWidget))
+				{
+					PreviousUserWidget->SetFocus();
+				}
 			}
 			return;
 		}
