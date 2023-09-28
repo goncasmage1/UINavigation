@@ -9,13 +9,13 @@ FNavigationReply UUINavHorizontalComponent::NativeOnNavigation(const FGeometry& 
 {
 	FNavigationReply Reply = Super::NativeOnNavigation(MyGeometry, InNavigationEvent, InDefaultReply);
 
-	if (InNavigationEvent.GetNavigationType() == EUINavigation::Left)
+	if (InNavigationEvent.GetNavigationType() == EUINavigation::Left && Reply.GetBoundaryRule() != EUINavigationRule::Stop)
 	{
 		NavigateLeft();
 		return FNavigationReply::Stop();
 	}
 
-	if (InNavigationEvent.GetNavigationType() == EUINavigation::Right)
+	if (InNavigationEvent.GetNavigationType() == EUINavigation::Right && Reply.GetBoundaryRule() != EUINavigationRule::Stop)
 	{
 		NavigateRight();
 		return FNavigationReply::Stop();
