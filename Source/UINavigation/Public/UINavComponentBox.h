@@ -28,7 +28,7 @@ public:
 
 	virtual void NativeConstruct() override;
 
-	virtual void SetOptionIndex(const int NewIndex) override;
+	virtual bool SetOptionIndex(const int NewIndex) override;
 
 	void BaseConstruct();
 

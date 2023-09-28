@@ -74,16 +74,18 @@ bool UUINavHorizontalComponent::Update(const bool bNotify /*= true*/)
 void UUINavHorizontalComponent::NotifyUpdated()
 {
 	OnUpdated();
+	OnValueChanged.Broadcast();
+	OnNativeValueChanged.Broadcast();
 	if (IsValid(ParentWidget))
 	{
 		ParentWidget->PropagateOnHorizCompUpdated(this);
 	}
 }
 
-void UUINavHorizontalComponent::SetOptionIndex(int NewIndex)
+bool UUINavHorizontalComponent::SetOptionIndex(int NewIndex)
 {
 	OptionIndex = NewIndex;
-	Update();
+	return Update(false);
 }
 
 void UUINavHorizontalComponent::OnNavigateLeft_Implementation()

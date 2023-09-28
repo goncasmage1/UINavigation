@@ -84,12 +84,7 @@ void UUINavSlider::OnNavigatedFrom_Implementation()
 void UUINavSlider::SetValueClamped(const float Value)
 {
 	OptionIndex = IndexFromValue(Value);
-	if (Update())
-	{
-		OnUpdated();
-		OnValueChanged.Broadcast();
-		OnNativeValueChanged.Broadcast();
-	}
+	Update();
 }
 
 float UUINavSlider::GetSliderValue() const
@@ -119,11 +114,7 @@ void UUINavSlider::NavigateRight()
 	}
 	else if (bLoopOptions) OptionIndex = 0;
 
-	const bool bShouldUpdate = LastOptionIndex != OptionIndex;
-
-	Update();
-
-	if (bShouldUpdate)
+	if (Update())
 	{
 		Super::NavigateRight();
 	}
