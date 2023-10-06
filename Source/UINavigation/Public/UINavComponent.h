@@ -50,6 +50,9 @@ public:
 	virtual void NativeDestruct() override;
 
 	virtual bool Initialize() override;
+
+	UFUNCTION()
+	void OnEnabledChanged(bool InbIsEnabled);
 	
 	UFUNCTION(BlueprintNativeEvent, Category = UINavComponent)
 	void OnNavigatedTo();

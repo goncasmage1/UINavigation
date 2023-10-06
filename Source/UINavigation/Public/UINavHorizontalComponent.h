@@ -43,7 +43,7 @@ public:
 
 	//Changes the text displayed to match the specified option index
 	UFUNCTION(BlueprintCallable, Category = UINavComponentBox)
-	virtual void SetOptionIndex(int NewIndex);
+	virtual bool SetOptionIndex(int NewIndex);
 
 	UFUNCTION(BlueprintCallable, Category = UINavComponentBox)
 	virtual FORCEINLINE int GetMaxOptionIndex() const { return 0; }
@@ -55,7 +55,6 @@ public:
 	virtual void NavigateRight();
 
 	virtual void NotifyNavigateLeft();
-
 	virtual void NotifyNavigateRight();
 
 	UFUNCTION(BlueprintNativeEvent, Category = UINavHorizontalComponent)

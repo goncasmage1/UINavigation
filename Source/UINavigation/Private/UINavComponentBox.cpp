@@ -38,24 +38,33 @@ void UUINavComponentBox::BaseConstruct()
 void UUINavComponentBox::CheckLeftLimit()
 {
 	if (bLoopOptions) return;
-	if (OptionIndex <= 0) LeftButton->SetIsEnabled(false);
+	
+	LeftButton->SetIsEnabled(OptionIndex > 0);
 }
 
 void UUINavComponentBox::CheckRightLimit()
 {
 	if (bLoopOptions) return;
-	if (OptionIndex >= GetMaxOptionIndex()) RightButton->SetIsEnabled(false);
+	
+	RightButton->SetIsEnabled(OptionIndex < GetMaxOptionIndex());
 }
 
-void UUINavComponentBox::SetOptionIndex(const int NewIndex)
+bool UUINavComponentBox::SetOptionIndex(const int NewIndex)
 {
-	Super::SetOptionIndex(NewIndex);
+	const bool bShouldNotify = Super::SetOptionIndex(NewIndex);
 
-	if (!bDisableButtons || bLoopOptions) return;
-	if (!RightButton->GetIsEnabled()) RightButton->SetIsEnabled(true);
-	if (!LeftButton->GetIsEnabled()) LeftButton->SetIsEnabled(true);
-	CheckLeftLimit();
-	CheckRightLimit();
+	if (!bLoopOptions && bDisableButtons)
+	{
+		CheckLeftLimit();
+		CheckRightLimit();
+	}
+
+	if (bShouldNotify)
+	{
+		NotifyUpdated();
+	}
+
+	return bShouldNotify;
 }
 
 void UUINavComponentBox::NavigateLeft()
@@ -65,19 +74,19 @@ void UUINavComponentBox::NavigateLeft()
 	else if (bLoopOptions) OptionIndex = GetMaxOptionIndex();
 	else return;
 
-	if (Update())
+	const bool bShouldNotify = Update(false);
+
+	if (!bLoopOptions && bDisableButtons)
 	{
-		NotifyNavigateLeft();
+		CheckLeftLimit();
+		CheckRightLimit();
 	}
 
-	if (bLoopOptions || !bDisableButtons)
+	if (bShouldNotify)
 	{
-		return;
+		NotifyUpdated();
+		Super::NavigateLeft();
 	}
-
-	CheckLeftLimit();
-	//Enable button if previously disabled
-	if (!RightButton->GetIsEnabled() && GetMaxOptionIndex() > 0) RightButton->SetIsEnabled(true);
 }
 
 void UUINavComponentBox::NavigateRight()
@@ -89,17 +98,17 @@ void UUINavComponentBox::NavigateRight()
 		else return;
 	}
 
-	if (Update())
+	const bool bShouldNotify = Update(false);
+
+	if (!bLoopOptions && bDisableButtons)
 	{
-		NotifyNavigateRight();
+		CheckLeftLimit();
+		CheckRightLimit();
 	}
 
-	if (bLoopOptions || !bDisableButtons)
+	if (bShouldNotify)
 	{
-		return;
+		NotifyUpdated();
+		Super::NavigateRight();
 	}
-
-	CheckRightLimit();
-	//Enable button if previously disabled
-	if (!LeftButton->GetIsEnabled() && GetMaxOptionIndex() > 0) LeftButton->SetIsEnabled(true);
 }
