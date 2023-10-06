@@ -9,13 +9,13 @@ FNavigationReply UUINavHorizontalComponent::NativeOnNavigation(const FGeometry& 
 {
 	FNavigationReply Reply = Super::NativeOnNavigation(MyGeometry, InNavigationEvent, InDefaultReply);
 
-	if (InNavigationEvent.GetNavigationType() == EUINavigation::Left)
+	if (InNavigationEvent.GetNavigationType() == EUINavigation::Left && Reply.GetBoundaryRule() != EUINavigationRule::Stop)
 	{
 		NavigateLeft();
 		return FNavigationReply::Stop();
 	}
 
-	if (InNavigationEvent.GetNavigationType() == EUINavigation::Right)
+	if (InNavigationEvent.GetNavigationType() == EUINavigation::Right && Reply.GetBoundaryRule() != EUINavigationRule::Stop)
 	{
 		NavigateRight();
 		return FNavigationReply::Stop();
@@ -74,16 +74,18 @@ bool UUINavHorizontalComponent::Update(const bool bNotify /*= true*/)
 void UUINavHorizontalComponent::NotifyUpdated()
 {
 	OnUpdated();
+	OnValueChanged.Broadcast();
+	OnNativeValueChanged.Broadcast();
 	if (IsValid(ParentWidget))
 	{
 		ParentWidget->PropagateOnHorizCompUpdated(this);
 	}
 }
 
-void UUINavHorizontalComponent::SetOptionIndex(int NewIndex)
+bool UUINavHorizontalComponent::SetOptionIndex(int NewIndex)
 {
 	OptionIndex = NewIndex;
-	Update();
+	return Update(false);
 }
 
 void UUINavHorizontalComponent::OnNavigateLeft_Implementation()
