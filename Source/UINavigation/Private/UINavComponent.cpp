@@ -3,6 +3,7 @@
 #include "UINavComponent.h"
 #include "UINavWidget.h"
 #include "UINavPCComponent.h"
+#include "UINavButtonBase.h"
 #include "Components/OverlaySlot.h"
 #include "Components/TextBlock.h"
 #include "Framework/Application/SlateApplication.h"
@@ -57,6 +58,19 @@ void UUINavComponent::NativeConstruct()
 			}
 		}
 	}
+
+	if (IsFocusable())
+	{
+		SetIsFocusable(GetIsEnabled());
+	}
+
+	UUINavButtonBase* NavButtonBase = Cast<UUINavButtonBase>(NavButton);
+	if (IsValid(NavButtonBase))
+	{
+		NavButtonBase->SetIsFocusable(IsFocusable());
+	}
+
+	if (!bIsEnabledDelegate.IsBoundToObject(this)) bIsEnabledDelegate.BindUFunction(this, TEXT("OnEnabledChanged"));
 }
 
 void UUINavComponent::NativeDestruct()
@@ -71,6 +85,16 @@ void UUINavComponent::NativeDestruct()
 bool UUINavComponent::Initialize()
 {
 	return Super::Initialize();
+}
+
+void UUINavComponent::OnEnabledChanged(bool InbIsEnabled)
+{
+	SetIsFocusable(InbIsEnabled);
+	UUINavButtonBase* NavButtonBase = Cast<UUINavButtonBase>(NavButton);
+	if (IsValid(NavButtonBase))
+	{
+		NavButtonBase->SetIsFocusable(IsFocusable());
+	}
 }
 
 FReply UUINavComponent::NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent)
@@ -386,6 +410,7 @@ void UUINavComponent::NativeOnFocusChanging(const FWeakWidgetPath& PreviousFocus
 	const FString WidgetTypeString = NewWidgetPath.GetLastWidget()->GetType().ToString();
 	if (!WidgetTypeString.Contains(TEXT("SObjectWidget")) &&
 		!WidgetTypeString.Contains(TEXT("SButton")) &&
+		!WidgetTypeString.Contains(TEXT("SUINavButton")) &&
 		!WidgetTypeString.Contains(TEXT("SSpinBox")) &&
 		!WidgetTypeString.Contains(TEXT("SEditableText")))
 	{
