@@ -23,7 +23,6 @@ public:
 		, _TouchMethod(EButtonTouchMethod::DownAndUp)
 		, _PressMethod(EButtonPressMethod::DownAndUp)
 		, _IsFocusable(true)
-		, _IsInteractionEnabled(true)
 	{}
 	SLATE_DEFAULT_SLOT(FArguments, Content)
 		SLATE_STYLE_ARGUMENT(FButtonStyle, ButtonStyle)
@@ -39,10 +38,6 @@ public:
 		SLATE_ARGUMENT(EButtonTouchMethod::Type, TouchMethod)
 		SLATE_ARGUMENT(EButtonPressMethod::Type, PressMethod)
 		SLATE_ARGUMENT(bool, IsFocusable)
-
-		/** Is interaction enabled? */
-		SLATE_ARGUMENT(bool, IsButtonEnabled)
-		SLATE_ARGUMENT(bool, IsInteractionEnabled)
 		SLATE_END_ARGS()
 
 	void Construct(const FArguments& InArgs)
