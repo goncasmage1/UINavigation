@@ -59,18 +59,7 @@ void UUINavComponent::NativeConstruct()
 		}
 	}
 
-	if (IsFocusable())
-	{
-		SetIsFocusable(GetIsEnabled());
-	}
-
-	UUINavButtonBase* NavButtonBase = Cast<UUINavButtonBase>(NavButton);
-	if (IsValid(NavButtonBase))
-	{
-		NavButtonBase->SetIsFocusable(IsFocusable());
-	}
-
-	if (!bIsEnabledDelegate.IsBoundToObject(this)) bIsEnabledDelegate.BindUFunction(this, TEXT("OnEnabledChanged"));
+	SetFocusable(IsFocusable() && GetIsEnabled());
 }
 
 void UUINavComponent::NativeDestruct()
@@ -87,9 +76,9 @@ bool UUINavComponent::Initialize()
 	return Super::Initialize();
 }
 
-void UUINavComponent::OnEnabledChanged(bool InbIsEnabled)
+void UUINavComponent::SetFocusable(const bool bNewIsFocusable)
 {
-	SetIsFocusable(InbIsEnabled);
+	SetIsFocusable(bNewIsFocusable);
 	UUINavButtonBase* NavButtonBase = Cast<UUINavButtonBase>(NavButton);
 	if (IsValid(NavButtonBase))
 	{

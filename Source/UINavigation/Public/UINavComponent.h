@@ -51,9 +51,8 @@ public:
 
 	virtual bool Initialize() override;
 
-	UFUNCTION()
-	void OnEnabledChanged(bool InbIsEnabled);
-	
+	virtual void SetFocusable(const bool bNewIsFocusable);
+
 	UFUNCTION(BlueprintNativeEvent, Category = UINavComponent)
 	void OnNavigatedTo();
 
