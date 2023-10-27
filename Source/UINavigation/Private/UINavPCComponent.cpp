@@ -125,6 +125,11 @@ void UUINavPCComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	{
 		FSlateApplication::Get().UnregisterInputPreProcessor(SharedInputProcessor);
 	}
+
+	if (IsValid(ActiveWidget))
+	{
+		ActiveWidget->ReturnToParent(true);
+	}
 	
 	IPlatformInputDeviceMapper::Get().GetOnInputDeviceConnectionChange().RemoveAll(this);
 
