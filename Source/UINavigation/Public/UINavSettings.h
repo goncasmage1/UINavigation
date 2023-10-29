@@ -40,7 +40,7 @@ public:
 	UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	bool bStopNextPreviousNavigation = true;
 
-	// Whether disables buttons should be ignored for navigation
+	// Whether disabled buttons should be ignored for navigation
 	UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	bool bIgnoreDisabledButton = true;
 
@@ -51,6 +51,10 @@ public:
 	// Whether to call return to parent when using the Back/Return input
 	UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	bool bRemoveWidgetOnReturn = true;
+
+	// Whether to remove active UINavWidgets on EndPlay event
+	UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = "Settings")
+	bool bRemoveActiveWidgetsOnEndPlay = true;
 
 	// Whether to allow a UINavComponent to lose focus to the viewport when in Input Mode GameAndUI
 	UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = "Settings")
