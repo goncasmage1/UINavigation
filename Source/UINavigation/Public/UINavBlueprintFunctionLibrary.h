@@ -11,6 +11,7 @@ class UPromptDataBinary;
 class UWidget;
 class UUserWidget;
 class UUINavSettings;
+class UPanelWidget;
 
 /**
  * 

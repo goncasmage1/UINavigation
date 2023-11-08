@@ -13,6 +13,7 @@
 
 class UUINavWidget;
 class UTextBlock;
+class UScrollBox;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnClickedEvent);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPressedEvent);
@@ -111,6 +112,9 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavComponent)
 	bool CanBeNavigated() const;
 
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavComponent)
+	UScrollBox* GetParentScrollBox() const { return ParentScrollBox; }
+
 protected:
 
 	virtual FReply NativeOnFocusReceived(const FGeometry& InGeometry, const FFocusEvent& InFocusEvent) override;
@@ -174,6 +178,9 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly, Transient, Category = UINavComponent, meta = (BindWidgetAnimOptional))
 	UWidgetAnimation* ComponentAnimation = nullptr;
+
+	UPROPERTY()
+	UScrollBox* ParentScrollBox = nullptr;
 
 	/**
 	 * The sound the button should play when initially Navigated over

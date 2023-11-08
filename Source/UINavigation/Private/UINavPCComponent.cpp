@@ -11,6 +11,7 @@
 #include "UINavInputBox.h"
 #include "UINavigationConfig.h"
 #include "SwapKeysWidget.h"
+#include "Components/ScrollBox.h"
 #include "GameFramework/InputSettings.h"
 #include "Data/AxisType.h"
 #include "Data/InputIconMapping.h"
@@ -28,6 +29,7 @@
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "Templates/SharedPointer.h"
 #include "Engine/GameViewportClient.h"
+#include "Engine/World.h"
 #include "Engine/Texture2D.h"
 #include "UObject/SoftObjectPtr.h"
 #include "Internationalization/Internationalization.h"
@@ -392,6 +394,21 @@ EThumbstickAsMouse UUINavPCComponent::UsingThumbstickAsMouse() const
 	return ActiveWidgetThumbstickAsMouse != EThumbstickAsMouse::None ? ActiveWidgetThumbstickAsMouse : UseThumbstickAsMouse;
 }
 
+void UUINavPCComponent::SetShowMouseCursor(const bool bShowMouse)
+{
+	if (!IsValid(PC))
+	{
+		return;
+	}
+
+	PC->bShowMouseCursor = bShowMouse;
+	PC->CurrentMouseCursor = bShowMouse ? PC->DefaultMouseCursor : static_cast<TEnumAsByte<EMouseCursor::Type>>(EMouseCursor::None);
+	float MousePosX;
+	float MousePosY;
+	PC->GetMousePosition(MousePosX, MousePosY);
+	PC->SetMouseLocation(static_cast<int>(MousePosX), static_cast<int>(MousePosY));
+}
+
 void UUINavPCComponent::RefreshNavigationKeys()
 {
 	FSlateApplication::Get().SetNavigationConfig(
@@ -511,6 +528,14 @@ void UUINavPCComponent::HandleAnalogInputEvent(FSlateApplication& SlateApp, cons
 		LastPressedKey = UsedAnalogKey;
 	}
 
+	const UWorld* const World = GetWorld();
+	if (!IsValid(World))
+	{
+		return;
+	}
+
+	const float DeltaTime = World->DeltaTimeSeconds;
+
 	const EThumbstickAsMouse ThumbstickAsMouse = UsingThumbstickAsMouse();
 	if (ThumbstickAsMouse != EThumbstickAsMouse::None)
 	{
@@ -532,8 +557,8 @@ void UUINavPCComponent::HandleAnalogInputEvent(FSlateApplication& SlateApp, cons
 			if (ThumbstickDelta.SizeSquared() < 0.01f) return;
 
 			const FVector2D OldPosition = SlateApp.GetCursorPos();
-			const FVector2D NewPosition(OldPosition.X + (bIsHorizontal ? Value * ThumbstickCursorSensitivity : 0.0f),
-										OldPosition.Y + (!bIsHorizontal ? -Value * ThumbstickCursorSensitivity : 0.0f));
+			const FVector2D NewPosition(OldPosition.X + (bIsHorizontal ? Value * ThumbstickCursorSensitivity * 100.0f * DeltaTime : 0.0f),
+				OldPosition.Y + (!bIsHorizontal ? -Value * ThumbstickCursorSensitivity * 100.0f * DeltaTime : 0.0f));
 			SlateApp.SetCursorPos(NewPosition);
 			// Since the cursor may have been locked and its location clamped, get the actual new position
 			if (const TSharedPtr<FSlateUser> SlateUser = SlateApp.GetUser(SlateApp.CursorUserIndex))
@@ -551,6 +576,34 @@ void UUINavPCComponent::HandleAnalogInputEvent(FSlateApplication& SlateApp, cons
 				);
 				//process the event
 				SlateApp.ProcessMouseMoveEvent(MouseEvent);
+			}
+		}
+	}
+
+	if (bScrollWithRightThumbstick &&
+		ThumbstickAsMouse != EThumbstickAsMouse::RightThumbstick &&
+		InAnalogInputEvent.GetKey() == EKeys::Gamepad_RightY &&
+		FMath::Abs(InAnalogInputEvent.GetAnalogValue()) >= RightThumbstickScrollDeadzone)
+	{
+		const float ScrollAmount = -InAnalogInputEvent.GetAnalogValue() * RightThumbstickScrollSensitivity * 10.0f * DeltaTime;
+		if (IsValid(ActiveWidget))
+		{
+			const UUINavComponent* const CurrentUINavComponent = ActiveWidget->GetCurrentComponent();
+			if (IsValid(CurrentUINavComponent))
+			{
+				UScrollBox* ParentScrollBox = CurrentUINavComponent->GetParentScrollBox();
+				if (!IsValid(ParentScrollBox))
+				{
+					ParentScrollBox = ActiveWidget->GetScrollBoxToFocus();
+				}
+
+				if (IsValid(ParentScrollBox))
+				{
+					UE_LOG(LogTemp, Warning, TEXT("%f"), ScrollAmount);
+
+					const float ScrollOffsetOfEnd = ParentScrollBox->GetScrollOffsetOfEnd();
+					ParentScrollBox->SetScrollOffset(FMath::Clamp(ParentScrollBox->GetScrollOffset() + ScrollAmount, 0, ScrollOffsetOfEnd));
+				}
 			}
 		}
 	}
@@ -1047,6 +1100,11 @@ void UUINavPCComponent::NotifyInputTypeChange(const EInputType NewInputType, con
 		{
 			ActiveWidget->AttemptUnforceNavigation(CurrentInputType);
 		}
+
+		const bool bShouldHideMouse = ((NewInputType == EInputType::Keyboard && AutoHideMouse > EAutoHideMouse::Gamepad) ||
+			(NewInputType == EInputType::Gamepad && AutoHideMouse > EAutoHideMouse::Never));
+		SetShowMouseCursor(!bShouldHideMouse);
+
 		ActiveWidget->PropagateOnInputChanged(OldInputType, CurrentInputType);
 	}
 	InputTypeChangedDelegate.Broadcast(CurrentInputType);
