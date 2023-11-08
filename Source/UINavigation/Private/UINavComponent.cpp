@@ -4,8 +4,10 @@
 #include "UINavWidget.h"
 #include "UINavPCComponent.h"
 #include "UINavButtonBase.h"
+#include "UINavBlueprintFunctionLibrary.h"
 #include "Components/OverlaySlot.h"
 #include "Components/TextBlock.h"
+#include "Components/ScrollBox.h"
 #include "Framework/Application/SlateApplication.h"
 #include "Internationalization/Internationalization.h"
 #include "Sound/SoundBase.h"
@@ -57,6 +59,8 @@ void UUINavComponent::NativeConstruct()
 				SetFocus();
 			}
 		}
+
+		ParentScrollBox = Cast<UScrollBox>(UUINavBlueprintFunctionLibrary::GetParentPanelWidget(this, UScrollBox::StaticClass()));
 	}
 
 	SetFocusable(IsFocusable() && GetIsEnabled());

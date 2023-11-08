@@ -11,6 +11,7 @@
 #include "UINavInputBox.h"
 #include "UINavigationConfig.h"
 #include "SwapKeysWidget.h"
+#include "Components/ScrollBox.h"
 #include "GameFramework/InputSettings.h"
 #include "Data/AxisType.h"
 #include "Data/InputIconMapping.h"
@@ -28,6 +29,7 @@
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "Templates/SharedPointer.h"
 #include "Engine/GameViewportClient.h"
+#include "Engine/World.h"
 #include "Engine/Texture2D.h"
 #include "UObject/SoftObjectPtr.h"
 #include "Internationalization/Internationalization.h"
@@ -526,6 +528,14 @@ void UUINavPCComponent::HandleAnalogInputEvent(FSlateApplication& SlateApp, cons
 		LastPressedKey = UsedAnalogKey;
 	}
 
+	const UWorld* const World = GetWorld();
+	if (!IsValid(World))
+	{
+		return;
+	}
+
+	const float DeltaTime = World->DeltaTimeSeconds;
+
 	const EThumbstickAsMouse ThumbstickAsMouse = UsingThumbstickAsMouse();
 	if (ThumbstickAsMouse != EThumbstickAsMouse::None)
 	{
@@ -566,6 +576,29 @@ void UUINavPCComponent::HandleAnalogInputEvent(FSlateApplication& SlateApp, cons
 				);
 				//process the event
 				SlateApp.ProcessMouseMoveEvent(MouseEvent);
+			}
+		}
+	}
+
+	if (bScrollWithRightThumbstick &&
+		ThumbstickAsMouse != EThumbstickAsMouse::RightThumbstick &&
+		InAnalogInputEvent.GetKey() == EKeys::Gamepad_RightY &&
+		FMath::Abs(InAnalogInputEvent.GetAnalogValue()) >= RightThumbstickScrollDeadzone)
+	{
+		const float ScrollAmount = -InAnalogInputEvent.GetAnalogValue() * RightThumbstickScrollSensitivity * 10.0f * DeltaTime;
+		if (IsValid(ActiveWidget))
+		{
+			const UUINavComponent* const CurrentUINavComponent = ActiveWidget->GetCurrentComponent();
+			if (IsValid(CurrentUINavComponent))
+			{
+				UScrollBox* ParentScrollBox = CurrentUINavComponent->GetParentScrollBox();
+				if (IsValid(ParentScrollBox))
+				{
+					UE_LOG(LogTemp, Warning, TEXT("%f"), ScrollAmount);
+
+					const float ScrollOffsetOfEnd = ParentScrollBox->GetScrollOffsetOfEnd();
+					ParentScrollBox->SetScrollOffset(FMath::Clamp(ParentScrollBox->GetScrollOffset() + ScrollAmount, 0, ScrollOffsetOfEnd));
+				}
 			}
 		}
 	}
