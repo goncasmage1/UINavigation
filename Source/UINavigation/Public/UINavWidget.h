@@ -16,6 +16,7 @@ class UUINavComponent;
 class UUINavHorizontalComponent;
 class UUINavPromptWidget;
 class UPromptDataBase;
+class UScrollBox;
 enum class EButtonStyle : uint8;
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FPromptWidgetDecided, const UPromptDataBase*, PromptData);
@@ -258,6 +259,10 @@ public:
 	void SetCurrentComponent(UUINavComponent* Component);
 	void SetHoveredComponent(UUINavComponent* Component);
 	void SetSelectedComponent(UUINavComponent* Component);
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, BlueprintPure, Category = UINavWidget)
+	UScrollBox* GetScrollBoxToFocus();
+	virtual UScrollBox* GetScrollBoxToFocus_Implementation() { return nullptr; }
 
 	void UpdateNavigationVisuals(UUINavComponent* Component, const bool bHadNavigation, const bool bBypassForcedNavigation = false, const bool bFinishInstantly = false);
 

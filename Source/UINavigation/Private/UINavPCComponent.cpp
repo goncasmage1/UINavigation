@@ -592,6 +592,11 @@ void UUINavPCComponent::HandleAnalogInputEvent(FSlateApplication& SlateApp, cons
 			if (IsValid(CurrentUINavComponent))
 			{
 				UScrollBox* ParentScrollBox = CurrentUINavComponent->GetParentScrollBox();
+				if (!IsValid(ParentScrollBox))
+				{
+					ParentScrollBox = ActiveWidget->GetScrollBoxToFocus();
+				}
+
 				if (IsValid(ParentScrollBox))
 				{
 					UE_LOG(LogTemp, Warning, TEXT("%f"), ScrollAmount);
