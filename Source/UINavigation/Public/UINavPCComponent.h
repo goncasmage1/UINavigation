@@ -10,6 +10,7 @@
 #include "Data/InputRestriction.h"
 #include "Data/InputType.h"
 #include "Data/ThumbstickAsMouse.h"
+#include "Data/AutoHideMouse.h"
 #include "Types/SlateEnums.h"
 #include "InputCoreTypes.h"
 #include "Input/Reply.h"
@@ -180,10 +181,36 @@ public:
 	EThumbstickAsMouse UseThumbstickAsMouse = EThumbstickAsMouse::None;
 
 	/*
+	Indicates whether you can scroll through scroll boxes using the gamepad's right thumbstick
+	*/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavController)
+	bool bScrollWithRightThumbstick = true;
+
+	/*
+	Indicates the deadzone to use when scrolling with the right thumbstick
+	*/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavController)
+	float RightThumbstickScrollDeadzone = 0.1f;
+
+	/*
+	Indicates whether the controller should automatically hide the mouse cursor when using certain input types.
+	In order for this to work, you have to set your GameViewportClient to UINavGameViewportClient in the Project Settings,
+	or your custom ViewportClient class must inherit from UINavGameViewportClient and not override the GetCursor function.
+	*/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavController)
+	EAutoHideMouse AutoHideMouse = EAutoHideMouse::Never;
+
+	/*
 	The sensitivity of the cursor when moved with the left stick
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavController)
-	float ThumbstickCursorSensitivity = 15.0f;
+	float ThumbstickCursorSensitivity = 10.0f;
+
+	/*
+	The sensitivity of scrolling when using the right thumbstick
+	*/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavController)
+	float RightThumbstickScrollSensitivity = 10.0f;
 
 	/*
 	The required value for an axis to be considered for rebinding
@@ -294,6 +321,8 @@ public:
 	FORCEINLINE bool AllowsNavigatingDirection(const EUINavigation Direction) const { return AllowsDirectionalInput() || (AllowDirection != EUINavigation::Invalid && AllowDirection != Direction); }
 	
 	EThumbstickAsMouse UsingThumbstickAsMouse() const;
+
+	void SetShowMouseCursor(const bool bShowMouse);
 
 	UFUNCTION(BlueprintCallable, Category = UINavController)
 	void RefreshNavigationKeys();
