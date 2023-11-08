@@ -3,6 +3,7 @@
 #include "UINavGameViewportClient.h"
 #include "UnrealClient.h"
 #include "Engine/Console.h"
+#include "Engine/GameInstance.h"
 
 EMouseCursor::Type UUINavGameViewportClient::GetCursor(FViewport* InViewport, int32 X, int32 Y)
 {

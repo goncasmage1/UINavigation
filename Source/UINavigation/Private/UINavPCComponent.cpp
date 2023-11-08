@@ -402,7 +402,7 @@ void UUINavPCComponent::SetShowMouseCursor(const bool bShowMouse)
 	}
 
 	PC->bShowMouseCursor = bShowMouse;
-	PC->CurrentMouseCursor = bShowMouse ? PC->DefaultMouseCursor : EMouseCursor::None;
+	PC->CurrentMouseCursor = bShowMouse ? PC->DefaultMouseCursor : static_cast<TEnumAsByte<EMouseCursor::Type>>(EMouseCursor::None);
 	float MousePosX;
 	float MousePosY;
 	PC->GetMousePosition(MousePosX, MousePosY);
