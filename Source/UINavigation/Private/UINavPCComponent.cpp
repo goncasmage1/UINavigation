@@ -392,6 +392,21 @@ EThumbstickAsMouse UUINavPCComponent::UsingThumbstickAsMouse() const
 	return ActiveWidgetThumbstickAsMouse != EThumbstickAsMouse::None ? ActiveWidgetThumbstickAsMouse : UseThumbstickAsMouse;
 }
 
+void UUINavPCComponent::SetShowMouseCursor(const bool bShowMouse)
+{
+	if (!IsValid(PC))
+	{
+		return;
+	}
+
+	PC->bShowMouseCursor = bShowMouse;
+	PC->CurrentMouseCursor = bShowMouse ? PC->DefaultMouseCursor : EMouseCursor::None;
+	float MousePosX;
+	float MousePosY;
+	PC->GetMousePosition(MousePosX, MousePosY);
+	PC->SetMouseLocation(static_cast<int>(MousePosX), static_cast<int>(MousePosY));
+}
+
 void UUINavPCComponent::RefreshNavigationKeys()
 {
 	FSlateApplication::Get().SetNavigationConfig(
@@ -1047,6 +1062,11 @@ void UUINavPCComponent::NotifyInputTypeChange(const EInputType NewInputType, con
 		{
 			ActiveWidget->AttemptUnforceNavigation(CurrentInputType);
 		}
+
+		const bool bShouldHideMouse = ((NewInputType == EInputType::Keyboard && AutoHideMouse > EAutoHideMouse::Gamepad) ||
+			(NewInputType == EInputType::Gamepad && AutoHideMouse > EAutoHideMouse::Never));
+		SetShowMouseCursor(!bShouldHideMouse);
+
 		ActiveWidget->PropagateOnInputChanged(OldInputType, CurrentInputType);
 	}
 	InputTypeChangedDelegate.Broadcast(CurrentInputType);
