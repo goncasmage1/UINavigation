@@ -18,6 +18,8 @@ class UScrollBox;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnClickedEvent);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPressedEvent);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnReleasedEvent);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnNavigatedToEvent);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnNavigatedFromEvent);
 
 UENUM(BlueprintType, meta = (ScriptName = "UINavButtonStyle"))
 enum class EButtonStyle : uint8
@@ -154,6 +156,16 @@ public:
 	FOnReleasedEvent OnReleased;
 	DECLARE_EVENT(UUserWidget, FNativeOnReleasedEvent);
 	FNativeOnReleasedEvent OnNativeReleased;
+
+	UPROPERTY(BlueprintAssignable, Category = "Appearance|Event")
+	FOnNavigatedToEvent OnNavigatedToEvent;
+	DECLARE_EVENT(UUserWidget, FNativeOnNavigatedToEvent);
+	FNativeOnNavigatedToEvent OnNativeNavigatedToEvent;
+
+	UPROPERTY(BlueprintAssignable, Category = "Appearance|Event")
+	FOnNavigatedFromEvent OnNavigatedFromEvent;
+	DECLARE_EVENT(UUserWidget, FNativeOnNavigatedFromEvent);
+	FNativeOnNavigatedFromEvent OnNativeNavigatedFromEvent;
 
 	EButtonStyle CurrentStyle = EButtonStyle::Normal;
 
