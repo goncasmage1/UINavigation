@@ -79,8 +79,10 @@ void UUINavInputDisplay::UpdateInputVisuals()
 		return;
 	}
 
+	InputText->SetVisibility(ESlateVisibility::Collapsed);
+	InputImage->SetVisibility(ESlateVisibility::Collapsed);
 	UTexture2D* NewTexture = UINavPC->GetEnhancedInputIcon(InputAction, Axis, Scale, UINavPC->IsUsingGamepad() ? EInputRestriction::Gamepad : EInputRestriction::Keyboard_Mouse);
-	if (NewTexture != nullptr)
+	if (NewTexture != nullptr && DisplayType != EInputDisplayType::Text)
 	{
 		InputImage->SetBrushFromTexture(NewTexture, bMatchIconSize);
 		if (!bMatchIconSize)
@@ -88,14 +90,12 @@ void UUINavInputDisplay::UpdateInputVisuals()
 			InputImage->SetDesiredSizeOverride(IconSize);
 		}
 
-		InputText->SetVisibility(ESlateVisibility::Collapsed);
 		InputImage->SetVisibility(ESlateVisibility::Visible);
 	}
-	else
+	if (NewTexture == nullptr || DisplayType != EInputDisplayType::Icon)
 	{
 		InputText->SetText(UINavPC->GetEnhancedInputText(InputAction, Axis, Scale, UINavPC->IsUsingGamepad() ? EInputRestriction::Gamepad : EInputRestriction::Keyboard_Mouse));
 
-		InputImage->SetVisibility(ESlateVisibility::Collapsed);
 		InputText->SetVisibility(ESlateVisibility::Visible);
 	}
 }

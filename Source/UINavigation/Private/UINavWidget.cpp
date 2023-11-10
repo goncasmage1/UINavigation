@@ -1172,6 +1172,8 @@ void UUINavWidget::CallOnNavigate(UUINavComponent* FromComponent, UUINavComponen
 	if (IsValid(FromComponent))
 	{
 		FromComponent->OnNavigatedFrom();
+		FromComponent->OnNavigatedFromEvent.Broadcast();
+		FromComponent->OnNativeNavigatedFromEvent.Broadcast();
 		FromComponent->ExecuteComponentActions(EComponentAction::OnNavigatedFrom);
 	}
 
@@ -1183,6 +1185,8 @@ void UUINavWidget::CallOnNavigate(UUINavComponent* FromComponent, UUINavComponen
 			PlaySound(NavigatedSound);
 		}
 		ToComponent->OnNavigatedTo();
+		ToComponent->OnNavigatedToEvent.Broadcast();
+		ToComponent->OnNativeNavigatedToEvent.Broadcast();
 		ToComponent->ExecuteComponentActions(EComponentAction::OnNavigatedTo);
 	}
 }
