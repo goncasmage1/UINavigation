@@ -599,10 +599,15 @@ void UUINavPCComponent::HandleAnalogInputEvent(FSlateApplication& SlateApp, cons
 
 				if (IsValid(ParentScrollBox))
 				{
-					UE_LOG(LogTemp, Warning, TEXT("%f"), ScrollAmount);
-
+					const float CurrentScrollOffset = ParentScrollBox->GetScrollOffset();
 					const float ScrollOffsetOfEnd = ParentScrollBox->GetScrollOffsetOfEnd();
-					ParentScrollBox->SetScrollOffset(FMath::Clamp(ParentScrollBox->GetScrollOffset() + ScrollAmount, 0, ScrollOffsetOfEnd));
+					const float NewScrollOffset = FMath::Clamp(CurrentScrollOffset + ScrollAmount, 0.0f, ScrollOffsetOfEnd);
+					
+					ParentScrollBox->SetScrollOffset(NewScrollOffset);
+					if (CurrentScrollOffset != NewScrollOffset)
+					{
+						ParentScrollBox->OnUserScrolled.Broadcast(NewScrollOffset);
+					}
 				}
 			}
 		}
