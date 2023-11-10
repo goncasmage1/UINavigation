@@ -515,7 +515,7 @@ public:
 	*	@param  bDestroyParent  Whether to destruct the parent widget (this widget)
 	*	@param  ZOrder Order to display the widget
 	*/
-	UFUNCTION(BlueprintCallable, Category = UINavWidget, meta = (AdvancedDisplay=2))
+	UFUNCTION(BlueprintCallable, Category = UINavWidget, meta = (AdvancedDisplay = 2, DeterminesOutputType="NewWidgetClass"))
 	UUINavWidget* GoToWidget(TSubclassOf<UUINavWidget> NewWidgetClass, const bool bRemoveParent = true, const bool bDestroyParent = false, const int ZOrder = 0);
 
 	/**
@@ -526,7 +526,7 @@ public:
 	*	@param  bDestroyParent  Whether to destruct the parent widget (this widget)
 	*	@param  ZOrder Order to display the widget
 	*/
-	UFUNCTION(BlueprintCallable, Category = UINavWidget, meta = (AdvancedDisplay = 4))
+	UFUNCTION(BlueprintCallable, Category = UINavWidget, meta = (AdvancedDisplay = 4, DeterminesOutputType = "NewWidgetClass"))
 	UUINavWidget* GoToPromptWidget(TSubclassOf<UUINavPromptWidget> NewWidgetClass, const FPromptWidgetDecided& Event, const FText Title = FText(), const FText Message = FText(), const bool bRemoveParent = false, const int ZOrder = 0);
 
 	/**
@@ -537,7 +537,7 @@ public:
 	*	@param  bDestroyParent  Whether to destruct the parent widget (this widget)
 	*	@param  ZOrder Order to display the widget
 	*/
-	UFUNCTION(BlueprintCallable, Category = UINavWidget, meta = (AdvancedDisplay=2))
+	UFUNCTION(BlueprintCallable, Category = UINavWidget, meta = (AdvancedDisplay = 2, DeterminesOutputType = "NewWidgetClass"))
 	UUINavWidget* GoToBuiltWidget(UUINavWidget* NewWidget, const bool bRemoveParent, const bool bDestroyParent = false, const int ZOrder = 0);
 
 	/**
