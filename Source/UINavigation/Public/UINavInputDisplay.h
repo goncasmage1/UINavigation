@@ -5,6 +5,7 @@
 #include "Blueprint/UserWidget.h"
 #include "InputAction.h"
 #include "Data/InputType.h"
+#include "Data/InputDisplayType.h"
 #include "Data/AxisType.h"
 #include "Data/InputContainerEnhancedActionData.h"
 #include "Math/Vector2D.h"
@@ -58,6 +59,9 @@ protected:
 	
 	UPROPERTY(EditAnywhere, Category = "InputDisplay")
 	EAxisType Scale = EAxisType::None;
+
+	UPROPERTY(EditAnywhere, Category = "InputDisplay")
+	EInputDisplayType DisplayType = EInputDisplayType::Icon;
 
 	UPROPERTY(EditAnywhere, Category = "InputDisplay")
 	bool bMatchIconSize = false;
