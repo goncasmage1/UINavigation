@@ -60,6 +60,10 @@ public:
 	UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	bool bAllowFocusOnViewportInGameAndUI = false;
 
+	// Whether to load the input icons asynchronously, in order to prevent Load Flushes
+	UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = "Settings")
+	bool bLoadInputIconsAsync = false;
+
 	// The amount of mouse movement delta that will trigger a rebind attempt when listening to a new key for input rebinding
 	UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	float MouseMoveRebindThreshold = 1.0f;

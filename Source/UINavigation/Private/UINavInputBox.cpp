@@ -710,10 +710,12 @@ FNavigationReply UUINavInputBox::NativeOnNavigation(const FGeometry& MyGeometry,
 
 bool UUINavInputBox::UpdateKeyIconForKey(const int Index)
 {
-	UTexture2D* NewTexture = Container->UINavPC->GetKeyIcon(Keys[Index]);
-	if (NewTexture != nullptr)
+	TSoftObjectPtr<UTexture2D> NewSoftTexture = GetDefault<UUINavSettings>()->bLoadInputIconsAsync ?
+		Container->UINavPC->GetSoftKeyIcon(Keys[Index]) :
+		Container->UINavPC->GetKeyIcon(Keys[Index]);
+	if (!NewSoftTexture.IsNull())
 	{
-		InputButtons[Index]->InputImage->SetBrushFromTexture(NewTexture);
+		InputButtons[Index]->InputImage->SetBrushFromSoftTexture(NewSoftTexture);
 		return true;
 	}
 	return false;

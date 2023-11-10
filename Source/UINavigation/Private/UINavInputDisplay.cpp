@@ -7,6 +7,7 @@
 #include "Engine/Texture2D.h"
 #include "Components/Image.h"
 #include "Components/TextBlock.h"
+#include "UINavSettings.h"
 
 void UUINavInputDisplay::NativeConstruct()
 {
@@ -81,10 +82,12 @@ void UUINavInputDisplay::UpdateInputVisuals()
 
 	InputText->SetVisibility(ESlateVisibility::Collapsed);
 	InputImage->SetVisibility(ESlateVisibility::Collapsed);
-	UTexture2D* NewTexture = UINavPC->GetEnhancedInputIcon(InputAction, Axis, Scale, UINavPC->IsUsingGamepad() ? EInputRestriction::Gamepad : EInputRestriction::Keyboard_Mouse);
-	if (NewTexture != nullptr && DisplayType != EInputDisplayType::Text)
+	TSoftObjectPtr<UTexture2D> NewSoftTexture = GetDefault<UUINavSettings>()->bLoadInputIconsAsync ?
+		UINavPC->GetSoftEnhancedInputIcon(InputAction, Axis, Scale, UINavPC->IsUsingGamepad() ? EInputRestriction::Gamepad : EInputRestriction::Keyboard_Mouse) :
+		UINavPC->GetEnhancedInputIcon(InputAction, Axis, Scale, UINavPC->IsUsingGamepad() ? EInputRestriction::Gamepad : EInputRestriction::Keyboard_Mouse);
+	if (!NewSoftTexture.IsNull() && DisplayType != EInputDisplayType::Text)
 	{
-		InputImage->SetBrushFromTexture(NewTexture, bMatchIconSize);
+		InputImage->SetBrushFromSoftTexture(NewSoftTexture, bMatchIconSize);
 		if (!bMatchIconSize)
 		{
 			InputImage->SetDesiredSizeOverride(IconSize);
@@ -92,7 +95,7 @@ void UUINavInputDisplay::UpdateInputVisuals()
 
 		InputImage->SetVisibility(ESlateVisibility::Visible);
 	}
-	if (NewTexture == nullptr || DisplayType != EInputDisplayType::Icon)
+	if (NewSoftTexture.IsNull() || DisplayType != EInputDisplayType::Icon)
 	{
 		InputText->SetText(UINavPC->GetEnhancedInputText(InputAction, Axis, Scale, UINavPC->IsUsingGamepad() ? EInputRestriction::Gamepad : EInputRestriction::Keyboard_Mouse));
 
