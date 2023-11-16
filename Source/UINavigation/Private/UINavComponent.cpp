@@ -94,8 +94,14 @@ FReply UUINavComponent::NativeOnKeyDown(const FGeometry& InGeometry, const FKeyE
 {
 	FReply Reply = Super::NativeOnKeyDown(InGeometry, InKeyEvent);
 	
-	if (!IsValid(ParentWidget))
+	if (!IsValid(ParentWidget) || !IsValid(ParentWidget->UINavPC))
 	{
+		return Reply;
+	}
+
+	if (ParentWidget->UINavPC->IsListeningToInputRebind())
+	{
+		bIgnoreDueToRebind = true;
 		return Reply;
 	}
 
@@ -134,6 +140,12 @@ FReply UUINavComponent::NativeOnKeyUp(const FGeometry& InGeometry, const FKeyEve
 
 	if (!IsValid(ParentWidget) || !IsValid(ParentWidget->UINavPC))
 	{
+		return Reply;
+	}
+
+	if (bIgnoreDueToRebind || ParentWidget->UINavPC->IsListeningToInputRebind())
+	{
+		bIgnoreDueToRebind = false;
 		return Reply;
 	}
 
