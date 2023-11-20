@@ -845,7 +845,13 @@ FKey UUINavPCComponent::GetEnhancedInputKey(const UInputAction* Action, const EI
 	return FKey();
 }
 
-UTexture2D * UUINavPCComponent::GetKeyIcon(const FKey Key) const
+UTexture2D* UUINavPCComponent::GetKeyIcon(const FKey Key) const
+{
+	TSoftObjectPtr<UTexture2D> SoftKeyIcon = GetSoftKeyIcon(Key);
+	return SoftKeyIcon.IsNull() ? nullptr : SoftKeyIcon.LoadSynchronous();
+}
+
+TSoftObjectPtr<UTexture2D> UUINavPCComponent::GetSoftKeyIcon(const FKey Key) const
 {
 	FInputIconMapping* KeyIcon = nullptr;
 
@@ -866,13 +872,17 @@ UTexture2D * UUINavPCComponent::GetKeyIcon(const FKey Key) const
 
 	if (KeyIcon == nullptr) return nullptr;
 
-	UTexture2D* NewTexture = KeyIcon->InputIcon.LoadSynchronous();
-	return NewTexture;
+	return KeyIcon->InputIcon;
 }
 
 UTexture2D* UUINavPCComponent::GetEnhancedInputIcon(const UInputAction* Action, const EInputAxis Axis, const EAxisType Scale, const EInputRestriction InputRestriction) const
 {
 	return GetKeyIcon(GetEnhancedInputKey(Action, Axis, Scale, InputRestriction));
+}
+
+TSoftObjectPtr<UTexture2D> UUINavPCComponent::GetSoftEnhancedInputIcon(const UInputAction* Action, const EInputAxis Axis, const EAxisType Scale, const EInputRestriction InputRestriction) const
+{
+	return GetSoftKeyIcon(GetEnhancedInputKey(Action, Axis, Scale, InputRestriction));
 }
 
 FText UUINavPCComponent::GetEnhancedInputText(const UInputAction* Action, const EInputAxis Axis, const EAxisType Scale, const EInputRestriction InputRestriction) const

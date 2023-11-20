@@ -155,7 +155,7 @@ public:
 	bool bShouldDestroyParent = false;
 
 	//If set to true, this widget will be removed if it has no ParentWidget and is returned from
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = UINavWidget)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = UINavWidget)
 	bool bAllowRemoveIfRoot = true;
 
 	//If set to true, this widget will show the selector it has, otherwise it will hide it.
