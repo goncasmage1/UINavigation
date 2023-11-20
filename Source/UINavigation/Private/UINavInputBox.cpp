@@ -11,6 +11,7 @@
 #include "Components/Image.h"
 #include "Data/RevertRebindReason.h"
 #include "Engine/DataTable.h"
+#include "Engine/Texture2D.h"
 #include "GameFramework/InputSettings.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
 #include "InputAction.h"
