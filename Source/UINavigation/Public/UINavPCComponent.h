@@ -18,6 +18,7 @@
 #include "Data/InputContainerEnhancedActionData.h"
 #include "Delegates/DelegateCombinations.h"
 #include "Misc/CoreMiscDefines.h"
+#include "UObject/SoftObjectPtr.h"
 #include "UINavPCComponent.generated.h"
 
 class APlayerController;
@@ -424,10 +425,18 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
 	UTexture2D* GetKeyIcon(const FKey Key) const;
 
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
+	TSoftObjectPtr<UTexture2D> GetSoftKeyIcon(const FKey Key) const;
+
 	//Get first found Icon associated with the given enhanced input action
 	//Will search the icon table
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
 	UTexture2D* GetEnhancedInputIcon(const UInputAction* Action, const EInputAxis Axis = EInputAxis::X, const EAxisType Scale = EAxisType::None, const EInputRestriction InputRestriction = EInputRestriction::None) const;
+
+	//Get first found Icon associated with the given enhanced input action
+	//Will search the icon table
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
+	TSoftObjectPtr<UTexture2D> GetSoftEnhancedInputIcon(const UInputAction* Action, const EInputAxis Axis = EInputAxis::X, const EAxisType Scale = EAxisType::None, const EInputRestriction InputRestriction = EInputRestriction::None) const;
 
 	//Get first found Icon associated with the given enhanced input action
 	//Will search the icon table
