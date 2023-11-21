@@ -396,23 +396,25 @@ void UUINavComponent::NativeOnFocusChanging(const FWeakWidgetPath& PreviousFocus
 	{
 		int WidgetIndex = PreviousFocusPath.Widgets.Num() - 1;
 		TSharedPtr<SWidget> PreviousWidget = PreviousFocusPath.Widgets[WidgetIndex].Pin();
-		if (PreviousWidget.IsValid())
+		while (PreviousWidget.IsValid() && !PreviousWidget->GetType().IsEqual(FName(TEXT("SObjectWidget"))) && --WidgetIndex >= 0)
 		{
-			while (!PreviousWidget->GetType().IsEqual(FName(TEXT("SObjectWidget"))) && --WidgetIndex > 0)
+			PreviousWidget = PreviousFocusPath.Widgets[WidgetIndex].Pin();
+		}
+
+		if (WidgetIndex >= 0)
+		{
+			TSharedPtr<SObjectWidget> PreviousUserWidgetPtr = StaticCastSharedPtr<SObjectWidget>(PreviousWidget);
+			if (PreviousUserWidgetPtr.IsValid())
 			{
-				PreviousWidget = PreviousFocusPath.Widgets[WidgetIndex].Pin();
-				TSharedPtr<SObjectWidget> PreviousUserWidgetPtr = StaticCastSharedPtr<SObjectWidget>(PreviousWidget);
-				if (PreviousUserWidgetPtr.IsValid())
+				UUserWidget* PreviousUserWidget = PreviousUserWidgetPtr->GetWidgetObject();
+				if (IsValid(PreviousUserWidget))
 				{
-					UUserWidget* PreviousUserWidget = PreviousUserWidgetPtr->GetWidgetObject();
-					if (IsValid(PreviousUserWidget))
-					{
-						PreviousUserWidget->SetFocus();
-					}
+					PreviousUserWidget->SetFocus();
 				}
 			}
-			return;
 		}
+
+		return;
 	}
 
 	const FString WidgetTypeString = NewWidgetPath.GetLastWidget()->GetType().ToString();
