@@ -68,6 +68,10 @@ public:
 	UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	float MouseMoveRebindThreshold = 1.0f;
 
+	// Increment by 1 everytime your project's default inputs change
+	UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = "Settings")
+	uint8 CurrentInputVersion = 0;
+
 	UPROPERTY(config, EditAnywhere, Category = "Settings")
 	TSoftObjectPtr<UInputMappingContext> EnhancedInputContext = TSoftObjectPtr<UInputMappingContext>(FSoftObjectPath("/UINavigation/Input/IC_UINav.IC_UINav"));
 
