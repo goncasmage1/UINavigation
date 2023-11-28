@@ -271,6 +271,11 @@ void UUINavPCComponent::SetActiveWidget(UUINavWidget * NewActiveWidget)
 	{
 		if (NewActiveWidget == nullptr)
 		{
+			if (HidingMouseCursor())
+			{
+				SetShowMouseCursor(true);
+			}
+
 			IUINavPCReceiver::Execute_OnRootWidgetRemoved(GetOwner());
 			// GetOwningPlayer will not be valid if SetActiveWidget is called during PlayerController EndPlay()
 			APlayerController *ActiveWidgetPC = ActiveWidget->GetOwningPlayer();
@@ -294,6 +299,11 @@ void UUINavPCComponent::SetActiveWidget(UUINavWidget * NewActiveWidget)
 		if (OldActiveWidget == nullptr)
 		{
 			IUINavPCReceiver::Execute_OnRootWidgetAdded(GetOwner());
+
+			if (ShouldHideMouseCursor())
+			{
+				SetShowMouseCursor(false);
+			}
 		}
 	}
 }
@@ -410,6 +420,22 @@ void UUINavPCComponent::SetShowMouseCursor(const bool bShowMouse)
 	float MousePosY;
 	PC->GetMousePosition(MousePosX, MousePosY);
 	PC->SetMouseLocation(static_cast<int>(MousePosX), static_cast<int>(MousePosY));
+}
+
+bool UUINavPCComponent::HidingMouseCursor() const
+{
+	if (!IsValid(PC))
+	{
+		return false;
+	}
+
+	return !PC->bShowMouseCursor && PC->CurrentMouseCursor == static_cast<TEnumAsByte<EMouseCursor::Type>>(EMouseCursor::None);
+}
+
+bool UUINavPCComponent::ShouldHideMouseCursor() const
+{
+	return ((CurrentInputType == EInputType::Keyboard && AutoHideMouse > EAutoHideMouse::Gamepad) ||
+		(CurrentInputType == EInputType::Gamepad && AutoHideMouse > EAutoHideMouse::Never));
 }
 
 void UUINavPCComponent::RefreshNavigationKeys()
@@ -1119,9 +1145,10 @@ void UUINavPCComponent::NotifyInputTypeChange(const EInputType NewInputType, con
 			ActiveWidget->AttemptUnforceNavigation(CurrentInputType);
 		}
 
-		const bool bShouldHideMouse = ((NewInputType == EInputType::Keyboard && AutoHideMouse > EAutoHideMouse::Gamepad) ||
-			(NewInputType == EInputType::Gamepad && AutoHideMouse > EAutoHideMouse::Never));
-		SetShowMouseCursor(!bShouldHideMouse);
+		if (GetInputMode() != EInputMode::Game)
+		{
+			SetShowMouseCursor(!ShouldHideMouseCursor());
+		}
 
 		ActiveWidget->PropagateOnInputChanged(OldInputType, CurrentInputType);
 	}
