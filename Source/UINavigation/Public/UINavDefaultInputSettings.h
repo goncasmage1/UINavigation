@@ -38,4 +38,7 @@ public:
 	// A map for each Input Context in your game and its respective Default Input Context Mappings
 	UPROPERTY(config)
 	TMap<TSoftObjectPtr<UInputMappingContext>, FInputMappingArray> DefaultEnhancedInputMappings;
+
+	UPROPERTY(config)
+	uint8 InputVersion = 0;
 };
