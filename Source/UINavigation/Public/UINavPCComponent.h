@@ -325,6 +325,9 @@ public:
 
 	void SetShowMouseCursor(const bool bShowMouse);
 
+	bool HidingMouseCursor() const;
+	bool ShouldHideMouseCursor() const;
+
 	UFUNCTION(BlueprintCallable, Category = UINavController)
 	void RefreshNavigationKeys();
 
