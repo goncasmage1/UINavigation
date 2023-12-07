@@ -237,6 +237,11 @@ void UUINavComponent::HandleFocusLost()
 
 void UUINavComponent::OnButtonClicked()
 {
+	if (!ParentWidget->UINavPC->IsWidgetActive(ParentWidget))
+	{
+		return;
+	}
+
 	OnNativeClicked.Broadcast();
 	OnClicked.Broadcast();
 
@@ -252,6 +257,11 @@ void UUINavComponent::OnButtonClicked()
 
 void UUINavComponent::OnButtonPressed()
 {
+	if (!ParentWidget->UINavPC->IsWidgetActive(ParentWidget))
+	{
+		return;
+	}
+
 	OnNativePressed.Broadcast();
 	OnPressed.Broadcast();
 
@@ -265,6 +275,11 @@ void UUINavComponent::OnButtonPressed()
 
 void UUINavComponent::OnButtonReleased()
 {
+	if (!ParentWidget->UINavPC->IsWidgetActive(ParentWidget))
+	{
+		return;
+	}
+
 	OnNativeReleased.Broadcast();
 	OnReleased.Broadcast();
 

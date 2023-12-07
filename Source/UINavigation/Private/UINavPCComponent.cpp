@@ -814,6 +814,34 @@ void UUINavPCComponent::ClearNavigationTimer()
 	CountdownPhase = ECountdownPhase::None;
 }
 
+bool UUINavPCComponent::IsWidgetActive(const UUINavWidget* const UINavWidget) const
+{
+	if (!IsValid(ActiveWidget))
+	{
+		return false;
+	}
+
+	if (ActiveWidget == UINavWidget)
+	{
+		return true;
+	}
+
+	for (const UUINavWidget* const ChildUINavWidget : ActiveWidget->ChildUINavWidgets)
+	{
+		if (!IsValid(ChildUINavWidget))
+		{
+			continue;
+		}
+
+		if (IsWidgetActive(ChildUINavWidget))
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
 FKey UUINavPCComponent::GetEnhancedInputKey(const UInputAction* Action, const EInputAxis Axis, const EAxisType Scale, const EInputRestriction InputRestriction) const
 {
 	if (UUINavBlueprintFunctionLibrary::IsUINavInputAction(Action))
