@@ -323,9 +323,12 @@ public:
 	
 	EThumbstickAsMouse UsingThumbstickAsMouse() const;
 
+	UFUNCTION(BlueprintCallable, Category = UINavController)
 	void SetShowMouseCursor(const bool bShowMouse);
 
+	UFUNCTION(BlueprintCallable, Category = UINavController)
 	bool HidingMouseCursor() const;
+
 	bool ShouldHideMouseCursor() const;
 
 	UFUNCTION(BlueprintCallable, Category = UINavController)
