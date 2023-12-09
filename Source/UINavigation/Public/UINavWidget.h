@@ -17,6 +17,7 @@ class UUINavHorizontalComponent;
 class UUINavPromptWidget;
 class UPromptDataBase;
 class UScrollBox;
+class UInputMappingContext;
 enum class EButtonStyle : uint8;
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FPromptWidgetDecided, const UPromptDataBase*, PromptData);
@@ -169,6 +170,12 @@ public:
 	*/
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = UINavWidget)
 	bool bMaintainNavigationForChild = false;
+
+	/*
+	* Input Contexts to be applied when this widget becomes active (and to be removed when it becomes inactive)
+	*/
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = UINavWidget)
+	TArray<TObjectPtr<UInputMappingContext>> InputContextsToAdd;
 
 	/*If set to Left or Right, the gamepad's left or right thumbstick will be used to move the mouse when this widget is active */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = UINavWidget)

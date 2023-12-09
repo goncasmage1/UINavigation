@@ -996,8 +996,12 @@ UUINavWidget * UUINavWidget::GoToBuiltWidget(UUINavWidget* NewWidget, const bool
 		}
 	}
 	OldOuterUINavWidget->CleanSetup();
-	SetHoveredComponent(nullptr);
 	
+	SelectCount = 0;
+	SetSelectedComponent(nullptr);
+
+	SetHoveredComponent(nullptr);
+
 	return NewWidget;
 }
 
