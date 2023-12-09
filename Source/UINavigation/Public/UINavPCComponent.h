@@ -108,6 +108,9 @@ protected:
 	UPROPERTY()
 	TArray<const UInputMappingContext*> CachedInputContexts;
 
+	UPROPERTY()
+	TMap<const UInputMappingContext*, uint8> AppliedInputContexts;
+
 	/*************************************************************************/
 
 	void SetTimer(const EUINavigation NavigationDirection);
@@ -140,6 +143,8 @@ protected:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	void OnControllerConnectionChanged(EInputDeviceConnectionState NewConnectionState, FPlatformUserId UserId, FInputDeviceId UserIndex);
+
+	UUINavWidget* GetFirstCommonParent(UUINavWidget* const Widget1, UUINavWidget* const Widget2);
 
 public:
 
@@ -323,9 +328,12 @@ public:
 	
 	EThumbstickAsMouse UsingThumbstickAsMouse() const;
 
+	UFUNCTION(BlueprintCallable, Category = UINavController)
 	void SetShowMouseCursor(const bool bShowMouse);
 
+	UFUNCTION(BlueprintCallable, Category = UINavController)
 	bool HidingMouseCursor() const;
+
 	bool ShouldHideMouseCursor() const;
 
 	UFUNCTION(BlueprintCallable, Category = UINavController)
@@ -350,6 +358,18 @@ public:
 	bool IgnoreFocusByNavigation() const { return bIgnoreFocusByNavigation; }
 
 	void RequestRebuildMappings();
+
+	void AddInputContextFromUINavWidget(const UUINavWidget* const UINavWidget, const UUINavWidget* const ParentLimit = nullptr);
+	void RemoveInputContextFromUINavWidget(const UUINavWidget* const UINavWidget, const UUINavWidget* const ParentLimit = nullptr);
+	
+	void AddInputContextForMenu(const TObjectPtr<UInputMappingContext> Context);
+
+	void RemoveInputContextFromMenu(const TObjectPtr<UInputMappingContext> Context);
+
+	UFUNCTION(BlueprintCallable, Category = "Input")
+	void AddInputContext(const UInputMappingContext* const Context, const int32 Priority = 0);
+	UFUNCTION(BlueprintCallable, Category = "Input")
+	void RemoveInputContext(const UInputMappingContext* const Context);
 		
 	void HandleKeyDownEvent(FSlateApplication& SlateApp, const FKeyEvent& InKeyEvent);
 	void HandleKeyUpEvent(FSlateApplication& SlateApp, const FKeyEvent& InKeyEvent);
@@ -518,6 +538,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
 	FORCEINLINE UUINavWidget* GetActiveSubWidget() const { return ActiveSubWidget != nullptr ? ActiveSubWidget : ActiveWidget; }
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
+	bool IsWidgetActive(const UUINavWidget* const UINavWidget) const;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
     FORCEINLINE FVector2D GetThumbstickDelta() const { return ThumbstickDelta; }
