@@ -195,9 +195,135 @@ void UUINavPCComponent::RequestRebuildMappings()
 	});
 }
 
+void UUINavPCComponent::AddInputContextFromUINavWidget(const UUINavWidget* const UINavWidget, const UUINavWidget* const ParentLimit /*= nullptr*/)
+{
+	const UUINavWidget* CurrentWidget = UINavWidget;
+	while (IsValid(CurrentWidget) && ParentLimit != CurrentWidget)
+	{
+		for (const TObjectPtr<UInputMappingContext> InputContextToAdd : CurrentWidget->InputContextsToAdd)
+		{
+			AddInputContextForMenu(InputContextToAdd);
+		}
+
+		CurrentWidget = CurrentWidget->OuterUINavWidget;
+	}
+}
+
+void UUINavPCComponent::RemoveInputContextFromUINavWidget(const UUINavWidget* const UINavWidget, const UUINavWidget* const ParentLimit /*= nullptr*/)
+{
+	const UUINavWidget* CurrentWidget = UINavWidget;
+	while (IsValid(CurrentWidget) && ParentLimit != CurrentWidget)
+	{
+		for (const TObjectPtr<UInputMappingContext> InputContextToAdd : CurrentWidget->InputContextsToAdd)
+		{
+			RemoveInputContextFromMenu(InputContextToAdd);
+		}
+
+		CurrentWidget = CurrentWidget->OuterUINavWidget;
+	}
+}
+
+void UUINavPCComponent::AddInputContextForMenu(const TObjectPtr<UInputMappingContext> Context)
+{
+	uint8* NumTimesApplied = AppliedInputContexts.Find(Context);
+	if (NumTimesApplied != nullptr)
+	{
+		(*NumTimesApplied)++;
+	}
+	else
+	{
+		AddInputContext(Context);
+		AppliedInputContexts.Add(Context, 1);
+	}
+}
+
+void UUINavPCComponent::RemoveInputContextFromMenu(const TObjectPtr<UInputMappingContext> Context)
+{
+	uint8* NumTimesApplied = AppliedInputContexts.Find(Context);
+	if (NumTimesApplied == nullptr)
+	{
+		return;
+	}
+
+	if (*NumTimesApplied > 1)
+	{
+		(*NumTimesApplied)--;
+	}
+	else
+	{
+		RemoveInputContext(Context);
+		AppliedInputContexts.Remove(Context);
+	}
+}
+
+void UUINavPCComponent::AddInputContext(const UInputMappingContext* const Context, const int32 Priority /*= 0*/)
+{
+	UEnhancedInputLocalPlayerSubsystem* InputSubsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PC->GetLocalPlayer());
+	if (!IsValid(InputSubsystem))
+	{
+		return;
+	}
+
+	InputSubsystem->AddMappingContext(Context, Priority);
+}
+
+void UUINavPCComponent::RemoveInputContext(const UInputMappingContext* const Context)
+{
+	UEnhancedInputLocalPlayerSubsystem* InputSubsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PC->GetLocalPlayer());
+	if (!IsValid(InputSubsystem))
+	{
+		return;
+	}
+
+	InputSubsystem->RemoveMappingContext(Context);
+}
+
 void UUINavPCComponent::OnControllerConnectionChanged(EInputDeviceConnectionState NewConnectionState, FPlatformUserId UserId, FInputDeviceId UserIndex)
 {
 	IUINavPCReceiver::Execute_OnControllerConnectionChanged(GetOwner(), NewConnectionState == EInputDeviceConnectionState::Connected, static_cast<int32>(UserId), static_cast<int32>(UserIndex.GetId()));
+}
+
+UUINavWidget* UUINavPCComponent::GetFirstCommonParent(UUINavWidget* const Widget1, UUINavWidget* const Widget2)
+{
+	if (!IsValid(Widget1) ||
+		!IsValid(Widget2) ||
+		Widget1->GetMostOuterUINavWidget() != Widget2->GetMostOuterUINavWidget())
+	{
+		return nullptr;
+	}
+
+	UUINavWidget* CommonParent = Widget1->GetMostOuterUINavWidget();
+	if (CommonParent == nullptr)
+	{
+		return nullptr;
+	}
+
+	uint8 Depth = 0;
+	const TArray<int> OldPath = Widget1 != nullptr ? Widget1->GetUINavWidgetPath() : TArray<int>();
+	const TArray<int> NewPath = Widget2 != nullptr ? Widget2->GetUINavWidgetPath() : TArray<int>();
+	while (true)
+	{
+		const int OldIndex = OldPath.Num() > Depth ? OldPath[Depth] : -1;
+		const int NewIndex = NewPath.Num() > Depth ? NewPath[Depth] : -1;
+
+		if (OldIndex == -1 && NewIndex == -1)
+		{
+			break;
+		}
+
+		Depth++;
+
+		if (OldIndex == NewIndex)
+		{
+			CommonParent = CommonParent->GetChildUINavWidget(OldIndex);
+		}
+		else
+		{
+			break;
+		}
+	}
+
+	return Depth > 0 ? CommonParent : nullptr;
 }
 
 void UUINavPCComponent::CacheGameInputContexts()
@@ -265,8 +391,6 @@ void UUINavPCComponent::SetActiveWidget(UUINavWidget * NewActiveWidget)
 {
 	if (NewActiveWidget == ActiveWidget) return;
 
-	UUINavWidget* CommonParent = ActiveWidget != nullptr ? ActiveWidget->GetMostOuterUINavWidget() : NewActiveWidget->GetMostOuterUINavWidget();
-	
 	if (ActiveWidget != nullptr)
 	{
 		if (NewActiveWidget == nullptr)
@@ -291,6 +415,10 @@ void UUINavPCComponent::SetActiveWidget(UUINavWidget * NewActiveWidget)
 	ActiveWidget = NewActiveWidget;
 	ActiveSubWidget = nullptr;
 	RefreshNavigationKeys();
+
+	const UUINavWidget* const CommonParent = GetFirstCommonParent(ActiveWidget, OldActiveWidget);
+	RemoveInputContextFromUINavWidget(OldActiveWidget, CommonParent);
+	AddInputContextFromUINavWidget(ActiveWidget, CommonParent);
 	
 	IUINavPCReceiver::Execute_OnActiveWidgetChanged(GetOwner(), OldActiveWidget, ActiveWidget);
 	
