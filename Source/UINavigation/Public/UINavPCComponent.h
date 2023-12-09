@@ -540,7 +540,7 @@ public:
 	FORCEINLINE UUINavWidget* GetActiveSubWidget() const { return ActiveSubWidget != nullptr ? ActiveSubWidget : ActiveWidget; }
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
-	FORCEINLINE bool IsWidgetActive(const UUINavWidget* const UINavWidget) const;
+	bool IsWidgetActive(const UUINavWidget* const UINavWidget) const;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
     FORCEINLINE FVector2D GetThumbstickDelta() const { return ThumbstickDelta; }
