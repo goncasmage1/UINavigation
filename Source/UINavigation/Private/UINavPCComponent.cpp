@@ -1309,6 +1309,7 @@ void UUINavPCComponent::NotifyInputTypeChange(const EInputType NewInputType, con
 		ActiveWidget->PropagateOnInputChanged(OldInputType, CurrentInputType);
 	}
 	InputTypeChangedDelegate.Broadcast(CurrentInputType);
+	UpdateInputIconsDelegate.Broadcast();
 }
 
 UEnhancedInputComponent* UUINavPCComponent::GetEnhancedInputComponent() const

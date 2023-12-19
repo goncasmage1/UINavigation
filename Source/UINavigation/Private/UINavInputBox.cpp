@@ -212,6 +212,7 @@ int32 UUINavInputBox::FinishUpdateNewKey(const int32 MappingIndexToIgnore /*= -1
 
 	Container->OnKeyRebinded(InputName, OldKey, Keys[AwaitingIndex]);
 	Container->UINavPC->RefreshNavigationKeys();
+	Container->UINavPC->UpdateInputIconsDelegate.Broadcast();
 	AwaitingIndex = -1;
 
 	return ModifiedActionMappingIndex;

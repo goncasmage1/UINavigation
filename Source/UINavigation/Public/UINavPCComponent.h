@@ -29,6 +29,7 @@ class UUINavWidget;
 class UInputMappingContext;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FInputTypeChangedDelegate, EInputType, InputType);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FUpdateInputIconsDelegate);
 
 USTRUCT(BlueprintType)
 struct FAxis2D_Keys
@@ -308,6 +309,9 @@ public:
 
 	UPROPERTY(BlueprintAssignable, BlueprintCallable, BlueprintReadOnly, Category = UINavController)
 	FInputTypeChangedDelegate InputTypeChangedDelegate;
+
+	UPROPERTY(BlueprintAssignable, BlueprintCallable, BlueprintReadOnly, Category = UINavController)
+	FUpdateInputIconsDelegate UpdateInputIconsDelegate;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
 	FORCEINLINE bool AllowsAllMenuInput() const { return bAllowDirectionalInput && bAllowSelectInput && bAllowReturnInput && bAllowSectionInput; }
