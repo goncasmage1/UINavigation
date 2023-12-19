@@ -567,25 +567,6 @@ void UUINavComponent::NativePreConstruct()
 		{
 			NavRichText->SetDefaultFont(FontOverride);
 		}
-		else
-		{
-			if (const UDataTable* const TextStyleSet = NavRichText->GetTextStyleSet())
-			{
-				if (TextStyleSet->GetRowStruct()->IsChildOf(FRichTextStyleRow::StaticStruct()))
-				{
-					for (const auto& Entry : TextStyleSet->GetRowMap())
-					{
-						FName SubStyleName = Entry.Key;
-						FRichTextStyleRow* RichTextStyle = (FRichTextStyleRow*)Entry.Value;
-
-						if (SubStyleName == FName(TEXT("Default")))
-						{
-							FontOverride = RichTextStyle->TextStyle.Font;
-						}
-					}
-				}
-			}
-		}
 
 		if (bUseTextColor)
 		{
