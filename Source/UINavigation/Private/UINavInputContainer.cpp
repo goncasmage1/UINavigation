@@ -40,6 +40,18 @@ void UUINavInputContainer::NativeConstruct()
 	Super::NativeConstruct();
 }
 
+FReply UUINavInputContainer::NativeOnFocusReceived(const FGeometry& InGeometry, const FFocusEvent& InFocusEvent)
+{
+	const FReply Reply = Super::NativeOnFocusReceived(InGeometry, InFocusEvent);
+
+	if (InputBoxes.Num() > 0)
+	{
+		InputBoxes[0]->InputButton1->SetFocus();
+	}
+
+	return Reply;
+}
+
 void UUINavInputContainer::OnAddInputBox_Implementation(class UUINavInputBox* NewInputBox)
 {
 	if (InputBoxesPanel != nullptr)
