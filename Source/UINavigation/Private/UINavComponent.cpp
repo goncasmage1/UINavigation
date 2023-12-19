@@ -7,6 +7,7 @@
 #include "UINavBlueprintFunctionLibrary.h"
 #include "Components/OverlaySlot.h"
 #include "Components/TextBlock.h"
+#include "Components/RichTextBlock.h"
 #include "Components/ScrollBox.h"
 #include "Framework/Application/SlateApplication.h"
 #include "Internationalization/Internationalization.h"
@@ -43,14 +44,14 @@ void UUINavComponent::NativeConstruct()
 		if (!IsValid(ParentWidget))
 		{
 			ParentWidget = UUINavWidget::GetOuterObject<UUINavWidget>(Slot);
-			
+
 			if (!IsValid(ParentWidget))
 			{
 				DISPLAYERROR("UI Nav Component isn't in a UINavWidget!");
 				return;
 			}
 		}
-		
+
 		if (!IsValid(ParentWidget->GetFirstComponent()) && CanBeNavigated())
 		{
 			ParentWidget->SetFirstComponent(this);
@@ -93,7 +94,7 @@ void UUINavComponent::SetFocusable(const bool bNewIsFocusable)
 FReply UUINavComponent::NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent)
 {
 	FReply Reply = Super::NativeOnKeyDown(InGeometry, InKeyEvent);
-	
+
 	if (!IsValid(ParentWidget) || !IsValid(ParentWidget->UINavPC))
 	{
 		return Reply;
@@ -251,7 +252,7 @@ void UUINavComponent::OnButtonClicked()
 	{
 		return;
 	}
-	
+
 	IUINavPCReceiver::Execute_OnSelect(ParentWidget->UINavPC->GetOwner());
 }
 
@@ -315,13 +316,26 @@ void UUINavComponent::SetText(const FText& Text)
 	{
 		NavText->SetText(ComponentText);
 	}
+
+	if (NavRichText != nullptr)
+	{
+		NavRichText->SetText(ComponentText);
+	}
 }
 
 void UUINavComponent::SwitchTextColorTo(FLinearColor Color)
 {
-	if (IsValid(NavText) && bUseTextColor)
+	if (bUseTextColor)
 	{
-		NavText->SetColorAndOpacity(Color);
+		if (IsValid(NavText))
+		{
+			NavText->SetColorAndOpacity(Color);
+		}
+
+		if (NavRichText != nullptr)
+		{
+			NavRichText->SetDefaultColorAndOpacity(Color);
+		}
 	}
 }
 
@@ -544,7 +558,41 @@ void UUINavComponent::NativePreConstruct()
 			NavText->SetColorAndOpacity(TextDefaultColor);
 		}
 	}
-	
+
+	if (NavRichText != nullptr)
+	{
+		NavRichText->SetText(ComponentText);
+
+		if (bOverride_Font)
+		{
+			NavRichText->SetDefaultFont(FontOverride);
+		}
+		else
+		{
+			if (const UDataTable* const TextStyleSet = NavRichText->GetTextStyleSet())
+			{
+				if (TextStyleSet->GetRowStruct()->IsChildOf(FRichTextStyleRow::StaticStruct()))
+				{
+					for (const auto& Entry : TextStyleSet->GetRowMap())
+					{
+						FName SubStyleName = Entry.Key;
+						FRichTextStyleRow* RichTextStyle = (FRichTextStyleRow*)Entry.Value;
+
+						if (SubStyleName == FName(TEXT("Default")))
+						{
+							FontOverride = RichTextStyle->TextStyle.Font;
+						}
+					}
+				}
+			}
+		}
+
+		if (bUseTextColor)
+		{
+			NavRichText->SetDefaultColorAndOpacity(TextDefaultColor);
+		}
+	}
+
 	if (IsValid(NavButton))
 	{
 		if (bOverride_Style)

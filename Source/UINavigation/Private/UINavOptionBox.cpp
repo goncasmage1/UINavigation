@@ -4,6 +4,7 @@
 #include "Blueprint/WidgetTree.h"
 #include "Components/Button.h"
 #include "Components/TextBlock.h"
+#include "Components/RichTextBlock.h"
 #include "UINavMacros.h"
 
 void UUINavOptionBox::NativeConstruct()
@@ -12,7 +13,7 @@ void UUINavOptionBox::NativeConstruct()
 
 	if (!LeftButton->OnClicked.IsBound())
 		LeftButton->OnClicked.AddDynamic(this, &UUINavHorizontalComponent::NavigateLeft);
-	
+
 	if (!RightButton->OnClicked.IsBound())
 		RightButton->OnClicked.AddDynamic(this, &UUINavHorizontalComponent::NavigateRight);
 }
@@ -33,10 +34,13 @@ bool UUINavOptionBox::Update(const bool bNotify /*= true*/)
 {
 	const bool bChangedIndex = Super::Update(bNotify);
 
-	NavText->SetText(bUseNumberRange ? 
-		FText::FromString(FString::FromInt(MinRange + OptionIndex*Interval)) : 
+	NavText->SetText(bUseNumberRange ?
+		FText::FromString(FString::FromInt(MinRange + OptionIndex*Interval)) :
+		StringOptions.IsValidIndex(OptionIndex) ? StringOptions[OptionIndex] : FText());
+
+	NavRichText->SetText(bUseNumberRange ?
+		FText::FromString(FString::FromInt(MinRange + OptionIndex * Interval)) :
 		StringOptions.IsValidIndex(OptionIndex) ? StringOptions[OptionIndex] : FText());
 
 	return bChangedIndex;
 }
-

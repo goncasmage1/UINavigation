@@ -8,6 +8,7 @@
 #include "UINavPCComponent.h"
 #include "UINavWidget.h"
 #include "Components/TextBlock.h"
+#include "Components/RichTextBlock.h"
 #include "Components/Image.h"
 #include "Data/RevertRebindReason.h"
 #include "Engine/DataTable.h"
@@ -88,7 +89,7 @@ void UUINavInputBox::CreateEnhancedInputKeyWidgets()
 					{
 						continue;
 					}
-						
+
 					if (!Container->RespectsRestriction(NewKey, j))
 					{
 						continue;
@@ -111,6 +112,7 @@ void UUINavInputBox::CreateEnhancedInputKeyWidgets()
 			NewInputButton->SetText(Container->EmptyKeyText);
 			NewInputButton->InputImage->SetVisibility(ESlateVisibility::Collapsed);
 			NewInputButton->NavText->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+			NewInputButton->NavRichText->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
 			Keys.Add(FKey());
 		}
 	}
@@ -136,6 +138,7 @@ bool UUINavInputBox::TrySetupNewKey(const FKey& NewKey, const int KeyIndex, UUIN
 		bUsingKeyImage[KeyIndex] = true;
 		NewInputButton->InputImage->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
 		NewInputButton->NavText->SetVisibility(ESlateVisibility::Collapsed);
+		NewInputButton->NavRichText->SetVisibility(ESlateVisibility::Collapsed);
 	}
 	NewInputButton->SetText(GetKeyText(KeyIndex));
 
@@ -443,7 +446,7 @@ void UUINavInputBox::TryMap2DAxisKey(const FKey& NewMappingKey, const int Index)
 		bNegateX = InputActionData.Axis == EInputAxis::X && bNegateX;
 		bNegateY = InputActionData.Axis == EInputAxis::Y && bNegateY;
 		bNegateZ = InputActionData.Axis == EInputAxis::Z && bNegateZ;
-		
+
 		InputContext->UnmapKey(InputActionData.Action, NewMappingKey);
 		InputContext->UnmapKey(InputActionData.Action, OppositeAxis);
 		FEnhancedActionKeyMapping& NewMapping = InputContext->MapKey(InputActionData.Action, Container->UINavPC->GetAxis2DFromAxis1D(OppositeAxis));
@@ -628,6 +631,7 @@ void UUINavInputBox::InputComponentClicked(const int Index)
 	{
 		InputButtons[Index]->InputImage->SetVisibility(ESlateVisibility::Collapsed);
 		InputButtons[Index]->NavText->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+		InputButtons[Index]->NavRichText->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
 	}
 
 	Container->UINavPC->ListenToInputRebind(this);
@@ -735,6 +739,7 @@ void UUINavInputBox::UpdateKeyDisplay(const int Index)
 	{
 		InputButtons[Index]->InputImage->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
 		InputButtons[Index]->NavText->SetVisibility(ESlateVisibility::Collapsed);
+		InputButtons[Index]->NavRichText->SetVisibility(ESlateVisibility::Collapsed);
 	}
 }
 
@@ -763,4 +768,3 @@ bool UUINavInputBox::WantsAxisKey() const
 {
 	return IS_AXIS && InputActionData.AxisScale == EAxisType::None;
 }
-

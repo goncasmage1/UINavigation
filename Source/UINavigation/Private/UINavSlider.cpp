@@ -5,6 +5,7 @@
 #include "UINavWidget.h"
 #include "Components/Slider.h"
 #include "Components/TextBlock.h"
+#include "Components/RichTextBlock.h"
 #include "Components/SpinBox.h"
 
 void UUINavSlider::NativeConstruct()
@@ -61,6 +62,9 @@ bool UUINavSlider::Update(const bool bNotify /*= true*/)
 	if (!bUseComma) ValueText = FText::FromString(ValueText.ToString().Replace(TEXT(","),TEXT(".")));
 
 	if (NavText != nullptr) NavText->SetText(ValueText);
+
+	if (NavRichText != nullptr) NavRichText->SetText(ValueText);
+
 	if (NavSpinBox != nullptr)
 	{
 		NavSpinBox->SetValue(Value);

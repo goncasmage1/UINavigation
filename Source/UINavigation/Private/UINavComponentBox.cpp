@@ -9,7 +9,7 @@ void UUINavComponentBox::NativeConstruct()
 	BaseConstruct();
 
 	if (!LeftButton->OnClicked.IsBound())
-		LeftButton->OnClicked.AddDynamic(this, &UUINavComponentBox::NavigateLeft);	
+		LeftButton->OnClicked.AddDynamic(this, &UUINavComponentBox::NavigateLeft);
 	if (!RightButton->OnClicked.IsBound())
 		RightButton->OnClicked.AddDynamic(this, &UUINavComponentBox::NavigateRight);
 }
@@ -27,6 +27,8 @@ void UUINavComponentBox::BaseConstruct()
 
 	if (NavText == nullptr) DISPLAYERROR(TEXT("Couldn't find TextBlock named NavText in UINavOptionBox"));
 
+	if (NavRichText == nullptr) DISPLAYERROR(TEXT("Couldn't find RichTextBlock named NavRichText in UINavOptionBox"));
+
 	Update();
 
 	if (!bDisableButtons || bLoopOptions) return;
@@ -38,14 +40,14 @@ void UUINavComponentBox::BaseConstruct()
 void UUINavComponentBox::CheckLeftLimit()
 {
 	if (bLoopOptions) return;
-	
+
 	LeftButton->SetIsEnabled(OptionIndex > 0);
 }
 
 void UUINavComponentBox::CheckRightLimit()
 {
 	if (bLoopOptions) return;
-	
+
 	RightButton->SetIsEnabled(OptionIndex < GetMaxOptionIndex());
 }
 

@@ -13,6 +13,7 @@
 
 class UUINavWidget;
 class UTextBlock;
+class URichTextBlock;
 class UScrollBox;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnClickedEvent);
@@ -31,13 +32,13 @@ enum class EButtonStyle : uint8
 };
 
 /**
- * 
+ *
  */
 UCLASS()
 class UINAVIGATION_API UUINavComponent : public UUserWidget
 {
 	GENERATED_BODY()
-	
+
 public:
 
 	UUINavComponent(const FObjectInitializer& ObjectInitializer);
@@ -82,7 +83,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = UINavComponent)
 	void SetText(const FText& Text);
-	
+
 	UFUNCTION(BlueprintCallable, Category = UINavComponent)
 	void SwitchButtonStyle(const EButtonStyle NewStyle, const bool bRevertStyle = true);
 
@@ -138,6 +139,9 @@ public:
 
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget, OptionalWidget = true), Category = UINavComponent)
 	UTextBlock* NavText = nullptr;
+
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget, OptionalWidget = true), Category = UINavComponent)
+	URichTextBlock* NavRichText = nullptr;
 
 	UPROPERTY(BlueprintReadOnly, Category = UINavComponent)
 	UUINavWidget* ParentWidget = nullptr;
