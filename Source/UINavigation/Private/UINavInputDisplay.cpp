@@ -25,7 +25,7 @@ void UUINavInputDisplay::NativeConstruct()
 		return;
 	}
 
-	UINavPC->InputTypeChangedDelegate.AddDynamic(this, &UUINavInputDisplay::InputTypeChanged);
+	UINavPC->UpdateInputIconsDelegate.AddDynamic(this, &UUINavInputDisplay::UpdateInputVisuals);
 
 	UpdateInputVisuals();
 }
@@ -37,7 +37,7 @@ void UUINavInputDisplay::NativeDestruct()
 		return;
 	}
 
-	UINavPC->InputTypeChangedDelegate.RemoveDynamic(this, &UUINavInputDisplay::InputTypeChanged);
+	UINavPC->UpdateInputIconsDelegate.RemoveDynamic(this, &UUINavInputDisplay::UpdateInputVisuals);
 
 	Super::NativeDestruct();
 }
@@ -101,11 +101,6 @@ void UUINavInputDisplay::UpdateInputVisuals()
 
 		InputText->SetVisibility(ESlateVisibility::Visible);
 	}
-}
-
-void UUINavInputDisplay::InputTypeChanged(const EInputType NewInputType)
-{
-	UpdateInputVisuals();
 }
 
 void UUINavInputDisplay::SetInputAction(UInputAction* NewAction, const EInputAxis NewAxis, const EAxisType NewScale)

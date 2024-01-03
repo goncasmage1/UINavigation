@@ -17,11 +17,6 @@
 #include "InputAction.h"
 #include "InputMappingContext.h"
 
-#define IS_POSITIVE_AXIS (AxisType == EAxisType::Positive)
-#define IS_NEGATIVE_AXIS (AxisType == EAxisType::Negative)
-#define IS_RIGHT_SCALE(Axis) ((Axis.Scale > 0.0f && IS_POSITIVE_AXIS) || (Axis.Scale < 0.0f && IS_NEGATIVE_AXIS))
-#define GET_REVERSE_AXIS (AxisType == EAxisType::Positive ? EAxisType::Negative : EAxisType::Positive)
-
 UUINavInputBox::UUINavInputBox(const FObjectInitializer& ObjectInitializer)
 	:Super(ObjectInitializer)
 {
@@ -80,7 +75,7 @@ void UUINavInputBox::CreateEnhancedInputKeyWidgets()
 				{
 					if (Container->UINavPC->IsAxis(NewKey) && InputActionData.AxisScale != EAxisType::None)
 					{
-						NewKey = Container->UINavPC->GetKeyFromAxis(NewKey, bPositive ? IS_POSITIVE_AXIS : !IS_POSITIVE_AXIS, InputActionData.Axis);
+						NewKey = Container->UINavPC->GetKeyFromAxis(NewKey, bPositive ? AxisType == EAxisType::Positive : AxisType != EAxisType::Positive, InputActionData.Axis);
 					}
 					else if (OppositeInputBox != nullptr &&
 						InputActionData.AxisScale != EAxisType::None &&
@@ -212,6 +207,7 @@ int32 UUINavInputBox::FinishUpdateNewKey(const int32 MappingIndexToIgnore /*= -1
 
 	Container->OnKeyRebinded(InputName, OldKey, Keys[AwaitingIndex]);
 	Container->UINavPC->RefreshNavigationKeys();
+	Container->UINavPC->UpdateInputIconsDelegate.Broadcast();
 	AwaitingIndex = -1;
 
 	return ModifiedActionMappingIndex;
@@ -356,7 +352,7 @@ int32 UUINavInputBox::FinishUpdateNewEnhancedInputKey(const FKey& PressedKey, co
 
 	if (bRemoved2DAxis)
 	{
-		Container->ResetInputBox(InputName, GET_REVERSE_AXIS);
+		Container->ResetInputBox(InputName, AxisType == EAxisType::Positive ? EAxisType::Negative : EAxisType::Positive);
 	}
 
 	return ModifiedActionMappingIndex;

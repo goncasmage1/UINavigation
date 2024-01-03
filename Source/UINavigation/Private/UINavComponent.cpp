@@ -189,7 +189,8 @@ FReply UUINavComponent::NativeOnMouseButtonDown(const FGeometry& InGeometry, con
 		IsValid(ParentWidget->UINavPC) &&
 		ParentWidget->UINavPC->IsListeningToInputRebind())
 	{
-		ParentWidget->UINavPC->ProcessRebind(EKeys::LeftMouseButton);
+		const FKeyEvent MouseKeyEvent(EKeys::LeftMouseButton, FModifierKeysState(), InMouseEvent.GetUserIndex(), InMouseEvent.IsRepeat(), 0, 0);
+		ParentWidget->UINavPC->ProcessRebind(MouseKeyEvent);
 	}
 
 	return Reply;
@@ -204,7 +205,8 @@ FReply UUINavComponent::NativeOnMouseButtonDoubleClick(const FGeometry& InGeomet
 		IsValid(ParentWidget->UINavPC) &&
 		ParentWidget->UINavPC->IsListeningToInputRebind())
 	{
-		ParentWidget->UINavPC->ProcessRebind(EKeys::LeftMouseButton);
+		const FKeyEvent MouseKeyEvent(EKeys::LeftMouseButton, FModifierKeysState(), InMouseEvent.GetUserIndex(), InMouseEvent.IsRepeat(), 0, 0);
+		ParentWidget->UINavPC->ProcessRebind(MouseKeyEvent);
 	}
 
 	return Reply;
@@ -237,7 +239,8 @@ void UUINavComponent::HandleFocusLost()
 
 void UUINavComponent::OnButtonClicked()
 {
-	if (!ParentWidget->UINavPC->IsWidgetActive(ParentWidget))
+	if (!ParentWidget->UINavPC->IsWidgetActive(ParentWidget) ||
+		ParentWidget->UINavPC->ShouldIgnoreClickEvent())
 	{
 		return;
 	}

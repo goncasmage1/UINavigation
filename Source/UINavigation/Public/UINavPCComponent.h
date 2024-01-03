@@ -29,6 +29,7 @@ class UUINavWidget;
 class UInputMappingContext;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FInputTypeChangedDelegate, EInputType, InputType);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FUpdateInputIconsDelegate);
 
 USTRUCT(BlueprintType)
 struct FAxis2D_Keys
@@ -104,6 +105,8 @@ protected:
 	bool bReceivedAnalogInput = false;
 
 	bool bIgnoreFocusByNavigation = false;
+
+	bool bIgnoreClickEvent = false;
 
 	UPROPERTY()
 	TArray<const UInputMappingContext*> CachedInputContexts;
@@ -309,6 +312,9 @@ public:
 	UPROPERTY(BlueprintAssignable, BlueprintCallable, BlueprintReadOnly, Category = UINavController)
 	FInputTypeChangedDelegate InputTypeChangedDelegate;
 
+	UPROPERTY(BlueprintAssignable, BlueprintCallable, BlueprintReadOnly, Category = UINavController)
+	FUpdateInputIconsDelegate UpdateInputIconsDelegate;
+
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
 	FORCEINLINE bool AllowsAllMenuInput() const { return bAllowDirectionalInput && bAllowSelectInput && bAllowReturnInput && bAllowSectionInput; }
 
@@ -389,7 +395,7 @@ public:
 	FKey GetKeyUsedForNavigation(const EUINavigation Direction) const;
 	FKey GetMostRecentlyPressedKey(const ENavigationGenesis Genesis) const;
 
-	void ProcessRebind(const FKey Key);
+	void ProcessRebind(const FKeyEvent& KeyEvent);
 	void CancelRebind();
 
 	/**
@@ -541,6 +547,8 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
 	bool IsWidgetActive(const UUINavWidget* const UINavWidget) const;
+
+	bool ShouldIgnoreClickEvent();
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
     FORCEINLINE FVector2D GetThumbstickDelta() const { return ThumbstickDelta; }

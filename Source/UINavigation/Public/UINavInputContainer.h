@@ -14,6 +14,9 @@
 #include "UINavInputContainer.generated.h"
 
 class UPromptDataBase;
+class FReply;
+struct FGeometry;
+struct FFocusEvent;
 
 /**
 * This class contains the logic for aggregating several input boxes
@@ -37,6 +40,8 @@ protected:
 public:
 
 	virtual void NativeConstruct() override;
+
+	virtual FReply NativeOnFocusReceived(const FGeometry& InGeometry, const FFocusEvent& InFocusEvent) override;
 
 	/**
 	*	Called when a new input box is added
