@@ -106,6 +106,8 @@ protected:
 
 	bool bIgnoreFocusByNavigation = false;
 
+	bool bIgnoreClickEvent = false;
+
 	UPROPERTY()
 	TArray<const UInputMappingContext*> CachedInputContexts;
 
@@ -393,7 +395,7 @@ public:
 	FKey GetKeyUsedForNavigation(const EUINavigation Direction) const;
 	FKey GetMostRecentlyPressedKey(const ENavigationGenesis Genesis) const;
 
-	void ProcessRebind(const FKey Key);
+	void ProcessRebind(const FKeyEvent& KeyEvent);
 	void CancelRebind();
 
 	/**
@@ -545,6 +547,8 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
 	bool IsWidgetActive(const UUINavWidget* const UINavWidget) const;
+
+	bool ShouldIgnoreClickEvent();
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
     FORCEINLINE FVector2D GetThumbstickDelta() const { return ThumbstickDelta; }

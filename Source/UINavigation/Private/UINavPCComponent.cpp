@@ -362,20 +362,22 @@ void UUINavPCComponent::TryResetDefaultInputs()
 	}
 }
 
-void UUINavPCComponent::ProcessRebind(const FKey Key)
+void UUINavPCComponent::ProcessRebind(const FKeyEvent& KeyEvent)
 {
 	if (!IsValid(ListeningInputBox))
 	{
 		return;
 	}
 
-	if (Key == EKeys::LeftMouseButton)
+	if (KeyEvent.GetKey() == EKeys::LeftMouseButton)
 	{
 		bIgnoreSelectRelease = true;
 	}
 
-	ListeningInputBox->UpdateInputKey(Key);
+	ListeningInputBox->UpdateInputKey(KeyEvent.GetKey());
 	ListeningInputBox = nullptr;
+
+	bIgnoreClickEvent = FSlateApplication::Get().GetNavigationActionFromKey(KeyEvent) == EUINavigationAction::Accept;
 }
 
 void UUINavPCComponent::CancelRebind()
@@ -639,7 +641,8 @@ void UUINavPCComponent::HandleKeyUpEvent(FSlateApplication& SlateApp, const FKey
 		{
 			Key = GetAxisFromKey(Key);
 		}
-		ProcessRebind(InKeyEvent.GetKey());
+
+		ProcessRebind(InKeyEvent);
 	}
 	else if (!bShouldUnforceNavigation)
 	{
@@ -782,7 +785,7 @@ void UUINavPCComponent::HandleMouseMoveEvent(FSlateApplication& SlateApp, const 
 
 		if (IsValid(ListeningInputBox))
 		{
-			FKey MouseKey;
+			FKey MouseKey = MouseEvent.GetEffectingButton();
 			const float MouseMoveThreshold = GetDefault<UUINavSettings>()->MouseMoveRebindThreshold;
 			const FVector2D MovementDelta = MouseEvent.GetCursorDelta();
 
@@ -803,7 +806,8 @@ void UUINavPCComponent::HandleMouseMoveEvent(FSlateApplication& SlateApp, const 
 				MouseKey = MouseLeft;
 			}
 
-			ProcessRebind(MouseKey);
+			const FKeyEvent MouseKeyEvent(MouseKey, FModifierKeysState(), MouseEvent.GetUserIndex(), MouseEvent.IsRepeat(), 0, 0);
+			ProcessRebind(MouseKeyEvent);
 		}
 	}
 }
@@ -816,7 +820,9 @@ void UUINavPCComponent::HandleMouseButtonDownEvent(FSlateApplication& SlateApp, 
 		{
 			CancelRebind();
 		}
-		ProcessRebind(MouseEvent.GetEffectingButton());
+
+		const FKeyEvent MouseKeyEvent(MouseEvent.GetEffectingButton(), FModifierKeysState(), MouseEvent.GetUserIndex(), MouseEvent.IsRepeat(), 0, 0);
+		ProcessRebind(MouseKeyEvent);
 	}
 
 	if (CurrentInputType != EInputType::Mouse)
@@ -851,7 +857,8 @@ void UUINavPCComponent::HandleMouseWheelOrGestureEvent(FSlateApplication& SlateA
 {
 	if (IsValid(ListeningInputBox))
 	{
-		ProcessRebind(InWheelEvent.GetWheelDelta() > 0.f ? EKeys::MouseScrollUp : EKeys::MouseScrollDown);
+		const FKeyEvent MouseKeyEvent(InWheelEvent.GetWheelDelta() > 0.f ? EKeys::MouseScrollUp : EKeys::MouseScrollDown, FModifierKeysState(), InWheelEvent.GetUserIndex(), InWheelEvent.IsRepeat(), 0, 0);
+		ProcessRebind(MouseKeyEvent);
 	}
 
 	if (CurrentInputType != EInputType::Mouse && InWheelEvent.GetWheelDelta() != 0.0f)
@@ -968,6 +975,13 @@ bool UUINavPCComponent::IsWidgetActive(const UUINavWidget* const UINavWidget) co
 	}
 
 	return false;
+}
+
+bool UUINavPCComponent::ShouldIgnoreClickEvent()
+{
+	const bool bOldIgnoreClickEvent = bIgnoreClickEvent;
+	bIgnoreClickEvent = false;
+	return bOldIgnoreClickEvent;
 }
 
 FKey UUINavPCComponent::GetEnhancedInputKey(const UInputAction* Action, const EInputAxis Axis, const EAxisType Scale, const EInputRestriction InputRestriction) const
