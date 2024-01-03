@@ -36,11 +36,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "InputDisplay")
 	void SetInputAction(UInputAction* NewAction, const EInputAxis NewAxis, const EAxisType NewScale);
 
-protected:
-
-	UFUNCTION()
-	void InputTypeChanged(const EInputType NewInputType);
-
 public:
 
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget), Category = "InputDisplay")
