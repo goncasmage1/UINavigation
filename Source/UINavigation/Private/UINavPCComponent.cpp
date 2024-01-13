@@ -633,18 +633,9 @@ void UUINavPCComponent::HandleKeyUpEvent(FSlateApplication& SlateApp, const FKey
 	const bool bIsGamepadKey = InKeyEvent.GetKey().IsGamepadKey();
 	const bool bShouldUnforceNavigation = !bUsingThumbstickAsMouse || !bIsSelectKey || !bIsGamepadKey;
 
-	if (IsValid(ListeningInputBox))
-	{
-		FKey Key = InKeyEvent.GetKey();
+	if (IsValid(ListeningInputBox)) return;
 
-		if (ListeningInputBox->IsAxis())
-		{
-			Key = GetAxisFromKey(Key);
-		}
-
-		ProcessRebind(InKeyEvent);
-	}
-	else if (!bShouldUnforceNavigation)
+	if (!bShouldUnforceNavigation)
 	{
 		bIgnoreMouseRelease = true;
 		SimulateMouseRelease();
