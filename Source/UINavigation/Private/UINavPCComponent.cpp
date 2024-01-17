@@ -33,6 +33,7 @@
 #include "Engine/Texture2D.h"
 #include "UObject/SoftObjectPtr.h"
 #include "Internationalization/Internationalization.h"
+#include "UINavLocalPlayerSubsystem.h"
 
 const FKey UUINavPCComponent::MouseUp("MouseUp");
 const FKey UUINavPCComponent::MouseDown("MouseDown");
@@ -82,6 +83,8 @@ void UUINavPCComponent::BeginPlay()
 
 	if (PC != nullptr && PC->IsLocalPlayerController() && !SharedInputProcessor.IsValid())
 	{
+		ULocalPlayer::GetSubsystem<UUINavLocalPlayerSubsystem>(PC->GetLocalPlayer())->ApplySavedInputContexts();
+
 		RefreshNavigationKeys();
 
 		if (IsValid(GetEnhancedInputComponent()))
