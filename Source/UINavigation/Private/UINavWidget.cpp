@@ -240,7 +240,7 @@ void UUINavWidget::UINavSetup()
 
 	IgnoreHoverComponent = nullptr;
 
-	OnSetupCompleted();
+	PropagateOnSetupCompleted();
 }
 
 UUINavComponent* UUINavWidget::GetInitialFocusComponent_Implementation()
@@ -876,6 +876,16 @@ void UUINavWidget::PreSetup_Implementation(const bool bFirstSetup)
 void UUINavWidget::OnSetupCompleted_Implementation()
 {
 
+}
+
+void UUINavWidget::PropagateOnSetupCompleted()
+{
+	OnSetupCompleted();
+
+	for (UUINavWidget* ChildUINavWidget : ChildUINavWidgets)
+	{
+		ChildUINavWidget->PropagateOnSetupCompleted();
+	}
 }
 
 void UUINavWidget::OnHorizCompNavigateLeft_Implementation(UUINavComponent* Component)
