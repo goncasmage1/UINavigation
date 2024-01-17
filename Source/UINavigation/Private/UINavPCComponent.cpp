@@ -1318,7 +1318,7 @@ void UUINavPCComponent::NotifyInputTypeChange(const EInputType NewInputType, con
 			ActiveWidget->AttemptUnforceNavigation(CurrentInputType);
 		}
 
-		if (GetInputMode() != EInputMode::Game)
+		if (IsValid(ActiveWidget) && AutoHideMouse != EAutoHideMouse::Never)
 		{
 			SetShowMouseCursor(!ShouldHideMouseCursor());
 		}
