@@ -400,7 +400,7 @@ void UUINavPCComponent::SetActiveWidget(UUINavWidget * NewActiveWidget)
 	{
 		if (NewActiveWidget == nullptr)
 		{
-			if (HidingMouseCursor())
+			if (HidingMouseCursor() && AutoHideMouse != EAutoHideMouse::Never)
 			{
 				SetShowMouseCursor(true);
 			}
