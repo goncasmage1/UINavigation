@@ -7,6 +7,7 @@
 #include "UINavSettings.h"
 #include "UINavPCComponent.h"
 #include "UINavWidget.h"
+#include "UINavLocalPlayerSubsystem.h"
 #include "Components/TextBlock.h"
 #include "Components/Image.h"
 #include "Data/RevertRebindReason.h"
@@ -347,6 +348,8 @@ int32 UUINavInputBox::FinishUpdateNewEnhancedInputKey(const FKey& PressedKey, co
 	}
 
 	Container->UINavPC->RequestRebuildMappings();
+
+	ULocalPlayer::GetSubsystem<UUINavLocalPlayerSubsystem>(GetOwningLocalPlayer())->SaveInputContextState(InputContext);
 
 	UpdateKeyDisplay(Index);
 

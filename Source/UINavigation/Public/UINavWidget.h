@@ -425,6 +425,8 @@ public:
 	
 	virtual void OnSetupCompleted_Implementation();
 
+	void PropagateOnSetupCompleted();
+
 	/**
 	*	Called when the user navigates left on a UINavComponentBox
 	*/

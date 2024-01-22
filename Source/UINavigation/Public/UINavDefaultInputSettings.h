@@ -2,26 +2,10 @@
 
 #pragma once
 
-#include "UObject/NoExportTypes.h"
-#include "GameFramework/PlayerInput.h"
+#include "UObject/Object.h"
 #include "InputMappingContext.h"
-#include "Data/UINavEnhancedInputActions.h"
-#include "Data/UINavEnhancedActionKeyMapping.h"
+#include "Data/InputMappingArray.h"
 #include "UINavDefaultInputSettings.generated.h"
-
-USTRUCT(BlueprintType)
-struct FInputMappingArray
-{
-	GENERATED_BODY()
-
-	FInputMappingArray() {}
-
-	FInputMappingArray(const TArray<FEnhancedActionKeyMapping>& InputMappings)
-	: DefaultInputMappings(InputMappings) {}
-
-	UPROPERTY()
-	TArray<FUINavEnhancedActionKeyMapping> DefaultInputMappings;
-};
 
 /**
  *

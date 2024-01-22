@@ -33,6 +33,7 @@
 #include "Engine/Texture2D.h"
 #include "UObject/SoftObjectPtr.h"
 #include "Internationalization/Internationalization.h"
+#include "UINavLocalPlayerSubsystem.h"
 
 const FKey UUINavPCComponent::MouseUp("MouseUp");
 const FKey UUINavPCComponent::MouseDown("MouseDown");
@@ -82,6 +83,8 @@ void UUINavPCComponent::BeginPlay()
 
 	if (PC != nullptr && PC->IsLocalPlayerController() && !SharedInputProcessor.IsValid())
 	{
+		ULocalPlayer::GetSubsystem<UUINavLocalPlayerSubsystem>(PC->GetLocalPlayer())->ApplySavedInputContexts();
+
 		RefreshNavigationKeys();
 
 		if (IsValid(GetEnhancedInputComponent()))
@@ -397,7 +400,7 @@ void UUINavPCComponent::SetActiveWidget(UUINavWidget * NewActiveWidget)
 	{
 		if (NewActiveWidget == nullptr)
 		{
-			if (HidingMouseCursor())
+			if (HidingMouseCursor() && AutoHideMouse != EAutoHideMouse::Never)
 			{
 				SetShowMouseCursor(true);
 			}
@@ -616,9 +619,11 @@ void UUINavPCComponent::HandleKeyDownEvent(FSlateApplication& SlateApp, const FK
 	const bool bIsGamepadKey = InKeyEvent.GetKey().IsGamepadKey();
 	const bool bShouldUnforceNavigation = !bUsingThumbstickAsMouse || !bIsSelectKey || !bIsGamepadKey;
 
+	if (bOverrideConsiderHover) bOverrideConsiderHover = false;
+
 	LastPressedKey = InKeyEvent.GetKey();
 	LastPressedKeyUserIndex = InKeyEvent.GetUserIndex();
-	VerifyInputTypeChangeByKey(InKeyEvent.GetKey(), bShouldUnforceNavigation);
+	VerifyInputTypeChangeByKey(InKeyEvent, bShouldUnforceNavigation);
 
 	if (!bShouldUnforceNavigation)
 	{
@@ -633,18 +638,9 @@ void UUINavPCComponent::HandleKeyUpEvent(FSlateApplication& SlateApp, const FKey
 	const bool bIsGamepadKey = InKeyEvent.GetKey().IsGamepadKey();
 	const bool bShouldUnforceNavigation = !bUsingThumbstickAsMouse || !bIsSelectKey || !bIsGamepadKey;
 
-	if (IsValid(ListeningInputBox))
-	{
-		FKey Key = InKeyEvent.GetKey();
+	if (IsValid(ListeningInputBox)) return;
 
-		if (ListeningInputBox->IsAxis())
-		{
-			Key = GetAxisFromKey(Key);
-		}
-
-		ProcessRebind(InKeyEvent);
-	}
-	else if (!bShouldUnforceNavigation)
+	if (!bShouldUnforceNavigation)
 	{
 		bIgnoreMouseRelease = true;
 		SimulateMouseRelease();
@@ -1242,12 +1238,24 @@ bool UUINavPCComponent::IsAxis(const FKey& Key) const
 	return IsAxis2D(Key) || AxisToKeyMap.Contains(Key);
 }
 
-void UUINavPCComponent::VerifyInputTypeChangeByKey(const FKey& Key, const bool bAttemptUnforceNavigation /*= true*/)
+void UUINavPCComponent::VerifyInputTypeChangeByKey(const FKeyEvent& KeyEvent, const bool bAttemptUnforceNavigation /*= true*/)
 {
+	const FKey Key = KeyEvent.GetKey();
 	const EInputType NewInputType = GetKeyInputType(Key);
 
 	if (NewInputType != CurrentInputType)
 	{
+		if (!bOverrideConsiderHover && NewInputType == EInputType::Mouse)
+		{
+			const FSlateApplication& SlateApplication = FSlateApplication::Get();
+			const EUINavigationAction NavAction = SlateApplication.GetNavigationActionFromKey(KeyEvent);
+			const bool bIsAcceptOrReturn = NavAction == EUINavigationAction::Accept || NavAction == EUINavigationAction::Back;
+			if (bIsAcceptOrReturn)
+			{
+				bOverrideConsiderHover = true;
+			}
+		}
+
 		NotifyInputTypeChange(NewInputType, bAttemptUnforceNavigation);
 	}
 }
@@ -1315,7 +1323,7 @@ void UUINavPCComponent::NotifyInputTypeChange(const EInputType NewInputType, con
 			ActiveWidget->AttemptUnforceNavigation(CurrentInputType);
 		}
 
-		if (GetInputMode() != EInputMode::Game)
+		if (IsValid(ActiveWidget) && AutoHideMouse != EAutoHideMouse::Never)
 		{
 			SetShowMouseCursor(!ShouldHideMouseCursor());
 		}

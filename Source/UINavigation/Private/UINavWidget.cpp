@@ -240,7 +240,7 @@ void UUINavWidget::UINavSetup()
 
 	IgnoreHoverComponent = nullptr;
 
-	OnSetupCompleted();
+	PropagateOnSetupCompleted();
 }
 
 UUINavComponent* UUINavWidget::GetInitialFocusComponent_Implementation()
@@ -878,6 +878,16 @@ void UUINavWidget::OnSetupCompleted_Implementation()
 
 }
 
+void UUINavWidget::PropagateOnSetupCompleted()
+{
+	OnSetupCompleted();
+
+	for (UUINavWidget* ChildUINavWidget : ChildUINavWidgets)
+	{
+		ChildUINavWidget->PropagateOnSetupCompleted();
+	}
+}
+
 void UUINavWidget::OnHorizCompNavigateLeft_Implementation(UUINavComponent* Component)
 {
 
@@ -1345,7 +1355,7 @@ bool UUINavWidget::IsSelectorValid()
 
 void UUINavWidget::OnHoveredComponent(UUINavComponent* Component)
 {
-	if (!IsValid(Component) || UINavPC == nullptr || UINavPC->GetPC()->CurrentMouseCursor == EMouseCursor::None) return;
+	if (!IsValid(Component) || UINavPC == nullptr || (UINavPC->HidingMouseCursor() && !UINavPC->OverrideConsiderHover())) return;
 
 	UINavPC->CancelRebind();
 
