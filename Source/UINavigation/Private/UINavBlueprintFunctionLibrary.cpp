@@ -87,11 +87,11 @@ void UUINavBlueprintFunctionLibrary::ResetInputSettings(APlayerController* PC)
 				}
 				
 				const FInputMappingArray& DefaultMappings = Entry.Value;
-				if (DefaultMappings.DefaultInputMappings.Num() == 0) continue;
+				if (DefaultMappings.InputMappings.Num() == 0) continue;
 
 				InputContext->UnmapAll();
 
-				for (const FUINavEnhancedActionKeyMapping& DefaultInputMapping : DefaultMappings.DefaultInputMappings)
+				for (const FUINavEnhancedActionKeyMapping& DefaultInputMapping : DefaultMappings.InputMappings)
 				{
 					FEnhancedActionKeyMapping& NewMapping = InputContext->MapKey(DefaultInputMapping.Action.LoadSynchronous(), DefaultInputMapping.Key);
 
