@@ -1355,7 +1355,7 @@ bool UUINavWidget::IsSelectorValid()
 
 void UUINavWidget::OnHoveredComponent(UUINavComponent* Component)
 {
-	if (!IsValid(Component) || UINavPC == nullptr || UINavPC->GetPC()->CurrentMouseCursor == EMouseCursor::None) return;
+	if (!IsValid(Component) || UINavPC == nullptr || (UINavPC->HidingMouseCursor() && !UINavPC->OverrideConsiderHover())) return;
 
 	UINavPC->CancelRebind();
 

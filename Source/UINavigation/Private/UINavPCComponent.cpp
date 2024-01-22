@@ -619,9 +619,11 @@ void UUINavPCComponent::HandleKeyDownEvent(FSlateApplication& SlateApp, const FK
 	const bool bIsGamepadKey = InKeyEvent.GetKey().IsGamepadKey();
 	const bool bShouldUnforceNavigation = !bUsingThumbstickAsMouse || !bIsSelectKey || !bIsGamepadKey;
 
+	if (bOverrideConsiderHover) bOverrideConsiderHover = false;
+
 	LastPressedKey = InKeyEvent.GetKey();
 	LastPressedKeyUserIndex = InKeyEvent.GetUserIndex();
-	VerifyInputTypeChangeByKey(InKeyEvent.GetKey(), bShouldUnforceNavigation);
+	VerifyInputTypeChangeByKey(InKeyEvent, bShouldUnforceNavigation);
 
 	if (!bShouldUnforceNavigation)
 	{
@@ -1236,12 +1238,24 @@ bool UUINavPCComponent::IsAxis(const FKey& Key) const
 	return IsAxis2D(Key) || AxisToKeyMap.Contains(Key);
 }
 
-void UUINavPCComponent::VerifyInputTypeChangeByKey(const FKey& Key, const bool bAttemptUnforceNavigation /*= true*/)
+void UUINavPCComponent::VerifyInputTypeChangeByKey(const FKeyEvent& KeyEvent, const bool bAttemptUnforceNavigation /*= true*/)
 {
+	const FKey Key = KeyEvent.GetKey();
 	const EInputType NewInputType = GetKeyInputType(Key);
 
 	if (NewInputType != CurrentInputType)
 	{
+		if (!bOverrideConsiderHover && NewInputType == EInputType::Mouse)
+		{
+			const FSlateApplication& SlateApplication = FSlateApplication::Get();
+			const EUINavigationAction NavAction = SlateApplication.GetNavigationActionFromKey(KeyEvent);
+			const bool bIsAcceptOrReturn = NavAction == EUINavigationAction::Accept || NavAction == EUINavigationAction::Back;
+			if (bIsAcceptOrReturn)
+			{
+				bOverrideConsiderHover = true;
+			}
+		}
+
 		NotifyInputTypeChange(NewInputType, bAttemptUnforceNavigation);
 	}
 }

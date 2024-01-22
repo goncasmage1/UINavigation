@@ -108,6 +108,8 @@ protected:
 
 	bool bIgnoreClickEvent = false;
 
+	bool bOverrideConsiderHover = false;
+
 	UPROPERTY()
 	TArray<const UInputMappingContext*> CachedInputContexts;
 
@@ -342,6 +344,8 @@ public:
 
 	bool ShouldHideMouseCursor() const;
 
+	bool OverrideConsiderHover() const { return bOverrideConsiderHover; }
+
 	UFUNCTION(BlueprintCallable, Category = UINavController)
 	void RefreshNavigationKeys();
 
@@ -403,7 +407,7 @@ public:
 	*
 	*	@param Key The specified key
 	*/
-	void VerifyInputTypeChangeByKey(const FKey& Key, const bool bAttemptUnforceNavigation = true);
+	void VerifyInputTypeChangeByKey(const FKeyEvent& KeyEvent, const bool bAttemptUnforceNavigation = true);
 
 	/**
 	*	Notifies the controller that a mouse is being used
