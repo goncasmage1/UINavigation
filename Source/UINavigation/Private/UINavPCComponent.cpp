@@ -1245,7 +1245,7 @@ void UUINavPCComponent::VerifyInputTypeChangeByKey(const FKeyEvent& KeyEvent, co
 
 	if (NewInputType != CurrentInputType)
 	{
-		if (!bOverrideConsiderHover && NewInputType == EInputType::Mouse)
+		if (!bOverrideConsiderHover && CurrentInputType == EInputType::Mouse)
 		{
 			const FSlateApplication& SlateApplication = FSlateApplication::Get();
 			const EUINavigationAction NavAction = SlateApplication.GetNavigationActionFromKey(KeyEvent);
