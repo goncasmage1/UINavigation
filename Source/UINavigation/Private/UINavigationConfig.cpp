@@ -10,7 +10,7 @@ FUINavigationConfig::FUINavigationConfig(const bool bAllowAccept /*= true*/, con
 	KeyEventRules.Reset();
 	bTabNavigation = false;
 	bKeyNavigation = true;
-	bAnalogNavigation = bUseAnalogDirectionalInput;
+	bAnalogNavigation = bUseAnalogDirectionalInput && !bUsingThumbstickAsMouse;
 
 	const UUINavSettings* const UINavSettings = GetDefault<UUINavSettings>();
 	const UUINavEnhancedInputActions* const InputActions = UINavSettings->EnhancedInputActions.LoadSynchronous();
@@ -22,19 +22,19 @@ FUINavigationConfig::FUINavigationConfig(const bool bAllowAccept /*= true*/, con
 
 	for (const FEnhancedActionKeyMapping& Mapping : InputContext->GetMappings())
 	{
-		if (Mapping.Action == InputActions->IA_MenuUp && (!Mapping.Key.IsGamepadKey() || !bUsingThumbstickAsMouse))
+		if (Mapping.Action == InputActions->IA_MenuUp)
 		{
 			KeyEventRules.Emplace(Mapping.Key, EUINavigation::Up);
 		}
-		else if (Mapping.Action == InputActions->IA_MenuDown && (!Mapping.Key.IsGamepadKey() || !bUsingThumbstickAsMouse))
+		else if (Mapping.Action == InputActions->IA_MenuDown)
 		{
 			KeyEventRules.Emplace(Mapping.Key, EUINavigation::Down);
 		}
-		else if (Mapping.Action == InputActions->IA_MenuLeft && (!Mapping.Key.IsGamepadKey() || !bUsingThumbstickAsMouse))
+		else if (Mapping.Action == InputActions->IA_MenuLeft)
 		{
 			KeyEventRules.Emplace(Mapping.Key, EUINavigation::Left);
 		}
-		else if (Mapping.Action == InputActions->IA_MenuRight && (!Mapping.Key.IsGamepadKey() || !bUsingThumbstickAsMouse))
+		else if (Mapping.Action == InputActions->IA_MenuRight)
 		{
 			KeyEventRules.Emplace(Mapping.Key, EUINavigation::Right);
 		}
