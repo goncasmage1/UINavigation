@@ -5,7 +5,7 @@
 #include "Data/UINavEnhancedInputActions.h"
 #include "InputMappingContext.h"
 
-FUINavigationConfig::FUINavigationConfig(const bool bAllowAccept /*= true*/, const bool bAllowBack /*= true*/, const bool bUseAnalogDirectionalInput /*= true*/, const bool bUsingThumbstickAsMouse /*= false*/)
+FUINavigationConfig::FUINavigationConfig(const bool bAllowDirectionalInput /*= true*/, const bool bAllowSectionInput /*= true*/, const bool bAllowAccept /*= true*/, const bool bAllowBack /*= true*/, const bool bUseAnalogDirectionalInput /*= true*/, const bool bUsingThumbstickAsMouse /*= false*/)
 {
 	KeyEventRules.Reset();
 	bTabNavigation = false;
@@ -22,27 +22,27 @@ FUINavigationConfig::FUINavigationConfig(const bool bAllowAccept /*= true*/, con
 
 	for (const FEnhancedActionKeyMapping& Mapping : InputContext->GetMappings())
 	{
-		if (Mapping.Action == InputActions->IA_MenuUp)
+		if (Mapping.Action == InputActions->IA_MenuUp && bAllowDirectionalInput)
 		{
 			KeyEventRules.Emplace(Mapping.Key, EUINavigation::Up);
 		}
-		else if (Mapping.Action == InputActions->IA_MenuDown)
+		else if (Mapping.Action == InputActions->IA_MenuDown && bAllowDirectionalInput)
 		{
 			KeyEventRules.Emplace(Mapping.Key, EUINavigation::Down);
 		}
-		else if (Mapping.Action == InputActions->IA_MenuLeft)
+		else if (Mapping.Action == InputActions->IA_MenuLeft && bAllowDirectionalInput)
 		{
 			KeyEventRules.Emplace(Mapping.Key, EUINavigation::Left);
 		}
-		else if (Mapping.Action == InputActions->IA_MenuRight)
+		else if (Mapping.Action == InputActions->IA_MenuRight && bAllowDirectionalInput)
 		{
 			KeyEventRules.Emplace(Mapping.Key, EUINavigation::Right);
 		}
-		else if (Mapping.Action == InputActions->IA_MenuNext)
+		else if (Mapping.Action == InputActions->IA_MenuNext && bAllowSectionInput)
 		{
 			KeyEventRules.Emplace(Mapping.Key, EUINavigation::Next);
 		}
-		else if (Mapping.Action == InputActions->IA_MenuPrevious)
+		else if (Mapping.Action == InputActions->IA_MenuPrevious && bAllowSectionInput)
 		{
 			KeyEventRules.Emplace(Mapping.Key, EUINavigation::Previous);
 		}

@@ -575,6 +575,8 @@ void UUINavPCComponent::RefreshNavigationKeys()
 {
 	FSlateApplication::Get().SetNavigationConfig(
 		MakeShared<FUINavigationConfig>(
+			bAllowDirectionalInput,
+			bAllowSectionInput,
 			bAllowSelectInput,
 			bAllowReturnInput,
 			bUseAnalogDirectionalInput && UsingThumbstickAsMouse() != EThumbstickAsMouse::LeftThumbstick,
