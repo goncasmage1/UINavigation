@@ -5,7 +5,9 @@
 #include "UINavWidget.h"
 #include "Components/Slider.h"
 #include "Components/TextBlock.h"
+#include "Components/RichTextBlock.h"
 #include "Components/SpinBox.h"
+#include "UINavBlueprintFunctionLibrary.h"
 
 void UUINavSlider::NativeConstruct()
 {
@@ -60,7 +62,17 @@ bool UUINavSlider::Update(const bool bNotify /*= true*/)
 	FText ValueText = FText::AsNumber(Value, &FormatOptions);
 	if (!bUseComma) ValueText = FText::FromString(ValueText.ToString().Replace(TEXT(","),TEXT(".")));
 
-	if (NavText != nullptr) NavText->SetText(ValueText);
+	if (NavText != nullptr)
+	{
+		NavText->SetText(ValueText);
+	}
+
+	if (IsValid(NavRichText))
+	{
+		const FString StyleRowName = IsBeingNavigated() ? NavigatedStyleRowName : NormalStyleRowName;
+		NavRichText->SetText(StyleRowName.IsEmpty() ? ValueText : UUINavBlueprintFunctionLibrary::ApplyStyleRowToText(ValueText, StyleRowName));
+	}
+
 	if (NavSpinBox != nullptr)
 	{
 		NavSpinBox->SetValue(Value);

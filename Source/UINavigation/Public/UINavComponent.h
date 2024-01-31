@@ -13,6 +13,7 @@
 
 class UUINavWidget;
 class UTextBlock;
+class URichTextBlock;
 class UScrollBox;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnClickedEvent);
@@ -115,6 +116,9 @@ public:
 	bool CanBeNavigated() const;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavComponent)
+	bool IsBeingNavigated() const;
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavComponent)
 	UScrollBox* GetParentScrollBox() const { return ParentScrollBox; }
 
 protected:
@@ -138,6 +142,9 @@ public:
 
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget, OptionalWidget = true), Category = UINavComponent)
 	UTextBlock* NavText = nullptr;
+
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget, OptionalWidget = true), Category = UINavComponent)
+	URichTextBlock* NavRichText = nullptr;
 
 	UPROPERTY(BlueprintReadOnly, Category = UINavComponent)
 	UUINavWidget* ParentWidget = nullptr;
@@ -187,6 +194,13 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavComponent)
 	bool bUseComponentAnimation = true;
+
+	// Applied to the optional NavRichText text block if it exists and if this string isn't empty
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavComponent)
+	FString NormalStyleRowName;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavComponent)
+	FString NavigatedStyleRowName;
 
 	UPROPERTY(BlueprintReadOnly, Transient, Category = UINavComponent, meta = (BindWidgetAnimOptional))
 	UWidgetAnimation* ComponentAnimation = nullptr;

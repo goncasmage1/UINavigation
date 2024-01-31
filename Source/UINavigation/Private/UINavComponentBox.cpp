@@ -25,7 +25,7 @@ void UUINavComponentBox::BaseConstruct()
 
 	if (RightButton == nullptr) DISPLAYERROR(TEXT("Couldn't find Button named RightButton in UINavOptionBox"));
 
-	if (NavText == nullptr) DISPLAYERROR(TEXT("Couldn't find TextBlock named NavText in UINavOptionBox"));
+	if (NavText == nullptr && NavRichText == nullptr) DISPLAYERROR(TEXT("Couldn't find TextBlock named NavText or RichTextBlock named NavRichText in UINavOptionBox"));
 
 	Update();
 
