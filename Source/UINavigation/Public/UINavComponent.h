@@ -199,8 +199,11 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavComponent)
 	FString NormalStyleRowName;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavComponent)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavComponent, meta = (editcondition = "bUseNavigatedStyleRow"))
 	FString NavigatedStyleRowName;
+
+	UPROPERTY(EditAnywhere, Category = UINavComponent, meta = (InlineEditConditionToggle))
+	uint8 bUseNavigatedStyleRow : 1;
 
 	UPROPERTY(BlueprintReadOnly, Transient, Category = UINavComponent, meta = (BindWidgetAnimOptional))
 	UWidgetAnimation* ComponentAnimation = nullptr;

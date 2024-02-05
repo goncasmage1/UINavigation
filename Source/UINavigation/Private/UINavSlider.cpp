@@ -62,16 +62,7 @@ bool UUINavSlider::Update(const bool bNotify /*= true*/)
 	FText ValueText = FText::AsNumber(Value, &FormatOptions);
 	if (!bUseComma) ValueText = FText::FromString(ValueText.ToString().Replace(TEXT(","),TEXT(".")));
 
-	if (NavText != nullptr)
-	{
-		NavText->SetText(ValueText);
-	}
-
-	if (IsValid(NavRichText))
-	{
-		const FString StyleRowName = IsBeingNavigated() ? NavigatedStyleRowName : NormalStyleRowName;
-		NavRichText->SetText(StyleRowName.IsEmpty() ? ValueText : UUINavBlueprintFunctionLibrary::ApplyStyleRowToText(ValueText, StyleRowName));
-	}
+	SetText(ValueText);
 
 	if (NavSpinBox != nullptr)
 	{

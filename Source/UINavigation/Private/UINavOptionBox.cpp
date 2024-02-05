@@ -40,15 +40,7 @@ bool UUINavOptionBox::Update(const bool bNotify /*= true*/)
 		FText::FromString(FString::FromInt(MinRange + OptionIndex * Interval)) :
 		StringOptions.IsValidIndex(OptionIndex) ? StringOptions[OptionIndex] : FText();
 
-	if (IsValid(NavText))
-	{
-		NavText->SetText(NewText);
-	}
-	if (IsValid(NavRichText))
-	{
-		const FString StyleRowName = IsBeingNavigated() ? NavigatedStyleRowName : NormalStyleRowName;
-		NavRichText->SetText(StyleRowName.IsEmpty() ? NewText : UUINavBlueprintFunctionLibrary::ApplyStyleRowToText(NewText, StyleRowName));
-	}
+	SetText(NewText);
 
 	return bChangedIndex;
 }

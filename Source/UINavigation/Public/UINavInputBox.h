@@ -16,6 +16,8 @@ class UUINavInputComponent;
 class UInputAction;
 class UInputMappingContext;
 class UInputSettings;
+class UTextBlock;
+class URichTextBlock;
 struct FInputAxisKeyMapping;
 
 /**
@@ -95,8 +97,11 @@ public:
 
 	TArray<class UUINavInputComponent*> InputButtons;
 
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget), Category = "UINav Input")
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidgetOptional), Category = "UINav Input")
 	class UTextBlock* InputText = nullptr;
+
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidgetOptional), Category = "UINav Input")
+	class URichTextBlock* InputRichText = nullptr;
 
 	UPROPERTY()
 	class UUINavInputContainer* Container = nullptr;
@@ -110,6 +115,9 @@ public:
 
 	UPROPERTY(BlueprintReadOnly, Category = "Enhanced Input")
 	FInputContainerEnhancedActionData InputActionData;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINavPromptWidget")
+	FString InputTextStyleRowName;
 	
 	FInputRebindData InputData = FInputRebindData();
 

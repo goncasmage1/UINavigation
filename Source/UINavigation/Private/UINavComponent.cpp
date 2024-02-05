@@ -323,7 +323,8 @@ void UUINavComponent::SetText(const FText& Text)
 	
 	if (IsValid(NavRichText))
 	{
-		NavRichText->SetText(NormalStyleRowName.IsEmpty() ? ComponentText : UUINavBlueprintFunctionLibrary::ApplyStyleRowToText(ComponentText, NormalStyleRowName));
+		const FString StyleRowName = IsBeingNavigated() ? NavigatedStyleRowName : NormalStyleRowName;
+		NavRichText->SetText(StyleRowName.IsEmpty() ? ComponentText : UUINavBlueprintFunctionLibrary::ApplyStyleRowToText(ComponentText, StyleRowName));
 	}
 }
 
@@ -339,10 +340,9 @@ void UUINavComponent::SwitchTextColorToDefault()
 {
 	SwitchTextColorTo(TextDefaultColor);
 
-	if (IsValid(NavRichText))
+	if (IsValid(NavRichText) && bUseNavigatedStyleRow)
 	{
-		const FText CurrentText = UUINavBlueprintFunctionLibrary::GetRawTextFromRichText(NavRichText->GetText());
-		NavRichText->SetText(NormalStyleRowName.IsEmpty() ? CurrentText : UUINavBlueprintFunctionLibrary::ApplyStyleRowToText(CurrentText, NormalStyleRowName));
+		NavRichText->SetText(NormalStyleRowName.IsEmpty() ? ComponentText : UUINavBlueprintFunctionLibrary::ApplyStyleRowToText(ComponentText, NormalStyleRowName));
 	}
 }
 
@@ -350,10 +350,9 @@ void UUINavComponent::SwitchTextColorToNavigated()
 {
 	SwitchTextColorTo(TextNavigatedColor);
 
-	if (IsValid(NavRichText))
+	if (IsValid(NavRichText) && bUseNavigatedStyleRow)
 	{
-		const FText CurrentText = UUINavBlueprintFunctionLibrary::GetRawTextFromRichText(NavRichText->GetText());
-		NavRichText->SetText(NavigatedStyleRowName.IsEmpty() ? CurrentText : UUINavBlueprintFunctionLibrary::ApplyStyleRowToText(CurrentText, NavigatedStyleRowName));
+		NavRichText->SetText(NavigatedStyleRowName.IsEmpty() ? ComponentText : UUINavBlueprintFunctionLibrary::ApplyStyleRowToText(ComponentText, NavigatedStyleRowName));
 	}
 }
 
