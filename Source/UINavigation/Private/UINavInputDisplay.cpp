@@ -7,7 +7,9 @@
 #include "Engine/Texture2D.h"
 #include "Components/Image.h"
 #include "Components/TextBlock.h"
+#include "Components/RichTextBlock.h"
 #include "UINavSettings.h"
+#include "UINavBlueprintFunctionLibrary.h"
 
 void UUINavInputDisplay::NativeConstruct()
 {
@@ -67,6 +69,11 @@ void UUINavInputDisplay::NativePreConstruct()
 		}
 	}
 
+	if (IsValid(InputRichText))
+	{
+		InputRichText->SetText(StyleRowName.IsEmpty() ? InputRichText->GetText() : UUINavBlueprintFunctionLibrary::ApplyStyleRowToText(InputRichText->GetText(), StyleRowName));
+	}
+
 	if (IsValid(InputImage) && !bMatchIconSize)
 	{
 		InputImage->SetDesiredSizeOverride(IconSize);
@@ -80,8 +87,10 @@ void UUINavInputDisplay::UpdateInputVisuals()
 		return;
 	}
 
-	InputText->SetVisibility(ESlateVisibility::Collapsed);
+	if (IsValid(InputText)) InputText->SetVisibility(ESlateVisibility::Collapsed);
+	if (IsValid(InputRichText)) InputRichText->SetVisibility(ESlateVisibility::Collapsed);
 	InputImage->SetVisibility(ESlateVisibility::Collapsed);
+
 	TSoftObjectPtr<UTexture2D> NewSoftTexture = GetDefault<UUINavSettings>()->bLoadInputIconsAsync ?
 		UINavPC->GetSoftEnhancedInputIcon(InputAction, Axis, Scale, UINavPC->IsUsingGamepad() ? EInputRestriction::Gamepad : EInputRestriction::Keyboard_Mouse) :
 		UINavPC->GetEnhancedInputIcon(InputAction, Axis, Scale, UINavPC->IsUsingGamepad() ? EInputRestriction::Gamepad : EInputRestriction::Keyboard_Mouse);
@@ -97,9 +106,18 @@ void UUINavInputDisplay::UpdateInputVisuals()
 	}
 	if (NewSoftTexture.IsNull() || DisplayType != EInputDisplayType::Icon)
 	{
-		InputText->SetText(UINavPC->GetEnhancedInputText(InputAction, Axis, Scale, UINavPC->IsUsingGamepad() ? EInputRestriction::Gamepad : EInputRestriction::Keyboard_Mouse));
+		const FText InputRawText = UINavPC->GetEnhancedInputText(InputAction, Axis, Scale, UINavPC->IsUsingGamepad() ? EInputRestriction::Gamepad : EInputRestriction::Keyboard_Mouse);
+		if (IsValid(InputText))
+		{
+			InputText->SetText(InputRawText);
+			InputText->SetVisibility(ESlateVisibility::Visible);
+		}
 
-		InputText->SetVisibility(ESlateVisibility::Visible);
+		if (IsValid(InputRichText))
+		{
+			InputRichText->SetText(StyleRowName.IsEmpty() ? InputRawText : UUINavBlueprintFunctionLibrary::ApplyStyleRowToText(InputRawText, StyleRowName));
+			InputRichText->SetVisibility(ESlateVisibility::Visible);
+		}
 	}
 }
 

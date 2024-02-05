@@ -389,6 +389,13 @@ FReply UUINavWidget::NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEven
 				StartedSelect();
 			}
 		}
+		else if (FSlateApplication::Get().GetNavigationActionFromKey(InKeyEvent) == EUINavigationAction::Back)
+		{
+			if (!TryConsumeNavigation())
+			{
+				StartedReturn();
+			}
+		}
 		else if (FSlateApplication::Get().GetNavigationDirectionFromKey(InKeyEvent) == EUINavigation::Next)
 		{
 			if (!TryConsumeNavigation())
@@ -519,6 +526,27 @@ FReply UUINavWidget::NativeOnFocusReceived(const FGeometry& InGeometry, const FF
 void UUINavWidget::NativeOnFocusLost(const FFocusEvent& InFocusEvent)
 {
 	Super::NativeOnFocusLost(InFocusEvent);
+}
+
+void UUINavWidget::NativeOnFocusChanging(const FWeakWidgetPath& PreviousFocusPath, const FWidgetPath& NewWidgetPath, const FFocusEvent& InFocusEvent)
+{
+	Super::NativeOnFocusChanging(PreviousFocusPath, NewWidgetPath, InFocusEvent);
+
+	if (IsValid(CurrentComponent))
+	{
+		return;
+	}
+
+	const FString WidgetTypeString = NewWidgetPath.GetLastWidget()->GetType().ToString();
+	if (!WidgetTypeString.Contains(TEXT("SObjectWidget")) &&
+		!WidgetTypeString.Contains(TEXT("SButton")) &&
+		!WidgetTypeString.Contains(TEXT("SUINavButton")) &&
+		!WidgetTypeString.Contains(TEXT("SSpinBox")) &&
+		!WidgetTypeString.Contains(TEXT("SEditableText")))
+	{
+		SetFocus();
+		return;
+	}
 }
 
 void UUINavWidget::HandleSelectorMovement(const float DeltaTime)

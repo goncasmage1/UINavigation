@@ -157,6 +157,31 @@ bool UUINavBlueprintFunctionLibrary::RespectsRestriction(const FKey Key, const E
 	return false;
 }
 
+FText UUINavBlueprintFunctionLibrary::ApplyStyleRowToText(const FText& Text, const FString& StyleRowName)
+{
+	return FText::FromString(TEXT("<") + StyleRowName + TEXT(">") + Text.ToString() + TEXT("</>"));
+}
+
+FText UUINavBlueprintFunctionLibrary::GetRawTextFromRichText(const FText& RichText)
+{
+	FString RichTextStr = RichText.ToString();
+
+	int32 StartIndex;
+	if (!RichTextStr.FindChar(TCHAR('>'), StartIndex))
+	{
+		return RichText;
+	}
+	RichTextStr = RichTextStr.RightChop(StartIndex + 1);
+
+	int32 EndIndex;
+	if (!RichTextStr.FindChar(TCHAR('<'), EndIndex))
+	{
+		return RichText;
+	}
+	RichTextStr = RichTextStr.Left(EndIndex);
+	return FText::FromString(*RichTextStr);
+}
+
 bool UUINavBlueprintFunctionLibrary::IsGamepadConnected()
 {
 	return FSlateApplication::Get().IsGamepadAttached();

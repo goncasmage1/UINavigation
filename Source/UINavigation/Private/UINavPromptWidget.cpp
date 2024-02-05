@@ -3,6 +3,7 @@
 #include "UINavPromptWidget.h"
 #include "UINavBlueprintFunctionLibrary.h"
 #include "Components/TextBlock.h"
+#include "Components/RichTextBlock.h"
 #include "Data/PromptData.h"
 
 void UUINavPromptWidget::NativeConstruct()
@@ -11,14 +12,30 @@ void UUINavPromptWidget::NativeConstruct()
 
 	Super::NativeConstruct();
 
-	if (IsValid(TitleText) && !Title.IsEmpty())
+	if (!Title.IsEmpty())
 	{
-		TitleText->SetText(Title);
+		if (IsValid(TitleText))
+		{
+			TitleText->SetText(Title);
+		}
+
+		if (IsValid(TitleRichText))
+		{
+			TitleRichText->SetText(UUINavBlueprintFunctionLibrary::ApplyStyleRowToText(Title, TitleStyleRowName));
+		}
 	}
 
-	if (IsValid(MessageText) && !Message.IsEmpty())
+	if (!Message.IsEmpty())
 	{
-		MessageText->SetText(Message);
+		if (IsValid(MessageText))
+		{
+			MessageText->SetText(Message);
+		}
+
+		if (IsValid(MessageRichText))
+		{
+			MessageRichText->SetText(UUINavBlueprintFunctionLibrary::ApplyStyleRowToText(Message, MessageStyleRowName));
+		}
 	}
 }
 

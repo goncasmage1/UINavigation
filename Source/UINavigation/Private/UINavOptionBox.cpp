@@ -4,7 +4,10 @@
 #include "Blueprint/WidgetTree.h"
 #include "Components/Button.h"
 #include "Components/TextBlock.h"
+#include "Components/RichTextBlock.h"
+#include "UINavWidget.h"
 #include "UINavMacros.h"
+#include "UINavBlueprintFunctionLibrary.h"
 
 void UUINavOptionBox::NativeConstruct()
 {
@@ -33,9 +36,11 @@ bool UUINavOptionBox::Update(const bool bNotify /*= true*/)
 {
 	const bool bChangedIndex = Super::Update(bNotify);
 
-	NavText->SetText(bUseNumberRange ? 
-		FText::FromString(FString::FromInt(MinRange + OptionIndex*Interval)) : 
-		StringOptions.IsValidIndex(OptionIndex) ? StringOptions[OptionIndex] : FText());
+	const FText NewText = bUseNumberRange ?
+		FText::FromString(FString::FromInt(MinRange + OptionIndex * Interval)) :
+		StringOptions.IsValidIndex(OptionIndex) ? StringOptions[OptionIndex] : FText();
+
+	SetText(NewText);
 
 	return bChangedIndex;
 }
