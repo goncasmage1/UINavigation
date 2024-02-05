@@ -7,6 +7,7 @@
 #include "UINavBlueprintFunctionLibrary.h"
 #include "Components/OverlaySlot.h"
 #include "Components/TextBlock.h"
+#include "Components/RichTextBlock.h"
 #include "Components/ScrollBox.h"
 #include "Framework/Application/SlateApplication.h"
 #include "Internationalization/Internationalization.h"
@@ -319,6 +320,12 @@ void UUINavComponent::SetText(const FText& Text)
 	{
 		NavText->SetText(ComponentText);
 	}
+	
+	if (IsValid(NavRichText))
+	{
+		const FString StyleRowName = IsBeingNavigated() ? NavigatedStyleRowName : NormalStyleRowName;
+		NavRichText->SetText(StyleRowName.IsEmpty() ? ComponentText : UUINavBlueprintFunctionLibrary::ApplyStyleRowToText(ComponentText, StyleRowName));
+	}
 }
 
 void UUINavComponent::SwitchTextColorTo(FLinearColor Color)
@@ -332,11 +339,21 @@ void UUINavComponent::SwitchTextColorTo(FLinearColor Color)
 void UUINavComponent::SwitchTextColorToDefault()
 {
 	SwitchTextColorTo(TextDefaultColor);
+
+	if (IsValid(NavRichText) && bUseNavigatedStyleRow)
+	{
+		NavRichText->SetText(NormalStyleRowName.IsEmpty() ? ComponentText : UUINavBlueprintFunctionLibrary::ApplyStyleRowToText(ComponentText, NormalStyleRowName));
+	}
 }
 
 void UUINavComponent::SwitchTextColorToNavigated()
 {
 	SwitchTextColorTo(TextNavigatedColor);
+
+	if (IsValid(NavRichText) && bUseNavigatedStyleRow)
+	{
+		NavRichText->SetText(NavigatedStyleRowName.IsEmpty() ? ComponentText : UUINavBlueprintFunctionLibrary::ApplyStyleRowToText(ComponentText, NavigatedStyleRowName));
+	}
 }
 
 void UUINavComponent::ExecuteComponentActions(const EComponentAction Action)
@@ -371,6 +388,11 @@ bool UUINavComponent::CanBeNavigated() const
 		(GetIsEnabled() || !bIgnoreDisabled) &&
 		NavButton->GetVisibility() == ESlateVisibility::Visible &&
 		(NavButton->GetIsEnabled() || !bIgnoreDisabled));
+}
+
+bool UUINavComponent::IsBeingNavigated() const
+{
+	return IsValid(ParentWidget) && ParentWidget->GetCurrentComponent() == this;
 }
 
 FReply UUINavComponent::NativeOnFocusReceived(const FGeometry& InGeometry, const FFocusEvent& InFocusEvent)
@@ -547,6 +569,11 @@ void UUINavComponent::NativePreConstruct()
 		{
 			NavText->SetColorAndOpacity(TextDefaultColor);
 		}
+	}
+
+	if (IsValid(NavRichText))
+	{
+		NavRichText->SetText(NormalStyleRowName.IsEmpty() ? ComponentText : UUINavBlueprintFunctionLibrary::ApplyStyleRowToText(ComponentText, NormalStyleRowName));
 	}
 	
 	if (IsValid(NavButton))

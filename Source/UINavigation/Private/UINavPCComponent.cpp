@@ -526,7 +526,7 @@ UUINavWidget* UUINavPCComponent::GoToBuiltWidget(UUINavWidget* NewWidget, const 
 
 	if (ActiveWidget == nullptr)
 	{
-		NewWidget->AddToViewport();
+		NewWidget->AddToViewport(ZOrder);
 		NewWidget->SetFocus();
 		return NewWidget;
 	}

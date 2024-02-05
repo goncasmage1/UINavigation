@@ -6,6 +6,7 @@
 #include "UINavPromptWidget.generated.h"
 
 class UTextBlock;
+class URichTextBlock;
 
 UCLASS()
 class UINAVIGATION_API UUINavPromptWidget : public UUINavWidget
@@ -39,11 +40,23 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "UINavPromptWidget")
 	bool FirstComponentIsAccept = false;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINavPromptWidget")
+	FString TitleStyleRowName;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINavPromptWidget")
+	FString MessageStyleRowName;
+
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget, OptionalWidget = true), Category = "UINavPromptWidget")
 	UTextBlock* TitleText = nullptr;
 
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget, OptionalWidget = true), Category = "UINavPromptWidget")
 	UTextBlock* MessageText = nullptr;
+
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget, OptionalWidget = true), Category = "UINavPromptWidget")
+	URichTextBlock* TitleRichText = nullptr;
+
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget, OptionalWidget = true), Category = "UINavPromptWidget")
+	URichTextBlock* MessageRichText = nullptr;
 
 	FPromptWidgetDecided Callback;
 	

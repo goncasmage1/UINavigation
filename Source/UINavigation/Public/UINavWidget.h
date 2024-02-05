@@ -219,6 +219,8 @@ public:
 	virtual FReply NativeOnFocusReceived(const FGeometry& InGeometry, const FFocusEvent& InFocusEvent) override;
 	virtual void NativeOnFocusLost(const FFocusEvent& InFocusEvent) override;
 
+	virtual void NativeOnFocusChanging(const FWeakWidgetPath& PreviousFocusPath, const FWidgetPath& NewWidgetPath, const FFocusEvent& InFocusEvent) override;
+
 	/**
 	*	Traverses this widget's hierarchy to setup all the UIUINavButtons
 	*/

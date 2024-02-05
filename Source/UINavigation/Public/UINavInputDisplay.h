@@ -13,6 +13,7 @@
 
 class UImage;
 class UTextBlock;
+class URichTextBlock;
 class UUINavPCComponent;
 
 /**
@@ -41,8 +42,11 @@ public:
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget), Category = "InputDisplay")
 	UImage* InputImage = nullptr;
 
-	UPROPERTY(BlueprintReadOnly, meta = (BindWidget), Category = "InputDisplay")
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidgetOptional), Category = "InputDisplay")
 	UTextBlock* InputText = nullptr;
+
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidgetOptional), Category = "InputDisplay")
+	URichTextBlock* InputRichText = nullptr;
 
 protected:
 
@@ -64,17 +68,20 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "InputDisplay", meta = (editcondition = "!bMatchIconSize"))
 	FVector2D IconSize = FVector2D(24.0f, 24.0f);
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavComponent, meta = (editcondition = "bOverride_TextColor"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "InputDisplay", meta = (editcondition = "bOverride_TextColor"))
 	FSlateColor TextColorOverride;
 
-	UPROPERTY(EditAnywhere, Category = UINavComponent, meta = (InlineEditConditionToggle))
+	UPROPERTY(EditAnywhere, Category = "InputDisplay", meta = (InlineEditConditionToggle))
 	uint8 bOverride_TextColor : 1;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavComponent, meta = (editcondition = "bOverride_Font"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "InputDisplay", meta = (editcondition = "bOverride_Font"))
 	FSlateFontInfo FontOverride;
 
-	UPROPERTY(EditAnywhere, Category = UINavComponent, meta = (InlineEditConditionToggle))
+	UPROPERTY(EditAnywhere, Category = "InputDisplay", meta = (InlineEditConditionToggle))
 	uint8 bOverride_Font : 1;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "InputDisplay")
+	FString StyleRowName;
 
 private:
 

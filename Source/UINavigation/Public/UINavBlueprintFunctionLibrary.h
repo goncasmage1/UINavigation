@@ -42,6 +42,12 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "UINav Input")
 	static bool RespectsRestriction(const FKey CompareKey, const EInputRestriction Restriction);
 
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavigationLibrary)
+	static FText ApplyStyleRowToText(const FText& Text, const FString& StyleRowName);
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavigationLibrary)
+	static FText GetRawTextFromRichText(const FText& RichText);
+
 	// Checks whether a gamepad is connected
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavigationLibrary)
 	static bool IsGamepadConnected();

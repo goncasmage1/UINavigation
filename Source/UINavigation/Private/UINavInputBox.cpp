@@ -8,7 +8,9 @@
 #include "UINavPCComponent.h"
 #include "UINavWidget.h"
 #include "UINavLocalPlayerSubsystem.h"
+#include "UINavBlueprintFunctionLibrary.h"
 #include "Components/TextBlock.h"
+#include "Components/RichTextBlock.h"
 #include "Components/Image.h"
 #include "Data/RevertRebindReason.h"
 #include "Engine/DataTable.h"
@@ -106,7 +108,8 @@ void UUINavInputBox::CreateEnhancedInputKeyWidgets()
 		{
 			NewInputButton->SetText(Container->EmptyKeyText);
 			NewInputButton->InputImage->SetVisibility(ESlateVisibility::Collapsed);
-			NewInputButton->NavText->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+			if (IsValid(NewInputButton->NavText)) NewInputButton->NavText->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+			if (IsValid(NewInputButton->NavRichText)) NewInputButton->NavRichText->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
 			Keys.Add(FKey());
 		}
 	}
@@ -131,7 +134,8 @@ bool UUINavInputBox::TrySetupNewKey(const FKey& NewKey, const int KeyIndex, UUIN
 	{
 		bUsingKeyImage[KeyIndex] = true;
 		NewInputButton->InputImage->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
-		NewInputButton->NavText->SetVisibility(ESlateVisibility::Collapsed);
+		if (IsValid(NewInputButton->NavText)) NewInputButton->NavText->SetVisibility(ESlateVisibility::Collapsed);
+		if (IsValid(NewInputButton->NavRichText)) NewInputButton->NavRichText->SetVisibility(ESlateVisibility::Collapsed);
 	}
 	NewInputButton->SetText(GetKeyText(KeyIndex));
 
@@ -581,7 +585,16 @@ void UUINavInputBox::ProcessInputName()
 	{
 		InputActionData.DisplayName = FText::FromName(InputActionData.Action->GetFName());
 	}
-	InputText->SetText(InputActionData.DisplayName);
+
+	if (IsValid(InputText))
+	{
+		InputText->SetText(InputActionData.DisplayName);
+	}
+
+	if (IsValid(InputRichText))
+	{
+		InputRichText->SetText(UUINavBlueprintFunctionLibrary::ApplyStyleRowToText(InputActionData.DisplayName, InputTextStyleRowName));
+	}
 }
 
 int UUINavInputBox::GetNumValidKeys(const int Index) const
@@ -626,7 +639,9 @@ void UUINavInputBox::InputComponentClicked(const int Index)
 	if (bUsingKeyImage[Index])
 	{
 		InputButtons[Index]->InputImage->SetVisibility(ESlateVisibility::Collapsed);
-		InputButtons[Index]->NavText->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+		
+		if (IsValid(InputButtons[Index]->NavText)) InputButtons[Index]->NavText->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+		if (IsValid(InputButtons[Index]->NavRichText)) InputButtons[Index]->NavRichText->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
 	}
 
 	Container->UINavPC->ListenToInputRebind(this);
@@ -733,7 +748,8 @@ void UUINavInputBox::UpdateKeyDisplay(const int Index)
 	if (bUsingKeyImage[Index])
 	{
 		InputButtons[Index]->InputImage->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
-		InputButtons[Index]->NavText->SetVisibility(ESlateVisibility::Collapsed);
+		if (IsValid(InputButtons[Index]->NavText)) InputButtons[Index]->NavText->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+		if (IsValid(InputButtons[Index]->NavRichText)) InputButtons[Index]->NavRichText->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
 	}
 }
 

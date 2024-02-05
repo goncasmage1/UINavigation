@@ -4,7 +4,9 @@
 #include "UINavWidget.h"
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
+#include "Components/RichTextBlock.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "UINavBlueprintFunctionLibrary.h"
 
 void UUINavSliderBox::NativeConstruct()
 {
@@ -20,8 +22,8 @@ bool UUINavSliderBox::Update(const bool bNotify /*= true*/)
 {
 	const bool bChangedIndex = Super::Update(bNotify);
 	
-	if (NavText != nullptr)
-		NavText->SetText(FText::FromString(FString::FromInt(MinRange + OptionIndex * Interval)));
+	const FText NewText = FText::FromString(FString::FromInt(MinRange + OptionIndex * Interval));
+	SetText(NewText);
 
 	const float Percent = UKismetMathLibrary::NormalizeToRange(MinRange + OptionIndex * Interval, MinRange, MaxRange);
 	SliderBar->SetPercent(Percent);
