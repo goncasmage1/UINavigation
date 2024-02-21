@@ -323,7 +323,7 @@ void UUINavComponent::SetText(const FText& Text)
 	
 	if (IsValid(NavRichText))
 	{
-		const FString StyleRowName = IsBeingNavigated() ? NavigatedStyleRowName : NormalStyleRowName;
+		const FString StyleRowName = IsBeingNavigated() && bUseNavigatedStyleRow ? NavigatedStyleRowName : NormalStyleRowName;
 		NavRichText->SetText(StyleRowName.IsEmpty() ? ComponentText : UUINavBlueprintFunctionLibrary::ApplyStyleRowToText(ComponentText, StyleRowName));
 	}
 }
