@@ -30,10 +30,10 @@ public:
 	void SetCallback(const FPromptWidgetDecided& InCallback) { Callback = InCallback; }
 
 public:
-	UPROPERTY(EditAnywhere, Category = "UINavPromptWidget")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UINavPromptWidget")
 	FText Title;
 
-	UPROPERTY(EditAnywhere, Category = "UINavPromptWidget")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UINavPromptWidget")
 	FText Message;
 
 protected:
