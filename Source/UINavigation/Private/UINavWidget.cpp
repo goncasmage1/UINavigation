@@ -504,9 +504,9 @@ FReply UUINavWidget::NativeOnFocusReceived(const FGeometry& InGeometry, const FF
 		{
 			CurrentComponent->SetFocus();
 		}
-		else
+		else if (TryFocusOnInitialComponent())
 		{
-			TryFocusOnInitialComponent();
+			UINavPC->NotifyNavigatedTo(this);
 		}
 
 		return Reply;
