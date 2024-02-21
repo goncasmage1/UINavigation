@@ -532,7 +532,7 @@ void UUINavWidget::NativeOnFocusChanging(const FWeakWidgetPath& PreviousFocusPat
 {
 	Super::NativeOnFocusChanging(PreviousFocusPath, NewWidgetPath, InFocusEvent);
 
-	if (IsValid(CurrentComponent))
+	if (IsValid(CurrentComponent) || !NewWidgetPath.IsValid())
 	{
 		return;
 	}
