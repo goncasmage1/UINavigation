@@ -314,60 +314,6 @@ UUINavInputBox* UUINavInputContainer::GetOppositeInputBox(const FName& InputName
 	return nullptr;
 }
 
-void UUINavInputContainer::GetAxisPropertiesFromMapping(const FEnhancedActionKeyMapping& ActionMapping, bool& bOutPositive, EInputAxis& OutAxis) const
-{
-	TArray<UInputModifier*> Modifiers(ActionMapping.Modifiers);
-	Modifiers.Append(ActionMapping.Action->Modifiers);
-	bOutPositive = true;
-	if (!UINavPC->IsAxis2D(ActionMapping.Key))
-	{
-		OutAxis = EInputAxis::X;
-	}
-	
-	for (const UInputModifier* Modifier : Modifiers)
-	{
-		const UInputModifierSwizzleAxis* Swizzle = Cast<UInputModifierSwizzleAxis>(Modifier);
-		if (Swizzle != nullptr && !UINavPC->IsAxis2D(ActionMapping.Key))
-		{
-			switch(Swizzle->Order)
-			{
-			case EInputAxisSwizzle::YXZ:
-			case EInputAxisSwizzle::YZX:
-				OutAxis = EInputAxis::Y;
-				break;
-			case EInputAxisSwizzle::ZXY:
-			case EInputAxisSwizzle::ZYX:
-				OutAxis = EInputAxis::Z;
-				break;
-			}
-			continue;
-		}
-	}
-
-	for (const UInputModifier* Modifier : Modifiers)
-	{
-		const UInputModifierNegate* Negate = Cast<UInputModifierNegate>(Modifier);
-		if (Negate != nullptr)
-		{
-			if (OutAxis == EInputAxis::X)
-			{
-				bOutPositive = !Negate->bX;
-			}
-			else if (OutAxis == EInputAxis::Y)
-			{
-				bOutPositive = !Negate->bY;
-			}
-			else if (OutAxis == EInputAxis::Z)
-			{
-				bOutPositive = !Negate->bZ;
-			}
-			continue;
-		}
-
-		// TODO: Add support for Scalar input modifier
-	}
-}
-
 void UUINavInputContainer::GetInputRebindData(const int InputIndex, FInputRebindData& RebindData) const
 {
 	if (InputBoxes.IsValidIndex(InputIndex))

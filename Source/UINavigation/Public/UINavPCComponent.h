@@ -27,6 +27,7 @@ class UUINavInputBox;
 class UTexture2D;
 class UUINavWidget;
 class UInputMappingContext;
+struct FEnhancedActionKeyMapping;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FInputTypeChangedDelegate, EInputType, InputType);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FUpdateInputIconsDelegate);
@@ -444,6 +445,8 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
 	const FKey GetOppositeAxis2DAxis(const FKey& Key) const;
+
+	void GetAxisPropertiesFromMapping(const FEnhancedActionKeyMapping& ActionMapping, bool& bOutPositive, EInputAxis& OutAxis) const;
 	
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
 	bool IsAxis2D(const FKey& Key) const;

@@ -66,7 +66,7 @@ void UUINavInputBox::CreateEnhancedInputKeyWidgets()
 
 				bool bPositive;
 				EInputAxis Axis = InputActionData.Axis;
-				Container->GetAxisPropertiesFromMapping(ActionMapping, bPositive, Axis);
+				Container->UINavPC->GetAxisPropertiesFromMapping(ActionMapping, bPositive, Axis);
 				TArray<int32> MappingsForAction;
 				GetEnhancedMappingsForAction(ActionMapping.Action, InputActionData.Axis, j, MappingsForAction);
 				UUINavInputBox* OppositeInputBox = Container->GetOppositeInputBox(InputActionData);
@@ -239,7 +239,7 @@ int32 UUINavInputBox::FinishUpdateNewEnhancedInputKey(const FKey& PressedKey, co
 		if (ActionMapping.Action == InputActionData.Action && i != MappingIndexToIgnore)
 		{
 			EInputAxis Axis = InputActionData.Axis;
-			Container->GetAxisPropertiesFromMapping(ActionMapping, bPositive, Axis);
+			Container->UINavPC->GetAxisPropertiesFromMapping(ActionMapping, bPositive, Axis);
 			if (InputActionData.Axis == Axis)
 			{
 				const FKey& MappingKey = GetKeyFromAxis(ActionMapping.Key);
@@ -657,7 +657,7 @@ void UUINavInputBox::GetEnhancedMappingsForAction(const UInputAction* Action, co
 		{
 			bool bPositive;
 			EInputAxis ActionAxis = InputActionData.Axis;
-			Container->GetAxisPropertiesFromMapping(ActionMapping, bPositive, ActionAxis);
+			Container->UINavPC->GetAxisPropertiesFromMapping(ActionMapping, bPositive, ActionAxis);
 			if (ActionAxis == Axis && Container->RespectsRestriction(ActionMapping.Key, Index))
 			{
 				OutMappingIndices.Add(i);

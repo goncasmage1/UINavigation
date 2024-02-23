@@ -1033,12 +1033,25 @@ FKey UUINavPCComponent::GetEnhancedInputKey(const UInputAction* Action, const EI
 				}
 				else
 				{
-					return GetKeyFromAxis(Mapping.Key, Scale == EAxisType::Positive, Axis);
+					if (IsAxis(Mapping.Key))
+					{
+						return GetKeyFromAxis(Mapping.Key, Scale == EAxisType::Positive, Axis);
+					}
+					else
+					{
+						bool bPositive;
+						EInputAxis KeyAxis;
+						GetAxisPropertiesFromMapping(Mapping, bPositive, KeyAxis);
+						if (KeyAxis == Axis && bPositive == (Scale == EAxisType::Positive))
+						{
+							return Mapping.Key;
+						}
+					}
 				}
 			}
 		}
 	}
-	
+
 	return FKey();
 }
 
@@ -1228,6 +1241,60 @@ const FKey UUINavPCComponent::GetOppositeAxis2DAxis(const FKey& Key) const
 		if (Axis2DAxes.Value.NegativeKey == Key) return Axis2DAxes.Value.PositiveKey;
 	}
 	return FKey();
+}
+
+void UUINavPCComponent::GetAxisPropertiesFromMapping(const FEnhancedActionKeyMapping& ActionMapping, bool& bOutPositive, EInputAxis& OutAxis) const
+{
+	TArray<UInputModifier*> Modifiers(ActionMapping.Modifiers);
+	Modifiers.Append(ActionMapping.Action->Modifiers);
+	bOutPositive = true;
+	if (!IsAxis2D(ActionMapping.Key))
+	{
+		OutAxis = EInputAxis::X;
+	}
+
+	for (const UInputModifier* Modifier : Modifiers)
+	{
+		const UInputModifierSwizzleAxis* Swizzle = Cast<UInputModifierSwizzleAxis>(Modifier);
+		if (Swizzle != nullptr && !IsAxis2D(ActionMapping.Key))
+		{
+			switch (Swizzle->Order)
+			{
+			case EInputAxisSwizzle::YXZ:
+			case EInputAxisSwizzle::YZX:
+				OutAxis = EInputAxis::Y;
+				break;
+			case EInputAxisSwizzle::ZXY:
+			case EInputAxisSwizzle::ZYX:
+				OutAxis = EInputAxis::Z;
+				break;
+			}
+			continue;
+		}
+	}
+
+	for (const UInputModifier* Modifier : Modifiers)
+	{
+		const UInputModifierNegate* Negate = Cast<UInputModifierNegate>(Modifier);
+		if (Negate != nullptr)
+		{
+			if (OutAxis == EInputAxis::X)
+			{
+				bOutPositive = !Negate->bX;
+			}
+			else if (OutAxis == EInputAxis::Y)
+			{
+				bOutPositive = !Negate->bY;
+			}
+			else if (OutAxis == EInputAxis::Z)
+			{
+				bOutPositive = !Negate->bZ;
+			}
+			continue;
+		}
+
+		// TODO: Add support for Scalar input modifier
+	}
 }
 
 bool UUINavPCComponent::IsAxis2D(const FKey& Key) const
