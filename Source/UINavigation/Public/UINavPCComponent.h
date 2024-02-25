@@ -219,6 +219,13 @@ public:
 	float ThumbstickCursorSensitivity = 10.0f;
 
 	/*
+	The squared deadzone of the thumbstick when using it as a mouse cursor.
+	If you want the deadzone to be 0.1, set it to 0.01 (0.1 * 0.1).
+	*/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavController)
+	float ThumbstickCursorDeadzoneSqr = 0.01f;
+
+	/*
 	The sensitivity of scrolling when using the right thumbstick
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavController)

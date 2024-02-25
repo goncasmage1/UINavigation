@@ -712,7 +712,7 @@ void UUINavPCComponent::HandleAnalogInputEvent(FSlateApplication& SlateApp, cons
 			if (bIsHorizontal) ThumbstickDelta.X = FMath::Abs(Value) > 0.001f ? Value : 0.0f;
 			else ThumbstickDelta.Y = FMath::Abs(Value) > 0.001f ? Value : 0.0f;
 
-			if (ThumbstickDelta.SizeSquared() < 0.01f) return;
+			if (ThumbstickDelta.SizeSquared() < ThumbstickCursorDeadzoneSqr) return;
 
 			const FVector2D OldPosition = SlateApp.GetCursorPos();
 			const FVector2D NewPosition(OldPosition.X + (bIsHorizontal ? Value * ThumbstickCursorSensitivity * 100.0f * DeltaTime : 0.0f),
