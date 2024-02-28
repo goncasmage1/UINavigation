@@ -640,6 +640,9 @@ void UUINavPCComponent::HandleKeyUpEvent(FSlateApplication& SlateApp, const FKey
 	const bool bIsGamepadKey = InKeyEvent.GetKey().IsGamepadKey();
 	const bool bShouldUnforceNavigation = !bUsingThumbstickAsMouse || !bIsSelectKey || !bIsGamepadKey;
 
+	LastReleasedKey = InKeyEvent.GetKey();
+	LastReleasedKeyUserIndex = InKeyEvent.GetUserIndex();
+
 	if (IsValid(ListeningInputBox)) return;
 
 	if (!bShouldUnforceNavigation)

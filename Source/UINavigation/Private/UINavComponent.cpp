@@ -285,6 +285,13 @@ void UUINavComponent::OnButtonReleased()
 		return;
 	}
 
+	if (ParentWidget->UINavPC->IsListeningToInputRebind())
+	{
+		const FKeyEvent ReleasedKeyEvent(ParentWidget->UINavPC->LastReleasedKey, FModifierKeysState(), ParentWidget->UINavPC->LastReleasedKeyUserIndex, false, 0, 0);
+		ParentWidget->UINavPC->ProcessRebind(ReleasedKeyEvent);
+		return;
+	}
+
 	OnNativeReleased.Broadcast();
 	OnReleased.Broadcast();
 

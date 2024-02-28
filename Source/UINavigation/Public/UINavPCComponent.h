@@ -267,6 +267,9 @@ public:
 	FKey LastPressedKey;
 	int32 LastPressedKeyUserIndex;
 
+	FKey LastReleasedKey;
+	int32 LastReleasedKeyUserIndex;
+
 	static const FKey MouseUp;
 	static const FKey MouseDown;
 	static const FKey MouseRight;
