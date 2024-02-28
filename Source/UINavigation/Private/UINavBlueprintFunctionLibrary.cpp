@@ -161,7 +161,7 @@ FText UUINavBlueprintFunctionLibrary::ApplyStyleRowToText(const FText& Text, con
 {
 	const FString TextString = Text.ToString();
 	
-	FJsonSerializableArray StringArray;
+	TArray<FString> StringArray;
 	TextString.ParseIntoArray(StringArray, TEXT("\n"));
 	
 	FString FinalString;
