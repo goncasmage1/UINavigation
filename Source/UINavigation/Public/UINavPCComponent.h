@@ -567,6 +567,8 @@ public:
 
 	bool ShouldIgnoreClickEvent();
 
+	void ResetIgnoreClickEvent() { bIgnoreClickEvent = false; }
+
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
     FORCEINLINE FVector2D GetThumbstickDelta() const { return ThumbstickDelta; }
 

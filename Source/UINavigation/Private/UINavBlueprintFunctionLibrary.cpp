@@ -159,7 +159,19 @@ bool UUINavBlueprintFunctionLibrary::RespectsRestriction(const FKey Key, const E
 
 FText UUINavBlueprintFunctionLibrary::ApplyStyleRowToText(const FText& Text, const FString& StyleRowName)
 {
-	return FText::FromString(TEXT("<") + StyleRowName + TEXT(">") + Text.ToString() + TEXT("</>"));
+	const FString TextString = Text.ToString();
+	
+	FJsonSerializableArray StringArray;
+	TextString.ParseIntoArray(StringArray, TEXT("\n"));
+	
+	FString FinalString;
+	for (int32 i = 0; i < StringArray.Num(); ++i)
+	{
+		if (i > 0) FinalString += TEXT("\n");
+		FinalString += TEXT("<") + StyleRowName + TEXT(">") + StringArray[i] + TEXT("</>");
+	}
+	
+	return FText::FromString(FinalString);
 }
 
 FText UUINavBlueprintFunctionLibrary::GetRawTextFromRichText(const FText& RichText)

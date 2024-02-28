@@ -2,6 +2,7 @@
 
 #include "SwapKeysWidget.h"
 #include "UINavInputBox.h"
+#include "UINavPCComponent.h"
 #include "Data/RevertRebindReason.h"
 #include "UINavBlueprintFunctionLibrary.h"
 #include "Data/PromptDataSwapKeys.h"
@@ -28,6 +29,7 @@ void USwapKeysWidget::NotifySwapResult(const bool bSwap)
 	SwapKeysPromptData->InputCollisionData = InputCollisionData;
 	SwapKeysPromptData->CurrentInputBox = CurrentInputBox;
 	SwapKeysPromptData->CollidingInputBox = CollidingInputBox;
+	UINavPC->ResetIgnoreClickEvent();
 
 	ProcessPromptWidgetSelected(SwapKeysPromptData);
 }
