@@ -181,7 +181,7 @@ int32 UUINavInputBox::UpdateInputKey(const FKey& NewKey, int Index, const bool b
 			FInputRebindData CollidingInputData;
 			Container->GetEnhancedInputRebindData(CollidingActionIndex, CollidingInputData);
 			if (!Container->InputBoxes.Find(this, SelfIndex) ||
-				!Container->RequestKeySwap(FInputCollisionData(InputText->GetText(),
+				!Container->RequestKeySwap(FInputCollisionData(GetCurrentText(),
 					CollidingInputData.InputText,
 					CollidingKeyIndex,
 					Keys[Index],
@@ -767,6 +767,13 @@ void UUINavInputBox::RevertToKeyText(const int Index)
 	}
 
 	InputButtons[Index]->SetText(OldName);
+}
+
+FText UUINavInputBox::GetCurrentText() const
+{
+	if (IsValid(InputText)) return InputText->GetText();
+	if (IsValid(InputRichText)) return InputRichText->GetText();
+	return FText();
 }
 
 int UUINavInputBox::ContainsKey(const FKey& CompareKey) const

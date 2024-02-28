@@ -147,7 +147,7 @@ FReply UUINavComponent::NativeOnKeyUp(const FGeometry& InGeometry, const FKeyEve
 	if (bIgnoreDueToRebind || ParentWidget->UINavPC->IsListeningToInputRebind())
 	{
 		bIgnoreDueToRebind = false;
-		ParentWidget->UINavPC->ProcessRebind( InKeyEvent );
+		ParentWidget->UINavPC->ProcessRebind(InKeyEvent);
 		return Reply;
 	}
 

@@ -14,6 +14,7 @@
 #include "GameFramework/PlayerController.h"
 #include "Components/PanelWidget.h"
 #include "Components/TextBlock.h"
+#include "Components/RichTextBlock.h"
 #include "IImageWrapper.h"
 #include "EnhancedInputComponent.h"
 #include "UINavMacros.h"
@@ -326,7 +327,7 @@ void UUINavInputContainer::GetEnhancedInputRebindData(const int InputIndex, FInp
 {
 	if (InputBoxes.IsValidIndex(InputIndex))
 	{
-		RebindData.InputText = InputBoxes[InputIndex]->InputText->GetText();
+		RebindData.InputText = InputBoxes[InputIndex]->GetCurrentText();
 		RebindData.InputGroups = InputBoxes[InputIndex]->EnhancedInputGroups;
 	}
 }
