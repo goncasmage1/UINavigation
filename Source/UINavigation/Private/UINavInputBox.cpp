@@ -748,6 +748,12 @@ void UUINavInputBox::UpdateKeyDisplay(const int Index)
 	if (bUsingKeyImage[Index])
 	{
 		InputButtons[Index]->InputImage->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+		if (IsValid(InputButtons[Index]->NavText)) InputButtons[Index]->NavText->SetVisibility(ESlateVisibility::Collapsed);
+		if (IsValid(InputButtons[Index]->NavRichText)) InputButtons[Index]->NavRichText->SetVisibility(ESlateVisibility::Collapsed);
+	}
+	else
+	{
+		InputButtons[Index]->InputImage->SetVisibility(ESlateVisibility::Collapsed);
 		if (IsValid(InputButtons[Index]->NavText)) InputButtons[Index]->NavText->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
 		if (IsValid(InputButtons[Index]->NavRichText)) InputButtons[Index]->NavRichText->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
 	}
@@ -772,7 +778,7 @@ void UUINavInputBox::RevertToKeyText(const int Index)
 FText UUINavInputBox::GetCurrentText() const
 {
 	if (IsValid(InputText)) return InputText->GetText();
-	if (IsValid(InputRichText)) return InputRichText->GetText();
+	if (IsValid(InputRichText)) return UUINavBlueprintFunctionLibrary::GetRawTextFromRichText(InputRichText->GetText());
 	return FText();
 }
 

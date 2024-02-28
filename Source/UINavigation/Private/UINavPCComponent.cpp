@@ -981,7 +981,7 @@ bool UUINavPCComponent::IsWidgetActive(const UUINavWidget* const UINavWidget) co
 bool UUINavPCComponent::ShouldIgnoreClickEvent()
 {
 	const bool bOldIgnoreClickEvent = bIgnoreClickEvent;
-	bIgnoreClickEvent = false;
+	ResetIgnoreClickEvent();
 	return bOldIgnoreClickEvent;
 }
 
