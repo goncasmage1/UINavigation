@@ -79,6 +79,8 @@ public:
 	void CancelUpdateInputKey(const ERevertRebindReason Reason);
 	void RevertToKeyText(const int Index);
 
+	FText GetCurrentText() const;
+
 	int ContainsKey(const FKey& CompareKey) const;
 	FORCEINLINE bool IsAxis() const { return IS_AXIS; }
 	FORCEINLINE bool WantsAxisKey() const;

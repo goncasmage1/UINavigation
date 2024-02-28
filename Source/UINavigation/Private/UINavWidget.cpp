@@ -504,9 +504,9 @@ FReply UUINavWidget::NativeOnFocusReceived(const FGeometry& InGeometry, const FF
 		{
 			CurrentComponent->SetFocus();
 		}
-		else
+		else if (TryFocusOnInitialComponent())
 		{
-			TryFocusOnInitialComponent();
+			UINavPC->NotifyNavigatedTo(this);
 		}
 
 		return Reply;
@@ -532,7 +532,7 @@ void UUINavWidget::NativeOnFocusChanging(const FWeakWidgetPath& PreviousFocusPat
 {
 	Super::NativeOnFocusChanging(PreviousFocusPath, NewWidgetPath, InFocusEvent);
 
-	if (IsValid(CurrentComponent))
+	if (IsValid(CurrentComponent) || !NewWidgetPath.IsValid())
 	{
 		return;
 	}

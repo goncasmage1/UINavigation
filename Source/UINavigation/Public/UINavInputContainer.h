@@ -96,8 +96,6 @@ public:
 	UUINavInputBox* GetOppositeInputBox(const FInputContainerEnhancedActionData& ActionData);
 	UUINavInputBox* GetOppositeInputBox(const FName& InputName, const EAxisType AxisType);
 
-	void GetAxisPropertiesFromMapping(const FEnhancedActionKeyMapping& ActionMapping, bool& bOutPositive, EInputAxis& OutAxis) const;
-
 	void GetInputRebindData(const int InputIndex, FInputRebindData& RebindData) const;
 
 	void GetEnhancedInputRebindData(const int InputIndex, FInputRebindData& RebindData) const;
@@ -177,6 +175,6 @@ public:
 
 	//The message text used for the swap keys widget
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Input")
-	FText SwapKeysMessageText = FText::FromString(TEXT("{CollidingKey} is already being used by {CollidingAction}.\nDo you want swap it with {OtherKey}? "));
+	FText SwapKeysMessageText = FText::FromString(TEXT("{CollidingKey} is already being used by {CollidingAction}.\nDo you want swap it with {OtherKey}?"));
 
 };
