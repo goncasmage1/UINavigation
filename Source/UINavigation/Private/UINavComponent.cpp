@@ -147,7 +147,7 @@ FReply UUINavComponent::NativeOnKeyUp(const FGeometry& InGeometry, const FKeyEve
 	if (bIgnoreDueToRebind || ParentWidget->UINavPC->IsListeningToInputRebind())
 	{
 		bIgnoreDueToRebind = false;
-		ParentWidget->UINavPC->ProcessRebind( InKeyEvent );
+		ParentWidget->UINavPC->ProcessRebind(InKeyEvent);
 		return Reply;
 	}
 
@@ -285,6 +285,13 @@ void UUINavComponent::OnButtonReleased()
 		return;
 	}
 
+	if (ParentWidget->UINavPC->IsListeningToInputRebind())
+	{
+		const FKeyEvent ReleasedKeyEvent(ParentWidget->UINavPC->LastReleasedKey, FModifierKeysState(), ParentWidget->UINavPC->LastReleasedKeyUserIndex, false, 0, 0);
+		ParentWidget->UINavPC->ProcessRebind(ReleasedKeyEvent);
+		return;
+	}
+
 	OnNativeReleased.Broadcast();
 	OnReleased.Broadcast();
 
@@ -323,7 +330,7 @@ void UUINavComponent::SetText(const FText& Text)
 	
 	if (IsValid(NavRichText))
 	{
-		const FString StyleRowName = IsBeingNavigated() ? NavigatedStyleRowName : NormalStyleRowName;
+		const FString StyleRowName = IsBeingNavigated() && bUseNavigatedStyleRow ? NavigatedStyleRowName : NormalStyleRowName;
 		NavRichText->SetText(StyleRowName.IsEmpty() ? ComponentText : UUINavBlueprintFunctionLibrary::ApplyStyleRowToText(ComponentText, StyleRowName));
 	}
 }
@@ -416,7 +423,8 @@ void UUINavComponent::NativeOnFocusChanging(const FWeakWidgetPath& PreviousFocus
 {
 	Super::NativeOnFocusChanging(PreviousFocusPath, NewWidgetPath, InFocusEvent);
 
-	if (ParentWidget->UINavPC->GetInputMode() == EInputMode::Game ||
+	if (!NewWidgetPath.IsValid() ||
+		ParentWidget->UINavPC->GetInputMode() == EInputMode::Game ||
 		(InFocusEvent.GetCause() == EFocusCause::Mouse &&
 		ParentWidget->UINavPC->GetInputMode() == EInputMode::GameUI &&
 		GetDefault<UUINavSettings>()->bAllowFocusOnViewportInGameAndUI))

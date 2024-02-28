@@ -66,7 +66,7 @@ void UUINavInputBox::CreateEnhancedInputKeyWidgets()
 
 				bool bPositive;
 				EInputAxis Axis = InputActionData.Axis;
-				Container->GetAxisPropertiesFromMapping(ActionMapping, bPositive, Axis);
+				Container->UINavPC->GetAxisPropertiesFromMapping(ActionMapping, bPositive, Axis);
 				TArray<int32> MappingsForAction;
 				GetEnhancedMappingsForAction(ActionMapping.Action, InputActionData.Axis, j, MappingsForAction);
 				UUINavInputBox* OppositeInputBox = Container->GetOppositeInputBox(InputActionData);
@@ -181,7 +181,7 @@ int32 UUINavInputBox::UpdateInputKey(const FKey& NewKey, int Index, const bool b
 			FInputRebindData CollidingInputData;
 			Container->GetEnhancedInputRebindData(CollidingActionIndex, CollidingInputData);
 			if (!Container->InputBoxes.Find(this, SelfIndex) ||
-				!Container->RequestKeySwap(FInputCollisionData(InputText->GetText(),
+				!Container->RequestKeySwap(FInputCollisionData(GetCurrentText(),
 					CollidingInputData.InputText,
 					CollidingKeyIndex,
 					Keys[Index],
@@ -239,7 +239,7 @@ int32 UUINavInputBox::FinishUpdateNewEnhancedInputKey(const FKey& PressedKey, co
 		if (ActionMapping.Action == InputActionData.Action && i != MappingIndexToIgnore)
 		{
 			EInputAxis Axis = InputActionData.Axis;
-			Container->GetAxisPropertiesFromMapping(ActionMapping, bPositive, Axis);
+			Container->UINavPC->GetAxisPropertiesFromMapping(ActionMapping, bPositive, Axis);
 			if (InputActionData.Axis == Axis)
 			{
 				const FKey& MappingKey = GetKeyFromAxis(ActionMapping.Key);
@@ -657,7 +657,7 @@ void UUINavInputBox::GetEnhancedMappingsForAction(const UInputAction* Action, co
 		{
 			bool bPositive;
 			EInputAxis ActionAxis = InputActionData.Axis;
-			Container->GetAxisPropertiesFromMapping(ActionMapping, bPositive, ActionAxis);
+			Container->UINavPC->GetAxisPropertiesFromMapping(ActionMapping, bPositive, ActionAxis);
 			if (ActionAxis == Axis && Container->RespectsRestriction(ActionMapping.Key, Index))
 			{
 				OutMappingIndices.Add(i);
@@ -767,6 +767,13 @@ void UUINavInputBox::RevertToKeyText(const int Index)
 	}
 
 	InputButtons[Index]->SetText(OldName);
+}
+
+FText UUINavInputBox::GetCurrentText() const
+{
+	if (IsValid(InputText)) return InputText->GetText();
+	if (IsValid(InputRichText)) return InputRichText->GetText();
+	return FText();
 }
 
 int UUINavInputBox::ContainsKey(const FKey& CompareKey) const

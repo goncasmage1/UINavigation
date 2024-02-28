@@ -25,7 +25,7 @@ class UINAVIGATION_API IUINavPCReceiver
 public:
 
 	/**
-	*	Called when the root UINavWidget is removed from the viewport
+	*	Called when the root UINavWidget is added to the viewport
 	*/
 	UFUNCTION(BlueprintNativeEvent, Category = UINavController)
 	void OnRootWidgetAdded();

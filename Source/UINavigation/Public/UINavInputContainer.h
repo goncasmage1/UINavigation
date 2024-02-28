@@ -96,8 +96,6 @@ public:
 	UUINavInputBox* GetOppositeInputBox(const FInputContainerEnhancedActionData& ActionData);
 	UUINavInputBox* GetOppositeInputBox(const FName& InputName, const EAxisType AxisType);
 
-	void GetAxisPropertiesFromMapping(const FEnhancedActionKeyMapping& ActionMapping, bool& bOutPositive, EInputAxis& OutAxis) const;
-
 	void GetInputRebindData(const int InputIndex, FInputRebindData& RebindData) const;
 
 	void GetEnhancedInputRebindData(const int InputIndex, FInputRebindData& RebindData) const;

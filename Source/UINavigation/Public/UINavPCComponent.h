@@ -27,6 +27,7 @@ class UUINavInputBox;
 class UTexture2D;
 class UUINavWidget;
 class UInputMappingContext;
+struct FEnhancedActionKeyMapping;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FInputTypeChangedDelegate, EInputType, InputType);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FUpdateInputIconsDelegate);
@@ -218,6 +219,13 @@ public:
 	float ThumbstickCursorSensitivity = 10.0f;
 
 	/*
+	The squared deadzone of the thumbstick when using it as a mouse cursor.
+	If you want the deadzone to be 0.1, set it to 0.01 (0.1 * 0.1).
+	*/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavController)
+	float ThumbstickCursorDeadzoneSqr = 0.01f;
+
+	/*
 	The sensitivity of scrolling when using the right thumbstick
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavController)
@@ -258,6 +266,9 @@ public:
 
 	FKey LastPressedKey;
 	int32 LastPressedKeyUserIndex;
+
+	FKey LastReleasedKey;
+	int32 LastReleasedKeyUserIndex;
 
 	static const FKey MouseUp;
 	static const FKey MouseDown;
@@ -444,6 +455,8 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
 	const FKey GetOppositeAxis2DAxis(const FKey& Key) const;
+
+	void GetAxisPropertiesFromMapping(const FEnhancedActionKeyMapping& ActionMapping, bool& bOutPositive, EInputAxis& OutAxis) const;
 	
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
 	bool IsAxis2D(const FKey& Key) const;
