@@ -34,6 +34,7 @@
 #include "UObject/SoftObjectPtr.h"
 #include "Internationalization/Internationalization.h"
 #include "UINavLocalPlayerSubsystem.h"
+#include "Curves/CurveFloat.h"
 
 const FKey UUINavPCComponent::MouseUp("MouseUp");
 const FKey UUINavPCComponent::MouseDown("MouseDown");
@@ -59,6 +60,12 @@ UUINavPCComponent::UUINavPCComponent()
 	}
 
 	EnhancedInputContext = GetDefault<UUINavSettings>()->EnhancedInputContext.Get();
+
+	static ConstructorHelpers::FObjectFinderOptional<UCurveFloat> ThumbstickCursorCurveAsset(TEXT("/UINavigation/Data/ThumbstickMoveCurve.ThumbstickMoveCurve"));
+	if (IsValid(ThumbstickCursorCurveAsset.Get()))
+	{
+		ThumbstickCursorCurve = ThumbstickCursorCurveAsset.Get();
+	}
 }
 
 void UUINavPCComponent::Activate(bool bReset)
@@ -83,7 +90,8 @@ void UUINavPCComponent::BeginPlay()
 
 	if (PC != nullptr && PC->IsLocalPlayerController() && !SharedInputProcessor.IsValid())
 	{
-		ULocalPlayer::GetSubsystem<UUINavLocalPlayerSubsystem>(PC->GetLocalPlayer())->ApplySavedInputContexts();
+		UUINavLocalPlayerSubsystem* UINavLocalPlayerSubsystem = ULocalPlayer::GetSubsystem<UUINavLocalPlayerSubsystem>(PC->GetLocalPlayer());
+		if (IsValid(UINavLocalPlayerSubsystem)) UINavLocalPlayerSubsystem->ApplySavedInputContexts();
 
 		RefreshNavigationKeys();
 
@@ -173,6 +181,34 @@ void UUINavPCComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAct
 	else
 	{
 		bReceivedAnalogInput = false;
+
+		const float DeltaSize = FMath::Clamp(ThumbstickDelta.Size(), 0.0f, 1.0f);
+		if (DeltaSize >= ThumbstickCursorDeadzone)
+		{
+			FSlateApplication& SlateApp = FSlateApplication::Get();
+			const float MovementAmount = ThumbstickCursorSensitivity * 33.3f * DeltaTime;
+			const FVector2D ModifiedDelta = ThumbstickDelta * (IsValid(ThumbstickCursorCurve) ? ThumbstickCursorCurve->GetFloatValue(DeltaSize) : 1.0f);
+			const FVector2D OldPosition = SlateApp.GetCursorPos();
+			const FVector2D NewPosition(OldPosition.X + (ModifiedDelta.X * MovementAmount), OldPosition.Y + (-ModifiedDelta.Y * MovementAmount));
+			SlateApp.SetCursorPos(NewPosition);
+			// Since the cursor may have been locked and its location clamped, get the actual new position
+			if (const TSharedPtr<FSlateUser> SlateUser = SlateApp.GetUser(SlateApp.CursorUserIndex))
+			{
+				//create a new mouse event
+				const bool bIsPrimaryUser = FSlateApplication::CursorUserIndex == SlateUser->GetUserIndex();
+				const FPointerEvent MouseEvent(
+					SlateApp.CursorPointerIndex,
+					NewPosition,
+					OldPosition,
+					bIsPrimaryUser ? SlateApp.GetPressedMouseButtons() : TSet<FKey>(),
+					EKeys::Invalid,
+					0,
+					bIsPrimaryUser ? SlateApp.GetModifierKeys() : FModifierKeysState()
+				);
+				//process the event
+				SlateApp.ProcessMouseMoveEvent(MouseEvent);
+			}
+		}
 	}
 
 	if (bIgnoreFocusByNavigation)
@@ -711,33 +747,9 @@ void UUINavPCComponent::HandleAnalogInputEvent(FSlateApplication& SlateApp, cons
 			bReceivedAnalogInput = true;
 
 			const bool bIsHorizontal = Key == EKeys::Gamepad_LeftX || Key == EKeys::Gamepad_RightX;
-			const float Value = InAnalogInputEvent.GetAnalogValue() / 3.0f;
-			if (bIsHorizontal) ThumbstickDelta.X = FMath::Abs(Value) > 0.001f ? Value : 0.0f;
-			else ThumbstickDelta.Y = FMath::Abs(Value) > 0.001f ? Value : 0.0f;
-
-			if (ThumbstickDelta.SizeSquared() < ThumbstickCursorDeadzoneSqr) return;
-
-			const FVector2D OldPosition = SlateApp.GetCursorPos();
-			const FVector2D NewPosition(OldPosition.X + (bIsHorizontal ? Value * ThumbstickCursorSensitivity * 100.0f * DeltaTime : 0.0f),
-				OldPosition.Y + (!bIsHorizontal ? -Value * ThumbstickCursorSensitivity * 100.0f * DeltaTime : 0.0f));
-			SlateApp.SetCursorPos(NewPosition);
-			// Since the cursor may have been locked and its location clamped, get the actual new position
-			if (const TSharedPtr<FSlateUser> SlateUser = SlateApp.GetUser(SlateApp.CursorUserIndex))
-			{
-				//create a new mouse event
-				const bool bIsPrimaryUser = FSlateApplication::CursorUserIndex == SlateUser->GetUserIndex();
-				const FPointerEvent MouseEvent(
-					SlateApp.CursorPointerIndex,
-					NewPosition,
-					OldPosition,
-					bIsPrimaryUser ? SlateApp.GetPressedMouseButtons() : TSet<FKey>(),
-					EKeys::Invalid,
-					0,
-					bIsPrimaryUser ? SlateApp.GetModifierKeys() : FModifierKeysState()
-				);
-				//process the event
-				SlateApp.ProcessMouseMoveEvent(MouseEvent);
-			}
+			const float AnalogValue = InAnalogInputEvent.GetAnalogValue();
+			if (bIsHorizontal) ThumbstickDelta.X = AnalogValue;
+			else ThumbstickDelta.Y = AnalogValue;
 		}
 	}
 
