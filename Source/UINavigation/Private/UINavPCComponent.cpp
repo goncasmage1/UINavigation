@@ -35,6 +35,7 @@
 #include "Internationalization/Internationalization.h"
 #include "UINavLocalPlayerSubsystem.h"
 #include "Curves/CurveFloat.h"
+#include "UObject/ConstructorHelpers.h"
 
 const FKey UUINavPCComponent::MouseUp("MouseUp");
 const FKey UUINavPCComponent::MouseDown("MouseDown");
