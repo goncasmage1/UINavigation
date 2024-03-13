@@ -19,6 +19,7 @@
 #include "Delegates/DelegateCombinations.h"
 #include "Misc/CoreMiscDefines.h"
 #include "UObject/SoftObjectPtr.h"
+#include "Data/PromptData.h"
 #include "UINavPCComponent.generated.h"
 
 class APlayerController;
@@ -26,8 +27,10 @@ class FUINavInputProcessor;
 class UUINavInputBox;
 class UTexture2D;
 class UUINavWidget;
+class UUINavPromptWidget;
 class UInputMappingContext;
 class UCurveFloat;
+class FText;
 struct FEnhancedActionKeyMapping;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FInputTypeChangedDelegate, EInputType, InputType);
@@ -521,6 +524,17 @@ public:
 	*/
 	UFUNCTION(BlueprintCallable, Category = UINavController, meta = (AdvancedDisplay = 2, DeterminesOutputType = "NewWidgetClass"))
 	UUINavWidget* GoToWidget(TSubclassOf<UUINavWidget> NewWidgetClass, const bool bRemoveParent, const bool bDestroyParent = false, const int ZOrder = 0);
+
+	/**
+	*	Adds given widget to screen (strongly recommended over manual alternative)
+	*
+	*	@param	NewWidgetClass  The class of the widget to add to the screen
+	*	@param	bRemoveParent  Whether to remove the parent widget (this widget) from the viewport
+	*	@param  bDestroyParent  Whether to destruct the parent widget (this widget)
+	*	@param  ZOrder Order to display the widget
+	*/
+	UFUNCTION(BlueprintCallable, Category = UINavWidget, meta = (AdvancedDisplay = 4, DeterminesOutputType = "NewWidgetClass"))
+	UUINavWidget* GoToPromptWidget(TSubclassOf<UUINavPromptWidget> NewWidgetClass, const FPromptWidgetDecided& Event, const FText Title = FText(), const FText Message = FText(), const bool bRemoveParent = false, const int ZOrder = 0);
 
 	/**
 	*	Adds given widget to screen (strongly recommended over manual alternative)

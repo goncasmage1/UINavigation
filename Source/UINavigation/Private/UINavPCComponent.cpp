@@ -556,6 +556,27 @@ UUINavWidget* UUINavPCComponent::GoToWidget(TSubclassOf<UUINavWidget> NewWidgetC
 	return GoToBuiltWidget(NewWidget, bRemoveParent, bDestroyParent, ZOrder);
 }
 
+UUINavWidget* UUINavPCComponent::GoToPromptWidget(TSubclassOf<UUINavPromptWidget> NewWidgetClass, const FPromptWidgetDecided& Event, const FText Title, const FText Message, const bool bRemoveParent, const int ZOrder)
+{
+	if (NewWidgetClass == nullptr)
+	{
+		DISPLAYERROR("GoToPromptWidget: No Widget Class found");
+		return nullptr;
+	}
+
+	if (!Event.IsBound())
+	{
+		DISPLAYERROR("GoToPromptWidget: Event isn't bound");
+		return nullptr;
+	}
+
+	UUINavPromptWidget* NewWidget = CreateWidget<UUINavPromptWidget>(PC, NewWidgetClass);
+	NewWidget->Title = Title;
+	NewWidget->Message = Message;
+	NewWidget->SetCallback(Event);
+	return GoToBuiltWidget(NewWidget, bRemoveParent, false, ZOrder);
+}
+
 UUINavWidget* UUINavPCComponent::GoToBuiltWidget(UUINavWidget* NewWidget, const bool bRemoveParent, const bool bDestroyParent, const int ZOrder)
 {
 	if (NewWidget == nullptr) return nullptr;
