@@ -2,7 +2,10 @@
 
 #pragma once
 #include "UObject/Object.h"
+#include "Delegates/DelegateCombinations.h"
 #include "PromptData.generated.h"
+
+DECLARE_DYNAMIC_DELEGATE_OneParam(FPromptWidgetDecided, const UPromptDataBase*, PromptData);
 
 UCLASS(BlueprintType, Blueprintable)
 class UINAVIGATION_API UPromptDataBase : public UObject
