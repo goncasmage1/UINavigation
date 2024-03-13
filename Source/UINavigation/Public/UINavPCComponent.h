@@ -19,6 +19,7 @@
 #include "Delegates/DelegateCombinations.h"
 #include "Misc/CoreMiscDefines.h"
 #include "UObject/SoftObjectPtr.h"
+#include "Data/PromptData.h"
 #include "UINavPCComponent.generated.h"
 
 class APlayerController;
@@ -26,7 +27,10 @@ class FUINavInputProcessor;
 class UUINavInputBox;
 class UTexture2D;
 class UUINavWidget;
+class UUINavPromptWidget;
 class UInputMappingContext;
+class UCurveFloat;
+class FText;
 struct FEnhancedActionKeyMapping;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FInputTypeChangedDelegate, EInputType, InputType);
@@ -193,6 +197,24 @@ public:
 	EThumbstickAsMouse UseThumbstickAsMouse = EThumbstickAsMouse::None;
 
 	/*
+	The sensitivity of the cursor when moved with the left stick
+	*/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavController)
+	float ThumbstickCursorSensitivity = 10.0f;
+
+	/*
+	The deadzone of the thumbstick when using it as a mouse cursor.
+	*/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavController)
+	float ThumbstickCursorDeadzone = 0.1f;
+
+	/*
+	A float curve that dictates how much the analog stick moves the mouse in relation to the sensitivity
+	*/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavController)
+	UCurveFloat* ThumbstickCursorCurve;
+
+	/*
 	Indicates whether you can scroll through scroll boxes using the gamepad's right thumbstick
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavController)
@@ -211,19 +233,6 @@ public:
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavController)
 	EAutoHideMouse AutoHideMouse = EAutoHideMouse::Never;
-
-	/*
-	The sensitivity of the cursor when moved with the left stick
-	*/
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavController)
-	float ThumbstickCursorSensitivity = 10.0f;
-
-	/*
-	The squared deadzone of the thumbstick when using it as a mouse cursor.
-	If you want the deadzone to be 0.1, set it to 0.01 (0.1 * 0.1).
-	*/
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavController)
-	float ThumbstickCursorDeadzoneSqr = 0.01f;
 
 	/*
 	The sensitivity of scrolling when using the right thumbstick
@@ -515,6 +524,17 @@ public:
 	*/
 	UFUNCTION(BlueprintCallable, Category = UINavController, meta = (AdvancedDisplay = 2, DeterminesOutputType = "NewWidgetClass"))
 	UUINavWidget* GoToWidget(TSubclassOf<UUINavWidget> NewWidgetClass, const bool bRemoveParent, const bool bDestroyParent = false, const int ZOrder = 0);
+
+	/**
+	*	Adds given widget to screen (strongly recommended over manual alternative)
+	*
+	*	@param	NewWidgetClass  The class of the widget to add to the screen
+	*	@param	bRemoveParent  Whether to remove the parent widget (this widget) from the viewport
+	*	@param  bDestroyParent  Whether to destruct the parent widget (this widget)
+	*	@param  ZOrder Order to display the widget
+	*/
+	UFUNCTION(BlueprintCallable, Category = UINavWidget, meta = (AdvancedDisplay = 4, DeterminesOutputType = "NewWidgetClass"))
+	UUINavWidget* GoToPromptWidget(TSubclassOf<UUINavPromptWidget> NewWidgetClass, const FPromptWidgetDecided& Event, const FText Title = FText(), const FText Message = FText(), const bool bRemoveParent = false, const int ZOrder = 0);
 
 	/**
 	*	Adds given widget to screen (strongly recommended over manual alternative)

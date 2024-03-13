@@ -8,8 +8,8 @@
 #include "Data/SelectorPosition.h"
 #include "Data/NavigationEvent.h"
 #include "Data/ThumbstickAsMouse.h"
-#include "Delegates/DelegateCombinations.h"
 #include "UObject/Object.h"
+#include "Data/PromptData.h"
 #include "UINavWidget.generated.h"
 
 class UUINavComponent;
@@ -19,8 +19,6 @@ class UPromptDataBase;
 class UScrollBox;
 class UInputMappingContext;
 enum class EButtonStyle : uint8;
-
-DECLARE_DYNAMIC_DELEGATE_OneParam(FPromptWidgetDecided, const UPromptDataBase*, PromptData);
 
 /**
 * This class contains the logic for UserWidget navigation
