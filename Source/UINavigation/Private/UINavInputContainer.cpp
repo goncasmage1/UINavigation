@@ -135,9 +135,8 @@ void UUINavInputContainer::SetupInputBoxes()
 
 void UUINavInputContainer::CreateInputBoxes()
 {
-	if (InputBox_BP == nullptr) return;
+	if (InputBox_BP == nullptr || UINavPC == nullptr) return;
 
-	APlayerController* PC = Cast<APlayerController>(UINavPC->GetOwner());
 	for (int i = 0; i < NumberOfInputs; ++i)
 	{
 		UUINavInputBox* NewInputBox = CreateWidget<UUINavInputBox>(this, InputBox_BP);
