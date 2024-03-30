@@ -175,6 +175,6 @@ public:
 
 	//The message text used for the swap keys widget
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Input")
-	FText SwapKeysMessageText = FText::FromString(TEXT("{CollidingKey} is already being used by {CollidingAction}.\nDo you want swap it with {OtherKey}?"));
+	FText SwapKeysMessageText = FText::FromString(TEXT("{CollidingKey} is already being used by {CollidingAction}.\nDo you want to swap it with {OtherKey}?"));
 
 };
