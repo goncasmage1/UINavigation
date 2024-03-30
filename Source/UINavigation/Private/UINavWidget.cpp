@@ -220,20 +220,22 @@ void UUINavWidget::UINavSetup()
 
 	bCompletedSetup = true;
 
+	UUINavWidget* CurrentActiveWidget = UINavPC->GetActiveWidget();
+	const bool bShouldTakeFocus = !IsValid(CurrentActiveWidget) || CurrentActiveWidget == OuterUINavWidget;
 	if (ReturnedFromWidget != nullptr && IsValid(CurrentComponent))
 	{
-		CurrentComponent->SetFocus();
+		if (bShouldTakeFocus)
+		{
+			CurrentComponent->SetFocus();
+		}
 		if (!GetDefault<UUINavSettings>()->bForceNavigation && !IsValid(HoveredComponent))
 		{
 			UnforceNavigation(false);
 		}
 	}
-	else
+	else if (bShouldTakeFocus && !TryFocusOnInitialComponent())
 	{
-		if (!TryFocusOnInitialComponent())
-		{
-			UINavPC->NotifyNavigatedTo(this);
-		}
+		UINavPC->NotifyNavigatedTo(this);
 	}
 
 	ReturnedFromWidget = nullptr;
@@ -504,7 +506,7 @@ FReply UUINavWidget::NativeOnFocusReceived(const FGeometry& InGeometry, const FF
 		{
 			CurrentComponent->SetFocus();
 		}
-		else if (TryFocusOnInitialComponent())
+		else if (!TryFocusOnInitialComponent())
 		{
 			UINavPC->NotifyNavigatedTo(this);
 		}

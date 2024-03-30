@@ -996,7 +996,7 @@ bool UUINavPCComponent::IsWidgetActive(const UUINavWidget* const UINavWidget) co
 		return true;
 	}
 
-	for (const UUINavWidget* const ChildUINavWidget : ActiveWidget->ChildUINavWidgets)
+	for (const UUINavWidget* const ChildUINavWidget : UINavWidget->ChildUINavWidgets)
 	{
 		if (!IsValid(ChildUINavWidget))
 		{
