@@ -221,7 +221,7 @@ void UUINavWidget::UINavSetup()
 	bCompletedSetup = true;
 
 	UUINavWidget* CurrentActiveWidget = UINavPC->GetActiveWidget();
-	const bool bShouldTakeFocus = !IsValid(CurrentActiveWidget) || CurrentActiveWidget == OuterUINavWidget;
+	const bool bShouldTakeFocus = !IsValid(CurrentActiveWidget) || CurrentActiveWidget == OuterUINavWidget || IsValid(ReturnedFromWidget);
 	if (ReturnedFromWidget != nullptr && IsValid(CurrentComponent))
 	{
 		if (bShouldTakeFocus)

@@ -1012,6 +1012,30 @@ bool UUINavPCComponent::IsWidgetActive(const UUINavWidget* const UINavWidget) co
 	return false;
 }
 
+bool UUINavPCComponent::IsWidgetChild(const UUINavWidget* const ParentWidget, const UUINavWidget* const ChildWidget) const
+{
+	if (!IsValid(ParentWidget) || !IsValid(ChildWidget))
+	{
+		return false;
+	}
+
+	for (const UUINavWidget* const ChildUINavWidget : ParentWidget->ChildUINavWidgets)
+	{
+		if (!IsValid(ChildUINavWidget))
+		{
+			continue;
+		}
+
+		if (ChildUINavWidget == ChildWidget ||
+			IsWidgetChild(ChildUINavWidget, ChildWidget))
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
 bool UUINavPCComponent::ShouldIgnoreClickEvent()
 {
 	const bool bOldIgnoreClickEvent = bIgnoreClickEvent;

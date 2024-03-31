@@ -585,6 +585,9 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
 	bool IsWidgetActive(const UUINavWidget* const UINavWidget) const;
 
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
+	bool IsWidgetChild(const UUINavWidget* const ParentWidget, const UUINavWidget* const ChildWidget) const;
+
 	bool ShouldIgnoreClickEvent();
 
 	void ResetIgnoreClickEvent() { bIgnoreClickEvent = false; }
