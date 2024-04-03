@@ -1204,6 +1204,22 @@ void UUINavPCComponent::GetEnhancedInputKeys(const UInputAction* Action, TArray<
 	{
 		OutKeys = Subsystem->QueryKeysMappedToAction(Action);
 	}
+
+	if (OutKeys.Num() > 0)
+	{
+		return;
+	}
+
+	for (const UInputMappingContext* const InputContext : CachedInputContexts)
+	{
+		for (const FEnhancedActionKeyMapping& Mapping : InputContext->GetMappings())
+		{
+			if (Mapping.Action == Action)
+			{
+				OutKeys.Add(Mapping.Key);
+			}
+		}
+	}
 }
 
 EInputType UUINavPCComponent::GetKeyInputType(const FKey& Key)
