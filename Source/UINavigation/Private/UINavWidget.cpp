@@ -221,7 +221,13 @@ void UUINavWidget::UINavSetup()
 	bCompletedSetup = true;
 
 	UUINavWidget* CurrentActiveWidget = UINavPC->GetActiveWidget();
-	const bool bShouldTakeFocus = !IsValid(CurrentActiveWidget) || CurrentActiveWidget == OuterUINavWidget || ReturnedFromWidget != nullptr;
+	const bool bShouldTakeFocus =
+		!IsValid(CurrentActiveWidget) ||
+		CurrentActiveWidget == OuterUINavWidget ||
+		CurrentActiveWidget == ParentWidget ||
+		CurrentActiveWidget->ParentWidget == this ||
+		ReturnedFromWidget != nullptr;
+
 	if (ReturnedFromWidget != nullptr && IsValid(CurrentComponent))
 	{
 		if (bShouldTakeFocus)
@@ -534,7 +540,12 @@ void UUINavWidget::NativeOnFocusChanging(const FWeakWidgetPath& PreviousFocusPat
 {
 	Super::NativeOnFocusChanging(PreviousFocusPath, NewWidgetPath, InFocusEvent);
 
-	if (IsValid(CurrentComponent) || !NewWidgetPath.IsValid())
+	if (IsValid(CurrentComponent) || 
+		!NewWidgetPath.IsValid() ||
+		UINavPC->GetInputMode() == EInputMode::Game ||
+		(InFocusEvent.GetCause() == EFocusCause::Mouse &&
+			UINavPC->GetInputMode() == EInputMode::GameUI &&
+			GetDefault<UUINavSettings>()->bAllowFocusOnViewportInGameAndUI))
 	{
 		return;
 	}
@@ -1047,7 +1058,7 @@ UUINavWidget * UUINavWidget::GoToBuiltWidget(UUINavWidget* NewWidget, const bool
 
 void UUINavWidget::ReturnToParent(const bool bRemoveAllParents, const int ZOrder)
 {
-	if (ParentWidget == nullptr)
+ 	if (ParentWidget == nullptr)
 	{
 		if (bAllowRemoveIfRoot && UINavPC != nullptr)
 		{
