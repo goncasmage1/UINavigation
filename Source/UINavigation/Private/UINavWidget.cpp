@@ -262,10 +262,6 @@ bool UUINavWidget::TryFocusOnInitialComponent()
 	if (IsValid(InitialComponent))
 	{
 		InitialComponent->SetFocus();
-		if (!GetDefault<UUINavSettings>()->bForceNavigation && !IsValid(HoveredComponent))
-		{
-			UnforceNavigation(false);
-		}
 		return true;
 	}
 
@@ -356,7 +352,14 @@ void UUINavWidget::OnLostNavigation_Implementation(UUINavWidget* NewActiveWidget
 
 void UUINavWidget::SetCurrentComponent(UUINavComponent* Component)
 {
+	const bool bShouldUnforceNavigation = !IsValid(CurrentComponent) && !GetDefault<UUINavSettings>()->bForceNavigation && !IsValid(HoveredComponent);
+
 	CurrentComponent = Component;
+
+	if (bShouldUnforceNavigation)
+	{
+		UnforceNavigation(false);
+	}
 
 	if (IsValid(OuterUINavWidget) && !OuterUINavWidget->bMaintainNavigationForChild)
 	{
@@ -835,7 +838,7 @@ void UUINavWidget::AttemptUnforceNavigation(const EInputType NewInputType)
 				HoveredComponent->SetFocus();
 			}
 		}
-		else
+		else if (bForcingNavigation)
 		{
 			UnforceNavigation(true);
 		}
@@ -1410,8 +1413,12 @@ void UUINavWidget::OnHoveredComponent(UUINavComponent* Component)
 	if (!bForcingNavigation)
 	{
 		bForcingNavigation = true;
-		bHoverRestoredNavigation = true;
-		if (Component == CurrentComponent)
+
+		if (Component != CurrentComponent)
+		{
+			bHoverRestoredNavigation = true;
+		}
+		else
 		{
 			UpdateNavigationVisuals(CurrentComponent, false, true);
 		}
