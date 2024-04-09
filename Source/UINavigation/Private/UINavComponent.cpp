@@ -241,8 +241,7 @@ void UUINavComponent::HandleFocusLost()
 
 void UUINavComponent::OnButtonClicked()
 {
-	if (!ParentWidget->UINavPC->IsWidgetActive(ParentWidget) ||
-		ParentWidget->UINavPC->ShouldIgnoreClickEvent())
+	if (!ParentWidget->UINavPC->IsWidgetActive(ParentWidget))
 	{
 		return;
 	}
@@ -282,13 +281,6 @@ void UUINavComponent::OnButtonReleased()
 {
 	if (!ParentWidget->UINavPC->IsWidgetActive(ParentWidget))
 	{
-		return;
-	}
-
-	if (ParentWidget->UINavPC->IsListeningToInputRebind())
-	{
-		const FKeyEvent ReleasedKeyEvent(ParentWidget->UINavPC->LastReleasedKey, FModifierKeysState(), ParentWidget->UINavPC->LastReleasedKeyUserIndex, false, 0, 0);
-		ParentWidget->UINavPC->ProcessRebind(ReleasedKeyEvent);
 		return;
 	}
 

@@ -111,8 +111,6 @@ protected:
 
 	bool bIgnoreFocusByNavigation = false;
 
-	bool bIgnoreClickEvent = false;
-
 	bool bOverrideConsiderHover = false;
 
 	UPROPERTY()
@@ -587,10 +585,6 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
 	bool IsWidgetChild(const UUINavWidget* const ParentWidget, const UUINavWidget* const ChildWidget) const;
-
-	bool ShouldIgnoreClickEvent();
-
-	void ResetIgnoreClickEvent() { bIgnoreClickEvent = false; }
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
     FORCEINLINE FVector2D GetThumbstickDelta() const { return ThumbstickDelta; }
