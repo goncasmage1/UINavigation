@@ -29,7 +29,6 @@ void USwapKeysWidget::NotifySwapResult(const bool bSwap)
 	SwapKeysPromptData->InputCollisionData = InputCollisionData;
 	SwapKeysPromptData->CurrentInputBox = CurrentInputBox;
 	SwapKeysPromptData->CollidingInputBox = CollidingInputBox;
-	UINavPC->ResetIgnoreClickEvent();
 
 	ProcessPromptWidgetSelected(SwapKeysPromptData);
 }

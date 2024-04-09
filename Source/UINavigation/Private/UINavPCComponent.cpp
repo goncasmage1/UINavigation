@@ -416,8 +416,7 @@ void UUINavPCComponent::ProcessRebind(const FKeyEvent& KeyEvent)
 
 	ListeningInputBox->UpdateInputKey(KeyEvent.GetKey());
 	ListeningInputBox = nullptr;
-
-	bIgnoreClickEvent = FSlateApplication::Get().GetNavigationActionFromKey(KeyEvent) == EUINavigationAction::Accept;
+	PressedNavigationDirections.Reset();
 }
 
 void UUINavPCComponent::CancelRebind()
@@ -1034,13 +1033,6 @@ bool UUINavPCComponent::IsWidgetChild(const UUINavWidget* const ParentWidget, co
 	}
 
 	return false;
-}
-
-bool UUINavPCComponent::ShouldIgnoreClickEvent()
-{
-	const bool bOldIgnoreClickEvent = bIgnoreClickEvent;
-	ResetIgnoreClickEvent();
-	return bOldIgnoreClickEvent;
 }
 
 FKey UUINavPCComponent::GetEnhancedInputKey(const UInputAction* Action, const EInputAxis Axis, const EAxisType Scale, const EInputRestriction InputRestriction) const
