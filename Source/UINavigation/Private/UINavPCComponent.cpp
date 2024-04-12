@@ -441,6 +441,9 @@ void UUINavPCComponent::SetActiveWidget(UUINavWidget * NewActiveWidget)
 				SetShowMouseCursor(true);
 			}
 
+			PressedNavigationDirections.Reset();
+			ClearNavigationTimer();
+
 			IUINavPCReceiver::Execute_OnRootWidgetRemoved(GetOwner());
 			// GetOwningPlayer will not be valid if SetActiveWidget is called during PlayerController EndPlay()
 			APlayerController *ActiveWidgetPC = ActiveWidget->GetOwningPlayer();
