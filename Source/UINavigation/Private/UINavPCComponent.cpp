@@ -60,7 +60,7 @@ UUINavPCComponent::UUINavPCComponent()
 		EKeys::AddKey(FKeyDetails(MouseLeft, NSLOCTEXT("InputKeys", "MouseLeft", "Mouse Left"), FKeyDetails::MouseButton));
 	}
 
-	EnhancedInputContext = GetDefault<UUINavSettings>()->EnhancedInputContext.Get();
+	UINavInputContextSoftRef = GetDefault<UUINavSettings>()->EnhancedInputContext.Get();
 
 	static ConstructorHelpers::FObjectFinderOptional<UCurveFloat> ThumbstickCursorCurveAsset(TEXT("/UINavigation/Data/ThumbstickMoveCurve.ThumbstickMoveCurve"));
 	if (IsValid(ThumbstickCursorCurveAsset.Get()))
