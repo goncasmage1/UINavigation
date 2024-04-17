@@ -241,22 +241,30 @@ void UUINavComponent::HandleFocusLost()
 
 void UUINavComponent::OnButtonClicked()
 {
+	if (!IsValid(ParentWidget) || !IsValid(ParentWidget->UINavPC))
+	{
+		return;
+	}
+
 	if (!ParentWidget->UINavPC->IsWidgetActive(ParentWidget))
 	{
 		return;
 	}
+	
+	const bool bWasListeningToRebind = ParentWidget->UINavPC->IsListeningToInputRebind();
 
 	OnNativeClicked.Broadcast();
 	OnClicked.Broadcast();
 
 	ExecuteComponentActions(EComponentAction::OnClicked);
 
-	if (!IsValid(ParentWidget) || !IsValid(ParentWidget->UINavPC))
-	{
-		return;
-	}
-	
 	IUINavPCReceiver::Execute_OnSelect(ParentWidget->UINavPC->GetOwner());
+	
+	if (bWasListeningToRebind)
+	{
+		const FKeyEvent ReleasedKeyEvent(ParentWidget->UINavPC->LastReleasedKey, FModifierKeysState(), ParentWidget->UINavPC->LastReleasedKeyUserIndex, false, 0, 0);
+		ParentWidget->UINavPC->ProcessRebind(ReleasedKeyEvent);
+	}
 }
 
 void UUINavComponent::OnButtonPressed()
@@ -281,13 +289,6 @@ void UUINavComponent::OnButtonReleased()
 {
 	if (!ParentWidget->UINavPC->IsWidgetActive(ParentWidget))
 	{
-		return;
-	}
-
-	if (ParentWidget->UINavPC->IsListeningToInputRebind())
-	{
-		const FKeyEvent ReleasedKeyEvent(ParentWidget->UINavPC->LastReleasedKey, FModifierKeysState(), ParentWidget->UINavPC->LastReleasedKeyUserIndex, false, 0, 0);
-		ParentWidget->UINavPC->ProcessRebind(ReleasedKeyEvent);
 		return;
 	}
 
