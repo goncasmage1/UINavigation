@@ -10,6 +10,7 @@
 #include "Components/RichTextBlock.h"
 #include "UINavSettings.h"
 #include "UINavBlueprintFunctionLibrary.h"
+#include "UINavMacros.h"
 
 void UUINavInputDisplay::NativeConstruct()
 {
@@ -84,6 +85,12 @@ void UUINavInputDisplay::UpdateInputVisuals()
 {
 	if (!IsValid(UINavPC))
 	{
+		return;
+	}
+
+	if (!IsValid(InputImage))
+	{
+		DISPLAYERROR(TEXT("Use a UINavInputDisplay widget Blueprint class instead of the C++ class directly!"));
 		return;
 	}
 
