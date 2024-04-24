@@ -1,6 +1,7 @@
 // Copyright (C) 2023 Gonçalo Marques - All Rights Reserved
 
 #include "UINavigation.h"
+#include "Modules/ModuleManager.h"
 
 #define LOCTEXT_NAMESPACE "FUINavigationModule"
 

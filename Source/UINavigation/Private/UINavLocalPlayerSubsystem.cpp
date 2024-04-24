@@ -2,9 +2,13 @@
 
 
 #include "UINavLocalPlayerSubsystem.h"
+#include "Engine/LocalPlayer.h"
+#include "Engine/World.h"
 #include "EnhancedInputSubsystems.h"
 #include "UINavSavedInputSettings.h"
 #include "InputMappingContext.h"
+#include "Subsystems/SubsystemCollection.h"
+#include "AssetRegistry/AssetData.h"
 
 void UUINavLocalPlayerSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
