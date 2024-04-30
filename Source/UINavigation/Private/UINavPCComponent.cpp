@@ -240,7 +240,7 @@ void UUINavPCComponent::AddInputContextFromUINavWidget(const UUINavWidget* const
 	const UUINavWidget* CurrentWidget = UINavWidget;
 	while (IsValid(CurrentWidget) && ParentLimit != CurrentWidget)
 	{
-		for (const TObjectPtr<UInputMappingContext> InputContextToAdd : CurrentWidget->InputContextsToAdd)
+		for (const TObjectPtr<UInputMappingContext>& InputContextToAdd : CurrentWidget->InputContextsToAdd)
 		{
 			AddInputContextForMenu(InputContextToAdd);
 		}
@@ -254,7 +254,7 @@ void UUINavPCComponent::RemoveInputContextFromUINavWidget(const UUINavWidget* co
 	const UUINavWidget* CurrentWidget = UINavWidget;
 	while (IsValid(CurrentWidget) && ParentLimit != CurrentWidget)
 	{
-		for (const TObjectPtr<UInputMappingContext> InputContextToAdd : CurrentWidget->InputContextsToAdd)
+		for (const TObjectPtr<UInputMappingContext>& InputContextToAdd : CurrentWidget->InputContextsToAdd)
 		{
 			RemoveInputContextFromMenu(InputContextToAdd);
 		}
