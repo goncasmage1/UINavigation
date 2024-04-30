@@ -714,7 +714,7 @@ void UUINavPCComponent::HandleKeyUpEvent(FSlateApplication& SlateApp, const FKey
 
 void UUINavPCComponent::HandleAnalogInputEvent(FSlateApplication& SlateApp, const FAnalogInputEvent& InAnalogInputEvent)
 {
-	if (CurrentInputType != EInputType::Gamepad && FMath::Abs(InAnalogInputEvent.GetAnalogValue()) > 0.1f)
+	if (CurrentInputType != EInputType::Gamepad && FMath::Abs(InAnalogInputEvent.GetAnalogValue()) > GetDefault<UUINavSettings>()->AnalogInputChangeThreshold)
 	{
 		NotifyInputTypeChange(EInputType::Gamepad);
 	}
@@ -817,7 +817,11 @@ void UUINavPCComponent::HandleMouseMoveEvent(FSlateApplication& SlateApp, const 
 	{
 		if (CurrentInputType != EInputType::Mouse)
 		{
-			NotifyInputTypeChange(EInputType::Mouse);
+			const float MouseInputChangeThreshold = GetDefault<UUINavSettings>()->MouseInputChangeThreshold;
+			if (MouseEvent.GetCursorDelta().SizeSquared() > (MouseInputChangeThreshold * MouseInputChangeThreshold))
+			{
+				NotifyInputTypeChange(EInputType::Mouse);
+			}
 		}
 
 		if (IsValid(ListeningInputBox))
