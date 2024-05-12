@@ -410,6 +410,15 @@ public:
 	virtual void OnReturn_Implementation();
 
 	/**
+	*	Called when ReturnToParent is called (i.e. the player wants to exit the menu), only in child nested UINavWidgets.
+	*	Returns whether the Parent Widget's OnReturn/OnChildReturn should be called;
+	*/
+	UFUNCTION(BlueprintNativeEvent, Category = UINavWidget)
+	bool OnChildReturn();
+
+	virtual bool OnChildReturn_Implementation() { return true; }
+
+	/**
 	*	Called when player navigates to the next section
 	*/
 	UFUNCTION(BlueprintNativeEvent, Category = UINavWidget)

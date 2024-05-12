@@ -1026,7 +1026,7 @@ void UUINavWidget::UnforceNavigation(const bool bHadNavigation)
 
 void UUINavWidget::OnReturn_Implementation()
 {
-	if(GetDefault<UUINavSettings>()->bRemoveWidgetOnReturn && OuterUINavWidget == nullptr) ReturnToParent();
+	if(GetDefault<UUINavSettings>()->bRemoveWidgetOnReturn) ReturnToParent();
 }
 
 void UUINavWidget::OnNext_Implementation()
@@ -1447,13 +1447,13 @@ void UUINavWidget::ExecuteReturn(const bool bPress)
 
 	if (OuterUINavWidget != nullptr)
 	{
-		if (bPress)
+		if (OnChildReturn())
 		{
-			OuterUINavWidget->StartedReturn();
+			OuterUINavWidget->ExecuteReturn(bPress);
 		}
 		else
 		{
-			OuterUINavWidget->StoppedReturn();
+			IUINavPCReceiver::Execute_OnReturn(UINavPC->GetOwner());
 		}
 	}
 	else
