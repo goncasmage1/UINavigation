@@ -68,6 +68,14 @@ public:
 	UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	float MouseMoveRebindThreshold = 1.0f;
 
+	// The amount of mouse movement delta that will trigger the input type being changed to mouse
+	UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = "Settings")
+	float MouseInputChangeThreshold = 0.5f;
+
+	// The amount of analog movement that will trigger the input type being changed to gamepad
+	UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = "Settings")
+	float AnalogInputChangeThreshold = 0.1f;
+
 	// Increment by 1 everytime your project's default inputs change
 	UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	uint8 CurrentInputVersion = 0;

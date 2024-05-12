@@ -10,6 +10,9 @@
 #include "Data/ThumbstickAsMouse.h"
 #include "UObject/Object.h"
 #include "Data/PromptData.h"
+#include "Templates/SharedPointer.h"
+#include "Widgets/SWidget.h"
+#include "Slate/SObjectWidget.h"
 #include "UINavWidget.generated.h"
 
 class UUINavComponent;
@@ -76,8 +79,7 @@ protected:
 
 	TArray<int> UINavWidgetPath;
 
-	//This widget's class
-	TSubclassOf<UUINavWidget> WidgetClass;
+	static const TArray<FString> AllowedObjectTypesToFocus;
 
 	bool bUsingSplitScreen = false;
 
@@ -218,6 +220,34 @@ public:
 	virtual void NativeOnFocusLost(const FFocusEvent& InFocusEvent) override;
 
 	virtual void NativeOnFocusChanging(const FWeakWidgetPath& PreviousFocusPath, const FWidgetPath& NewWidgetPath, const FFocusEvent& InFocusEvent) override;
+	virtual FNavigationReply NativeOnNavigation(const FGeometry& MyGeometry, const FNavigationEvent& InNavigationEvent, const FNavigationReply& InDefaultReply) override;
+
+	static void HandleOnFocusChanging(UUINavWidget* Widget, UUINavComponent* Component, const FWeakWidgetPath& PreviousFocusPath, const FWidgetPath& NewWidgetPath, const FFocusEvent& InFocusEvent);
+	static FNavigationReply HandleOnNavigation(FNavigationReply Reply, UUINavWidget* Widget, const FNavigationEvent& InNavigationEvent);
+	static FReply HandleOnKeyDown(FReply Reply, UUINavWidget* Widget, UUINavComponent* Component, const FKeyEvent& InKeyEvent);
+	static FReply HandleOnKeyUp(FReply Reply, UUINavWidget* Widget, UUINavComponent* Component, const FKeyEvent& InKeyEvent);
+
+	template <typename T>
+	static UUserWidget* FindUserWidgetInWidgetPath(const T& WidgetPath, TSharedPtr<SWidget> LastWidget)
+	{
+		int WidgetIndex = WidgetPath.Widgets.Num() - 1;
+		TSharedPtr<SWidget> CurrentWidget = LastWidget;
+		while (CurrentWidget.IsValid() && !CurrentWidget->GetType().IsEqual(FName(TEXT("SObjectWidget"))) && --WidgetIndex >= 0)
+		{
+			CurrentWidget = CurrentWidget->GetParentWidget();
+		}
+
+		if (WidgetIndex >= 0)
+		{
+			TSharedPtr<SObjectWidget> PreviousUserWidgetPtr = StaticCastSharedPtr<SObjectWidget>(CurrentWidget);
+			if (PreviousUserWidgetPtr.IsValid())
+			{
+				return PreviousUserWidgetPtr->GetWidgetObject();
+			}
+		}
+
+		return nullptr;
+	}
 
 	/**
 	*	Traverses this widget's hierarchy to setup all the UIUINavButtons
@@ -378,6 +408,15 @@ public:
 	void OnReturn();
 	
 	virtual void OnReturn_Implementation();
+
+	/**
+	*	Called when ReturnToParent is called (i.e. the player wants to exit the menu), only in child nested UINavWidgets.
+	*	Returns whether the Parent Widget's OnReturn/OnChildReturn should be called;
+	*/
+	UFUNCTION(BlueprintNativeEvent, Category = UINavWidget)
+	bool OnChildReturn();
+
+	virtual bool OnChildReturn_Implementation() { return true; }
 
 	/**
 	*	Called when player navigates to the next section
