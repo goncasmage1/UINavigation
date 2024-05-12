@@ -3,6 +3,7 @@
 #include "UINavWidget.h"
 #include "UINavHorizontalComponent.h"
 #include "UINavComponent.h"
+#include "UINavigationConfig.h"
 #include "UINavInputBox.h"
 #include "UINavPCComponent.h"
 #include "UINavPCReceiver.h"
@@ -28,6 +29,14 @@
 #include "Engine/GameViewportClient.h"
 #include "Engine/ViewportSplitScreen.h"
 #include "Curves/CurveFloat.h"
+
+const TArray<FString> UUINavWidget::AllowedObjectTypesToFocus = {
+		TEXT("SObjectWidget"),
+		TEXT("SButton"),
+		TEXT("SUINavButton"),
+		TEXT("SSpinBox"),
+		TEXT("SEditableText")
+};
 
 UUINavWidget::UUINavWidget(const FObjectInitializer& ObjectInitializer)
 	:Super(ObjectInitializer)
@@ -108,7 +117,6 @@ void UUINavWidget::InitialSetup(const bool bRebuilding)
 {
 	if (!bRebuilding)
 	{
-		WidgetClass = GetClass();
 		if (UINavPC == nullptr)
 		{
 			ConfigureUINavPC();
@@ -390,65 +398,13 @@ void UUINavWidget::SetSelectedComponent(UUINavComponent* Component)
 FReply UUINavWidget::NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent)
 {
 	FReply Reply = Super::NativeOnKeyDown(InGeometry, InKeyEvent);
-
-	if (!IsValid(CurrentComponent))
-	{
-		if (FSlateApplication::Get().GetNavigationActionFromKey(InKeyEvent) == EUINavigationAction::Accept)
-		{
-			if (!TryConsumeNavigation())
-			{
-				StartedSelect();
-			}
-		}
-		else if (FSlateApplication::Get().GetNavigationActionFromKey(InKeyEvent) == EUINavigationAction::Back)
-		{
-			if (!TryConsumeNavigation())
-			{
-				StartedReturn();
-			}
-		}
-		else if (FSlateApplication::Get().GetNavigationDirectionFromKey(InKeyEvent) == EUINavigation::Next)
-		{
-			if (!TryConsumeNavigation())
-			{
-				PropagateOnNext();
-			}
-		}
-		else if (FSlateApplication::Get().GetNavigationDirectionFromKey(InKeyEvent) == EUINavigation::Previous)
-		{
-			if (!TryConsumeNavigation())
-			{
-				PropagateOnPrevious();
-			}
-		}
-	}
-
-	return Reply;
+	return IsValid(CurrentComponent) ? Reply : UUINavWidget::HandleOnKeyDown(Reply, this, nullptr, InKeyEvent);
 }
 
 FReply UUINavWidget::NativeOnKeyUp(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent)
 {
 	FReply Reply = Super::NativeOnKeyUp(InGeometry, InKeyEvent);
-
-	if (!IsValid(CurrentComponent))
-	{
-		if (FSlateApplication::Get().GetNavigationActionFromKey(InKeyEvent) == EUINavigationAction::Accept)
-		{
-			if (!TryConsumeNavigation())
-			{
-				StoppedSelect();
-			}
-		}
-		else if (FSlateApplication::Get().GetNavigationActionFromKey(InKeyEvent) == EUINavigationAction::Back)
-		{
-			if (!TryConsumeNavigation())
-			{
-				StoppedReturn();
-			}
-		}
-	}
-
-	return Reply;
+	return IsValid(CurrentComponent) ? Reply : UUINavWidget::HandleOnKeyUp(Reply, this, nullptr, InKeyEvent);
 }
 
 void UUINavWidget::NativeTick(const FGeometry & MyGeometry, float DeltaTime)
@@ -543,26 +499,229 @@ void UUINavWidget::NativeOnFocusChanging(const FWeakWidgetPath& PreviousFocusPat
 {
 	Super::NativeOnFocusChanging(PreviousFocusPath, NewWidgetPath, InFocusEvent);
 
-	if (IsValid(CurrentComponent) || 
-		!NewWidgetPath.IsValid() ||
-		UINavPC->GetInputMode() == EInputMode::Game ||
+	if (!IsValid(CurrentComponent))
+	{
+		UUINavWidget::HandleOnFocusChanging(this, nullptr, PreviousFocusPath, NewWidgetPath, InFocusEvent);
+	}
+}
+
+FNavigationReply UUINavWidget::NativeOnNavigation(const FGeometry& MyGeometry, const FNavigationEvent& InNavigationEvent, const FNavigationReply& InDefaultReply)
+{
+	FNavigationReply Reply = Super::NativeOnNavigation(MyGeometry, InNavigationEvent, InDefaultReply);
+	return IsValid(CurrentComponent) ? Reply : UUINavWidget::HandleOnNavigation(Reply, this, InNavigationEvent);
+}
+
+void UUINavWidget::HandleOnFocusChanging(UUINavWidget* Widget, UUINavComponent* Component, const FWeakWidgetPath& PreviousFocusPath, const FWidgetPath& NewWidgetPath, const FFocusEvent& InFocusEvent)
+{
+	if (!NewWidgetPath.IsValid() ||
+		NewWidgetPath.Widgets.Num() == 0 ||
+		Widget->UINavPC->GetInputMode() == EInputMode::Game ||
 		(InFocusEvent.GetCause() == EFocusCause::Mouse &&
-			UINavPC->GetInputMode() == EInputMode::GameUI &&
+			Widget->UINavPC->GetInputMode() == EInputMode::GameUI &&
 			GetDefault<UUINavSettings>()->bAllowFocusOnViewportInGameAndUI))
 	{
 		return;
 	}
 
-	const FString WidgetTypeString = NewWidgetPath.GetLastWidget()->GetType().ToString();
-	if (!WidgetTypeString.Contains(TEXT("SObjectWidget")) &&
-		!WidgetTypeString.Contains(TEXT("SButton")) &&
-		!WidgetTypeString.Contains(TEXT("SUINavButton")) &&
-		!WidgetTypeString.Contains(TEXT("SSpinBox")) &&
-		!WidgetTypeString.Contains(TEXT("SEditableText")))
+	if (InFocusEvent.GetCause() == EFocusCause::Navigation && Widget->UINavPC->IgnoreFocusByNavigation())
 	{
-		SetFocus();
+		UUserWidget* PreviousUserWidget = UUINavWidget::FindUserWidgetInWidgetPath(PreviousFocusPath, PreviousFocusPath.GetLastWidget().Pin());
+		if (IsValid(PreviousUserWidget))
+		{
+			PreviousUserWidget->SetFocus();
+		}
+
 		return;
 	}
+
+	const TSharedRef<SWidget> LastWidget = NewWidgetPath.GetLastWidget();
+	const FString LastWidgetTypeStr = LastWidget->GetTypeAsString();
+	const bool LastWidgetIsButton = LastWidgetTypeStr == TEXT("SButton");
+	UUserWidget* ParentWidget = LastWidgetIsButton ? UUINavWidget::FindUserWidgetInWidgetPath(NewWidgetPath, NewWidgetPath.GetLastWidget()) : nullptr;
+	if (!UUINavWidget::AllowedObjectTypesToFocus.Contains(LastWidgetTypeStr) ||
+		(LastWidgetIsButton && !IsValid(ParentWidget)))
+	{
+		if (IsValid(Component))
+		{
+			Component->NavButton->SetFocus();
+		}
+		else
+		{
+			Widget->SetFocus();
+		}
+
+		return;
+	}
+
+	if (IsValid(Component))
+	{
+		const bool bHadFocus = PreviousFocusPath.ContainsWidget(&Component->TakeWidget().Get());
+		const bool bHasFocus = NewWidgetPath.ContainsWidget(&Component->TakeWidget().Get());
+		const bool bHasButtonFocus = NewWidgetPath.ContainsWidget(&Component->NavButton->TakeWidget().Get());
+
+		if (!bHadFocus && bHasFocus)
+		{
+			Component->HandleFocusReceived();
+		}
+		else if (bHadFocus && !bHasFocus)
+		{
+			Component->HandleFocusLost();
+		}
+
+		if (bHasFocus && !bHasButtonFocus)
+		{
+			Component->NavButton->SetFocus();
+		}
+	}
+}
+
+FNavigationReply UUINavWidget::HandleOnNavigation(FNavigationReply Reply, UUINavWidget* Widget, const FNavigationEvent& InNavigationEvent)
+{
+	if (!IsValid(Widget) || !IsValid(Widget->UINavPC))
+	{
+		return Reply;
+	}
+
+	if (!Widget->UINavPC->AllowsNavigatingDirection(InNavigationEvent.GetNavigationType()))
+	{
+		return FNavigationReply::Stop();
+	}
+
+	if (Widget->TryConsumeNavigation())
+	{
+		return FNavigationReply::Stop();
+	}
+
+	if (!Widget->UINavPC->TryNavigateInDirection(InNavigationEvent.GetNavigationType(), InNavigationEvent.GetNavigationGenesis()))
+	{
+		return FNavigationReply::Stop();
+	}
+
+	const bool bStopNextPrevious = GetDefault<UUINavSettings>()->bStopNextPreviousNavigation;
+	const bool bAllowsSectionInput = Widget->UINavPC->AllowsSectionInput();
+
+	if (InNavigationEvent.GetNavigationType() == EUINavigation::Next)
+	{
+		if (bAllowsSectionInput)
+		{
+			Widget->PropagateOnNext();
+
+			IUINavPCReceiver::Execute_OnNext(Widget->UINavPC->GetOwner());
+		}
+
+		if (bStopNextPrevious || !bAllowsSectionInput)
+		{
+			Widget->UINavPC->SetIgnoreFocusByNavigation(true);
+			return FNavigationReply::Stop();
+		}
+	}
+	else if (InNavigationEvent.GetNavigationType() == EUINavigation::Previous)
+	{
+		if (bAllowsSectionInput)
+		{
+			IUINavPCReceiver::Execute_OnPrevious(Widget->UINavPC->GetOwner());
+			Widget->PropagateOnPrevious();
+		}
+
+		if (bStopNextPrevious || !bAllowsSectionInput)
+		{
+			Widget->UINavPC->SetIgnoreFocusByNavigation(true);
+			return FNavigationReply::Stop();
+		}
+	}
+	else if (InNavigationEvent.GetNavigationType() != EUINavigation::Invalid)
+	{
+		IUINavPCReceiver::Execute_OnNavigated(Widget->UINavPC->GetOwner(), InNavigationEvent.GetNavigationType());
+	}
+
+	return Reply;
+}
+
+FReply UUINavWidget::HandleOnKeyDown(FReply Reply, UUINavWidget* Widget, UUINavComponent* Component, const FKeyEvent& InKeyEvent)
+{
+	if (!IsValid(Widget) || !IsValid(Widget->UINavPC))
+	{
+		return Reply;
+	}
+
+	if (IsValid(Component) && Widget->UINavPC->IsListeningToInputRebind())
+	{
+		Component->bIgnoreDueToRebind = true;
+		return Reply;
+	}
+
+	if (FSlateApplication::Get().GetNavigationActionFromKey(InKeyEvent) == EUINavigationAction::Accept)
+	{
+		if (!Widget->TryConsumeNavigation())
+		{
+			Widget->StartedSelect();
+		}
+	}
+	else if (FSlateApplication::Get().GetNavigationActionFromKey(InKeyEvent) == EUINavigationAction::Back)
+	{
+		if (!Widget->TryConsumeNavigation())
+		{
+			Widget->StartedReturn();
+		}
+	}
+
+	TSharedRef<FUINavigationConfig> NavConfig = StaticCastSharedRef<FUINavigationConfig>(FSlateApplication::Get().GetNavigationConfig());
+	EUINavigation Direction = NavConfig->GetNavigationDirectionFromKey(InKeyEvent);
+	if (Direction == EUINavigation::Invalid)
+	{
+		Direction = NavConfig->GetNavigationDirectionFromAnalogKey(InKeyEvent);
+	}
+	if (Direction != EUINavigation::Invalid)
+	{
+		Widget->UINavPC->NotifyNavigationKeyPressed(InKeyEvent.GetKey(), Direction);
+	}
+
+	return Reply;
+}
+
+FReply UUINavWidget::HandleOnKeyUp(FReply Reply, UUINavWidget* Widget, UUINavComponent* Component, const FKeyEvent& InKeyEvent)
+{
+	if (!IsValid(Widget) || !IsValid(Widget->UINavPC))
+	{
+		return Reply;
+	}
+
+	if (IsValid(Component) && Component->bIgnoreDueToRebind || Widget->UINavPC->IsListeningToInputRebind())
+	{
+		Component->bIgnoreDueToRebind = false;
+		Widget->UINavPC->ProcessRebind(InKeyEvent);
+		return Reply;
+	}
+
+	if (FSlateApplication::Get().GetNavigationActionFromKey(InKeyEvent) == EUINavigationAction::Accept)
+	{
+		if (!Widget->TryConsumeNavigation())
+		{
+			Widget->StoppedSelect();
+		}
+	}
+	else if (FSlateApplication::Get().GetNavigationActionFromKey(InKeyEvent) == EUINavigationAction::Back)
+	{
+		if (!Widget->TryConsumeNavigation())
+		{
+			Widget->StoppedReturn();
+		}
+	}
+	else
+	{
+		TSharedRef<FUINavigationConfig> NavConfig = StaticCastSharedRef<FUINavigationConfig>(FSlateApplication::Get().GetNavigationConfig());
+		EUINavigation Direction = NavConfig->GetNavigationDirectionFromKey(InKeyEvent);
+		if (Direction == EUINavigation::Invalid)
+		{
+			Direction = NavConfig->GetNavigationDirectionFromAnalogKey(InKeyEvent);
+		}
+		if (Direction != EUINavigation::Invalid)
+		{
+			Widget->UINavPC->NotifyNavigationKeyReleased(InKeyEvent.GetKey(), Direction);
+		}
+	}
+
+	return Reply;
 }
 
 void UUINavWidget::HandleSelectorMovement(const float DeltaTime)

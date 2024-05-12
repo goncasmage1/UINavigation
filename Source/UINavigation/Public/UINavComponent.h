@@ -178,6 +178,8 @@ public:
 
 	EButtonStyle ForcedStyle = EButtonStyle::None;
 
+	bool bIgnoreDueToRebind = false;
+
 protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavComponent)
@@ -210,8 +212,6 @@ protected:
 
 	UPROPERTY()
 	UScrollBox* ParentScrollBox = nullptr;
-
-	bool bIgnoreDueToRebind = false;
 
 	/**
 	 * The sound the button should play when initially Navigated over

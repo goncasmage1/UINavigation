@@ -93,93 +93,12 @@ void UUINavComponent::SetFocusable(const bool bNewIsFocusable)
 
 FReply UUINavComponent::NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent)
 {
-	FReply Reply = Super::NativeOnKeyDown(InGeometry, InKeyEvent);
-	
-	if (!IsValid(ParentWidget) || !IsValid(ParentWidget->UINavPC))
-	{
-		return Reply;
-	}
-
-	if (ParentWidget->UINavPC->IsListeningToInputRebind())
-	{
-		bIgnoreDueToRebind = true;
-		return Reply;
-	}
-
-	if (FSlateApplication::Get().GetNavigationActionFromKey(InKeyEvent) == EUINavigationAction::Accept)
-	{
-		if (!ParentWidget->TryConsumeNavigation())
-		{
-			ParentWidget->StartedSelect();
-		}
-	}
-	else if (FSlateApplication::Get().GetNavigationActionFromKey(InKeyEvent) == EUINavigationAction::Back)
-	{
-		if (!ParentWidget->TryConsumeNavigation())
-		{
-			ParentWidget->StartedReturn();
-		}
-	}
-
-	TSharedRef<FUINavigationConfig> NavConfig = StaticCastSharedRef<FUINavigationConfig>(FSlateApplication::Get().GetNavigationConfig());
-	EUINavigation Direction = NavConfig->GetNavigationDirectionFromKey(InKeyEvent);
-	if (Direction == EUINavigation::Invalid)
-	{
-		Direction = NavConfig->GetNavigationDirectionFromAnalogKey(InKeyEvent);
-	}
-	if (Direction != EUINavigation::Invalid)
-	{
-		ParentWidget->UINavPC->NotifyNavigationKeyPressed(InKeyEvent.GetKey(), Direction);
-	}
-
-	return Reply;
+	return UUINavWidget::HandleOnKeyDown(Super::NativeOnKeyDown(InGeometry, InKeyEvent), ParentWidget, this, InKeyEvent);
 }
 
 FReply UUINavComponent::NativeOnKeyUp(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent)
 {
-	FReply Reply = Super::NativeOnKeyUp(InGeometry, InKeyEvent);
-
-	if (!IsValid(ParentWidget) || !IsValid(ParentWidget->UINavPC))
-	{
-		return Reply;
-	}
-
-	if (bIgnoreDueToRebind || ParentWidget->UINavPC->IsListeningToInputRebind())
-	{
-		bIgnoreDueToRebind = false;
-		ParentWidget->UINavPC->ProcessRebind(InKeyEvent);
-		return Reply;
-	}
-
-	if (FSlateApplication::Get().GetNavigationActionFromKey(InKeyEvent) == EUINavigationAction::Accept)
-	{
-		if (!ParentWidget->TryConsumeNavigation())
-		{
-			ParentWidget->StoppedSelect();
-		}
-	}
-	else if (FSlateApplication::Get().GetNavigationActionFromKey(InKeyEvent) == EUINavigationAction::Back)
-	{
-		if (!ParentWidget->TryConsumeNavigation())
-		{
-			ParentWidget->StoppedReturn();
-		}
-	}
-	else
-	{
-		TSharedRef<FUINavigationConfig> NavConfig = StaticCastSharedRef<FUINavigationConfig>(FSlateApplication::Get().GetNavigationConfig());
-		EUINavigation Direction = NavConfig->GetNavigationDirectionFromKey(InKeyEvent);
-		if (Direction == EUINavigation::Invalid)
-		{
-			Direction = NavConfig->GetNavigationDirectionFromAnalogKey(InKeyEvent);
-		}
-		if (Direction != EUINavigation::Invalid)
-		{
-			ParentWidget->UINavPC->NotifyNavigationKeyReleased(InKeyEvent.GetKey(), Direction);
-		}
-	}
-
-	return Reply;
+	return UUINavWidget::HandleOnKeyUp(Super::NativeOnKeyUp(InGeometry, InKeyEvent), ParentWidget, this, InKeyEvent);
 }
 
 FReply UUINavComponent::NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
@@ -423,137 +342,12 @@ void UUINavComponent::NativeOnFocusChanging(const FWeakWidgetPath& PreviousFocus
 {
 	Super::NativeOnFocusChanging(PreviousFocusPath, NewWidgetPath, InFocusEvent);
 
-	if (!NewWidgetPath.IsValid() ||
-		ParentWidget->UINavPC->GetInputMode() == EInputMode::Game ||
-		(InFocusEvent.GetCause() == EFocusCause::Mouse &&
-		ParentWidget->UINavPC->GetInputMode() == EInputMode::GameUI &&
-		GetDefault<UUINavSettings>()->bAllowFocusOnViewportInGameAndUI))
-	{
-		return;
-	}
-
-	const bool bHadFocus = PreviousFocusPath.ContainsWidget(&TakeWidget().Get());
-	const bool bHasFocus = NewWidgetPath.ContainsWidget(&TakeWidget().Get());
-	const bool bHasButtonFocus = NewWidgetPath.ContainsWidget(&NavButton->TakeWidget().Get());
-
-	if (NewWidgetPath.Widgets.Num() == 0)
-	{
-		return;
-	}
-
-	if (InFocusEvent.GetCause() == EFocusCause::Navigation && ParentWidget->UINavPC->IgnoreFocusByNavigation())
-	{
-		int WidgetIndex = PreviousFocusPath.Widgets.Num() - 1;
-		TSharedPtr<SWidget> PreviousWidget = PreviousFocusPath.Widgets[WidgetIndex].Pin();
-		while (PreviousWidget.IsValid() && !PreviousWidget->GetType().IsEqual(FName(TEXT("SObjectWidget"))) && --WidgetIndex >= 0)
-		{
-			PreviousWidget = PreviousFocusPath.Widgets[WidgetIndex].Pin();
-		}
-
-		if (WidgetIndex >= 0)
-		{
-			TSharedPtr<SObjectWidget> PreviousUserWidgetPtr = StaticCastSharedPtr<SObjectWidget>(PreviousWidget);
-			if (PreviousUserWidgetPtr.IsValid())
-			{
-				UUserWidget* PreviousUserWidget = PreviousUserWidgetPtr->GetWidgetObject();
-				if (IsValid(PreviousUserWidget))
-				{
-					PreviousUserWidget->SetFocus();
-				}
-			}
-		}
-
-		return;
-	}
-
-	const FString WidgetTypeString = NewWidgetPath.GetLastWidget()->GetType().ToString();
-	if (!WidgetTypeString.Contains(TEXT("SObjectWidget")) &&
-		!WidgetTypeString.Contains(TEXT("SButton")) &&
-		!WidgetTypeString.Contains(TEXT("SUINavButton")) &&
-		!WidgetTypeString.Contains(TEXT("SSpinBox")) &&
-		!WidgetTypeString.Contains(TEXT("SEditableText")))
-	{
-		NavButton->SetFocus();
-		return;
-	}
-
-	if (!bHadFocus && bHasFocus)
-	{
-		HandleFocusReceived();
-	}
-	else if (bHadFocus && !bHasFocus)
-	{
-		HandleFocusLost();
-	}
-
-	if (bHasFocus && !bHasButtonFocus)
-	{
-		NavButton->SetFocus();
-	}
+	UUINavWidget::HandleOnFocusChanging(ParentWidget, this, PreviousFocusPath, NewWidgetPath, InFocusEvent);
 }
 
 FNavigationReply UUINavComponent::NativeOnNavigation(const FGeometry& MyGeometry, const FNavigationEvent& InNavigationEvent, const FNavigationReply& InDefaultReply)
 {
-	FNavigationReply Reply = Super::NativeOnNavigation(MyGeometry, InNavigationEvent, InDefaultReply);
-
-	if (!IsValid(ParentWidget) || !IsValid(ParentWidget->UINavPC))
-	{
-		return Reply;
-	}
-
-	if (!ParentWidget->UINavPC->AllowsNavigatingDirection(InNavigationEvent.GetNavigationType()))
-	{
-		return FNavigationReply::Stop();
-	}
-
-	if (ParentWidget->TryConsumeNavigation())
-	{
-		return FNavigationReply::Stop();
-	}
-
-	if (!ParentWidget->UINavPC->TryNavigateInDirection(InNavigationEvent.GetNavigationType(), InNavigationEvent.GetNavigationGenesis()))
-	{
-		return FNavigationReply::Stop();
-	}
-
-	const bool bStopNextPrevious = GetDefault<UUINavSettings>()->bStopNextPreviousNavigation;
-	const bool bAllowsSectionInput = ParentWidget->UINavPC->AllowsSectionInput();
-
-	if (InNavigationEvent.GetNavigationType() == EUINavigation::Next)
-	{
-		if (bAllowsSectionInput)
-		{
-			ParentWidget->PropagateOnNext();
-
-			IUINavPCReceiver::Execute_OnNext(ParentWidget->UINavPC->GetOwner());
-		}
-
-		if (bStopNextPrevious || !bAllowsSectionInput)
-		{
-			ParentWidget->UINavPC->SetIgnoreFocusByNavigation(true);
-			return FNavigationReply::Stop();
-		}
-	}
-	else if (InNavigationEvent.GetNavigationType() == EUINavigation::Previous)
-	{
-		if (bAllowsSectionInput)
-		{
-			IUINavPCReceiver::Execute_OnPrevious(ParentWidget->UINavPC->GetOwner());
-			ParentWidget->PropagateOnPrevious();
-		}
-
-		if (bStopNextPrevious || !bAllowsSectionInput)
-		{
-			ParentWidget->UINavPC->SetIgnoreFocusByNavigation(true);
-			return FNavigationReply::Stop();
-		}
-	}
-	else if (InNavigationEvent.GetNavigationType() != EUINavigation::Invalid)
-	{
-		IUINavPCReceiver::Execute_OnNavigated(ParentWidget->UINavPC->GetOwner(), InNavigationEvent.GetNavigationType());
-	}
-
-	return Reply;
+	return UUINavWidget::HandleOnNavigation(Super::NativeOnNavigation(MyGeometry, InNavigationEvent, InDefaultReply), ParentWidget, InNavigationEvent);
 }
 
 void UUINavComponent::NativePreConstruct()
