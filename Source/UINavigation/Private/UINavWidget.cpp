@@ -686,7 +686,7 @@ FReply UUINavWidget::HandleOnKeyUp(FReply Reply, UUINavWidget* Widget, UUINavCom
 		return Reply;
 	}
 
-	if ((IsValid(Component) && Component->bIgnoreDueToRebind) || Widget->UINavPC->IsListeningToInputRebind())
+	if (IsValid(Component) && (Component->bIgnoreDueToRebind || Widget->UINavPC->IsListeningToInputRebind()))
 	{
 		Component->bIgnoreDueToRebind = false;
 		Widget->UINavPC->ProcessRebind(InKeyEvent);
