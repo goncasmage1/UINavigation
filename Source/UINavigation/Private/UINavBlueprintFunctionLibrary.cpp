@@ -7,6 +7,7 @@
 #include "GameFramework/InputSettings.h"
 #include "UINavSettings.h"
 #include "UINavDefaultInputSettings.h"
+#include "UINavSavedInputSettings.h"
 #include "UINavComponent.h"
 #include "UINavMacros.h"
 #include "Data/PromptData.h"
@@ -110,6 +111,8 @@ void UUINavBlueprintFunctionLibrary::ResetInputSettings(APlayerController* PC)
 					NewMapping.Triggers = InputTriggers;
 				}
 			}
+
+			GetMutableDefault<UUINavSavedInputSettings>()->SavedEnhancedInputMappings.Reset();
 
 			UUINavPCComponent* UINavPC = PC->FindComponentByClass<UUINavPCComponent>();
 			if (IsValid(UINavPC))
