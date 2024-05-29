@@ -112,7 +112,9 @@ void UUINavBlueprintFunctionLibrary::ResetInputSettings(APlayerController* PC)
 				}
 			}
 
-			GetMutableDefault<UUINavSavedInputSettings>()->SavedEnhancedInputMappings.Reset();
+			UUINavSavedInputSettings* SavedInputSettings = GetMutableDefault<UUINavSavedInputSettings>();
+			SavedInputSettings->SavedEnhancedInputMappings.Reset();
+			SavedInputSettings->SaveConfig();
 
 			UUINavPCComponent* UINavPC = PC->FindComponentByClass<UUINavPCComponent>();
 			if (IsValid(UINavPC))
