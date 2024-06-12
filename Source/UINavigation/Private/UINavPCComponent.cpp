@@ -495,7 +495,7 @@ void UUINavPCComponent::NotifyNavigatedTo(UUINavWidget* NavigatedWidget)
 	UUINavWidget* OldActiveWidget = ActiveSubWidget != nullptr ? ActiveSubWidget : ActiveWidget;
 	UUINavWidget* OldActiveSubWidget = ActiveSubWidget;
 
-	if (!IsValid(ActiveWidget))
+	if (!IsValid(ActiveWidget) && (NavigatedWidget->WidgetComp == nullptr || NavigatedWidget->bCompletedSetup))
 	{
 		SetActiveWidget(NavigatedWidget);
 	}

@@ -226,8 +226,6 @@ void UUINavWidget::UINavSetup()
 {
 	if (UINavPC == nullptr) return;
 
-	bCompletedSetup = true;
-
 	UUINavWidget* CurrentActiveWidget = UINavPC->GetActiveWidget();
 	const bool bShouldTakeFocus =
 		!IsValid(CurrentActiveWidget) ||
@@ -252,8 +250,8 @@ void UUINavWidget::UINavSetup()
 		UINavPC->NotifyNavigatedTo(this);
 	}
 
+	bCompletedSetup = true;
 	ReturnedFromWidget = nullptr;
-
 	IgnoreHoverComponent = nullptr;
 
 	PropagateOnSetupCompleted();
