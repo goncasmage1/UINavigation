@@ -1457,8 +1457,6 @@ bool UUINavPCComponent::IsListeningToInputRebind() const
 
 void UUINavPCComponent::NotifyInputTypeChange(const EInputType NewInputType, const bool bAttemptUnforceNavigation /*= true*/)
 {
-	IUINavPCReceiver::Execute_OnInputChanged(GetOwner(), CurrentInputType, NewInputType);
-
 	const EInputType OldInputType = CurrentInputType;
 	CurrentInputType = NewInputType;
 	if (ActiveWidget != nullptr)
@@ -1475,6 +1473,8 @@ void UUINavPCComponent::NotifyInputTypeChange(const EInputType NewInputType, con
 
 		ActiveWidget->PropagateOnInputChanged(OldInputType, CurrentInputType);
 	}
+
+	IUINavPCReceiver::Execute_OnInputChanged(GetOwner(), CurrentInputType, NewInputType);
 	InputTypeChangedDelegate.Broadcast(CurrentInputType);
 	UpdateInputIconsDelegate.Broadcast();
 }
