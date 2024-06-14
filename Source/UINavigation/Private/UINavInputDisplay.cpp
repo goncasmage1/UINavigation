@@ -1,4 +1,4 @@
-// Copyright (C) 2023 Gonçalo Marques - All Rights Reserved
+// Copyright (C) 2023 GonÃ§alo Marques - All Rights Reserved
 
 
 #include "UINavInputDisplay.h"
@@ -28,8 +28,11 @@ void UUINavInputDisplay::NativeConstruct()
 		return;
 	}
 
-	UINavPC->UpdateInputIconsDelegate.AddDynamic(this, &UUINavInputDisplay::UpdateInputVisuals);
-
+	if (InputTypeRestriction == EInputRestriction::None)
+	{
+		UINavPC->UpdateInputIconsDelegate.AddDynamic(this, &UUINavInputDisplay::UpdateInputVisuals);
+	}
+	
 	UpdateInputVisuals();
 }
 
@@ -40,7 +43,10 @@ void UUINavInputDisplay::NativeDestruct()
 		return;
 	}
 
-	UINavPC->UpdateInputIconsDelegate.RemoveDynamic(this, &UUINavInputDisplay::UpdateInputVisuals);
+	if (InputTypeRestriction == EInputRestriction::None)
+	{
+		UINavPC->UpdateInputIconsDelegate.RemoveDynamic(this, &UUINavInputDisplay::UpdateInputVisuals);
+	}
 
 	Super::NativeDestruct();
 }
@@ -98,10 +104,9 @@ void UUINavInputDisplay::UpdateInputVisuals()
 	if (IsValid(InputRichText)) InputRichText->SetVisibility(ESlateVisibility::Collapsed);
 	InputImage->SetVisibility(ESlateVisibility::Collapsed);
 
-	EInputRestriction Restriction = InputMethodRestriction;
+	EInputRestriction Restriction = InputTypeRestriction;
 	if(Restriction == EInputRestriction::None)
 	{
-		// if set to None, detect automatically
 		Restriction = UINavPC->IsUsingGamepad() ? EInputRestriction::Gamepad : EInputRestriction::Keyboard_Mouse;
 	}
 
