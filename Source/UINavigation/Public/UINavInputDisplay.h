@@ -15,6 +15,7 @@ class UImage;
 class UTextBlock;
 class URichTextBlock;
 class UUINavPCComponent;
+enum class EInputRestriction : uint8;
 
 /**
  * 
@@ -36,6 +37,10 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "InputDisplay")
 	void SetInputAction(UInputAction* NewAction, const EInputAxis NewAxis, const EAxisType NewScale);
+
+	// Locks to a specific input type. If set to None, it is automatically detected
+	UPROPERTY(BlueprintReadWrite,EditAnywhere,meta=(ExposeOnSpawn),Category="InputDisplay")
+	EInputRestriction InputMethodRestriction;
 
 public:
 

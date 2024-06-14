@@ -98,9 +98,16 @@ void UUINavInputDisplay::UpdateInputVisuals()
 	if (IsValid(InputRichText)) InputRichText->SetVisibility(ESlateVisibility::Collapsed);
 	InputImage->SetVisibility(ESlateVisibility::Collapsed);
 
+	EInputRestriction Restriction = InputMethodRestriction;
+	if(Restriction == EInputRestriction::None)
+	{
+		// if set to None, detect automatically
+		Restriction = UINavPC->IsUsingGamepad() ? EInputRestriction::Gamepad : EInputRestriction::Keyboard_Mouse;
+	}
+
 	TSoftObjectPtr<UTexture2D> NewSoftTexture = GetDefault<UUINavSettings>()->bLoadInputIconsAsync ?
-		UINavPC->GetSoftEnhancedInputIcon(InputAction, Axis, Scale, UINavPC->IsUsingGamepad() ? EInputRestriction::Gamepad : EInputRestriction::Keyboard_Mouse) :
-		UINavPC->GetEnhancedInputIcon(InputAction, Axis, Scale, UINavPC->IsUsingGamepad() ? EInputRestriction::Gamepad : EInputRestriction::Keyboard_Mouse);
+		UINavPC->GetSoftEnhancedInputIcon(InputAction, Axis, Scale, Restriction) : UINavPC->GetEnhancedInputIcon(InputAction, Axis, Scale, Restriction);
+		
 	if (!NewSoftTexture.IsNull() && DisplayType != EInputDisplayType::Text)
 	{
 		InputImage->SetBrushFromSoftTexture(NewSoftTexture, bMatchIconSize);
@@ -113,7 +120,7 @@ void UUINavInputDisplay::UpdateInputVisuals()
 	}
 	if (NewSoftTexture.IsNull() || DisplayType != EInputDisplayType::Icon)
 	{
-		const FText InputRawText = UINavPC->GetEnhancedInputText(InputAction, Axis, Scale, UINavPC->IsUsingGamepad() ? EInputRestriction::Gamepad : EInputRestriction::Keyboard_Mouse);
+		const FText InputRawText = UINavPC->GetEnhancedInputText(InputAction, Axis, Scale, Restriction);
 		if (IsValid(InputText))
 		{
 			InputText->SetText(InputRawText);
