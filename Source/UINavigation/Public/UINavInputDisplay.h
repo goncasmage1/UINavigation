@@ -16,7 +16,6 @@ class UImage;
 class UTextBlock;
 class URichTextBlock;
 class UUINavPCComponent;
-enum class EInputRestriction : uint8;
 
 /**
  * 
