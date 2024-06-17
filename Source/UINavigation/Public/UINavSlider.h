@@ -5,6 +5,8 @@
 #include "UINavHorizontalComponent.h"
 #include "UINavSlider.generated.h"
 
+class FText;
+
 /**
  * 
  */
@@ -25,13 +27,24 @@ protected:
 	void HandleOnSliderValueChanged(const float InValue);
 
 	UFUNCTION()
-	void HandleOnMouseCaptureEnd();
+	void HandleOnSliderMouseCaptureBegin();
+	UFUNCTION()
+	void HandleOnSliderMouseCaptureEnd();
 
 	UFUNCTION()
-	void HandleOnSpinBoxValueChanged(float InValue, ETextCommit::Type CommitMethod);
+	void HandleOnSpinBoxMouseCaptureBegin();
 
-	float IndexFromPercent(const float Value);
-	float IndexFromValue(const float Value);
+	UFUNCTION()
+	void HandleOnSpinBoxValueChanged(const float InValue);
+
+	UFUNCTION()
+	void HandleOnSpinBoxValueCommitted(const float InValue, const ETextCommit::Type CommitMethod);
+
+	int IndexFromPercent(const float Value);
+	int IndexFromValue(const float Value);
+
+	void UpdateTextFromValue(const float Value, const bool bUpdateSpinBox = true);
+	void UpdateTextFromPercent(const float Percent, const bool bUpdateSpinBox = true);
 
 public:
 
@@ -54,6 +67,9 @@ public:
 	bool bUseComma = false;
 
 	float Difference = 0.0f;
+
+	bool bMovingSlider = false;
+	bool bMovingSpinBox = false;
 
 	FLinearColor HandleDefaultColor = FColor::Black;
 	FLinearColor BarDefaultColor = FColor::White;
