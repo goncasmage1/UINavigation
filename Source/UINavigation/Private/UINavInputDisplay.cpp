@@ -1,4 +1,4 @@
-// Copyright (C) 2023 Gonçalo Marques - All Rights Reserved
+// Copyright (C) 2023 GonÃ§alo Marques - All Rights Reserved
 
 
 #include "UINavInputDisplay.h"
@@ -28,8 +28,11 @@ void UUINavInputDisplay::NativeConstruct()
 		return;
 	}
 
-	UINavPC->UpdateInputIconsDelegate.AddDynamic(this, &UUINavInputDisplay::UpdateInputVisuals);
-
+	if (InputTypeRestriction == EInputRestriction::None)
+	{
+		UINavPC->UpdateInputIconsDelegate.AddDynamic(this, &UUINavInputDisplay::UpdateInputVisuals);
+	}
+	
 	UpdateInputVisuals();
 }
 
@@ -40,7 +43,10 @@ void UUINavInputDisplay::NativeDestruct()
 		return;
 	}
 
-	UINavPC->UpdateInputIconsDelegate.RemoveDynamic(this, &UUINavInputDisplay::UpdateInputVisuals);
+	if (InputTypeRestriction == EInputRestriction::None)
+	{
+		UINavPC->UpdateInputIconsDelegate.RemoveDynamic(this, &UUINavInputDisplay::UpdateInputVisuals);
+	}
 
 	Super::NativeDestruct();
 }
@@ -98,9 +104,15 @@ void UUINavInputDisplay::UpdateInputVisuals()
 	if (IsValid(InputRichText)) InputRichText->SetVisibility(ESlateVisibility::Collapsed);
 	InputImage->SetVisibility(ESlateVisibility::Collapsed);
 
+	EInputRestriction Restriction = InputTypeRestriction;
+	if(Restriction == EInputRestriction::None)
+	{
+		Restriction = UINavPC->IsUsingGamepad() ? EInputRestriction::Gamepad : EInputRestriction::Keyboard_Mouse;
+	}
+
 	TSoftObjectPtr<UTexture2D> NewSoftTexture = GetDefault<UUINavSettings>()->bLoadInputIconsAsync ?
-		UINavPC->GetSoftEnhancedInputIcon(InputAction, Axis, Scale, UINavPC->IsUsingGamepad() ? EInputRestriction::Gamepad : EInputRestriction::Keyboard_Mouse) :
-		UINavPC->GetEnhancedInputIcon(InputAction, Axis, Scale, UINavPC->IsUsingGamepad() ? EInputRestriction::Gamepad : EInputRestriction::Keyboard_Mouse);
+		UINavPC->GetSoftEnhancedInputIcon(InputAction, Axis, Scale, Restriction) : UINavPC->GetEnhancedInputIcon(InputAction, Axis, Scale, Restriction);
+		
 	if (!NewSoftTexture.IsNull() && DisplayType != EInputDisplayType::Text)
 	{
 		InputImage->SetBrushFromSoftTexture(NewSoftTexture, bMatchIconSize);
@@ -113,7 +125,7 @@ void UUINavInputDisplay::UpdateInputVisuals()
 	}
 	if (NewSoftTexture.IsNull() || DisplayType != EInputDisplayType::Icon)
 	{
-		const FText InputRawText = UINavPC->GetEnhancedInputText(InputAction, Axis, Scale, UINavPC->IsUsingGamepad() ? EInputRestriction::Gamepad : EInputRestriction::Keyboard_Mouse);
+		const FText InputRawText = UINavPC->GetEnhancedInputText(InputAction, Axis, Scale, Restriction);
 		if (IsValid(InputText))
 		{
 			InputText->SetText(InputRawText);
