@@ -1,4 +1,4 @@
-// Copyright (C) 2023 Gonçalo Marques - All Rights Reserved
+// Copyright (C) 2023 GonÃ§alo Marques - All Rights Reserved
 
 #pragma once
 
@@ -7,6 +7,7 @@
 #include "Data/InputType.h"
 #include "Data/InputDisplayType.h"
 #include "Data/AxisType.h"
+#include "Data/InputRestriction.h"
 #include "Data/InputContainerEnhancedActionData.h"
 #include "Math/Vector2D.h"
 #include "UINavInputDisplay.generated.h"
@@ -36,6 +37,10 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "InputDisplay")
 	void SetInputAction(UInputAction* NewAction, const EInputAxis NewAxis, const EAxisType NewScale);
+
+	// Locks to a specific input type. If set to None, it is automatically detected
+	UPROPERTY(EditAnywhere, Category="InputDisplay")
+	EInputRestriction InputTypeRestriction = EInputRestriction::None;
 
 public:
 
