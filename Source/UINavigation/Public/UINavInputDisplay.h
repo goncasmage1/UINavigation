@@ -39,7 +39,7 @@ public:
 	void SetInputAction(UInputAction* NewAction, const EInputAxis NewAxis, const EAxisType NewScale);
 
 	// Locks to a specific input type. If set to None, it is automatically detected
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category="InputDisplay")
+	UPROPERTY(EditAnywhere, Category="InputDisplay")
 	EInputRestriction InputTypeRestriction = EInputRestriction::None;
 
 public:
