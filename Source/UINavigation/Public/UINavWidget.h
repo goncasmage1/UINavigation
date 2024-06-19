@@ -512,7 +512,7 @@ public:
 
 	bool IsForcingNavigation() const { return bForcingNavigation; }
 
-	bool IsBeingRemoved() const { return bBeingRemoved; }
+	bool IsBeingRemoved() const;
 
 	UUINavComponent* GetCurrentComponent() const { return CurrentComponent; }
 

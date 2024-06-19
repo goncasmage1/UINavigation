@@ -1472,6 +1472,16 @@ bool UUINavWidget::TryConsumeNavigation()
 	return IsValid(SelectedComponent);
 }
 
+bool UUINavWidget::IsBeingRemoved() const
+{
+	if (!IsValid(OuterUINavWidget))
+	{
+		return bBeingRemoved;
+	}
+
+	return OuterUINavWidget->IsBeingRemoved();
+}
+
 UUINavWidget* UUINavWidget::GetMostOuterUINavWidget()
 {
 	UUINavWidget* MostOUter = this;
