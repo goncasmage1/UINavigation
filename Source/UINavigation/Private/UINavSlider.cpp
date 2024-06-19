@@ -8,6 +8,7 @@
 #include "Components/RichTextBlock.h"
 #include "Components/SpinBox.h"
 #include "UINavBlueprintFunctionLibrary.h"
+#include "TimerManager.h"
 
 void UUINavSlider::NativeConstruct()
 {
