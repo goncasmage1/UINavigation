@@ -93,12 +93,16 @@ void UUINavComponent::SetFocusable(const bool bNewIsFocusable)
 
 FReply UUINavComponent::NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent)
 {
-	return UUINavWidget::HandleOnKeyDown(Super::NativeOnKeyDown(InGeometry, InKeyEvent), ParentWidget, this, InKeyEvent);
+	FReply Reply = Super::NativeOnKeyDown(InGeometry, InKeyEvent);
+	UUINavWidget::HandleOnKeyDown(Reply, ParentWidget, this, InKeyEvent);
+	return Reply;
 }
 
 FReply UUINavComponent::NativeOnKeyUp(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent)
 {
-	return UUINavWidget::HandleOnKeyUp(Super::NativeOnKeyUp(InGeometry, InKeyEvent), ParentWidget, this, InKeyEvent);
+	FReply Reply = Super::NativeOnKeyUp(InGeometry, InKeyEvent);
+	UUINavWidget::HandleOnKeyUp(Reply, ParentWidget, this, InKeyEvent);
+	return Reply;
 }
 
 FReply UUINavComponent::NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
@@ -347,7 +351,9 @@ void UUINavComponent::NativeOnFocusChanging(const FWeakWidgetPath& PreviousFocus
 
 FNavigationReply UUINavComponent::NativeOnNavigation(const FGeometry& MyGeometry, const FNavigationEvent& InNavigationEvent, const FNavigationReply& InDefaultReply)
 {
-	return UUINavWidget::HandleOnNavigation(Super::NativeOnNavigation(MyGeometry, InNavigationEvent, InDefaultReply), ParentWidget, InNavigationEvent);
+	FNavigationReply Reply = Super::NativeOnNavigation(MyGeometry, InNavigationEvent, InDefaultReply);
+	UUINavWidget::HandleOnNavigation(Reply, ParentWidget, InNavigationEvent);
+	return Reply;
 }
 
 void UUINavComponent::NativePreConstruct()

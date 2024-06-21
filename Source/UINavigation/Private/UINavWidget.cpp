@@ -396,13 +396,15 @@ void UUINavWidget::SetSelectedComponent(UUINavComponent* Component)
 FReply UUINavWidget::NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent)
 {
 	FReply Reply = Super::NativeOnKeyDown(InGeometry, InKeyEvent);
-	return IsValid(CurrentComponent) ? Reply : UUINavWidget::HandleOnKeyDown(Reply, this, nullptr, InKeyEvent);
+	if (!IsValid(CurrentComponent)) UUINavWidget::HandleOnKeyDown(Reply, this, nullptr, InKeyEvent);
+	return Reply;
 }
 
 FReply UUINavWidget::NativeOnKeyUp(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent)
 {
 	FReply Reply = Super::NativeOnKeyUp(InGeometry, InKeyEvent);
-	return IsValid(CurrentComponent) ? Reply : UUINavWidget::HandleOnKeyUp(Reply, this, nullptr, InKeyEvent);
+	if (!IsValid(CurrentComponent)) UUINavWidget::HandleOnKeyUp(Reply, this, nullptr, InKeyEvent);
+	return Reply;
 }
 
 void UUINavWidget::NativeTick(const FGeometry & MyGeometry, float DeltaTime)
@@ -506,7 +508,8 @@ void UUINavWidget::NativeOnFocusChanging(const FWeakWidgetPath& PreviousFocusPat
 FNavigationReply UUINavWidget::NativeOnNavigation(const FGeometry& MyGeometry, const FNavigationEvent& InNavigationEvent, const FNavigationReply& InDefaultReply)
 {
 	FNavigationReply Reply = Super::NativeOnNavigation(MyGeometry, InNavigationEvent, InDefaultReply);
-	return IsValid(CurrentComponent) ? Reply : UUINavWidget::HandleOnNavigation(Reply, this, InNavigationEvent);
+	if (!IsValid(CurrentComponent)) UUINavWidget::HandleOnNavigation(Reply, this, InNavigationEvent);
+	return Reply;
 }
 
 void UUINavWidget::HandleOnFocusChanging(UUINavWidget* Widget, UUINavComponent* Component, const FWeakWidgetPath& PreviousFocusPath, const FWidgetPath& NewWidgetPath, const FFocusEvent& InFocusEvent)
@@ -573,26 +576,29 @@ void UUINavWidget::HandleOnFocusChanging(UUINavWidget* Widget, UUINavComponent* 
 	}
 }
 
-FNavigationReply UUINavWidget::HandleOnNavigation(FNavigationReply Reply, UUINavWidget* Widget, const FNavigationEvent& InNavigationEvent)
+void UUINavWidget::HandleOnNavigation(FNavigationReply& Reply, UUINavWidget* Widget, const FNavigationEvent& InNavigationEvent)
 {
 	if (!IsValid(Widget) || !IsValid(Widget->UINavPC))
 	{
-		return Reply;
+		return;
 	}
 
 	if (!Widget->UINavPC->AllowsNavigatingDirection(InNavigationEvent.GetNavigationType()))
 	{
-		return FNavigationReply::Stop();
+		Reply = FNavigationReply::Stop();
+		return;
 	}
 
 	if (Widget->TryConsumeNavigation())
 	{
-		return FNavigationReply::Stop();
+		Reply = FNavigationReply::Stop();
+		return;
 	}
 
 	if (!Widget->UINavPC->TryNavigateInDirection(InNavigationEvent.GetNavigationType(), InNavigationEvent.GetNavigationGenesis()))
 	{
-		return FNavigationReply::Stop();
+		Reply = FNavigationReply::Stop();
+		return;
 	}
 
 	const bool bStopNextPrevious = GetDefault<UUINavSettings>()->bStopNextPreviousNavigation;
@@ -610,7 +616,8 @@ FNavigationReply UUINavWidget::HandleOnNavigation(FNavigationReply Reply, UUINav
 		if (bStopNextPrevious || !bAllowsSectionInput)
 		{
 			Widget->UINavPC->SetIgnoreFocusByNavigation(true);
-			return FNavigationReply::Stop();
+			Reply = FNavigationReply::Stop();
+			return;
 		}
 	}
 	else if (InNavigationEvent.GetNavigationType() == EUINavigation::Previous)
@@ -624,35 +631,39 @@ FNavigationReply UUINavWidget::HandleOnNavigation(FNavigationReply Reply, UUINav
 		if (bStopNextPrevious || !bAllowsSectionInput)
 		{
 			Widget->UINavPC->SetIgnoreFocusByNavigation(true);
-			return FNavigationReply::Stop();
+			Reply = FNavigationReply::Stop();
+			return;
 		}
 	}
 	else if (InNavigationEvent.GetNavigationType() != EUINavigation::Invalid)
 	{
 		IUINavPCReceiver::Execute_OnNavigated(Widget->UINavPC->GetOwner(), InNavigationEvent.GetNavigationType());
 	}
-
-	return Reply;
 }
 
-FReply UUINavWidget::HandleOnKeyDown(FReply Reply, UUINavWidget* Widget, UUINavComponent* Component, const FKeyEvent& InKeyEvent)
+void UUINavWidget::HandleOnKeyDown(FReply& Reply, UUINavWidget* Widget, UUINavComponent* Component, const FKeyEvent& InKeyEvent)
 {
 	if (!IsValid(Widget) || !IsValid(Widget->UINavPC))
 	{
-		return Reply;
+		return;
 	}
 
 	if (IsValid(Component) && Widget->UINavPC->IsListeningToInputRebind())
 	{
 		Component->bIgnoreDueToRebind = true;
-		return Reply;
+		return;
 	}
 
+	const bool bHandleReply = GetDefault<UUINavSettings>()->bConsumeNavigationInputs;
 	if (FSlateApplication::Get().GetNavigationActionFromKey(InKeyEvent) == EUINavigationAction::Accept)
 	{
 		if (!Widget->TryConsumeNavigation())
 		{
 			Widget->StartedSelect();
+			if (bHandleReply)
+			{
+				Reply = FReply::Handled();
+			}
 		}
 	}
 	else if (FSlateApplication::Get().GetNavigationActionFromKey(InKeyEvent) == EUINavigationAction::Back)
@@ -660,6 +671,10 @@ FReply UUINavWidget::HandleOnKeyDown(FReply Reply, UUINavWidget* Widget, UUINavC
 		if (!Widget->TryConsumeNavigation())
 		{
 			Widget->StartedReturn();
+			if (bHandleReply)
+			{
+				Reply = FReply::Handled();
+			}
 		}
 	}
 
@@ -672,30 +687,38 @@ FReply UUINavWidget::HandleOnKeyDown(FReply Reply, UUINavWidget* Widget, UUINavC
 	if (Direction != EUINavigation::Invalid)
 	{
 		Widget->UINavPC->NotifyNavigationKeyPressed(InKeyEvent.GetKey(), Direction);
+		if (bHandleReply)
+		{
+			Reply = FReply::Handled();
+		}
 	}
-
-	return Reply;
 }
 
-FReply UUINavWidget::HandleOnKeyUp(FReply Reply, UUINavWidget* Widget, UUINavComponent* Component, const FKeyEvent& InKeyEvent)
+void UUINavWidget::HandleOnKeyUp(FReply& Reply, UUINavWidget* Widget, UUINavComponent* Component, const FKeyEvent& InKeyEvent)
 {
 	if (!IsValid(Widget) || !IsValid(Widget->UINavPC))
 	{
-		return Reply;
+		return;
 	}
 
 	if (IsValid(Component) && (Component->bIgnoreDueToRebind || Widget->UINavPC->IsListeningToInputRebind()))
 	{
 		Component->bIgnoreDueToRebind = false;
 		Widget->UINavPC->ProcessRebind(InKeyEvent);
-		return Reply;
+		return;
 	}
+
+	const bool bHandleReply = GetDefault<UUINavSettings>()->bConsumeNavigationInputs;
 
 	if (FSlateApplication::Get().GetNavigationActionFromKey(InKeyEvent) == EUINavigationAction::Accept)
 	{
 		if (!Widget->TryConsumeNavigation())
 		{
 			Widget->StoppedSelect();
+			if (bHandleReply)
+			{
+				Reply = FReply::Handled();
+			}
 		}
 	}
 	else if (FSlateApplication::Get().GetNavigationActionFromKey(InKeyEvent) == EUINavigationAction::Back)
@@ -703,6 +726,10 @@ FReply UUINavWidget::HandleOnKeyUp(FReply Reply, UUINavWidget* Widget, UUINavCom
 		if (!Widget->TryConsumeNavigation())
 		{
 			Widget->StoppedReturn();
+			if (bHandleReply)
+			{
+				Reply = FReply::Handled();
+			}
 		}
 	}
 	else
@@ -716,10 +743,12 @@ FReply UUINavWidget::HandleOnKeyUp(FReply Reply, UUINavWidget* Widget, UUINavCom
 		if (Direction != EUINavigation::Invalid)
 		{
 			Widget->UINavPC->NotifyNavigationKeyReleased(InKeyEvent.GetKey(), Direction);
+			if (bHandleReply)
+			{
+				Reply = FReply::Handled();
+			}
 		}
 	}
-
-	return Reply;
 }
 
 void UUINavWidget::HandleSelectorMovement(const float DeltaTime)

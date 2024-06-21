@@ -36,6 +36,10 @@ public:
 	UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	bool bForceNavigation = true;
 
+	// Whether navigation-relevant keys events will be consumed by the plugin
+	UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = "Settings")
+	bool bConsumeNavigationInputs = true;
+	
 	// Whether focus navigation should stop when using Next/Previous input
 	UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	bool bStopNextPreviousNavigation = true;

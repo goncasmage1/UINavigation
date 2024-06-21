@@ -223,9 +223,9 @@ public:
 	virtual FNavigationReply NativeOnNavigation(const FGeometry& MyGeometry, const FNavigationEvent& InNavigationEvent, const FNavigationReply& InDefaultReply) override;
 
 	static void HandleOnFocusChanging(UUINavWidget* Widget, UUINavComponent* Component, const FWeakWidgetPath& PreviousFocusPath, const FWidgetPath& NewWidgetPath, const FFocusEvent& InFocusEvent);
-	static FNavigationReply HandleOnNavigation(FNavigationReply Reply, UUINavWidget* Widget, const FNavigationEvent& InNavigationEvent);
-	static FReply HandleOnKeyDown(FReply Reply, UUINavWidget* Widget, UUINavComponent* Component, const FKeyEvent& InKeyEvent);
-	static FReply HandleOnKeyUp(FReply Reply, UUINavWidget* Widget, UUINavComponent* Component, const FKeyEvent& InKeyEvent);
+	static void HandleOnNavigation(FNavigationReply& Reply, UUINavWidget* Widget, const FNavigationEvent& InNavigationEvent);
+	static void HandleOnKeyDown(FReply& Reply, UUINavWidget* Widget, UUINavComponent* Component, const FKeyEvent& InKeyEvent);
+	static void HandleOnKeyUp(FReply& Reply, UUINavWidget* Widget, UUINavComponent* Component, const FKeyEvent& InKeyEvent);
 
 	template <typename T>
 	static UUserWidget* FindUserWidgetInWidgetPath(const T& WidgetPath, TSharedPtr<SWidget> LastWidget)
