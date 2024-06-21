@@ -46,6 +46,8 @@ protected:
 
 	bool bReturningToParent = false;
 
+	bool bPressingReturn = false;
+
 	bool bDestroying = false;
 	bool bHasNavigation = false;
 	bool bForcingNavigation = true;

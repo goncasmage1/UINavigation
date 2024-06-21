@@ -1451,6 +1451,7 @@ void UUINavWidget::StoppedSelect()
 
 void UUINavWidget::StartedReturn()
 {
+	bPressingReturn = true;
 	if (GetDefault<UUINavSettings>()->bReturnOnPress)
 	{
 		ExecuteReturn(/*bPress*/ true);
@@ -1463,6 +1464,8 @@ void UUINavWidget::StoppedReturn()
 	{
 		ExecuteReturn(/*bPress*/ false);
 	}
+
+	bPressingReturn = false;
 }
 
 void UUINavWidget::ExecuteReturn(const bool bPress)
@@ -1483,7 +1486,7 @@ void UUINavWidget::ExecuteReturn(const bool bPress)
 			IUINavPCReceiver::Execute_OnReturn(UINavPC->GetOwner());
 		}
 	}
-	else
+	else if (!bPress && bPressingReturn)
 	{
 		OnReturn();
 		IUINavPCReceiver::Execute_OnReturn(UINavPC->GetOwner());
