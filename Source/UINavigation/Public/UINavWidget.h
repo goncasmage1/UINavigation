@@ -175,6 +175,7 @@ public:
 
 	/*
 	* If set to true, the UINavWidget will clear its navigation state if it's a child UINavWidget.
+	* Only applies when using nested UINavWidgets.
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavWidget)
 	bool bClearNavigationStateWhenChild = true;
