@@ -347,7 +347,7 @@ void UUINavWidget::LoseNavigation(UUINavWidget* NewActiveWidget)
 
 	bHasNavigation = false;
 
-	if (!bNewWidgetIsChild && bHaveSameOuter) CurrentComponent = nullptr;
+	if (!bNewWidgetIsChild && bHaveSameOuter && bClearNavigationStateWhenChild) CurrentComponent = nullptr;
 
 	OnLostNavigation(NewActiveWidget, bNewWidgetIsChild);
 }

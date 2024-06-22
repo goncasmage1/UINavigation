@@ -174,6 +174,12 @@ public:
 	bool bMaintainNavigationForChild = false;
 
 	/*
+	* If set to true, the UINavWidget will clear its navigation state if it's a child UINavWidget.
+	*/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavWidget)
+	bool bClearNavigationStateWhenChild = true;
+
+	/*
 	* Input Contexts to be applied when this widget becomes active (and to be removed when it becomes inactive)
 	*/
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = UINavWidget)
