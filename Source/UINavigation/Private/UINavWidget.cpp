@@ -536,11 +536,11 @@ void UUINavWidget::HandleOnFocusChanging(UUINavWidget* Widget, UUINavComponent* 
 		return;
 	}
 
-	const TSharedRef<SWidget> LastWidget = NewWidgetPath.GetLastWidget();
-	const FString LastWidgetTypeStr = LastWidget->GetTypeAsString();
+	const FString LastWidgetTypeStr = NewWidgetPath.GetLastWidget()->GetTypeAsString();
 	const bool LastWidgetIsButton = LastWidgetTypeStr == TEXT("SButton");
 	UUserWidget* ParentWidget = LastWidgetIsButton ? UUINavWidget::FindUserWidgetInWidgetPath(NewWidgetPath, NewWidgetPath.GetLastWidget()) : nullptr;
-	if (!UUINavWidget::AllowedObjectTypesToFocus.Contains(LastWidgetTypeStr) ||
+	if (InFocusEvent.GetCause() == EFocusCause::WindowActivate ||
+		!UUINavWidget::AllowedObjectTypesToFocus.Contains(LastWidgetTypeStr) ||
 		(LastWidgetIsButton && !IsValid(ParentWidget)))
 	{
 		if (IsValid(Component))
