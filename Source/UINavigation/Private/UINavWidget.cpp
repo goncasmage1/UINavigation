@@ -35,7 +35,8 @@ const TArray<FString> UUINavWidget::AllowedObjectTypesToFocus = {
 		TEXT("SButton"),
 		TEXT("SUINavButton"),
 		TEXT("SSpinBox"),
-		TEXT("SEditableText")
+		TEXT("SEditableText"),
+		TEXT("SMultilineEditableText")
 };
 
 UUINavWidget::UUINavWidget(const FObjectInitializer& ObjectInitializer)
