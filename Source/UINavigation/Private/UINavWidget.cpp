@@ -1222,11 +1222,12 @@ UUINavWidget * UUINavWidget::GoToBuiltWidget(UUINavWidget* NewWidget, const bool
 	{
 		if (NewOuterUINavWidget == OldOuterUINavWidget)
 		{
+			NewWidget->SetFocus();
 			return NewWidget;
 		}
 	}
 	
-	NewWidget->ParentWidget = GetMostOuterUINavWidget();
+	NewWidget->ParentWidget = this;
 	NewWidget->bParentRemoved = bRemoveParent;
 	NewWidget->bShouldDestroyParent = bDestroyParent;
 	NewWidget->WidgetComp = WidgetComp;
@@ -1246,7 +1247,7 @@ UUINavWidget * UUINavWidget::GoToBuiltWidget(UUINavWidget* NewWidget, const bool
 			NewWidget->SetKeyboardFocus();
 		}
 	}
-	OldOuterUINavWidget->CleanSetup();
+	CleanSetup();
 	
 	SelectCount = 0;
 	SetSelectedComponent(nullptr);
