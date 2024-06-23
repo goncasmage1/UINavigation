@@ -306,6 +306,8 @@ public:
 	void SetHoveredComponent(UUINavComponent* Component);
 	void SetSelectedComponent(UUINavComponent* Component);
 
+	void SetPressingReturn(const bool InbPressingReturn);
+
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, BlueprintPure, Category = UINavWidget)
 	UScrollBox* GetScrollBoxToFocus();
 	virtual UScrollBox* GetScrollBoxToFocus_Implementation() { return nullptr; }

@@ -394,6 +394,16 @@ void UUINavWidget::SetSelectedComponent(UUINavComponent* Component)
 	}
 }
 
+void UUINavWidget::SetPressingReturn(const bool InbPressingReturn)
+{
+	bPressingReturn = true;
+
+	if (OuterUINavWidget != nullptr)
+	{
+		OuterUINavWidget->SetPressingReturn(InbPressingReturn);
+	}
+}
+
 FReply UUINavWidget::NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent)
 {
 	FReply Reply = Super::NativeOnKeyDown(InGeometry, InKeyEvent);
@@ -655,7 +665,7 @@ void UUINavWidget::HandleOnKeyDown(FReply& Reply, UUINavWidget* Widget, UUINavCo
 		return;
 	}
 
-	const bool bHandleReply = GetDefault<UUINavSettings>()->bConsumeNavigationInputs;
+	const bool bHandleReply = Widget->OuterUINavWidget == nullptr && GetDefault<UUINavSettings>()->bConsumeNavigationInputs;
 	if (FSlateApplication::Get().GetNavigationActionFromKey(InKeyEvent) == EUINavigationAction::Accept)
 	{
 		if (!Widget->TryConsumeNavigation())
@@ -709,7 +719,7 @@ void UUINavWidget::HandleOnKeyUp(FReply& Reply, UUINavWidget* Widget, UUINavComp
 		return;
 	}
 
-	const bool bHandleReply = GetDefault<UUINavSettings>()->bConsumeNavigationInputs;
+	const bool bHandleReply = Widget->OuterUINavWidget == nullptr && GetDefault<UUINavSettings>()->bConsumeNavigationInputs;
 
 	if (FSlateApplication::Get().GetNavigationActionFromKey(InKeyEvent) == EUINavigationAction::Accept)
 	{
@@ -1452,7 +1462,7 @@ void UUINavWidget::StoppedSelect()
 
 void UUINavWidget::StartedReturn()
 {
-	bPressingReturn = true;
+	SetPressingReturn(true);
 	if (GetDefault<UUINavSettings>()->bReturnOnPress)
 	{
 		ExecuteReturn(/*bPress*/ true);
@@ -1466,7 +1476,7 @@ void UUINavWidget::StoppedReturn()
 		ExecuteReturn(/*bPress*/ false);
 	}
 
-	bPressingReturn = false;
+	SetPressingReturn(false);
 }
 
 void UUINavWidget::ExecuteReturn(const bool bPress)
