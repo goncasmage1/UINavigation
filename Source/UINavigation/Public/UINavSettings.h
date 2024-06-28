@@ -6,6 +6,7 @@
 #include "GameFramework/PlayerInput.h"
 #include "InputMappingContext.h"
 #include "Data/UINavEnhancedInputActions.h"
+#include "Data/PlatformConfigData.h"
 #include "UINavSettings.generated.h"
 
 /**
@@ -83,6 +84,10 @@ public:
 	// Increment by 1 everytime your project's default inputs change
 	UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	uint8 CurrentInputVersion = 0;
+
+	// The input data used for each platform
+	UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = "Settings")
+	TMap<FString, FPlatformConfigData> PlatformConfigData;
 
 	UPROPERTY(config, EditAnywhere, Category = "Settings")
 	TSoftObjectPtr<UInputMappingContext> EnhancedInputContext = TSoftObjectPtr<UInputMappingContext>(FSoftObjectPath("/UINavigation/Input/IC_UINav.IC_UINav"));

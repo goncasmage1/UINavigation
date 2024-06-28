@@ -16,6 +16,7 @@
 #include "Input/Reply.h"
 #include "InputAction.h"
 #include "Data/InputContainerEnhancedActionData.h"
+#include "Data/PlatformConfigData.h"
 #include "Delegates/DelegateCombinations.h"
 #include "Misc/CoreMiscDefines.h"
 #include "UObject/SoftObjectPtr.h"
@@ -126,6 +127,8 @@ protected:
 	void CacheGameInputContexts();
 
 	void TryResetDefaultInputs();
+
+	void InitPlatformData();
 
 	/**
 	*	Returns the input type of the given key
@@ -249,27 +252,29 @@ public:
 	/*
 	Holds the key icons for gamepad
 	*/
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavController)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavController, meta = (RequiredAssetDataTags = "/Script/RowStructure=UINavigation.InputIconMapping"))
 	UDataTable* GamepadKeyIconData = nullptr;
 	/*
 	Holds the key icons for mouse and keyboard
 	*/
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavController)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavController, meta = (RequiredAssetDataTags = "/Script/RowStructure=UINavigation.InputIconMapping"))
 	UDataTable* KeyboardMouseKeyIconData = nullptr;
 
 	/*
 	Holds the key names for gamepad
 	*/
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavController)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavController, meta = (RequiredAssetDataTags = "/Script/RowStructure=UINavigation.InputNameMapping"))
 	UDataTable* GamepadKeyNameData = nullptr;
 	/*
 	Holds the key names for mouse and keyboard
 	*/
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavController)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavController, meta = (RequiredAssetDataTags = "/Script/RowStructure=UINavigation.InputNameMapping"))
 	UDataTable* KeyboardMouseKeyNameData = nullptr;
 
 	UPROPERTY(VisibleAnywhere, Category = "Settings")
-	TSoftObjectPtr<UInputMappingContext> UINavInputContextSoftRef;
+	UInputMappingContext* UINavInputContextRef;
+
+	FPlatformConfigData CurrentPlatformData;
 
 	FKey LastPressedKey;
 	int32 LastPressedKeyUserIndex;

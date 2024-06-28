@@ -16,6 +16,7 @@
 #include "Data/AxisType.h"
 #include "Data/InputIconMapping.h"
 #include "Data/InputNameMapping.h"
+#include "Data/PlatformConfigData.h"
 #include "UINavBlueprintFunctionLibrary.h"
 #include "UINavInputProcessor.h"
 #include "GenericPlatform/GenericPlatformInputDeviceMapper.h"
@@ -35,6 +36,7 @@
 #include "Internationalization/Internationalization.h"
 #include "UINavLocalPlayerSubsystem.h"
 #include "Curves/CurveFloat.h"
+#include "Kismet/GameplayStatics.h"
 #include "UObject/ConstructorHelpers.h"
 
 const FKey UUINavPCComponent::MouseUp("MouseUp");
@@ -60,7 +62,7 @@ UUINavPCComponent::UUINavPCComponent()
 		EKeys::AddKey(FKeyDetails(MouseLeft, NSLOCTEXT("InputKeys", "MouseLeft", "Mouse Left"), FKeyDetails::MouseButton));
 	}
 
-	UINavInputContextSoftRef = GetDefault<UUINavSettings>()->EnhancedInputContext.Get();
+	UINavInputContextRef = GetDefault<UUINavSettings>()->EnhancedInputContext.Get();
 
 	static ConstructorHelpers::FObjectFinderOptional<UCurveFloat> ThumbstickCursorCurveAsset(TEXT("/UINavigation/Data/ThumbstickMoveCurve.ThumbstickMoveCurve"));
 	if (IsValid(ThumbstickCursorCurveAsset.Get()))
@@ -83,6 +85,8 @@ void UUINavPCComponent::Activate(bool bReset)
 		DISPLAYERROR(TEXT("Player Controller doesn't implement UINavPCReceiver interface!"));
 		return;
 	}
+
+	InitPlatformData();
 }
 
 void UUINavPCComponent::BeginPlay()
@@ -399,6 +403,22 @@ void UUINavPCComponent::TryResetDefaultInputs()
 			DefaultInputSettings->DefaultEnhancedInputMappings.Add(TSoftObjectPtr<UInputMappingContext>(FAssetData(InputContext).ToSoftObjectPath()), InputContext->GetMappings());
 		}
 		DefaultInputSettings->SaveConfig();
+	}
+}
+
+void UUINavPCComponent::InitPlatformData()
+{
+	const FString PlatformName = UGameplayStatics::GetPlatformName();
+	const FPlatformConfigData* const FoundPlatformData = GetDefault<UUINavSettings>()->PlatformConfigData.Find(PlatformName);
+	if (FoundPlatformData != nullptr)
+	{
+		CurrentPlatformData = *FoundPlatformData;
+	}
+	else
+	{
+		CurrentPlatformData.GamepadKeyIconData = GamepadKeyIconData;
+		CurrentPlatformData.GamepadKeyNameData = GamepadKeyNameData;
+		CurrentPlatformData.bCanUseKeyboardMouse = true;
 	}
 }
 
@@ -1127,22 +1147,20 @@ TSoftObjectPtr<UTexture2D> UUINavPCComponent::GetSoftKeyIcon(const FKey Key) con
 
 	if (Key.IsGamepadKey())
 	{
-		if (GamepadKeyIconData != nullptr && GamepadKeyIconData->GetRowMap().Contains(Key.GetFName()))
+		if (CurrentPlatformData.GamepadKeyIconData != nullptr && CurrentPlatformData.GamepadKeyIconData->GetRowMap().Contains(Key.GetFName()))
 		{
-			KeyIcon = reinterpret_cast<FInputIconMapping*>(GamepadKeyIconData->GetRowMap()[Key.GetFName()]);
+			KeyIcon = reinterpret_cast<FInputIconMapping*>(CurrentPlatformData.GamepadKeyIconData->GetRowMap()[Key.GetFName()]);
 		}
 	}
 	else
 	{
-		if (KeyboardMouseKeyIconData != nullptr && KeyboardMouseKeyIconData->GetRowMap().Contains(Key.GetFName()))
+		if (CurrentPlatformData.bCanUseKeyboardMouse && KeyboardMouseKeyIconData != nullptr && KeyboardMouseKeyIconData->GetRowMap().Contains(Key.GetFName()))
 		{
 			KeyIcon = reinterpret_cast<FInputIconMapping*>(KeyboardMouseKeyIconData->GetRowMap()[Key.GetFName()]);
 		}
 	}
 
-	if (KeyIcon == nullptr) return nullptr;
-
-	return KeyIcon->InputIcon;
+	return KeyIcon != nullptr ? KeyIcon->InputIcon : nullptr;
 }
 
 UTexture2D* UUINavPCComponent::GetEnhancedInputIcon(const UInputAction* Action, const EInputAxis Axis, const EAxisType Scale, const EInputRestriction InputRestriction) const
@@ -1168,22 +1186,20 @@ FText UUINavPCComponent::GetKeyText(const FKey Key) const
 
 	if (Key.IsGamepadKey())
 	{
-		if (GamepadKeyNameData != nullptr && GamepadKeyNameData->GetRowMap().Contains(Key.GetFName()))
+		if (CurrentPlatformData.GamepadKeyNameData != nullptr && CurrentPlatformData.GamepadKeyNameData->GetRowMap().Contains(Key.GetFName()))
 		{
-			Keyname = reinterpret_cast<FInputNameMapping*>(GamepadKeyNameData->GetRowMap()[Key.GetFName()]);
+			Keyname = reinterpret_cast<FInputNameMapping*>(CurrentPlatformData.GamepadKeyNameData->GetRowMap()[Key.GetFName()]);
 		}
 	}
 	else
 	{
-		if (KeyboardMouseKeyNameData != nullptr && KeyboardMouseKeyNameData->GetRowMap().Contains(Key.GetFName()))
+		if (CurrentPlatformData.bCanUseKeyboardMouse && KeyboardMouseKeyNameData != nullptr && KeyboardMouseKeyNameData->GetRowMap().Contains(Key.GetFName()))
 		{
 			Keyname = reinterpret_cast<FInputNameMapping*>(KeyboardMouseKeyNameData->GetRowMap()[Key.GetFName()]);
 		}
 	}
 
-	if (Keyname == nullptr) return Key.GetDisplayName();
-
-	return Keyname->InputText;
+	return Keyname != nullptr ? Keyname->InputText : Key.GetDisplayName();
 }
 
 void UUINavPCComponent::GetEnhancedInputKeys(const UInputAction* Action, TArray<FKey>& OutKeys)
