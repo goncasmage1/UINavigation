@@ -20,7 +20,7 @@ struct FPlatformConfigData
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = PlatformConfigData, meta = (RequiredAssetDataTags = "RowStructure=/Script/UINavigation.InputNameMapping"))
 	UDataTable* GamepadKeyNameData = nullptr;
 
-	UPROPERTY(EditAnywhere, Category = "Settings")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = PlatformConfigData)
 	UInputMappingContext* UINavInputContextOverride = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = PlatformConfigData)
