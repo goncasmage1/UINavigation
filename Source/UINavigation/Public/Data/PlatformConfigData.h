@@ -5,6 +5,7 @@
 #include "PlatformConfigData.generated.h"
 
 class UDataTable;
+class UInputMappingContext;
 
 USTRUCT(BlueprintType)
 struct FPlatformConfigData
@@ -18,6 +19,9 @@ struct FPlatformConfigData
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = PlatformConfigData, meta = (RequiredAssetDataTags = "RowStructure=/Script/UINavigation.InputNameMapping"))
 	UDataTable* GamepadKeyNameData = nullptr;
+
+	UPROPERTY(EditAnywhere, Category = "Settings")
+	UInputMappingContext* UINavInputContextOverride = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = PlatformConfigData)
 	bool bCanUseKeyboardMouse = true;

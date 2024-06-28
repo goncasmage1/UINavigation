@@ -4,10 +4,12 @@
 
 #include "Framework/Application/NavigationConfig.h" // from Slate
 
+class UInputMappingContext;
+
 class UINAVIGATION_API FUINavigationConfig : public FNavigationConfig
 {
 public:
-	FUINavigationConfig(const bool bAllowDirectionalInput = true, const bool bAllowSectionInput = true, const bool bAllowAccept = true, const bool bAllowBack = true, const bool bUseAnalogDirectionalInput = true, const bool bUsingThumbstickAsMouse = false);
+	FUINavigationConfig(const UInputMappingContext* const InputContext, const bool bAllowDirectionalInput = true, const bool bAllowSectionInput = true, const bool bAllowAccept = true, const bool bAllowBack = true, const bool bUseAnalogDirectionalInput = true, const bool bUsingThumbstickAsMouse = false);
 
 	virtual EUINavigationAction GetNavigationActionForKey(const FKey& InKey) const override;
 

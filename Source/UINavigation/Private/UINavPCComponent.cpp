@@ -103,7 +103,7 @@ void UUINavPCComponent::BeginPlay()
 		if (IsValid(GetEnhancedInputComponent()))
 		{
 			const UUINavSettings* const UINavSettings = GetDefault<UUINavSettings>();
-			const UInputMappingContext* InputContext = UINavSettings->EnhancedInputContext.LoadSynchronous();
+			const UInputMappingContext* InputContext = GetUINavInputContext();
 			const UUINavEnhancedInputActions* const InputActions = UINavSettings->EnhancedInputActions.LoadSynchronous();
 		
 			if (!IsValid(InputContext) ||
@@ -655,6 +655,7 @@ void UUINavPCComponent::RefreshNavigationKeys()
 {
 	FSlateApplication::Get().SetNavigationConfig(
 		MakeShared<FUINavigationConfig>(
+			GetUINavInputContext(),
 			bAllowDirectionalInput,
 			bAllowSectionInput,
 			bAllowSelectInput,
@@ -1498,6 +1499,13 @@ void UUINavPCComponent::NotifyInputTypeChange(const EInputType NewInputType, con
 UEnhancedInputComponent* UUINavPCComponent::GetEnhancedInputComponent() const
 {
 	return IsValid(PC) ? Cast<UEnhancedInputComponent>(PC->InputComponent) : nullptr;
+}
+
+UInputMappingContext* UUINavPCComponent::GetUINavInputContext() const
+{
+	return CurrentPlatformData.UINavInputContextOverride != nullptr ?
+		CurrentPlatformData.UINavInputContextOverride :
+		GetDefault<UUINavSettings>()->EnhancedInputContext.LoadSynchronous();
 }
 
 void UUINavPCComponent::NavigateInDirection(const EUINavigation InDirection)

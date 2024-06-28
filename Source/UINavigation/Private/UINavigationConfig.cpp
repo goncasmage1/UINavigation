@@ -5,7 +5,7 @@
 #include "Data/UINavEnhancedInputActions.h"
 #include "InputMappingContext.h"
 
-FUINavigationConfig::FUINavigationConfig(const bool bAllowDirectionalInput /*= true*/, const bool bAllowSectionInput /*= true*/, const bool bAllowAccept /*= true*/, const bool bAllowBack /*= true*/, const bool bUseAnalogDirectionalInput /*= true*/, const bool bUsingThumbstickAsMouse /*= false*/)
+FUINavigationConfig::FUINavigationConfig(const UInputMappingContext* const InputContext, const bool bAllowDirectionalInput /*= true*/, const bool bAllowSectionInput /*= true*/, const bool bAllowAccept /*= true*/, const bool bAllowBack /*= true*/, const bool bUseAnalogDirectionalInput /*= true*/, const bool bUsingThumbstickAsMouse /*= false*/)
 {
 	KeyEventRules.Reset();
 	bTabNavigation = false;
@@ -14,7 +14,6 @@ FUINavigationConfig::FUINavigationConfig(const bool bAllowDirectionalInput /*= t
 
 	const UUINavSettings* const UINavSettings = GetDefault<UUINavSettings>();
 	const UUINavEnhancedInputActions* const InputActions = UINavSettings->EnhancedInputActions.LoadSynchronous();
-	const UInputMappingContext* const InputContext = UINavSettings->EnhancedInputContext.LoadSynchronous();
 	if (InputActions == nullptr || InputContext == nullptr)
 	{
 		return;

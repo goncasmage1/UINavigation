@@ -271,7 +271,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavController, meta = (RequiredAssetDataTags = "/Script/RowStructure=UINavigation.InputNameMapping"))
 	UDataTable* KeyboardMouseKeyNameData = nullptr;
 
-	UPROPERTY(VisibleAnywhere, Category = "Settings")
+	UPROPERTY(EditDefaultsOnly, Category = "Settings")
 	UInputMappingContext* UINavInputContextRef;
 
 	FPlatformConfigData CurrentPlatformData;
@@ -510,6 +510,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
 	UEnhancedInputComponent* GetEnhancedInputComponent() const;
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
+	UInputMappingContext* GetUINavInputContext() const;
 
 	UFUNCTION(BlueprintCallable, Category = UINavController)
 	void SetActiveWidget(UUINavWidget* NewActiveWidget);
