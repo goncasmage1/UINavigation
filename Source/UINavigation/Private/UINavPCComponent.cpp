@@ -87,6 +87,11 @@ void UUINavPCComponent::Activate(bool bReset)
 	}
 
 	InitPlatformData();
+
+	if (!CurrentPlatformData.bCanUseKeyboardMouse || FSlateApplication::Get().IsGamepadAttached())
+	{
+		CurrentInputType = EInputType::Gamepad;
+	}
 }
 
 void UUINavPCComponent::BeginPlay()

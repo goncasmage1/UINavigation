@@ -22,6 +22,7 @@
 #include "HAL/Platform.h"
 #include "Delegates/Delegate.h"
 #include "Data/PromptDataSwapKeys.h"
+#include "Data/PlatformConfigData.h"
 
 void UUINavInputContainer::NativeConstruct()
 {
@@ -32,6 +33,21 @@ void UUINavInputContainer::NativeConstruct()
 
 	if (InputRestrictions.Num() == 0) InputRestrictions.Add(EInputRestriction::None);
 	else if (InputRestrictions.Num() > 3) InputRestrictions.SetNum(3);
+
+	if (IsValid(UINavPC) && !UINavPC->GetCurrentPlatformData().bCanUseKeyboardMouse)
+	{
+		for (int32 i = InputRestrictions.Num() - 1; i >= 0; --i)
+		{
+			const EInputRestriction InputRestriction = InputRestrictions[i];
+			if (InputRestriction == EInputRestriction::Keyboard ||
+				InputRestriction == EInputRestriction::Mouse ||
+				InputRestriction == EInputRestriction::Keyboard_Mouse)
+			{
+				InputRestrictions.RemoveAt(i);
+			}
+		}
+	}
+
 	KeysPerInput = InputRestrictions.Num();
 
 	DecidedCallback.BindUFunction(this, FName("SwapKeysDecided"));

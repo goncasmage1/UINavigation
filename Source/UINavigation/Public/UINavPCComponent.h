@@ -574,6 +574,9 @@ public:
 	FORCEINLINE EInputType GetCurrentInputType() const { return CurrentInputType; }
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
+	const FPlatformConfigData& GetCurrentPlatformData() const { return CurrentPlatformData; }
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
     FORCEINLINE bool IsUsingMouse() const { return CurrentInputType == EInputType::Mouse; }
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
