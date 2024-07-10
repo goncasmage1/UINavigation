@@ -17,7 +17,7 @@ class UINAVIGATION_API UUINavSectionsWidget : public UUserWidget
 
 public:
 
-	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget), Category = "UINavSectionsWidget")
 	UPanelWidget* SectionButtonsPanel = nullptr;
 
 };
