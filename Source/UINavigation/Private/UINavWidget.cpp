@@ -12,6 +12,7 @@
 #include "UINavWidgetComponent.h"
 #include "UINavBlueprintFunctionLibrary.h"
 #include "UINavMacros.h"
+#include "UINavSectionsWidget.h"
 #include "ComponentActions/UINavComponentAction.h"
 #include "Blueprint/UserWidget.h"
 #include "Blueprint/WidgetTree.h"
@@ -26,6 +27,7 @@
 #include "Components/CanvasPanelSlot.h"
 #include "Components/ActorComponent.h"
 #include "Components/ListView.h"
+#include "Components/WidgetSwitcher.h"
 #include "Engine/GameViewportClient.h"
 #include "Engine/ViewportSplitScreen.h"
 #include "Curves/CurveFloat.h"
@@ -205,6 +207,99 @@ void UUINavWidget::TraverseHierarchy()
 		{
 			ChildUINavWidget->AddParentToPath(ChildUINavWidgets.Num());
 			ChildUINavWidgets.Add(ChildUINavWidget);
+		}
+	}
+
+	SetupSections();
+}
+
+void UUINavWidget::SetupSections()
+{
+	if (!IsValid(UINavSectionsPanel) && !IsValid(UINavSwitcher))
+	{
+		return;
+	}
+
+	if (!IsValid(UINavSwitcher))
+	{
+		DISPLAYERROR("UINavSectionsPanel doesn't have corresponding UINavSwitcher!");
+		return;
+	}
+
+	if (!IsValid(UINavSectionsPanel))
+	{
+		return;
+	}
+
+	UUINavSectionsWidget* SectionsWidget = Cast<UUINavSectionsWidget>(UINavSectionsPanel);
+	UPanelWidget* SectionsPanel = IsValid(SectionsWidget) ? SectionsWidget->SectionButtonsPanel : Cast<UPanelWidget>(UINavSectionsPanel);
+	if (!IsValid(SectionsPanel))
+	{
+		DISPLAYERROR("UINavSectionsPanel isn't a PanelWidget child or UINavSectionsWidget!");
+		return;
+	}
+
+	TArray<const UButton*> SectionButtons;
+	for (UWidget* const ChildWidget : SectionsPanel->GetAllChildren())
+	{
+		if (ChildWidget->IsA<UUINavComponent>())
+		{
+			DISPLAYERROR("UINavSectionsPanel has a UINavComponent. It should only have normal Buttons!");
+			return;
+		}
+
+		UButton* SectionButton = nullptr;
+
+		const UUserWidget* const ChildUserWidget = Cast<UUserWidget>(ChildWidget);
+		if (IsValid(ChildUserWidget))
+		{
+			//...
+		}
+
+		if (!IsValid(SectionButton))
+		{
+			SectionButton = Cast<UButton>(ChildWidget);
+		}
+
+		if (!IsValid(SectionButton))
+		{
+			continue;
+		}
+
+		SectionButtons.Add(SectionButton);
+		const int32 NumSectionsButtons = SectionButtons.Num();
+		switch (NumSectionsButtons)
+		{
+		case 1:
+			SectionButton->OnClicked.AddUniqueDynamic(this, &UUINavWidget::OnSectionButtonPressed1);
+			break;
+		case 2:
+			SectionButton->OnClicked.AddUniqueDynamic(this, &UUINavWidget::OnSectionButtonPressed2);
+			break;
+		case 3:
+			SectionButton->OnClicked.AddUniqueDynamic(this, &UUINavWidget::OnSectionButtonPressed3);
+			break;
+		case 4:
+			SectionButton->OnClicked.AddUniqueDynamic(this, &UUINavWidget::OnSectionButtonPressed4);
+			break;
+		case 5:
+			SectionButton->OnClicked.AddUniqueDynamic(this, &UUINavWidget::OnSectionButtonPressed5);
+			break;
+		case 6:
+			SectionButton->OnClicked.AddUniqueDynamic(this, &UUINavWidget::OnSectionButtonPressed6);
+			break;
+		case 7:
+			SectionButton->OnClicked.AddUniqueDynamic(this, &UUINavWidget::OnSectionButtonPressed7);
+			break;
+		case 8:
+			SectionButton->OnClicked.AddUniqueDynamic(this, &UUINavWidget::OnSectionButtonPressed8);
+			break;
+		case 9:
+			SectionButton->OnClicked.AddUniqueDynamic(this, &UUINavWidget::OnSectionButtonPressed9);
+			break;
+		case 10:
+			SectionButton->OnClicked.AddUniqueDynamic(this, &UUINavWidget::OnSectionButtonPressed10);
+			break;
 		}
 	}
 }
@@ -779,6 +874,103 @@ void UUINavWidget::HandleSelectorMovement(const float DeltaTime)
 	TheSelector->SetRenderTranslation(SelectorOrigin + Distance*MoveCurve->GetFloatValue(MovementCounter));
 }
 
+void UUINavWidget::GoToNextSection()
+{
+	if (!IsValid(UINavSwitcher))
+	{
+		return;
+	}
+
+	const int32 ActiveIndex = UINavSwitcher->GetActiveWidgetIndex();
+	const int32 NumSections = UINavSwitcher->GetChildrenCount();
+	if (ActiveIndex == NumSections - 1)
+	{
+		GoToSection(0);
+	}
+
+	GoToSection(ActiveIndex + 1);
+}
+
+void UUINavWidget::GoToPreviousSection()
+{
+	if (!IsValid(UINavSwitcher))
+	{
+		return;
+	}
+
+	const int32 ActiveIndex = UINavSwitcher->GetActiveWidgetIndex();
+	const int32 NumSections = UINavSwitcher->GetChildrenCount();
+	if (ActiveIndex == 0)
+	{
+		GoToSection(NumSections - 1);
+	}
+
+	GoToSection(ActiveIndex - 1);
+}
+
+void UUINavWidget::GoToSection(const int32 SectionIndex)
+{
+	if (!IsValid(UINavSwitcher) || !IsValid(UINavSwitcher->GetWidgetAtIndex(SectionIndex)))
+	{
+		return;
+	}
+
+	const int32 OldIndex = UINavSwitcher->GetActiveWidgetIndex();
+	UINavSwitcher->SetActiveWidgetIndex(SectionIndex);
+	UINavSwitcher->GetActiveWidget()->SetFocus();
+	OnChangedSection(OldIndex, SectionIndex);
+}
+
+void UUINavWidget::OnSectionButtonPressed1()
+{
+	GoToSection(0);
+}
+
+void UUINavWidget::OnSectionButtonPressed2()
+{
+	GoToSection(1);
+}
+
+void UUINavWidget::OnSectionButtonPressed3()
+{
+	GoToSection(2);
+}
+
+void UUINavWidget::OnSectionButtonPressed4()
+{
+	GoToSection(3);
+}
+
+void UUINavWidget::OnSectionButtonPressed5()
+{
+	GoToSection(4);
+}
+
+void UUINavWidget::OnSectionButtonPressed6()
+{
+	GoToSection(5);
+}
+
+void UUINavWidget::OnSectionButtonPressed7()
+{
+	GoToSection(6);
+}
+
+void UUINavWidget::OnSectionButtonPressed8()
+{
+	GoToSection(7);
+}
+
+void UUINavWidget::OnSectionButtonPressed9()
+{
+	GoToSection(8);
+}
+
+void UUINavWidget::OnSectionButtonPressed10()
+{
+	GoToSection(9);
+}
+
 void UUINavWidget::UpdateSelectorLocation(UUINavComponent* Component)
 {
 	if (TheSelector == nullptr || !IsValid(FirstComponent)) return;
@@ -1069,7 +1261,10 @@ void UUINavWidget::OnReturn_Implementation()
 
 void UUINavWidget::OnNext_Implementation()
 {
-
+	if (IsValid(UINavSwitcher))
+	{
+		GoToNextSection();
+	}
 }
 
 void UUINavWidget::PropagateOnNext()
@@ -1083,7 +1278,10 @@ void UUINavWidget::PropagateOnNext()
 
 void UUINavWidget::OnPrevious_Implementation()
 {
-
+	if (IsValid(UINavSwitcher))
+	{
+		GoToPreviousSection();
+	}
 }
 
 void UUINavWidget::PropagateOnPrevious()
@@ -1093,6 +1291,11 @@ void UUINavWidget::PropagateOnPrevious()
 	{
 		OuterUINavWidget->PropagateOnPrevious();
 	}
+}
+
+void UUINavWidget::OnChangedSection_Implementation(const int32 FromIndex, const int32 ToIndex)
+{
+
 }
 
 void UUINavWidget::OnInputChanged_Implementation(const EInputType From, const EInputType To)

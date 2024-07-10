@@ -21,6 +21,7 @@ class UUINavPromptWidget;
 class UPromptDataBase;
 class UScrollBox;
 class UInputMappingContext;
+class UWidgetSwitcher;
 enum class EButtonStyle : uint8;
 
 /**
@@ -118,6 +119,34 @@ protected:
 	void BeginSelectorMovement(UUINavComponent* FromComponent, UUINavComponent* ToComponent);
 	void HandleSelectorMovement(const float DeltaTime);
 
+	UFUNCTION(BlueprintCallable, Category = UINavWidget)
+	void GoToNextSection();
+	UFUNCTION(BlueprintCallable, Category = UINavWidget)
+	void GoToPreviousSection();
+	UFUNCTION(BlueprintCallable, Category = UINavWidget)
+	void GoToSection(const int32 SectionIndex);
+
+	UFUNCTION()
+	void OnSectionButtonPressed1();
+	UFUNCTION()
+	void OnSectionButtonPressed2();
+	UFUNCTION()
+	void OnSectionButtonPressed3();
+	UFUNCTION()
+	void OnSectionButtonPressed4();
+	UFUNCTION()
+	void OnSectionButtonPressed5();
+	UFUNCTION()
+	void OnSectionButtonPressed6();
+	UFUNCTION()
+	void OnSectionButtonPressed7();
+	UFUNCTION()
+	void OnSectionButtonPressed8();
+	UFUNCTION()
+	void OnSectionButtonPressed9();
+	UFUNCTION()
+	void OnSectionButtonPressed10();
+
 public:
 
 	EReceiveInputType ReceiveInputType = EReceiveInputType::None;
@@ -148,6 +177,14 @@ public:
 
 	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
 	class UUINavWidgetComponent* WidgetComp = nullptr;
+
+	//The Widget Switcher that will be used to switch between sections
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget, OptionalWidget = true), Category = UINavWidget)
+	UWidgetSwitcher* UINavSwitcher = nullptr;
+
+	//The PanelWidget or UserWidget that contains the Buttons (not UINavComponents) that will switch between the sections
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget, OptionalWidget = true), Category = UINavWidget)
+	UWidget* UINavSectionsPanel = nullptr;
 
 	//Should this widget remove its parent from the viewport when created?
 	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
@@ -262,6 +299,8 @@ public:
 	*	Traverses this widget's hierarchy to setup all the UIUINavButtons
 	*/
 	void TraverseHierarchy();
+
+	void SetupSections();
 
 	/**
 	*	Reconfigures the blueprint if it has already been setup
@@ -448,6 +487,14 @@ public:
 	virtual void OnPrevious_Implementation();
 
 	void PropagateOnPrevious();
+
+	/**
+	*	Called when player changes section, either through OnNext/OnPrevious or by pressing the corresponding section button
+	*/
+	UFUNCTION(BlueprintNativeEvent, Category = UINavWidget)
+	void OnChangedSection(const int32 FromIndex, const int32 ToIndex);
+
+	virtual void OnChangedSection_Implementation(const int32 FromIndex, const int32 ToIndex);
 
 	/**
 	*	Called when the input type changed
