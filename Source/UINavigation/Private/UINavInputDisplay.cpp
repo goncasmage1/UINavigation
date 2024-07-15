@@ -148,3 +148,13 @@ void UUINavInputDisplay::SetInputAction(UInputAction* NewAction, const EInputAxi
 
 	UpdateInputVisuals();
 }
+
+void UUINavInputDisplay::SetIconSize(const FVector2D& NewSize)
+{
+	IconSize = NewSize;
+
+	if (IsInViewport())
+	{
+		UpdateInputVisuals();
+	}
+}

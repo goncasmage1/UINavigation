@@ -1529,7 +1529,6 @@ void UUINavPCComponent::NavigateInDirection(const EUINavigation InDirection)
 	SlateApplication.FindPathToWidget(ActiveWidget->GetCurrentComponent()->GetCachedWidget().ToSharedRef(), FocusPath);
 	const ENavigationGenesis Genesis = GetCurrentInputType() == EInputType::Gamepad ? ENavigationGenesis::Controller : ENavigationGenesis::Keyboard;
 	const FReply Reply = FReply::Handled().SetNavigation(InDirection, Genesis);
-	TSharedPtr<FSlateUser> SlateUser = SlateApplication.GetUser(SlateApplication.GetUserIndexForKeyboard());
 	SlateApplication.ProcessReply(
 		FocusPath,
 		Reply,

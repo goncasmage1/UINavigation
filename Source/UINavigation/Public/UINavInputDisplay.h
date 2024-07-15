@@ -38,6 +38,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "InputDisplay")
 	void SetInputAction(UInputAction* NewAction, const EInputAxis NewAxis, const EAxisType NewScale);
 
+	UFUNCTION(BlueprintCallable, Category = "InputDisplay")
+	void SetIconSize(const FVector2D& NewSize);
+
 	// Locks to a specific input type. If set to None, it is automatically detected
 	UPROPERTY(EditAnywhere, Category="InputDisplay")
 	EInputRestriction InputTypeRestriction = EInputRestriction::None;
