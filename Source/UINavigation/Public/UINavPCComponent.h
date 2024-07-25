@@ -252,23 +252,23 @@ public:
 	/*
 	Holds the key icons for gamepad
 	*/
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavController, meta = (RequiredAssetDataTags = "/Script/RowStructure=UINavigation.InputIconMapping"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavController, meta = (RequiredAssetDataTags = "RowStructure=/Script/UINavigation.InputIconMapping"))
 	UDataTable* GamepadKeyIconData = nullptr;
 	/*
 	Holds the key icons for mouse and keyboard
 	*/
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavController, meta = (RequiredAssetDataTags = "/Script/RowStructure=UINavigation.InputIconMapping"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavController, meta = (RequiredAssetDataTags = "RowStructure=/Script/UINavigation.InputIconMapping"))
 	UDataTable* KeyboardMouseKeyIconData = nullptr;
 
 	/*
 	Holds the key names for gamepad
 	*/
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavController, meta = (RequiredAssetDataTags = "/Script/RowStructure=UINavigation.InputNameMapping"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavController, meta = (RequiredAssetDataTags = "RowStructure=/Script/UINavigation.InputNameMapping"))
 	UDataTable* GamepadKeyNameData = nullptr;
 	/*
 	Holds the key names for mouse and keyboard
 	*/
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavController, meta = (RequiredAssetDataTags = "/Script/RowStructure=UINavigation.InputNameMapping"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavController, meta = (RequiredAssetDataTags = "RowStructure=/Script/UINavigation.InputNameMapping"))
 	UDataTable* KeyboardMouseKeyNameData = nullptr;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Settings")
