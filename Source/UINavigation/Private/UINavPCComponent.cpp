@@ -501,6 +501,11 @@ void UUINavPCComponent::SetActiveWidget(UUINavWidget * NewActiveWidget)
 			{
 				SetShowMouseCursor(false);
 			}
+
+			if (GetInputMode() == EInputMode::UI)
+			{
+				DISPLAYERROR("Input Mode UI Only is being used. This can cause issues! Please use Input Mode Game and UI instead.");
+			}
 		}
 	}
 }
