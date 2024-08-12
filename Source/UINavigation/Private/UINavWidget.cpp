@@ -210,8 +210,6 @@ void UUINavWidget::TraverseHierarchy()
 			ChildUINavWidgets.Add(ChildUINavWidget);
 		}
 	}
-
-	SetupSections();
 }
 
 void UUINavWidget::SetupSections()
@@ -240,7 +238,7 @@ void UUINavWidget::SetupSections()
 		return;
 	}
 
-	TArray<const UButton*> SectionButtons;
+	uint8 SectionButtonsNum = 0;
 	for (UWidget* const ChildWidget : SectionsPanel->GetAllChildren())
 	{
 		if (ChildWidget->IsA<UUINavComponent>())
@@ -267,9 +265,7 @@ void UUINavWidget::SetupSections()
 			continue;
 		}
 
-		SectionButtons.Add(SectionButton);
-		const int32 NumSectionsButtons = SectionButtons.Num();
-		switch (NumSectionsButtons)
+		switch (++SectionButtonsNum)
 		{
 		case 1:
 			SectionButton->OnClicked.AddUniqueDynamic(this, &UUINavWidget::OnSectionButtonPressed1);
@@ -322,6 +318,8 @@ void UUINavWidget::SetupSelector()
 void UUINavWidget::UINavSetup()
 {
 	if (UINavPC == nullptr) return;
+
+	SetupSections();
 
 	UUINavWidget* CurrentActiveWidget = UINavPC->GetActiveWidget();
 	const bool bShouldTakeFocus =
@@ -911,7 +909,7 @@ void UUINavWidget::GoToPreviousSection()
 
 void UUINavWidget::GoToSection(const int32 SectionIndex)
 {
-	if (!IsValid(UINavSwitcher) || !IsValid(UINavSwitcher->GetWidgetAtIndex(SectionIndex)))
+	if (!IsValid(UINavSwitcher) || !IsValid(UINavSwitcher->GetWidgetAtIndex(SectionIndex)) || UINavSwitcher->GetActiveWidgetIndex() == SectionIndex)
 	{
 		return;
 	}
