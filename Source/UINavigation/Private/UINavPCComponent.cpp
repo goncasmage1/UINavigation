@@ -122,6 +122,7 @@ void UUINavPCComponent::BeginPlay()
 				!IsValid(InputActions->IA_MenuNext) ||
 				!IsValid(InputActions->IA_MenuPrevious))
 			{
+				DISPLAYERROR("Make sure '/UINavigation/Input' is added as an Additional Directory to Cook in your Project!");
 				DISPLAYERROR("Not all Enhanced Menu Inputs have been setup!");
 				return;
 			}
