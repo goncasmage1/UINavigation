@@ -13,6 +13,7 @@
 #include "UINavBlueprintFunctionLibrary.h"
 #include "UINavMacros.h"
 #include "UINavSectionsWidget.h"
+#include "UINavSectionButton.h"
 #include "ComponentActions/UINavComponentAction.h"
 #include "Blueprint/UserWidget.h"
 #include "Blueprint/WidgetTree.h"
@@ -250,10 +251,10 @@ void UUINavWidget::SetupSections()
 
 		UButton* SectionButton = nullptr;
 
-		const UUserWidget* const ChildUserWidget = Cast<UUserWidget>(ChildWidget);
-		if (IsValid(ChildUserWidget))
+		const UUINavSectionButton* const ChildSectionButtonWidget = Cast<UUINavSectionButton>(ChildWidget);
+		if (IsValid(ChildSectionButtonWidget))
 		{
-			//...
+			SectionButton = ChildSectionButtonWidget->SectionButton;
 		}
 
 		if (!IsValid(SectionButton))
