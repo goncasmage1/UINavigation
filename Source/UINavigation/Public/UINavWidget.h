@@ -22,6 +22,7 @@ class UPromptDataBase;
 class UScrollBox;
 class UInputMappingContext;
 class UWidgetSwitcher;
+class UButton;
 enum class EButtonStyle : uint8;
 
 /**
@@ -81,6 +82,8 @@ protected:
 	UUINavComponent* IgnoreHoverComponent;
 
 	TArray<int> UINavWidgetPath;
+
+	TArray<UButton*> SectionButtons;
 
 	static const TArray<FString> AllowedObjectTypesToFocus;
 

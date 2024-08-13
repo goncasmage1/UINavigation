@@ -138,6 +138,8 @@ void UUINavWidget::InitialSetup(const bool bRebuilding)
 
 	TraverseHierarchy();
 
+	SetupSections();
+
 	//If this widget doesn't need to create the selector, skip to setup
 	if (!IsSelectorValid())
 	{
@@ -238,64 +240,79 @@ void UUINavWidget::SetupSections()
 		return;
 	}
 
-	uint8 SectionButtonsNum = 0;
-	for (UWidget* const ChildWidget : SectionsPanel->GetAllChildren())
+	if (SectionButtons.IsEmpty())
 	{
-		if (ChildWidget->IsA<UUINavComponent>())
+#if WITH_EDITOR
+		static const TArray<TSubclassOf<UWidget>> ClassArray = { UButton::StaticClass(), UUINavSectionButton::StaticClass(), UUINavComponent::StaticClass() };
+#else
+		static const TArray<TSubclassOf<UWidget>> ClassArray = { UButton::StaticClass(), UUINavSectionButton::StaticClass() };
+#endif
+
+		for (UWidget* const ChildWidget : SectionsPanel->GetAllChildren())
 		{
-			DISPLAYERROR("UINavSectionsPanel has a UINavComponent. It should only have normal Buttons!");
-			return;
+			UWidget* TargetWidget = UUINavBlueprintFunctionLibrary::FindWidgetOfClassesInWidget(ChildWidget, ClassArray);
+
+			if (TargetWidget->IsA<UUINavComponent>())
+			{
+				DISPLAYERROR("UINavSectionsPanel has a UINavComponent. It should only have normal Buttons!");
+				return;
+			}
+
+			UButton* SectionButton = nullptr;
+
+			const UUINavSectionButton* const ChildSectionButtonWidget = Cast<UUINavSectionButton>(TargetWidget);
+			if (IsValid(ChildSectionButtonWidget))
+			{
+				SectionButton = ChildSectionButtonWidget->SectionButton;
+			}
+
+			if (!IsValid(SectionButton))
+			{
+				SectionButton = Cast<UButton>(TargetWidget);
+			}
+
+			if (!IsValid(SectionButton))
+			{
+				continue;
+			}
+
+			SectionButtons.Add(SectionButton);
 		}
+	}
 
-		UButton* SectionButton = nullptr;
-
-		const UUINavSectionButton* const ChildSectionButtonWidget = Cast<UUINavSectionButton>(ChildWidget);
-		if (IsValid(ChildSectionButtonWidget))
+	for (int i = 0; i < SectionButtons.Num(); ++i)
+	{
+		switch (i)
 		{
-			SectionButton = ChildSectionButtonWidget->SectionButton;
-		}
-
-		if (!IsValid(SectionButton))
-		{
-			SectionButton = Cast<UButton>(ChildWidget);
-		}
-
-		if (!IsValid(SectionButton))
-		{
-			continue;
-		}
-
-		switch (++SectionButtonsNum)
-		{
+		case 0:
+			SectionButtons[i]->OnClicked.AddUniqueDynamic(this, &UUINavWidget::OnSectionButtonPressed1);
+				break;
 		case 1:
-			SectionButton->OnClicked.AddUniqueDynamic(this, &UUINavWidget::OnSectionButtonPressed1);
-			break;
+			SectionButtons[i]->OnClicked.AddUniqueDynamic(this, &UUINavWidget::OnSectionButtonPressed2);
+				break;
 		case 2:
-			SectionButton->OnClicked.AddUniqueDynamic(this, &UUINavWidget::OnSectionButtonPressed2);
+			SectionButtons[i]->OnClicked.AddUniqueDynamic(this, &UUINavWidget::OnSectionButtonPressed3);
 			break;
 		case 3:
-			SectionButton->OnClicked.AddUniqueDynamic(this, &UUINavWidget::OnSectionButtonPressed3);
+			SectionButtons[i]->OnClicked.AddUniqueDynamic(this, &UUINavWidget::OnSectionButtonPressed4);
 			break;
 		case 4:
-			SectionButton->OnClicked.AddUniqueDynamic(this, &UUINavWidget::OnSectionButtonPressed4);
+			SectionButtons[i]->OnClicked.AddUniqueDynamic(this, &UUINavWidget::OnSectionButtonPressed5);
 			break;
 		case 5:
-			SectionButton->OnClicked.AddUniqueDynamic(this, &UUINavWidget::OnSectionButtonPressed5);
+			SectionButtons[i]->OnClicked.AddUniqueDynamic(this, &UUINavWidget::OnSectionButtonPressed6);
 			break;
 		case 6:
-			SectionButton->OnClicked.AddUniqueDynamic(this, &UUINavWidget::OnSectionButtonPressed6);
+			SectionButtons[i]->OnClicked.AddUniqueDynamic(this, &UUINavWidget::OnSectionButtonPressed7);
 			break;
 		case 7:
-			SectionButton->OnClicked.AddUniqueDynamic(this, &UUINavWidget::OnSectionButtonPressed7);
+			SectionButtons[i]->OnClicked.AddUniqueDynamic(this, &UUINavWidget::OnSectionButtonPressed8);
 			break;
 		case 8:
-			SectionButton->OnClicked.AddUniqueDynamic(this, &UUINavWidget::OnSectionButtonPressed8);
+			SectionButtons[i]->OnClicked.AddUniqueDynamic(this, &UUINavWidget::OnSectionButtonPressed9);
 			break;
 		case 9:
-			SectionButton->OnClicked.AddUniqueDynamic(this, &UUINavWidget::OnSectionButtonPressed9);
-			break;
-		case 10:
-			SectionButton->OnClicked.AddUniqueDynamic(this, &UUINavWidget::OnSectionButtonPressed10);
+			SectionButtons[i]->OnClicked.AddUniqueDynamic(this, &UUINavWidget::OnSectionButtonPressed10);
 			break;
 		}
 	}
@@ -318,8 +335,6 @@ void UUINavWidget::SetupSelector()
 void UUINavWidget::UINavSetup()
 {
 	if (UINavPC == nullptr) return;
-
-	SetupSections();
 
 	UUINavWidget* CurrentActiveWidget = UINavPC->GetActiveWidget();
 	const bool bShouldTakeFocus =
@@ -916,7 +931,13 @@ void UUINavWidget::GoToSection(const int32 SectionIndex)
 
 	const int32 OldIndex = UINavSwitcher->GetActiveWidgetIndex();
 	UINavSwitcher->SetActiveWidgetIndex(SectionIndex);
-	UINavSwitcher->GetActiveWidget()->SetFocus();
+	UWidget* NewActiveWidget = UINavSwitcher->GetActiveWidget();
+	static const TArray<TSubclassOf<UWidget>> ClassArray = { UUINavWidget::StaticClass(), UUINavComponent::StaticClass() };
+	UWidget* TargetWidget = UUINavBlueprintFunctionLibrary::FindWidgetOfClassesInWidget(NewActiveWidget, ClassArray);
+	if (IsValid(TargetWidget))
+	{
+		TargetWidget->SetFocus();
+	}
 	OnChangedSection(OldIndex, SectionIndex);
 }
 
@@ -1700,7 +1721,7 @@ void UUINavWidget::ExecuteReturn(const bool bPress)
 			IUINavPCReceiver::Execute_OnReturn(UINavPC->GetOwner());
 		}
 	}
-	else if (!bPress && bPressingReturn)
+	else if (bPress || bPressingReturn)
 	{
 		OnReturn();
 		IUINavPCReceiver::Execute_OnReturn(UINavPC->GetOwner());
