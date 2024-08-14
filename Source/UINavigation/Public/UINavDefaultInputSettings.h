@@ -10,7 +10,7 @@
 /**
  *
  */
-UCLASS(config = UINavDefaultInputSettings)
+UCLASS(config = UserUINavDefaultInputSettings)
 class UINAVIGATION_API UUINavDefaultInputSettings : public UObject
 {
 	GENERATED_BODY()
