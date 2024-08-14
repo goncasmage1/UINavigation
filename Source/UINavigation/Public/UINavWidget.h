@@ -84,6 +84,7 @@ protected:
 	TArray<int> UINavWidgetPath;
 
 	TArray<UButton*> SectionButtons;
+	TArray<UWidget*> SectionWidgets;
 
 	static const TArray<FString> AllowedObjectTypesToFocus;
 

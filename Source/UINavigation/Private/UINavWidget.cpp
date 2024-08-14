@@ -243,14 +243,14 @@ void UUINavWidget::SetupSections()
 	if (SectionButtons.IsEmpty())
 	{
 #if WITH_EDITOR
-		static const TArray<TSubclassOf<UWidget>> ClassArray = { UButton::StaticClass(), UUINavSectionButton::StaticClass(), UUINavComponent::StaticClass() };
+		static const TArray<TSubclassOf<UWidget>> ButtonClassArray = { UButton::StaticClass(), UUINavSectionButton::StaticClass(), UUINavComponent::StaticClass() };
 #else
-		static const TArray<TSubclassOf<UWidget>> ClassArray = { UButton::StaticClass(), UUINavSectionButton::StaticClass() };
+		static const TArray<TSubclassOf<UWidget>> ButtonClassArray = { UButton::StaticClass(), UUINavSectionButton::StaticClass() };
 #endif
 
 		for (UWidget* const ChildWidget : SectionsPanel->GetAllChildren())
 		{
-			UWidget* TargetWidget = UUINavBlueprintFunctionLibrary::FindWidgetOfClassesInWidget(ChildWidget, ClassArray);
+			UWidget* TargetWidget = UUINavBlueprintFunctionLibrary::FindWidgetOfClassesInWidget(ChildWidget, ButtonClassArray);
 
 			if (TargetWidget->IsA<UUINavComponent>())
 			{
@@ -314,6 +314,19 @@ void UUINavWidget::SetupSections()
 		case 9:
 			SectionButtons[i]->OnClicked.AddUniqueDynamic(this, &UUINavWidget::OnSectionButtonPressed10);
 			break;
+		}
+	}
+
+	if (SectionWidgets.IsEmpty())
+	{
+		static const TArray<TSubclassOf<UWidget>> WidgetClassArray = { UUINavWidget::StaticClass(), UUINavComponent::StaticClass() };
+		for (UWidget* const ChildWidget : UINavSwitcher->GetAllChildren())
+		{
+			UWidget* TargetWidget = UUINavBlueprintFunctionLibrary::FindWidgetOfClassesInWidget(ChildWidget, WidgetClassArray);
+			if (IsValid(TargetWidget))
+			{
+				SectionWidgets.Add(TargetWidget);
+			}
 		}
 	}
 }
@@ -924,16 +937,17 @@ void UUINavWidget::GoToPreviousSection()
 
 void UUINavWidget::GoToSection(const int32 SectionIndex)
 {
-	if (!IsValid(UINavSwitcher) || !IsValid(UINavSwitcher->GetWidgetAtIndex(SectionIndex)) || UINavSwitcher->GetActiveWidgetIndex() == SectionIndex)
+	if (!IsValid(UINavSwitcher) ||
+		!IsValid(UINavSwitcher->GetWidgetAtIndex(SectionIndex)) ||
+		UINavSwitcher->GetActiveWidgetIndex() == SectionIndex ||
+		!SectionWidgets.IsValidIndex(SectionIndex))
 	{
 		return;
 	}
-
+	
 	const int32 OldIndex = UINavSwitcher->GetActiveWidgetIndex();
 	UINavSwitcher->SetActiveWidgetIndex(SectionIndex);
-	UWidget* NewActiveWidget = UINavSwitcher->GetActiveWidget();
-	static const TArray<TSubclassOf<UWidget>> ClassArray = { UUINavWidget::StaticClass(), UUINavComponent::StaticClass() };
-	UWidget* TargetWidget = UUINavBlueprintFunctionLibrary::FindWidgetOfClassesInWidget(NewActiveWidget, ClassArray);
+	UWidget* TargetWidget = SectionWidgets[SectionIndex];
 	if (IsValid(TargetWidget))
 	{
 		TargetWidget->SetFocus();
