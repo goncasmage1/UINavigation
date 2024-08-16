@@ -86,6 +86,11 @@ void UUINavPCComponent::Activate(bool bReset)
 		return;
 	}
 
+	if (!PC->IsLocalController())
+	{
+		return;
+	}
+
 	InitPlatformData();
 
 	if (!CurrentPlatformData.bCanUseKeyboardMouse || FSlateApplication::Get().IsGamepadAttached())
@@ -98,7 +103,13 @@ void UUINavPCComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (PC != nullptr && PC->IsLocalPlayerController() && !SharedInputProcessor.IsValid())
+	if (!PC->IsLocalController())
+	{
+		SetComponentTickEnabled(false);
+		return;
+	}
+
+	if (PC != nullptr && !SharedInputProcessor.IsValid())
 	{
 		UUINavLocalPlayerSubsystem* UINavLocalPlayerSubsystem = ULocalPlayer::GetSubsystem<UUINavLocalPlayerSubsystem>(PC->GetLocalPlayer());
 		if (IsValid(UINavLocalPlayerSubsystem)) UINavLocalPlayerSubsystem->ApplySavedInputContexts();
@@ -145,7 +156,7 @@ void UUINavPCComponent::BeginPlay()
 
 void UUINavPCComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
-	if (PC != nullptr && PC->IsLocalPlayerController())
+	if (PC != nullptr && PC->IsLocalController())
 	{
 		FSlateApplication::Get().UnregisterInputPreProcessor(SharedInputProcessor);
 	}
