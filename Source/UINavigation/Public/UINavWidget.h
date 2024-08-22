@@ -341,6 +341,20 @@ public:
         void OnLostNavigation(UUINavWidget* NewActiveWidget, const bool bToChild);
 	virtual void OnLostNavigation_Implementation(UUINavWidget* NewActiveWidget, const bool bToChild);
 
+	/**
+	*	Called on all navigation actions that reach this widget, even if they will be ignored.
+	*/
+	UFUNCTION(BlueprintNativeEvent, Category = UINavWidget)
+	void OnRawNavigationAction(EUINavigationAction Action);
+	virtual void OnRawNavigationAction_Implementation(EUINavigationAction Action);
+
+	/**
+	*	Called on all navigation actions that reach this widget, even if they will be ignored.
+	*/
+	UFUNCTION(BlueprintNativeEvent, Category = UINavWidget)
+	void OnRawNavigation(EUINavigation Event);
+	virtual void OnRawNavigation_Implementation(EUINavigation Event);
+
 	void SetCurrentComponent(UUINavComponent* Component);
 	void SetHoveredComponent(UUINavComponent* Component);
 	void SetSelectedComponent(UUINavComponent* Component);

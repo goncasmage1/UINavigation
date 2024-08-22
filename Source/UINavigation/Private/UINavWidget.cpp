@@ -451,6 +451,14 @@ void UUINavWidget::OnLostNavigation_Implementation(UUINavWidget* NewActiveWidget
 {
 }
 
+void UUINavWidget::OnRawNavigationAction_Implementation(EUINavigationAction Action)
+{
+}
+
+void UUINavWidget::OnRawNavigation_Implementation(EUINavigation Event)
+{
+}
+
 void UUINavWidget::SetCurrentComponent(UUINavComponent* Component)
 {
 	const bool bShouldUnforceNavigation = !IsValid(CurrentComponent) && !GetDefault<UUINavSettings>()->bForceNavigation && !IsValid(HoveredComponent);
@@ -688,6 +696,8 @@ void UUINavWidget::HandleOnNavigation(FNavigationReply& Reply, UUINavWidget* Wid
 		return;
 	}
 
+	Widget->OnRawNavigation(InNavigationEvent.GetNavigationType());
+
 	if (!Widget->UINavPC->AllowsNavigatingDirection(InNavigationEvent.GetNavigationType()))
 	{
 		Reply = FNavigationReply::Stop();
@@ -762,6 +772,7 @@ void UUINavWidget::HandleOnKeyDown(FReply& Reply, UUINavWidget* Widget, UUINavCo
 	const bool bHandleReply = Widget->OuterUINavWidget == nullptr && GetDefault<UUINavSettings>()->bConsumeNavigationInputs;
 	if (FSlateApplication::Get().GetNavigationActionFromKey(InKeyEvent) == EUINavigationAction::Accept)
 	{
+		Widget->OnRawNavigationAction(EUINavigationAction::Accept);
 		if (!Widget->TryConsumeNavigation())
 		{
 			Widget->StartedSelect();
@@ -773,6 +784,7 @@ void UUINavWidget::HandleOnKeyDown(FReply& Reply, UUINavWidget* Widget, UUINavCo
 	}
 	else if (FSlateApplication::Get().GetNavigationActionFromKey(InKeyEvent) == EUINavigationAction::Back)
 	{
+		Widget->OnRawNavigationAction(EUINavigationAction::Back);
 		if (!Widget->TryConsumeNavigation())
 		{
 			Widget->StartedReturn();
