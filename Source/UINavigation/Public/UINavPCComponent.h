@@ -138,6 +138,8 @@ protected:
 	*/
 	static EInputType GetKeyInputType(const FKey& Key);
 
+	bool IsNavigationKeyEvent(const FKeyEvent& Key) const;
+
 	/**
 	*	Notifies to the active UUINavWidget that the input type changed
 	*
@@ -163,6 +165,9 @@ public:
 
 	UPROPERTY(BlueprintReadOnly, Category = UINavController)
 	EInputType CurrentInputType = EInputType::Mouse;
+
+	UPROPERTY(BlueprintReadOnly, Category = UINavController)
+	EInputType CurrentNavOnlyInputType = EInputType::Mouse;
 
 	/*
 	Indicates whether the left analog stick should be used for directional navigation
@@ -234,6 +239,13 @@ public:
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavController)
 	EAutoHideMouse AutoHideMouse = EAutoHideMouse::Never;
+
+	/*
+	If true, only perform the Mouse->Keyboard input mode transition on navigation keys, not any key press.
+	This can help avoid flip-flopping on UIs which expect both mouse and keyboard usage.
+	*/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavController)
+	bool bPreferMouse = true;
 
 	/*
 	The sensitivity of scrolling when using the right thumbstick

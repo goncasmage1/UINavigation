@@ -91,6 +91,7 @@ void UUINavPCComponent::Activate(bool bReset)
 	if (!CurrentPlatformData.bCanUseKeyboardMouse || FSlateApplication::Get().IsGamepadAttached())
 	{
 		CurrentInputType = EInputType::Gamepad;
+		CurrentNavOnlyInputType = EInputType::Gamepad;
 	}
 }
 
@@ -1411,10 +1412,25 @@ bool UUINavPCComponent::IsAxis(const FKey& Key) const
 	return IsAxis2D(Key) || AxisToKeyMap.Contains(Key);
 }
 
+bool UUINavPCComponent::IsNavigationKeyEvent(const FKeyEvent& KeyEvent) const
+{
+	if (!IsValid(ActiveWidget))
+	{
+		return false;
+	}
+	const FSlateApplication& SlateApplication = FSlateApplication::Get();
+	return SlateApplication.GetNavigationActionFromKey(KeyEvent) != EUINavigationAction::Invalid ||
+		SlateApplication.GetNavigationDirectionFromKey(KeyEvent) != EUINavigation::Invalid;
+}
+
 void UUINavPCComponent::VerifyInputTypeChangeByKey(const FKeyEvent& KeyEvent, const bool bAttemptUnforceNavigation /*= true*/)
 {
 	const FKey Key = KeyEvent.GetKey();
 	const EInputType NewInputType = GetKeyInputType(Key);
+	if (bPreferMouse && CurrentInputType == EInputType::Mouse && NewInputType == EInputType::Keyboard && !IsNavigationKeyEvent(KeyEvent))
+	{
+		return;
+	}
 
 	if (NewInputType != CurrentInputType)
 	{
