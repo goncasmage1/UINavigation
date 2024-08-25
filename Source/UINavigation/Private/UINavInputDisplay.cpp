@@ -104,14 +104,22 @@ void UUINavInputDisplay::UpdateInputVisuals()
 	if (IsValid(InputRichText)) InputRichText->SetVisibility(ESlateVisibility::Collapsed);
 	InputImage->SetVisibility(ESlateVisibility::Collapsed);
 
-	EInputRestriction Restriction = InputTypeRestriction;
-	if(Restriction == EInputRestriction::None)
+	FKey Key;
+	if(InputTypeRestriction != EInputRestriction::None)
 	{
-		Restriction = UINavPC->IsUsingGamepad() ? EInputRestriction::Gamepad : EInputRestriction::Keyboard_Mouse;
+		Key = UINavPC->GetEnhancedInputKey(InputAction, Axis, Scale, InputTypeRestriction);
+	} else if (UINavPC->IsUsingGamepad())
+	{
+		Key = UINavPC->GetEnhancedInputKey(InputAction, Axis, Scale, EInputRestriction::Gamepad);
+	} else
+	{
+		// Prefer matching the exact current input device, but allow fallback between mouse and keyboard.
+		Key = UINavPC->GetEnhancedInputKey(InputAction, Axis, Scale, UINavPC->IsUsingMouse() ? EInputRestriction::Mouse : EInputRestriction::Keyboard);
+		if (!Key.IsValid()) Key = UINavPC->GetEnhancedInputKey(InputAction, Axis, Scale, EInputRestriction::Keyboard_Mouse);
 	}
 
 	TSoftObjectPtr<UTexture2D> NewSoftTexture = GetDefault<UUINavSettings>()->bLoadInputIconsAsync ?
-		UINavPC->GetSoftEnhancedInputIcon(InputAction, Axis, Scale, Restriction) : UINavPC->GetEnhancedInputIcon(InputAction, Axis, Scale, Restriction);
+		UINavPC->GetSoftKeyIcon(Key) : UINavPC->GetKeyIcon(Key);
 		
 	if (!NewSoftTexture.IsNull() && DisplayType != EInputDisplayType::Text)
 	{
@@ -125,7 +133,7 @@ void UUINavInputDisplay::UpdateInputVisuals()
 	}
 	if (NewSoftTexture.IsNull() || DisplayType != EInputDisplayType::Icon)
 	{
-		const FText InputRawText = UINavPC->GetEnhancedInputText(InputAction, Axis, Scale, Restriction);
+		const FText InputRawText = UINavPC->GetKeyText(Key);
 		if (IsValid(InputText))
 		{
 			InputText->SetText(InputRawText);
