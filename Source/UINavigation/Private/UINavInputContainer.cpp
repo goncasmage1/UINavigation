@@ -94,34 +94,32 @@ void UUINavInputContainer::ResetKeyMappings()
 	for (UUINavInputBox* InputBox : InputBoxes) InputBox->ResetKeyWidgets();
 }
 
-ERevertRebindReason UUINavInputContainer::CanRegisterKey(UUINavInputBox * InputBox, const FKey NewKey, const int Index, int& OutCollidingActionIndex, int& OutCollidingKeyIndex)
+ERevertRebindReason UUINavInputContainer::CanRegisterKey(UUINavInputBox * InputBox, const FKey NewKey, int& OutCollidingActionIndex)
 {
 	if (!NewKey.IsValid()) return ERevertRebindReason::BlacklistedKey;
 	if (KeyWhitelist.Num() > 0 && !KeyWhitelist.Contains(NewKey)) return ERevertRebindReason::NonWhitelistedKey;
 	if (KeyBlacklist.Contains(NewKey)) return ERevertRebindReason::BlacklistedKey;
 	if (!UUINavBlueprintFunctionLibrary::RespectsRestriction(NewKey, InputBox->InputRestriction)) return ERevertRebindReason::RestrictionMismatch;
-	if (InputBox->ContainsKey(NewKey) != INDEX_NONE) return ERevertRebindReason::UsedBySameInput;
-	if (!CanUseKey(InputBox, NewKey, OutCollidingActionIndex, OutCollidingKeyIndex)) return ERevertRebindReason::UsedBySameInputGroup;
+	if (InputBox->ContainsKey(NewKey)) return ERevertRebindReason::UsedBySameInput;
+	if (!CanUseKey(InputBox, NewKey, OutCollidingActionIndex)) return ERevertRebindReason::UsedBySameInputGroup;
 
 	return ERevertRebindReason::None;
 }
 
-bool UUINavInputContainer::CanUseKey(UUINavInputBox* InputBox, const FKey CompareKey, int& OutCollidingActionIndex, int& OutCollidingKeyIndex) const
+bool UUINavInputContainer::CanUseKey(UUINavInputBox* InputBox, const FKey CompareKey, int& OutCollidingActionIndex) const
 {
 	if (InputBox->EnhancedInputGroups.Num() == 0) InputBox->EnhancedInputGroups.Add(-1);
 
 	for (int i = 0; i < InputBoxes.Num(); ++i)
 	{
 		if (InputBox == InputBoxes[i]) continue;
-
-		const int KeyIndex = InputBoxes[i]->ContainsKey(CompareKey);
-		if (KeyIndex != INDEX_NONE)
+		
+		if (InputBoxes[i]->ContainsKey(CompareKey))
 		{
 			if (InputBox->EnhancedInputGroups.Contains(-1) ||
 				InputBoxes[i]->EnhancedInputGroups.Contains(-1))
 			{
 				OutCollidingActionIndex = i;
-				OutCollidingKeyIndex = KeyIndex;
 				return false;
 			}
 
@@ -130,7 +128,6 @@ bool UUINavInputContainer::CanUseKey(UUINavInputBox* InputBox, const FKey Compar
 				if (InputBoxes[i]->EnhancedInputGroups.Contains(InputGroup))
 				{
 					OutCollidingActionIndex = i;
-					OutCollidingKeyIndex = KeyIndex;
 					return false;
 				}
 			}
@@ -147,11 +144,9 @@ void UUINavInputContainer::SwapKeysDecided(const UPromptDataBase* const PromptDa
 	{
 		if (SwapKeysPromptData->bShouldSwap)
 		{
-			int32 ModifiedActionMappingIndex = SwapKeysPromptData->CurrentInputBox->FinishUpdateNewKey();
+			SwapKeysPromptData->CurrentInputBox->FinishUpdateNewKey();
 			SwapKeysPromptData->CollidingInputBox->UpdateInputKey(SwapKeysPromptData->InputCollisionData.CurrentInputKey,
-				SwapKeysPromptData->InputCollisionData.CollidingKeyIndex,
-				true,
-				ModifiedActionMappingIndex);
+				true);
 		}
 		else
 		{

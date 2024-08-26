@@ -64,10 +64,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "UINav Input")
 	void ResetKeyMappings();
 
-	ERevertRebindReason CanRegisterKey(class UUINavInputBox* InputBox, const FKey NewKey, const int Index, int& OutCollidingActionIndex, int& OutCollidingKeyIndex);
+	ERevertRebindReason CanRegisterKey(class UUINavInputBox* InputBox, const FKey NewKey, int& OutCollidingActionIndex);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "UINav Input")
-	bool CanUseKey(class UUINavInputBox* InputBox, const FKey CompareKey, int& OutCollidingActionIndex, int& OutCollidingKeyIndex) const;
+	bool CanUseKey(class UUINavInputBox* InputBox, const FKey CompareKey, int& OutCollidingActionIndex) const;
 
 	UFUNCTION()
 	void SwapKeysDecided(const UPromptDataBase* const PromptData);

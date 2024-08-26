@@ -889,11 +889,6 @@ void UUINavPCComponent::HandleMouseButtonDownEvent(FSlateApplication& SlateApp, 
 {
 	if (IsValid(ListeningInputBox))
 	{
-		if (ListeningInputBox->IsAxis())
-		{
-			CancelRebind();
-		}
-
 		const FKeyEvent MouseKeyEvent(MouseEvent.GetEffectingButton(), FModifierKeysState(), MouseEvent.GetUserIndex(), MouseEvent.IsRepeat(), 0, 0);
 		ProcessRebind(MouseKeyEvent);
 	}
