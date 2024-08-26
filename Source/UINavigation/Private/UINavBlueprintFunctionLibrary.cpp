@@ -7,7 +7,6 @@
 #include "GameFramework/InputSettings.h"
 #include "UINavSettings.h"
 #include "UINavDefaultInputSettings.h"
-#include "UINavSavedInputSettings.h"
 #include "UINavComponent.h"
 #include "UINavMacros.h"
 #include "Data/PromptData.h"
@@ -28,6 +27,7 @@
 #include "Misc/ConfigCacheIni.h"
 #include "Blueprint/UserWidget.h"
 #include "Blueprint/WidgetTree.h"
+#include "UserSettings/EnhancedInputUserSettings.h"
 
 void UUINavBlueprintFunctionLibrary::SetSoundClassVolume(USoundClass * TargetClass, const float NewVolume)
 {
@@ -77,44 +77,20 @@ void UUINavBlueprintFunctionLibrary::ResetInputSettings(APlayerController* PC)
 		UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PC->GetLocalPlayer());
 		if (PC->InputComponent->IsA<UEnhancedInputComponent>() && Subsystem != nullptr)
 		{
-			const UUINavDefaultInputSettings* DefaultUINavInputSettings = GetDefault<UUINavDefaultInputSettings>();
-			for (const TPair<TSoftObjectPtr<UInputMappingContext>, FInputMappingArray>& Entry : DefaultUINavInputSettings->DefaultEnhancedInputMappings)
+			UEnhancedInputUserSettings* PlayerSettings = Subsystem->GetUserSettings();
+			if (IsValid(PlayerSettings))
 			{
-				UInputMappingContext* InputContext = Entry.Key.LoadSynchronous();
-
-				if (InputContext == nullptr)
+				FGameplayTagContainer FailureReason;
+				PlayerSettings->ResetKeyProfileToDefault(PlayerSettings->GetCurrentKeyProfile()->GetProfileIdentifer(), FailureReason);
+				if (FailureReason.IsValid())
 				{
-					continue;
-				}
-				
-				const FInputMappingArray& DefaultMappings = Entry.Value;
-				if (DefaultMappings.InputMappings.Num() == 0) continue;
-
-				InputContext->UnmapAll();
-
-				for (const FUINavEnhancedActionKeyMapping& DefaultInputMapping : DefaultMappings.InputMappings)
-				{
-					FEnhancedActionKeyMapping& NewMapping = InputContext->MapKey(DefaultInputMapping.Action.LoadSynchronous(), DefaultInputMapping.Key);
-
-					TArray<UInputModifier*> InputModifiers;
-					for (const TSoftObjectPtr<UInputModifier>& Modifier : DefaultInputMapping.Modifiers)
-					{
-						InputModifiers.Add(Modifier.LoadSynchronous());
-					}
-					NewMapping.Modifiers = InputModifiers;
-
-					TArray<UInputTrigger*> InputTriggers;
-					for (const TSoftObjectPtr<UInputTrigger>& Trigger : DefaultInputMapping.Triggers)
-					{
-						InputTriggers.Add(Trigger.LoadSynchronous());
-					}
-					NewMapping.Triggers = InputTriggers;
+					FString Message = TEXT("Failed to reset keybindings: ");
+					Message.Append(FailureReason.ToStringSimple(true));
+					GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, Message);
 				}
 			}
-
-			UUINavSavedInputSettings* SavedInputSettings = GetMutableDefault<UUINavSavedInputSettings>();
-			SavedInputSettings->SavedEnhancedInputMappings.Reset();
-			SavedInputSettings->SaveConfig();
+			PlayerSettings->ApplySettings();
+			PlayerSettings->AsyncSaveSettings();
 
 			UUINavPCComponent* UINavPC = PC->FindComponentByClass<UUINavPCComponent>();
 			if (IsValid(UINavPC))

@@ -34,7 +34,6 @@
 #include "Engine/Texture2D.h"
 #include "UObject/SoftObjectPtr.h"
 #include "Internationalization/Internationalization.h"
-#include "UINavLocalPlayerSubsystem.h"
 #include "Curves/CurveFloat.h"
 #include "Kismet/GameplayStatics.h"
 #include "UObject/ConstructorHelpers.h"
@@ -101,9 +100,6 @@ void UUINavPCComponent::BeginPlay()
 
 	if (PC != nullptr && PC->IsLocalPlayerController() && !SharedInputProcessor.IsValid())
 	{
-		UUINavLocalPlayerSubsystem* UINavLocalPlayerSubsystem = ULocalPlayer::GetSubsystem<UUINavLocalPlayerSubsystem>(PC->GetLocalPlayer());
-		if (IsValid(UINavLocalPlayerSubsystem)) UINavLocalPlayerSubsystem->ApplySavedInputContexts();
-
 		RefreshNavigationKeys();
 
 		if (IsValid(GetEnhancedInputComponent()))
@@ -880,8 +876,11 @@ void UUINavPCComponent::HandleMouseMoveEvent(FSlateApplication& SlateApp, const 
 				MouseKey = MouseLeft;
 			}
 
-			const FKeyEvent MouseKeyEvent(MouseKey, FModifierKeysState(), MouseEvent.GetUserIndex(), MouseEvent.IsRepeat(), 0, 0);
-			ProcessRebind(MouseKeyEvent);
+			if (MouseKey.IsValid())
+			{
+				const FKeyEvent MouseKeyEvent(MouseKey, FModifierKeysState(), MouseEvent.GetUserIndex(), MouseEvent.IsRepeat(), 0, 0);
+				ProcessRebind(MouseKeyEvent);
+			}
 		}
 	}
 }

@@ -30,29 +30,18 @@ void UUINavInputContainer::NativeConstruct()
 	UINavPC = Cast<APlayerController>(GetOwningPlayer())->FindComponentByClass<UUINavPCComponent>();
 
 	SetIsFocusable(false);
-
-	if (InputRestrictions.Num() == 0) InputRestrictions.Add(EInputRestriction::None);
-	else if (InputRestrictions.Num() > 3) InputRestrictions.SetNum(3);
-
-	if (IsValid(UINavPC) && !UINavPC->GetCurrentPlatformData().bCanUseKeyboardMouse)
-	{
-		for (int32 i = InputRestrictions.Num() - 1; i >= 0; --i)
-		{
-			const EInputRestriction InputRestriction = InputRestrictions[i];
-			if (InputRestriction == EInputRestriction::Keyboard ||
-				InputRestriction == EInputRestriction::Mouse ||
-				InputRestriction == EInputRestriction::Keyboard_Mouse)
-			{
-				InputRestrictions.RemoveAt(i);
-			}
-		}
-	}
-
-	KeysPerInput = InputRestrictions.Num();
-
+	
 	DecidedCallback.BindUFunction(this, FName("SwapKeysDecided"));
 
-	SetupInputBoxes();
+	WidgetTree->ForWidgetAndChildren(InputBoxesPanel, [this](UWidget* Widget)
+	{
+		if (UUINavInputBox* InputBox = Cast<UUINavInputBox>(Widget))
+		{
+			InputBox->Container = this;
+			InputBox->CreateKeyWidgets();
+			this->InputBoxes.Add(InputBox);
+		}
+	});
 
 	Super::NativeConstruct();
 }
@@ -63,18 +52,10 @@ FReply UUINavInputContainer::NativeOnFocusReceived(const FGeometry& InGeometry, 
 
 	if (InputBoxes.Num() > 0)
 	{
-		InputBoxes[0]->InputButton1->SetFocus();
+		InputBoxes[0]->InputButton->SetFocus();
 	}
 
 	return Reply;
-}
-
-void UUINavInputContainer::OnAddInputBox_Implementation(class UUINavInputBox* NewInputBox)
-{
-	if (InputBoxesPanel != nullptr)
-	{
-		InputBoxesPanel->AddChild(NewInputBox);
-	}
 }
 
 void UUINavInputContainer::OnKeyRebinded_Implementation(FName InputName, FKey OldKey, FKey NewKey)
@@ -113,84 +94,12 @@ void UUINavInputContainer::ResetKeyMappings()
 	for (UUINavInputBox* InputBox : InputBoxes) InputBox->ResetKeyWidgets();
 }
 
-UUINavInputBox* UUINavInputContainer::GetInputBoxAtIndex(const int Index) const
-{
-	if (Index == -1 && InputBoxes.Num() > 0)
-	{
-		return InputBoxes.Last();
-	}
-
-	if (!InputBoxes.IsValidIndex(Index))
-	{
-		return nullptr;
-	}
-
-	return InputBoxes[Index];
-}
-
-void UUINavInputContainer::SetupInputBoxes()
-{
-	if (InputBox_BP == nullptr) return;
-
-	InputBoxes.Reset();
-
-	NumberOfInputs = 0;
-	for (const TPair<UInputMappingContext*, FInputContainerEnhancedActionDataArray>& Context : EnhancedInputs)
-	{
-		NumberOfInputs += Context.Value.Actions.Num();
-	}
-
-	if (NumberOfInputs == 0)
-	{
-		DISPLAYERROR(TEXT("Input Container has no Enhanced Input data!"));
-		return;
-	}
-	
-	CreateInputBoxes();
-}
-
-void UUINavInputContainer::CreateInputBoxes()
-{
-	if (InputBox_BP == nullptr || UINavPC == nullptr) return;
-
-	for (int i = 0; i < NumberOfInputs; ++i)
-	{
-		UUINavInputBox* NewInputBox = CreateWidget<UUINavInputBox>(this, InputBox_BP);
-		InputBoxes.Add(NewInputBox);
-		NewInputBox->Container = this;
-		NewInputBox->KeysPerInput = KeysPerInput;
-
-		int Index = i;
-		for (const TPair<UInputMappingContext*, FInputContainerEnhancedActionDataArray>& Context : EnhancedInputs)
-		{
-			if (Index >= Context.Value.Actions.Num())
-			{
-				Index -= Context.Value.Actions.Num();
-			}
-			else
-			{
-				NewInputBox->InputContext = Context.Key;
-				NewInputBox->InputActionData = Context.Value.Actions[Index];
-				NewInputBox->EnhancedInputGroups = Context.Value.InputGroups;
-				break;
-			}
-		}
-	}
-
-	for (int i = 0; i < NumberOfInputs; ++i)
-	{
-		UUINavInputBox* const InputBox = InputBoxes[i];
-		InputBox->CreateKeyWidgets();
-		OnAddInputBox(InputBox);
-	}
-}
-
 ERevertRebindReason UUINavInputContainer::CanRegisterKey(UUINavInputBox * InputBox, const FKey NewKey, const int Index, int& OutCollidingActionIndex, int& OutCollidingKeyIndex)
 {
 	if (!NewKey.IsValid()) return ERevertRebindReason::BlacklistedKey;
 	if (KeyWhitelist.Num() > 0 && !KeyWhitelist.Contains(NewKey)) return ERevertRebindReason::NonWhitelistedKey;
 	if (KeyBlacklist.Contains(NewKey)) return ERevertRebindReason::BlacklistedKey;
-	if (!RespectsRestriction(NewKey, Index)) return ERevertRebindReason::RestrictionMismatch;
+	if (!UUINavBlueprintFunctionLibrary::RespectsRestriction(NewKey, InputBox->InputRestriction)) return ERevertRebindReason::RestrictionMismatch;
 	if (InputBox->ContainsKey(NewKey) != INDEX_NONE) return ERevertRebindReason::UsedBySameInput;
 	if (!CanUseKey(InputBox, NewKey, OutCollidingActionIndex, OutCollidingKeyIndex)) return ERevertRebindReason::UsedBySameInputGroup;
 
@@ -229,26 +138,6 @@ bool UUINavInputContainer::CanUseKey(UUINavInputBox* InputBox, const FKey Compar
 	}
 
 	return true;
-}
-
-bool UUINavInputContainer::RespectsRestriction(const FKey CompareKey, const int Index)
-{
-	const EInputRestriction Restriction = InputRestrictions[Index];
-
-	return UUINavBlueprintFunctionLibrary::RespectsRestriction(CompareKey, Restriction);
-}
-
-void UUINavInputContainer::ResetInputBox(const FName InputName, const EAxisType AxisType)
-{
-	for (UUINavInputBox* InputBox : InputBoxes)
-	{
-		if (InputBox->InputName.IsEqual(InputName) &&
-			InputBox->AxisType == AxisType)
-		{
-			InputBox->ResetKeyWidgets();
-			break;
-		}
-	}
 }
 
 void UUINavInputContainer::SwapKeysDecided(const UPromptDataBase* const PromptData)
@@ -297,37 +186,6 @@ UUINavInputBox* UUINavInputContainer::GetInputBoxInDirection(UUINavInputBox* Inp
 	}
 
 	return InputBoxes.IsValidIndex(Index) ? InputBoxes[Index] : nullptr;
-}
-
-UUINavInputBox* UUINavInputContainer::GetOppositeInputBox(const FInputContainerEnhancedActionData& ActionData)
-{
-	for (UUINavInputBox* InputBox : InputBoxes)
-	{
-		if (InputBox->InputActionData.Action == ActionData.Action &&
-			InputBox->InputActionData.Axis == ActionData.Axis &&
-			((InputBox->InputActionData.AxisScale == EAxisType::Positive && ActionData.AxisScale == EAxisType::Negative) ||
-			(InputBox->InputActionData.AxisScale == EAxisType::Negative && ActionData.AxisScale == EAxisType::Positive)))
-		{
-			return InputBox;
-		}
-	}
-
-	return nullptr;
-}
-
-UUINavInputBox* UUINavInputContainer::GetOppositeInputBox(const FName& InputName, const EAxisType AxisType)
-{
-	for (UUINavInputBox* InputBox : InputBoxes)
-	{
-		if (InputBox->InputName == InputName &&
-			((InputBox->AxisType == EAxisType::Positive && AxisType == EAxisType::Negative) ||
-			(InputBox->AxisType == EAxisType::Negative && AxisType == EAxisType::Positive)))
-		{
-			return InputBox;
-		}
-	}
-
-	return nullptr;
 }
 
 void UUINavInputContainer::GetInputRebindData(const int InputIndex, FInputRebindData& RebindData) const

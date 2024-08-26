@@ -29,9 +29,6 @@ class UINAVIGATION_API UUINavInputContainer : public UUserWidget
 	
 protected:
 
-	void SetupInputBoxes();
-	void CreateInputBoxes();
-
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget), Category = "UINav Input")
 	class UPanelWidget* InputBoxesPanel = nullptr;
 
@@ -42,14 +39,6 @@ public:
 	virtual void NativeConstruct() override;
 
 	virtual FReply NativeOnFocusReceived(const FGeometry& InGeometry, const FFocusEvent& InFocusEvent) override;
-
-	/**
-	*	Called when a new input box is added
-	*/
-	UFUNCTION(BlueprintNativeEvent, Category = UINavWidget)
-	void OnAddInputBox(class UUINavInputBox* NewInputBox);
-
-	virtual void OnAddInputBox_Implementation(class UUINavInputBox* NewInputBox);
 
 	/*
 	*	Called when key was successfully rebinded
@@ -75,26 +64,15 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "UINav Input")
 	void ResetKeyMappings();
 
-	UFUNCTION(BlueprintCallable, Category = "UINav Input")
-	UUINavInputBox* GetInputBoxAtIndex(const int Index) const;
-
 	ERevertRebindReason CanRegisterKey(class UUINavInputBox* InputBox, const FKey NewKey, const int Index, int& OutCollidingActionIndex, int& OutCollidingKeyIndex);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "UINav Input")
 	bool CanUseKey(class UUINavInputBox* InputBox, const FKey CompareKey, int& OutCollidingActionIndex, int& OutCollidingKeyIndex) const;
 
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "UINav Input")
-	bool RespectsRestriction(const FKey CompareKey, const int Index);
-
-	void ResetInputBox(const FName InputName, const EAxisType AxisType);
-
 	UFUNCTION()
 	void SwapKeysDecided(const UPromptDataBase* const PromptData);
 
 	UUINavInputBox* GetInputBoxInDirection(UUINavInputBox* InputBox, const EUINavigation Direction);
-	
-	UUINavInputBox* GetOppositeInputBox(const FInputContainerEnhancedActionData& ActionData);
-	UUINavInputBox* GetOppositeInputBox(const FName& InputName, const EAxisType AxisType);
 
 	void GetInputRebindData(const int InputIndex, FInputRebindData& RebindData) const;
 
@@ -103,25 +81,9 @@ public:
 	//-----------------------------------------------------------------------
 
 	class UUINavPCComponent* UINavPC = nullptr;
-
-	UPROPERTY(BlueprintReadOnly, Category = "UINav Input")
-	int NumberOfInputs = 0;
-
-	UPROPERTY(BlueprintReadOnly, Category = "UINav Input")
-	int KeysPerInput = 0;
-
+	
 	UPROPERTY(BlueprintReadOnly, Category = "UINav Input")
 	TArray<UUINavInputBox*> InputBoxes;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Input")
-	TMap<UInputMappingContext*, FInputContainerEnhancedActionDataArray> EnhancedInputs;
-	
-	/*
-	The restrictions for the type of input associated with each column
-	in the Input Container
-	*/
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Input")
-	TArray<EInputRestriction> InputRestrictions;
 
 	/*
 	A list of the keys that the player should only be able to use for the inputs
@@ -141,9 +103,6 @@ public:
 		EKeys::RightCommand,
 	};
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Input")
-	TSubclassOf<class UUINavInputBox> InputBox_BP;
-
 	/*
 	The widget class of the widget that will tell the player that 2 keys can be swapped.
 	*/
@@ -152,7 +111,7 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Input")
 	int SpawnKeysWidgetZOrder = 0;
-	
+
 	/*
 	Indicates whether unused input boxes will hidden or collapsed
 	*/

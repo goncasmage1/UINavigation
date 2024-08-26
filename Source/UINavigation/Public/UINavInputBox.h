@@ -6,6 +6,7 @@
 #include "Data/AxisType.h"
 #include "Data/InputContainerEnhancedActionData.h"
 #include "Data/InputRebindData.h"
+#include "Data/InputRestriction.h"
 #include "Data/RevertRebindReason.h"
 #include "EnhancedActionKeyMapping.h"
 #include "UINavInputBox.generated.h"
@@ -29,10 +30,8 @@ class UINAVIGATION_API UUINavInputBox : public UUserWidget
 	GENERATED_BODY()
 	
 protected:
-
-	TArray<FKey> Keys;
-
-	TArray<bool> bUsingKeyImage = { false, false, false };
+	FKey CurrentKey = FKey();
+	bool bUsingKeyImage;
 
 	FKey AwaitingNewKey = FKey();
 	int8 AwaitingIndex = -1;
@@ -44,19 +43,11 @@ protected:
 	void UpdateKeyDisplay(const int Index);
 	FKey GetKeyFromAxis(const FKey& AxisKey) const;
 	void ProcessInputName();
-	int GetNumValidKeys(const int Index) const;
 
 	UFUNCTION()
-	void InputComponent1Clicked();
-	UFUNCTION()
-	void InputComponent2Clicked();
-	UFUNCTION()
-	void InputComponent3Clicked();
+	void InputComponentClicked();
 		
 	void InputComponentClicked(const int Index);
-
-	void GetEnhancedMappingsForAction(const UInputAction* Action, const EInputAxis& Axis, const int Index, TArray<int32>& OutMappingIndices);
-	void GetKeyMappingNegateAxes(const FKey& OldAxisKey, bool& bNegateX, bool& bNegateY, bool& bNegateZ);
 
 public:
 
@@ -71,11 +62,6 @@ public:
 	int32 UpdateInputKey(const FKey& NewKey, int Index = -1, const bool bSkipChecks = false, const int32 MappingIndexToIgnore = -1);
 	int32 FinishUpdateNewKey(const int32 MappingIndexToIgnore = -1);
 	int32 FinishUpdateNewEnhancedInputKey(const FKey& PressedKey, int Index, const int32 MappingIndexToIgnore = -1);
-	void TryMapEnhancedAxisKey(const FKey& NewKey, const int32 Index);
-	void TryMap2DAxisKey(const FKey& NewMappingKey, const int Index);
-	void UnmapEnhancedAxisKey(const FKey& NewAxisKey, const FKey& OldAxisKey, const FKey& NewKey, const int32 Index, const bool bNegateX, const bool bNegateY, const bool bNegateZ);
-	void AddRelevantModifiers(const FInputContainerEnhancedActionData& ActionData, FEnhancedActionKeyMapping& Mapping);
-	void ApplyNegateModifiers(UUINavInputBox* InputBox, FEnhancedActionKeyMapping& Mapping, const bool bNegateX, const bool bNegateY, const bool bNegateZ);
 	void CancelUpdateInputKey(const ERevertRebindReason Reason);
 	void RevertToKeyText(const int Index);
 
@@ -84,21 +70,13 @@ public:
 	int ContainsKey(const FKey& CompareKey) const;
 	FORCEINLINE bool IsAxis() const { return IS_AXIS; }
 	FORCEINLINE bool WantsAxisKey() const;
-	FORCEINLINE FKey GetKey(const int Index) { return Index >= 0 && Index < Keys.Num() ? Keys[Index] : FKey(); }
+	FORCEINLINE FKey GetKey(const int Index) { return Index >= 0 ? CurrentKey : FKey(); }
 
 	EAxisType AxisType = EAxisType::None;
 
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget), Category = "UINav Input")
-	class UUINavInputComponent* InputButton1 = nullptr;
+	class UUINavInputComponent* InputButton = nullptr;
 		
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget), Category = "UINav Input")
-	class UUINavInputComponent* InputButton2 = nullptr;
-		
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget), Category = "UINav Input")
-	class UUINavInputComponent* InputButton3 = nullptr;
-
-	TArray<class UUINavInputComponent*> InputButtons;
-
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidgetOptional), Category = "UINav Input")
 	class UTextBlock* InputText = nullptr;
 
@@ -108,19 +86,27 @@ public:
 	UPROPERTY()
 	class UUINavInputContainer* Container = nullptr;
 
-	UPROPERTY(BlueprintReadOnly, Category = "Input")
+	UPROPERTY()
 	FName InputName;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Enhanced Input")
 	TArray<int> EnhancedInputGroups;
 
-	UPROPERTY(BlueprintReadOnly, Category = "Enhanced Input")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Enhanced Input")
 	UInputMappingContext* InputContext = nullptr;
 
-	UPROPERTY(BlueprintReadOnly, Category = "Enhanced Input")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Enhanced Input")
 	FInputContainerEnhancedActionData InputActionData;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINavPromptWidget")
 	FString InputTextStyleRowName;
-	
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Input")
+	EInputRestriction InputRestriction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Enhanced Input")
+	FName PlayerMappableKeySettingsName;
+
 	FInputRebindData InputData = FInputRebindData();
 
 	int KeysPerInput = 2;

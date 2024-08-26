@@ -34,7 +34,8 @@ public class UINavigation : ModuleRules
                 "EnhancedInput",
                 "RHI",
                 "HeadMountedDisplay",
-				"AssetRegistry"
+				"AssetRegistry",
+				"GameplayTags",
 			}
 			);
 		
