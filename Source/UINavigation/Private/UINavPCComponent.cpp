@@ -4,7 +4,6 @@
 #include "UINavWidget.h"
 #include "UINavComponent.h"
 #include "UINavSettings.h"
-#include "UINavDefaultInputSettings.h"
 #include "UINavPCReceiver.h"
 #include "UINavInputContainer.h"
 #include "UINavMacros.h"
@@ -27,6 +26,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputLibrary.h"
 #include "EnhancedPlayerInput.h"
+#include "PlayerMappableKeySettings.h"
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "Templates/SharedPointer.h"
 #include "Engine/GameViewportClient.h"
@@ -37,6 +37,7 @@
 #include "Curves/CurveFloat.h"
 #include "Kismet/GameplayStatics.h"
 #include "UObject/ConstructorHelpers.h"
+#include "UserSettings/EnhancedInputUserSettings.h"
 
 const FKey UUINavPCComponent::MouseUp("MouseUp");
 const FKey UUINavPCComponent::MouseDown("MouseDown");
@@ -130,14 +131,25 @@ void UUINavPCComponent::BeginPlay()
 		FSlateApplication::Get().RegisterInputPreProcessor(SharedInputProcessor);
 
 		CacheGameInputContexts();
-		TryResetDefaultInputs();
 
 		IPlatformInputDeviceMapper& PlatformInputMapper = IPlatformInputDeviceMapper::Get();
 		if (!PlatformInputMapper.GetOnInputDeviceConnectionChange().IsBoundToObject(this))
 		{
 			PlatformInputMapper.GetOnInputDeviceConnectionChange().AddUObject(this, &UUINavPCComponent::OnControllerConnectionChanged);
 		}
+		
+		UEnhancedInputLocalPlayerSubsystem* InputSubsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PC->GetLocalPlayer());
+		if (IsValid(InputSubsystem))
+		{
+			InputSubsystem->ControlMappingsRebuiltDelegate.AddUniqueDynamic(this, &UUINavPCComponent::OnControlMappingsRebuilt);
+		}
 	}
+}
+
+void UUINavPCComponent::OnControlMappingsRebuilt()
+{
+	RefreshNavigationKeys();
+	UpdateInputIconsDelegate.Broadcast();
 }
 
 void UUINavPCComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -390,22 +402,6 @@ void UUINavPCComponent::CacheGameInputContexts()
 
 			CachedInputContexts.Add(InputContext);
 		}
-	}
-}
-
-void UUINavPCComponent::TryResetDefaultInputs()
-{
-	UUINavDefaultInputSettings* DefaultInputSettings = GetMutableDefault<UUINavDefaultInputSettings>();
-	const uint8 CurrentInputVersion = GetDefault<UUINavSettings>()->CurrentInputVersion;
-	if (DefaultInputSettings->DefaultEnhancedInputMappings.Num() == 0 || CurrentInputVersion > DefaultInputSettings->InputVersion)
-	{
-		DefaultInputSettings->DefaultEnhancedInputMappings.Reset();
-		DefaultInputSettings->InputVersion = CurrentInputVersion;
-		for (const UInputMappingContext* const InputContext : CachedInputContexts)
-		{
-			DefaultInputSettings->DefaultEnhancedInputMappings.Add(TSoftObjectPtr<UInputMappingContext>(FAssetData(InputContext).ToSoftObjectPath()), InputContext->GetMappings());
-		}
-		DefaultInputSettings->SaveConfig();
 	}
 }
 
@@ -663,7 +659,7 @@ void UUINavPCComponent::RefreshNavigationKeys()
 {
 	FSlateApplication::Get().SetNavigationConfig(
 		MakeShared<FUINavigationConfig>(
-			GetUINavInputContext(),
+			this,
 			bAllowDirectionalInput,
 			bAllowSectionInput,
 			bAllowSelectInput,
@@ -1076,15 +1072,16 @@ FKey UUINavPCComponent::GetEnhancedInputKey(const UInputAction* Action, const EI
 		const UInputMappingContext* const UINavInputContext = GetDefault<UUINavSettings>()->EnhancedInputContext.LoadSynchronous();
 		for (const FEnhancedActionKeyMapping& Mapping : UINavInputContext->GetMappings())
 		{
-			if (Mapping.Action == Action && UUINavBlueprintFunctionLibrary::RespectsRestriction(Mapping.Key, InputRestriction))
+			FKey Key = GetCurrentKey(Mapping);
+			if (Mapping.Action == Action && UUINavBlueprintFunctionLibrary::RespectsRestriction(Key, InputRestriction))
 			{
 				if (Action->ValueType == EInputActionValueType::Boolean || Scale == EAxisType::None)
 				{
-					return Mapping.Key;
+					return Key;
 				}
 				else
 				{
-					return GetKeyFromAxis(Mapping.Key, Scale == EAxisType::Positive, Axis);
+					return GetKeyFromAxis(Key, Scale == EAxisType::Positive, Axis);
 				}
 			}
 		}
@@ -1100,7 +1097,7 @@ FKey UUINavPCComponent::GetEnhancedInputKey(const UInputAction* Action, const EI
 				{
 					return Key;
 				}
-				else
+				else if (IsAxis(Key))
 				{
 					return GetKeyFromAxis(Key, Scale == EAxisType::Positive, Axis);
 				}
@@ -1112,17 +1109,18 @@ FKey UUINavPCComponent::GetEnhancedInputKey(const UInputAction* Action, const EI
 	{
 		for (const FEnhancedActionKeyMapping& Mapping : InputContext->GetMappings())
 		{
-			if (Mapping.Action == Action && UUINavBlueprintFunctionLibrary::RespectsRestriction(Mapping.Key, InputRestriction))
+			FKey Key = GetCurrentKey(Mapping);
+			if (Mapping.Action == Action && UUINavBlueprintFunctionLibrary::RespectsRestriction(Key, InputRestriction))
 			{
 				if (Action->ValueType == EInputActionValueType::Boolean || Scale == EAxisType::None)
 				{
-					return Mapping.Key;
+					return Key;
 				}
 				else
 				{
-					if (IsAxis(Mapping.Key))
+					if (IsAxis(Key))
 					{
-						return GetKeyFromAxis(Mapping.Key, Scale == EAxisType::Positive, Axis);
+						return GetKeyFromAxis(Key, Scale == EAxisType::Positive, Axis);
 					}
 					else
 					{
@@ -1131,7 +1129,7 @@ FKey UUINavPCComponent::GetEnhancedInputKey(const UInputAction* Action, const EI
 						GetAxisPropertiesFromMapping(Mapping, bPositive, KeyAxis);
 						if (KeyAxis == Axis && bPositive == (Scale == EAxisType::Positive))
 						{
-							return Mapping.Key;
+							return Key;
 						}
 					}
 				}
@@ -1216,9 +1214,10 @@ void UUINavPCComponent::GetEnhancedInputKeys(const UInputAction* Action, TArray<
 		const UInputMappingContext* const UINavInputContext = GetDefault<UUINavSettings>()->EnhancedInputContext.LoadSynchronous();
 		for (const FEnhancedActionKeyMapping& Mapping : UINavInputContext->GetMappings())
 		{
-			if (Mapping.Action == Action && UUINavBlueprintFunctionLibrary::RespectsRestriction(Mapping.Key, EInputRestriction::None))
+			FKey Key = GetCurrentKey(Mapping);
+			if (Mapping.Action == Action && UUINavBlueprintFunctionLibrary::RespectsRestriction(Key, EInputRestriction::None))
 			{
-				OutKeys.Add(Mapping.Key);
+				OutKeys.Add(Key);
 			}
 		}
 	}
@@ -1238,10 +1237,28 @@ void UUINavPCComponent::GetEnhancedInputKeys(const UInputAction* Action, TArray<
 		{
 			if (Mapping.Action == Action)
 			{
-				OutKeys.Add(Mapping.Key);
+				OutKeys.Add(GetCurrentKey(Mapping));
 			}
 		}
 	}
+}
+
+FKey UUINavPCComponent::GetCurrentKey(const FEnhancedActionKeyMapping& Mapping) const
+{
+	if (UPlayerMappableKeySettings* KeySettings = Mapping.GetPlayerMappableKeySettings(); IsValid(KeySettings))
+	{
+		if (UEnhancedInputLocalPlayerSubsystem* InputSubsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PC->GetLocalPlayer()); IsValid(InputSubsystem))
+		{
+			if (UEnhancedInputUserSettings* UserSettings = InputSubsystem->GetUserSettings(); IsValid(UserSettings))
+			{
+				if (const FPlayerKeyMapping* PlayerMapping = UserSettings->FindCurrentMappingForSlot(KeySettings->Name, EPlayerMappableKeySlot::First))
+				{
+					return PlayerMapping->GetCurrentKey();
+				}
+			}
+		}
+	}
+	return Mapping.Key;
 }
 
 EInputType UUINavPCComponent::GetKeyInputType(const FKey& Key)
@@ -1344,10 +1361,11 @@ const FKey UUINavPCComponent::GetOppositeAxis2DAxis(const FKey& Key) const
 
 void UUINavPCComponent::GetAxisPropertiesFromMapping(const FEnhancedActionKeyMapping& ActionMapping, bool& bOutPositive, EInputAxis& OutAxis) const
 {
+	FKey Key = GetCurrentKey(ActionMapping);
 	TArray<UInputModifier*> Modifiers(ActionMapping.Modifiers);
 	Modifiers.Append(ActionMapping.Action->Modifiers);
 	bOutPositive = true;
-	if (!IsAxis2D(ActionMapping.Key))
+	if (!IsAxis2D(Key))
 	{
 		OutAxis = EInputAxis::X;
 	}
@@ -1355,7 +1373,7 @@ void UUINavPCComponent::GetAxisPropertiesFromMapping(const FEnhancedActionKeyMap
 	for (const UInputModifier* Modifier : Modifiers)
 	{
 		const UInputModifierSwizzleAxis* Swizzle = Cast<UInputModifierSwizzleAxis>(Modifier);
-		if (Swizzle != nullptr && !IsAxis2D(ActionMapping.Key))
+		if (Swizzle != nullptr && !IsAxis2D(Key))
 		{
 			switch (Swizzle->Order)
 			{

@@ -6,7 +6,6 @@
 #include "Data/InputRebindData.h"
 #include "Data/InputRestriction.h"
 #include "Data/RevertRebindReason.h"
-#include "EnhancedActionKeyMapping.h"
 #include "UINavInputBox.generated.h"
 
 #define IS_AXIS (AxisType != EAxisType::None)
@@ -80,13 +79,13 @@ public:
 	TArray<int> EnhancedInputGroups;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Input")
-	UInputMappingContext* InputContext = nullptr;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Input")
 	EInputRestriction InputRestriction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Input")
 	FName PlayerMappableKeySettingsName;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Input")
+	TArray<FName> MirrorToPlayerMappableKeySettingsNames; 
+	
 	FInputRebindData InputData = FInputRebindData();
 };

@@ -1,15 +1,15 @@
-// Copyright (C) 2023 Gonçalo Marques - All Rights Reserved
+// Copyright (C) 2023 Gonï¿½alo Marques - All Rights Reserved
 
 #pragma once
 
 #include "Framework/Application/NavigationConfig.h" // from Slate
 
-class UInputMappingContext;
+class UUINavPCComponent;
 
 class UINAVIGATION_API FUINavigationConfig : public FNavigationConfig
 {
 public:
-	FUINavigationConfig(const UInputMappingContext* const InputContext, const bool bAllowDirectionalInput = true, const bool bAllowSectionInput = true, const bool bAllowAccept = true, const bool bAllowBack = true, const bool bUseAnalogDirectionalInput = true, const bool bUsingThumbstickAsMouse = false);
+	FUINavigationConfig(const UUINavPCComponent* const UINavPC, const bool bAllowDirectionalInput = true, const bool bAllowSectionInput = true, const bool bAllowAccept = true, const bool bAllowBack = true, const bool bUseAnalogDirectionalInput = true, const bool bUsingThumbstickAsMouse = false);
 
 	virtual EUINavigationAction GetNavigationActionForKey(const FKey& InKey) const override;
 

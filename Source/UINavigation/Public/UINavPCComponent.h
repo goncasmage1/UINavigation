@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include "EnhancedActionKeyMapping.h"
 #include "Components/ActorComponent.h"
 #include "Engine/DataTable.h"
 #include "Data/CountdownPhase.h"
@@ -32,7 +33,6 @@ class UUINavPromptWidget;
 class UInputMappingContext;
 class UCurveFloat;
 class FText;
-struct FEnhancedActionKeyMapping;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FInputTypeChangedDelegate, EInputType, InputType);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FUpdateInputIconsDelegate);
@@ -424,6 +424,9 @@ public:
 	void HandleMouseButtonUpEvent(FSlateApplication& SlateApp, const FPointerEvent& MouseEvent);
 	void HandleMouseWheelOrGestureEvent(FSlateApplication& SlateApp, const FPointerEvent& InWheelEvent, const FPointerEvent* InGesture);
 
+	UFUNCTION()
+	void OnControlMappingsRebuilt();
+	
 	UFUNCTION(BlueprintCallable, Category = UINavController)
 	void SimulateMousePress();
 	UFUNCTION(BlueprintCallable, Category = UINavController)
@@ -436,7 +439,7 @@ public:
 
 	void ProcessRebind(const FKeyEvent& KeyEvent);
 	void CancelRebind();
-
+	
 	/**
 	*	Verifies if a new input type is being used
 	*
@@ -520,6 +523,9 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
 	void GetEnhancedInputKeys(const UInputAction* Action, TArray<FKey>& OutKeys);
 
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
+	FKey GetCurrentKey(const FEnhancedActionKeyMapping& Mapping) const;
+	
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
 	UEnhancedInputComponent* GetEnhancedInputComponent() const;
 

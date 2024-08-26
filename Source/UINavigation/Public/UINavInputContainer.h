@@ -136,4 +136,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Input")
 	FText SwapKeysMessageText = FText::FromString(TEXT("{CollidingKey} is already being used by {CollidingAction}.\nDo you want to swap it with {OtherKey}?"));
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Input")
+	TArray<UInputMappingContext*> InputContexts;
 };

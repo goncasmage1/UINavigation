@@ -16,13 +16,15 @@
 #include "Components/TextBlock.h"
 #include "Components/RichTextBlock.h"
 #include "IImageWrapper.h"
-#include "EnhancedInputComponent.h"
+#include "EnhancedInputSubsystems.h"
+#include "InputMappingContext.h"
 #include "UINavMacros.h"
 #include "Internationalization/Internationalization.h"
 #include "HAL/Platform.h"
 #include "Delegates/Delegate.h"
 #include "Data/PromptDataSwapKeys.h"
 #include "Data/PlatformConfigData.h"
+#include "UserSettings/EnhancedInputUserSettings.h"
 
 void UUINavInputContainer::NativeConstruct()
 {
@@ -33,6 +35,23 @@ void UUINavInputContainer::NativeConstruct()
 	
 	DecidedCallback.BindUFunction(this, FName("SwapKeysDecided"));
 
+	if (IsValid(UINavPC) && IsValid(UINavPC->GetPC()) && IsValid(UINavPC->GetPC()->GetLocalPlayer()))
+	{
+		if (UEnhancedInputLocalPlayerSubsystem* PlayerSubsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(UINavPC->GetPC()->GetLocalPlayer()); IsValid(PlayerSubsystem))
+		{
+			if (UEnhancedInputUserSettings* PlayerSettings = PlayerSubsystem->GetUserSettings(); IsValid(PlayerSettings))
+			{
+				for (UInputMappingContext* InputContext : InputContexts)
+				{
+					if (!PlayerSettings->IsMappingContextRegistered(InputContext))
+					{
+						PlayerSettings->RegisterInputMappingContext(InputContext);
+					}
+				}
+			}
+		}
+	}
+	
 	WidgetTree->ForWidgetAndChildren(InputBoxesPanel, [this](UWidget* Widget)
 	{
 		if (UUINavInputBox* InputBox = Cast<UUINavInputBox>(Widget))

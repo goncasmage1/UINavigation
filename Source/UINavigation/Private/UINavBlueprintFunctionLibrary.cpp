@@ -6,13 +6,11 @@
 #include "GameFramework/GameUserSettings.h"
 #include "GameFramework/InputSettings.h"
 #include "UINavSettings.h"
-#include "UINavDefaultInputSettings.h"
 #include "UINavComponent.h"
 #include "UINavMacros.h"
 #include "Data/PromptData.h"
 #include "InputAction.h"
 #include "EnhancedInputSubsystems.h"
-#include "Data/UINavEnhancedActionKeyMapping.h"
 #include "Components/PanelWidget.h"
 #include "Components/UniformGridPanel.h"
 #include "Components/UniformGridSlot.h"
@@ -91,13 +89,6 @@ void UUINavBlueprintFunctionLibrary::ResetInputSettings(APlayerController* PC)
 			}
 			PlayerSettings->ApplySettings();
 			PlayerSettings->AsyncSaveSettings();
-
-			UUINavPCComponent* UINavPC = PC->FindComponentByClass<UUINavPCComponent>();
-			if (IsValid(UINavPC))
-			{
-				UINavPC->RefreshNavigationKeys();
-			}
-
 			Subsystem->RequestRebuildControlMappings();
 		}
 	}

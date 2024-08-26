@@ -1,17 +1,18 @@
-// Copyright (C) 2023 Gonçalo Marques - All Rights Reserved
+// Copyright (C) 2023 Gonï¿½alo Marques - All Rights Reserved
 
 #include "UINavigationConfig.h"
 #include "UINavSettings.h"
 #include "Data/UINavEnhancedInputActions.h"
 #include "InputMappingContext.h"
+#include "UINavPCComponent.h"
 
-FUINavigationConfig::FUINavigationConfig(const UInputMappingContext* const InputContext, const bool bAllowDirectionalInput /*= true*/, const bool bAllowSectionInput /*= true*/, const bool bAllowAccept /*= true*/, const bool bAllowBack /*= true*/, const bool bUseAnalogDirectionalInput /*= true*/, const bool bUsingThumbstickAsMouse /*= false*/)
+FUINavigationConfig::FUINavigationConfig(const UUINavPCComponent* const UINavPC, const bool bAllowDirectionalInput /*= true*/, const bool bAllowSectionInput /*= true*/, const bool bAllowAccept /*= true*/, const bool bAllowBack /*= true*/, const bool bUseAnalogDirectionalInput /*= true*/, const bool bUsingThumbstickAsMouse /*= false*/)
 {
 	KeyEventRules.Reset();
 	bTabNavigation = false;
 	bKeyNavigation = true;
 	bAnalogNavigation = bUseAnalogDirectionalInput && !bUsingThumbstickAsMouse;
-
+	const UInputMappingContext* const InputContext = UINavPC->GetUINavInputContext();
 	const UUINavSettings* const UINavSettings = GetDefault<UUINavSettings>();
 	const UUINavEnhancedInputActions* const InputActions = UINavSettings->EnhancedInputActions.LoadSynchronous();
 	if (InputActions == nullptr || InputContext == nullptr)
@@ -25,19 +26,19 @@ FUINavigationConfig::FUINavigationConfig(const UInputMappingContext* const Input
 		{
 			if (Mapping.Action == InputActions->IA_MenuUp)
 			{
-				KeyEventRules.Emplace(Mapping.Key, EUINavigation::Up);
+				KeyEventRules.Emplace(UINavPC->GetCurrentKey(Mapping), EUINavigation::Up);
 			}
 			else if (Mapping.Action == InputActions->IA_MenuDown)
 			{
-				KeyEventRules.Emplace(Mapping.Key, EUINavigation::Down);
+				KeyEventRules.Emplace(UINavPC->GetCurrentKey(Mapping), EUINavigation::Down);
 			}
 			else if (Mapping.Action == InputActions->IA_MenuLeft)
 			{
-				KeyEventRules.Emplace(Mapping.Key, EUINavigation::Left);
+				KeyEventRules.Emplace(UINavPC->GetCurrentKey(Mapping), EUINavigation::Left);
 			}
 			else if (Mapping.Action == InputActions->IA_MenuRight)
 			{
-				KeyEventRules.Emplace(Mapping.Key, EUINavigation::Right);
+				KeyEventRules.Emplace(UINavPC->GetCurrentKey(Mapping), EUINavigation::Right);
 			}
 		}
 		
@@ -45,30 +46,30 @@ FUINavigationConfig::FUINavigationConfig(const UInputMappingContext* const Input
 		{
 			if (Mapping.Action == InputActions->IA_MenuNext)
 			{
-				KeyEventRules.Emplace(Mapping.Key, EUINavigation::Next);
+				KeyEventRules.Emplace(UINavPC->GetCurrentKey(Mapping), EUINavigation::Next);
 			}
 			else if (Mapping.Action == InputActions->IA_MenuPrevious)
 			{
-				KeyEventRules.Emplace(Mapping.Key, EUINavigation::Previous);
+				KeyEventRules.Emplace(UINavPC->GetCurrentKey(Mapping), EUINavigation::Previous);
 			}
 		}
 
 		if (bAllowAccept && Mapping.Action == InputActions->IA_MenuSelect)
 		{
-			const bool bIsGamepadKey = Mapping.Key.IsGamepadKey();
+			const bool bIsGamepadKey = UINavPC->GetCurrentKey(Mapping).IsGamepadKey();
 			if (bIsGamepadKey)
 			{
-				GamepadSelectKeys.AddUnique(Mapping.Key);
+				GamepadSelectKeys.AddUnique(UINavPC->GetCurrentKey(Mapping));
 			}
 
 			if (!bIsGamepadKey || !bUsingThumbstickAsMouse)
 			{
-				KeyActionRules.Emplace(Mapping.Key, EUINavigationAction::Accept);
+				KeyActionRules.Emplace(UINavPC->GetCurrentKey(Mapping), EUINavigationAction::Accept);
 			}
 		}
 		else if (bAllowBack && Mapping.Action == InputActions->IA_MenuReturn)
 		{
-			KeyActionRules.Emplace(Mapping.Key, EUINavigationAction::Back);
+			KeyActionRules.Emplace(UINavPC->GetCurrentKey(Mapping), EUINavigationAction::Back);
 		}
 	}
 }

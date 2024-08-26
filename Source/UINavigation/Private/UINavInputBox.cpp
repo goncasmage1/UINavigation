@@ -58,10 +58,6 @@ void UUINavInputBox::CreateEnhancedInputKeyWidgets()
 	{
 		return;
 	}
-	if (!PlayerSettings->IsMappingContextRegistered(InputContext))
-	{
-		PlayerSettings->RegisterInputMappingContext(InputContext);
-	}
 	const FPlayerKeyMapping* KeyMapping = PlayerSettings->FindCurrentMappingForSlot(PlayerMappableKeySettingsName, EPlayerMappableKeySlot::First);
 	if (KeyMapping != nullptr && IsValid(KeyMapping->GetAssociatedInputAction()))
 	{
@@ -152,8 +148,6 @@ void UUINavInputBox::FinishUpdateNewKey()
 	const FKey OldKey = CurrentKey;
 	FinishUpdateNewEnhancedInputKey(AwaitingNewKey);
 	Container->OnKeyRebinded(InputName, OldKey, CurrentKey);
-	Container->UINavPC->RefreshNavigationKeys();
-	Container->UINavPC->UpdateInputIconsDelegate.Broadcast();
 	bAwaitingNewKey = false;
 }
 
@@ -188,6 +182,20 @@ void UUINavInputBox::FinishUpdateNewEnhancedInputKey(const FKey& PressedKey)
 		Message.Append(FailureReason.ToStringSimple(true));
 		DISPLAYERROR(Message);
 		return;
+	}
+	for (const FName Mirror : MirrorToPlayerMappableKeySettingsNames)
+	{
+		Args.MappingName = Mirror;
+		PlayerSettings->MapPlayerKey(Args, FailureReason);
+		if (FailureReason.IsValid())
+		{
+			FString Message = TEXT("Failed to mirror to ");
+			Message.Append(*Mirror.ToString());
+			Message.Append(TEXT(": "));
+			Message.Append(FailureReason.ToStringSimple(true));
+			DISPLAYERROR(Message);
+			return;
+		}
 	}
 	
 	PlayerSettings->ApplySettings();
