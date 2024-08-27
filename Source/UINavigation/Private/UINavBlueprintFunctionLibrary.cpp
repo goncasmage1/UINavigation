@@ -242,6 +242,34 @@ UWidget* UUINavBlueprintFunctionLibrary::GetUniformGridChild(const UWidget* cons
 	return nullptr;
 }
 
+UWidget* UUINavBlueprintFunctionLibrary::FindWidgetOfClassesInWidget(UWidget* Widget, const TArray<TSubclassOf<UWidget>>& WidgetClasses)
+{
+	for (const TSubclassOf<UWidget> WidgetClass : WidgetClasses)
+	{
+		if (Widget->IsA(WidgetClass))
+		{
+			return Widget;
+		}
+	}
+
+	const UPanelWidget* const PanelWidget = Cast<UPanelWidget>(Widget);
+	if (!IsValid(PanelWidget))
+	{
+		return nullptr;
+	}
+
+	for (UWidget* ChildWidget : PanelWidget->GetAllChildren())
+	{
+		UWidget* FoundWidget = FindWidgetOfClassesInWidget(ChildWidget, WidgetClasses);
+		if (IsValid(FoundWidget))
+		{
+			return FoundWidget;
+		}
+	}
+
+	return nullptr;
+}
+
 int UUINavBlueprintFunctionLibrary::GetIndexInPanelWidget(const UWidget* const Widget, TSubclassOf<UPanelWidget> PanelWidgetSubclass)
 {
 	if (!IsValid(Widget))

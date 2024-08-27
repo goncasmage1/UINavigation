@@ -82,7 +82,13 @@ void UUINavPCComponent::Activate(bool bReset)
 
 	if (!PC->GetClass()->ImplementsInterface(UUINavPCReceiver::StaticClass()))
 	{
+		PC = nullptr;
 		DISPLAYERROR(TEXT("Player Controller doesn't implement UINavPCReceiver interface!"));
+		return;
+	}
+
+	if (!PC->IsLocalController())
+	{
 		return;
 	}
 
@@ -99,7 +105,13 @@ void UUINavPCComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (PC != nullptr && PC->IsLocalPlayerController() && !SharedInputProcessor.IsValid())
+	if (!PC->IsLocalController())
+	{
+		SetComponentTickEnabled(false);
+		return;
+	}
+
+	if (PC != nullptr && !SharedInputProcessor.IsValid())
 	{
 		RefreshNavigationKeys();
 
@@ -154,7 +166,7 @@ void UUINavPCComponent::OnControlMappingsRebuilt()
 
 void UUINavPCComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
-	if (PC != nullptr && PC->IsLocalPlayerController())
+	if (PC != nullptr && PC->IsLocalController())
 	{
 		FSlateApplication::Get().UnregisterInputPreProcessor(SharedInputProcessor);
 	}
@@ -449,7 +461,7 @@ void UUINavPCComponent::CancelRebind()
 
 void UUINavPCComponent::SetActiveWidget(UUINavWidget * NewActiveWidget)
 {
-	if (NewActiveWidget == ActiveWidget) return;
+	if (NewActiveWidget == ActiveWidget || !IsValid(PC)) return;
 
 	if (ActiveWidget != nullptr)
 	{
