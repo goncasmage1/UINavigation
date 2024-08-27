@@ -82,6 +82,7 @@ void UUINavPCComponent::Activate(bool bReset)
 
 	if (!PC->GetClass()->ImplementsInterface(UUINavPCReceiver::StaticClass()))
 	{
+		PC = nullptr;
 		DISPLAYERROR(TEXT("Player Controller doesn't implement UINavPCReceiver interface!"));
 		return;
 	}
@@ -467,7 +468,7 @@ void UUINavPCComponent::CancelRebind()
 
 void UUINavPCComponent::SetActiveWidget(UUINavWidget * NewActiveWidget)
 {
-	if (NewActiveWidget == ActiveWidget) return;
+	if (NewActiveWidget == ActiveWidget || !IsValid(PC)) return;
 
 	if (ActiveWidget != nullptr)
 	{
