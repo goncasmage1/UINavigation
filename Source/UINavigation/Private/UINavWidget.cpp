@@ -1643,7 +1643,7 @@ void UUINavWidget::NavigatedTo(UUINavComponent* NavigatedToComponent, const bool
 		RevertAnimation(CurrentComponent);
 	}
 
-	if (!bForcingNavigation)
+	if (!bForcingNavigation && GetDefault<UUINavSettings>()->bForceNavigation)
 	{
 		bForcingNavigation = true;
 	}
@@ -1673,7 +1673,7 @@ void UUINavWidget::CallOnNavigate(UUINavComponent* FromComponent, UUINavComponen
 	if (IsValid(ToComponent))
 	{
 		USoundBase* NavigatedSound = ToComponent->GetOnNavigatedSound();
-		if (NavigatedSound != nullptr)
+		if (NavigatedSound != nullptr && bForcingNavigation)
 		{
 			PlaySound(NavigatedSound);
 		}
@@ -1869,6 +1869,12 @@ void UUINavWidget::OnHoveredComponent(UUINavComponent* Component)
 		else
 		{
 			UpdateNavigationVisuals(CurrentComponent, false, true);
+
+			USoundBase* NavigatedSound = Component->GetOnNavigatedSound();
+			if (NavigatedSound != nullptr && bForcingNavigation)
+			{
+				PlaySound(NavigatedSound);
+			}
 		}
 	}
 
