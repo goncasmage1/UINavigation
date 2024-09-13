@@ -1447,24 +1447,30 @@ void UUINavPCComponent::VerifyInputTypeChangeByKey(const FKeyEvent& KeyEvent, co
 
 EInputMode UUINavPCComponent::GetInputMode() const
 {
-	if (PC != nullptr)
+	if (IsValid(PC))
 	{
-		UGameViewportClient* GameViewportClient = PC->GetWorld()->GetGameViewport();
+		const UWorld* const World = PC->GetWorld();
+		if (IsValid(World))
+		{
+			UGameViewportClient* GameViewportClient = World->GetGameViewport();
+			if (IsValid(GameViewportClient))
+			{
+				const bool bIgnore = GameViewportClient->IgnoreInput();
+				const EMouseCaptureMode Capt = GameViewportClient->GetMouseCaptureMode();
 
-		const bool bIgnore = GameViewportClient->IgnoreInput();
-		const EMouseCaptureMode Capt = GameViewportClient->GetMouseCaptureMode();
-
-		if (bIgnore == false && Capt == EMouseCaptureMode::CaptureDuringMouseDown)
-		{
-			return EInputMode::GameUI;
-		}
-		else if (bIgnore == true && Capt == EMouseCaptureMode::NoCapture)
-		{
-			return EInputMode::UI;
-		}
-		else
-		{
-			return EInputMode::Game;
+				if (bIgnore == false && Capt == EMouseCaptureMode::CaptureDuringMouseDown)
+				{
+					return EInputMode::GameUI;
+				}
+				else if (bIgnore == true && Capt == EMouseCaptureMode::NoCapture)
+				{
+					return EInputMode::UI;
+				}
+				else
+				{
+					return EInputMode::Game;
+				}
+			}
 		}
 	}
 	return EInputMode::None;
