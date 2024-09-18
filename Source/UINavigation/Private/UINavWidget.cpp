@@ -1842,7 +1842,7 @@ void UUINavWidget::RemovedComponent(UUINavComponent* Component)
 
 bool UUINavWidget::IsSelectorValid()
 {
-	return TheSelector != nullptr && TheSelector->GetIsEnabled() && bShowSelector;
+	return TheSelector != nullptr && TheSelector->GetIsEnabled();
 }
 
 void UUINavWidget::OnHoveredComponent(UUINavComponent* Component)
