@@ -176,7 +176,7 @@ public:
 
 	EButtonStyle CurrentStyle = EButtonStyle::Normal;
 
-	EButtonStyle ForcedStyle = EButtonStyle::None;
+	TPair<EButtonStyle, EButtonStyle> ForcedStylePair = { EButtonStyle::None, EButtonStyle::None };
 
 	bool bIgnoreDueToRebind = false;
 
