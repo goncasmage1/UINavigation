@@ -708,7 +708,7 @@ FNavigationReply UUINavInputBox::NativeOnNavigation(const FGeometry& MyGeometry,
 	for (int i = 0; i < InputButtons.Num(); ++i)
 	{
 		const UUINavInputComponent* const InputButton = InputButtons[i];
-		if (InputButton->ForcedStyle == EButtonStyle::Hovered)
+		if (InputButton->ForcedStylePair.Key == EButtonStyle::Hovered)
 		{
 			TargetIndex = i;
 			break;
