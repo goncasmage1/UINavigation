@@ -1346,6 +1346,20 @@ void UUINavWidget::PropagateOnInputChanged(const EInputType From, const EInputTy
 	}
 }
 
+void UUINavWidget::OnThumbstickCursorInput_Implementation(const FVector2D& ThumbstickDelta)
+{
+
+}
+
+void UUINavWidget::PropagateOnThumbstickCursorInput(const FVector2D& ThumbstickDelta)
+{
+	OnThumbstickCursorInput(ThumbstickDelta);
+	if (IsValid(OuterUINavWidget) && !OuterUINavWidget->bMaintainNavigationForChild)
+	{
+		OuterUINavWidget->PropagateOnThumbstickCursorInput(ThumbstickDelta);
+	}
+}
+
 void UUINavWidget::PreSetup_Implementation(const bool bFirstSetup)
 {
 

@@ -511,6 +511,16 @@ public:
 	void PropagateOnInputChanged(const EInputType From, const EInputType To);
 
 	/**
+	*	Called when the gamepad's thumbstick moves
+	*/
+	UFUNCTION(BlueprintNativeEvent, Category = UINavController)
+	void OnThumbstickCursorInput(const FVector2D& ThumbstickDelta);
+
+	virtual void OnThumbstickCursorInput_Implementation(const FVector2D& ThumbstickDelta);
+
+	void PropagateOnThumbstickCursorInput(const FVector2D& ThumbstickDelta);
+
+	/**
 	*	Called before this widget is setup for UINav logic
 	*/
 	UFUNCTION(BlueprintNativeEvent, Category = UINavWidget)

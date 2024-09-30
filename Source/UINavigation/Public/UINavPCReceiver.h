@@ -52,6 +52,14 @@ public:
 	virtual void OnInputChanged_Implementation(EInputType From, EInputType To);
 
 	/**
+	*	Called when the gamepad's thumbstick moves
+	*/
+	UFUNCTION(BlueprintNativeEvent, Category = UINavController)
+	void OnThumbstickCursorInput(const FVector2D& ThumbstickDelta);
+
+	virtual void OnThumbstickCursorInput_Implementation(const FVector2D& ThumbstickDelta);
+
+	/**
 	*	Called when a controller is connected and disconnected
 	*/
 	UFUNCTION(BlueprintNativeEvent, Category = UINavController)

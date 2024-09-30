@@ -15,6 +15,10 @@ void IUINavPCReceiver::OnInputChanged_Implementation(EInputType From, EInputType
 {
 }
 
+void IUINavPCReceiver::OnThumbstickCursorInput_Implementation(const FVector2D& ThumbstickDelta)
+{
+}
+
 void IUINavPCReceiver::OnControllerConnectionChanged_Implementation(bool bConnected, int32 UserId, int32 UserIndex)
 {
 }

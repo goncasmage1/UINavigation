@@ -199,7 +199,15 @@ void UUINavPCComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAct
 
 	if (!bReceivedAnalogInput)
 	{
-		ThumbstickDelta = FVector2D::ZeroVector;
+		if (ThumbstickDelta != FVector2D::ZeroVector)
+		{
+			ThumbstickDelta = FVector2D::ZeroVector;
+			IUINavPCReceiver::Execute_OnThumbstickCursorInput(GetOwner(), ThumbstickDelta);
+			if (IsValid(ActiveWidget))
+			{
+				ActiveWidget->PropagateOnThumbstickCursorInput(ThumbstickDelta);
+			}
+		}
 	}
 	else
 	{
@@ -230,6 +238,12 @@ void UUINavPCComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAct
 				);
 				//process the event
 				SlateApp.ProcessMouseMoveEvent(MouseEvent);
+			}
+
+			IUINavPCReceiver::Execute_OnThumbstickCursorInput(GetOwner(), ModifiedDelta);
+			if (IsValid(ActiveWidget))
+			{
+				ActiveWidget->PropagateOnThumbstickCursorInput(ModifiedDelta);
 			}
 		}
 	}
@@ -799,34 +813,32 @@ void UUINavPCComponent::HandleAnalogInputEvent(FSlateApplication& SlateApp, cons
 		return;
 	}
 
-	const float DeltaTime = World->DeltaTimeSeconds;
+	const FKey AnalogKey = InAnalogInputEvent.GetKey();
+	const float AnalogValue = InAnalogInputEvent.GetAnalogValue();
+	const bool bIsHorizontal = AnalogKey == EKeys::Gamepad_LeftX || AnalogKey == EKeys::Gamepad_RightX;
+	if (bIsHorizontal) ThumbstickDelta.X = AnalogValue;
+	else ThumbstickDelta.Y = AnalogValue;
 
 	const EThumbstickAsMouse ThumbstickAsMouse = UsingThumbstickAsMouse();
 	if (ThumbstickAsMouse != EThumbstickAsMouse::None)
 	{
-		const FKey Key = InAnalogInputEvent.GetKey();
-		if ((ThumbstickAsMouse == EThumbstickAsMouse::LeftThumbstick && (Key == EKeys::Gamepad_LeftX || Key == EKeys::Gamepad_LeftY)) ||
-			(ThumbstickAsMouse == EThumbstickAsMouse::RightThumbstick && (Key == EKeys::Gamepad_RightX || Key == EKeys::Gamepad_RightY)))
+		if ((ThumbstickAsMouse == EThumbstickAsMouse::LeftThumbstick && (AnalogKey == EKeys::Gamepad_LeftX || AnalogKey == EKeys::Gamepad_LeftY)) ||
+			(ThumbstickAsMouse == EThumbstickAsMouse::RightThumbstick && (AnalogKey == EKeys::Gamepad_RightX || AnalogKey == EKeys::Gamepad_RightY)))
 		{
 			if (ThumbstickDelta == FVector2D::ZeroVector)
 			{
 				RefreshNavigationKeys();
 			}
 			bReceivedAnalogInput = true;
-
-			const bool bIsHorizontal = Key == EKeys::Gamepad_LeftX || Key == EKeys::Gamepad_RightX;
-			const float AnalogValue = InAnalogInputEvent.GetAnalogValue();
-			if (bIsHorizontal) ThumbstickDelta.X = AnalogValue;
-			else ThumbstickDelta.Y = AnalogValue;
 		}
 	}
 
 	if (bScrollWithRightThumbstick &&
 		ThumbstickAsMouse != EThumbstickAsMouse::RightThumbstick &&
-		InAnalogInputEvent.GetKey() == EKeys::Gamepad_RightY &&
-		FMath::Abs(InAnalogInputEvent.GetAnalogValue()) >= RightThumbstickScrollDeadzone)
+		AnalogKey == EKeys::Gamepad_RightY &&
+		FMath::Abs(AnalogValue) >= RightThumbstickScrollDeadzone)
 	{
-		const float ScrollAmount = -InAnalogInputEvent.GetAnalogValue() * RightThumbstickScrollSensitivity * 10.0f * DeltaTime;
+		const float ScrollAmount = -AnalogValue * RightThumbstickScrollSensitivity * 10.0f * World->DeltaTimeSeconds;
 		if (IsValid(ActiveWidget))
 		{
 			const UUINavComponent* const CurrentUINavComponent = ActiveWidget->GetCurrentComponent();
