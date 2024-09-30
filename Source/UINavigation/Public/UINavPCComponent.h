@@ -553,8 +553,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = UINavController, meta = (AdvancedDisplay = 2, DeterminesOutputType = "NewWidgetClass"))
 	UUINavWidget* GoToBuiltWidget(UUINavWidget* NewWidget, const bool bRemoveParent, const bool bDestroyParent = false, const int ZOrder = 0);
 
-	UFUNCTION(BlueprintCallable, Category = UINavController)
-	void NavigateInDirection(const EUINavigation Direction);
+	UFUNCTION(BlueprintCallable, Category = UINavController, meta = (AdvancedDisplay = 1))
+	void NavigateInDirection(const EUINavigation Direction, const int32 UserIndex = 0);
 	void MenuNext();
 	void MenuPrevious();
 

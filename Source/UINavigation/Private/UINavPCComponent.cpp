@@ -1549,7 +1549,7 @@ UInputMappingContext* UUINavPCComponent::GetUINavInputContext() const
 		GetDefault<UUINavSettings>()->EnhancedInputContext.LoadSynchronous();
 }
 
-void UUINavPCComponent::NavigateInDirection(const EUINavigation InDirection)
+void UUINavPCComponent::NavigateInDirection(const EUINavigation InDirection, const int32 UserIndex /*= 0*/)
 {
 	AllowDirection = InDirection;
 
@@ -1570,7 +1570,7 @@ void UUINavPCComponent::NavigateInDirection(const EUINavigation InDirection)
 		Reply,
 		nullptr,
 		nullptr,
-		SlateApplication.GetUserIndexForKeyboard());
+		UserIndex);
 }
 
 void UUINavPCComponent::MenuNext()
