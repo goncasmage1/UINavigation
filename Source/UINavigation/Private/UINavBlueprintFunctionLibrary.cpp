@@ -288,7 +288,13 @@ UWidget* UUINavBlueprintFunctionLibrary::FindWidgetOfClassesInWidget(UWidget* Wi
 	const UPanelWidget* const PanelWidget = Cast<UPanelWidget>(Widget);
 	if (!IsValid(PanelWidget))
 	{
-		return nullptr;
+		const UUserWidget* const UserWidget = Cast<UUserWidget>(Widget);
+		if (!IsValid(UserWidget))
+		{
+			return nullptr;
+		}
+
+		return FindWidgetOfClassesInWidget(UserWidget->WidgetTree->RootWidget, WidgetClasses);
 	}
 
 	for (UWidget* ChildWidget : PanelWidget->GetAllChildren())
