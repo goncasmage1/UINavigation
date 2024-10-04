@@ -221,6 +221,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavWidget)
 	bool bClearNavigationStateWhenChild = true;
 
+	//If set to true, this widget will go from the first section to the last and vice-versa when using auto section switching.
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = UINavWidget)
+	bool bWrapAutoSectionNavigation = true;
+
 	/*
 	* Input Contexts to be applied when this widget becomes active (and to be removed when it becomes inactive)
 	*/

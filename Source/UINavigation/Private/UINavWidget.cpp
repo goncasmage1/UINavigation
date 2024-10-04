@@ -912,6 +912,11 @@ void UUINavWidget::GoToNextSection()
 	const int32 NumSections = UINavSwitcher->GetChildrenCount();
 	if (ActiveIndex == NumSections - 1)
 	{
+		if (!bWrapAutoSectionNavigation)
+		{
+			return;
+		}
+
 		GoToSection(0);
 	}
 
@@ -929,6 +934,11 @@ void UUINavWidget::GoToPreviousSection()
 	const int32 NumSections = UINavSwitcher->GetChildrenCount();
 	if (ActiveIndex == 0)
 	{
+		if (!bWrapAutoSectionNavigation)
+		{
+			return;
+		}
+
 		GoToSection(NumSections - 1);
 	}
 
