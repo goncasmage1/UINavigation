@@ -1532,7 +1532,7 @@ void UUINavPCComponent::NotifyInputTypeChange(const EInputType NewInputType, con
 		ActiveWidget->PropagateOnInputChanged(OldInputType, CurrentInputType);
 	}
 
-	IUINavPCReceiver::Execute_OnInputChanged(GetOwner(), CurrentInputType, NewInputType);
+	IUINavPCReceiver::Execute_OnInputChanged(GetOwner(), OldInputType, CurrentInputType);
 	InputTypeChangedDelegate.Broadcast(CurrentInputType);
 	UpdateInputIconsDelegate.Broadcast();
 }
