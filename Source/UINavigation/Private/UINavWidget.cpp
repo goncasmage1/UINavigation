@@ -25,6 +25,7 @@
 #include "Components/VerticalBox.h"
 #include "Components/OverlaySlot.h"
 #include "Components/ScrollBox.h"
+#include "Components/CanvasPanel.h"
 #include "Components/CanvasPanelSlot.h"
 #include "Components/ActorComponent.h"
 #include "Components/ListView.h"
@@ -894,11 +895,54 @@ void UUINavWidget::HandleSelectorMovement(const float DeltaTime)
 	{
 		MovementCounter = 0.f;
 		bMovingSelector = false;
-		TheSelector->SetRenderTranslation(SelectorDestination);
+		SetSelectorLocation(SelectorDestination);
 		return;
 	}
 
-	TheSelector->SetRenderTranslation(SelectorOrigin + Distance*MoveCurve->GetFloatValue(MovementCounter));
+	SetSelectorLocation(SelectorOrigin + Distance * MoveCurve->GetFloatValue(MovementCounter));
+}
+
+FVector2D UUINavWidget::GetSelectorLocationOffset(const bool bAbsolute /*= true*/)
+{
+	FVector2D Offset = FVector2D::ZeroVector;
+	if (bAbsolute)
+	{
+		const UPanelSlot* const SelectorPanelSlot = Cast<UPanelSlot>(TheSelector->Slot);
+		if (IsValid(SelectorPanelSlot))
+		{
+			const UCanvasPanel* CanvasPanel = Cast<UCanvasPanel>(SelectorPanelSlot->Parent);
+			while (IsValid(CanvasPanel))
+			{
+				if (!IsValid(CanvasPanel->Slot))
+				{
+					break;
+				}
+
+				const UCanvasPanelSlot* const CanvasPanelSlot = Cast<UCanvasPanelSlot>(CanvasPanel->Slot);
+				if (IsValid(CanvasPanelSlot))
+				{
+					const FVector2D LocalSize = CanvasPanel->GetCachedGeometry().GetLocalSize();
+					const FAnchors CanvasAnchors = CanvasPanelSlot->GetAnchors();
+					Offset.X += (LocalSize.X * CanvasAnchors.Minimum.X) / (CanvasAnchors.Maximum.X - CanvasAnchors.Minimum.X);
+					Offset.Y += (LocalSize.Y * CanvasAnchors.Minimum.Y) / (CanvasAnchors.Maximum.Y - CanvasAnchors.Minimum.Y);
+				}
+
+				CanvasPanel = Cast<UCanvasPanel>(CanvasPanel->Slot->Parent);
+			}
+		}
+	}
+
+	return Offset;
+}
+
+FVector2D UUINavWidget::GetSelectorLocation(const bool bAbsolute /*= true*/)
+{
+	return TheSelector->GetRenderTransform().Translation + GetSelectorLocationOffset(bAbsolute);
+}
+
+void UUINavWidget::SetSelectorLocation(const FVector2D& NewLocation, const bool bAbsolute /*= true*/)
+{
+	TheSelector->SetRenderTranslation(NewLocation - GetSelectorLocationOffset(bAbsolute));
 }
 
 void UUINavWidget::GoToNextSection()
@@ -1018,7 +1062,7 @@ void UUINavWidget::OnSectionButtonPressed10()
 void UUINavWidget::UpdateSelectorLocation(UUINavComponent* Component)
 {
 	if (TheSelector == nullptr || !IsValid(FirstComponent)) return;
-	TheSelector->SetRenderTranslation(GetButtonLocation(Component));
+	SetSelectorLocation(GetButtonLocation(Component));
 }
 
 FVector2D UUINavWidget::GetButtonLocation(UUINavComponent* Component) const
@@ -1248,7 +1292,7 @@ void UUINavWidget::BeginSelectorMovement(UUINavComponent* FromComponent, UUINavC
 {
 	if (MoveCurve == nullptr) return;
 
-	SelectorOrigin = (bMovingSelector || !IsValid(FromComponent)) ? TheSelector->GetRenderTransform().Translation : GetButtonLocation(FromComponent);
+	SelectorOrigin = (bMovingSelector || !IsValid(FromComponent)) ? GetSelectorLocation() : GetButtonLocation(FromComponent);
 	SelectorDestination = GetButtonLocation(ToComponent);
 	Distance = SelectorDestination - SelectorOrigin;
 

@@ -123,6 +123,10 @@ protected:
 	void BeginSelectorMovement(UUINavComponent* FromComponent, UUINavComponent* ToComponent);
 	void HandleSelectorMovement(const float DeltaTime);
 
+	FVector2D GetSelectorLocationOffset(const bool bAbsolute = true);
+	FVector2D GetSelectorLocation(const bool bAbsolute = true);
+	void SetSelectorLocation(const FVector2D& NewLocation, const bool bAbsolute = true);
+
 	UFUNCTION(BlueprintCallable, Category = UINavWidget)
 	void GoToNextSection();
 	UFUNCTION(BlueprintCallable, Category = UINavWidget)
