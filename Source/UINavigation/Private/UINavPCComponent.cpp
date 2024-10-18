@@ -440,8 +440,7 @@ void UUINavPCComponent::TryResetDefaultInputs()
 
 void UUINavPCComponent::InitPlatformData()
 {
-	const FString PlatformName = UGameplayStatics::GetPlatformName();
-	const FPlatformConfigData* const FoundPlatformData = GetDefault<UUINavSettings>()->PlatformConfigData.Find(PlatformName);
+	const FPlatformConfigData* const FoundPlatformData = GetDefault<UUINavSettings>()->PlatformConfigData.Find(UGameplayStatics::GetPlatformName());
 	if (FoundPlatformData != nullptr)
 	{
 		CurrentPlatformData = *FoundPlatformData;
@@ -714,6 +713,7 @@ void UUINavPCComponent::SetAllowAllMenuInput(const bool bAllowInput)
 void UUINavPCComponent::SetAllowDirectionalInput(const bool bAllowInput)
 {
 	bAllowDirectionalInput = bAllowInput;
+	RefreshNavigationKeys();
 }
 
 void UUINavPCComponent::SetAllowSelectInput(const bool bAllowInput)
@@ -731,6 +731,7 @@ void UUINavPCComponent::SetAllowReturnInput(const bool bAllowInput)
 void UUINavPCComponent::SetAllowSectionInput(const bool bAllowInput)
 {
 	bAllowSectionInput = bAllowInput;
+	RefreshNavigationKeys();
 }
 
 void UUINavPCComponent::HandleKeyDownEvent(FSlateApplication& SlateApp, const FKeyEvent& InKeyEvent)
@@ -1544,9 +1545,40 @@ UEnhancedInputComponent* UUINavPCComponent::GetEnhancedInputComponent() const
 
 UInputMappingContext* UUINavPCComponent::GetUINavInputContext() const
 {
+	const TMap<FString, TObjectPtr<UInputMappingContext>>* const ActiveWidgetOverrides = GetActiveWidgetInputContextOverrides(ActiveWidget);
+	if (ActiveWidgetOverrides != nullptr)
+	{
+		const TObjectPtr<UInputMappingContext>* BaselineInputContextOverride = ActiveWidgetOverrides->Find(TEXT(""));
+		if (BaselineInputContextOverride != nullptr)
+		{
+			return *BaselineInputContextOverride;
+		}
+
+		const TObjectPtr<UInputMappingContext>* PlatformInputContextOverride = ActiveWidgetOverrides->Find(UGameplayStatics::GetPlatformName());
+		if (PlatformInputContextOverride != nullptr)
+		{
+			return *PlatformInputContextOverride;
+		}
+	}
+
 	return CurrentPlatformData.UINavInputContextOverride != nullptr ?
 		CurrentPlatformData.UINavInputContextOverride :
 		GetDefault<UUINavSettings>()->EnhancedInputContext.LoadSynchronous();
+}
+
+const TMap<FString, TObjectPtr<UInputMappingContext>>* const UUINavPCComponent::GetActiveWidgetInputContextOverrides(const UUINavWidget* const UINavWidget) const
+{
+	if (!IsValid(UINavWidget))
+	{
+		return nullptr;
+	}
+
+	if (!UINavWidget->UINavInputContextOverrides.IsEmpty())
+	{
+		return &UINavWidget->UINavInputContextOverrides;
+	}
+
+	return GetActiveWidgetInputContextOverrides(UINavWidget->OuterUINavWidget);
 }
 
 void UUINavPCComponent::NavigateInDirection(const EUINavigation InDirection, const int32 UserIndex /*= 0*/)

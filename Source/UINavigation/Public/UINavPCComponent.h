@@ -514,6 +514,8 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
 	UInputMappingContext* GetUINavInputContext() const;
 
+	const TMap<FString, TObjectPtr<UInputMappingContext>>* const GetActiveWidgetInputContextOverrides(const UUINavWidget* const UINavWidget) const;
+
 	UFUNCTION(BlueprintCallable, Category = UINavController)
 	void SetActiveWidget(UUINavWidget* NewActiveWidget);
 

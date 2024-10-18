@@ -230,6 +230,13 @@ public:
 	bool bWrapAutoSectionNavigation = true;
 
 	/*
+	* Input Context to be used to replace the default one. for each platform, in this specific widget (assuming a child widget doesn't override that)
+	* The Map's Key (String) should be the name of the platform you want to override. Leave blank if this applies to all platforms.
+	*/
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = UINavWidget)
+	TMap<FString, TObjectPtr<UInputMappingContext>> UINavInputContextOverrides;
+
+	/*
 	* Input Contexts to be applied when this widget becomes active (and to be removed when it becomes inactive)
 	*/
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = UINavWidget)
