@@ -35,6 +35,7 @@
 #include "UObject/SoftObjectPtr.h"
 #include "Internationalization/Internationalization.h"
 #include "UINavLocalPlayerSubsystem.h"
+#include "UINavGameViewportClient.h"
 #include "Curves/CurveFloat.h"
 #include "Kismet/GameplayStatics.h"
 #include "UObject/ConstructorHelpers.h"
@@ -669,6 +670,18 @@ void UUINavPCComponent::SetShowMouseCursor(const bool bShowMouse)
 	float MousePosY;
 	PC->GetMousePosition(MousePosX, MousePosY);
 	PC->SetMouseLocation(static_cast<int>(MousePosX), static_cast<int>(MousePosY));
+
+#if WITH_EDITOR
+	const UWorld* const World = PC->GetWorld();
+	if (IsValid(World))
+	{
+		const UGameViewportClient* const GameViewportClient = World->GetGameViewport();
+		if (IsValid(GameViewportClient) && !GameViewportClient->IsA<UUINavGameViewportClient>())
+		{
+			DISPLAYERROR(TEXT("GameViewportClient isn't a UINavGameViewportClient, so hiding the mouse cursor won't function properly! Please update the GameViewportClient class in Project Settings."));
+		}
+	}
+#endif //WITH_EDITOR
 }
 
 bool UUINavPCComponent::HidingMouseCursor() const
