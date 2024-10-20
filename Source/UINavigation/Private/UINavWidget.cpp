@@ -32,6 +32,7 @@
 #include "Components/WidgetSwitcher.h"
 #include "Engine/GameViewportClient.h"
 #include "Engine/ViewportSplitScreen.h"
+#include "Engine/Console.h"
 #include "Curves/CurveFloat.h"
 
 const TArray<FString> UUINavWidget::AllowedObjectTypesToFocus = {
@@ -676,6 +677,17 @@ void UUINavWidget::HandleOnFocusChanging(UUINavWidget* Widget, UUINavComponent* 
 		!UUINavWidget::AllowedObjectTypesToFocus.Contains(LastWidgetTypeStr) ||
 		(LastWidgetIsButton && !IsValid(ParentWidget)))
 	{
+		if (const UWorld* const World = Widget->GetWorld())
+		{
+			if (const UGameViewportClient* const ViewportClient = World->GetGameViewport())
+			{
+				if (IsValid(ViewportClient->ViewportConsole) && ViewportClient->ViewportConsole->bCaptureKeyInput)
+				{
+					return;
+				}
+			}
+		}
+
 		if (IsValid(Component))
 		{
 			Component->NavButton->SetFocus();
