@@ -41,6 +41,14 @@ public:
 	UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	bool bConsumeNavigationInputs = false;
 	
+	// Whether navigation is allowed while pressing a button
+	UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = "Settings")
+	bool bAllowNavigationWhilePressing = false;
+
+	// Whether a UINavComponent that's released should gain focus at that moment
+	UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = "Settings")
+	bool bSetFocusOnRelease = true;
+
 	// Whether focus navigation should stop when using Next/Previous input
 	UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	bool bStopNextPreviousNavigation = true;

@@ -1830,7 +1830,7 @@ bool UUINavWidget::TryConsumeNavigation()
 		return true;
 	}
 
-	return IsValid(SelectedComponent);
+	return IsValid(SelectedComponent) && !GetDefault<UUINavSettings>()->bAllowNavigationWhilePressing;
 }
 
 bool UUINavWidget::IsBeingRemoved() const
@@ -2035,5 +2035,5 @@ void UUINavWidget::OnReleasedComponent(UUINavComponent* Component)
 		}
 	}
 
-	if (Component != CurrentComponent) Component->SetFocus();
+	if (Component != CurrentComponent && GetDefault<UUINavSettings>()->bSetFocusOnRelease) Component->SetFocus();
 }
