@@ -29,6 +29,14 @@ UUINavComponent::UUINavComponent(const FObjectInitializer& ObjectInitializer)
 
 void UUINavComponent::NativeConstruct()
 {
+	if (!IsValid(NavButton))
+	{
+		Super::NativeConstruct();
+		const FString ErrorMessage = FString::Printf(TEXT("%s doesn't have a NavButton!"), *GetName());
+		DISPLAYERROR(ErrorMessage);
+		return;
+	}
+
 	NavButton->OnClicked.AddUniqueDynamic(this, &UUINavComponent::OnButtonClicked);
 	NavButton->OnPressed.AddUniqueDynamic(this, &UUINavComponent::OnButtonPressed);
 	NavButton->OnReleased.AddUniqueDynamic(this, &UUINavComponent::OnButtonReleased);
