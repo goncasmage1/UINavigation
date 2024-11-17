@@ -86,8 +86,6 @@ protected:
 	TArray<UButton*> SectionButtons;
 	TArray<UWidget*> SectionWidgets;
 
-	static const TArray<FString> AllowedObjectTypesToFocus;
-
 	bool bUsingSplitScreen = false;
 
 	/******************************************************************************/

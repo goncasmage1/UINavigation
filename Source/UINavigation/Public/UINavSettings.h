@@ -89,6 +89,17 @@ public:
 	UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	float AnalogInputChangeThreshold = 0.1f;
 
+	// The list of widget types (Slate names) to allow to be focused
+	UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = "Settings")
+	TArray<FString> AllowedWidgetTypesToFocus = {
+		TEXT("SObjectWidget"),
+		TEXT("SButton"),
+		TEXT("SUINavButton"),
+		TEXT("SSpinBox"),
+		TEXT("SEditableText"),
+		TEXT("SMultilineEditableText")
+	};
+
 	// Increment by 1 everytime your project's default inputs change
 	UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	uint8 CurrentInputVersion = 0;

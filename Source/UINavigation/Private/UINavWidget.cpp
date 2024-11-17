@@ -35,15 +35,6 @@
 #include "Engine/Console.h"
 #include "Curves/CurveFloat.h"
 
-const TArray<FString> UUINavWidget::AllowedObjectTypesToFocus = {
-		TEXT("SObjectWidget"),
-		TEXT("SButton"),
-		TEXT("SUINavButton"),
-		TEXT("SSpinBox"),
-		TEXT("SEditableText"),
-		TEXT("SMultilineEditableText")
-};
-
 UUINavWidget::UUINavWidget(const FObjectInitializer& ObjectInitializer)
 	:Super(ObjectInitializer)
 {
@@ -649,12 +640,14 @@ FNavigationReply UUINavWidget::NativeOnNavigation(const FGeometry& MyGeometry, c
 
 void UUINavWidget::HandleOnFocusChanging(UUINavWidget* Widget, UUINavComponent* Component, const FWeakWidgetPath& PreviousFocusPath, const FWidgetPath& NewWidgetPath, const FFocusEvent& InFocusEvent)
 {
+	const UUINavSettings* const UINavSettings = GetDefault<UUINavSettings>();
+
 	if (!NewWidgetPath.IsValid() ||
 		NewWidgetPath.Widgets.Num() == 0 ||
 		Widget->UINavPC->GetInputMode() == EInputMode::Game ||
 		(InFocusEvent.GetCause() == EFocusCause::Mouse &&
 			Widget->UINavPC->GetInputMode() == EInputMode::GameUI &&
-			GetDefault<UUINavSettings>()->bAllowFocusOnViewportInGameAndUI))
+			UINavSettings->bAllowFocusOnViewportInGameAndUI))
 	{
 		return;
 	}
@@ -674,7 +667,7 @@ void UUINavWidget::HandleOnFocusChanging(UUINavWidget* Widget, UUINavComponent* 
 	const bool LastWidgetIsButton = LastWidgetTypeStr == TEXT("SButton");
 	UUserWidget* ParentWidget = LastWidgetIsButton ? UUINavWidget::FindUserWidgetInWidgetPath(NewWidgetPath, NewWidgetPath.GetLastWidget()) : nullptr;
 	if (InFocusEvent.GetCause() == EFocusCause::WindowActivate ||
-		!UUINavWidget::AllowedObjectTypesToFocus.Contains(LastWidgetTypeStr) ||
+		!UINavSettings->AllowedWidgetTypesToFocus.Contains(LastWidgetTypeStr) ||
 		(LastWidgetIsButton && !IsValid(ParentWidget)))
 	{
 		if (const UWorld* const World = Widget->GetWorld())
