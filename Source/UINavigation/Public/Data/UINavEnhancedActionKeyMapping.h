@@ -23,7 +23,7 @@ struct FUINavEnhancedActionKeyMapping
 
 	/** Action to be affected by the key  */
 	UPROPERTY(EditAnywhere, Category = "Input")
-	TSoftObjectPtr<UInputAction> Action = nullptr;
+	TSoftObjectPtr<const UInputAction> Action = nullptr;
 
 	/** Key that affect the action. */
 	UPROPERTY(EditAnywhere, Category = "Input")
@@ -50,7 +50,7 @@ struct FUINavEnhancedActionKeyMapping
 	{ }
 
 	FUINavEnhancedActionKeyMapping(const FEnhancedActionKeyMapping& InMapping)
-		: Action(TSoftObjectPtr<UInputAction>(InMapping.Action))
+		: Action(TSoftObjectPtr<const UInputAction>(InMapping.Action))
 		, Key(InMapping.Key)
 		, Triggers(InMapping.Triggers)
 		, Modifiers(InMapping.Modifiers)

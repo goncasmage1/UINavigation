@@ -1086,7 +1086,7 @@ FVector2D UUINavWidget::GetButtonLocation(UUINavComponent* Component) const
 
 	const FGeometry Geom = Component->NavButton->GetCachedGeometry();
 	const FVector2D LocalSize = Geom.GetLocalSize();
-	FVector2D LocalPosition;
+	FVector2D LocalPosition = FVector2D::ZeroVector;
 	switch (SelectorPositioning)
 	{
 		case ESelectorPosition::Position_Center:
