@@ -172,12 +172,7 @@ void UUINavComponent::HandleFocusLost()
 
 void UUINavComponent::OnButtonClicked()
 {
-	if (!IsValid(ParentWidget) || !IsValid(ParentWidget->UINavPC))
-	{
-		return;
-	}
-
-	if (!ParentWidget->UINavPC->IsWidgetActive(ParentWidget))
+	if (!IsValid(ParentWidget) || !IsValid(ParentWidget->UINavPC) || !ParentWidget->UINavPC->IsWidgetActive(ParentWidget) || !NavButton->HasAnyUserFocus())
 	{
 		return;
 	}
@@ -200,7 +195,7 @@ void UUINavComponent::OnButtonClicked()
 
 void UUINavComponent::OnButtonPressed()
 {
-	if (!ParentWidget->UINavPC->IsWidgetActive(ParentWidget))
+	if (!IsValid(ParentWidget) || !IsValid(ParentWidget->UINavPC) || !ParentWidget->UINavPC->IsWidgetActive(ParentWidget) || !NavButton->HasAnyUserFocus())
 	{
 		return;
 	}
@@ -218,7 +213,7 @@ void UUINavComponent::OnButtonPressed()
 
 void UUINavComponent::OnButtonReleased()
 {
-	if (!ParentWidget->UINavPC->IsWidgetActive(ParentWidget))
+	if (!IsValid(ParentWidget) || !IsValid(ParentWidget->UINavPC) || !ParentWidget->UINavPC->IsWidgetActive(ParentWidget) || !NavButton->HasAnyUserFocus())
 	{
 		return;
 	}
