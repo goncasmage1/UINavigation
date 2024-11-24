@@ -1920,7 +1920,13 @@ bool UUINavWidget::IsSelectorValid()
 
 void UUINavWidget::OnHoveredComponent(UUINavComponent* Component)
 {
-	if (!IsValid(Component) || UINavPC == nullptr || (UINavPC->HidingMouseCursor() && !UINavPC->OverrideConsiderHover())) return;
+	if (!IsValid(Component) || UINavPC == nullptr) return;
+
+	if (UINavPC->HidingMouseCursor() && !UINavPC->OverrideConsiderHover())
+	{
+		Component->SwitchButtonStyle(EButtonStyle::Normal);
+		return;
+	}
 
 	UINavPC->CancelRebind();
 
