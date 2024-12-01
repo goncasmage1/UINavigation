@@ -9,6 +9,7 @@
 #include "UINavInputContainer.h"
 #include "UINavMacros.h"
 #include "UINavInputBox.h"
+#include "UINavInputDisplay.h"
 #include "UINavigationConfig.h"
 #include "SwapKeysWidget.h"
 #include "Components/ScrollBox.h"
@@ -18,6 +19,7 @@
 #include "Data/InputNameMapping.h"
 #include "Data/PlatformConfigData.h"
 #include "UINavBlueprintFunctionLibrary.h"
+#include "Blueprint/WidgetBlueprintLibrary.h"
 #include "UINavInputProcessor.h"
 #include "GenericPlatform/GenericPlatformInputDeviceMapper.h"
 #include "Framework/Application/SlateApplication.h"
@@ -745,6 +747,44 @@ void UUINavPCComponent::SetAllowSectionInput(const bool bAllowInput)
 {
 	bAllowSectionInput = bAllowInput;
 	RefreshNavigationKeys();
+}
+
+void UUINavPCComponent::SetGamepadInputDataTables(UDataTable* NewKeyIconTable, UDataTable* NewKeyNameTable, const bool bUpdateInputDisplays /*= true*/)
+{
+	CurrentPlatformData.GamepadKeyIconData = NewKeyIconTable;
+	CurrentPlatformData.GamepadKeyNameData = NewKeyNameTable;
+
+	if (bUpdateInputDisplays && CurrentInputType == EInputType::Gamepad)
+	{
+		ForceUpdateAllInputDisplays();
+	}
+}
+
+void UUINavPCComponent::SetKeyboardInputDataTables(UDataTable* NewKeyIconTable, UDataTable* NewKeyNameTable, const bool bUpdateInputDisplays /*= true*/)
+{
+	KeyboardMouseKeyIconData = NewKeyIconTable;
+	KeyboardMouseKeyNameData = NewKeyNameTable;
+
+	if (bUpdateInputDisplays && CurrentInputType != EInputType::Gamepad)
+	{
+		ForceUpdateAllInputDisplays();
+	}
+}
+
+void UUINavPCComponent::ForceUpdateAllInputDisplays(const bool bOnlyTopLevel /*= false*/)
+{
+	TArray<UUserWidget*> Widgets;
+	UWidgetBlueprintLibrary::GetAllWidgetsOfClass(this, Widgets, UUINavInputDisplay::StaticClass(), /*bTopLevel*/ bOnlyTopLevel);
+	for (UUserWidget* Widget : Widgets)
+	{
+		UUINavInputDisplay* InputDisplay = Cast<UUINavInputDisplay>(Widget);
+		if (!IsValid(InputDisplay))
+		{
+			continue;
+		}
+
+		InputDisplay->UpdateInputVisuals();
+	}
 }
 
 void UUINavPCComponent::HandleKeyDownEvent(FSlateApplication& SlateApp, const FKeyEvent& InKeyEvent)
