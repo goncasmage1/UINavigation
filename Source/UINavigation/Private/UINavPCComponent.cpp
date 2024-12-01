@@ -107,6 +107,11 @@ void UUINavPCComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
+	if (PC == nullptr)
+	{
+		return;
+	}
+
 	if (!PC->IsLocalController())
 	{
 		SetComponentTickEnabled(false);
