@@ -387,6 +387,20 @@ public:
 	UFUNCTION(BlueprintCallable, Category = UINavController)
 	void SetAllowSectionInput(const bool bAllowInput);
 
+	UFUNCTION(BlueprintCallable, Category = UINavController)
+	void SetGamepadInputDataTables(UDataTable* NewKeyIconTable, UDataTable* NewKeyNameTable, const bool bUpdateInputDisplays = true);
+
+	UFUNCTION(BlueprintCallable, Category = UINavController)
+	void SetKeyboardInputDataTables(UDataTable* NewKeyIconTable, UDataTable* NewKeyNameTable, const bool bUpdateInputDisplays = true);
+
+	/*
+	*	Fetches all UINavInputDisplays and forces them to update their visuals.
+	* 
+	*	@param bOnlyTopLevel Whether to update only direct children of the viewport.
+	*/
+	UFUNCTION(BlueprintCallable, Category = UINavController)
+	void ForceUpdateAllInputDisplays(const bool bOnlyTopLevel = false);
+
 	void SetIgnoreFocusByNavigation(const bool bIgnore) { bIgnoreFocusByNavigation = bIgnore; }
 	bool IgnoreFocusByNavigation() const { return bIgnoreFocusByNavigation; }
 

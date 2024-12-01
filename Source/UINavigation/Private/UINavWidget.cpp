@@ -220,20 +220,15 @@ void UUINavWidget::SetupSections()
 		return;
 	}
 
-	if (!IsValid(UINavSectionsPanel))
-	{
-		return;
-	}
-
 	UUINavSectionsWidget* SectionsWidget = Cast<UUINavSectionsWidget>(UINavSectionsPanel);
-	UPanelWidget* SectionsPanel = IsValid(SectionsWidget) ? SectionsWidget->SectionButtonsPanel : Cast<UPanelWidget>(UINavSectionsPanel);
-	if (!IsValid(SectionsPanel))
+	UPanelWidget* TargetSectionsPanel = IsValid(SectionsWidget) ? SectionsWidget->SectionButtonsPanel : Cast<UPanelWidget>(UINavSectionsPanel);
+	if (IsValid(UINavSectionsPanel) && !IsValid(TargetSectionsPanel))
 	{
 		DISPLAYERROR("UINavSectionsPanel isn't a PanelWidget child or UINavSectionsWidget!");
 		return;
 	}
 
-	if (SectionButtons.IsEmpty())
+	if (SectionButtons.IsEmpty() && IsValid(TargetSectionsPanel))
 	{
 #if WITH_EDITOR
 		static const TArray<TSubclassOf<UWidget>> ButtonClassArray = { UButton::StaticClass(), UUINavSectionButton::StaticClass(), UUINavComponent::StaticClass() };
@@ -241,7 +236,7 @@ void UUINavWidget::SetupSections()
 		static const TArray<TSubclassOf<UWidget>> ButtonClassArray = { UButton::StaticClass(), UUINavSectionButton::StaticClass() };
 #endif
 
-		for (UWidget* const ChildWidget : SectionsPanel->GetAllChildren())
+		for (UWidget* const ChildWidget : TargetSectionsPanel->GetAllChildren())
 		{
 			UWidget* TargetWidget = UUINavBlueprintFunctionLibrary::FindWidgetOfClassesInWidget(ChildWidget, ButtonClassArray);
 
@@ -279,10 +274,10 @@ void UUINavWidget::SetupSections()
 		{
 		case 0:
 			SectionButtons[i]->OnClicked.AddUniqueDynamic(this, &UUINavWidget::OnSectionButtonPressed1);
-				break;
+			break;
 		case 1:
 			SectionButtons[i]->OnClicked.AddUniqueDynamic(this, &UUINavWidget::OnSectionButtonPressed2);
-				break;
+			break;
 		case 2:
 			SectionButtons[i]->OnClicked.AddUniqueDynamic(this, &UUINavWidget::OnSectionButtonPressed3);
 			break;
@@ -1920,7 +1915,13 @@ bool UUINavWidget::IsSelectorValid()
 
 void UUINavWidget::OnHoveredComponent(UUINavComponent* Component)
 {
-	if (!IsValid(Component) || UINavPC == nullptr || (UINavPC->HidingMouseCursor() && !UINavPC->OverrideConsiderHover())) return;
+	if (!IsValid(Component) || UINavPC == nullptr) return;
+
+	if (UINavPC->HidingMouseCursor() && !UINavPC->OverrideConsiderHover())
+	{
+		Component->SwitchButtonStyle(EButtonStyle::Normal);
+		return;
+	}
 
 	UINavPC->CancelRebind();
 
