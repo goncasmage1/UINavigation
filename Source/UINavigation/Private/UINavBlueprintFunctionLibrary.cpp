@@ -277,6 +277,11 @@ UWidget* UUINavBlueprintFunctionLibrary::GetUniformGridChild(const UWidget* cons
 
 UWidget* UUINavBlueprintFunctionLibrary::FindWidgetOfClassesInWidget(UWidget* Widget, const TArray<TSubclassOf<UWidget>>& WidgetClasses)
 {
+	if (!IsValid(Widget))
+	{
+		return nullptr;
+	}
+
 	for (const TSubclassOf<UWidget>& WidgetClass : WidgetClasses)
 	{
 		if (Widget->IsA(WidgetClass))
