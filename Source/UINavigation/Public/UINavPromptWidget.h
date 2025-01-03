@@ -20,14 +20,18 @@ public:
 
 	virtual void OnReturn_Implementation() override;
 
-	UFUNCTION(BlueprintCallable, Category = "UINavPromptWidget")
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "UINavPromptWidget")
 	void ProcessPromptWidgetSelected(UPromptDataBase* InPromptData);
+	virtual void ProcessPromptWidgetSelected_Implementation(UPromptDataBase* InPromptData);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "UINavPromptWidget")
 	bool IsAcceptComponent(UUINavComponent* Component) const;
 
 	UFUNCTION(BlueprintCallable, Category = "UINavPromptWidget")
 	void SetCallback(const FPromptWidgetDecided& InCallback) { Callback = InCallback; }
+
+	UFUNCTION(BlueprintCallable, Category = "UINavPromptWidget")
+	void ExecuteCallback(UPromptDataBase* InPromptData);
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UINavPromptWidget")

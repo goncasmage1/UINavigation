@@ -49,7 +49,7 @@ void UUINavPromptWidget::OnReturn_Implementation()
 	ProcessPromptWidgetSelected(UUINavBlueprintFunctionLibrary::CreateBinaryPromptData(false));
 }
 
-void UUINavPromptWidget::ProcessPromptWidgetSelected(UPromptDataBase* InPromptData)
+void UUINavPromptWidget::ProcessPromptWidgetSelected_Implementation(UPromptDataBase* InPromptData)
 {
 	if (!IsValid(InPromptData))
 	{
@@ -58,10 +58,15 @@ void UUINavPromptWidget::ProcessPromptWidgetSelected(UPromptDataBase* InPromptDa
 
 	ReturnToParent();
 
-	Callback.ExecuteIfBound(InPromptData);
+	ExecuteCallback(InPromptData);
 }
 
 bool UUINavPromptWidget::IsAcceptComponent(UUINavComponent* Component) const
 {
 	return (Component == FirstComponent) == FirstComponentIsAccept;
+}
+
+void UUINavPromptWidget::ExecuteCallback(UPromptDataBase* InPromptData)
+{
+	Callback.ExecuteIfBound(InPromptData);
 }
