@@ -345,6 +345,11 @@ void UUINavWidget::UINavSetup()
 		CurrentActiveWidget->ParentWidget == this ||
 		ReturnedFromWidget != nullptr;
 
+	if (IsValid(TheSelector))
+	{
+		TheSelector->SetVisibility(ESlateVisibility::Hidden);
+	}
+
 	if (ReturnedFromWidget != nullptr && IsValid(CurrentComponent))
 	{
 		if (bShouldTakeFocus)

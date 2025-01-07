@@ -789,6 +789,6 @@ int UUINavInputBox::ContainsKey(const FKey& CompareKey) const
 
 bool UUINavInputBox::WantsAxisKey() const
 {
-	return IS_AXIS && InputActionData.AxisScale == EAxisType::None;
+	return IS_AXIS && InputActionData.AxisScale != EAxisType::None;
 }
 
