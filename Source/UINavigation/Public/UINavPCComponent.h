@@ -465,7 +465,7 @@ public:
 	const FKey GetKeyFromAxis(const FKey& Key, bool bPositive, const EInputAxis Axis = EInputAxis::X) const;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
-	const FKey GetAxisFromScaledKey(const FKey& Key, bool& OutbPositive) const;
+	const FKey GetAxisFromScaledKey(const FKey& Key, const bool bInclude1DAxis, bool& OutbPositive) const;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
 	const FKey GetAxisFromKey(const FKey& Key) const;

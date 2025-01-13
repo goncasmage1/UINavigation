@@ -224,7 +224,7 @@ int32 UUINavInputBox::FinishUpdateNewEnhancedInputKey(const FKey& PressedKey, co
 
 	int32 ModifiedActionMappingIndex = -1;
 	bool bPositive;
-	const FKey PressedAxisKey = Container->UINavPC->GetAxisFromScaledKey(PressedKey, bPositive);
+	const FKey PressedAxisKey = Container->UINavPC->GetAxisFromScaledKey(PressedKey, true, bPositive);
 	const FKey NewKey = WantsAxisKey() && PressedAxisKey.IsValid() ? PressedAxisKey : PressedKey;
 
 	FKey NewAxisKey;
@@ -255,7 +255,7 @@ int32 UUINavInputBox::FinishUpdateNewEnhancedInputKey(const FKey& PressedKey, co
 								InputActionData.AxisScale != EAxisType::None)
 							{
 								bool bNewKeyPositive = true;
-								if (Container->UINavPC->GetAxisFromScaledKey(NewKey, bNewKeyPositive).IsValid())
+								if (Container->UINavPC->GetAxisFromScaledKey(NewKey, false, bNewKeyPositive).IsValid())
 								{
 									NewAxisKey = NewKey;
 								}
@@ -281,9 +281,9 @@ int32 UUINavInputBox::FinishUpdateNewEnhancedInputKey(const FKey& PressedKey, co
 						Container->GetOppositeInputBox(InputActionData) != nullptr)
 					{
 						bool bOtherKeyPositive = true;
-						const FKey OtherKeyAxis = Container->UINavPC->GetAxisFromScaledKey(ActionMapping.Key, bOtherKeyPositive);
+						const FKey OtherKeyAxis = Container->UINavPC->GetAxisFromScaledKey(ActionMapping.Key, false, bOtherKeyPositive);
 						bool bNewKeyPositive = true;
-						const FKey NewKeyAxis = Container->UINavPC->GetAxisFromScaledKey(NewKey, bNewKeyPositive);
+						const FKey NewKeyAxis = Container->UINavPC->GetAxisFromScaledKey(NewKey, false, bNewKeyPositive);
 
 						if (OtherKeyAxis == NewKeyAxis &&
 							bOtherKeyPositive != bNewKeyPositive &&
@@ -343,6 +343,7 @@ int32 UUINavInputBox::FinishUpdateNewEnhancedInputKey(const FKey& PressedKey, co
 		Keys[Index] = NewKey;
 		InputButtons[Index]->SetText(GetKeyText(Index));
 
+		// Try to merge 2 1D axes into a 2D axis
 		TryMap2DAxisKey(NewMapping.Key, Index);
 	}
 	else
@@ -400,7 +401,7 @@ void UUINavInputBox::TryMapEnhancedAxisKey(const FKey& NewKey, const int32 Index
 			InputContext->UnmapKey(InputActionData.Action, NewOppositeKey);
 			InputContext->UnmapKey(InputActionData.Action, NewKey);
 			bool bPositive;
-			FEnhancedActionKeyMapping& NewMapping = InputContext->MapKey(InputActionData.Action, Container->UINavPC->GetAxisFromScaledKey(NewKey, bPositive));
+			FEnhancedActionKeyMapping& NewMapping = InputContext->MapKey(InputActionData.Action, Container->UINavPC->GetAxisFromScaledKey(NewKey, false, bPositive));
 			AddRelevantModifiers(InputActionData, NewMapping);
 			ApplyNegateModifiers(this, NewMapping, bNegateX, bNegateY, bNegateZ);
 

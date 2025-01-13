@@ -1359,7 +1359,7 @@ const FKey UUINavPCComponent::GetKeyFromAxis(const FKey& Key, const bool bPositi
 	return bPositive ? AxisKeys->PositiveKey : AxisKeys->NegativeKey;
 }
 
-const FKey UUINavPCComponent::GetAxisFromScaledKey(const FKey& Key, bool& OutbPositive) const
+const FKey UUINavPCComponent::GetAxisFromScaledKey(const FKey& Key, const bool bInclude1DAxis, bool& OutbPositive) const
 {
 	for (const TPair<FKey, FAxis2D_Keys>& AxisKeys : AxisToKeyMap)
 	{
@@ -1375,6 +1375,13 @@ const FKey UUINavPCComponent::GetAxisFromScaledKey(const FKey& Key, bool& OutbPo
 			return AxisKeys.Key;
 		}
 	}
+
+	if (bInclude1DAxis)
+	{
+		return GetAxisFromKey(Key);
+		OutbPositive = true;
+	}
+
 	return FKey();
 }
 
