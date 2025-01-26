@@ -83,6 +83,7 @@ void UUINavWidget::NativeConstruct()
 
 		if (bShouldDestroyParent)
 		{
+			ParentWidget = OuterParentWidget->ParentWidget;
 			OuterParentWidget->Destruct();
 			OuterParentWidget = nullptr;
 		}
