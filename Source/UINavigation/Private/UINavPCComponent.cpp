@@ -184,25 +184,28 @@ void UUINavPCComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAct
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	switch (CountdownPhase)
+	if (bChainNavigation)
 	{
-		case ECountdownPhase::First:
-			TimerCounter += DeltaTime;
-			if (TimerCounter >= InputHeldWaitTime)
-			{
-				NavigateInDirection(CallbackDirection);
-				TimerCounter -= InputHeldWaitTime;
-				CountdownPhase = ECountdownPhase::Looping;
-			}
-			break;
-		case ECountdownPhase::Looping:
-			TimerCounter += DeltaTime;
-			if (TimerCounter >= NavigationChainFrequency)
-			{
-				NavigateInDirection(CallbackDirection);
-				TimerCounter -= NavigationChainFrequency;
-			}
-			break;
+		switch (CountdownPhase)
+		{
+			case ECountdownPhase::First:
+				TimerCounter += DeltaTime;
+				if (TimerCounter >= InputHeldWaitTime)
+				{
+					NavigateInDirection(CallbackDirection);
+					TimerCounter -= InputHeldWaitTime;
+					CountdownPhase = ECountdownPhase::Looping;
+				}
+				break;
+			case ECountdownPhase::Looping:
+				TimerCounter += DeltaTime;
+				if (TimerCounter >= NavigationChainFrequency)
+				{
+					NavigateInDirection(CallbackDirection);
+					TimerCounter -= NavigationChainFrequency;
+				}
+				break;
+		}
 	}
 
 	if (!bReceivedAnalogInput)
@@ -1650,7 +1653,7 @@ void UUINavPCComponent::NavigateInDirection(const EUINavigation InDirection, con
 {
 	AllowDirection = InDirection;
 
-	if (!IsValid(ActiveWidget) || !IsValid(ActiveWidget->GetCurrentComponent()))
+	if (!IsValid(ActiveWidget) || !IsValid(ActiveWidget->GetCurrentComponent()) || ActiveWidget->GetCurrentComponent()->GetCachedWidget() == nullptr)
 	{
 		return;
 	}
