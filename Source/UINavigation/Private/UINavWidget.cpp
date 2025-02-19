@@ -1558,6 +1558,12 @@ UUINavWidget * UUINavWidget::GoToBuiltWidget(UUINavWidget* NewWidget, const bool
 			NewWidget->SetKeyboardFocus();
 		}
 	}
+
+	if (NewWidget->GetMostOuterUINavWidget() == GetMostOuterUINavWidget())
+	{
+		DISPLAYERROR("Calling GoToBuildWidget on a nested widget. You should call SetFocus instead!");
+	}
+
 	CleanSetup();
 	
 	SelectCount = 0;
@@ -1839,13 +1845,13 @@ bool UUINavWidget::IsBeingRemoved() const
 
 UUINavWidget* UUINavWidget::GetMostOuterUINavWidget()
 {
-	UUINavWidget* MostOUter = this;
-	while (MostOUter->OuterUINavWidget != nullptr)
+	UUINavWidget* MostOuter = this;
+	while (MostOuter->OuterUINavWidget != nullptr)
 	{
-		MostOUter = MostOUter->OuterUINavWidget;
+		MostOuter = MostOuter->OuterUINavWidget;
 	}
 
-	return MostOUter;
+	return MostOuter;
 }
 
 UUINavWidget* UUINavWidget::GetChildUINavWidget(const int ChildIndex) const
@@ -2027,6 +2033,8 @@ void UUINavWidget::OnReleasedComponent(UUINavComponent* Component)
 		{
 			SetSelectedComponent(nullptr);
 
+			if (Component != CurrentComponent && GetDefault<UUINavSettings>()->bSetFocusOnRelease) Component->SetFocus();
+
 			if (bIsSelectedButton)
 			{
 				PropagateOnSelect(Component);
@@ -2034,6 +2042,4 @@ void UUINavWidget::OnReleasedComponent(UUINavComponent* Component)
 			PropagateOnStopSelect(Component);
 		}
 	}
-
-	if (Component != CurrentComponent && GetDefault<UUINavSettings>()->bSetFocusOnRelease) Component->SetFocus();
 }
