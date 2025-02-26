@@ -352,6 +352,10 @@ void UUINavWidget::UINavSetup()
 	}
 
 	SetPressingReturn(IsNavigationKeyPressed(EUINavigationAction::Back));
+	if (bPressingReturn && !GetDefault<UUINavSettings>()->bReturnOnPress)
+	{
+		bIgnoreFirstReturn = true;
+	}
 
 	if (ReturnedFromWidget != nullptr && IsValid(CurrentComponent))
 	{
@@ -1841,7 +1845,14 @@ void UUINavWidget::StoppedReturn()
 {
 	if (!GetDefault<UUINavSettings>()->bReturnOnPress)
 	{
-		ExecuteReturn(/*bPress*/ false);
+		if (bIgnoreFirstReturn)
+		{
+			bIgnoreFirstReturn = false;
+		}
+		else
+		{
+			ExecuteReturn(/*bPress*/ false);
+		}
 	}
 
 	SetPressingReturn(false);

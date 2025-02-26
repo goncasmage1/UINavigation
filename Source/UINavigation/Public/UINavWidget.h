@@ -51,6 +51,7 @@ protected:
 	bool bReturningToParent = false;
 
 	bool bPressingReturn = false;
+	bool bIgnoreFirstReturn = false;
 
 	bool bDestroying = false;
 	bool bHasNavigation = false;
