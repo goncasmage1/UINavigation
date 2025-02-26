@@ -6,6 +6,7 @@
 #include "Engine/World.h"
 #include "EnhancedInputSubsystems.h"
 #include "UINavSavedInputSettings.h"
+#include "UINavSettings.h"
 #include "InputMappingContext.h"
 #include "Subsystems/SubsystemCollection.h"
 #include "AssetRegistry/AssetData.h"
@@ -38,7 +39,15 @@ void UUINavLocalPlayerSubsystem::ApplySavedInputContexts()
 		return;
 	}
 
-	const UUINavSavedInputSettings* SavedUINavInputSettings = GetDefault<UUINavSavedInputSettings>();
+	UUINavSavedInputSettings* SavedUINavInputSettings = GetMutableDefault<UUINavSavedInputSettings>();
+	const uint8 CurrentInputVersion = GetDefault<UUINavSettings>()->CurrentInputVersion;
+	if (SavedUINavInputSettings->InputVersion < CurrentInputVersion)
+	{
+		SavedUINavInputSettings->SavedEnhancedInputMappings.Reset();
+		SavedUINavInputSettings->SaveConfig();
+		return;
+	}
+
 	for (const TPair<TSoftObjectPtr<UInputMappingContext>, FInputMappingArray>& Entry : SavedUINavInputSettings->SavedEnhancedInputMappings)
 	{
 		UInputMappingContext* InputContext = Entry.Key.LoadSynchronous();
