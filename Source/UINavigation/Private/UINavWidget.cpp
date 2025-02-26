@@ -351,6 +351,8 @@ void UUINavWidget::UINavSetup()
 		TheSelector->SetVisibility(ESlateVisibility::Hidden);
 	}
 
+	SetPressingReturn(IsNavigationKeyPressed(EUINavigationAction::Back));
+
 	if (ReturnedFromWidget != nullptr && IsValid(CurrentComponent))
 	{
 		if (bShouldTakeFocus)
@@ -512,12 +514,60 @@ void UUINavWidget::SetSelectedComponent(UUINavComponent* Component)
 
 void UUINavWidget::SetPressingReturn(const bool InbPressingReturn)
 {
-	bPressingReturn = true;
+	bPressingReturn = InbPressingReturn;
 
 	if (OuterUINavWidget != nullptr)
 	{
 		OuterUINavWidget->SetPressingReturn(InbPressingReturn);
 	}
+}
+
+bool UUINavWidget::IsNavigationKeyPressed(const EUINavigation NavigationEvent) const
+{
+	if (!IsValid(UINavPC))
+	{
+		return false;
+	}
+
+	TSharedRef<FUINavigationConfig> NavConfig = StaticCastSharedRef<FUINavigationConfig>(FSlateApplication::Get().GetNavigationConfig());
+	for (const TPair<FKey, EUINavigation> KeyEventRule : NavConfig->KeyEventRules)
+	{
+		if (KeyEventRule.Value != NavigationEvent)
+		{
+			continue;
+		}
+
+		if (UINavPC->GetPC()->IsInputKeyDown(KeyEventRule.Key))
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
+bool UUINavWidget::IsNavigationKeyPressed(const EUINavigationAction NavigationAction) const
+{
+	if (!IsValid(UINavPC))
+	{
+		return false;
+	}
+
+	TSharedRef<FUINavigationConfig> NavConfig = StaticCastSharedRef<FUINavigationConfig>(FSlateApplication::Get().GetNavigationConfig());
+	for (const TPair<FKey, EUINavigationAction> KeyEventRule : NavConfig->KeyActionRules)
+	{
+		if (KeyEventRule.Value != NavigationAction)
+		{
+			continue;
+		}
+
+		if (UINavPC->GetPC()->IsInputKeyDown(KeyEventRule.Key))
+		{
+			return true;
+		}
+	}
+
+	return false;
 }
 
 FReply UUINavWidget::NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent)
@@ -1646,7 +1696,6 @@ void UUINavWidget::ReturnToParent(const bool bRemoveAllParents, const int ZOrder
 				}
 				else
 				{
-					UUINavWidget* ParentOuter = ParentWidget->GetMostOuterUINavWidget();
 					ParentWidget->ReturnedFromWidget = this;
 					ParentWidget->ReconfigureSetup();
 				}
@@ -1780,8 +1829,9 @@ void UUINavWidget::StoppedSelect()
 
 void UUINavWidget::StartedReturn()
 {
+	const bool bWasPressingReturn = bPressingReturn;
 	SetPressingReturn(true);
-	if (GetDefault<UUINavSettings>()->bReturnOnPress)
+	if (GetDefault<UUINavSettings>()->bReturnOnPress && !bWasPressingReturn)
 	{
 		ExecuteReturn(/*bPress*/ true);
 	}
