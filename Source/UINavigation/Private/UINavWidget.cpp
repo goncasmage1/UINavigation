@@ -1053,9 +1053,14 @@ void UUINavWidget::GoToSection(const int32 SectionIndex)
 {
 	if (!IsValid(UINavSwitcher) ||
 		!IsValid(UINavSwitcher->GetWidgetAtIndex(SectionIndex)) ||
-		UINavSwitcher->GetActiveWidgetIndex() == SectionIndex ||
 		!SectionWidgets.IsValidIndex(SectionIndex))
 	{
+		return;
+	}
+
+	if (UINavSwitcher->GetActiveWidgetIndex() == SectionIndex)
+	{
+		UINavSwitcher->GetActiveWidget()->SetFocus();
 		return;
 	}
 	
