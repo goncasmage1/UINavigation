@@ -351,6 +351,12 @@ void UUINavWidget::UINavSetup()
 		TheSelector->SetVisibility(ESlateVisibility::Hidden);
 	}
 
+	SetPressingReturn(IsNavigationKeyPressed(EUINavigationAction::Back));
+	if (bPressingReturn && !GetDefault<UUINavSettings>()->bReturnOnPress)
+	{
+		bIgnoreFirstReturn = true;
+	}
+
 	if (ReturnedFromWidget != nullptr && IsValid(CurrentComponent))
 	{
 		if (bShouldTakeFocus)
@@ -512,12 +518,60 @@ void UUINavWidget::SetSelectedComponent(UUINavComponent* Component)
 
 void UUINavWidget::SetPressingReturn(const bool InbPressingReturn)
 {
-	bPressingReturn = true;
+	bPressingReturn = InbPressingReturn;
 
 	if (OuterUINavWidget != nullptr)
 	{
 		OuterUINavWidget->SetPressingReturn(InbPressingReturn);
 	}
+}
+
+bool UUINavWidget::IsNavigationKeyPressed(const EUINavigation NavigationEvent) const
+{
+	if (!IsValid(UINavPC))
+	{
+		return false;
+	}
+
+	TSharedRef<FUINavigationConfig> NavConfig = StaticCastSharedRef<FUINavigationConfig>(FSlateApplication::Get().GetNavigationConfig());
+	for (const TPair<FKey, EUINavigation> KeyEventRule : NavConfig->KeyEventRules)
+	{
+		if (KeyEventRule.Value != NavigationEvent)
+		{
+			continue;
+		}
+
+		if (UINavPC->GetPC()->IsInputKeyDown(KeyEventRule.Key))
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
+bool UUINavWidget::IsNavigationKeyPressed(const EUINavigationAction NavigationAction) const
+{
+	if (!IsValid(UINavPC))
+	{
+		return false;
+	}
+
+	TSharedRef<FUINavigationConfig> NavConfig = StaticCastSharedRef<FUINavigationConfig>(FSlateApplication::Get().GetNavigationConfig());
+	for (const TPair<FKey, EUINavigationAction> KeyEventRule : NavConfig->KeyActionRules)
+	{
+		if (KeyEventRule.Value != NavigationAction)
+		{
+			continue;
+		}
+
+		if (UINavPC->GetPC()->IsInputKeyDown(KeyEventRule.Key))
+		{
+			return true;
+		}
+	}
+
+	return false;
 }
 
 FReply UUINavWidget::NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent)
@@ -999,9 +1053,14 @@ void UUINavWidget::GoToSection(const int32 SectionIndex)
 {
 	if (!IsValid(UINavSwitcher) ||
 		!IsValid(UINavSwitcher->GetWidgetAtIndex(SectionIndex)) ||
-		UINavSwitcher->GetActiveWidgetIndex() == SectionIndex ||
 		!SectionWidgets.IsValidIndex(SectionIndex))
 	{
+		return;
+	}
+
+	if (UINavSwitcher->GetActiveWidgetIndex() == SectionIndex)
+	{
+		UINavSwitcher->GetActiveWidget()->SetFocus();
 		return;
 	}
 	
@@ -1558,6 +1617,12 @@ UUINavWidget * UUINavWidget::GoToBuiltWidget(UUINavWidget* NewWidget, const bool
 			NewWidget->SetKeyboardFocus();
 		}
 	}
+
+	if (NewWidget->GetMostOuterUINavWidget() == GetMostOuterUINavWidget())
+	{
+		DISPLAYERROR("Calling GoToBuildWidget on a nested widget. You should call SetFocus instead!");
+	}
+
 	CleanSetup();
 	
 	SelectCount = 0;
@@ -1640,7 +1705,6 @@ void UUINavWidget::ReturnToParent(const bool bRemoveAllParents, const int ZOrder
 				}
 				else
 				{
-					UUINavWidget* ParentOuter = ParentWidget->GetMostOuterUINavWidget();
 					ParentWidget->ReturnedFromWidget = this;
 					ParentWidget->ReconfigureSetup();
 				}
@@ -1774,8 +1838,9 @@ void UUINavWidget::StoppedSelect()
 
 void UUINavWidget::StartedReturn()
 {
+	const bool bWasPressingReturn = bPressingReturn;
 	SetPressingReturn(true);
-	if (GetDefault<UUINavSettings>()->bReturnOnPress)
+	if (GetDefault<UUINavSettings>()->bReturnOnPress && !bWasPressingReturn)
 	{
 		ExecuteReturn(/*bPress*/ true);
 	}
@@ -1785,7 +1850,14 @@ void UUINavWidget::StoppedReturn()
 {
 	if (!GetDefault<UUINavSettings>()->bReturnOnPress)
 	{
-		ExecuteReturn(/*bPress*/ false);
+		if (bIgnoreFirstReturn)
+		{
+			bIgnoreFirstReturn = false;
+		}
+		else
+		{
+			ExecuteReturn(/*bPress*/ false);
+		}
 	}
 
 	SetPressingReturn(false);
@@ -1839,13 +1911,13 @@ bool UUINavWidget::IsBeingRemoved() const
 
 UUINavWidget* UUINavWidget::GetMostOuterUINavWidget()
 {
-	UUINavWidget* MostOUter = this;
-	while (MostOUter->OuterUINavWidget != nullptr)
+	UUINavWidget* MostOuter = this;
+	while (MostOuter->OuterUINavWidget != nullptr)
 	{
-		MostOUter = MostOUter->OuterUINavWidget;
+		MostOuter = MostOuter->OuterUINavWidget;
 	}
 
-	return MostOUter;
+	return MostOuter;
 }
 
 UUINavWidget* UUINavWidget::GetChildUINavWidget(const int ChildIndex) const
@@ -2027,6 +2099,8 @@ void UUINavWidget::OnReleasedComponent(UUINavComponent* Component)
 		{
 			SetSelectedComponent(nullptr);
 
+			if (Component != CurrentComponent && GetDefault<UUINavSettings>()->bSetFocusOnRelease) Component->SetFocus();
+
 			if (bIsSelectedButton)
 			{
 				PropagateOnSelect(Component);
@@ -2034,6 +2108,4 @@ void UUINavWidget::OnReleasedComponent(UUINavComponent* Component)
 			PropagateOnStopSelect(Component);
 		}
 	}
-
-	if (Component != CurrentComponent && GetDefault<UUINavSettings>()->bSetFocusOnRelease) Component->SetFocus();
 }

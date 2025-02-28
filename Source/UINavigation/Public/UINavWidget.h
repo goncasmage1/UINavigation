@@ -24,6 +24,8 @@ class UInputMappingContext;
 class UWidgetSwitcher;
 class UButton;
 enum class EButtonStyle : uint8;
+enum class EUINavigation : uint8;
+enum class EUINavigationAction : uint8;
 
 /**
 * This class contains the logic for UserWidget navigation
@@ -49,6 +51,7 @@ protected:
 	bool bReturningToParent = false;
 
 	bool bPressingReturn = false;
+	bool bIgnoreFirstReturn = false;
 
 	bool bDestroying = false;
 	bool bHasNavigation = false;
@@ -363,6 +366,9 @@ public:
 	void SetSelectedComponent(UUINavComponent* Component);
 
 	void SetPressingReturn(const bool InbPressingReturn);
+
+	bool IsNavigationKeyPressed(const EUINavigation NavigationEvent) const;
+	bool IsNavigationKeyPressed(const EUINavigationAction NavigationAction) const;
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, BlueprintPure, Category = UINavWidget)
 	UScrollBox* GetScrollBoxToFocus();

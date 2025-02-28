@@ -8,6 +8,7 @@ public class UINavigationEditor : ModuleRules
     public UINavigationEditor(ReadOnlyTargetRules Target) : base(Target)
     {
         PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
+        IncludeOrderVersion = EngineIncludeOrderVersion.Latest;
         PublicIncludePaths.Add(Path.Combine(ModuleDirectory, "Public"));
         PrivateIncludePaths.Add(Path.Combine(ModuleDirectory, "Private"));
         
