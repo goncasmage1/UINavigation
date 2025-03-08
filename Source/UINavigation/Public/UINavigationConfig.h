@@ -24,7 +24,5 @@ public:
 
 	bool IsGamepadSelectKey(const FKey& Key) const { return GamepadSelectKeys.Contains(Key); }
 
-	TMap<FKey, EUINavigationAction> KeyActionRules;
-
 	TArray<FKey> GamepadSelectKeys;
 };
