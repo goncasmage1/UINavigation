@@ -40,6 +40,21 @@ protected:
 	UFUNCTION()
 	void HandleOnSpinBoxValueCommitted(const float InValue, const ETextCommit::Type CommitMethod);
 
+	UFUNCTION(BlueprintCallable, Category = UINavSlider)
+	FORCEINLINE void SetMinValue(const float NewValue) { MinValue = NewValue; Update(false); }
+
+	UFUNCTION(BlueprintCallable, Category = UINavSlider)
+	FORCEINLINE void SetMaxValue(const float NewValue) { MaxValue = NewValue; Update(false); }
+
+	UFUNCTION(BlueprintCallable, Category = UINavSlider)
+	FORCEINLINE void SetInterval(const float NewInterval) { Interval = NewInterval; Update(false); }
+
+	UFUNCTION(BlueprintCallable, Category = UINavSlider)
+	FORCEINLINE void SetMinDecimalDigits(const int DecimalDigits) { MinDecimalDigits = DecimalDigits;  Update(false); }
+
+	UFUNCTION(BlueprintCallable, Category = UINavSlider)
+	FORCEINLINE void SetMaxDecimalDigits(const int DecimalDigits) { MaxDecimalDigits = DecimalDigits;  Update(false); }
+
 	int IndexFromPercent(const float Value);
 	int IndexFromValue(const float Value);
 
