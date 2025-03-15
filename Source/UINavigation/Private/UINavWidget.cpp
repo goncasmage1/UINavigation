@@ -2045,6 +2045,11 @@ void UUINavWidget::OnUnhoveredComponent(UUINavComponent* Component)
 		SetHoveredComponent(nullptr);
 	}
 
+	if (Component == SelectedComponent)
+	{
+		SetSelectedComponent(nullptr);
+	}
+
 	if (!GetDefault<UUINavSettings>()->bForceNavigation)
 	{
 		UnforceNavigation(true);
