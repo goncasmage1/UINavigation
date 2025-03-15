@@ -393,6 +393,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = UINavController)
 	void SetKeyboardInputDataTables(UDataTable* NewKeyIconTable, UDataTable* NewKeyNameTable, const bool bUpdateInputDisplays = true);
 
+	UFUNCTION()
+	void InputKey(const FKey& Key, const EInputEvent Event, const float Delta);
+
 	/*
 	*	Fetches all UINavInputDisplays and forces them to update their visuals.
 	* 

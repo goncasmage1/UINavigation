@@ -14,6 +14,7 @@
 #include "SwapKeysWidget.h"
 #include "Components/ScrollBox.h"
 #include "GameFramework/InputSettings.h"
+#include "GameFramework/PlayerInput.h"
 #include "Data/AxisType.h"
 #include "Data/InputIconMapping.h"
 #include "Data/InputNameMapping.h"
@@ -783,6 +784,14 @@ void UUINavPCComponent::SetKeyboardInputDataTables(UDataTable* NewKeyIconTable, 
 	if (bUpdateInputDisplays && CurrentInputType != EInputType::Gamepad)
 	{
 		ForceUpdateAllInputDisplays();
+	}
+}
+
+void UUINavPCComponent::InputKey(const FKey& Key, const EInputEvent Event, const float Delta)
+{
+	if (IsValid(PC))
+	{
+		PC->InputKey(FInputKeyParams(Key, Event, Delta));
 	}
 }
 
