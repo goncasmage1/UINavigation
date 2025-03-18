@@ -271,9 +271,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavController, meta = (RequiredAssetDataTags = "RowStructure=/Script/UINavigation.InputNameMapping"))
 	UDataTable* KeyboardMouseKeyNameData = nullptr;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Settings")
-	UInputMappingContext* UINavInputContextRef;
-
 	FPlatformConfigData CurrentPlatformData;
 
 	FKey LastPressedKey;
