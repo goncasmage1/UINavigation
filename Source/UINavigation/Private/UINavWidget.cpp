@@ -34,6 +34,7 @@
 #include "Engine/ViewportSplitScreen.h"
 #include "Engine/Console.h"
 #include "Curves/CurveFloat.h"
+#include "Kismet/GameplayStatics.h"
 
 UUINavWidget::UUINavWidget(const FObjectInitializer& ObjectInitializer)
 	:Super(ObjectInitializer)
@@ -181,8 +182,12 @@ void UUINavWidget::ConfigureUINavPC()
 	APlayerController* PC = Cast<APlayerController>(GetOwningPlayer());
 	if (PC == nullptr)
 	{
-		DISPLAYERROR("Player Controller is Null!");
-		return;
+		PC = UGameplayStatics::GetPlayerController(this, 0);
+		if (PC == nullptr)
+		{
+			DISPLAYERROR("Player Controller is Null!");
+			return;
+		}
 	}
 	UINavPC = Cast<UUINavPCComponent>(PC->GetComponentByClass(UUINavPCComponent::StaticClass()));
 	if (UINavPC == nullptr)
