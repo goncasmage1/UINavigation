@@ -10,10 +10,8 @@
 #include "UINavBlueprintFunctionLibrary.h"
 #include "TimerManager.h"
 
-void UUINavSlider::NativeConstruct()
+void UUINavSlider::NativePreConstruct()
 {
-	Super::NativeConstruct();
-
 	if (MinValue >= MaxValue)
 	{
 		DISPLAYERROR(TEXT("MaxValue should be greater than MinValue"));
@@ -35,14 +33,20 @@ void UUINavSlider::NativeConstruct()
 		NavSpinBox->SetMaxValue(MaxValue);
 		NavSpinBox->SetClearKeyboardFocusOnCommit(true);
 
-		if (!NavSpinBox->OnValueCommitted.IsBound()) NavSpinBox->OnValueCommitted.AddUniqueDynamic(this, &UUINavSlider::HandleOnSpinBoxValueCommitted);
-		if (!NavSpinBox->OnValueChanged.IsBound()) NavSpinBox->OnValueChanged.AddUniqueDynamic(this, &UUINavSlider::HandleOnSpinBoxValueChanged);
-		if (!NavSpinBox->OnBeginSliderMovement.IsBound()) NavSpinBox->OnBeginSliderMovement.AddUniqueDynamic(this, &UUINavSlider::HandleOnSpinBoxMouseCaptureBegin);
+		if (!IsDesignTime())
+		{
+			if (!NavSpinBox->OnValueCommitted.IsBound()) NavSpinBox->OnValueCommitted.AddUniqueDynamic(this, &UUINavSlider::HandleOnSpinBoxValueCommitted);
+			if (!NavSpinBox->OnValueChanged.IsBound()) NavSpinBox->OnValueChanged.AddUniqueDynamic(this, &UUINavSlider::HandleOnSpinBoxValueChanged);
+			if (!NavSpinBox->OnBeginSliderMovement.IsBound()) NavSpinBox->OnBeginSliderMovement.AddUniqueDynamic(this, &UUINavSlider::HandleOnSpinBoxMouseCaptureBegin);
+		}
 	}
 
-	if (!Slider->OnMouseCaptureBegin.IsBound()) Slider->OnMouseCaptureBegin.AddUniqueDynamic(this, &UUINavSlider::HandleOnSliderMouseCaptureBegin);
-	if (!Slider->OnValueChanged.IsBound()) Slider->OnValueChanged.AddUniqueDynamic(this, &UUINavSlider::HandleOnSliderValueChanged);
-	if (!Slider->OnMouseCaptureEnd.IsBound()) Slider->OnMouseCaptureEnd.AddUniqueDynamic(this, &UUINavSlider::HandleOnSliderMouseCaptureEnd);
+	if (!IsDesignTime())
+	{
+		if (!Slider->OnMouseCaptureBegin.IsBound()) Slider->OnMouseCaptureBegin.AddUniqueDynamic(this, &UUINavSlider::HandleOnSliderMouseCaptureBegin);
+		if (!Slider->OnValueChanged.IsBound()) Slider->OnValueChanged.AddUniqueDynamic(this, &UUINavSlider::HandleOnSliderValueChanged);
+		if (!Slider->OnMouseCaptureEnd.IsBound()) Slider->OnMouseCaptureEnd.AddUniqueDynamic(this, &UUINavSlider::HandleOnSliderMouseCaptureEnd);
+	}
 
 	Difference = MaxValue - MinValue;
 	Slider->SetStepSize(Interval / Difference);
@@ -51,6 +55,8 @@ void UUINavSlider::NativeConstruct()
 	BarDefaultColor = Slider->GetSliderBarColor();
 
 	Update();
+
+	Super::NativePreConstruct();
 }
 
 bool UUINavSlider::Update(const bool bNotify /*= true*/)

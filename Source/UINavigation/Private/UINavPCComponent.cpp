@@ -14,6 +14,7 @@
 #include "SwapKeysWidget.h"
 #include "Components/ScrollBox.h"
 #include "GameFramework/InputSettings.h"
+#include "GameFramework/PlayerInput.h"
 #include "Data/AxisType.h"
 #include "Data/InputIconMapping.h"
 #include "Data/InputNameMapping.h"
@@ -64,8 +65,6 @@ UUINavPCComponent::UUINavPCComponent()
 		EKeys::AddKey(FKeyDetails(MouseRight, NSLOCTEXT("InputKeys", "MouseRight", "Mouse Right"), FKeyDetails::MouseButton));
 		EKeys::AddKey(FKeyDetails(MouseLeft, NSLOCTEXT("InputKeys", "MouseLeft", "Mouse Left"), FKeyDetails::MouseButton));
 	}
-
-	UINavInputContextRef = GetDefault<UUINavSettings>()->EnhancedInputContext.Get();
 
 	static ConstructorHelpers::FObjectFinderOptional<UCurveFloat> ThumbstickCursorCurveAsset(TEXT("/UINavigation/Data/ThumbstickMoveCurve.ThumbstickMoveCurve"));
 	if (IsValid(ThumbstickCursorCurveAsset.Get()))
@@ -783,6 +782,14 @@ void UUINavPCComponent::SetKeyboardInputDataTables(UDataTable* NewKeyIconTable, 
 	if (bUpdateInputDisplays && CurrentInputType != EInputType::Gamepad)
 	{
 		ForceUpdateAllInputDisplays();
+	}
+}
+
+void UUINavPCComponent::InputKey(const FKey& Key, const EInputEvent Event, const float Delta)
+{
+	if (IsValid(PC))
+	{
+		PC->InputKey(FInputKeyParams(Key, Event, Delta));
 	}
 }
 

@@ -271,9 +271,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavController, meta = (RequiredAssetDataTags = "RowStructure=/Script/UINavigation.InputNameMapping"))
 	UDataTable* KeyboardMouseKeyNameData = nullptr;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Settings")
-	UInputMappingContext* UINavInputContextRef;
-
 	FPlatformConfigData CurrentPlatformData;
 
 	FKey LastPressedKey;
@@ -392,6 +389,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = UINavController)
 	void SetKeyboardInputDataTables(UDataTable* NewKeyIconTable, UDataTable* NewKeyNameTable, const bool bUpdateInputDisplays = true);
+
+	UFUNCTION()
+	void InputKey(const FKey& Key, const EInputEvent Event, const float Delta);
 
 	/*
 	*	Fetches all UINavInputDisplays and forces them to update their visuals.

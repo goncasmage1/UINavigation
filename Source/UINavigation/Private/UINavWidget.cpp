@@ -34,6 +34,7 @@
 #include "Engine/ViewportSplitScreen.h"
 #include "Engine/Console.h"
 #include "Curves/CurveFloat.h"
+#include "Kismet/GameplayStatics.h"
 
 UUINavWidget::UUINavWidget(const FObjectInitializer& ObjectInitializer)
 	:Super(ObjectInitializer)
@@ -181,8 +182,12 @@ void UUINavWidget::ConfigureUINavPC()
 	APlayerController* PC = Cast<APlayerController>(GetOwningPlayer());
 	if (PC == nullptr)
 	{
-		DISPLAYERROR("Player Controller is Null!");
-		return;
+		PC = UGameplayStatics::GetPlayerController(this, 0);
+		if (PC == nullptr)
+		{
+			DISPLAYERROR("Player Controller is Null!");
+			return;
+		}
 	}
 	UINavPC = Cast<UUINavPCComponent>(PC->GetComponentByClass(UUINavPCComponent::StaticClass()));
 	if (UINavPC == nullptr)
@@ -625,6 +630,12 @@ void UUINavWidget::NativeTick(const FGeometry & MyGeometry, float DeltaTime)
 		{
 			HandleSelectorMovement(DeltaTime);
 		}
+	}
+
+	if (bUpdateMousePositionNextFrame && !CurrentComponent->NavButton->GetCachedGeometry().GetLocalSize().IsNearlyZero())
+	{
+		SetMousePositionToButton(CurrentComponent, GetDefault<UUINavSettings>()->MoveMouseToButtonPosition);
+		bUpdateMousePositionNextFrame = false;
 	}
 }
 
@@ -1127,10 +1138,15 @@ void UUINavWidget::OnSectionButtonPressed10()
 void UUINavWidget::UpdateSelectorLocation(UUINavComponent* Component)
 {
 	if (TheSelector == nullptr || !IsValid(FirstComponent)) return;
-	SetSelectorLocation(GetButtonLocation(Component));
+	SetSelectorLocation(GetSelectorLocationForButton(Component));
 }
 
-FVector2D UUINavWidget::GetButtonLocation(UUINavComponent* Component) const
+FVector2D UUINavWidget::GetSelectorLocationForButton(UUINavComponent* Component) const
+{
+	return GetButtonLocation(Component, SelectorPositioning, true) + SelectorOffset;
+}
+
+FVector2D UUINavWidget::GetButtonLocation(UUINavComponent* Component, const ESelectorPosition Offset, const bool bUseViewportPosition) const
 {
 	if (!IsValid(Component))
 	{
@@ -1140,41 +1156,46 @@ FVector2D UUINavWidget::GetButtonLocation(UUINavComponent* Component) const
 	const FGeometry Geom = Component->NavButton->GetCachedGeometry();
 	const FVector2D LocalSize = Geom.GetLocalSize();
 	FVector2D LocalPosition = FVector2D::ZeroVector;
-	switch (SelectorPositioning)
+	switch (Offset)
 	{
-		case ESelectorPosition::Position_Center:
-			LocalPosition = LocalSize / 2;
-			break;
-		case ESelectorPosition::Position_Top:
-			LocalPosition = FVector2D(LocalSize.X / 2, 0.f);
-			break;
-		case ESelectorPosition::Position_Bottom:
-			LocalPosition = FVector2D(LocalSize.X / 2, LocalSize.Y);
-			break;
-		case ESelectorPosition::Position_Left:
-			LocalPosition = FVector2D(0.f, LocalSize.Y / 2);
-			break;
-		case ESelectorPosition::Position_Right:
-			LocalPosition = FVector2D(LocalSize.X, LocalSize.Y / 2);
-			break;
-		case ESelectorPosition::Position_Top_Right:
-			LocalPosition = FVector2D(LocalSize.X, 0.f);
-			break;
-		case ESelectorPosition::Position_Top_Left:
-			LocalPosition = FVector2D(0.f, 0.f);
-			break;
-		case ESelectorPosition::Position_Bottom_Right:
-			LocalPosition = FVector2D(LocalSize.X, LocalSize.Y);
-			break;
-		case ESelectorPosition::Position_Bottom_Left:
-			LocalPosition = FVector2D(0.f, LocalSize.Y);
-			break;
+	case ESelectorPosition::Position_Center:
+		LocalPosition = LocalSize / 2;
+		break;
+	case ESelectorPosition::Position_Top:
+		LocalPosition = FVector2D(LocalSize.X / 2, 0.f);
+		break;
+	case ESelectorPosition::Position_Bottom:
+		LocalPosition = FVector2D(LocalSize.X / 2, LocalSize.Y);
+		break;
+	case ESelectorPosition::Position_Left:
+		LocalPosition = FVector2D(0.f, LocalSize.Y / 2);
+		break;
+	case ESelectorPosition::Position_Right:
+		LocalPosition = FVector2D(LocalSize.X, LocalSize.Y / 2);
+		break;
+	case ESelectorPosition::Position_Top_Right:
+		LocalPosition = FVector2D(LocalSize.X, 0.f);
+		break;
+	case ESelectorPosition::Position_Top_Left:
+		LocalPosition = FVector2D(0.f, 0.f);
+		break;
+	case ESelectorPosition::Position_Bottom_Right:
+		LocalPosition = FVector2D(LocalSize.X, LocalSize.Y);
+		break;
+	case ESelectorPosition::Position_Bottom_Left:
+		LocalPosition = FVector2D(0.f, LocalSize.Y);
+		break;
 	}
-	
+
 	FVector2D PixelPos, ViewportPos;
 	USlateBlueprintLibrary::LocalToViewport(GetWorld(), Geom, LocalPosition, PixelPos, ViewportPos);
-	ViewportPos += SelectorOffset;
-	return ViewportPos;
+	return bUseViewportPosition ? ViewportPos : PixelPos;
+}
+
+void UUINavWidget::SetMousePositionToButton(UUINavComponent* Component, const ESelectorPosition MouseRelativePosition)
+{
+	const FVector2D ButtonLocation = GetButtonLocation(Component, MouseRelativePosition, false) + GetDefault<UUINavSettings>()->MoveMouseToButtonOffset;
+	UINavPC->GetPC()->SetMouseLocation(static_cast<int>(ButtonLocation.X), static_cast<int>(ButtonLocation.Y));
 }
 
 void UUINavWidget::ExecuteAnimations(UUINavComponent* FromComponent, UUINavComponent* ToComponent, const bool bHadNavigation, const bool bFinishInstantly /*= false*/)
@@ -1357,8 +1378,8 @@ void UUINavWidget::BeginSelectorMovement(UUINavComponent* FromComponent, UUINavC
 {
 	if (MoveCurve == nullptr) return;
 
-	SelectorOrigin = (bMovingSelector || !IsValid(FromComponent)) ? GetSelectorLocation() : GetButtonLocation(FromComponent);
-	SelectorDestination = GetButtonLocation(ToComponent);
+	SelectorOrigin = (bMovingSelector || !IsValid(FromComponent)) ? GetSelectorLocation() : GetSelectorLocationForButton(FromComponent);
+	SelectorDestination = GetSelectorLocationForButton(ToComponent);
 	Distance = SelectorDestination - SelectorOrigin;
 
 	float MinTime, MaxTime;
@@ -1794,6 +1815,12 @@ void UUINavWidget::NavigatedTo(UUINavComponent* NavigatedToComponent, const bool
 	{
 		bHoverRestoredNavigation = false;
 	}
+
+	const ESelectorPosition MouseRelativePosition = GetDefault<UUINavSettings>()->MoveMouseToButtonPosition;
+	if (MouseRelativePosition != ESelectorPosition::None && UINavPC->GetCurrentInputType() != EInputType::Mouse)
+	{
+		bUpdateMousePositionNextFrame = true;
+	}
 }
 
 void UUINavWidget::CallOnNavigate(UUINavComponent* FromComponent, UUINavComponent* ToComponent)
@@ -1995,7 +2022,7 @@ void UUINavWidget::OnHoveredComponent(UUINavComponent* Component)
 {
 	if (!IsValid(Component) || UINavPC == nullptr) return;
 
-	if (UINavPC->HidingMouseCursor() && !UINavPC->OverrideConsiderHover())
+	if (UINavPC->HidingMouseCursor() && !UINavPC->OverrideConsiderHover() && GetDefault<UUINavSettings>()->MoveMouseToButtonPosition == ESelectorPosition::None)
 	{
 		Component->SwitchButtonStyle(EButtonStyle::Normal);
 		return;
@@ -2043,6 +2070,11 @@ void UUINavWidget::OnUnhoveredComponent(UUINavComponent* Component)
 	if (IgnoreHoverComponent == nullptr || IgnoreHoverComponent != Component)
 	{
 		SetHoveredComponent(nullptr);
+	}
+
+	if (Component == SelectedComponent)
+	{
+		SetSelectedComponent(nullptr);
 	}
 
 	if (!GetDefault<UUINavSettings>()->bForceNavigation)

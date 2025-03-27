@@ -26,7 +26,7 @@ protected:
 
 public:
 
-	virtual void NativeConstruct() override;
+	virtual void NativePreConstruct() override;
 
 	virtual bool SetOptionIndex(const int NewIndex) override;
 
