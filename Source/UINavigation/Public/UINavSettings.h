@@ -7,6 +7,8 @@
 #include "InputMappingContext.h"
 #include "Data/UINavEnhancedInputActions.h"
 #include "Data/PlatformConfigData.h"
+#include "Data/SelectorPosition.h"
+#include "MAth/MathFwd.h"
 #include "UINavSettings.generated.h"
 
 /**
@@ -88,6 +90,18 @@ public:
 	// The amount of analog movement that will trigger the input type being changed to gamepad
 	UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	float AnalogInputChangeThreshold = 0.1f;
+
+	// What relative button position to move the mouse cursor to when navigating to that button (None if you don't want this to happen).
+	/*
+	* What relative button position to move the mouse cursor to when navigating to that button (None if you don't want this to happen).
+	* This can be useful to displaying button tooltips when using the gamepad/keyboard.
+	*/
+	UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = "Settings")
+	ESelectorPosition MoveMouseToButtonPosition = ESelectorPosition::None;
+
+	// The offset to use when moving the mouse cursor to the button's position.
+	UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = "Settings")
+	FVector2D MoveMouseToButtonOffset = FVector2D(-1.0f, 1.0f);
 
 	// The list of widget types (Slate names) to allow to be focused
 	UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = "Settings")

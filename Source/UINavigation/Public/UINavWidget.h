@@ -39,6 +39,7 @@ protected:
 
 	bool bMovingSelector = false;
 	bool bBeingRemoved = false;
+	bool bUpdateMousePositionNextFrame = false;
 		
 	UPROPERTY()
 	UUINavComponent* UpdateSelectorPrevComponent = nullptr;
@@ -119,7 +120,11 @@ protected:
 	/**
 	*	Returns the position of the UINavButton with the specified index
 	*/
-	FVector2D GetButtonLocation(UUINavComponent* Component) const;
+	FVector2D GetSelectorLocationForButton(UUINavComponent* Component) const;
+
+	FVector2D GetButtonLocation(UUINavComponent* Component, const ESelectorPosition Offset, const bool bUseViewportPosition) const;
+
+	void SetMousePositionToButton(UUINavComponent* Component, const ESelectorPosition MouseRelativePosition);
 
 	void BeginSelectorMovement(UUINavComponent* FromComponent, UUINavComponent* ToComponent);
 	void HandleSelectorMovement(const float DeltaTime);

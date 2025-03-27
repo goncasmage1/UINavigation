@@ -6,6 +6,7 @@
 UENUM(BlueprintType, meta = (ScriptName = "UINavSelectorPosition"))
 enum class ESelectorPosition : uint8
 {
+	None UMETA(DisplayName = "None"),
 	Position_Center UMETA(DisplayName = "Center"),
 	Position_Top UMETA(DisplayName = "Top"),
 	Position_Bottom UMETA(DisplayName = "Bottom"),
