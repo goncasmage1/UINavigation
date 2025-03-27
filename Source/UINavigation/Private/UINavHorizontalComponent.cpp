@@ -73,6 +73,11 @@ bool UUINavHorizontalComponent::Update(const bool bNotify /*= true*/)
 
 void UUINavHorizontalComponent::NotifyUpdated()
 {
+	if (!IsInViewport())
+	{
+		return;
+	}
+
 	OnUpdated();
 	OnValueChanged.Broadcast();
 	OnNativeValueChanged.Broadcast();

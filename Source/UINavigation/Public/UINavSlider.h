@@ -95,7 +95,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavSlider)
 	FLinearColor BarHoverColor = FColor::Blue;
 
-	virtual void NativeConstruct() override;
+	virtual void NativePreConstruct() override;
 
 	virtual bool Update(const bool bNotify = true) override;
 

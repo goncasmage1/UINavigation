@@ -4,20 +4,21 @@
 #include "UINavMacros.h"
 #include "Components/TextBlock.h"
 
-void UUINavComponentBox::NativeConstruct()
+void UUINavComponentBox::NativePreConstruct()
 {
 	BaseConstruct();
 
-	if (!LeftButton->OnClicked.IsBound())
-		LeftButton->OnClicked.AddDynamic(this, &UUINavComponentBox::NavigateLeft);	
-	if (!RightButton->OnClicked.IsBound())
-		RightButton->OnClicked.AddDynamic(this, &UUINavComponentBox::NavigateRight);
+	if (!IsDesignTime())
+	{
+		if (LeftButton != nullptr && !LeftButton->OnClicked.IsBound())
+			LeftButton->OnClicked.AddDynamic(this, &UUINavComponentBox::NavigateLeft);	
+		if (RightButton != nullptr && !RightButton->OnClicked.IsBound())
+			RightButton->OnClicked.AddDynamic(this, &UUINavComponentBox::NavigateRight);
+	}
 }
 
 void UUINavComponentBox::BaseConstruct()
 {
-	Super::NativeConstruct();
-
 	if (MinRange >= MaxRange) DISPLAYERROR(TEXT("MinRange has to be smaller that MaxRange"));
 	if (Interval <= 0) DISPLAYERROR(TEXT("Interval must be at least 1"));
 
@@ -29,6 +30,8 @@ void UUINavComponentBox::BaseConstruct()
 
 	Update();
 
+	Super::NativePreConstruct();
+
 	if (!bDisableButtons || bLoopOptions) return;
 
 	CheckLeftLimit();
@@ -37,14 +40,14 @@ void UUINavComponentBox::BaseConstruct()
 
 void UUINavComponentBox::CheckLeftLimit()
 {
-	if (bLoopOptions) return;
+	if (bLoopOptions || LeftButton == nullptr) return;
 	
 	LeftButton->SetIsEnabled(OptionIndex > 0);
 }
 
 void UUINavComponentBox::CheckRightLimit()
 {
-	if (bLoopOptions) return;
+	if (bLoopOptions || RightButton == nullptr) return;
 	
 	RightButton->SetIsEnabled(OptionIndex < GetMaxOptionIndex());
 }
