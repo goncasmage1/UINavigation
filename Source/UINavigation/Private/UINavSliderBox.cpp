@@ -23,7 +23,7 @@ void UUINavSliderBox::NativePreConstruct()
 
 bool UUINavSliderBox::Update(const bool bNotify /*= true*/)
 {
-	const bool bChangedIndex = Super::Update(bNotify);
+	const bool bChangedIndex = Super::Update(false);
 	
 	const FText NewText = FText::FromString(FString::FromInt(MinRange + OptionIndex * Interval));
 	SetText(NewText);
@@ -32,6 +32,11 @@ bool UUINavSliderBox::Update(const bool bNotify /*= true*/)
 	{
 		const float Percent = UKismetMathLibrary::NormalizeToRange(MinRange + OptionIndex * Interval, MinRange, MaxRange);
 		SliderBar->SetPercent(Percent);
+	}
+
+	if (bChangedIndex && bNotify)
+	{
+		NotifyUpdated();
 	}
 
 	return bChangedIndex;
