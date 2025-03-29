@@ -73,7 +73,7 @@ bool UUINavHorizontalComponent::Update(const bool bNotify /*= true*/)
 
 void UUINavHorizontalComponent::NotifyUpdated()
 {
-	if (!IsInViewport())
+	if (IsDesignTime())
 	{
 		return;
 	}

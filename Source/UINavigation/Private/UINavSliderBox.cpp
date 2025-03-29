@@ -8,25 +8,36 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "UINavBlueprintFunctionLibrary.h"
 
-void UUINavSliderBox::NativeConstruct()
+void UUINavSliderBox::NativePreConstruct()
 {
 	Super::BaseConstruct();
 
-	if (!LeftButton->OnClicked.IsBound())
-		LeftButton->OnClicked.AddDynamic(this, &UUINavSliderBox::NavigateLeft);
-	if (!RightButton->OnClicked.IsBound())
-		RightButton->OnClicked.AddDynamic(this, &UUINavSliderBox::NavigateRight);
+	if (!IsDesignTime())
+	{
+		if (!LeftButton->OnClicked.IsBound())
+			LeftButton->OnClicked.AddDynamic(this, &UUINavSliderBox::NavigateLeft);
+		if (!RightButton->OnClicked.IsBound())
+			RightButton->OnClicked.AddDynamic(this, &UUINavSliderBox::NavigateRight);
+	}
 }
 
 bool UUINavSliderBox::Update(const bool bNotify /*= true*/)
 {
-	const bool bChangedIndex = Super::Update(bNotify);
+	const bool bChangedIndex = Super::Update(false);
 	
 	const FText NewText = FText::FromString(FString::FromInt(MinRange + OptionIndex * Interval));
 	SetText(NewText);
 
-	const float Percent = UKismetMathLibrary::NormalizeToRange(MinRange + OptionIndex * Interval, MinRange, MaxRange);
-	SliderBar->SetPercent(Percent);
+	if (IsValid(SliderBar))
+	{
+		const float Percent = UKismetMathLibrary::NormalizeToRange(MinRange + OptionIndex * Interval, MinRange, MaxRange);
+		SliderBar->SetPercent(Percent);
+	}
+
+	if (bChangedIndex && bNotify)
+	{
+		NotifyUpdated();
+	}
 
 	return bChangedIndex;
 }

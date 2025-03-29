@@ -61,10 +61,15 @@ void UUINavSlider::NativePreConstruct()
 
 bool UUINavSlider::Update(const bool bNotify /*= true*/)
 {
-	const bool bChangedIndex = Super::Update(bNotify);
+	const bool bChangedIndex = Super::Update(false);
 
 	Slider->SetValue(static_cast<float>(OptionIndex) / static_cast<float>(GetMaxOptionIndex()));
 	UpdateTextFromPercent(Slider->GetValue());
+
+	if (bChangedIndex && bNotify)
+	{
+		NotifyUpdated();
+	}
 
 	return bChangedIndex;
 }
