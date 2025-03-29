@@ -22,7 +22,7 @@ protected:
 	
 public:
 
-	virtual void NativeConstruct() override;
+	virtual void NativePreConstruct() override;
 
 	FORCEINLINE virtual int GetMaxOptionIndex() const override
 	{
@@ -30,6 +30,6 @@ public:
 	}
 
 	UFUNCTION(BlueprintPure, BlueprintCallable, Category = UINavSliderBox)
-		float GetSliderPercent() const;
+	float GetSliderPercent() const;
 	
 };
