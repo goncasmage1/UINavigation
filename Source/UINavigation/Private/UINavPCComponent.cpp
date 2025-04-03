@@ -894,24 +894,28 @@ void UUINavPCComponent::HandleAnalogInputEvent(FSlateApplication& SlateApp, cons
 		return;
 	}
 
+	const EThumbstickAsMouse ThumbstickAsMouse = UsingThumbstickAsMouse();
 	const FKey AnalogKey = InAnalogInputEvent.GetKey();
+	const bool bConsiderLeftStick = ThumbstickAsMouse == EThumbstickAsMouse::LeftThumbstick && (AnalogKey == EKeys::Gamepad_LeftX || AnalogKey == EKeys::Gamepad_LeftY);
+	const bool bConsiderRightStick = ThumbstickAsMouse == EThumbstickAsMouse::RightThumbstick && (AnalogKey == EKeys::Gamepad_RightX || AnalogKey == EKeys::Gamepad_RightY);
+
+	if (!bConsiderLeftStick && !bConsiderRightStick)
+	{
+		return;
+	}
+
 	const float AnalogValue = InAnalogInputEvent.GetAnalogValue();
 	const bool bIsHorizontal = AnalogKey == EKeys::Gamepad_LeftX || AnalogKey == EKeys::Gamepad_RightX;
 	if (bIsHorizontal) ThumbstickDelta.X = AnalogValue;
 	else ThumbstickDelta.Y = AnalogValue;
 
-	const EThumbstickAsMouse ThumbstickAsMouse = UsingThumbstickAsMouse();
-	if (ThumbstickAsMouse != EThumbstickAsMouse::None)
+	if (bConsiderLeftStick || bConsiderRightStick)
 	{
-		if ((ThumbstickAsMouse == EThumbstickAsMouse::LeftThumbstick && (AnalogKey == EKeys::Gamepad_LeftX || AnalogKey == EKeys::Gamepad_LeftY)) ||
-			(ThumbstickAsMouse == EThumbstickAsMouse::RightThumbstick && (AnalogKey == EKeys::Gamepad_RightX || AnalogKey == EKeys::Gamepad_RightY)))
+		if (ThumbstickDelta == FVector2D::ZeroVector)
 		{
-			if (ThumbstickDelta == FVector2D::ZeroVector)
-			{
-				RefreshNavigationKeys();
-			}
-			bReceivedAnalogInput = true;
+			RefreshNavigationKeys();
 		}
+		bReceivedAnalogInput = true;
 	}
 
 	if (bScrollWithRightThumbstick &&
