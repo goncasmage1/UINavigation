@@ -48,7 +48,8 @@ void UUINavSlider::NativePreConstruct()
 		if (!Slider->OnMouseCaptureEnd.IsBound()) Slider->OnMouseCaptureEnd.AddUniqueDynamic(this, &UUINavSlider::HandleOnSliderMouseCaptureEnd);
 	}
 
-	Difference = MaxValue - MinValue;
+	SanitizeValues();
+
 	Slider->SetStepSize(Interval / Difference);
 
 	HandleDefaultColor = Slider->GetSliderHandleColor();
@@ -181,6 +182,27 @@ void UUINavSlider::HandleOnSpinBoxValueCommitted(float InValue, ETextCommit::Typ
 	}
 }
 
+void UUINavSlider::SetMinValue(const float NewValue, const bool bNotifyUpdate /*= true*/)
+{
+	MinValue = NewValue;
+	SanitizeValues();
+	Update(bNotifyUpdate);
+}
+
+void UUINavSlider::SetMaxValue(const float NewValue, const bool bNotifyUpdate /*= true*/)
+{
+	MaxValue = NewValue;
+	SanitizeValues();
+	Update(bNotifyUpdate);
+}
+
+void UUINavSlider::SetInterval(const float NewInterval, const bool bNotifyUpdate /*= true*/)
+{
+	Interval = NewInterval;
+	SanitizeValues();
+	Update(bNotifyUpdate);
+}
+
 int UUINavSlider::IndexFromPercent(const float Value)
 {
 	float Div = Value / Slider->GetStepSize();
@@ -220,4 +242,19 @@ void UUINavSlider::UpdateTextFromPercent(const float Percent, const bool bUpdate
 	{
 		NavSpinBox->SetValue(NewValue);
 	}
+}
+
+void UUINavSlider::SanitizeValues()
+{
+	if (Interval == 0.0f)
+	{
+		Interval = 0.1f;
+	}
+
+	if (MaxValue <= MinValue)
+	{
+		MaxValue = MinValue + Interval;
+	}
+
+	Difference = MaxValue - MinValue;
 }
