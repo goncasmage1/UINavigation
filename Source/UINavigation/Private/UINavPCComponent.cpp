@@ -848,6 +848,11 @@ void UUINavPCComponent::HandleKeyUpEvent(FSlateApplication& SlateApp, const FKey
 
 void UUINavPCComponent::HandleAnalogInputEvent(FSlateApplication& SlateApp, const FAnalogInputEvent& InAnalogInputEvent)
 {
+	if (!IsValid(ActiveWidget))
+	{
+		return;
+	}
+
 	if (CurrentInputType != EInputType::Gamepad && FMath::Abs(InAnalogInputEvent.GetAnalogValue()) > GetDefault<UUINavSettings>()->AnalogInputChangeThreshold)
 	{
 		NotifyInputTypeChange(EInputType::Gamepad);
