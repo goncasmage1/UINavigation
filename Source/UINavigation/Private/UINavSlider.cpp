@@ -185,6 +185,11 @@ void UUINavSlider::HandleOnSpinBoxValueCommitted(float InValue, ETextCommit::Typ
 void UUINavSlider::SetMinValue(const float NewValue, const bool bNotifyUpdate /*= true*/)
 {
 	MinValue = NewValue;
+	if (IsValid(NavSpinBox))
+	{
+		NavSpinBox->SetMinSliderValue(MinValue);
+		NavSpinBox->SetMinValue(MinValue);
+	}
 	SanitizeValues();
 	Update(bNotifyUpdate);
 }
@@ -192,6 +197,11 @@ void UUINavSlider::SetMinValue(const float NewValue, const bool bNotifyUpdate /*
 void UUINavSlider::SetMaxValue(const float NewValue, const bool bNotifyUpdate /*= true*/)
 {
 	MaxValue = NewValue;
+	if (IsValid(NavSpinBox))
+	{
+		NavSpinBox->SetMaxSliderValue(MaxValue);
+		NavSpinBox->SetMaxValue(MaxValue);
+	}
 	SanitizeValues();
 	Update(bNotifyUpdate);
 }
