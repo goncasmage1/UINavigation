@@ -41,19 +41,19 @@ protected:
 	void HandleOnSpinBoxValueCommitted(const float InValue, const ETextCommit::Type CommitMethod);
 
 	UFUNCTION(BlueprintCallable, Category = UINavSlider)
-	FORCEINLINE void SetMinValue(const float NewValue, const bool bNotifyUpdate = true);
+	void SetMinValue(const float NewValue, const bool bNotifyUpdate = true);
 
 	UFUNCTION(BlueprintCallable, Category = UINavSlider)
-	FORCEINLINE void SetMaxValue(const float NewValue, const bool bNotifyUpdate = true);
+	void SetMaxValue(const float NewValue, const bool bNotifyUpdate = true);
 
 	UFUNCTION(BlueprintCallable, Category = UINavSlider)
-	FORCEINLINE void SetInterval(const float NewInterval, const bool bNotifyUpdate = true);
+	void SetInterval(const float NewInterval, const bool bNotifyUpdate = true);
 
 	UFUNCTION(BlueprintCallable, Category = UINavSlider)
-	FORCEINLINE void SetMinDecimalDigits(const int DecimalDigits) { MinDecimalDigits = DecimalDigits;  Update(false); }
+	void SetMinDecimalDigits(const int DecimalDigits) { MinDecimalDigits = DecimalDigits;  Update(false); }
 
 	UFUNCTION(BlueprintCallable, Category = UINavSlider)
-	FORCEINLINE void SetMaxDecimalDigits(const int DecimalDigits) { MaxDecimalDigits = DecimalDigits;  Update(false); }
+	void SetMaxDecimalDigits(const int DecimalDigits) { MaxDecimalDigits = DecimalDigits;  Update(false); }
 
 	int IndexFromPercent(const float Value);
 	int IndexFromValue(const float Value);
