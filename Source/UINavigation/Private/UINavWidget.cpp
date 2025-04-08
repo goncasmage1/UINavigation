@@ -710,7 +710,9 @@ void UUINavWidget::HandleOnFocusChanging(UUINavWidget* Widget, UUINavComponent* 
 {
 	const UUINavSettings* const UINavSettings = GetDefault<UUINavSettings>();
 
-	if (!NewWidgetPath.IsValid() ||
+	if (!IsValid(Widget) ||
+		!IsValid(Widget->UINavPC) ||
+		!NewWidgetPath.IsValid() ||
 		NewWidgetPath.Widgets.Num() == 0 ||
 		Widget->UINavPC->GetInputMode() == EInputMode::Game ||
 		(InFocusEvent.GetCause() == EFocusCause::Mouse &&
