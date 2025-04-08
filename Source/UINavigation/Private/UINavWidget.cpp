@@ -541,7 +541,7 @@ bool UUINavWidget::IsNavigationKeyPressed(const EUINavigation NavigationEvent) c
 	}
 
 	TSharedRef<FUINavigationConfig> NavConfig = StaticCastSharedRef<FUINavigationConfig>(FSlateApplication::Get().GetNavigationConfig());
-	for (const TPair<FKey, EUINavigation> KeyEventRule : NavConfig->KeyEventRules)
+	for (const TPair<FKey, EUINavigation>& KeyEventRule : NavConfig->KeyEventRules)
 	{
 		if (KeyEventRule.Value != NavigationEvent)
 		{
@@ -565,7 +565,7 @@ bool UUINavWidget::IsNavigationKeyPressed(const EUINavigationAction NavigationAc
 	}
 
 	TSharedRef<FUINavigationConfig> NavConfig = StaticCastSharedRef<FUINavigationConfig>(FSlateApplication::Get().GetNavigationConfig());
-	for (const TPair<FKey, EUINavigationAction> KeyEventRule : NavConfig->KeyActionRules)
+	for (const TPair<FKey, EUINavigationAction>& KeyEventRule : NavConfig->KeyActionRules)
 	{
 		if (KeyEventRule.Value != NavigationAction)
 		{
