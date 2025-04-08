@@ -391,6 +391,7 @@ void UUINavComponent::NativePreConstruct()
 	{
 		if (bOverride_Style)
 		{
+			RevertButtonStyle();
 			NavButton->SetStyle(StyleOverride);
 		}
 		else
