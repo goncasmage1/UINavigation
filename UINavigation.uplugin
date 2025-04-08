@@ -1,7 +1,7 @@
 {
 	"FileVersion": 3,
 	"Version": 1,
-	"VersionName": "3.12.3",
+	"VersionName": "3.12.4",
 	"FriendlyName": "UI Navigation",
 	"Description": "A plugin that allows you to easily setup mouse, keyboard and controller navigation in UMG, among other things.",
 	"Category": "User Interface",
