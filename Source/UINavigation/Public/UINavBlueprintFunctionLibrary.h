@@ -12,6 +12,7 @@ class UWidget;
 class UUserWidget;
 class UUINavSettings;
 class UPanelWidget;
+class UUINavComponent;
 
 /**
  * 
@@ -99,6 +100,9 @@ public:
 	// Returns first widget of the given widget tree
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
 	static UWidget* GetFirstWidgetInUserWidget(const UUserWidget* const UserWidget);
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
+	static UUINavComponent* GetValidUINavComponentInWidget(const UPanelWidget* const Widget);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
 	static const UUINavSettings* GetUINavSettings();
