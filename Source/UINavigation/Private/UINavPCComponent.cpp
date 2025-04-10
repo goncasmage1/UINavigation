@@ -25,6 +25,7 @@
 #include "GenericPlatform/GenericPlatformInputDeviceMapper.h"
 #include "Framework/Application/SlateApplication.h"
 #include "Framework/Application/SlateUser.h"
+#include "TimerManager.h"
 #include "InputCoreTypes.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
