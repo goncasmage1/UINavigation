@@ -343,7 +343,7 @@ void UUINavWidget::UINavSetup()
 {
 	if (UINavPC == nullptr) return;
 
-	FSlateApplication::Get().ReleaseMouseCapture();
+	FSlateApplication::Get().ReleaseAllPointerCapture();
 
 	UUINavWidget* CurrentActiveWidget = UINavPC->GetActiveWidget();
 	const bool bShouldTakeFocus =
