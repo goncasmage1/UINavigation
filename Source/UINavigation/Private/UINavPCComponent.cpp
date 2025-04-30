@@ -822,7 +822,7 @@ void UUINavPCComponent::HandleKeyDownEvent(FSlateApplication& SlateApp, const FK
 	LastPressedKeyUserIndex = InKeyEvent.GetUserIndex();
 	VerifyInputTypeChangeByKey(InKeyEvent, bShouldUnforceNavigation);
 
-	if (!bShouldUnforceNavigation)
+	if (!bShouldUnforceNavigation && IsValid(ActiveWidget))
 	{
 		bIgnoreMousePress = true;
 		SimulateMousePress();
