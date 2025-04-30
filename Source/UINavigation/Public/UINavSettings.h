@@ -8,7 +8,7 @@
 #include "Data/UINavEnhancedInputActions.h"
 #include "Data/PlatformConfigData.h"
 #include "Data/SelectorPosition.h"
-#include "MAth/MathFwd.h"
+#include "Math/MathFwd.h"
 #include "UINavSettings.generated.h"
 
 /**

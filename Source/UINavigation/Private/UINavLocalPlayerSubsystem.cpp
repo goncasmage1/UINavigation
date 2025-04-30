@@ -44,6 +44,7 @@ void UUINavLocalPlayerSubsystem::ApplySavedInputContexts()
 	if (SavedUINavInputSettings->InputVersion < CurrentInputVersion)
 	{
 		SavedUINavInputSettings->SavedEnhancedInputMappings.Reset();
+		SavedUINavInputSettings->InputVersion = CurrentInputVersion;
 		SavedUINavInputSettings->SaveConfig();
 		return;
 	}
