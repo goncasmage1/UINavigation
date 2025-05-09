@@ -83,6 +83,10 @@ public:
 	UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	float MouseMoveRebindThreshold = 1.0f;
 
+	// The amount of time the player needs to hold a key in order to rebind to a hold input
+	UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = "Settings")
+	float HoldRebindThreshold = 0.5f;
+
 	// The amount of mouse movement delta that will trigger the input type being changed to mouse
 	UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	float MouseInputChangeThreshold = 0.5f;

@@ -471,7 +471,7 @@ void UUINavPCComponent::InitPlatformData()
 	}
 }
 
-void UUINavPCComponent::ProcessRebind(const FKeyEvent& KeyEvent)
+void UUINavPCComponent::ProcessRebind(const FKeyEvent& KeyEvent, const bool bIsHold /*= false*/)
 {
 	if (!IsValid(ListeningInputBox))
 	{
@@ -483,7 +483,7 @@ void UUINavPCComponent::ProcessRebind(const FKeyEvent& KeyEvent)
 		bIgnoreSelectRelease = true;
 	}
 
-	ListeningInputBox->UpdateInputKey(KeyEvent.GetKey());
+	ListeningInputBox->UpdateInputKey(KeyEvent.GetKey(), bIsHold);
 	ListeningInputBox = nullptr;
 	PressedNavigationDirections.Reset();
 }

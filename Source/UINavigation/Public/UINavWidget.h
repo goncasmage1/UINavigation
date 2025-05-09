@@ -274,6 +274,7 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UINavigation Selector")
 	FVector2D SelectorOffset;
 
+	double InputRebindPressTimestamp = 0.0;
 
 	/*********************************************************************************/
 

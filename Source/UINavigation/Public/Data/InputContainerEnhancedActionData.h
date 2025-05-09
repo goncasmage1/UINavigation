@@ -3,6 +3,7 @@
 #pragma once
 #include "InputAction.h"
 #include "Data/AxisType.h"
+#include "Data/InputHoldBehavior.h"
 #include "InputContainerEnhancedActionData.generated.h"
 
 UENUM(BlueprintType, meta = (ScriptName = "UINavAxis"))
@@ -34,6 +35,17 @@ struct FInputContainerEnhancedActionData
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = EnhancedInput)
 	EAxisType AxisScale = EAxisType::None;
+
+	// How this input action rebind should react to hold inputs: Don't allow hold input, allow hold if the key is held, or force hold even if the key isn't held.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = EnhancedInput)
+	EInputHoldBehavior HoldBehavior = EInputHoldBehavior::DontAllow;
+
+	// Specify an action that is supposed to have a hold input with the same key as the current input action, so that it automatically gets updated during rebinding.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = EnhancedInput)
+	UInputAction* HoldInputActionToUpdate = nullptr;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = InputRebindData)
+	TArray<int> InputGroupsOverride;
 };
 
 USTRUCT(BlueprintType)

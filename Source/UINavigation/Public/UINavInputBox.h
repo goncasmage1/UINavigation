@@ -66,11 +66,11 @@ public:
 	void CreateEnhancedInputKeyWidgets();
 
 	void CreateKeyWidgets();
-	bool TrySetupNewKey(const FKey& NewKey, const int KeyIndex, UUINavInputComponent* const NewInputButton);
+	bool TrySetupNewKey(const FKey& NewKey, const int KeyIndex, UUINavInputComponent* const NewInputButton, const bool bIsHold);
 	void ResetKeyWidgets();
-	int32 UpdateInputKey(const FKey& NewKey, int Index = -1, const bool bSkipChecks = false, const int32 MappingIndexToIgnore = -1);
-	int32 FinishUpdateNewKey(const int32 MappingIndexToIgnore = -1);
-	int32 FinishUpdateNewEnhancedInputKey(const FKey& PressedKey, int Index, const int32 MappingIndexToIgnore = -1);
+	int32 UpdateInputKey(const FKey& NewKey, const bool bIsHold = false, int Index = -1, const bool bSkipChecks = false, const int32 MappingIndexToIgnore = -1, const TObjectPtr<UInputTrigger> TriggerToUse = nullptr);
+	int32 FinishUpdateNewKey(const bool bIsHold = false, const int32 MappingIndexToIgnore = -1, const TObjectPtr<UInputTrigger> TriggerToUse = nullptr);
+	int32 FinishUpdateNewEnhancedInputKey(const FKey& PressedKey, int Index, const bool bIsHold = false, const int32 MappingIndexToIgnore = -1, const TObjectPtr<UInputTrigger> TriggerToUse = nullptr);
 	void TryMapEnhancedAxisKey(const FKey& NewKey, const int32 Index);
 	void TryMap2DAxisKey(const FKey& NewMappingKey, const int Index);
 	void UnmapEnhancedAxisKey(const FKey& NewAxisKey, const FKey& OldAxisKey, const FKey& NewKey, const int32 Index, const bool bNegateX, const bool bNegateY, const bool bNegateZ);
@@ -78,6 +78,11 @@ public:
 	void ApplyNegateModifiers(UUINavInputBox* InputBox, FEnhancedActionKeyMapping& Mapping, const bool bNegateX, const bool bNegateY, const bool bNegateZ);
 	void CancelUpdateInputKey(const ERevertRebindReason Reason);
 	void RevertToKeyText(const int Index);
+	bool HasHoldModifier(const FEnhancedActionKeyMapping& ActionMapping);
+	void AddHoldModifier(FEnhancedActionKeyMapping& ActionMapping);
+	void RemoveHoldModifier(FEnhancedActionKeyMapping& ActionMapping, const TObjectPtr<UInputTrigger> TriggerToAdd = nullptr);
+	void AutoUpdateInputActionKey(const UInputAction* Action, const FKey& NewKey, const int Index);
+	FEnhancedActionKeyMapping* GetActionMapping(const int Index, const UInputAction* Action = nullptr);
 
 	FText GetCurrentText() const;
 
@@ -124,4 +129,6 @@ public:
 	FInputRebindData InputData = FInputRebindData();
 
 	int KeysPerInput = 2;
+
+	TArray<bool> bIsHoldInput = { false, false, false };
 };

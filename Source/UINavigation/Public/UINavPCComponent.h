@@ -436,7 +436,7 @@ public:
 	FKey GetKeyUsedForNavigation(const EUINavigation Direction) const;
 	FKey GetMostRecentlyPressedKey(const ENavigationGenesis Genesis) const;
 
-	void ProcessRebind(const FKeyEvent& KeyEvent);
+	void ProcessRebind(const FKeyEvent& KeyEvent, const bool bIsHold = false);
 	void CancelRebind();
 
 	/**
