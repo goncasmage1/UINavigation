@@ -171,7 +171,7 @@ void UUINavInputContainer::CreateInputBoxes()
 			{
 				NewInputBox->InputContext = Context.Key;
 				NewInputBox->InputActionData = Context.Value.Actions[Index];
-				NewInputBox->EnhancedInputGroups = Context.Value.InputGroups;
+				NewInputBox->EnhancedInputGroups = Context.Value.Actions[Index].InputGroupsOverride.Num() > 0 ? Context.Value.Actions[Index].InputGroupsOverride : Context.Value.InputGroups;
 				break;
 			}
 		}
@@ -185,19 +185,21 @@ void UUINavInputContainer::CreateInputBoxes()
 	}
 }
 
-ERevertRebindReason UUINavInputContainer::CanRegisterKey(UUINavInputBox * InputBox, const FKey NewKey, const int Index, int& OutCollidingActionIndex, int& OutCollidingKeyIndex)
+ERevertRebindReason UUINavInputContainer::CanRegisterKey(UUINavInputBox * InputBox, const FKey NewKey, const bool bIsHold, const int Index, int& OutCollidingActionIndex, int& OutCollidingKeyIndex)
 {
 	if (!NewKey.IsValid()) return ERevertRebindReason::BlacklistedKey;
 	if (KeyWhitelist.Num() > 0 && !KeyWhitelist.Contains(NewKey)) return ERevertRebindReason::NonWhitelistedKey;
 	if (KeyBlacklist.Contains(NewKey)) return ERevertRebindReason::BlacklistedKey;
 	if (!RespectsRestriction(NewKey, Index)) return ERevertRebindReason::RestrictionMismatch;
-	if (InputBox->ContainsKey(NewKey) != INDEX_NONE) return ERevertRebindReason::UsedBySameInput;
-	if (!CanUseKey(InputBox, NewKey, OutCollidingActionIndex, OutCollidingKeyIndex)) return ERevertRebindReason::UsedBySameInputGroup;
+
+	const int ExistingKeyIndex = InputBox->ContainsKey(NewKey);
+	if (ExistingKeyIndex != INDEX_NONE && InputBox->bIsHoldInput[ExistingKeyIndex]) return ERevertRebindReason::UsedBySameInput;
+	if (!CanUseKey(InputBox, NewKey, bIsHold, OutCollidingActionIndex, OutCollidingKeyIndex)) return ERevertRebindReason::UsedBySameInputGroup;
 
 	return ERevertRebindReason::None;
 }
 
-bool UUINavInputContainer::CanUseKey(UUINavInputBox* InputBox, const FKey CompareKey, int& OutCollidingActionIndex, int& OutCollidingKeyIndex) const
+bool UUINavInputContainer::CanUseKey(UUINavInputBox* InputBox, const FKey CompareKey, const bool bIsHold, int& OutCollidingActionIndex, int& OutCollidingKeyIndex) const
 {
 	if (InputBox->EnhancedInputGroups.Num() == 0) InputBox->EnhancedInputGroups.Add(-1);
 
@@ -208,23 +210,38 @@ bool UUINavInputContainer::CanUseKey(UUINavInputBox* InputBox, const FKey Compar
 		const int KeyIndex = InputBoxes[i]->ContainsKey(CompareKey);
 		if (KeyIndex != INDEX_NONE)
 		{
+			bool bIsCollidingInputBox = false;
 			if (InputBox->EnhancedInputGroups.Contains(-1) ||
 				InputBoxes[i]->EnhancedInputGroups.Contains(-1))
+			{
+				bIsCollidingInputBox = true;
+			}
+
+			if (!bIsCollidingInputBox)
+			{
+				for (int InputGroup : InputBox->EnhancedInputGroups)
+				{
+					if (InputBoxes[i]->EnhancedInputGroups.Contains(InputGroup))
+					{
+						bIsCollidingInputBox = true;
+						break;
+					}
+				}
+			}
+
+			if (bIsHold != InputBoxes[i]->bIsHoldInput[KeyIndex])
+			{
+				return true;
+			}
+
+			if (bIsCollidingInputBox)
 			{
 				OutCollidingActionIndex = i;
 				OutCollidingKeyIndex = KeyIndex;
 				return false;
 			}
 
-			for (int InputGroup : InputBox->EnhancedInputGroups)
-			{
-				if (InputBoxes[i]->EnhancedInputGroups.Contains(InputGroup))
-				{
-					OutCollidingActionIndex = i;
-					OutCollidingKeyIndex = KeyIndex;
-					return false;
-				}
-			}
+			return true;
 		}
 	}
 
@@ -258,11 +275,20 @@ void UUINavInputContainer::SwapKeysDecided(const UPromptDataBase* const PromptDa
 	{
 		if (SwapKeysPromptData->bShouldSwap)
 		{
-			int32 ModifiedActionMappingIndex = SwapKeysPromptData->CurrentInputBox->FinishUpdateNewKey();
+			const bool bWasCurrentInputBoxHold = SwapKeysPromptData->CurrentInputBox->bIsHoldInput[SwapKeysPromptData->InputCollisionData.CurrentKeyIndex];
+			const bool bWasCollidingInputBoxHold = SwapKeysPromptData->CollidingInputBox->bIsHoldInput[SwapKeysPromptData->InputCollisionData.CollidingKeyIndex];
+			FEnhancedActionKeyMapping* CurrentActionMapping = SwapKeysPromptData->CurrentInputBox->GetActionMapping(SwapKeysPromptData->InputCollisionData.CurrentKeyIndex);
+			FEnhancedActionKeyMapping* CollidingActionMapping = SwapKeysPromptData->CollidingInputBox->GetActionMapping(SwapKeysPromptData->InputCollisionData.CollidingKeyIndex);
+			const TObjectPtr<UInputTrigger> CurrentInputBoxTrigger = CollidingActionMapping != nullptr && !CollidingActionMapping->Triggers.IsEmpty() && bWasCurrentInputBoxHold && !bWasCollidingInputBoxHold ? DuplicateObject<UInputTrigger>(CollidingActionMapping->Triggers[0], this) : nullptr;
+			const TObjectPtr<UInputTrigger> CollidingInputBoxTrigger = CurrentActionMapping != nullptr && !CurrentActionMapping->Triggers.IsEmpty() && !bWasCurrentInputBoxHold && bWasCollidingInputBoxHold ? DuplicateObject<UInputTrigger>(CurrentActionMapping->Triggers[0], this) : nullptr;
+
+			int32 ModifiedActionMappingIndex = SwapKeysPromptData->CurrentInputBox->FinishUpdateNewKey(bWasCollidingInputBoxHold, -1, CurrentInputBoxTrigger);
 			SwapKeysPromptData->CollidingInputBox->UpdateInputKey(SwapKeysPromptData->InputCollisionData.CurrentInputKey,
+				bWasCurrentInputBoxHold,
 				SwapKeysPromptData->InputCollisionData.CollidingKeyIndex,
 				true,
-				ModifiedActionMappingIndex);
+				ModifiedActionMappingIndex,
+				CollidingInputBoxTrigger);
 		}
 		else
 		{

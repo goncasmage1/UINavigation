@@ -92,7 +92,7 @@ void UUINavInputBox::CreateEnhancedInputKeyWidgets()
 						continue;
 					}
 
-					if (TrySetupNewKey(NewKey, j, NewInputButton))
+					if (TrySetupNewKey(NewKey, j, NewInputButton, HasHoldModifier(ActionMapping)))
 					{
 						break;
 					}
@@ -107,6 +107,7 @@ void UUINavInputBox::CreateEnhancedInputKeyWidgets()
 		if (Keys.Num() - 1 < j)
 		{
 			NewInputButton->SetText(Container->EmptyKeyText);
+			NewInputButton->SetIsHold(FText(), /*bIsHold*/ false);
 			NewInputButton->InputImage->SetVisibility(ESlateVisibility::Collapsed);
 			if (IsValid(NewInputButton->NavText)) NewInputButton->NavText->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
 			if (IsValid(NewInputButton->NavRichText)) NewInputButton->NavRichText->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
@@ -124,7 +125,7 @@ void UUINavInputBox::CreateEnhancedInputKeyWidgets()
 	}
 }
 
-bool UUINavInputBox::TrySetupNewKey(const FKey& NewKey, const int KeyIndex, UUINavInputComponent* const NewInputButton)
+bool UUINavInputBox::TrySetupNewKey(const FKey& NewKey, const int KeyIndex, UUINavInputComponent* const NewInputButton, const bool bIsHold)
 {
 	if (!NewKey.IsValid() || Keys.IsValidIndex(KeyIndex) || Keys.Contains(NewKey)) return false;
 
@@ -137,7 +138,10 @@ bool UUINavInputBox::TrySetupNewKey(const FKey& NewKey, const int KeyIndex, UUIN
 		if (IsValid(NewInputButton->NavText)) NewInputButton->NavText->SetVisibility(ESlateVisibility::Collapsed);
 		if (IsValid(NewInputButton->NavRichText)) NewInputButton->NavRichText->SetVisibility(ESlateVisibility::Collapsed);
 	}
+
 	NewInputButton->SetText(GetKeyText(KeyIndex));
+	bIsHoldInput[KeyIndex] = bIsHold;
+	NewInputButton->SetIsHold(Container->HoldText, bIsHold);
 
 	return true;
 }
@@ -150,7 +154,7 @@ void UUINavInputBox::ResetKeyWidgets()
 	CreateKeyWidgets();
 }
 
-int32 UUINavInputBox::UpdateInputKey(const FKey& NewKey, int Index, const bool bSkipChecks, const int32 MappingIndexToIgnore /*= -1*/)
+int32 UUINavInputBox::UpdateInputKey(const FKey& NewKey, const bool bIsHold /*= false*/, int Index /*= -1*/, const bool bSkipChecks /*= false*/, const int32 MappingIndexToIgnore /*= -1*/, const TObjectPtr<UInputTrigger> TriggerToUse /*= nullptr*/)
 {
 	if (Index < 0) Index = AwaitingIndex;
 
@@ -167,7 +171,7 @@ int32 UUINavInputBox::UpdateInputKey(const FKey& NewKey, int Index, const bool b
 	{
 		int CollidingActionIndex = INDEX_NONE;
 		int CollidingKeyIndex = INDEX_NONE;
-		const ERevertRebindReason RevertReason = Container->CanRegisterKey(this, NewKey, Index, CollidingActionIndex, CollidingKeyIndex);
+		const ERevertRebindReason RevertReason = Container->CanRegisterKey(this, NewKey, bIsHold, Index, CollidingActionIndex, CollidingKeyIndex);
 		if (RevertReason == ERevertRebindReason::UsedBySameInputGroup)
 		{
 			if (!Keys[Index].IsValid())
@@ -183,6 +187,7 @@ int32 UUINavInputBox::UpdateInputKey(const FKey& NewKey, int Index, const bool b
 			if (!Container->InputBoxes.Find(this, SelfIndex) ||
 				!Container->RequestKeySwap(FInputCollisionData(GetCurrentText(),
 					CollidingInputData.InputText,
+					Index,
 					CollidingKeyIndex,
 					Keys[Index],
 					NewKey),
@@ -201,14 +206,14 @@ int32 UUINavInputBox::UpdateInputKey(const FKey& NewKey, int Index, const bool b
 		}
 	}
 
-	return FinishUpdateNewKey(MappingIndexToIgnore);
+	return FinishUpdateNewKey(bIsHold, MappingIndexToIgnore, TriggerToUse);
 }
 
-int32 UUINavInputBox::FinishUpdateNewKey(const int32 MappingIndexToIgnore /*= -1*/)
+int32 UUINavInputBox::FinishUpdateNewKey(const bool bIsHold /*= false*/, const int32 MappingIndexToIgnore /*= -1*/, const TObjectPtr<UInputTrigger> TriggerToUse /*= nullptr*/)
 {
 	const FKey OldKey = Keys[AwaitingIndex];
 
-	int32 ModifiedActionMappingIndex = FinishUpdateNewEnhancedInputKey(AwaitingNewKey, AwaitingIndex, MappingIndexToIgnore);
+	int32 ModifiedActionMappingIndex = FinishUpdateNewEnhancedInputKey(AwaitingNewKey, AwaitingIndex, bIsHold, MappingIndexToIgnore, TriggerToUse);
 
 	Container->OnKeyRebinded(InputName, OldKey, Keys[AwaitingIndex]);
 	Container->UINavPC->RefreshNavigationKeys();
@@ -218,7 +223,7 @@ int32 UUINavInputBox::FinishUpdateNewKey(const int32 MappingIndexToIgnore /*= -1
 	return ModifiedActionMappingIndex;
 }
 
-int32 UUINavInputBox::FinishUpdateNewEnhancedInputKey(const FKey& PressedKey, const int Index, const int32 MappingIndexToIgnore /*= -1*/)
+int32 UUINavInputBox::FinishUpdateNewEnhancedInputKey(const FKey& PressedKey, const int Index, const bool bIsHold /*= false*/, const int32 MappingIndexToIgnore /*= -1*/, const TObjectPtr<UInputTrigger> TriggerToUse /*= nullptr*/)
 {
 	const TArray<FEnhancedActionKeyMapping>& ActionMappings = InputContext->GetMappings();
 
@@ -274,6 +279,27 @@ int32 UUINavInputBox::FinishUpdateNewEnhancedInputKey(const FKey& PressedKey, co
 						}
 						Keys[Index] = NewKey;
 						InputButtons[Index]->SetText(GetKeyText(Index));
+
+						const bool bShouldAddHoldModifier = InputActionData.AxisScale == EAxisType::None &&
+									(InputActionData.HoldBehavior == EInputHoldBehavior::Force ||
+									(bIsHold && InputActionData.HoldBehavior != EInputHoldBehavior::DontAllow));
+						if (bShouldAddHoldModifier)
+						{
+							AddHoldModifier(ActionMapping);
+						}
+						else
+						{
+							RemoveHoldModifier(ActionMapping, TriggerToUse);
+
+							if (IsValid(InputActionData.HoldInputActionToUpdate))
+							{
+								AutoUpdateInputActionKey(InputActionData.HoldInputActionToUpdate, NewKey, Index);
+							}
+						}
+
+						bIsHoldInput[Index] = bShouldAddHoldModifier;
+						InputButtons[Index]->SetIsHold(Container->HoldText, bShouldAddHoldModifier);
+
 						bFound = true;
 						break;
 					}
@@ -636,6 +662,7 @@ void UUINavInputBox::InputComponentClicked(const int Index)
 	AwaitingIndex = Index;
 
 	InputButtons[Index]->SetText(Container->PressKeyText);
+	InputButtons[Index]->SetIsHold(FText(), /*bIsHold*/ false);
 
 	if (bUsingKeyImage[Index])
 	{
@@ -774,6 +801,84 @@ void UUINavInputBox::RevertToKeyText(const int Index)
 	}
 
 	InputButtons[Index]->SetText(OldName);
+	InputButtons[Index]->SetIsHold(Container->HoldText, bIsHoldInput[Index]);
+}
+
+bool UUINavInputBox::HasHoldModifier(const FEnhancedActionKeyMapping& ActionMapping)
+{
+	auto HasHoldTrigger = [](const TArray<TObjectPtr<UInputTrigger>>& Triggers) -> bool
+	{
+		for (const TObjectPtr<UInputTrigger> Trigger : Triggers)
+		{
+			if (!IsValid(Trigger))
+			{
+				continue;
+			}
+
+			if (Trigger->IsA<UInputTriggerHold>() ||
+				Trigger->IsA<UInputTriggerHoldAndRelease>())
+			{
+				return true;
+			}
+		}
+
+		return false;
+	};
+
+	return HasHoldTrigger(ActionMapping.Triggers) || HasHoldTrigger(ActionMapping.Action->Triggers);
+}
+
+void UUINavInputBox::AddHoldModifier(FEnhancedActionKeyMapping& ActionMapping)
+{
+	UInputTriggerHold* HoldTrigger = NewObject<UInputTriggerHold>(InputContext);
+	HoldTrigger->HoldTimeThreshold = GetDefault<UUINavSettings>()->HoldRebindThreshold;
+	ActionMapping.Triggers.Reset();
+	ActionMapping.Triggers.Add(HoldTrigger);
+}
+
+void UUINavInputBox::RemoveHoldModifier(FEnhancedActionKeyMapping& ActionMapping, const TObjectPtr<UInputTrigger> TriggerToAdd /*= nullptr*/)
+{
+	for (const TObjectPtr<UInputTrigger> Trigger : ActionMapping.Triggers)
+	{
+		if (!IsValid(Trigger))
+		{
+			continue;
+		}
+
+		if (Trigger->IsA<UInputTriggerHold>() ||
+			Trigger->IsA<UInputTriggerHoldAndRelease>())
+		{
+			ActionMapping.Triggers.Remove(Trigger);
+			if (IsValid(TriggerToAdd))
+			{
+				ActionMapping.Triggers.Add(DuplicateObject<UInputTrigger>(TriggerToAdd, InputContext));
+			}
+			return;
+		}
+	}
+}
+
+void UUINavInputBox::AutoUpdateInputActionKey(const UInputAction* Action, const FKey& NewKey, const int Index)
+{
+	FEnhancedActionKeyMapping* ActionMapping = GetActionMapping(Index, Action);
+	if (ActionMapping != nullptr)
+	{
+		ActionMapping->Key = NewKey;
+	}
+}
+
+FEnhancedActionKeyMapping* UUINavInputBox::GetActionMapping(const int Index, const UInputAction* Action /*= nullptr*/)
+{
+	const TArray<FEnhancedActionKeyMapping>& ActionMappings = InputContext->GetMappings();
+	TArray<int32> MappingsForAction;
+	GetEnhancedMappingsForAction(IsValid(Action) ? Action : InputActionData.Action, InputActionData.Axis, Index, MappingsForAction);
+
+	if (MappingsForAction.IsEmpty())
+	{
+		return nullptr;
+	}
+
+	return &InputContext->GetMapping(MappingsForAction[0]);
 }
 
 FText UUINavInputBox::GetCurrentText() const

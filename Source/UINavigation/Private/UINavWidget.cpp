@@ -860,6 +860,12 @@ void UUINavWidget::HandleOnKeyDown(FReply& Reply, UUINavWidget* Widget, UUINavCo
 	if (IsValid(Component) && Widget->UINavPC->IsListeningToInputRebind())
 	{
 		Component->bIgnoreDueToRebind = true;
+
+		if (FMath::IsNearlyZero(Widget->InputRebindPressTimestamp))
+		{
+			Widget->InputRebindPressTimestamp = FDateTime::Now().ToUnixTimestampDecimal();
+		}
+
 		return;
 	}
 
@@ -913,7 +919,9 @@ void UUINavWidget::HandleOnKeyUp(FReply& Reply, UUINavWidget* Widget, UUINavComp
 	if (IsValid(Component) && (Component->bIgnoreDueToRebind || Widget->UINavPC->IsListeningToInputRebind()))
 	{
 		Component->bIgnoreDueToRebind = false;
-		Widget->UINavPC->ProcessRebind(InKeyEvent);
+		double Difference = Widget->InputRebindPressTimestamp > 0.0 ? FDateTime::Now().ToUnixTimestampDecimal() - Widget->InputRebindPressTimestamp : 0.0;
+		Widget->InputRebindPressTimestamp = 0.0;
+		Widget->UINavPC->ProcessRebind(InKeyEvent, /*bIsHold*/ Difference > GetDefault<UUINavSettings>()->HoldRebindThreshold);
 		return;
 	}
 

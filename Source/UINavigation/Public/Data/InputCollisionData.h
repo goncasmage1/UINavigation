@@ -16,11 +16,13 @@ struct FInputCollisionData
 
 	FInputCollisionData(const FText InCurrentInputText,
 						const FText InCollidingInputText,
+						const int InCurrentKeyIndex,
 						const int InCollidingKeyIndex,
 						const FKey InCurrentInputKey,
 						const FKey InPressedKey) :
 		CurrentInputText(InCurrentInputText),
 		CollidingInputText(InCollidingInputText),
+		CurrentKeyIndex(InCurrentKeyIndex),
 		CollidingKeyIndex(InCollidingKeyIndex),
 		CurrentInputKey(InCurrentInputKey),
 		PressedKey(InPressedKey)
@@ -33,6 +35,9 @@ struct FInputCollisionData
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = InputCollisionData)
 	FText CollidingInputText;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = InputCollisionData)
+	int CurrentKeyIndex = -1;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = InputCollisionData)
 	int CollidingKeyIndex = -1;
 

@@ -78,10 +78,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "UINav Input")
 	UUINavInputBox* GetInputBoxAtIndex(const int Index) const;
 
-	ERevertRebindReason CanRegisterKey(class UUINavInputBox* InputBox, const FKey NewKey, const int Index, int& OutCollidingActionIndex, int& OutCollidingKeyIndex);
+	ERevertRebindReason CanRegisterKey(class UUINavInputBox* InputBox, const FKey NewKey, const bool bIsHold, const int Index, int& OutCollidingActionIndex, int& OutCollidingKeyIndex);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "UINav Input")
-	bool CanUseKey(class UUINavInputBox* InputBox, const FKey CompareKey, int& OutCollidingActionIndex, int& OutCollidingKeyIndex) const;
+	bool CanUseKey(class UUINavInputBox* InputBox, const FKey CompareKey, const bool bIsHold, int& OutCollidingActionIndex, int& OutCollidingKeyIndex) const;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "UINav Input")
 	bool RespectsRestriction(const FKey CompareKey, const int Index);
@@ -168,6 +168,10 @@ public:
 	//The text used for notifying the player to press a key
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Input")
 	FText PressKeyText = FText::FromString(TEXT("Press Any Key"));
+
+	//The text used for specifying that an key is used as a Hold
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Input")
+	FText HoldText = FText::FromString(TEXT("{} (Hold)"));
 
 	//The title text used for the swap keys widget
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINav Input")
