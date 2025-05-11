@@ -10,12 +10,11 @@ class UINAVIGATION_API UUINavWidgetComponent : public UWidgetComponent
 {
 	GENERATED_BODY()
 
-public:	
-
-	UUINavWidgetComponent();
-
 protected:
-
 	virtual void BeginPlay() override;
+
+public:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UINavigation Selector")
+	bool bTakeFocus = true;
 
 };

@@ -52,6 +52,7 @@ void UUINavWidget::NativeConstruct()
 	OuterUINavWidget = GetOuterObject<UUINavWidget>(this);
 	if (OuterUINavWidget != nullptr)
 	{
+		WidgetComp = OuterUINavWidget->WidgetComp;
 		if (!IsValid(OuterUINavWidget->GetFirstComponent()))
 		{
 			OuterUINavWidget->SetFirstComponent(FirstComponent);
@@ -343,7 +344,10 @@ void UUINavWidget::UINavSetup()
 {
 	if (UINavPC == nullptr) return;
 
-	FSlateApplication::Get().ReleaseAllPointerCapture();
+	if (WidgetComp == nullptr)
+	{
+		FSlateApplication::Get().ReleaseAllPointerCapture();
+	}
 
 	UUINavWidget* CurrentActiveWidget = UINavPC->GetActiveWidget();
 	const bool bShouldTakeFocus =
@@ -368,7 +372,7 @@ void UUINavWidget::UINavSetup()
 	{
 		if (bShouldTakeFocus)
 		{
-			CurrentComponent->SetFocus();
+			SetFocusOnComponent(CurrentComponent);
 		}
 		if (!GetDefault<UUINavSettings>()->bForceNavigation && !IsValid(HoveredComponent))
 		{
@@ -397,7 +401,7 @@ bool UUINavWidget::TryFocusOnInitialComponent()
 	UUINavComponent* InitialComponent = GetInitialFocusComponent();
 	if (IsValid(InitialComponent))
 	{
-		InitialComponent->SetFocus();
+		SetFocusOnComponent(InitialComponent);
 		return true;
 	}
 
@@ -663,7 +667,7 @@ FReply UUINavWidget::NativeOnFocusReceived(const FGeometry& InGeometry, const FF
 	{
 		if (IsValid(CurrentComponent))
 		{
-			CurrentComponent->SetFocus();
+			SetFocusOnComponent(CurrentComponent);
 		}
 		else if (!TryFocusOnInitialComponent())
 		{
@@ -675,7 +679,7 @@ FReply UUINavWidget::NativeOnFocusReceived(const FGeometry& InGeometry, const FF
 
 	if (IsValid(CurrentComponent))
 	{
-		CurrentComponent->SetFocus();
+		SetFocusOnComponent(CurrentComponent);
 		return Reply;
 	}
 
@@ -1026,6 +1030,18 @@ FVector2D UUINavWidget::GetSelectorLocation(const bool bAbsolute /*= true*/)
 void UUINavWidget::SetSelectorLocation(const FVector2D& NewLocation, const bool bAbsolute /*= true*/)
 {
 	TheSelector->SetRenderTranslation(NewLocation - GetSelectorLocationOffset(bAbsolute));
+}
+
+void UUINavWidget::SetFocusOnComponent(UUINavComponent* Component)
+{
+	if (WidgetComp == nullptr || WidgetComp->bTakeFocus)
+	{
+		Component->SetFocus();
+	}
+	else
+	{
+		NavigatedTo(Component, false);
+	}
 }
 
 void UUINavWidget::GoToNextSection()
@@ -1410,7 +1426,7 @@ void UUINavWidget::AttemptUnforceNavigation(const EInputType NewInputType)
 		{
 			if (HoveredComponent != CurrentComponent)
 			{
-				HoveredComponent->SetFocus();
+				SetFocusOnComponent(HoveredComponent);
 			}
 		}
 		else if (bForcingNavigation)
@@ -1707,8 +1723,8 @@ void UUINavWidget::ReturnToParent(const bool bRemoveAllParents, const int ZOrder
 			{
 				ParentWidget->ReconfigureSetup();
 			}
-			WidgetComp->SetWidget(ParentWidget);
 
+			WidgetComp->SetWidget(ParentWidget);
 		}
 	}
 	else
@@ -2071,7 +2087,7 @@ void UUINavWidget::OnHoveredComponent(UUINavComponent* Component)
 
 	if (Component != CurrentComponent || UINavPC->GetActiveSubWidget() != this)
 	{
-		Component->SetFocus();
+		SetFocusOnComponent(Component);
 	}
 }
 
@@ -2102,7 +2118,7 @@ void UUINavWidget::OnUnhoveredComponent(UUINavComponent* Component)
 
 		if (CurrentComponent == Component && (IgnoreHoverComponent == nullptr || IgnoreHoverComponent != Component))
 		{
-			Component->SetFocus();
+			SetFocusOnComponent(Component);
 		}
 		else
 		{
@@ -2143,7 +2159,10 @@ void UUINavWidget::OnReleasedComponent(UUINavComponent* Component)
 		{
 			SetSelectedComponent(nullptr);
 
-			if (Component != CurrentComponent && GetDefault<UUINavSettings>()->bSetFocusOnRelease) Component->SetFocus();
+			if (Component != CurrentComponent && GetDefault<UUINavSettings>()->bSetFocusOnRelease)
+			{
+				SetFocusOnComponent(Component);
+			}
 
 			if (bIsSelectedButton)
 			{
