@@ -2131,7 +2131,7 @@ void UUINavWidget::OnPressedComponent(UUINavComponent* Component)
 {
 	if (!IsValid(Component) || UINavPC == nullptr) return;
 
-	if (!UINavPC->AllowsSelectInput() || !UINavPC->IsWidgetActive(this)) return;
+	if (!UINavPC->AllowsSelectInput() || (!UINavPC->IsWidgetActive(this) && (WidgetComp == nullptr || WidgetComp->bTakeFocus))) return;
 
 	SetSelectedComponent(Component);
 
