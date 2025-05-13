@@ -40,9 +40,9 @@ struct FInputContainerEnhancedActionData
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = EnhancedInput)
 	EInputHoldBehavior HoldBehavior = EInputHoldBehavior::DontAllow;
 
-	// Specify an action that is supposed to have a hold input with the same key as the current input action, so that it automatically gets updated during rebinding.
+	// Specify an action that is supposed to be bound to the same key as the current input action, so that it automatically gets updated during rebinding.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = EnhancedInput)
-	UInputAction* HoldInputActionToUpdate = nullptr;
+	UInputAction* InputActionToUpdate = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = InputRebindData)
 	TArray<int> InputGroupsOverride;
