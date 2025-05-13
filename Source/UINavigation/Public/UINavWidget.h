@@ -344,6 +344,8 @@ public:
 
 	bool TryFocusOnInitialComponent();
 
+	void SetFocusOnComponent(UUINavComponent* Component);
+
 	void PropagateGainNavigation(UUINavWidget* PreviousActiveWidget, UUINavWidget* NewActiveWidget, const UUINavWidget* const CommonParent);
 
 	virtual void GainNavigation(UUINavWidget* PreviousActiveWidget);

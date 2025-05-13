@@ -291,9 +291,9 @@ int32 UUINavInputBox::FinishUpdateNewEnhancedInputKey(const FKey& PressedKey, co
 						{
 							RemoveHoldModifier(ActionMapping, TriggerToUse);
 
-							if (IsValid(InputActionData.HoldInputActionToUpdate))
+							if (IsValid(InputActionData.InputActionToUpdate))
 							{
-								AutoUpdateInputActionKey(InputActionData.HoldInputActionToUpdate, NewKey, Index);
+								AutoUpdateInputActionKey(InputActionData.InputActionToUpdate, NewKey, Index);
 							}
 						}
 

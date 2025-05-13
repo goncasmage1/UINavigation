@@ -5,10 +5,6 @@
 #include "UINavMacros.h"
 #include "UINavWidget.h"
 
-UUINavWidgetComponent::UUINavWidgetComponent()
-{
-}
-
 void UUINavWidgetComponent::BeginPlay()
 {
 	Super::BeginPlay();
