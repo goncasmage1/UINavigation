@@ -988,6 +988,10 @@ void UUINavPCComponent::HandleMouseMoveEvent(FSlateApplication& SlateApp, const 
 			{
 				MouseKey = MouseLeft;
 			}
+			else
+			{
+				return;
+			}
 
 			const FKeyEvent MouseKeyEvent(MouseKey, FModifierKeysState(), MouseEvent.GetUserIndex(), MouseEvent.IsRepeat(), 0, 0);
 			ProcessRebind(MouseKeyEvent);
