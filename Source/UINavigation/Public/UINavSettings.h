@@ -81,7 +81,7 @@ public:
 
 	// The amount of mouse movement delta that will trigger a rebind attempt when listening to a new key for input rebinding
 	UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = "Settings")
-	float MouseMoveRebindThreshold = 1.0f;
+	float MouseMoveRebindThreshold = 2.0f;
 
 	// The amount of time the player needs to hold a key in order to rebind to a hold input
 	UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = "Settings")
