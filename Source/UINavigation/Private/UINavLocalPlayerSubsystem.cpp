@@ -41,10 +41,10 @@ void UUINavLocalPlayerSubsystem::ApplySavedInputContexts()
 
 	UUINavSavedInputSettings* SavedUINavInputSettings = GetMutableDefault<UUINavSavedInputSettings>();
 	const uint8 CurrentInputVersion = GetDefault<UUINavSettings>()->CurrentInputVersion;
-	if (SavedUINavInputSettings->InputVersion < CurrentInputVersion)
+	if (SavedUINavInputSettings->SavedInputVersion < CurrentInputVersion)
 	{
 		SavedUINavInputSettings->SavedEnhancedInputMappings.Reset();
-		SavedUINavInputSettings->InputVersion = CurrentInputVersion;
+		SavedUINavInputSettings->SavedInputVersion = CurrentInputVersion;
 		SavedUINavInputSettings->SaveConfig();
 		return;
 	}

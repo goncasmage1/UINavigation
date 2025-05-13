@@ -10,7 +10,7 @@
 /**
  *
  */
-UCLASS(config = UserUINavSavedInputSettings)
+UCLASS(config = UINavigation)
 class UINAVIGATION_API UUINavSavedInputSettings : public UObject
 {
 	GENERATED_BODY()
@@ -24,5 +24,5 @@ public:
 	TMap<TSoftObjectPtr<UInputMappingContext>, FInputMappingArray> SavedEnhancedInputMappings;
 
 	UPROPERTY(config)
-	uint8 InputVersion = 0;
+	uint8 SavedInputVersion = 0;
 };

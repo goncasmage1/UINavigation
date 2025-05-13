@@ -444,10 +444,10 @@ void UUINavPCComponent::TryResetDefaultInputs()
 {
 	UUINavDefaultInputSettings* DefaultInputSettings = GetMutableDefault<UUINavDefaultInputSettings>();
 	const uint8 CurrentInputVersion = GetDefault<UUINavSettings>()->CurrentInputVersion;
-	if (DefaultInputSettings->DefaultEnhancedInputMappings.Num() == 0 || CurrentInputVersion > DefaultInputSettings->InputVersion)
+	if (DefaultInputSettings->DefaultEnhancedInputMappings.Num() == 0 || CurrentInputVersion > DefaultInputSettings->DefaultInputVersion)
 	{
 		DefaultInputSettings->DefaultEnhancedInputMappings.Reset();
-		DefaultInputSettings->InputVersion = CurrentInputVersion;
+		DefaultInputSettings->DefaultInputVersion = CurrentInputVersion;
 		for (const UInputMappingContext* const InputContext : CachedInputContexts)
 		{
 			DefaultInputSettings->DefaultEnhancedInputMappings.Add(TSoftObjectPtr<UInputMappingContext>(FAssetData(InputContext).ToSoftObjectPath()), InputContext->GetMappings());
