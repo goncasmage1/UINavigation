@@ -852,7 +852,7 @@ void UUINavWidget::HandleOnNavigation(FNavigationReply& Reply, UUINavWidget* Wid
 
 void UUINavWidget::HandleOnKeyDown(FReply& Reply, UUINavWidget* Widget, UUINavComponent* Component, const FKeyEvent& InKeyEvent)
 {
-	if (!IsValid(Widget) || !IsValid(Widget->UINavPC))
+	if (!IsValid(Widget) || !IsValid(Widget->UINavPC) || InKeyEvent.IsRepeat())
 	{
 		return;
 	}
