@@ -109,6 +109,17 @@ void UUINavComponent::SetFocusable(const bool bNewIsFocusable)
 	{
 		NavButtonBase->SetIsFocusable(IsFocusable());
 	}
+	else if (!bNewIsFocusable)
+	{
+		DISPLAYERROR("Trying to disable focus on a UI Nav Component whose NavButton isn't of class UINavButtonBase. Please update it accordingly!");
+	}
+}
+
+void UUINavComponent::SetIsEnabled(bool bInIsEnabled)
+{
+	Super::SetIsEnabled(bInIsEnabled);
+
+	SetFocusable(IsFocusable() && bInIsEnabled);
 }
 
 FReply UUINavComponent::NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent)

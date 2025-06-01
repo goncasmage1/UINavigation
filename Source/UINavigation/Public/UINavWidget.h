@@ -338,7 +338,7 @@ public:
 	*/
 	virtual void UINavSetup();
 
-	UFUNCTION(BlueprintNativeEvent, Category = UINavWidget)
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = UINavWidget)
 	UUINavComponent* GetInitialFocusComponent();
 	virtual UUINavComponent* GetInitialFocusComponent_Implementation();
 

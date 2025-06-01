@@ -57,6 +57,8 @@ public:
 
 	virtual void SetFocusable(const bool bNewIsFocusable);
 
+	virtual void SetIsEnabled(bool bInIsEnabled) override;
+
 	UFUNCTION(BlueprintNativeEvent, Category = UINavComponent)
 	void OnNavigatedTo();
 

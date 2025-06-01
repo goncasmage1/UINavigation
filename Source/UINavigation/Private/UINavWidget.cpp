@@ -848,15 +848,11 @@ void UUINavWidget::HandleOnNavigation(FNavigationReply& Reply, UUINavWidget* Wid
 			return;
 		}
 	}
-	else if (InNavigationEvent.GetNavigationType() != EUINavigation::Invalid)
-	{
-		IUINavPCReceiver::Execute_OnNavigated(Widget->UINavPC->GetOwner(), InNavigationEvent.GetNavigationType());
-	}
 }
 
 void UUINavWidget::HandleOnKeyDown(FReply& Reply, UUINavWidget* Widget, UUINavComponent* Component, const FKeyEvent& InKeyEvent)
 {
-	if (!IsValid(Widget) || !IsValid(Widget->UINavPC))
+	if (!IsValid(Widget) || !IsValid(Widget->UINavPC) || InKeyEvent.IsRepeat())
 	{
 		return;
 	}
