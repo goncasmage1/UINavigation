@@ -115,6 +115,13 @@ void UUINavComponent::SetFocusable(const bool bNewIsFocusable)
 	}
 }
 
+void UUINavComponent::SetIsEnabled(bool bInIsEnabled)
+{
+	Super::SetIsEnabled(bInIsEnabled);
+
+	SetFocusable(IsFocusable() && bInIsEnabled);
+}
+
 FReply UUINavComponent::NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent)
 {
 	FReply Reply = Super::NativeOnKeyDown(InGeometry, InKeyEvent);
