@@ -236,4 +236,5 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavComponent)
 	TMap<EComponentAction, FComponentActions> ComponentActions;
 
+	bool bWasFocusableWhenDisabled = true;
 };
