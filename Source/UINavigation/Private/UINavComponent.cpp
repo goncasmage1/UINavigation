@@ -117,9 +117,19 @@ void UUINavComponent::SetFocusable(const bool bNewIsFocusable)
 
 void UUINavComponent::SetIsEnabled(bool bInIsEnabled)
 {
+	if (!bInIsEnabled)
+	{
+		bWasFocusableWhenDisabled = IsFocusable();
+	}
+	
 	Super::SetIsEnabled(bInIsEnabled);
+	
+	SetFocusable(bInIsEnabled && bWasFocusableWhenDisabled);
 
-	SetFocusable(IsFocusable() && bInIsEnabled);
+	if (bInIsEnabled)
+	{
+		bWasFocusableWhenDisabled = true;
+	}
 }
 
 FReply UUINavComponent::NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent)
