@@ -43,6 +43,7 @@
 #include "Curves/CurveFloat.h"
 #include "Kismet/GameplayStatics.h"
 #include "UObject/ConstructorHelpers.h"
+#include "InputKeyEventArgs.h"
 
 const FKey UUINavPCComponent::MouseUp("MouseUp");
 const FKey UUINavPCComponent::MouseDown("MouseDown");
@@ -790,7 +791,7 @@ void UUINavPCComponent::InputKey(const FKey& Key, const EInputEvent Event, const
 {
 	if (IsValid(PC))
 	{
-		PC->InputKey(FInputKeyParams(Key, Event, Delta));
+		PC->InputKey(FInputKeyEventArgs::CreateSimulated(Key, Event, Delta));
 	}
 }
 
