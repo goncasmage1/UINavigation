@@ -425,7 +425,9 @@ void UUINavWidget::PropagateGainNavigation(UUINavWidget* PreviousActiveWidget, U
 
 void UUINavWidget::GainNavigation(UUINavWidget* PreviousActiveWidget)
 {
-	if (bHasNavigation) return;
+	if (bHasNavigation || !IsValid(UINavPC)) return;
+
+	UINavPC->AddInputContextFromUINavWidget(this);
 
 	if (IsValid(FirstComponent))
 	{
@@ -459,7 +461,9 @@ void UUINavWidget::PropagateLoseNavigation(UUINavWidget* NewActiveWidget, UUINav
 
 void UUINavWidget::LoseNavigation(UUINavWidget* NewActiveWidget)
 {
-	if (!bHasNavigation) return;
+	if (!bHasNavigation || !IsValid(UINavPC)) return;
+
+	UINavPC->RemoveInputContextFromUINavWidget(this);
 
 	const bool bHaveSameOuter = NewActiveWidget->GetMostOuterUINavWidget() == GetMostOuterUINavWidget();
 
