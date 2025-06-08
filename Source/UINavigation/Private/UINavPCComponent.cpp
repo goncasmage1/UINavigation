@@ -530,8 +530,6 @@ void UUINavPCComponent::SetActiveWidget(UUINavWidget * NewActiveWidget)
 	RefreshNavigationKeys();
 
 	const UUINavWidget* const CommonParent = GetFirstCommonParent(ActiveWidget, OldActiveWidget);
-	RemoveInputContextFromUINavWidget(OldActiveWidget, CommonParent);
-	AddInputContextFromUINavWidget(ActiveWidget, CommonParent);
 	
 	IUINavPCReceiver::Execute_OnActiveWidgetChanged(GetOwner(), OldActiveWidget, ActiveWidget);
 	
