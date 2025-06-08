@@ -572,12 +572,7 @@ void UUINavPCComponent::NotifyNavigatedTo(UUINavWidget* NavigatedWidget)
 		SetActiveWidget(NavigatedWidget);
 	}
 
-	UUINavWidget* CommonParent = OldActiveWidget != nullptr ? OldActiveWidget->GetMostOuterUINavWidget() : NavigatedWidget->GetMostOuterUINavWidget();
-	if (CommonParent == nullptr)
-	{
-		return;
-	}
-
+	UUINavWidget* CommonParent = OldActiveWidget != nullptr && OldActiveWidget->GetMostOuterUINavWidget() == NavigatedWidget->GetMostOuterUINavWidget() ? OldActiveWidget->GetMostOuterUINavWidget() : nullptr;
 	ActiveSubWidget = CommonParent != NavigatedWidget ? NavigatedWidget : nullptr;
 
 	uint8 Depth = 0;
@@ -604,7 +599,7 @@ void UUINavPCComponent::NotifyNavigatedTo(UUINavWidget* NavigatedWidget)
 				break;
 			}
 		}
-		else
+		else if (IsValid(CommonParent))
 		{
 			CommonParent = CommonParent->GetChildUINavWidget(OldIndex);
 		}
