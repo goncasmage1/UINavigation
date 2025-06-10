@@ -808,7 +808,7 @@ bool UUINavInputBox::HasHoldModifier(const FEnhancedActionKeyMapping& ActionMapp
 {
 	auto HasHoldTrigger = [](const TArray<TObjectPtr<UInputTrigger>>& Triggers) -> bool
 	{
-		for (const TObjectPtr<UInputTrigger> Trigger : Triggers)
+		for (const TObjectPtr<UInputTrigger>& Trigger : Triggers)
 		{
 			if (!IsValid(Trigger))
 			{
@@ -838,7 +838,7 @@ void UUINavInputBox::AddHoldModifier(FEnhancedActionKeyMapping& ActionMapping)
 
 void UUINavInputBox::RemoveHoldModifier(FEnhancedActionKeyMapping& ActionMapping, const TObjectPtr<UInputTrigger> TriggerToAdd /*= nullptr*/)
 {
-	for (const TObjectPtr<UInputTrigger> Trigger : ActionMapping.Triggers)
+	for (const TObjectPtr<UInputTrigger>& Trigger : ActionMapping.Triggers)
 	{
 		if (!IsValid(Trigger))
 		{
