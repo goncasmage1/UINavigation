@@ -579,8 +579,7 @@ void UUINavPCComponent::NotifyNavigatedTo(UUINavWidget* NavigatedWidget)
 	const TArray<int>& OldPath = OldActiveWidget != nullptr ? OldActiveWidget->GetUINavWidgetPath() : TArray<int>();
 	const TArray<int>& NewPath = NavigatedWidget != nullptr ? NavigatedWidget->GetUINavWidgetPath() : TArray<int>();
 
-	if (OldPath.Num() == Depth && OldActiveWidget != nullptr) OldActiveWidget->LoseNavigation(NavigatedWidget);
-	if (NewPath.Num() == Depth && NavigatedWidget != nullptr) NavigatedWidget->GainNavigation(OldActiveWidget);
+	if (OldPath.IsEmpty() && OldActiveWidget != nullptr) OldActiveWidget->LoseNavigation(NavigatedWidget);
 
 	while (true)
 	{
@@ -607,6 +606,8 @@ void UUINavPCComponent::NotifyNavigatedTo(UUINavWidget* NavigatedWidget)
 		if (OldPath.Num() == Depth && OldActiveWidget != nullptr) OldActiveWidget->LoseNavigation(NavigatedWidget);
 		if (NewPath.Num() == Depth && NavigatedWidget != nullptr) NavigatedWidget->GainNavigation(OldActiveWidget);
 	}
+
+	if (NewPath.IsEmpty() && NavigatedWidget != nullptr) NavigatedWidget->GainNavigation(OldActiveWidget);
 
 	if (ActiveWidget != NavigatedWidget)
 	{

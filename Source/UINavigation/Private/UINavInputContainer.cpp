@@ -34,18 +34,23 @@ void UUINavInputContainer::NativeConstruct()
 	if (InputRestrictions.Num() == 0) InputRestrictions.Add(EInputRestriction::None);
 	else if (InputRestrictions.Num() > 3) InputRestrictions.SetNum(3);
 
-	if (IsValid(UINavPC) && !UINavPC->GetCurrentPlatformData().bCanUseKeyboardMouse)
+	if (IsValid(UINavPC))
 	{
-		for (int32 i = InputRestrictions.Num() - 1; i >= 0; --i)
+		if (!UINavPC->GetCurrentPlatformData().bCanUseKeyboardMouse)
 		{
-			const EInputRestriction InputRestriction = InputRestrictions[i];
-			if (InputRestriction == EInputRestriction::Keyboard ||
-				InputRestriction == EInputRestriction::Mouse ||
-				InputRestriction == EInputRestriction::Keyboard_Mouse)
+			for (int32 i = InputRestrictions.Num() - 1; i >= 0; --i)
 			{
-				InputRestrictions.RemoveAt(i);
+				const EInputRestriction InputRestriction = InputRestrictions[i];
+				if (InputRestriction == EInputRestriction::Keyboard ||
+					InputRestriction == EInputRestriction::Mouse ||
+					InputRestriction == EInputRestriction::Keyboard_Mouse)
+				{
+					InputRestrictions.RemoveAt(i);
+				}
 			}
 		}
+
+		UINavPC->InputTypeChangedDelegate.AddUniqueDynamic(this, &UUINavInputContainer::OnInputTypeChanged);
 	}
 
 	KeysPerInput = InputRestrictions.Num();
@@ -55,6 +60,16 @@ void UUINavInputContainer::NativeConstruct()
 	SetupInputBoxes();
 
 	Super::NativeConstruct();
+}
+
+void UUINavInputContainer::NativeDestruct()
+{
+	if (IsValid(UINavPC))
+	{
+		UINavPC->InputTypeChangedDelegate.RemoveDynamic(this, &UUINavInputContainer::OnInputTypeChanged);
+	}
+
+	Super::NativeDestruct();
 }
 
 FReply UUINavInputContainer::NativeOnFocusReceived(const FGeometry& InGeometry, const FFocusEvent& InFocusEvent)
@@ -110,6 +125,11 @@ bool UUINavInputContainer::RequestKeySwap(const FInputCollisionData& InputCollis
 void UUINavInputContainer::ResetKeyMappings()
 {
 	UUINavBlueprintFunctionLibrary::ResetInputSettings(Cast<APlayerController>(UINavPC->GetOwner()));
+	ForceUpdateInputBoxes();
+}
+
+void UUINavInputContainer::ForceUpdateInputBoxes()
+{
 	for (UUINavInputBox* InputBox : InputBoxes) InputBox->ResetKeyWidgets();
 }
 
@@ -266,6 +286,11 @@ void UUINavInputContainer::ResetInputBox(const FName InputName, const EAxisType 
 			break;
 		}
 	}
+}
+
+void UUINavInputContainer::OnInputTypeChanged(const EInputType InputType)
+{
+	ForceUpdateInputBoxes();
 }
 
 void UUINavInputContainer::SwapKeysDecided(const UPromptDataBase* const PromptData)
