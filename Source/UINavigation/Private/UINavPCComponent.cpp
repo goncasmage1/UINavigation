@@ -1704,6 +1704,36 @@ void UUINavPCComponent::MenuPrevious()
 	IUINavPCReceiver::Execute_OnPrevious(GetOwner());
 }
 
+void UUINavPCComponent::SimulateStartSelect()
+{
+	if (!IsValid(ActiveWidget) || !IsValid(ActiveWidget->GetCurrentComponent()))
+	{
+		return;
+	}
+
+	ActiveWidget->GetCurrentComponent()->NavButton->OnPressed.Broadcast();
+}
+
+void UUINavPCComponent::SimulateStopSelect()
+{
+	if (!IsValid(ActiveWidget) || !IsValid(ActiveWidget->GetCurrentComponent()))
+	{
+		return;
+	}
+
+	ActiveWidget->GetCurrentComponent()->NavButton->OnReleased.Broadcast();
+}
+
+void UUINavPCComponent::SimulateSelect()
+{
+	if (!IsValid(ActiveWidget) || !IsValid(ActiveWidget->GetCurrentComponent()))
+	{
+		return;
+	}
+
+	ActiveWidget->GetCurrentComponent()->NavButton->OnClicked.Broadcast();
+}
+
 void UUINavPCComponent::NotifyNavigationKeyPressed(const FKey& Key, const EUINavigation Direction)
 {
 	TArray<FKey>* DirectionKeys = PressedNavigationDirections.Find(Direction);
