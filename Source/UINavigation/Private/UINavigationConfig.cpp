@@ -8,6 +8,7 @@
 FUINavigationConfig::FUINavigationConfig(const UInputMappingContext* const InputContext, const bool bAllowDirectionalInput /*= true*/, const bool bAllowSectionInput /*= true*/, const bool bAllowAccept /*= true*/, const bool bAllowBack /*= true*/, const bool bUseAnalogDirectionalInput /*= true*/, const bool bUsingThumbstickAsMouse /*= false*/)
 {
 	KeyEventRules.Reset();
+	KeyActionRules.Reset();
 	bTabNavigation = false;
 	bKeyNavigation = true;
 	bAnalogNavigation = bUseAnalogDirectionalInput && !bUsingThumbstickAsMouse;
