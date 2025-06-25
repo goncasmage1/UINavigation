@@ -17,7 +17,7 @@ public:
 };
 
 UCLASS(BlueprintType, Blueprintable)
-class UPromptDataBinary : public UPromptDataBase
+class UINAVIGATION_API UPromptDataBinary : public UPromptDataBase
 {
 	GENERATED_BODY()
 

@@ -41,6 +41,8 @@ public:
 
 	virtual void NativeConstruct() override;
 
+	virtual void NativeDestruct() override;
+
 	virtual FReply NativeOnFocusReceived(const FGeometry& InGeometry, const FFocusEvent& InFocusEvent) override;
 
 	/**
@@ -76,6 +78,9 @@ public:
 	void ResetKeyMappings();
 
 	UFUNCTION(BlueprintCallable, Category = "UINav Input")
+	void ForceUpdateInputBoxes();
+
+	UFUNCTION(BlueprintCallable, Category = "UINav Input")
 	UUINavInputBox* GetInputBoxAtIndex(const int Index) const;
 
 	ERevertRebindReason CanRegisterKey(class UUINavInputBox* InputBox, const FKey NewKey, const bool bIsHold, const int Index, int& OutCollidingActionIndex, int& OutCollidingKeyIndex);
@@ -87,6 +92,9 @@ public:
 	bool RespectsRestriction(const FKey CompareKey, const int Index);
 
 	void ResetInputBox(const FName InputName, const EAxisType AxisType);
+
+	UFUNCTION()
+	void OnInputTypeChanged(const EInputType InputType);
 
 	UFUNCTION()
 	void SwapKeysDecided(const UPromptDataBase* const PromptData);

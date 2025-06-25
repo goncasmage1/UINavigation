@@ -574,6 +574,15 @@ public:
 	void MenuNext();
 	void MenuPrevious();
 
+	UFUNCTION(BlueprintCallable, Category = UINavController)
+	void SimulateStartSelect();
+
+	UFUNCTION(BlueprintCallable, Category = UINavController)
+	void SimulateStopSelect();
+
+	UFUNCTION(BlueprintCallable, Category = UINavController)
+	void SimulateSelect();
+
 	void NotifyNavigationKeyPressed(const FKey& Key, const EUINavigation Direction);
 	void NotifyNavigationKeyReleased(const FKey& Key, const EUINavigation Direction);
 
