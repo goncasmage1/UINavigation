@@ -1637,6 +1637,12 @@ UUINavWidget * UUINavWidget::GoToBuiltWidget(UUINavWidget* NewWidget, const bool
 		IgnoreHoverComponent = HoveredComponent;
 	}
 	
+	if (!UINavPC->IsWidgetActive(this))
+	{
+		DISPLAYERROR("GoToWidget called on non-active UINavWidget! Use the UINavPC's GoToWidget to fix this.");
+		return nullptr;
+	}
+
 	if (OuterUINavWidget != nullptr || NewOuterUINavWidget == this)
 	{
 		if (NewOuterUINavWidget == OldOuterUINavWidget)
