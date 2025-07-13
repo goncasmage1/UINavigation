@@ -86,7 +86,6 @@ void UUINavWidget::NativeConstruct()
 		if (bShouldDestroyParent)
 		{
 			ParentWidget = OuterParentWidget->ParentWidget;
-			OuterParentWidget->Destruct();
 			OuterParentWidget = nullptr;
 		}
 	}
@@ -104,7 +103,10 @@ void UUINavWidget::NativeConstruct()
 			}
 		}
 
-		if (WidgetComp == nullptr) ReturnedFromWidget->Destruct();
+		if (WidgetComp == nullptr)
+		{
+			ReturnedFromWidget = nullptr;
+		}
 	}
 
 	PreSetup(!bCompletedSetup);
@@ -1738,7 +1740,6 @@ void UUINavWidget::ReturnToParent(const bool bRemoveAllParents, const int ZOrder
 				ParentWidget->RemoveAllParents();
 				bReturningToParent = true;
 				RemoveFromParent();
-				Destruct();
 			}
 			else
 			{
@@ -1776,7 +1777,6 @@ void UUINavWidget::RemoveAllParents()
 	}
 	bReturningToParent = true;
 	RemoveFromParent();
-	Destruct();
 }
 
 int UUINavWidget::GetWidgetHierarchyDepth(UWidget* Widget) const
