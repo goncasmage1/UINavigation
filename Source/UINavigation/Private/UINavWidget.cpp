@@ -35,6 +35,7 @@
 #include "Engine/Console.h"
 #include "Curves/CurveFloat.h"
 #include "Kismet/GameplayStatics.h"
+#include "Engine/InputDelegateBinding.h"
 
 UUINavWidget::UUINavWidget(const FObjectInitializer& ObjectInitializer)
 	:Super(ObjectInitializer)
@@ -431,10 +432,7 @@ void UUINavWidget::GainNavigation(UUINavWidget* PreviousActiveWidget)
 
 	UINavPC->AddInputContextFromUINavWidget(this);
 
-	if (IsValid(FirstComponent))
-	{
-		bHasNavigation = true;
-	}
+	bHasNavigation = true;
 
 	const bool bPreviousWidgetIsChild = PreviousActiveWidget != nullptr ?
                                     UUINavBlueprintFunctionLibrary::ContainsArray<int>(PreviousActiveWidget->GetUINavWidgetPath(), UINavWidgetPath) :
@@ -1751,6 +1749,9 @@ void UUINavWidget::ReturnToParent(const bool bRemoveAllParents, const int ZOrder
 						ParentWidget->ReturnedFromWidget = this;
 						if (!bForceUsePlayerScreen && (!bUsingSplitScreen || ParentWidget->bUseFullscreenWhenSplitscreen)) ParentWidget->AddToViewport(ZOrder);
 						else ParentWidget->AddToPlayerScreen(ZOrder);
+
+						ParentWidget->InitializeInputComponent();
+						UInputDelegateBinding::BindInputDelegates(ParentWidget->GetClass(), ParentWidget->InputComponent, ParentWidget);
 					}
 				}
 				else
