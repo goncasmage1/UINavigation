@@ -1713,6 +1713,7 @@ void UUINavPCComponent::SimulateStartSelect()
 	}
 
 	ActiveWidget->GetCurrentComponent()->NavButton->OnPressed.Broadcast();
+	ActiveWidget->OnStartSelect(ActiveWidget->GetCurrentComponent());
 }
 
 void UUINavPCComponent::SimulateStopSelect()
@@ -1723,6 +1724,8 @@ void UUINavPCComponent::SimulateStopSelect()
 	}
 
 	ActiveWidget->GetCurrentComponent()->NavButton->OnReleased.Broadcast();
+	ActiveWidget->GetCurrentComponent()->NavButton->OnClicked.Broadcast();
+	ActiveWidget->OnStopSelect(ActiveWidget->GetCurrentComponent());
 }
 
 void UUINavPCComponent::SimulateSelect()
@@ -1732,7 +1735,42 @@ void UUINavPCComponent::SimulateSelect()
 		return;
 	}
 
+	ActiveWidget->GetCurrentComponent()->NavButton->OnPressed.Broadcast();
+	ActiveWidget->OnStartSelect(ActiveWidget->GetCurrentComponent());
 	ActiveWidget->GetCurrentComponent()->NavButton->OnClicked.Broadcast();
+	ActiveWidget->GetCurrentComponent()->NavButton->OnReleased.Broadcast();
+	ActiveWidget->OnStopSelect(ActiveWidget->GetCurrentComponent());
+}
+
+void UUINavPCComponent::SimulateStartReturn()
+{
+	if (!IsValid(ActiveWidget))
+	{
+		return;
+	}
+
+	ActiveWidget->StartedReturn();
+}
+
+void UUINavPCComponent::SimulateStopReturn()
+{
+	if (!IsValid(ActiveWidget))
+	{
+		return;
+	}
+
+	ActiveWidget->StoppedReturn();
+}
+
+void UUINavPCComponent::SimulateReturn()
+{
+	if (!IsValid(ActiveWidget))
+	{
+		return;
+	}
+
+	ActiveWidget->StartedReturn();
+	ActiveWidget->StoppedReturn();
 }
 
 void UUINavPCComponent::NotifyNavigationKeyPressed(const FKey& Key, const EUINavigation Direction)
