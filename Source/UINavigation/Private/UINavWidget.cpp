@@ -35,6 +35,7 @@
 #include "Engine/Console.h"
 #include "Curves/CurveFloat.h"
 #include "Kismet/GameplayStatics.h"
+#include "Engine/InputDelegateBinding.h"
 
 UUINavWidget::UUINavWidget(const FObjectInitializer& ObjectInitializer)
 	:Super(ObjectInitializer)
@@ -86,7 +87,6 @@ void UUINavWidget::NativeConstruct()
 		if (bShouldDestroyParent)
 		{
 			ParentWidget = OuterParentWidget->ParentWidget;
-			OuterParentWidget->Destruct();
 			OuterParentWidget = nullptr;
 		}
 	}
@@ -104,7 +104,10 @@ void UUINavWidget::NativeConstruct()
 			}
 		}
 
-		if (WidgetComp == nullptr) ReturnedFromWidget->Destruct();
+		if (WidgetComp == nullptr)
+		{
+			ReturnedFromWidget = nullptr;
+		}
 	}
 
 	PreSetup(!bCompletedSetup);
@@ -429,10 +432,7 @@ void UUINavWidget::GainNavigation(UUINavWidget* PreviousActiveWidget)
 
 	UINavPC->AddInputContextFromUINavWidget(this);
 
-	if (IsValid(FirstComponent))
-	{
-		bHasNavigation = true;
-	}
+	bHasNavigation = true;
 
 	const bool bPreviousWidgetIsChild = PreviousActiveWidget != nullptr ?
                                     UUINavBlueprintFunctionLibrary::ContainsArray<int>(PreviousActiveWidget->GetUINavWidgetPath(), UINavWidgetPath) :
@@ -1637,6 +1637,12 @@ UUINavWidget * UUINavWidget::GoToBuiltWidget(UUINavWidget* NewWidget, const bool
 		IgnoreHoverComponent = HoveredComponent;
 	}
 	
+	if (!UINavPC->IsWidgetActive(this))
+	{
+		DISPLAYERROR("GoToWidget called on non-active UINavWidget! Use the UINavPC's GoToWidget to fix this.");
+		return nullptr;
+	}
+
 	if (OuterUINavWidget != nullptr || NewOuterUINavWidget == this)
 	{
 		if (NewOuterUINavWidget == OldOuterUINavWidget)
@@ -1738,7 +1744,6 @@ void UUINavWidget::ReturnToParent(const bool bRemoveAllParents, const int ZOrder
 				ParentWidget->RemoveAllParents();
 				bReturningToParent = true;
 				RemoveFromParent();
-				Destruct();
 			}
 			else
 			{
@@ -1750,6 +1755,9 @@ void UUINavWidget::ReturnToParent(const bool bRemoveAllParents, const int ZOrder
 						ParentWidget->ReturnedFromWidget = this;
 						if (!bForceUsePlayerScreen && (!bUsingSplitScreen || ParentWidget->bUseFullscreenWhenSplitscreen)) ParentWidget->AddToViewport(ZOrder);
 						else ParentWidget->AddToPlayerScreen(ZOrder);
+
+						ParentWidget->InitializeInputComponent();
+						UInputDelegateBinding::BindInputDelegates(ParentWidget->GetClass(), ParentWidget->InputComponent, ParentWidget);
 					}
 				}
 				else
@@ -1776,7 +1784,6 @@ void UUINavWidget::RemoveAllParents()
 	}
 	bReturningToParent = true;
 	RemoveFromParent();
-	Destruct();
 }
 
 int UUINavWidget::GetWidgetHierarchyDepth(UWidget* Widget) const
