@@ -108,6 +108,9 @@ void UUINavWidget::NativeConstruct()
 		{
 			ReturnedFromWidget = nullptr;
 		}
+
+		ReturnedFromWidget->InitializeInputComponent();
+		UInputDelegateBinding::BindInputDelegates(ReturnedFromWidget->GetClass(), ReturnedFromWidget->InputComponent, ReturnedFromWidget);
 	}
 
 	PreSetup(!bCompletedSetup);
@@ -1755,9 +1758,6 @@ void UUINavWidget::ReturnToParent(const bool bRemoveAllParents, const int ZOrder
 						ParentWidget->ReturnedFromWidget = this;
 						if (!bForceUsePlayerScreen && (!bUsingSplitScreen || ParentWidget->bUseFullscreenWhenSplitscreen)) ParentWidget->AddToViewport(ZOrder);
 						else ParentWidget->AddToPlayerScreen(ZOrder);
-
-						ParentWidget->InitializeInputComponent();
-						UInputDelegateBinding::BindInputDelegates(ParentWidget->GetClass(), ParentWidget->InputComponent, ParentWidget);
 					}
 				}
 				else
