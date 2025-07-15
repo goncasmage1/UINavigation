@@ -9,6 +9,7 @@
 #include "Components/SpinBox.h"
 #include "UINavBlueprintFunctionLibrary.h"
 #include "TimerManager.h"
+#include "Widgets/Input/SSlider.h"
 
 void UUINavSlider::NativePreConstruct()
 {
@@ -141,6 +142,9 @@ void UUINavSlider::HandleOnSliderMouseCaptureEnd()
 	bMovingSlider = false;
 	OptionIndex = IndexFromPercent(Slider->GetValue());
 	Update();
+	// Workaround for a bug in SSlider: on mouse up, it "restores" the cursor to the default cursor,
+	// rather than to unset, which prevents bubbling up to UUINavGameViewportClient.
+	StaticCastSharedRef<SSlider>(Slider->TakeWidget())->SetCursor(TOptional<EMouseCursor::Type>());
 }
 
 void UUINavSlider::HandleOnSpinBoxMouseCaptureBegin()
