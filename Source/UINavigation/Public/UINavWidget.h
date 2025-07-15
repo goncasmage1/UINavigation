@@ -694,7 +694,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = UINavWidget, meta = (AdvancedDisplay = 1))
 	virtual void ReturnToParent(const bool bRemoveAllParents = false, const int ZOrder = 0);
 
-	void RemoveAllParents();
+	void RemoveSelfAndAllParents();
 
 	int GetWidgetHierarchyDepth(UWidget* Widget) const;
 

@@ -104,13 +104,13 @@ void UUINavWidget::NativeConstruct()
 			}
 		}
 
+		ReturnedFromWidget->InitializeInputComponent();
+		UInputDelegateBinding::BindInputDelegates(ReturnedFromWidget->GetClass(), ReturnedFromWidget->InputComponent, ReturnedFromWidget);
+
 		if (WidgetComp == nullptr)
 		{
 			ReturnedFromWidget = nullptr;
 		}
-
-		ReturnedFromWidget->InitializeInputComponent();
-		UInputDelegateBinding::BindInputDelegates(ReturnedFromWidget->GetClass(), ReturnedFromWidget->InputComponent, ReturnedFromWidget);
 	}
 
 	PreSetup(!bCompletedSetup);
@@ -468,7 +468,7 @@ void UUINavWidget::LoseNavigation(UUINavWidget* NewActiveWidget)
 
 	UINavPC->RemoveInputContextFromUINavWidget(this);
 
-	const bool bHaveSameOuter = NewActiveWidget->GetMostOuterUINavWidget() == GetMostOuterUINavWidget();
+	const bool bHaveSameOuter = IsValid(NewActiveWidget) ? NewActiveWidget->GetMostOuterUINavWidget() == GetMostOuterUINavWidget() : false;
 
 	const bool bNewWidgetIsChild = NewActiveWidget != nullptr && NewActiveWidget->GetUINavWidgetPath().Num() > 0 ?
 		UUINavBlueprintFunctionLibrary::ContainsArray<int>(NewActiveWidget->GetUINavWidgetPath(), UINavWidgetPath) && bHaveSameOuter :
@@ -479,7 +479,7 @@ void UUINavWidget::LoseNavigation(UUINavWidget* NewActiveWidget)
 		return;
 	}
 
-	if (!NewActiveWidget->bMaintainNavigationForChild || !bNewWidgetIsChild)
+	if ((IsValid(NewActiveWidget) && !NewActiveWidget->bMaintainNavigationForChild) || !bNewWidgetIsChild)
 	{
 		UpdateNavigationVisuals(nullptr, true, false, true);
 	}
@@ -1698,6 +1698,7 @@ void UUINavWidget::ReturnToParent(const bool bRemoveAllParents, const int ZOrder
 		if (bAllowRemoveIfRoot && UINavPC != nullptr)
 		{
 			UINavPC->SetActiveWidget(nullptr);
+			LoseNavigation(nullptr);
 
 			SelectCount = 0;
 			SetSelectedComponent(nullptr);
@@ -1744,9 +1745,7 @@ void UUINavWidget::ReturnToParent(const bool bRemoveAllParents, const int ZOrder
 			{
 				IUINavPCReceiver::Execute_OnRootWidgetRemoved(UINavPC->GetOwner());
 				UINavPC->SetActiveWidget(nullptr);
-				ParentWidget->RemoveAllParents();
-				bReturningToParent = true;
-				RemoveFromParent();
+				RemoveSelfAndAllParents();
 			}
 			else
 			{
@@ -1776,11 +1775,13 @@ void UUINavWidget::ReturnToParent(const bool bRemoveAllParents, const int ZOrder
 	}
 }
 
-void UUINavWidget::RemoveAllParents()
+void UUINavWidget::RemoveSelfAndAllParents()
 {
+	bHasNavigation = true;
+	LoseNavigation(nullptr);
 	if (ParentWidget != nullptr)
 	{
-		ParentWidget->RemoveAllParents();
+		ParentWidget->RemoveSelfAndAllParents();
 	}
 	bReturningToParent = true;
 	RemoveFromParent();
