@@ -104,13 +104,13 @@ void UUINavWidget::NativeConstruct()
 			}
 		}
 
+		ReturnedFromWidget->InitializeInputComponent();
+		UInputDelegateBinding::BindInputDelegates(ReturnedFromWidget->GetClass(), ReturnedFromWidget->InputComponent, ReturnedFromWidget);
+
 		if (WidgetComp == nullptr)
 		{
 			ReturnedFromWidget = nullptr;
 		}
-
-		ReturnedFromWidget->InitializeInputComponent();
-		UInputDelegateBinding::BindInputDelegates(ReturnedFromWidget->GetClass(), ReturnedFromWidget->InputComponent, ReturnedFromWidget);
 	}
 
 	PreSetup(!bCompletedSetup);
