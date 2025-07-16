@@ -104,8 +104,8 @@ void UUINavWidget::NativeConstruct()
 			}
 		}
 
-		ReturnedFromWidget->InitializeInputComponent();
-		UInputDelegateBinding::BindInputDelegates(ReturnedFromWidget->GetClass(), ReturnedFromWidget->InputComponent, ReturnedFromWidget);
+		InitializeInputComponent();
+		UInputDelegateBinding::BindInputDelegates(GetClass(), InputComponent, this);
 
 		if (WidgetComp == nullptr)
 		{
