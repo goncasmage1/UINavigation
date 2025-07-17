@@ -681,7 +681,11 @@ void UUINavPCComponent::SetShowMouseCursor(const bool bShowMouse)
 	float MousePosY;
 	PC->GetMousePosition(MousePosX, MousePosY);
 	PC->SetMouseLocation(static_cast<int>(MousePosX), static_cast<int>(MousePosY));
-
+	// On Mac, this is only automatically called on mouse events, so auto-hide
+	// on keyboard/controller input doesn't work (without this). On other platforms
+	// it should be innocuous.
+	FSlateApplication::Get().OnCursorSet();
+	
 #if WITH_EDITOR
 	const UWorld* const World = PC->GetWorld();
 	if (IsValid(World))
