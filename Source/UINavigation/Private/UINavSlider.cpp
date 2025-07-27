@@ -51,8 +51,11 @@ void UUINavSlider::NativePreConstruct()
 
 	SanitizeValues();
 
-	HandleDefaultColor = Slider->GetSliderHandleColor();
-	BarDefaultColor = Slider->GetSliderBarColor();
+	if (Slider != nullptr)
+	{
+		HandleDefaultColor = Slider->GetSliderHandleColor();
+		BarDefaultColor = Slider->GetSliderBarColor();
+	}
 
 	Update();
 
