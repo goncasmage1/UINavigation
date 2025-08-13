@@ -907,7 +907,11 @@ void UUINavPCComponent::NavigateInDirection(const EUINavigation InDirection)
 		const uint32* CharacterCodePtr;
 		FInputKeyManager::Get().GetCodesFromKey(NavigationKey, KeyCodePtr, CharacterCodePtr);
 		const int32 KeyCode = KeyCodePtr != nullptr ? *KeyCodePtr : -1;
-
+		if (!CharacterCodePtr)
+		{
+ 		   UE_LOG(LogTemp, Warning, TEXT("CharacterCodePtr is null in NavigateInDirection"));
+ 		   return; // Or handle gracefully
+		}
 		FKey const Key = FInputKeyManager::Get().GetKeyFromCodes(KeyCode, *CharacterCodePtr);
 		KeyEvent = FKeyEvent(Key, SlateApplication.GetPlatformApplication()->GetModifierKeys(), SlateApplication.GetUserIndexForKeyboard(), true, *CharacterCodePtr, KeyCode);
 	}
