@@ -213,7 +213,7 @@ ERevertRebindReason UUINavInputContainer::CanRegisterKey(UUINavInputBox * InputB
 	if (!RespectsRestriction(NewKey, Index)) return ERevertRebindReason::RestrictionMismatch;
 
 	const int ExistingKeyIndex = InputBox->ContainsKey(NewKey);
-	if (ExistingKeyIndex != INDEX_NONE && InputBox->bIsHoldInput[ExistingKeyIndex]) return ERevertRebindReason::UsedBySameInput;
+	if (ExistingKeyIndex != INDEX_NONE && InputBox->bIsHoldInput[ExistingKeyIndex] == bIsHold) return ERevertRebindReason::UsedBySameInput;
 	if (!CanUseKey(InputBox, NewKey, bIsHold, OutCollidingActionIndex, OutCollidingKeyIndex)) return ERevertRebindReason::UsedBySameInputGroup;
 
 	return ERevertRebindReason::None;
