@@ -876,7 +876,7 @@ void UUINavWidget::HandleOnKeyDown(FReply& Reply, UUINavWidget* Widget, UUINavCo
 		return;
 	}
 
-	const bool bHandleReply = Widget->OuterUINavWidget == nullptr && GetDefault<UUINavSettings>()->bConsumeNavigationInputs;
+	const bool bHandleReply = Widget->OuterUINavWidget == nullptr;
 	if (FSlateApplication::Get().GetNavigationActionFromKey(InKeyEvent) == EUINavigationAction::Accept)
 	{
 		if (!Widget->TryConsumeNavigation())
@@ -932,7 +932,7 @@ void UUINavWidget::HandleOnKeyUp(FReply& Reply, UUINavWidget* Widget, UUINavComp
 		return;
 	}
 
-	const bool bHandleReply = Widget->OuterUINavWidget == nullptr && GetDefault<UUINavSettings>()->bConsumeNavigationInputs;
+	const bool bHandleReply = Widget->OuterUINavWidget == nullptr;
 
 	if (FSlateApplication::Get().GetNavigationActionFromKey(InKeyEvent) == EUINavigationAction::Accept)
 	{
