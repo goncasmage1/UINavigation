@@ -42,19 +42,21 @@ void UUINavSlider::NativePreConstruct()
 		}
 	}
 
-	if (!IsDesignTime())
+	if (Slider != nullptr)
 	{
-		if (!Slider->OnMouseCaptureBegin.IsBound()) Slider->OnMouseCaptureBegin.AddUniqueDynamic(this, &UUINavSlider::HandleOnSliderMouseCaptureBegin);
-		if (!Slider->OnValueChanged.IsBound()) Slider->OnValueChanged.AddUniqueDynamic(this, &UUINavSlider::HandleOnSliderValueChanged);
-		if (!Slider->OnMouseCaptureEnd.IsBound()) Slider->OnMouseCaptureEnd.AddUniqueDynamic(this, &UUINavSlider::HandleOnSliderMouseCaptureEnd);
+		if (!IsDesignTime())
+		{
+			if (!Slider->OnMouseCaptureBegin.IsBound()) Slider->OnMouseCaptureBegin.AddUniqueDynamic(this, &UUINavSlider::HandleOnSliderMouseCaptureBegin);
+			if (!Slider->OnValueChanged.IsBound()) Slider->OnValueChanged.AddUniqueDynamic(this, &UUINavSlider::HandleOnSliderValueChanged);
+			if (!Slider->OnMouseCaptureEnd.IsBound()) Slider->OnMouseCaptureEnd.AddUniqueDynamic(this, &UUINavSlider::HandleOnSliderMouseCaptureEnd);
+		}
+
+		SanitizeValues();
+		HandleDefaultColor = Slider->GetSliderHandleColor();
+		BarDefaultColor = Slider->GetSliderBarColor();
+
+		Update();
 	}
-
-	SanitizeValues();
-
-	HandleDefaultColor = Slider->GetSliderHandleColor();
-	BarDefaultColor = Slider->GetSliderBarColor();
-
-	Update();
 
 	Super::NativePreConstruct();
 }
