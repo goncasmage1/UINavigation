@@ -106,11 +106,6 @@ void UUINavWidget::NativeConstruct()
 
 		InitializeInputComponent();
 		UInputDelegateBinding::BindInputDelegates(GetClass(), InputComponent, this);
-
-		if (WidgetComp == nullptr)
-		{
-			ReturnedFromWidget = nullptr;
-		}
 	}
 
 	PreSetup(!bCompletedSetup);
