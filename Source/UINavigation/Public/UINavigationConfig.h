@@ -22,7 +22,7 @@ public:
 	virtual bool IsAnalogHorizontalKey(const FKey& InKey) const override { return InKey == EKeys::Gamepad_LeftX || InKey == EKeys::Gamepad_RightX; }
 	virtual bool IsAnalogVerticalKey(const FKey& InKey) const override { return InKey == EKeys::Gamepad_LeftY || InKey == EKeys::Gamepad_RightY; }
 
-	bool IsGamepadSelectKey(const FKey& Key) const { return GamepadSelectKeys.Contains(Key); }
+	const TArray<FKey>& GetGamepadSelectKeys() const { return GamepadSelectKeys; }
 
 	TArray<FKey> GamepadSelectKeys;
 };

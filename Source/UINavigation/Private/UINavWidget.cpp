@@ -443,6 +443,42 @@ void UUINavWidget::GainNavigation(UUINavWidget* PreviousActiveWidget)
 	OnGainedNavigation(PreviousActiveWidget, bPreviousWidgetIsChild);
 }
 
+const TMap<FString, TObjectPtr<UInputMappingContext>>* const UUINavWidget::GetInputContextOverrides() const
+{
+	if (!UINavInputContextOverrides.IsEmpty())
+	{
+		return &UINavInputContextOverrides;
+	}
+
+	if (IsValid(OuterUINavWidget))
+	{
+		return OuterUINavWidget->GetInputContextOverrides();
+	}
+
+	return nullptr;
+}
+
+TObjectPtr<UInputMappingContext> const UUINavWidget::GetInputContextOverride() const
+{
+	const TMap<FString, TObjectPtr<UInputMappingContext>>* const ActiveWidgetOverrides = GetInputContextOverrides();
+	if (ActiveWidgetOverrides != nullptr)
+	{
+		const TObjectPtr<UInputMappingContext>* BaselineInputContextOverride = ActiveWidgetOverrides->Find(TEXT(""));
+		if (BaselineInputContextOverride != nullptr)
+		{
+			return *BaselineInputContextOverride;
+		}
+
+		const TObjectPtr<UInputMappingContext>* PlatformInputContextOverride = ActiveWidgetOverrides->Find(UGameplayStatics::GetPlatformName());
+		if (PlatformInputContextOverride != nullptr)
+		{
+			return *PlatformInputContextOverride;
+		}
+	}
+
+	return nullptr;
+}
+
 void UUINavWidget::OnGainedNavigation_Implementation(UUINavWidget* PreviousActiveWidget, const bool bFromChild)
 {
 }

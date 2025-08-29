@@ -350,6 +350,10 @@ public:
 
 	virtual void GainNavigation(UUINavWidget* PreviousActiveWidget);
 
+	const TMap<FString, TObjectPtr<UInputMappingContext>>* const GetInputContextOverrides() const;
+
+	const TObjectPtr<UInputMappingContext> GetInputContextOverride() const;
+
 	/**
 	*	Called when navigation is gained
 	*/

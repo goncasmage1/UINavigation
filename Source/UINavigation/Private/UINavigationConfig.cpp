@@ -15,7 +15,7 @@ FUINavigationConfig::FUINavigationConfig(const UInputMappingContext* const Input
 
 	const UUINavSettings* const UINavSettings = GetDefault<UUINavSettings>();
 	const UUINavEnhancedInputActions* const InputActions = UINavSettings->EnhancedInputActions.LoadSynchronous();
-	if (InputActions == nullptr || InputContext == nullptr)
+	if (InputActions == nullptr || InputContext == nullptr || !UINavSettings->bUseFocusSystemNavigationInputs)
 	{
 		return;
 	}

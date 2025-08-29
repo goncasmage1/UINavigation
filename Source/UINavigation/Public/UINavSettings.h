@@ -39,6 +39,10 @@ public:
 	UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	bool bForceNavigation = true;
 
+	// Whether to use the focus system or an actual input context for navigation inputs
+	UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = "Settings")
+	bool bUseFocusSystemNavigationInputs = true;
+
 	// Whether navigation is allowed while pressing a button
 	UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	bool bAllowNavigationWhilePressing = false;

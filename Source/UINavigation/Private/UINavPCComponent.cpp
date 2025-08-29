@@ -27,10 +27,10 @@
 #include "Framework/Application/SlateUser.h"
 #include "TimerManager.h"
 #include "InputCoreTypes.h"
-#include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputLibrary.h"
 #include "EnhancedPlayerInput.h"
+#include "EnhancedActionKeyMapping.h"
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "Templates/SharedPointer.h"
 #include "Engine/GameViewportClient.h"
@@ -128,7 +128,7 @@ void UUINavPCComponent::BeginPlay()
 		if (IsValid(GetEnhancedInputComponent()))
 		{
 			const UUINavSettings* const UINavSettings = GetDefault<UUINavSettings>();
-			const UInputMappingContext* InputContext = GetUINavInputContext();
+			const UInputMappingContext* InputContext = GetUINavInputContext(ActiveWidget);
 			const UUINavEnhancedInputActions* const InputActions = UINavSettings->EnhancedInputActions.LoadSynchronous();
 		
 			if (!IsValid(InputContext) ||
@@ -289,9 +289,11 @@ void UUINavPCComponent::RequestRebuildMappings()
 	});
 }
 
-void UUINavPCComponent::AddInputContextFromUINavWidget(const UUINavWidget* const UINavWidget, const UUINavWidget* const ParentLimit /*= nullptr*/)
+void UUINavPCComponent::AddInputContextFromUINavWidget(UUINavWidget* UINavWidget, const UUINavWidget* const ParentLimit /*= nullptr*/)
 {
-	const UUINavWidget* CurrentWidget = UINavWidget;
+	UInputMappingContext* CurrentUINavInputContext = GetUINavInputContext(ActiveWidget);
+
+	UUINavWidget* CurrentWidget = UINavWidget;
 	while (IsValid(CurrentWidget) && ParentLimit != CurrentWidget)
 	{
 		for (const TObjectPtr<UInputMappingContext>& InputContextToAdd : CurrentWidget->InputContextsToAdd)
@@ -303,9 +305,9 @@ void UUINavPCComponent::AddInputContextFromUINavWidget(const UUINavWidget* const
 	}
 }
 
-void UUINavPCComponent::RemoveInputContextFromUINavWidget(const UUINavWidget* const UINavWidget, const UUINavWidget* const ParentLimit /*= nullptr*/)
+void UUINavPCComponent::RemoveInputContextFromUINavWidget(UUINavWidget* UINavWidget, const UUINavWidget* const ParentLimit /*= nullptr*/)
 {
-	const UUINavWidget* CurrentWidget = UINavWidget;
+	UUINavWidget* CurrentWidget = UINavWidget;
 	while (IsValid(CurrentWidget) && ParentLimit != CurrentWidget)
 	{
 		for (const TObjectPtr<UInputMappingContext>& InputContextToAdd : CurrentWidget->InputContextsToAdd)
@@ -319,7 +321,7 @@ void UUINavPCComponent::RemoveInputContextFromUINavWidget(const UUINavWidget* co
 
 void UUINavPCComponent::AddInputContextForMenu(const TObjectPtr<UInputMappingContext> Context)
 {
-	uint8* NumTimesApplied = AppliedInputContexts.Find(Context);
+	uint8* NumTimesApplied = AddedInputContexts.Find(Context);
 	if (NumTimesApplied != nullptr)
 	{
 		(*NumTimesApplied)++;
@@ -327,13 +329,13 @@ void UUINavPCComponent::AddInputContextForMenu(const TObjectPtr<UInputMappingCon
 	else
 	{
 		AddInputContext(Context);
-		AppliedInputContexts.Add(Context, 1);
+		AddedInputContexts.Add(Context, 1);
 	}
 }
 
 void UUINavPCComponent::RemoveInputContextFromMenu(const TObjectPtr<UInputMappingContext> Context)
 {
-	uint8* NumTimesApplied = AppliedInputContexts.Find(Context);
+	uint8* NumTimesApplied = AddedInputContexts.Find(Context);
 	if (NumTimesApplied == nullptr)
 	{
 		return;
@@ -346,7 +348,7 @@ void UUINavPCComponent::RemoveInputContextFromMenu(const TObjectPtr<UInputMappin
 	else
 	{
 		RemoveInputContext(Context);
-		AppliedInputContexts.Remove(Context);
+		AddedInputContexts.Remove(Context);
 	}
 }
 
@@ -375,6 +377,178 @@ void UUINavPCComponent::RemoveInputContext(const UInputMappingContext* const Con
 void UUINavPCComponent::OnControllerConnectionChanged(EInputDeviceConnectionState NewConnectionState, FPlatformUserId UserId, FInputDeviceId UserIndex)
 {
 	IUINavPCReceiver::Execute_OnControllerConnectionChanged(GetOwner(), NewConnectionState == EInputDeviceConnectionState::Connected, static_cast<int32>(UserId), static_cast<int32>(UserIndex.GetId()));
+}
+
+void UUINavPCComponent::BindNavigationInputs()
+{
+	UEnhancedInputComponent* InputComponent = GetEnhancedInputComponent();
+	if (!IsValid(InputComponent))
+	{
+		return;
+	}
+
+	const UUINavEnhancedInputActions* const InputActions = GetDefault<UUINavSettings>()->EnhancedInputActions.LoadSynchronous();
+	if (InputActions == nullptr)
+	{
+		return;
+	}
+
+	InputActionBindingHandles.Reset();
+
+	if (bAllowDirectionalInput)
+	{
+		InputActionBindingHandles.Add(InputComponent->BindAction(InputActions->IA_MenuUp, ETriggerEvent::Started, this, &UUINavPCComponent::MenuUpStarted).GetHandle());
+		InputActionBindingHandles.Add(InputComponent->BindAction(InputActions->IA_MenuUp, ETriggerEvent::Completed, this, &UUINavPCComponent::MenuUpStopped).GetHandle());
+		InputActionBindingHandles.Add(InputComponent->BindAction(InputActions->IA_MenuDown, ETriggerEvent::Started, this, &UUINavPCComponent::MenuDownStarted).GetHandle());
+		InputActionBindingHandles.Add(InputComponent->BindAction(InputActions->IA_MenuDown, ETriggerEvent::Completed, this, &UUINavPCComponent::MenuDownStopped).GetHandle());
+		InputActionBindingHandles.Add(InputComponent->BindAction(InputActions->IA_MenuLeft, ETriggerEvent::Started, this, &UUINavPCComponent::MenuLeftStarted).GetHandle());
+		InputActionBindingHandles.Add(InputComponent->BindAction(InputActions->IA_MenuLeft, ETriggerEvent::Completed, this, &UUINavPCComponent::MenuLeftStopped).GetHandle());
+		InputActionBindingHandles.Add(InputComponent->BindAction(InputActions->IA_MenuRight, ETriggerEvent::Started, this, &UUINavPCComponent::MenuRightStarted).GetHandle());
+		InputActionBindingHandles.Add(InputComponent->BindAction(InputActions->IA_MenuRight, ETriggerEvent::Completed, this, &UUINavPCComponent::MenuRightStopped).GetHandle());
+	}
+	if (bAllowSelectInput)
+	{
+		InputActionBindingHandles.Add(InputComponent->BindAction(InputActions->IA_MenuSelect, ETriggerEvent::Started, this, &UUINavPCComponent::SimulateStartSelect).GetHandle());
+		InputActionBindingHandles.Add(InputComponent->BindAction(InputActions->IA_MenuSelect, ETriggerEvent::Completed, this, &UUINavPCComponent::SimulateStopSelect).GetHandle());
+
+		const UInputMappingContext* const UINavContext = GetUINavInputContext(ActiveWidget);
+		if (IsValid(UINavContext))
+		{
+			for (const FEnhancedActionKeyMapping& ActionMapping : UINavContext->GetMappings())
+			{
+				if (ActionMapping.Action == InputActions->IA_MenuSelect &&
+					ActionMapping.Key.IsGamepadKey())
+				{
+					GamepadSelectKeys.AddUnique(ActionMapping.Key);
+				}
+			}
+		}
+	}
+	if (bAllowReturnInput)
+	{
+		InputActionBindingHandles.Add(InputComponent->BindAction(InputActions->IA_MenuReturn, ETriggerEvent::Started, this, &UUINavPCComponent::SimulateStartReturn).GetHandle());
+		InputActionBindingHandles.Add(InputComponent->BindAction(InputActions->IA_MenuReturn, ETriggerEvent::Completed, this, &UUINavPCComponent::SimulateStopReturn).GetHandle());
+	}
+	if (bAllowSectionInput)
+	{
+		InputActionBindingHandles.Add(InputComponent->BindAction(InputActions->IA_MenuNext, ETriggerEvent::Started, this, &UUINavPCComponent::MenuNextStarted).GetHandle());
+		InputActionBindingHandles.Add(InputComponent->BindAction(InputActions->IA_MenuPrevious, ETriggerEvent::Started, this, &UUINavPCComponent::MenuPreviousStarted).GetHandle());
+		InputActionBindingHandles.Add(InputComponent->BindAction(InputActions->IA_MenuNext, ETriggerEvent::Completed, this, &UUINavPCComponent::MenuNextStopped).GetHandle());
+		InputActionBindingHandles.Add(InputComponent->BindAction(InputActions->IA_MenuPrevious, ETriggerEvent::Completed, this, &UUINavPCComponent::MenuPreviousStopped).GetHandle());
+	}
+}
+
+void UUINavPCComponent::UnbindNavigationInputs()
+{
+	UEnhancedInputComponent* InputComponent = GetEnhancedInputComponent();
+	if (!IsValid(InputComponent))
+	{
+		return;
+	}
+
+	for (const int32 Handle : InputActionBindingHandles)
+	{
+		InputComponent->RemoveActionBindingForHandle(Handle);
+	}
+
+	InputActionBindingHandles.Reset();
+	GamepadSelectKeys.Reset();
+}
+
+void UUINavPCComponent::MenuUpStarted()
+{
+	const ENavigationGenesis Genesis = GetCurrentInputType() == EInputType::Gamepad ? ENavigationGenesis::Controller : ENavigationGenesis::Keyboard;
+	if (!TryNavigateInDirection(EUINavigation::Up, Genesis))
+	{
+		return;
+	}
+
+	NavigateInDirection(EUINavigation::Up);
+}
+
+void UUINavPCComponent::MenuUpStopped()
+{
+	NotifyNavigationKeyReleased(GetKeyUsedForNavigation(EUINavigation::Up), EUINavigation::Up);
+}
+
+void UUINavPCComponent::MenuDownStarted()
+{
+	const ENavigationGenesis Genesis = GetCurrentInputType() == EInputType::Gamepad ? ENavigationGenesis::Controller : ENavigationGenesis::Keyboard;
+	if (!TryNavigateInDirection(EUINavigation::Down, Genesis))
+	{
+		return;
+	}
+
+	NavigateInDirection(EUINavigation::Down);
+}
+
+void UUINavPCComponent::MenuDownStopped()
+{
+	NotifyNavigationKeyReleased(GetKeyUsedForNavigation(EUINavigation::Down), EUINavigation::Down);
+}
+
+void UUINavPCComponent::MenuLeftStarted()
+{
+	const ENavigationGenesis Genesis = GetCurrentInputType() == EInputType::Gamepad ? ENavigationGenesis::Controller : ENavigationGenesis::Keyboard;
+	if (!TryNavigateInDirection(EUINavigation::Left, Genesis))
+	{
+		return;
+	}
+
+	NavigateInDirection(EUINavigation::Left);
+}
+
+void UUINavPCComponent::MenuLeftStopped()
+{
+	NotifyNavigationKeyReleased(GetKeyUsedForNavigation(EUINavigation::Left), EUINavigation::Left);
+}
+
+void UUINavPCComponent::MenuRightStarted()
+{
+	const ENavigationGenesis Genesis = GetCurrentInputType() == EInputType::Gamepad ? ENavigationGenesis::Controller : ENavigationGenesis::Keyboard;
+	if (!TryNavigateInDirection(EUINavigation::Right, Genesis))
+	{
+		return;
+	}
+
+	NavigateInDirection(EUINavigation::Right);
+}
+
+void UUINavPCComponent::MenuRightStopped()
+{
+	NotifyNavigationKeyReleased(GetKeyUsedForNavigation(EUINavigation::Right), EUINavigation::Right);
+}
+
+void UUINavPCComponent::MenuNextStarted()
+{
+	const ENavigationGenesis Genesis = GetCurrentInputType() == EInputType::Gamepad ? ENavigationGenesis::Controller : ENavigationGenesis::Keyboard;
+	if (!TryNavigateInDirection(EUINavigation::Next, Genesis))
+	{
+		return;
+	}
+
+	NavigateInDirection(EUINavigation::Next);
+}
+
+void UUINavPCComponent::MenuNextStopped()
+{
+	NotifyNavigationKeyReleased(GetKeyUsedForNavigation(EUINavigation::Next), EUINavigation::Next);
+}
+
+void UUINavPCComponent::MenuPreviousStarted()
+{
+	const ENavigationGenesis Genesis = GetCurrentInputType() == EInputType::Gamepad ? ENavigationGenesis::Controller : ENavigationGenesis::Keyboard;
+	if (!TryNavigateInDirection(EUINavigation::Previous, Genesis))
+	{
+		return;
+	}
+
+	NavigateInDirection(EUINavigation::Previous);
+}
+
+void UUINavPCComponent::MenuPreviousStopped()
+{
+	NotifyNavigationKeyReleased(GetKeyUsedForNavigation(EUINavigation::Previous), EUINavigation::Previous);
 }
 
 UUINavWidget* UUINavPCComponent::GetFirstCommonParent(UUINavWidget* const Widget1, UUINavWidget* const Widget2)
@@ -520,6 +694,12 @@ void UUINavPCComponent::SetActiveWidget(UUINavWidget * NewActiveWidget)
 			{
 				FSlateApplication::Get().SetAllUserFocusToGameViewport();
 			}
+
+			if (IsValid(CurrentInputContext))
+			{
+				RemoveInputContext(CurrentInputContext);
+				CurrentInputContext = nullptr;
+			}
 		}
 	}
 
@@ -608,6 +788,17 @@ void UUINavPCComponent::NotifyNavigatedTo(UUINavWidget* NavigatedWidget)
 	}
 
 	if (NewPath.IsEmpty() && NavigatedWidget != nullptr) NavigatedWidget->GainNavigation(OldActiveWidget);
+
+	if (!GetDefault<UUINavSettings>()->bUseFocusSystemNavigationInputs)
+	{
+		UInputMappingContext* TargetInputContext = GetUINavInputContext(NavigatedWidget);
+		if (TargetInputContext != CurrentInputContext)
+		{
+			RemoveInputContext(CurrentInputContext);
+			AddInputContext(TargetInputContext);
+			CurrentInputContext = TargetInputContext;
+		}
+	}
 
 	if (ActiveWidget != NavigatedWidget)
 	{
@@ -719,13 +910,26 @@ void UUINavPCComponent::RefreshNavigationKeys()
 {
 	FSlateApplication::Get().SetNavigationConfig(
 		MakeShared<FUINavigationConfig>(
-			GetUINavInputContext(),
+			GetUINavInputContext(ActiveWidget),
 			bAllowDirectionalInput,
 			bAllowSectionInput,
 			bAllowSelectInput,
 			bAllowReturnInput,
 			bUseAnalogDirectionalInput && UsingThumbstickAsMouse() != EThumbstickAsMouse::LeftThumbstick,
 			UsingThumbstickAsMouse() != EThumbstickAsMouse::None));
+
+	if (IsValid(ActiveWidget))
+	{
+		if (!GetDefault<UUINavSettings>()->bUseFocusSystemNavigationInputs)
+		{
+			UnbindNavigationInputs();
+			BindNavigationInputs();
+		}
+		else
+		{
+			GamepadSelectKeys = StaticCastSharedRef<FUINavigationConfig>(FSlateApplication::Get().GetNavigationConfig())->GetGamepadSelectKeys();
+		}
+	}
 }
 
 void UUINavPCComponent::SetAllowAllMenuInput(const bool bAllowInput)
@@ -810,9 +1014,9 @@ void UUINavPCComponent::ForceUpdateAllInputDisplays(const bool bOnlyTopLevel /*=
 
 void UUINavPCComponent::HandleKeyDownEvent(FSlateApplication& SlateApp, const FKeyEvent& InKeyEvent)
 {
-	const bool bIsSelectKey = StaticCastSharedRef<FUINavigationConfig>(FSlateApplication::Get().GetNavigationConfig())->IsGamepadSelectKey(InKeyEvent.GetKey());
+	const bool bIsGamepadSelectKey = GamepadSelectKeys.Contains(InKeyEvent.GetKey());
 	const bool bIsGamepadKey = InKeyEvent.GetKey().IsGamepadKey();
-	const bool bShouldUnforceNavigation = !bUsingThumbstickAsMouse || !bIsSelectKey || !bIsGamepadKey;
+	const bool bShouldUnforceNavigation = !bUsingThumbstickAsMouse || !bIsGamepadSelectKey || !bIsGamepadKey;
 
 	if (bOverrideConsiderHover) bOverrideConsiderHover = false;
 
@@ -829,9 +1033,9 @@ void UUINavPCComponent::HandleKeyDownEvent(FSlateApplication& SlateApp, const FK
 
 void UUINavPCComponent::HandleKeyUpEvent(FSlateApplication& SlateApp, const FKeyEvent& InKeyEvent)
 {
-	const bool bIsSelectKey = StaticCastSharedRef<FUINavigationConfig>(FSlateApplication::Get().GetNavigationConfig())->IsGamepadSelectKey(InKeyEvent.GetKey());
+	const bool bIsGamepadSelectKey = GamepadSelectKeys.Contains(InKeyEvent.GetKey());
 	const bool bIsGamepadKey = InKeyEvent.GetKey().IsGamepadKey();
-	const bool bShouldUnforceNavigation = !bUsingThumbstickAsMouse || !bIsSelectKey || !bIsGamepadKey;
+	const bool bShouldUnforceNavigation = !bUsingThumbstickAsMouse || !bIsGamepadSelectKey || !bIsGamepadKey;
 
 	LastReleasedKey = InKeyEvent.GetKey();
 	LastReleasedKeyUserIndex = InKeyEvent.GetUserIndex();
@@ -1637,42 +1841,17 @@ UEnhancedInputComponent* UUINavPCComponent::GetEnhancedInputComponent() const
 	return IsValid(PC) ? Cast<UEnhancedInputComponent>(PC->InputComponent) : nullptr;
 }
 
-UInputMappingContext* UUINavPCComponent::GetUINavInputContext() const
+UInputMappingContext* UUINavPCComponent::GetUINavInputContext(const UUINavWidget* const UINavWidget) const
 {
-	const TMap<FString, TObjectPtr<UInputMappingContext>>* const ActiveWidgetOverrides = GetActiveWidgetInputContextOverrides(ActiveWidget);
-	if (ActiveWidgetOverrides != nullptr)
+	UInputMappingContext* const WidgetOverride = IsValid(UINavWidget) ? UINavWidget->GetInputContextOverride() : nullptr;
+	if (IsValid(WidgetOverride))
 	{
-		const TObjectPtr<UInputMappingContext>* BaselineInputContextOverride = ActiveWidgetOverrides->Find(TEXT(""));
-		if (BaselineInputContextOverride != nullptr)
-		{
-			return *BaselineInputContextOverride;
-		}
-
-		const TObjectPtr<UInputMappingContext>* PlatformInputContextOverride = ActiveWidgetOverrides->Find(UGameplayStatics::GetPlatformName());
-		if (PlatformInputContextOverride != nullptr)
-		{
-			return *PlatformInputContextOverride;
-		}
+		return WidgetOverride;
 	}
 
 	return CurrentPlatformData.UINavInputContextOverride != nullptr ?
 		CurrentPlatformData.UINavInputContextOverride :
 		GetDefault<UUINavSettings>()->EnhancedInputContext.LoadSynchronous();
-}
-
-const TMap<FString, TObjectPtr<UInputMappingContext>>* const UUINavPCComponent::GetActiveWidgetInputContextOverrides(const UUINavWidget* const UINavWidget) const
-{
-	if (!IsValid(UINavWidget))
-	{
-		return nullptr;
-	}
-
-	if (!UINavWidget->UINavInputContextOverrides.IsEmpty())
-	{
-		return &UINavWidget->UINavInputContextOverrides;
-	}
-
-	return GetActiveWidgetInputContextOverrides(UINavWidget->OuterUINavWidget);
 }
 
 void UUINavPCComponent::NavigateInDirection(const EUINavigation InDirection, const int32 UserIndex /*= 0*/)
