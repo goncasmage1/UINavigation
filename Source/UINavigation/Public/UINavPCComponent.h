@@ -13,6 +13,7 @@
 #include "Data/AutoHideMouse.h"
 #include "Types/SlateEnums.h"
 #include "InputCoreTypes.h"
+#include "EnhancedInputComponent.h"
 #include "Input/Reply.h"
 #include "InputAction.h"
 #include "Data/InputContainerEnhancedActionData.h"
@@ -118,7 +119,70 @@ protected:
 	TArray<const UInputMappingContext*> CachedInputContexts;
 
 	UPROPERTY()
-	TMap<const UInputMappingContext*, uint8> AppliedInputContexts;
+	TMap<const UInputMappingContext*, uint8> AddedInputContexts;
+
+	UPROPERTY()
+	UInputMappingContext* CurrentInputContext = nullptr;
+
+	TArray<int32> InputActionBindingHandles;
+
+	TMap<EUINavigation, TArray<FKey>> PressedNavigationDirections;
+
+	FPlatformConfigData CurrentPlatformData;
+
+	static const FKey MouseUp;
+	static const FKey MouseDown;
+	static const FKey MouseRight;
+	static const FKey MouseLeft;
+
+	static bool bInitialized;
+
+	TMap<FKey, FAxis2D_Keys> Axis2DToAxis1DMap = {
+		{EKeys::Gamepad_Left2D, {EKeys::Gamepad_LeftX, EKeys::Gamepad_LeftY}},
+		{EKeys::Gamepad_Right2D, {EKeys::Gamepad_RightX, EKeys::Gamepad_RightY}},
+		{EKeys::Mouse2D, {EKeys::MouseX, EKeys::MouseY}},
+	};
+
+	TMap<FKey, FAxis2D_Keys> AxisToKeyMap = {
+		{EKeys::Gamepad_LeftX, {EKeys::Gamepad_LeftStick_Right, EKeys::Gamepad_LeftStick_Left}},
+		{EKeys::Gamepad_LeftY, {EKeys::Gamepad_LeftStick_Up, EKeys::Gamepad_LeftStick_Down}},
+		{EKeys::Gamepad_RightX, {EKeys::Gamepad_RightStick_Right, EKeys::Gamepad_RightStick_Left}},
+		{EKeys::Gamepad_RightY, {EKeys::Gamepad_RightStick_Up, EKeys::Gamepad_RightStick_Down}},
+		{EKeys::MouseX, {MouseRight, MouseLeft}},
+		{EKeys::MouseY, {MouseUp, MouseDown}},
+		{EKeys::MouseWheelAxis, {EKeys::MouseScrollUp, EKeys::MouseScrollDown}},
+		{EKeys::MixedReality_Left_Thumbstick_X, {EKeys::MixedReality_Left_Thumbstick_Right, EKeys::MixedReality_Left_Thumbstick_Left}},
+		{EKeys::MixedReality_Left_Thumbstick_Y, {EKeys::MixedReality_Left_Thumbstick_Up, EKeys::MixedReality_Left_Thumbstick_Down}},
+		{EKeys::MixedReality_Right_Thumbstick_X, {EKeys::MixedReality_Right_Thumbstick_Right, EKeys::MixedReality_Right_Thumbstick_Left}},
+		{EKeys::MixedReality_Right_Thumbstick_Y, {EKeys::MixedReality_Right_Thumbstick_Up, EKeys::MixedReality_Right_Thumbstick_Down}},
+		{EKeys::OculusTouch_Left_Thumbstick_X, {EKeys::OculusTouch_Left_Thumbstick_Right, EKeys::OculusTouch_Left_Thumbstick_Left}},
+		{EKeys::OculusTouch_Left_Thumbstick_Y, {EKeys::OculusTouch_Left_Thumbstick_Up, EKeys::OculusTouch_Left_Thumbstick_Down}},
+		{EKeys::OculusTouch_Right_Thumbstick_X, {EKeys::OculusTouch_Right_Thumbstick_Right, EKeys::OculusTouch_Right_Thumbstick_Left}},
+		{EKeys::OculusTouch_Right_Thumbstick_Y, {EKeys::OculusTouch_Right_Thumbstick_Up, EKeys::OculusTouch_Right_Thumbstick_Down}},
+		{EKeys::ValveIndex_Left_Thumbstick_X, {EKeys::ValveIndex_Left_Thumbstick_Right, EKeys::ValveIndex_Left_Thumbstick_Left}},
+		{EKeys::ValveIndex_Left_Thumbstick_Y, {EKeys::ValveIndex_Left_Thumbstick_Up, EKeys::ValveIndex_Left_Thumbstick_Down}},
+		{EKeys::ValveIndex_Right_Thumbstick_X, {EKeys::ValveIndex_Right_Thumbstick_Right, EKeys::ValveIndex_Right_Thumbstick_Left}},
+		{EKeys::ValveIndex_Right_Thumbstick_Y, {EKeys::ValveIndex_Right_Thumbstick_Up, EKeys::ValveIndex_Right_Thumbstick_Down}},
+		{EKeys::Vive_Left_Trackpad_X, {EKeys::Vive_Left_Trackpad_Right, EKeys::Vive_Left_Trackpad_Left}},
+		{EKeys::Vive_Left_Trackpad_Y, {EKeys::Vive_Left_Trackpad_Up, EKeys::Vive_Left_Trackpad_Down}},
+		{EKeys::Vive_Right_Trackpad_X, {EKeys::Vive_Right_Trackpad_Right, EKeys::Vive_Right_Trackpad_Left}},
+		{EKeys::Vive_Right_Trackpad_Y, {EKeys::Vive_Right_Trackpad_Up, EKeys::Vive_Right_Trackpad_Down}},
+	};
+
+	TMap<FKey, FKey> KeyToAxisMap = {
+		{EKeys::Gamepad_LeftTrigger, EKeys::Gamepad_LeftTriggerAxis},
+		{EKeys::Gamepad_RightTrigger, EKeys::Gamepad_RightTriggerAxis},
+		{EKeys::MixedReality_Left_Trigger_Click, EKeys::MixedReality_Left_Trigger_Axis},
+		{EKeys::MixedReality_Right_Trigger_Click, EKeys::MixedReality_Right_Trigger_Axis},
+		{EKeys::OculusTouch_Left_Grip_Click, EKeys::OculusTouch_Left_Grip_Axis},
+		{EKeys::OculusTouch_Right_Grip_Click, EKeys::OculusTouch_Right_Grip_Axis},
+		{EKeys::ValveIndex_Left_Trigger_Click, EKeys::ValveIndex_Left_Trigger_Axis},
+		{EKeys::ValveIndex_Right_Trigger_Click, EKeys::ValveIndex_Right_Trigger_Axis},
+		{EKeys::Vive_Left_Trigger_Click, EKeys::Vive_Left_Trigger_Axis},
+		{EKeys::Vive_Right_Trigger_Click, EKeys::Vive_Right_Trigger_Axis},
+	};
+
+	TArray<FKey> GamepadSelectKeys;
 
 	/*************************************************************************/
 
@@ -129,6 +193,8 @@ protected:
 	void TryResetDefaultInputs();
 
 	void InitPlatformData();
+
+	void ClearNavigationTimer();
 
 	/**
 	*	Returns the input type of the given key
@@ -154,6 +220,22 @@ protected:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	void OnControllerConnectionChanged(EInputDeviceConnectionState NewConnectionState, FPlatformUserId UserId, FInputDeviceId UserIndex);
+
+	void BindNavigationInputs();
+	void UnbindNavigationInputs();
+
+	void MenuUpStarted();
+	void MenuUpStopped();
+	void MenuDownStarted();
+	void MenuDownStopped();
+	void MenuLeftStarted();
+	void MenuLeftStopped();
+	void MenuRightStarted();
+	void MenuRightStopped();
+	void MenuNextStarted();
+	void MenuNextStopped();
+	void MenuPreviousStarted();
+	void MenuPreviousStopped();
 
 	UUINavWidget* GetFirstCommonParent(UUINavWidget* const Widget1, UUINavWidget* const Widget2);
 
@@ -247,8 +329,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavController)
 	float RebindThreshold = 0.5f;
 
-	TMap<EUINavigation, TArray<FKey>> PressedNavigationDirections;
-
 	/*
 	Holds the key icons for gamepad
 	*/
@@ -271,65 +351,11 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavController, meta = (RequiredAssetDataTags = "RowStructure=/Script/UINavigation.InputNameMapping"))
 	UDataTable* KeyboardMouseKeyNameData = nullptr;
 
-	FPlatformConfigData CurrentPlatformData;
-
 	FKey LastPressedKey;
 	int32 LastPressedKeyUserIndex;
 
 	FKey LastReleasedKey;
 	int32 LastReleasedKeyUserIndex;
-
-	static const FKey MouseUp;
-	static const FKey MouseDown;
-	static const FKey MouseRight;
-	static const FKey MouseLeft;
-
-	static bool bInitialized;
-
-	TMap<FKey, FAxis2D_Keys> Axis2DToAxis1DMap = {
-		{EKeys::Gamepad_Left2D, {EKeys::Gamepad_LeftX, EKeys::Gamepad_LeftY}},
-		{EKeys::Gamepad_Right2D, {EKeys::Gamepad_RightX, EKeys::Gamepad_RightY}},
-		{EKeys::Mouse2D, {EKeys::MouseX, EKeys::MouseY}},
-	};
-	
-	TMap<FKey, FAxis2D_Keys> AxisToKeyMap = {
-		{EKeys::Gamepad_LeftX, {EKeys::Gamepad_LeftStick_Right, EKeys::Gamepad_LeftStick_Left}},
-		{EKeys::Gamepad_LeftY, {EKeys::Gamepad_LeftStick_Up, EKeys::Gamepad_LeftStick_Down}},
-		{EKeys::Gamepad_RightX, {EKeys::Gamepad_RightStick_Right, EKeys::Gamepad_RightStick_Left}},
-		{EKeys::Gamepad_RightY, {EKeys::Gamepad_RightStick_Up, EKeys::Gamepad_RightStick_Down}},
-		{EKeys::MouseX, {MouseRight, MouseLeft}},
-		{EKeys::MouseY, {MouseUp, MouseDown}},
-		{EKeys::MouseWheelAxis, {EKeys::MouseScrollUp, EKeys::MouseScrollDown}},
-		{EKeys::MixedReality_Left_Thumbstick_X, {EKeys::MixedReality_Left_Thumbstick_Right, EKeys::MixedReality_Left_Thumbstick_Left}},
-		{EKeys::MixedReality_Left_Thumbstick_Y, {EKeys::MixedReality_Left_Thumbstick_Up, EKeys::MixedReality_Left_Thumbstick_Down}},
-		{EKeys::MixedReality_Right_Thumbstick_X, {EKeys::MixedReality_Right_Thumbstick_Right, EKeys::MixedReality_Right_Thumbstick_Left}},
-		{EKeys::MixedReality_Right_Thumbstick_Y, {EKeys::MixedReality_Right_Thumbstick_Up, EKeys::MixedReality_Right_Thumbstick_Down}},
-		{EKeys::OculusTouch_Left_Thumbstick_X, {EKeys::OculusTouch_Left_Thumbstick_Right, EKeys::OculusTouch_Left_Thumbstick_Left}},
-		{EKeys::OculusTouch_Left_Thumbstick_Y, {EKeys::OculusTouch_Left_Thumbstick_Up, EKeys::OculusTouch_Left_Thumbstick_Down}},
-		{EKeys::OculusTouch_Right_Thumbstick_X, {EKeys::OculusTouch_Right_Thumbstick_Right, EKeys::OculusTouch_Right_Thumbstick_Left}},
-		{EKeys::OculusTouch_Right_Thumbstick_Y, {EKeys::OculusTouch_Right_Thumbstick_Up, EKeys::OculusTouch_Right_Thumbstick_Down}},
-		{EKeys::ValveIndex_Left_Thumbstick_X, {EKeys::ValveIndex_Left_Thumbstick_Right, EKeys::ValveIndex_Left_Thumbstick_Left}},
-		{EKeys::ValveIndex_Left_Thumbstick_Y, {EKeys::ValveIndex_Left_Thumbstick_Up, EKeys::ValveIndex_Left_Thumbstick_Down}},
-		{EKeys::ValveIndex_Right_Thumbstick_X, {EKeys::ValveIndex_Right_Thumbstick_Right, EKeys::ValveIndex_Right_Thumbstick_Left}},
-		{EKeys::ValveIndex_Right_Thumbstick_Y, {EKeys::ValveIndex_Right_Thumbstick_Up, EKeys::ValveIndex_Right_Thumbstick_Down}},
-		{EKeys::Vive_Left_Trackpad_X, {EKeys::Vive_Left_Trackpad_Right, EKeys::Vive_Left_Trackpad_Left}},
-		{EKeys::Vive_Left_Trackpad_Y, {EKeys::Vive_Left_Trackpad_Up, EKeys::Vive_Left_Trackpad_Down}},
-		{EKeys::Vive_Right_Trackpad_X, {EKeys::Vive_Right_Trackpad_Right, EKeys::Vive_Right_Trackpad_Left}},
-		{EKeys::Vive_Right_Trackpad_Y, {EKeys::Vive_Right_Trackpad_Up, EKeys::Vive_Right_Trackpad_Down}},
-	};
-
-	TMap<FKey, FKey> KeyToAxisMap = {
-		{EKeys::Gamepad_LeftTrigger, EKeys::Gamepad_LeftTriggerAxis},
-		{EKeys::Gamepad_RightTrigger, EKeys::Gamepad_RightTriggerAxis},
-		{EKeys::MixedReality_Left_Trigger_Click, EKeys::MixedReality_Left_Trigger_Axis},
-		{EKeys::MixedReality_Right_Trigger_Click, EKeys::MixedReality_Right_Trigger_Axis},
-		{EKeys::OculusTouch_Left_Grip_Click, EKeys::OculusTouch_Left_Grip_Axis},
-		{EKeys::OculusTouch_Right_Grip_Click, EKeys::OculusTouch_Right_Grip_Axis},
-		{EKeys::ValveIndex_Left_Trigger_Click, EKeys::ValveIndex_Left_Trigger_Axis},
-		{EKeys::ValveIndex_Right_Trigger_Click, EKeys::ValveIndex_Right_Trigger_Axis},
-		{EKeys::Vive_Left_Trigger_Click, EKeys::Vive_Left_Trigger_Axis},
-		{EKeys::Vive_Right_Trigger_Click, EKeys::Vive_Right_Trigger_Axis},
-	};
 
 	UPROPERTY(BlueprintAssignable, BlueprintCallable, BlueprintReadOnly, Category = UINavController)
 	FInputTypeChangedDelegate InputTypeChangedDelegate;
@@ -406,8 +432,8 @@ public:
 
 	void RequestRebuildMappings();
 
-	void AddInputContextFromUINavWidget(const UUINavWidget* const UINavWidget, const UUINavWidget* const ParentLimit = nullptr);
-	void RemoveInputContextFromUINavWidget(const UUINavWidget* const UINavWidget, const UUINavWidget* const ParentLimit = nullptr);
+	void AddInputContextFromUINavWidget(UUINavWidget* UINavWidget, const UUINavWidget* const ParentLimit = nullptr);
+	void RemoveInputContextFromUINavWidget(UUINavWidget* UINavWidget, const UUINavWidget* const ParentLimit = nullptr);
 	
 	void AddInputContextForMenu(const TObjectPtr<UInputMappingContext> Context);
 
@@ -526,9 +552,7 @@ public:
 	UEnhancedInputComponent* GetEnhancedInputComponent() const;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
-	UInputMappingContext* GetUINavInputContext() const;
-
-	const TMap<FString, TObjectPtr<UInputMappingContext>>* const GetActiveWidgetInputContextOverrides(const UUINavWidget* const UINavWidget) const;
+	UInputMappingContext* GetUINavInputContext(const UUINavWidget* const UINavWidget) const;
 
 	UFUNCTION(BlueprintCallable, Category = UINavController)
 	void SetActiveWidget(UUINavWidget* NewActiveWidget);
@@ -599,8 +623,6 @@ public:
 
 	void ClearAnalogKeysFromPressedKeys(const FKey& PressedKey);
 
-	void ClearNavigationTimer();
-
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
 	FORCEINLINE APlayerController* GetPC() const { return PC; }
 
@@ -636,5 +658,5 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
     FORCEINLINE bool IsMovingThumbstick() const { return ThumbstickDelta.X != 0.0f || ThumbstickDelta.Y != 0.0f; }
-		
+
 };

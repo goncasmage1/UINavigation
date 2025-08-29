@@ -39,10 +39,10 @@ public:
 	UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	bool bForceNavigation = true;
 
-	// Whether navigation-relevant keys events will be consumed by the plugin
+	// Whether to use the focus system or an actual input context for navigation inputs
 	UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = "Settings")
-	bool bConsumeNavigationInputs = false;
-	
+	bool bUseFocusSystemNavigationInputs = true;
+
 	// Whether navigation is allowed while pressing a button
 	UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	bool bAllowNavigationWhilePressing = false;

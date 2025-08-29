@@ -106,11 +106,6 @@ void UUINavWidget::NativeConstruct()
 
 		InitializeInputComponent();
 		UInputDelegateBinding::BindInputDelegates(GetClass(), InputComponent, this);
-
-		if (WidgetComp == nullptr)
-		{
-			ReturnedFromWidget = nullptr;
-		}
 	}
 
 	PreSetup(!bCompletedSetup);
@@ -441,6 +436,42 @@ void UUINavWidget::GainNavigation(UUINavWidget* PreviousActiveWidget)
                                     UUINavBlueprintFunctionLibrary::ContainsArray<int>(PreviousActiveWidget->GetUINavWidgetPath(), UINavWidgetPath) :
                                     false;
 	OnGainedNavigation(PreviousActiveWidget, bPreviousWidgetIsChild);
+}
+
+const TMap<FString, TObjectPtr<UInputMappingContext>>* const UUINavWidget::GetInputContextOverrides() const
+{
+	if (!UINavInputContextOverrides.IsEmpty())
+	{
+		return &UINavInputContextOverrides;
+	}
+
+	if (IsValid(OuterUINavWidget))
+	{
+		return OuterUINavWidget->GetInputContextOverrides();
+	}
+
+	return nullptr;
+}
+
+TObjectPtr<UInputMappingContext> const UUINavWidget::GetInputContextOverride() const
+{
+	const TMap<FString, TObjectPtr<UInputMappingContext>>* const ActiveWidgetOverrides = GetInputContextOverrides();
+	if (ActiveWidgetOverrides != nullptr)
+	{
+		const TObjectPtr<UInputMappingContext>* BaselineInputContextOverride = ActiveWidgetOverrides->Find(TEXT(""));
+		if (BaselineInputContextOverride != nullptr)
+		{
+			return *BaselineInputContextOverride;
+		}
+
+		const TObjectPtr<UInputMappingContext>* PlatformInputContextOverride = ActiveWidgetOverrides->Find(UGameplayStatics::GetPlatformName());
+		if (PlatformInputContextOverride != nullptr)
+		{
+			return *PlatformInputContextOverride;
+		}
+	}
+
+	return nullptr;
 }
 
 void UUINavWidget::OnGainedNavigation_Implementation(UUINavWidget* PreviousActiveWidget, const bool bFromChild)
@@ -876,7 +907,7 @@ void UUINavWidget::HandleOnKeyDown(FReply& Reply, UUINavWidget* Widget, UUINavCo
 		return;
 	}
 
-	const bool bHandleReply = Widget->OuterUINavWidget == nullptr && GetDefault<UUINavSettings>()->bConsumeNavigationInputs;
+	const bool bHandleReply = Widget->OuterUINavWidget == nullptr;
 	if (FSlateApplication::Get().GetNavigationActionFromKey(InKeyEvent) == EUINavigationAction::Accept)
 	{
 		if (!Widget->TryConsumeNavigation())
@@ -932,7 +963,7 @@ void UUINavWidget::HandleOnKeyUp(FReply& Reply, UUINavWidget* Widget, UUINavComp
 		return;
 	}
 
-	const bool bHandleReply = Widget->OuterUINavWidget == nullptr && GetDefault<UUINavSettings>()->bConsumeNavigationInputs;
+	const bool bHandleReply = Widget->OuterUINavWidget == nullptr;
 
 	if (FSlateApplication::Get().GetNavigationActionFromKey(InKeyEvent) == EUINavigationAction::Accept)
 	{
