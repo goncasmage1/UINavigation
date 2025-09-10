@@ -1588,7 +1588,7 @@ const FKey UUINavPCComponent::GetKeyFromAxis(const FKey& Key, const bool bPositi
 	const FKey CheckedKey = Axis2DKeys == nullptr ? Key : (Axis == EInputAxis::X ? Axis2DKeys->PositiveKey : Axis2DKeys->NegativeKey);
 
 	const FAxis2D_Keys* AxisKeys = AxisToKeyMap.Find(CheckedKey);
-	if (AxisKeys == nullptr) return FKey();
+	if (AxisKeys == nullptr) return Key;
 
 	return bPositive ? AxisKeys->PositiveKey : AxisKeys->NegativeKey;
 }
