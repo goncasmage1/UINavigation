@@ -1393,6 +1393,11 @@ bool UUINavPCComponent::IsWidgetChild(const UUINavWidget* const ParentWidget, co
 
 FKey UUINavPCComponent::GetEnhancedInputKey(const UInputAction* Action, const EInputAxis Axis, const EAxisType Scale, const EInputRestriction InputRestriction) const
 {
+	if (!IsValid(PC))
+	{
+		return FKey();
+	}
+
 	if (UUINavBlueprintFunctionLibrary::IsUINavInputAction(Action))
 	{
 		const UInputMappingContext* const UINavInputContext = GetDefault<UUINavSettings>()->EnhancedInputContext.LoadSynchronous();
