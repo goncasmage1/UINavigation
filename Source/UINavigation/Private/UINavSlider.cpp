@@ -33,6 +33,8 @@ void UUINavSlider::NativePreConstruct()
 		NavSpinBox->SetMaxSliderValue(MaxValue);
 		NavSpinBox->SetMaxValue(MaxValue);
 		NavSpinBox->SetClearKeyboardFocusOnCommit(true);
+		NavSpinBox->SetMinFractionalDigits(MinDecimalDigits);
+		NavSpinBox->SetMaxFractionalDigits(MaxDecimalDigits);
 
 		if (!IsDesignTime())
 		{
@@ -131,7 +133,16 @@ void UUINavSlider::HandleOnSliderValueChanged(float InValue)
 {
 	const int32 NewOptionIndex = IndexFromPercent(InValue);
 	const float NewValuePercent = static_cast<float>(NewOptionIndex) / static_cast<float>(GetMaxOptionIndex());
-	UpdateTextFromPercent(NewValuePercent, /*bUpdateSpinBox*/ !bMovingSpinBox);
+	UpdateTextFromPercent(NewValuePercent);
+
+	if (bMovingSlider)
+	{
+		if (bUpdateWhileDraggingSlider)
+		{
+			OptionIndex = NewOptionIndex;
+			Update();
+		}
+	}
 }
 
 void UUINavSlider::HandleOnSliderMouseCaptureBegin()
@@ -157,11 +168,18 @@ void UUINavSlider::HandleOnSpinBoxMouseCaptureBegin()
 void UUINavSlider::HandleOnSpinBoxValueChanged(const float InValue)
 {
 	const int32 NewOptionIndex = IndexFromValue(InValue);
-	if (!bMovingSlider)
+
+	if (bMovingSpinBox)
 	{
-		Slider->SetValue(static_cast<float>(NewOptionIndex) / static_cast<float>(GetMaxOptionIndex()));
+		if (bUpdateWhileDraggingSlider)
+		{
+			OptionIndex = NewOptionIndex;
+			Update();
+		}
+
+		Slider->SetValue(static_cast<float>(OptionIndex) / static_cast<float>(GetMaxOptionIndex()));
 	}
-	UpdateTextFromPercent(Slider->GetValue(), /*bUpdateSpinBox*/ false);
+	UpdateTextFromPercent(Slider->GetValue());
 }
 
 void UUINavSlider::HandleOnSpinBoxValueCommitted(float InValue, ETextCommit::Type CommitMethod)
@@ -175,7 +193,9 @@ void UUINavSlider::HandleOnSpinBoxValueCommitted(float InValue, ETextCommit::Typ
 
 	OptionIndex = IndexFromValue(InValue);
 
-	if (Update())
+	const bool bUpdatedOption = Update();
+
+	if (bUpdatedOption)
 	{
 		Super::NavigateRight();
 
@@ -233,14 +253,7 @@ int UUINavSlider::IndexFromValue(const float Value)
 	return IndexFromPercent(Value <= MinValue ? 0.f : (Value >= MaxValue ? 1.f : (Value - MinValue) / Difference));
 }
 
-void UUINavSlider::UpdateTextFromValue(const float Value, const bool bUpdateSpinBox /*= true*/)
-{
-	const int32 NewOptionIndex = IndexFromValue(Value);
-	const float NewValuePercent = static_cast<float>(NewOptionIndex) / static_cast<float>(GetMaxOptionIndex());
-	UpdateTextFromPercent(NewValuePercent, bUpdateSpinBox);
-}
-
-void UUINavSlider::UpdateTextFromPercent(const float Percent, const bool bUpdateSpinBox /*= true*/)
+void UUINavSlider::UpdateTextFromPercent(const float Percent)
 {
 	FNumberFormattingOptions FormatOptions = FNumberFormattingOptions();
 	FormatOptions.MaximumFractionalDigits = MaxDecimalDigits;
@@ -252,9 +265,9 @@ void UUINavSlider::UpdateTextFromPercent(const float Percent, const bool bUpdate
 
 	SetText(NewValueText);
 
-	if (NavSpinBox != nullptr && bUpdateSpinBox)
+	if (NavSpinBox != nullptr && !bMovingSpinBox)
 	{
-		NavSpinBox->SetValue(NewValue);
+		NavSpinBox->SetValue(GetCurrentValue());
 	}
 }
 

@@ -58,8 +58,7 @@ protected:
 	int IndexFromPercent(const float Value);
 	int IndexFromValue(const float Value);
 
-	void UpdateTextFromValue(const float Value, const bool bUpdateSpinBox = true);
-	void UpdateTextFromPercent(const float Percent, const bool bUpdateSpinBox = true);
+	void UpdateTextFromPercent(const float Percent);
 
 	void SanitizeValues();
 
@@ -82,6 +81,9 @@ public:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavSlider)
 	bool bUseComma = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavSlider)
+	bool bUpdateWhileDraggingSlider = false;
 
 	float Difference = 0.0f;
 
