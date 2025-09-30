@@ -64,6 +64,12 @@ void UUINavWidget::NativeConstruct()
 
 		ConfigureUINavPC();
 
+		if (InputComponent == nullptr)
+		{
+			InitializeInputComponent();
+			UInputDelegateBinding::BindInputDelegates(GetClass(), InputComponent, this);
+		}
+
 		Super::NativeConstruct();
 		return;
 	}
@@ -103,9 +109,6 @@ void UUINavWidget::NativeConstruct()
 				SetKeyboardFocus();
 			}
 		}
-
-		InitializeInputComponent();
-		UInputDelegateBinding::BindInputDelegates(GetClass(), InputComponent, this);
 	}
 
 	PreSetup(!bCompletedSetup);
@@ -344,6 +347,12 @@ void UUINavWidget::SetupSelector()
 void UUINavWidget::UINavSetup()
 {
 	if (UINavPC == nullptr) return;
+
+	if (InputComponent == nullptr)
+	{
+		InitializeInputComponent();
+		UInputDelegateBinding::BindInputDelegates(GetClass(), InputComponent, this);
+	}
 
 	if (WidgetComp == nullptr)
 	{
@@ -1728,8 +1737,8 @@ void UUINavWidget::ReturnToParent(const bool bRemoveAllParents, const int ZOrder
 	{
 		if (bAllowRemoveIfRoot && UINavPC != nullptr)
 		{
+			UINavPC->GetActiveWidget()->PropagateLoseNavigation(nullptr, UINavPC->GetActiveWidget(), nullptr);
 			UINavPC->SetActiveWidget(nullptr);
-			LoseNavigation(nullptr);
 
 			SelectCount = 0;
 			SetSelectedComponent(nullptr);
