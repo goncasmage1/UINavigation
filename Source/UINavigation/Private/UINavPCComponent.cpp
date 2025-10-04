@@ -1426,7 +1426,7 @@ FKey UUINavPCComponent::GetEnhancedInputKey(const UInputAction* Action, const EI
 				{
 					return Key;
 				}
-				else
+				else if (IsAxis(Key))
 				{
 					return GetKeyFromAxis(Key, Scale == EAxisType::Positive, Axis);
 				}
