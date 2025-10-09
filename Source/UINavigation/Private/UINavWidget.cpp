@@ -47,8 +47,6 @@ void UUINavWidget::NativeConstruct()
 {
 	bBeingRemoved = false;
 
-	bForcingNavigation = GetDefault<UUINavSettings>()->bForceNavigation;
-
 	const UWorld* const World = GetWorld();
 	OuterUINavWidget = GetOuterObject<UUINavWidget>(this);
 	if (OuterUINavWidget != nullptr)
@@ -69,6 +67,8 @@ void UUINavWidget::NativeConstruct()
 			InitializeInputComponent();
 			UInputDelegateBinding::BindInputDelegates(GetClass(), InputComponent, this);
 		}
+
+		bForcingNavigation = GetDefault<UUINavSettings>()->bForceNavigation || UINavPC->GetCurrentInputType() == EInputType::Gamepad;
 
 		Super::NativeConstruct();
 		return;
@@ -359,6 +359,8 @@ void UUINavWidget::UINavSetup()
 		FSlateApplication::Get().ReleaseAllPointerCapture();
 	}
 
+	bForcingNavigation = GetDefault<UUINavSettings>()->bForceNavigation || UINavPC->GetCurrentInputType() == EInputType::Gamepad;
+
 	UUINavWidget* CurrentActiveWidget = UINavPC->GetActiveWidget();
 	const bool bShouldTakeFocus =
 		!IsValid(CurrentActiveWidget) ||
@@ -539,7 +541,7 @@ void UUINavWidget::OnLostNavigation_Implementation(UUINavWidget* NewActiveWidget
 
 void UUINavWidget::SetCurrentComponent(UUINavComponent* Component)
 {
-	const bool bShouldUnforceNavigation = !IsValid(CurrentComponent) && !GetDefault<UUINavSettings>()->bForceNavigation && !IsValid(HoveredComponent);
+	const bool bShouldUnforceNavigation = !IsValid(CurrentComponent) && !GetDefault<UUINavSettings>()->bForceNavigation && !IsValid(HoveredComponent) && UINavPC->GetCurrentInputType() != EInputType::Gamepad;
 
 	CurrentComponent = Component;
 
