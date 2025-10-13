@@ -66,7 +66,7 @@ void UUINavInputContainer::NativeDestruct()
 {
 	if (IsValid(UINavPC))
 	{
-		UINavPC->InputTypeChangedDelegate.RemoveDynamic(this, &UUINavInputContainer::OnInputTypeChanged);
+		UINavPC->InputTypeChangedDelegate.RemoveAll(this);
 	}
 
 	Super::NativeDestruct();
