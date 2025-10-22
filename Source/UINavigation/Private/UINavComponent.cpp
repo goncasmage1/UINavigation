@@ -205,7 +205,8 @@ void UUINavComponent::HandleFocusLost()
 
 void UUINavComponent::OnButtonClicked()
 {
-	if (!IsValid(ParentWidget) || !IsValid(ParentWidget->UINavPC) || !ParentWidget->UINavPC->IsWidgetActive(ParentWidget) || !NavButton->HasAnyUserFocus())
+	if (!IsValid(ParentWidget))
+	if (!IsValid(ParentWidget->UINavPC) || !ParentWidget->UINavPC->IsWidgetActive(ParentWidget) || !NavButton->HasAnyUserFocus())
 	{
 		if (ParentWidget->WidgetComp == nullptr || ParentWidget->WidgetComp->bTakeFocus)
 		{
