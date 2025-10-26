@@ -1916,7 +1916,7 @@ void UUINavWidget::CallOnNavigate(UUINavComponent* FromComponent, UUINavComponen
 	if (IsValid(ToComponent))
 	{
 		USoundBase* NavigatedSound = ToComponent->GetOnNavigatedSound();
-		if (NavigatedSound != nullptr && bForcingNavigation)
+		if (NavigatedSound != nullptr && bForcingNavigation && (IsValid(FromComponent) || GetDefault<UUINavSettings>()->bPlayOnNavigatedSoundOnFirstUINavComponent))
 		{
 			PlaySound(NavigatedSound);
 		}
@@ -2108,6 +2108,8 @@ void UUINavWidget::OnHoveredComponent(UUINavComponent* Component)
 
 	UINavPC->CancelRebind();
 
+	const bool bNavigatingToFirstComponent = CurrentComponent == nullptr;
+
 	SetHoveredComponent(Component);
 
 	if (Component == CurrentComponent && UINavPC->GetActiveSubWidget() == this)
@@ -2128,7 +2130,7 @@ void UUINavWidget::OnHoveredComponent(UUINavComponent* Component)
 			UpdateNavigationVisuals(CurrentComponent, false, true);
 
 			USoundBase* NavigatedSound = Component->GetOnNavigatedSound();
-			if (NavigatedSound != nullptr && bForcingNavigation)
+			if (NavigatedSound != nullptr && bForcingNavigation && (!bNavigatingToFirstComponent || GetDefault<UUINavSettings>()->bPlayOnNavigatedSoundOnFirstUINavComponent))
 			{
 				PlaySound(NavigatedSound);
 			}

@@ -51,6 +51,10 @@ public:
 	UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	bool bSetFocusOnRelease = true;
 
+	// Whether to play the OnNavigated sound from the UINavComponent when navigating to the first UINavComponent of the widget
+	UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = "Settings")
+	bool bPlayOnNavigatedSoundOnFirstUINavComponent = false;
+
 	// Whether focus navigation should stop when using Next/Previous input
 	UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	bool bStopNextPreviousNavigation = true;
