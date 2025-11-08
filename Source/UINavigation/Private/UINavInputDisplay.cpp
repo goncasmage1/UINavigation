@@ -100,6 +100,12 @@ void UUINavInputDisplay::UpdateInputVisuals()
 		return;
 	}
 
+	if (!IsValid(InputAction))
+	{
+		DISPLAYERROR(TEXT("Doesn't have a valid Input Action"));
+		return;
+	}
+
 	if (IsValid(InputText)) InputText->SetVisibility(ESlateVisibility::Collapsed);
 	if (IsValid(InputRichText)) InputRichText->SetVisibility(ESlateVisibility::Collapsed);
 	InputImage->SetVisibility(ESlateVisibility::Collapsed);

@@ -90,6 +90,8 @@ protected:
 
 	bool bUsingThumbstickAsMouse = false;
 
+	bool bWaitingForInputCooldown = false;
+
 	UPROPERTY()
 	APlayerController* PC = nullptr;
 
@@ -106,6 +108,8 @@ protected:
 
 	EUINavigation CallbackDirection;
 	float TimerCounter = 0.f;
+
+	float InputCooldownTime = 0.0f;
 
 	bool bIgnoreNavigationKey = true;
 
@@ -389,6 +393,9 @@ public:
 	bool HidingMouseCursor() const;
 
 	bool ShouldHideMouseCursor() const;
+
+	UFUNCTION(BlueprintCallable, Category = UINavController)
+	bool IsWaitingForInputCooldown() const { return bWaitingForInputCooldown; }
 
 	bool OverrideConsiderHover() const { return bOverrideConsiderHover; }
 

@@ -277,6 +277,25 @@ void UUINavPCComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAct
 		bUsingThumbstickAsMouse = !bUsingThumbstickAsMouse;
 		RefreshNavigationKeys();
 	}
+
+	if (InputCooldownTime > 0.f)
+	{
+		InputCooldownTime -= DeltaTime;
+		if (InputCooldownTime <= 0.f)
+		{
+			InputCooldownTime = 0.f;
+			bWaitingForInputCooldown = false;
+
+			RefreshNavigationKeys();
+			
+			if (!GetDefault<UUINavSettings>()->bUseFocusSystemNavigationInputs)
+			{
+				UInputMappingContext* TargetInputContext = GetUINavInputContext(ActiveWidget);
+				AddInputContext(TargetInputContext);
+				CurrentInputContext = TargetInputContext;
+			}
+		}
+	}
 }
 
 void UUINavPCComponent::RequestRebuildMappings()
@@ -790,7 +809,18 @@ void UUINavPCComponent::NotifyNavigatedTo(UUINavWidget* NavigatedWidget)
 
 	if (NewPath.IsEmpty() && NavigatedWidget != nullptr) NavigatedWidget->GainNavigation(OldActiveWidget);
 
-	if (!GetDefault<UUINavSettings>()->bUseFocusSystemNavigationInputs)
+	const UUINavSettings* const UINavSettings = GetDefault<UUINavSettings>();
+	if (!IsValid(CommonParent) && UINavSettings->WidgetTransitionInputCooldown > 0.0f)
+	{
+		bWaitingForInputCooldown = true;
+		InputCooldownTime = UINavSettings->WidgetTransitionInputCooldown;
+		if (IsValid(CurrentInputContext))
+		{
+			RemoveInputContext(CurrentInputContext);
+		}
+	}
+
+	if (!GetDefault<UUINavSettings>()->bUseFocusSystemNavigationInputs && !bWaitingForInputCooldown)
 	{
 		UInputMappingContext* TargetInputContext = GetUINavInputContext(NavigatedWidget);
 		if (TargetInputContext != CurrentInputContext)
@@ -909,26 +939,42 @@ bool UUINavPCComponent::ShouldHideMouseCursor() const
 
 void UUINavPCComponent::RefreshNavigationKeys()
 {
-	FSlateApplication::Get().SetNavigationConfig(
-		MakeShared<FUINavigationConfig>(
-			GetUINavInputContext(ActiveWidget),
-			bAllowDirectionalInput,
-			bAllowSectionInput,
-			bAllowSelectInput,
-			bAllowReturnInput,
-			bUseAnalogDirectionalInput && UsingThumbstickAsMouse() != EThumbstickAsMouse::LeftThumbstick,
-			UsingThumbstickAsMouse() != EThumbstickAsMouse::None));
-
-	if (IsValid(ActiveWidget))
+	if (bWaitingForInputCooldown)
 	{
-		if (!GetDefault<UUINavSettings>()->bUseFocusSystemNavigationInputs)
+		FSlateApplication::Get().SetNavigationConfig(
+			MakeShared<FUINavigationConfig>(
+				/*UINavInputContext*/ nullptr,
+				/*bAllowDirectionalInput*/ false,
+				/*bAllowSectionInput*/ false,
+				/*bAllowSelectInput*/ false,
+				/*bAllowReturnInput*/ false,
+				/*bUseAnalogDirectionalInput*/ false,
+				/*bUsingThumbstickAsMouse*/ false));
+	}
+	else
+	{
+		FSlateApplication::Get().SetNavigationConfig(
+			MakeShared<FUINavigationConfig>(
+				GetUINavInputContext(ActiveWidget),
+				bAllowDirectionalInput,
+				bAllowSectionInput,
+				bAllowSelectInput,
+				bAllowReturnInput,
+				bUseAnalogDirectionalInput && UsingThumbstickAsMouse() != EThumbstickAsMouse::LeftThumbstick,
+				UsingThumbstickAsMouse() != EThumbstickAsMouse::None));
+
+	}
+
+	if (IsValid(ActiveWidget) && !bWaitingForInputCooldown)
+	{
+		if (GetDefault<UUINavSettings>()->bUseFocusSystemNavigationInputs)
 		{
-			UnbindNavigationInputs();
-			BindNavigationInputs();
+			GamepadSelectKeys = StaticCastSharedRef<FUINavigationConfig>(FSlateApplication::Get().GetNavigationConfig())->GetGamepadSelectKeys();
 		}
 		else
 		{
-			GamepadSelectKeys = StaticCastSharedRef<FUINavigationConfig>(FSlateApplication::Get().GetNavigationConfig())->GetGamepadSelectKeys();
+			UnbindNavigationInputs();
+			BindNavigationInputs();
 		}
 	}
 }
@@ -1025,7 +1071,7 @@ void UUINavPCComponent::HandleKeyDownEvent(FSlateApplication& SlateApp, const FK
 	LastPressedKeyUserIndex = InKeyEvent.GetUserIndex();
 	VerifyInputTypeChangeByKey(InKeyEvent, bShouldUnforceNavigation);
 
-	if (!bShouldUnforceNavigation && IsValid(ActiveWidget))
+	if (!bShouldUnforceNavigation && IsValid(ActiveWidget) && !bWaitingForInputCooldown)
 	{
 		bIgnoreMousePress = true;
 		SimulateMousePress();
@@ -1043,7 +1089,7 @@ void UUINavPCComponent::HandleKeyUpEvent(FSlateApplication& SlateApp, const FKey
 
 	if (IsValid(ListeningInputBox)) return;
 
-	if (!bShouldUnforceNavigation)
+	if (!bShouldUnforceNavigation && !bWaitingForInputCooldown)
 	{
 		bIgnoreMouseRelease = true;
 		SimulateMouseRelease();
@@ -1094,6 +1140,11 @@ void UUINavPCComponent::HandleAnalogInputEvent(FSlateApplication& SlateApp, cons
 
 	const UWorld* const World = GetWorld();
 	if (!IsValid(World))
+	{
+		return;
+	}
+
+	if (bWaitingForInputCooldown)
 	{
 		return;
 	}
