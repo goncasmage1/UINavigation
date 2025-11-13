@@ -41,6 +41,8 @@ UUINavWidget::UUINavWidget(const FObjectInitializer& ObjectInitializer)
 	:Super(ObjectInitializer)
 {
 	SetIsFocusable(true);
+
+	bAutomaticallyRegisterInputOnConstruction = true;
 }
 
 void UUINavWidget::NativeConstruct()
@@ -61,12 +63,6 @@ void UUINavWidget::NativeConstruct()
 		PreSetup(!bCompletedSetup);
 
 		ConfigureUINavPC();
-
-		if (InputComponent == nullptr)
-		{
-			InitializeInputComponent();
-			UInputDelegateBinding::BindInputDelegates(GetClass(), InputComponent, this);
-		}
 
 		bForcingNavigation = GetDefault<UUINavSettings>()->bForceNavigation || UINavPC->GetCurrentInputType() == EInputType::Gamepad;
 
@@ -347,12 +343,6 @@ void UUINavWidget::SetupSelector()
 void UUINavWidget::UINavSetup()
 {
 	if (UINavPC == nullptr) return;
-
-	if (InputComponent == nullptr)
-	{
-		InitializeInputComponent();
-		UInputDelegateBinding::BindInputDelegates(GetClass(), InputComponent, this);
-	}
 
 	if (WidgetComp == nullptr)
 	{
