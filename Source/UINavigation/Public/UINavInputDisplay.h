@@ -32,8 +32,9 @@ public:
 
 	virtual void NativePreConstruct() override;
 
-	UFUNCTION(BlueprintCallable, Category = "InputDisplay")
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "InputDisplay")
 	void UpdateInputVisuals();
+	virtual void UpdateInputVisuals_Implementation();
 
 	UFUNCTION(BlueprintCallable, Category = "InputDisplay")
 	void SetInputAction(UInputAction* NewAction, const EInputAxis NewAxis, const EAxisType NewScale);

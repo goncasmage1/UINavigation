@@ -1952,8 +1952,9 @@ void UUINavPCComponent::SimulateStartSelect()
 		return;
 	}
 
-	ActiveWidget->GetCurrentComponent()->NavButton->OnPressed.Broadcast();
-	ActiveWidget->OnStartSelect(ActiveWidget->GetCurrentComponent());
+	UUINavWidget* OldActiveWidget = ActiveWidget;
+	OldActiveWidget->GetCurrentComponent()->NavButton->OnPressed.Broadcast();
+	OldActiveWidget->OnStartSelect(OldActiveWidget->GetCurrentComponent());
 }
 
 void UUINavPCComponent::SimulateStopSelect()
@@ -1963,9 +1964,10 @@ void UUINavPCComponent::SimulateStopSelect()
 		return;
 	}
 
-	ActiveWidget->GetCurrentComponent()->NavButton->OnReleased.Broadcast();
-	ActiveWidget->GetCurrentComponent()->NavButton->OnClicked.Broadcast();
-	ActiveWidget->OnStopSelect(ActiveWidget->GetCurrentComponent());
+	UUINavWidget* OldActiveWidget = ActiveWidget;
+	OldActiveWidget->GetCurrentComponent()->NavButton->OnReleased.Broadcast();
+	OldActiveWidget->GetCurrentComponent()->NavButton->OnClicked.Broadcast();
+	OldActiveWidget->OnStopSelect(OldActiveWidget->GetCurrentComponent());
 }
 
 void UUINavPCComponent::SimulateSelect()
@@ -1975,11 +1977,12 @@ void UUINavPCComponent::SimulateSelect()
 		return;
 	}
 
-	ActiveWidget->GetCurrentComponent()->NavButton->OnPressed.Broadcast();
-	ActiveWidget->OnStartSelect(ActiveWidget->GetCurrentComponent());
-	ActiveWidget->GetCurrentComponent()->NavButton->OnClicked.Broadcast();
-	ActiveWidget->GetCurrentComponent()->NavButton->OnReleased.Broadcast();
-	ActiveWidget->OnStopSelect(ActiveWidget->GetCurrentComponent());
+	UUINavWidget* OldActiveWidget = ActiveWidget;
+	OldActiveWidget->GetCurrentComponent()->NavButton->OnPressed.Broadcast();
+	OldActiveWidget->OnStartSelect(OldActiveWidget->GetCurrentComponent());
+	OldActiveWidget->GetCurrentComponent()->NavButton->OnClicked.Broadcast();
+	OldActiveWidget->GetCurrentComponent()->NavButton->OnReleased.Broadcast();
+	OldActiveWidget->OnStopSelect(OldActiveWidget->GetCurrentComponent());
 }
 
 void UUINavPCComponent::SimulateStartReturn()

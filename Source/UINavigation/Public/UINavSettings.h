@@ -57,7 +57,7 @@ public:
 
 	// The amount of time that needs to pass after the user transitions to a new UINavWidget before input is allowed
 	UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = "Settings")
-	float WidgetTransitionInputCooldown = 0.5f;
+	float WidgetTransitionInputCooldown = 0.2f;
 
 	// Whether focus navigation should stop when using Next/Previous input
 	UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = "Settings")
