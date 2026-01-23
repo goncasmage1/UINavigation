@@ -87,7 +87,7 @@ void UUINavInputDisplay::NativePreConstruct()
 	}
 }
 
-void UUINavInputDisplay::UpdateInputVisuals()
+void UUINavInputDisplay::UpdateInputVisuals_Implementation()
 {
 	if (!IsValid(UINavPC))
 	{
