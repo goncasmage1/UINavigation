@@ -325,7 +325,7 @@ public:
 	The sensitivity of scrolling when using the right thumbstick
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavController)
-	float RightThumbstickScrollSensitivity = 10.0f;
+	float RightThumbstickScrollSensitivity = 20.0f;
 
 	/*
 	The required value for an axis to be considered for rebinding
