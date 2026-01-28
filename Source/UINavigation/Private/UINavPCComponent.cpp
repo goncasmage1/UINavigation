@@ -1166,10 +1166,10 @@ void UUINavPCComponent::HandleAnalogInputEvent(FSlateApplication& SlateApp, cons
 			const UUINavComponent* const CurrentUINavComponent = ActiveWidget->GetCurrentComponent();
 			if (IsValid(CurrentUINavComponent))
 			{
-				UScrollBox* ParentScrollBox = CurrentUINavComponent->GetParentScrollBox();
+				UScrollBox* ParentScrollBox = ActiveWidget->GetScrollBoxToFocus();
 				if (!IsValid(ParentScrollBox))
 				{
-					ParentScrollBox = ActiveWidget->GetScrollBoxToFocus();
+					ParentScrollBox = CurrentUINavComponent->GetParentScrollBox();
 				}
 
 				if (IsValid(ParentScrollBox))
