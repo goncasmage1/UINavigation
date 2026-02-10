@@ -414,6 +414,7 @@ void UUINavPCComponent::BindNavigationInputs()
 	}
 
 	InputActionBindingHandles.Reset();
+	InputComponent->ClearBindingsForObject(this);
 
 	if (bAllowDirectionalInput)
 	{
