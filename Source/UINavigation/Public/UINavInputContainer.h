@@ -91,7 +91,7 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "UINav Input")
 	bool RespectsRestriction(const FKey CompareKey, const int Index);
 
-	void ResetInputBox(const FName InputName, const EAxisType AxisType);
+	void ResetInputBox(const FName InputName, const EInputAxis Axis, const EAxisType AxisType);
 
 	UFUNCTION()
 	void OnInputTypeChanged(const EInputType InputType);

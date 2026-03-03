@@ -275,11 +275,12 @@ bool UUINavInputContainer::RespectsRestriction(const FKey CompareKey, const int 
 	return UUINavBlueprintFunctionLibrary::RespectsRestriction(CompareKey, Restriction);
 }
 
-void UUINavInputContainer::ResetInputBox(const FName InputName, const EAxisType AxisType)
+void UUINavInputContainer::ResetInputBox(const FName InputName, const EInputAxis Axis, const EAxisType AxisType)
 {
 	for (UUINavInputBox* InputBox : InputBoxes)
 	{
 		if (InputBox->InputName.IsEqual(InputName) &&
+			InputBox->InputActionData.Axis == Axis &&
 			InputBox->AxisType == AxisType)
 		{
 			InputBox->ResetKeyWidgets();
