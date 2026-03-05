@@ -2044,8 +2044,8 @@ void UUINavPCComponent::SimulateStopSelect()
 	}
 
 	UUINavWidget* OldActiveWidget = ActiveWidget;
-	OldActiveWidget->GetCurrentComponent()->NavButton->OnReleased.Broadcast();
-	OldActiveWidget->GetCurrentComponent()->NavButton->OnClicked.Broadcast();
+	if (IsValid(OldActiveWidget->GetCurrentComponent())) OldActiveWidget->GetCurrentComponent()->NavButton->OnReleased.Broadcast();
+	if (IsValid(OldActiveWidget->GetCurrentComponent())) OldActiveWidget->GetCurrentComponent()->NavButton->OnClicked.Broadcast();
 	OldActiveWidget->OnStopSelect(OldActiveWidget->GetCurrentComponent());
 }
 
@@ -2057,10 +2057,10 @@ void UUINavPCComponent::SimulateSelect()
 	}
 
 	UUINavWidget* OldActiveWidget = ActiveWidget;
-	OldActiveWidget->GetCurrentComponent()->NavButton->OnPressed.Broadcast();
+	if (IsValid(OldActiveWidget->GetCurrentComponent())) OldActiveWidget->GetCurrentComponent()->NavButton->OnPressed.Broadcast();
 	OldActiveWidget->OnStartSelect(OldActiveWidget->GetCurrentComponent());
-	OldActiveWidget->GetCurrentComponent()->NavButton->OnClicked.Broadcast();
-	OldActiveWidget->GetCurrentComponent()->NavButton->OnReleased.Broadcast();
+	if (IsValid(OldActiveWidget->GetCurrentComponent())) OldActiveWidget->GetCurrentComponent()->NavButton->OnClicked.Broadcast();
+	if (IsValid(OldActiveWidget->GetCurrentComponent())) OldActiveWidget->GetCurrentComponent()->NavButton->OnReleased.Broadcast();
 	OldActiveWidget->OnStopSelect(OldActiveWidget->GetCurrentComponent());
 }
 
