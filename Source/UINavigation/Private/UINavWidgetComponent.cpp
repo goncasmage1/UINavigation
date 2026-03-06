@@ -5,6 +5,11 @@
 #include "UINavMacros.h"
 #include "UINavWidget.h"
 
+UUINavWidgetComponent::UUINavWidgetComponent()
+{
+	PrimaryComponentTick.bTickEvenWhenPaused = true;
+}
+
 void UUINavWidgetComponent::BeginPlay()
 {
 	Super::BeginPlay();
