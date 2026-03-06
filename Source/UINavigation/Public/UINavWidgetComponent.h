@@ -11,6 +11,7 @@ class UINAVIGATION_API UUINavWidgetComponent : public UWidgetComponent
 	GENERATED_BODY()
 
 protected:
+	UUINavWidgetComponent();
 	virtual void BeginPlay() override;
 
 public:

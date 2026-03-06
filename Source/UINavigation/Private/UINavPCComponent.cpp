@@ -34,9 +34,11 @@
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "Templates/SharedPointer.h"
 #include "Engine/GameViewportClient.h"
+#include "UnrealClient.h"
 #include "Engine/World.h"
 #include "Engine/Texture2D.h"
 #include "UObject/SoftObjectPtr.h"
+#include "UObject/WeakObjectPtrTemplates.h"
 #include "Internationalization/Internationalization.h"
 #include "UINavLocalPlayerSubsystem.h"
 #include "UINavGameViewportClient.h"
@@ -44,6 +46,8 @@
 #include "Kismet/GameplayStatics.h"
 #include "UObject/ConstructorHelpers.h"
 #include "InputKeyEventArgs.h"
+#include "Widgets/SWidget.h"
+#include "Widgets/SViewport.h"
 
 const FKey UUINavPCComponent::MouseUp("MouseUp");
 const FKey UUINavPCComponent::MouseDown("MouseDown");
@@ -295,6 +299,21 @@ void UUINavPCComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAct
 				CurrentInputContext = TargetInputContext;
 			}
 		}
+	}
+
+	if (GameViewportRerouteData.GameViewportClient != nullptr)
+	{
+		GameViewportRerouteData.GameViewportClient->InputKey(
+			FInputKeyEventArgs::CreateSimulated(
+				GameViewportRerouteData.Key,
+				GameViewportRerouteData.InputEvent,
+				/*AmountDepressed*/ 1.0f,
+				/*NumSamplesOverride*/ -1,
+				GameViewportRerouteData.InputDeviceId,
+				/*IsTouchEvent*/ false,
+				GameViewportRerouteData.GameViewportClient->Viewport));
+		GameViewportRerouteData = FGameViewportRerouteData();
+		bIgnoreInputIn3DWidget = false;
 	}
 }
 
@@ -613,6 +632,37 @@ UUINavWidget* UUINavPCComponent::GetFirstCommonParent(UUINavWidget* const Widget
 	}
 
 	return Depth > 0 ? CommonParent : nullptr;
+}
+
+bool UUINavPCComponent::TryRerouteInputToGameViewport(FSlateApplication& SlateApp, const FKeyEvent& InKeyEvent, const EInputEvent InputEvent)
+{
+	const UWorld* const World = PC->GetWorld();
+	if (!IsValid(World))
+	{
+		return false;
+	}
+
+	UGameViewportClient* GameViewportClient = World->GetGameViewport();
+	if (!IsValid(GameViewportClient))
+	{
+		return false;
+	}
+	
+	TSharedPtr<FSlateUser> SlateUser = SlateApp.GetUser(InKeyEvent.GetUserIndex());
+	if (!SlateUser.IsValid())
+	{
+		return false;
+	}
+	
+	const bool bIsViewportInFocusPath = SlateUser->IsWidgetInFocusPath(TSharedPtr<SWidget>(GameViewportClient->GetGameViewportWidget()));
+	if (bIsViewportInFocusPath)
+	{
+		return false;
+	}
+	
+	GameViewportRerouteData = FGameViewportRerouteData(GameViewportClient, InKeyEvent.GetKey(), InKeyEvent.GetInputDeviceId(), InputEvent);
+	bIgnoreInputIn3DWidget = true;
+	return true;
 }
 
 void UUINavPCComponent::CacheGameInputContexts()
@@ -1044,6 +1094,30 @@ void UUINavPCComponent::InputKey(const FKey& Key, const EInputEvent Event, const
 	}
 }
 
+bool UUINavPCComponent::IsGameViewportInFocus(const int32 UserIndex)
+{
+	const UWorld* const World = PC->GetWorld();
+	if (!IsValid(World))
+	{
+		return false;
+	}
+
+	UGameViewportClient* GameViewportClient = World->GetGameViewport();
+	if (!IsValid(GameViewportClient))
+	{
+		return false;
+	}
+
+	TSharedPtr<FSlateUser> SlateUser = FSlateApplication::Get().GetUser(UserIndex);
+	if (!SlateUser.IsValid())
+	{
+		return false;
+	}
+
+	const bool bIsViewportInFocusPath = SlateUser->IsWidgetInFocusPath(TSharedPtr<SWidget>(GameViewportClient->GetGameViewportWidget()));
+	return bIsViewportInFocusPath;
+}
+
 void UUINavPCComponent::ForceUpdateAllInputDisplays(const bool bOnlyTopLevel /*= false*/)
 {
 	TArray<UUserWidget*> Widgets;
@@ -1077,6 +1151,8 @@ void UUINavPCComponent::HandleKeyDownEvent(FSlateApplication& SlateApp, const FK
 		bIgnoreMousePress = true;
 		SimulateMousePress();
 	}
+
+	TryRerouteInputToGameViewport(SlateApp, InKeyEvent, InKeyEvent.IsRepeat() ? EInputEvent::IE_Repeat : EInputEvent::IE_Pressed);
 }
 
 void UUINavPCComponent::HandleKeyUpEvent(FSlateApplication& SlateApp, const FKeyEvent& InKeyEvent)
@@ -1095,6 +1171,8 @@ void UUINavPCComponent::HandleKeyUpEvent(FSlateApplication& SlateApp, const FKey
 		bIgnoreMouseRelease = true;
 		SimulateMouseRelease();
 	}
+
+	TryRerouteInputToGameViewport(SlateApp, InKeyEvent, EInputEvent::IE_Released);
 }
 
 void UUINavPCComponent::HandleAnalogInputEvent(FSlateApplication& SlateApp, const FAnalogInputEvent& InAnalogInputEvent)
@@ -1966,8 +2044,8 @@ void UUINavPCComponent::SimulateStopSelect()
 	}
 
 	UUINavWidget* OldActiveWidget = ActiveWidget;
-	OldActiveWidget->GetCurrentComponent()->NavButton->OnReleased.Broadcast();
-	OldActiveWidget->GetCurrentComponent()->NavButton->OnClicked.Broadcast();
+	if (IsValid(OldActiveWidget->GetCurrentComponent())) OldActiveWidget->GetCurrentComponent()->NavButton->OnReleased.Broadcast();
+	if (IsValid(OldActiveWidget->GetCurrentComponent())) OldActiveWidget->GetCurrentComponent()->NavButton->OnClicked.Broadcast();
 	OldActiveWidget->OnStopSelect(OldActiveWidget->GetCurrentComponent());
 }
 
@@ -1979,10 +2057,10 @@ void UUINavPCComponent::SimulateSelect()
 	}
 
 	UUINavWidget* OldActiveWidget = ActiveWidget;
-	OldActiveWidget->GetCurrentComponent()->NavButton->OnPressed.Broadcast();
+	if (IsValid(OldActiveWidget->GetCurrentComponent())) OldActiveWidget->GetCurrentComponent()->NavButton->OnPressed.Broadcast();
 	OldActiveWidget->OnStartSelect(OldActiveWidget->GetCurrentComponent());
-	OldActiveWidget->GetCurrentComponent()->NavButton->OnClicked.Broadcast();
-	OldActiveWidget->GetCurrentComponent()->NavButton->OnReleased.Broadcast();
+	if (IsValid(OldActiveWidget->GetCurrentComponent())) OldActiveWidget->GetCurrentComponent()->NavButton->OnClicked.Broadcast();
+	if (IsValid(OldActiveWidget->GetCurrentComponent())) OldActiveWidget->GetCurrentComponent()->NavButton->OnReleased.Broadcast();
 	OldActiveWidget->OnStopSelect(OldActiveWidget->GetCurrentComponent());
 }
 

@@ -22,6 +22,7 @@
 #include "Misc/CoreMiscDefines.h"
 #include "UObject/SoftObjectPtr.h"
 #include "Data/PromptData.h"
+#include "Misc/CoreMiscDefines.h"
 #include "UINavPCComponent.generated.h"
 
 class APlayerController;
@@ -33,6 +34,7 @@ class UUINavPromptWidget;
 class UInputMappingContext;
 class UCurveFloat;
 class FText;
+class UGameViewportClient;
 struct FEnhancedActionKeyMapping;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FInputTypeChangedDelegate, EInputType, InputType);
@@ -58,6 +60,19 @@ public:
 
 	FKey PositiveKey;
 	FKey NegativeKey;
+};
+
+struct FGameViewportRerouteData
+{
+	FGameViewportRerouteData() = default;
+	FGameViewportRerouteData(UGameViewportClient* InGameViewportClient, const FKey& InKey, const FInputDeviceId InInputDeviceId, const EInputEvent InInputEvent)
+		: GameViewportClient(InGameViewportClient), Key(InKey), InputDeviceId(InInputDeviceId), InputEvent(InInputEvent)
+	{}
+
+	UGameViewportClient* GameViewportClient = nullptr;
+	FKey Key;
+	FInputDeviceId InputDeviceId;
+	EInputEvent InputEvent;
 };
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -119,6 +134,8 @@ protected:
 
 	bool bOverrideConsiderHover = false;
 
+	bool bIgnoreInputIn3DWidget = false;
+
 	UPROPERTY()
 	TArray<const UInputMappingContext*> CachedInputContexts;
 
@@ -133,6 +150,8 @@ protected:
 	TMap<EUINavigation, TArray<FKey>> PressedNavigationDirections;
 
 	FPlatformConfigData CurrentPlatformData;
+
+	FGameViewportRerouteData GameViewportRerouteData;
 
 	static const FKey MouseUp;
 	static const FKey MouseDown;
@@ -243,6 +262,7 @@ protected:
 
 	UUINavWidget* GetFirstCommonParent(UUINavWidget* const Widget1, UUINavWidget* const Widget2);
 
+	bool TryRerouteInputToGameViewport(FSlateApplication& SlateApp, const FKeyEvent& InKeyEvent, const EInputEvent InputEvent);
 public:
 
 	UUINavPCComponent();
@@ -425,6 +445,10 @@ public:
 
 	UFUNCTION()
 	void InputKey(const FKey& Key, const EInputEvent Event, const float Delta);
+
+	bool IsGameViewportInFocus(const int32 UserIndex = 0);
+
+	bool ShouldIgnoreInputIn3DWidget() const { return bIgnoreInputIn3DWidget; }
 
 	/*
 	*	Fetches all UINavInputDisplays and forces them to update their visuals.
