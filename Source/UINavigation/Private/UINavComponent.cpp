@@ -210,7 +210,7 @@ void UUINavComponent::OnButtonClicked()
 		return;
 	}
 
-	if (!ParentWidget->UINavPC->IsWidgetActive(ParentWidget) || !NavButton->HasAnyUserFocus())
+	if (!ParentWidget->UINavPC->IsWidgetActive(ParentWidget) || (!NavButton->HasAnyUserFocus() && !bIsClickableWhenNotFocusable))
 	{
 		if (ParentWidget->WidgetComp == nullptr || ParentWidget->WidgetComp->bTakeFocus)
 		{
@@ -241,7 +241,7 @@ void UUINavComponent::OnButtonPressed()
 		return;
 	}
 
-	if (!ParentWidget->UINavPC->IsWidgetActive(ParentWidget) || !NavButton->HasAnyUserFocus())
+	if (!ParentWidget->UINavPC->IsWidgetActive(ParentWidget) || (!NavButton->HasAnyUserFocus() && !bIsClickableWhenNotFocusable))
 	{
 		if (ParentWidget->WidgetComp == nullptr || ParentWidget->WidgetComp->bTakeFocus)
 		{
@@ -267,7 +267,7 @@ void UUINavComponent::OnButtonReleased()
 		return;
 	}
 
-	if (!ParentWidget->UINavPC->IsWidgetActive(ParentWidget) || !NavButton->HasAnyUserFocus())
+	if (!ParentWidget->UINavPC->IsWidgetActive(ParentWidget) || (!NavButton->HasAnyUserFocus() && !bIsClickableWhenNotFocusable))
 	{
 		if (ParentWidget->WidgetComp == nullptr || ParentWidget->WidgetComp->bTakeFocus)
 		{
