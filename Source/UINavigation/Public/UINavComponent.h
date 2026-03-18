@@ -236,5 +236,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavComponent)
 	TMap<EComponentAction, FComponentActions> ComponentActions;
 
+	// Whether this UINavComponent should be clickable when IsFocusable is false
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavComponent)
+	bool bIsClickableWhenNotFocusable = false;
+
 	bool bWasFocusableWhenDisabled = true;
 };

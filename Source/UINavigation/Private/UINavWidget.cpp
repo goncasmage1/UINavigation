@@ -246,6 +246,10 @@ void UUINavWidget::SetupSections()
 		for (UWidget* const ChildWidget : TargetSectionsPanel->GetAllChildren())
 		{
 			UWidget* TargetWidget = UUINavBlueprintFunctionLibrary::FindWidgetOfClassesInWidget(ChildWidget, ButtonClassArray);
+			if (!IsValid(TargetWidget))
+			{
+				continue;
+			}
 
 			if (TargetWidget->IsA<UUINavComponent>())
 			{
