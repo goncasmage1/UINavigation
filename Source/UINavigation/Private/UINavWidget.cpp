@@ -73,6 +73,11 @@ void UUINavWidget::NativeConstruct()
 		Super::NativeConstruct();
 		return;
 	}
+	else
+	{
+		SetAllNavigationRules(EUINavigationRule::Stop, NAME_None);
+	}
+
 	if (World != nullptr)
 	{
 		if (const UGameViewportClient* ViewportClient = World->GetGameViewport())
