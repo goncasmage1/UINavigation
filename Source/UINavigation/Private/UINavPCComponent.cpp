@@ -636,6 +636,11 @@ UUINavWidget* UUINavPCComponent::GetFirstCommonParent(UUINavWidget* const Widget
 
 bool UUINavPCComponent::TryRerouteInputToGameViewport(FSlateApplication& SlateApp, const FKeyEvent& InKeyEvent, const EInputEvent InputEvent)
 {
+	if (!IsValid(ActiveWidget))
+	{
+		return false;
+	}
+
 	const UWorld* const World = PC->GetWorld();
 	if (!IsValid(World))
 	{
