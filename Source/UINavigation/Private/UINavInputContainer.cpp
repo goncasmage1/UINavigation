@@ -297,6 +297,12 @@ void UUINavInputContainer::OnInputTypeChanged(const EInputType InputType)
 void UUINavInputContainer::SwapKeysDecided(const UPromptDataBase* const PromptData)
 {
 	const UPromptDataSwapKeys* const SwapKeysPromptData = Cast<UPromptDataSwapKeys>(PromptData);
+	if (!IsValid(SwapKeysPromptData))
+	{
+		DISPLAYERROR(TEXT("Prompt data wasn't valid or wasn't of PromptDataSwapKeys type!"));
+		return;
+	}
+
 	if (SwapKeysPromptData->CurrentInputBox != nullptr && SwapKeysPromptData->CollidingInputBox != nullptr)
 	{
 		if (SwapKeysPromptData->bShouldSwap)
