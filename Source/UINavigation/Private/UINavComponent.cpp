@@ -218,6 +218,12 @@ void UUINavComponent::OnButtonClicked()
 		}
 	}
 	
+	if (IsValid(ParentWidget) && !ParentWidget->IsForcingNavigation() && !GetDefault<UUINavSettings>()->bForceNavigation)
+	{
+		ParentWidget->ForceNavigation();
+		return;
+	}
+
 	const bool bWasListeningToRebind = ParentWidget->UINavPC->IsListeningToInputRebind();
 
 	OnNativeClicked.Broadcast();
@@ -249,6 +255,11 @@ void UUINavComponent::OnButtonPressed()
 		}
 	}
 
+	if (IsValid(ParentWidget) && !ParentWidget->IsForcingNavigation() && !GetDefault<UUINavSettings>()->bForceNavigation)
+	{
+		return;
+	}
+
 	OnNativePressed.Broadcast();
 	OnPressed.Broadcast();
 
@@ -273,6 +284,11 @@ void UUINavComponent::OnButtonReleased()
 		{
 			return;
 		}
+	}
+
+	if (IsValid(ParentWidget) && !ParentWidget->IsForcingNavigation() && !GetDefault<UUINavSettings>()->bForceNavigation)
+	{
+		return;
 	}
 
 	OnNativeReleased.Broadcast();
