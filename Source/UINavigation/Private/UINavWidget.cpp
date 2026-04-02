@@ -69,6 +69,11 @@ void UUINavWidget::NativeConstruct()
 		Super::NativeConstruct();
 		return;
 	}
+	else
+	{
+		SetAllNavigationRules(EUINavigationRule::Stop, NAME_None);
+	}
+
 	if (World != nullptr)
 	{
 		if (const UGameViewportClient* ViewportClient = World->GetGameViewport())
@@ -923,7 +928,7 @@ void UUINavWidget::HandleOnKeyDown(FReply& Reply, UUINavWidget* Widget, UUINavCo
 	const bool bHandleReply = Widget->OuterUINavWidget == nullptr;
 	if (FSlateApplication::Get().GetNavigationActionFromKey(InKeyEvent) == EUINavigationAction::Accept)
 	{
-		if (!Widget->TryConsumeNavigation())
+		if (Widget->IsForcingNavigation() || GetDefault<UUINavSettings>()->bForceNavigation)
 		{
 			Widget->StartedSelect();
 			if (bHandleReply)
@@ -934,7 +939,7 @@ void UUINavWidget::HandleOnKeyDown(FReply& Reply, UUINavWidget* Widget, UUINavCo
 	}
 	else if (FSlateApplication::Get().GetNavigationActionFromKey(InKeyEvent) == EUINavigationAction::Back)
 	{
-		if (!Widget->TryConsumeNavigation())
+		if (Widget->IsForcingNavigation() || GetDefault<UUINavSettings>()->bForceNavigation)
 		{
 			Widget->StartedReturn();
 			if (bHandleReply)
@@ -1945,6 +1950,11 @@ void UUINavWidget::StoppedSelect()
 
 void UUINavWidget::StartedReturn()
 {
+	if (!bForcingNavigation && !GetDefault<UUINavSettings>()->bForceNavigation)
+	{
+		return;
+	}
+
 	const bool bWasPressingReturn = bPressingReturn;
 	SetPressingReturn(true);
 	if (GetDefault<UUINavSettings>()->bReturnOnPress && !bWasPressingReturn)
@@ -1955,6 +1965,12 @@ void UUINavWidget::StartedReturn()
 
 void UUINavWidget::StoppedReturn()
 {
+	if (!bForcingNavigation && !GetDefault<UUINavSettings>()->bForceNavigation)
+	{
+		ForceNavigation();
+		return;
+	}
+
 	if (!GetDefault<UUINavSettings>()->bReturnOnPress)
 	{
 		if (bIgnoreFirstReturn)
@@ -2139,7 +2155,7 @@ void UUINavWidget::OnHoveredComponent(UUINavComponent* Component)
 		}
 	}
 
-	if (Component != CurrentComponent || UINavPC->GetActiveSubWidget() != this)
+	if (Component->IsFocusable() && Component != CurrentComponent || UINavPC->GetActiveSubWidget() != this)
 	{
 		SetFocusOnComponent(Component);
 	}
