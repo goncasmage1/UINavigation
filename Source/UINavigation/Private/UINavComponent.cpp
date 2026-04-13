@@ -205,7 +205,7 @@ void UUINavComponent::HandleFocusLost()
 
 void UUINavComponent::OnButtonClicked()
 {
-	if (!IsValid(ParentWidget) || !IsValid(ParentWidget->UINavPC) || ParentWidget->UINavPC->IsWaitingForInputCooldown())
+	if (!IsValid(ParentWidget) || !IsValid(ParentWidget->UINavPC) || ParentWidget->UINavPC->IsWaitingForInputCooldown() || ParentWidget->UINavPC->ShouldIgnoreInputIn3DWidget())
 	{
 		return;
 	}
@@ -242,7 +242,7 @@ void UUINavComponent::OnButtonClicked()
 
 void UUINavComponent::OnButtonPressed()
 {
-	if (!IsValid(ParentWidget) || !IsValid(ParentWidget->UINavPC) || ParentWidget->UINavPC->IsWaitingForInputCooldown())
+	if (!IsValid(ParentWidget) || !IsValid(ParentWidget->UINavPC) || ParentWidget->UINavPC->IsWaitingForInputCooldown() || ParentWidget->UINavPC->ShouldIgnoreInputIn3DWidget())
 	{
 		return;
 	}
@@ -273,7 +273,7 @@ void UUINavComponent::OnButtonPressed()
 
 void UUINavComponent::OnButtonReleased()
 {
-	if (!IsValid(ParentWidget) || !IsValid(ParentWidget->UINavPC) || ParentWidget->UINavPC->IsWaitingForInputCooldown())
+	if (!IsValid(ParentWidget) || !IsValid(ParentWidget->UINavPC) || ParentWidget->UINavPC->IsWaitingForInputCooldown() || ParentWidget->UINavPC->ShouldIgnoreInputIn3DWidget())
 	{
 		return;
 	}
