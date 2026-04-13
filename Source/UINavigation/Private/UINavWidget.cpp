@@ -855,8 +855,7 @@ void UUINavWidget::HandleOnNavigation(FNavigationReply& Reply, UUINavWidget* Wid
 	}
 
 	const FWidgetPath* WidgetPath = InNavigationEvent.GetEventPath();
-	if (!Widget->UINavPC->IsGameViewportInFocus(InNavigationEvent.GetUserIndex()) &&
-		Widget->UINavPC->ShouldIgnoreInputIn3DWidget())
+	if (Widget->UINavPC->ShouldIgnoreInputIn3DWidget())
 	{
 		Reply = FNavigationReply::Stop();
 		return;
