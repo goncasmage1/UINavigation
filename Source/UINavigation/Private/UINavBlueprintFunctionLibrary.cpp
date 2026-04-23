@@ -174,7 +174,11 @@ FText UUINavBlueprintFunctionLibrary::ApplyStyleRowToText(const FText& Text, con
 	for (int32 i = 0; i < StringArray.Num(); ++i)
 	{
 		if (i > 0) FinalString += TEXT("\n");
-		FinalString += TEXT("<") + StyleRowName + TEXT(">") + StringArray[i].TrimEnd() + TEXT("</>");
+		if ( StyleRowName.IsEmpty() ) {
+			FinalString += StringArray[i].TrimEnd();
+		} else {
+			FinalString += TEXT("<") + StyleRowName + TEXT(">") + StringArray[i].TrimEnd() + TEXT("</>");
+		}
 	}
 	
 	return FText::FromString(FinalString);
