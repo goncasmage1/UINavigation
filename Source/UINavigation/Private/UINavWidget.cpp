@@ -367,6 +367,10 @@ void UUINavWidget::UINavSetup()
 	{
 		FSlateApplication::Get().ReleaseAllPointerCapture();
 	}
+	else if (GetDefault<UUINavSettings>()->bUseFocusSystemNavigationInputs)
+	{
+		DISPLAYERROR("Using Focus System Inputs with 3D widget. Go to Project Settings -> Plugins -> UINavigation and set UseFocusSystemNavigationInputs to false!");
+	}
 
 	bForcingNavigation = GetDefault<UUINavSettings>()->bForceNavigation || UINavPC->GetCurrentInputType() == EInputType::Gamepad;
 
