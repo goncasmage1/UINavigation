@@ -2220,6 +2220,11 @@ void UUINavWidget::OnPressedComponent(UUINavComponent* Component)
 
 	SelectCount++;
 
+	if (!GetDefault<UUINavSettings>()->bUseFocusSystemNavigationInputs)
+	{
+		Component->SwitchButtonStyle(Component->NavButton->IsPressed() || SelectCount > 0 ? EButtonStyle::Pressed : (Component == CurrentComponent ? EButtonStyle::Hovered : EButtonStyle::Normal));
+	}
+
 	PropagateOnStartSelect(CurrentComponent);
 }
 
@@ -2235,7 +2240,7 @@ void UUINavWidget::OnReleasedComponent(UUINavComponent* Component)
 
 	if (IsValid(Component))
 	{
-		Component->SwitchButtonStyle(Component->NavButton->IsPressed() || SelectCount > 1 ? EButtonStyle::Pressed : (Component == CurrentComponent ? EButtonStyle::Hovered : EButtonStyle::Normal));
+		Component->SwitchButtonStyle(Component == CurrentComponent ? EButtonStyle::Hovered : EButtonStyle::Normal);
 
 		if (SelectCount > 0) SelectCount--;
 		if (SelectCount == 0)
