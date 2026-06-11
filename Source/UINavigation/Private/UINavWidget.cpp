@@ -64,7 +64,7 @@ void UUINavWidget::NativeConstruct()
 
 		ConfigureUINavPC();
 
-		bForcingNavigation = GetDefault<UUINavSettings>()->bForceNavigation || UINavPC->GetCurrentInputType() == EInputType::Gamepad;
+		SetForceNavigation(GetDefault<UUINavSettings>()->bForceNavigation || UINavPC->GetCurrentInputType() == EInputType::Gamepad);
 
 		Super::NativeConstruct();
 		return;
@@ -362,7 +362,7 @@ void UUINavWidget::UINavSetup()
 		DISPLAYERROR("Using Focus System Inputs with 3D widget. Go to Project Settings -> Plugins -> UINavigation and set UseFocusSystemNavigationInputs to false!");
 	}
 
-	bForcingNavigation = GetDefault<UUINavSettings>()->bForceNavigation || UINavPC->GetCurrentInputType() == EInputType::Gamepad;
+	SetForceNavigation(GetDefault<UUINavSettings>()->bForceNavigation || UINavPC->GetCurrentInputType() == EInputType::Gamepad);
 
 	UUINavWidget* CurrentActiveWidget = UINavPC->GetActiveWidget();
 	const bool bShouldTakeFocus =
@@ -687,6 +687,20 @@ void UUINavWidget::NativeTick(const FGeometry & MyGeometry, float DeltaTime)
 		if (bMovingSelector)
 		{
 			HandleSelectorMovement(DeltaTime);
+		}
+	}
+
+	if (bRevertNavigationVisualsNextTick)
+	{
+		bRevertNavigationVisualsNextTick = false;
+		
+		if (HoveredComponent == nullptr && UINavPC->IsWidgetActive(this))
+		{
+			UpdateNavigationVisuals(nullptr, bHadNavigationForNextTick);
+			if (IsValid(CurrentComponent))
+			{
+				CurrentComponent->RevertButtonStyle();
+			}
 		}
 	}
 
@@ -1087,6 +1101,17 @@ void UUINavWidget::SetSelectorLocation(const FVector2D& NewLocation, const bool 
 	TheSelector->SetRenderTranslation(NewLocation - GetSelectorLocationOffset(bAbsolute));
 }
 
+void UUINavWidget::SetForceNavigation(const bool bForceNavigation)
+{
+	if (OuterUINavWidget != nullptr)
+	{
+		OuterUINavWidget->SetForceNavigation(bForceNavigation);
+		return;
+	}
+
+	bForcingNavigation = bForceNavigation;
+}
+
 void UUINavWidget::SetFocusOnComponent(UUINavComponent* Component)
 {
 	if (WidgetComp == nullptr || WidgetComp->bTakeFocus)
@@ -1288,7 +1313,7 @@ void UUINavWidget::ExecuteAnimations(UUINavComponent* FromComponent, UUINavCompo
 		IsValid(FromComponent->GetComponentAnimation()) &&
 		FromComponent->UseComponentAnimation() &&
 		bHadNavigation &&
-		(bForcingNavigation || !IsValid(ToComponent)))
+		(IsForcingNavigation() || !IsValid(ToComponent)))
 	{
 		if (FromComponent->IsAnimationPlaying(FromComponent->GetComponentAnimation()))
 		{
@@ -1484,7 +1509,7 @@ void UUINavWidget::AttemptUnforceNavigation(const EInputType NewInputType)
 				SetFocusOnComponent(HoveredComponent);
 			}
 		}
-		else if (bForcingNavigation)
+		else if (IsForcingNavigation())
 		{
 			UnforceNavigation(true);
 		}
@@ -1493,7 +1518,7 @@ void UUINavWidget::AttemptUnforceNavigation(const EInputType NewInputType)
 
 void UUINavWidget::ForceNavigation()
 {
-	bForcingNavigation = true;
+	SetForceNavigation(true);
 	UpdateNavigationVisuals(CurrentComponent, true);
 	if (IsValid(CurrentComponent))
 	{
@@ -1503,12 +1528,10 @@ void UUINavWidget::ForceNavigation()
 
 void UUINavWidget::UnforceNavigation(const bool bHadNavigation)
 {
-	bForcingNavigation = false;
-	UpdateNavigationVisuals(nullptr, bHadNavigation);
-	if (IsValid(CurrentComponent))
-	{
-		CurrentComponent->RevertButtonStyle();
-	}
+	SetForceNavigation(false);
+
+	bRevertNavigationVisualsNextTick = true;
+	bHadNavigationForNextTick = bHadNavigation;
 }
 
 void UUINavWidget::OnReturn_Implementation()
@@ -1880,19 +1903,19 @@ void UUINavWidget::NavigatedTo(UUINavComponent* NavigatedToComponent, const bool
 		return;
 	}
 
-	if (bForcingNavigation || (CurrentComponent != NavigatedToComponent && CurrentComponent != nullptr))
+	if (IsForcingNavigation() || (CurrentComponent != NavigatedToComponent && CurrentComponent != nullptr))
 	{
 		UpdateNavigationVisuals(NavigatedToComponent, !bHoverRestoredNavigation);
 	}
 	else
 	{
-		ToggleSelectorVisibility(bForcingNavigation || IsValid(HoveredComponent));
+		ToggleSelectorVisibility(IsForcingNavigation() || IsValid(HoveredComponent));
 		RevertAnimation(CurrentComponent);
 	}
 
-	if (!bForcingNavigation && GetDefault<UUINavSettings>()->bForceNavigation)
+	if (!IsForcingNavigation() && GetDefault<UUINavSettings>()->bForceNavigation)
 	{
-		bForcingNavigation = true;
+		SetForceNavigation(true);
 	}
 
 	CallOnNavigate(bHadNavigation == bHasNavigation ? CurrentComponent : nullptr, NavigatedToComponent);
@@ -1926,7 +1949,7 @@ void UUINavWidget::CallOnNavigate(UUINavComponent* FromComponent, UUINavComponen
 	if (IsValid(ToComponent))
 	{
 		USoundBase* NavigatedSound = ToComponent->GetOnNavigatedSound();
-		if (NavigatedSound != nullptr && bForcingNavigation && (IsValid(FromComponent) || GetDefault<UUINavSettings>()->bPlayOnNavigatedSoundOnFirstUINavComponent))
+		if (NavigatedSound != nullptr && FromComponent != ToComponent && (IsValid(FromComponent) || GetDefault<UUINavSettings>()->bPlayOnNavigatedSoundOnFirstUINavComponent))
 		{
 			PlaySound(NavigatedSound);
 		}
@@ -1953,7 +1976,7 @@ void UUINavWidget::StoppedSelect()
 
 void UUINavWidget::StartedReturn()
 {
-	if (!bForcingNavigation && !GetDefault<UUINavSettings>()->bForceNavigation)
+	if (!IsForcingNavigation() && !GetDefault<UUINavSettings>()->bForceNavigation)
 	{
 		return;
 	}
@@ -1968,7 +1991,7 @@ void UUINavWidget::StartedReturn()
 
 void UUINavWidget::StoppedReturn()
 {
-	if (!bForcingNavigation && !GetDefault<UUINavSettings>()->bForceNavigation)
+	if (!IsForcingNavigation() && !GetDefault<UUINavSettings>()->bForceNavigation)
 	{
 		ForceNavigation();
 		return;
@@ -2016,13 +2039,23 @@ void UUINavWidget::ExecuteReturn(const bool bPress)
 
 bool UUINavWidget::TryConsumeNavigation()
 {
-	if (!bForcingNavigation && !GetDefault<UUINavSettings>()->bForceNavigation)
+	if (!IsForcingNavigation() && !GetDefault<UUINavSettings>()->bForceNavigation)
 	{
 		ForceNavigation();
 		return true;
 	}
 
 	return IsValid(SelectedComponent) && !GetDefault<UUINavSettings>()->bAllowNavigationWhilePressing;
+}
+
+bool UUINavWidget::IsForcingNavigation() const
+{
+	if (OuterUINavWidget != nullptr)
+	{
+		return OuterUINavWidget->IsForcingNavigation();
+	}
+
+	return bForcingNavigation;
 }
 
 bool UUINavWidget::IsBeingRemoved() const
@@ -2138,9 +2171,9 @@ void UUINavWidget::OnHoveredComponent(UUINavComponent* Component)
 		Component->RevertButtonStyle();
 	}
 
-	if (!bForcingNavigation)
+	if (!IsForcingNavigation())
 	{
-		bForcingNavigation = true;
+		SetForceNavigation(true);
 
 		if (Component != CurrentComponent)
 		{
@@ -2151,7 +2184,7 @@ void UUINavWidget::OnHoveredComponent(UUINavComponent* Component)
 			UpdateNavigationVisuals(CurrentComponent, false, true);
 
 			USoundBase* NavigatedSound = Component->GetOnNavigatedSound();
-			if (NavigatedSound != nullptr && bForcingNavigation && (!bNavigatingToFirstComponent || GetDefault<UUINavSettings>()->bPlayOnNavigatedSoundOnFirstUINavComponent))
+			if (NavigatedSound != nullptr && Component != CurrentComponent && (!bNavigatingToFirstComponent || GetDefault<UUINavSettings>()->bPlayOnNavigatedSoundOnFirstUINavComponent))
 			{
 				PlaySound(NavigatedSound);
 			}
