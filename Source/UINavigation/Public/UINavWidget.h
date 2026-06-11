@@ -60,6 +60,8 @@ protected:
 	bool bRestoreNavigation = false;
 
 	bool bHoverRestoredNavigation = false;
+	bool bRevertNavigationVisualsNextTick = false;
+	bool bHadNavigationForNextTick = false;
 
 	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
 	UUINavComponent* FirstComponent = nullptr;
@@ -132,6 +134,8 @@ protected:
 	FVector2D GetSelectorLocationOffset(const bool bAbsolute = true);
 	FVector2D GetSelectorLocation(const bool bAbsolute = true);
 	void SetSelectorLocation(const FVector2D& NewLocation, const bool bAbsolute = true);
+
+	void SetForceNavigation(const bool bForceNavigation);
 
 	UFUNCTION(BlueprintCallable, Category = UINavWidget)
 	void GoToNextSection();
@@ -613,7 +617,7 @@ public:
 
 	bool TryConsumeNavigation();
 
-	bool IsForcingNavigation() const { return bForcingNavigation; }
+	bool IsForcingNavigation() const;
 
 	bool IsBeingRemoved() const;
 
