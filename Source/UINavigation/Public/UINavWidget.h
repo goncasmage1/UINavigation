@@ -73,6 +73,9 @@ protected:
 	UUINavComponent* HoveredComponent = nullptr;
 
 	UPROPERTY()
+	UUINavComponent * HoveredComponentLastFrame = nullptr;
+
+	UPROPERTY()
 	UUINavComponent* SelectedComponent = nullptr;
 
 	uint8 SelectCount = 0;
