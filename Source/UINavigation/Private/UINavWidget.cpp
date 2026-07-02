@@ -719,6 +719,8 @@ void UUINavWidget::NativeTick(const FGeometry & MyGeometry, float DeltaTime)
 		SetMousePositionToButton(CurrentComponent, GetDefault<UUINavSettings>()->MoveMouseToButtonPosition);
 		bUpdateMousePositionNextFrame = false;
 	}
+
+	HoveredComponentLastFrame = HoveredComponent;
 }
 
 void UUINavWidget::RemoveFromParent()
@@ -1915,7 +1917,7 @@ void UUINavWidget::NavigatedTo(UUINavComponent* NavigatedToComponent, const bool
 
 	if (IsForcingNavigation() || (CurrentComponent != NavigatedToComponent && CurrentComponent != nullptr))
 	{
-		UpdateNavigationVisuals(NavigatedToComponent, !bHoverRestoredNavigation);
+		UpdateNavigationVisuals(NavigatedToComponent, !bHoverRestoredNavigation, /*bBypassForcedNavigation*/ false, /*bFinishInstantly*/ HoveredComponent == NavigatedToComponent);
 	}
 	else
 	{
@@ -2185,7 +2187,7 @@ void UUINavWidget::OnHoveredComponent(UUINavComponent* Component)
 	{
 		SetForceNavigation(true);
 
-		if (Component != CurrentComponent)
+		if (Component != CurrentComponent && HoveredComponentLastFrame == nullptr)
 		{
 			bHoverRestoredNavigation = true;
 		}
