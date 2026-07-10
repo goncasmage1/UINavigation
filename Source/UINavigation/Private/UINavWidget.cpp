@@ -1504,6 +1504,11 @@ void UUINavWidget::AttemptUnforceNavigation(const EInputType NewInputType)
 {
 	if (!GetDefault<UUINavSettings>()->bForceNavigation && NewInputType == EInputType::Mouse)
 	{
+		if (IsValid(SelectedComponent))
+		{
+			SetSelectedComponent(nullptr);
+		}
+
 		if (IsValid(HoveredComponent))
 		{
 			if (HoveredComponent != CurrentComponent)
@@ -2193,7 +2198,7 @@ void UUINavWidget::OnHoveredComponent(UUINavComponent* Component)
 		}
 	}
 
-	if (Component->IsFocusable() && Component != CurrentComponent || UINavPC->GetActiveSubWidget() != this)
+	if (Component->IsFocusable() && (Component != CurrentComponent || UINavPC->GetActiveSubWidget() != this))
 	{
 		SetFocusOnComponent(Component);
 	}
