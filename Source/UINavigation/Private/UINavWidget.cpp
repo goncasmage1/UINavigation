@@ -1514,6 +1514,11 @@ void UUINavWidget::AttemptUnforceNavigation(const EInputType NewInputType)
 {
 	if (!GetDefault<UUINavSettings>()->bForceNavigation && NewInputType == EInputType::Mouse)
 	{
+		if (IsValid(SelectedComponent))
+		{
+			SetSelectedComponent(nullptr);
+		}
+
 		if (IsValid(HoveredComponent))
 		{
 			if (HoveredComponent != CurrentComponent)
