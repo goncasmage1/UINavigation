@@ -2208,7 +2208,7 @@ void UUINavWidget::OnHoveredComponent(UUINavComponent* Component)
 		}
 	}
 
-	if (Component->IsFocusable() && Component != CurrentComponent || UINavPC->GetActiveSubWidget() != this)
+	if (Component->IsFocusable() && (Component != CurrentComponent || UINavPC->GetActiveSubWidget() != this))
 	{
 		SetFocusOnComponent(Component);
 	}
