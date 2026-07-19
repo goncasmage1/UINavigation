@@ -78,7 +78,9 @@ protected:
 	UPROPERTY()
 	UUINavComponent* SelectedComponent = nullptr;
 
-	uint8 SelectCount = 0;
+	uint8 GetTotalSelectCount() const { return NonMouseSelectCount + bPressingMouse; }
+
+	uint8 NonMouseSelectCount = 0;
 
 	float MovementCounter;
 	float MovementTime;
@@ -269,6 +271,8 @@ public:
 
 	bool bCompletedSetup = false;
 	bool bSetupStarted = false;
+	
+	bool bPressingMouse = false;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UINavigation Selector")
 	UCurveFloat* MoveCurve = nullptr;
@@ -662,8 +666,6 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
 	bool IsSelectorValid();
-
-	FORCEINLINE uint8 GetSelectCount() const { return SelectCount; }
 
 	/**
 	*	Adds given widget to screen (strongly recommended over manual alternative)

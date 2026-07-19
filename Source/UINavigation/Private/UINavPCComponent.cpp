@@ -276,6 +276,12 @@ void UUINavPCComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAct
 		bIgnoreFocusByNavigation = false;
 	}
 
+	if (bResetPressingMouseNextTick && IsValid(ActiveWidget))
+	{
+		ActiveWidget->bPressingMouse = false;
+		bResetPressingMouseNextTick = false;
+	}
+
 	if (UsingThumbstickAsMouse() != EThumbstickAsMouse::None != bUsingThumbstickAsMouse)
 	{
 		bUsingThumbstickAsMouse = !bUsingThumbstickAsMouse;
@@ -1376,6 +1382,8 @@ void UUINavPCComponent::HandleMouseButtonUpEvent(FSlateApplication& SlateApp, co
 			NotifyInputTypeChange(EInputType::Mouse);
 		}
 	}
+
+	bResetPressingMouseNextTick = true;
 }
 
 void UUINavPCComponent::HandleMouseWheelOrGestureEvent(FSlateApplication& SlateApp, const FPointerEvent& InWheelEvent, const FPointerEvent* InGesture)

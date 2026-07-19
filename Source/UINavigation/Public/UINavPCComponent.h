@@ -136,6 +136,8 @@ protected:
 
 	bool bIgnoreInputIn3DWidget = false;
 
+	bool bResetPressingMouseNextTick = false;
+
 	UPROPERTY()
 	TArray<const UInputMappingContext*> CachedInputContexts;
 
