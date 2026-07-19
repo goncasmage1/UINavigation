@@ -1765,7 +1765,8 @@ UUINavWidget * UUINavWidget::GoToBuiltWidget(UUINavWidget* NewWidget, const bool
 
 	CleanSetup();
 	
-	SelectCount = 0;
+	NonMouseSelectCount = 0;
+	bPressingMouse = false;
 	SetSelectedComponent(nullptr);
 
 	SetHoveredComponent(nullptr);
@@ -1782,7 +1783,8 @@ void UUINavWidget::ReturnToParent(const bool bRemoveAllParents, const int ZOrder
 			UINavPC->GetActiveWidget()->PropagateLoseNavigation(nullptr, UINavPC->GetActiveWidget(), nullptr);
 			UINavPC->SetActiveWidget(nullptr);
 
-			SelectCount = 0;
+			NonMouseSelectCount = 0;
+			bPressingMouse = false;
 			SetSelectedComponent(nullptr);
 			if (WidgetComp != nullptr)
 			{
@@ -1797,7 +1799,8 @@ void UUINavWidget::ReturnToParent(const bool bRemoveAllParents, const int ZOrder
 		return;
 	}
 
-	SelectCount = 0;
+	NonMouseSelectCount = 0;
+	bPressingMouse = false;
 	SetSelectedComponent(nullptr);
 	if (WidgetComp != nullptr)
 	{
@@ -2248,11 +2251,18 @@ void UUINavWidget::OnPressedComponent(UUINavComponent* Component)
 
 	SetSelectedComponent(Component);
 
-	SelectCount++;
+	if (UINavPC->GetCurrentInputType() == EInputType::Mouse)
+	{
+		bPressingMouse = true;
+	}
+	else
+	{
+		NonMouseSelectCount++;
+	}
 
 	if (!GetDefault<UUINavSettings>()->bUseFocusSystemNavigationInputs)
 	{
-		Component->SwitchButtonStyle(Component->NavButton->IsPressed() || SelectCount > 0 ? EButtonStyle::Pressed : (Component == CurrentComponent ? EButtonStyle::Hovered : EButtonStyle::Normal));
+		Component->SwitchButtonStyle(Component->NavButton->IsPressed() || GetTotalSelectCount() > 0 ? EButtonStyle::Pressed : (Component == CurrentComponent ? EButtonStyle::Hovered : EButtonStyle::Normal));
 	}
 
 	PropagateOnStartSelect(CurrentComponent);
@@ -2260,7 +2270,7 @@ void UUINavWidget::OnPressedComponent(UUINavComponent* Component)
 
 void UUINavWidget::OnReleasedComponent(UUINavComponent* Component)
 {
-	if (!IsValid(Component) || (!bHasNavigation && SelectCount == 0) || UINavPC == nullptr) return;
+	if (!IsValid(Component) || (!bHasNavigation && GetTotalSelectCount() == 0) || UINavPC == nullptr) return;
 
 	if (!Component->NavButton->IsHovered()) Component->RevertButtonStyle();
 
@@ -2272,8 +2282,16 @@ void UUINavWidget::OnReleasedComponent(UUINavComponent* Component)
 	{
 		Component->SwitchButtonStyle(Component == CurrentComponent ? EButtonStyle::Hovered : EButtonStyle::Normal);
 
-		if (SelectCount > 0) SelectCount--;
-		if (SelectCount == 0)
+		if (UINavPC->GetCurrentInputType() == EInputType::Mouse)
+		{
+			bPressingMouse = false;
+		}
+		else if (NonMouseSelectCount > 0)
+		{
+			NonMouseSelectCount--;
+		}
+
+		if (GetTotalSelectCount() == 0)
 		{
 			SetSelectedComponent(nullptr);
 
