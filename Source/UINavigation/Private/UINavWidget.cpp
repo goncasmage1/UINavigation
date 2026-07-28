@@ -2285,6 +2285,7 @@ void UUINavWidget::OnReleasedComponent(UUINavComponent* Component)
 		if (UINavPC->GetCurrentInputType() == EInputType::Mouse)
 		{
 			bPressingMouse = false;
+			NonMouseSelectCount = 0;
 		}
 		else if (NonMouseSelectCount > 0)
 		{
