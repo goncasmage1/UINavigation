@@ -279,6 +279,7 @@ void UUINavPCComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAct
 	if (bResetPressingMouseNextTick && IsValid(ActiveWidget))
 	{
 		ActiveWidget->bPressingMouse = false;
+		ActiveWidget->NonMouseSelectCount = 0;
 		bResetPressingMouseNextTick = false;
 	}
 

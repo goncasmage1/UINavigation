@@ -80,8 +80,6 @@ protected:
 
 	uint8 GetTotalSelectCount() const { return NonMouseSelectCount + bPressingMouse; }
 
-	uint8 NonMouseSelectCount = 0;
-
 	float MovementCounter;
 	float MovementTime;
 
@@ -274,15 +272,21 @@ public:
 	
 	bool bPressingMouse = false;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UINavigation Selector")
+	uint8 NonMouseSelectCount = 0;
+
+	//If set to true, this widget will show the selector it has, otherwise it will hide it.
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UINavWidget|Selector")
+	bool bShowSelector = true;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UINavWidget|Selector")
 	UCurveFloat* MoveCurve = nullptr;
 
 	//The position the selector will be in relative to the button
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UINavigation Selector")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UINavWidget|Selector")
 	ESelectorPosition SelectorPositioning = ESelectorPosition::Position_Center;
 
 	//The offset to apply when positioning the selector on a button
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UINavigation Selector")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UINavWidget!Selector")
 	FVector2D SelectorOffset;
 
 	double InputRebindPressTimestamp = 0.0;
