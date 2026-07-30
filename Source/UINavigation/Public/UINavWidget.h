@@ -63,7 +63,7 @@ protected:
 	bool bRevertNavigationVisualsNextTick = false;
 	bool bHadNavigationForNextTick = false;
 
-	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
+	UPROPERTY(BlueprintReadOnly, Category = "UINavWidget")
 	UUINavComponent* FirstComponent = nullptr;
 
 	UPROPERTY(BlueprintReadOnly, Category = "UINavWidget")
@@ -114,7 +114,7 @@ protected:
 	/**
 	*	Configures the UINavPC
 	*/
-	UFUNCTION(BlueprintCallable, Category = UINavWidget)
+	UFUNCTION(BlueprintCallable, Category = "UINavWidget")
 	void ConfigureUINavPC();
 
 	/**
@@ -140,11 +140,11 @@ protected:
 
 	void SetForceNavigation(const bool bForceNavigation);
 
-	UFUNCTION(BlueprintCallable, Category = UINavWidget)
+	UFUNCTION(BlueprintCallable, Category = "UINavWidget")
 	void GoToNextSection();
-	UFUNCTION(BlueprintCallable, Category = UINavWidget)
+	UFUNCTION(BlueprintCallable, Category = "UINavWidget")
 	void GoToPreviousSection();
-	UFUNCTION(BlueprintCallable, Category = UINavWidget)
+	UFUNCTION(BlueprintCallable, Category = "UINavWidget")
 	void GoToSection(const int32 SectionIndex);
 
 	UFUNCTION()
@@ -173,98 +173,94 @@ public:
 	EReceiveInputType ReceiveInputType = EReceiveInputType::None;
 
 	//The UserWidget object that will move along the Widget
-	UPROPERTY(BlueprintReadOnly, meta = (BindWidget, OptionalWidget = true), Category = UINavWidget)
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget, OptionalWidget = true), Category = "UINavWidget")
 	UUserWidget* TheSelector = nullptr;
 
 	//All the child UINavWidgets in this Widget
-	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
+	UPROPERTY(BlueprintReadOnly, Category = "UINavWidget")
 	TArray<UUINavWidget*> ChildUINavWidgets;
 
 	//Reference to the parent widget that created this widget
-	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
+	UPROPERTY(BlueprintReadOnly, Category = "UINavWidget")
 	UUINavWidget* ParentWidget = nullptr;
 
 	//Reference to the widget that encapsulates this widget
-	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
+	UPROPERTY(BlueprintReadOnly, Category = "UINavWidget")
 	UUINavWidget* OuterUINavWidget = nullptr;
 
 	//Current player controller
-	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
+	UPROPERTY(BlueprintReadOnly, Category = "UINavWidget")
 	class UUINavPCComponent* UINavPC = nullptr;
 
 	//Widget that created this widget (if returned from a child)
-	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
+	UPROPERTY(BlueprintReadOnly, Category = "UINavWidget")
 	UUINavWidget* ReturnedFromWidget = nullptr;
 
-	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
+	UPROPERTY(BlueprintReadOnly, Category = "UINavWidget")
 	class UUINavWidgetComponent* WidgetComp = nullptr;
 
 	//The Widget Switcher that will be used to switch between sections
-	UPROPERTY(BlueprintReadOnly, meta = (BindWidget, OptionalWidget = true), Category = UINavWidget)
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget, OptionalWidget = true), Category = "UINavWidget")
 	UWidgetSwitcher* UINavSwitcher = nullptr;
 
 	//The PanelWidget or UserWidget that contains the Buttons (not UINavComponents) that will switch between the sections
-	UPROPERTY(BlueprintReadOnly, meta = (BindWidget, OptionalWidget = true), Category = UINavWidget)
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget, OptionalWidget = true), Category = "UINavWidget")
 	UWidget* UINavSectionsPanel = nullptr;
 
 	//Should this widget remove its parent from the viewport when created?
-	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
+	UPROPERTY(BlueprintReadOnly, Category = "UINavWidget")
 	bool bParentRemoved = false;
 
 	//Should this widget destroy its parent
-	UPROPERTY(BlueprintReadOnly, Category = UINavWidget)
+	UPROPERTY(BlueprintReadOnly, Category = "UINavWidget")
 	bool bShouldDestroyParent = false;
 
 	//If set to true, this widget will be removed if it has no ParentWidget and is returned from
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = UINavWidget)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UINavWidget")
 	bool bAllowRemoveIfRoot = true;
-
-	//If set to true, this widget will show the selector it has, otherwise it will hide it.
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = UINavWidget)
-	bool bShowSelector = true;
 	
 	/*
 	* If set to true, the UINavWidget will maintain its navigated state when navigation moves to a child nested widget,
 	* otherwise, the button being navigated to at that moment will be navigated out of.
 	* Only applies when using nested UINavWidgets.
 	*/
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = UINavWidget)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UINavWidget")
 	bool bMaintainNavigationForChild = false;
 
 	/*
 	* If set to true, the UINavWidget will clear its navigation state if it's a child UINavWidget.
 	* Only applies when using nested UINavWidgets.
 	*/
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavWidget)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UINavWidget")
 	bool bClearNavigationStateWhenChild = true;
 
 	//If set to true, this widget will go from the first section to the last and vice-versa when using auto section switching.
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = UINavWidget)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UINavWidget")
 	bool bWrapAutoSectionNavigation = true;
 
 	/*
 	* Input Context to be used to replace the default one. for each platform, in this specific widget (assuming a child widget doesn't override that)
 	* The Map's Key (String) should be the name of the platform you want to override. Leave blank if this applies to all platforms.
 	*/
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = UINavWidget)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UINavWidget")
 	TMap<FString, TObjectPtr<UInputMappingContext>> UINavInputContextOverrides;
 
 	/*
 	* Input Contexts to be applied when this widget becomes active (and to be removed when it becomes inactive)
 	*/
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = UINavWidget)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UINavWidget")
 	TArray<TObjectPtr<UInputMappingContext>> InputContextsToAdd;
 
 	/*If set to Left or Right, the gamepad's left or right thumbstick will be used to move the mouse when this widget is active */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = UINavWidget)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UINavWidget")
 	EThumbstickAsMouse UseThumbstickAsMouse = EThumbstickAsMouse::None;
 
     /*If set to true, the widget will be set to fullscreen even when using split screen */
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = UINavWidget)
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UINavWidget")
 	bool bUseFullscreenWhenSplitscreen = false;
 
 	// If set to true, will always use AddToPlayerScreen instead of AddToViewport, even if not in split screen
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = UINavWidget)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UINavWidget")
 	bool bForceUsePlayerScreen = false;
 
 	bool bCompletedSetup = false;
@@ -353,7 +349,7 @@ public:
 	*/
 	virtual void UINavSetup();
 
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = UINavWidget)
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "UINavWidget")
 	UUINavComponent* GetInitialFocusComponent();
 	virtual UUINavComponent* GetInitialFocusComponent_Implementation();
 
@@ -372,7 +368,7 @@ public:
 	/**
 	*	Called when navigation is gained
 	*/
-	UFUNCTION(BlueprintNativeEvent, Category = UINavWidget)
+	UFUNCTION(BlueprintNativeEvent, Category = "UINavWidget")
     void OnGainedNavigation(UUINavWidget* PreviousActiveWidget, const bool bFromChild);
 	
 	virtual void OnGainedNavigation_Implementation(UUINavWidget* PreviousActiveWidget, const bool bFromChild);
@@ -384,7 +380,7 @@ public:
 	/**
 	*	Called when navigation is lost
 	*/
-	UFUNCTION(BlueprintNativeEvent, Category = UINavWidget)
+	UFUNCTION(BlueprintNativeEvent, Category = "UINavWidget")
         void OnLostNavigation(UUINavWidget* NewActiveWidget, const bool bToChild);
 	virtual void OnLostNavigation_Implementation(UUINavWidget* NewActiveWidget, const bool bToChild);
 
@@ -397,7 +393,7 @@ public:
 	bool IsNavigationKeyPressed(const EUINavigation NavigationEvent) const;
 	bool IsNavigationKeyPressed(const EUINavigationAction NavigationAction) const;
 
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, BlueprintPure, Category = UINavWidget)
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, BlueprintPure, Category = "UINavWidget")
 	UScrollBox* GetScrollBoxToFocus();
 	virtual UScrollBox* GetScrollBoxToFocus_Implementation() { return nullptr; }
 
@@ -408,7 +404,7 @@ public:
 	*
 	*	@param	Index  The new button's index in the Button's array
 	*/
-	UFUNCTION(BlueprintCallable, Category = UINavWidget)
+	UFUNCTION(BlueprintCallable, Category = "UINavWidget")
 	void UpdateSelectorLocation(UUINavComponent* Component);
 
 	/**
@@ -440,7 +436,7 @@ public:
 	*
 	*	@param	NewScale  The selector's new scale
 	*/
-	UFUNCTION(BlueprintCallable, Category = UINavWidget)
+	UFUNCTION(BlueprintCallable, Category = "UINavWidget")
 	void SetSelectorScale(FVector2D NewScale);
 
 	/**
@@ -448,15 +444,15 @@ public:
 	*
 	*	@param	bVisible Whether the selector will be visible
 	*/
-	UFUNCTION(BlueprintCallable, Category = UINavWidget)
+	UFUNCTION(BlueprintCallable, Category = "UINavWidget")
 	void SetSelectorVisible(const bool bVisible);
 		
 	void ToggleSelectorVisibility(const bool bVisible);
 
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "UINavWidget")
 	bool IsSelectorVisible();
 
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "UINavWidget")
 	FORCEINLINE bool IsRebindingInput() const { return ReceiveInputType != EReceiveInputType::None; }
 
 	/**
@@ -465,7 +461,7 @@ public:
 	*	@param	From  The index of the button that was navigated from
 	*	@param	To  The index of the button that was navigated to
 	*/
-	UFUNCTION(BlueprintNativeEvent, Category = UINavWidget)
+	UFUNCTION(BlueprintNativeEvent, Category = "UINavWidget")
 	void OnNavigate(UUINavComponent* FromComponent, UUINavComponent* ToComponent);
 	
 	virtual void OnNavigate_Implementation(UUINavComponent* FromComponent, UUINavComponent* ToComponent);
@@ -475,21 +471,21 @@ public:
 	*
 	*	@param	Index  The index of the button that was selected
 	*/
-	UFUNCTION(BlueprintNativeEvent, Category = UINavWidget)
+	UFUNCTION(BlueprintNativeEvent, Category = "UINavWidget")
 	void OnSelect(UUINavComponent* Component);
 	
 	virtual void OnSelect_Implementation(UUINavComponent* Component);
 
 	void PropagateOnSelect(UUINavComponent* Component);
 
-	UFUNCTION(BlueprintNativeEvent, Category = UINavWidget)
+	UFUNCTION(BlueprintNativeEvent, Category = "UINavWidget")
 	void OnStartSelect(UUINavComponent* Component);
 	
 	virtual void OnStartSelect_Implementation(UUINavComponent* Component);
 
 	void PropagateOnStartSelect(UUINavComponent* Component);
 
-	UFUNCTION(BlueprintNativeEvent, Category = UINavWidget)
+	UFUNCTION(BlueprintNativeEvent, Category = "UINavWidget")
 	void OnStopSelect(UUINavComponent* Component);
 
 	void PropagateOnStopSelect(UUINavComponent* Component);
@@ -504,7 +500,7 @@ public:
 	/**
 	*	Called when ReturnToParent is called (i.e. the player wants to exit the menu)
 	*/
-	UFUNCTION(BlueprintNativeEvent, Category = UINavWidget)
+	UFUNCTION(BlueprintNativeEvent, Category = "UINavWidget")
 	void OnReturn();
 	
 	virtual void OnReturn_Implementation();
@@ -513,7 +509,7 @@ public:
 	*	Called when ReturnToParent is called (i.e. the player wants to exit the menu), only in child nested UINavWidgets.
 	*	Returns whether the Parent Widget's OnReturn/OnChildReturn should be called;
 	*/
-	UFUNCTION(BlueprintNativeEvent, Category = UINavWidget)
+	UFUNCTION(BlueprintNativeEvent, Category = "UINavWidget")
 	bool OnChildReturn();
 
 	virtual bool OnChildReturn_Implementation() { return true; }
@@ -521,7 +517,7 @@ public:
 	/**
 	*	Called when player navigates to the next section
 	*/
-	UFUNCTION(BlueprintNativeEvent, Category = UINavWidget)
+	UFUNCTION(BlueprintNativeEvent, Category = "UINavWidget")
 	void OnNext();
 	
 	virtual void OnNext_Implementation();
@@ -531,7 +527,7 @@ public:
 	/**
 	*	Called when player navigates to the previous section
 	*/
-	UFUNCTION(BlueprintNativeEvent, Category = UINavWidget)
+	UFUNCTION(BlueprintNativeEvent, Category = "UINavWidget")
 	void OnPrevious();
 	
 	virtual void OnPrevious_Implementation();
@@ -541,7 +537,7 @@ public:
 	/**
 	*	Called when player changes section, either through OnNext/OnPrevious or by pressing the corresponding section button
 	*/
-	UFUNCTION(BlueprintNativeEvent, Category = UINavWidget)
+	UFUNCTION(BlueprintNativeEvent, Category = "UINavWidget")
 	void OnChangedSection(const int32 FromIndex, const int32 ToIndex);
 
 	virtual void OnChangedSection_Implementation(const int32 FromIndex, const int32 ToIndex);
@@ -549,7 +545,7 @@ public:
 	/**
 	*	Called when the input type changed
 	*/
-	UFUNCTION(BlueprintNativeEvent, Category = UINavWidget)
+	UFUNCTION(BlueprintNativeEvent, Category = "UINavWidget")
 	void OnInputChanged(const EInputType From, const EInputType To);
 	
 	virtual void OnInputChanged_Implementation(const EInputType From, const EInputType To);
@@ -569,7 +565,7 @@ public:
 	/**
 	*	Called before this widget is setup for UINav logic
 	*/
-	UFUNCTION(BlueprintNativeEvent, Category = UINavWidget)
+	UFUNCTION(BlueprintNativeEvent, Category = "UINavWidget")
 	void PreSetup(const bool bFirstSetup);
 	
 	virtual void PreSetup_Implementation(const bool bFirstSetup);
@@ -577,7 +573,7 @@ public:
 	/**
 	*	Called when this widget completed UINavSetup
 	*/
-	UFUNCTION(BlueprintNativeEvent, Category = UINavWidget)
+	UFUNCTION(BlueprintNativeEvent, Category = "UINavWidget")
 	void OnSetupCompleted();
 	
 	virtual void OnSetupCompleted_Implementation();
@@ -587,7 +583,7 @@ public:
 	/**
 	*	Called when the user navigates left on a UINavComponentBox
 	*/
-	UFUNCTION(BlueprintNativeEvent, Category = UINavWidget)
+	UFUNCTION(BlueprintNativeEvent, Category = "UINavWidget")
 	void OnHorizCompNavigateLeft(UUINavComponent* Component);
 	
 	virtual void OnHorizCompNavigateLeft_Implementation(UUINavComponent* Component);
@@ -597,7 +593,7 @@ public:
 	/**
 	*	Called when the user navigates right on a UINavComponentBox
 	*/
-	UFUNCTION(BlueprintNativeEvent, Category = UINavWidget)
+	UFUNCTION(BlueprintNativeEvent, Category = "UINavWidget")
 	void OnHorizCompNavigateRight(UUINavComponent* Component);
 	
 	virtual void OnHorizCompNavigateRight_Implementation(UUINavComponent* Component);
@@ -607,7 +603,7 @@ public:
 	/**
 	* Called when a HorizontalComponent was updated
 	*/
-	UFUNCTION(BlueprintNativeEvent, Category = UINavWidget)
+	UFUNCTION(BlueprintNativeEvent, Category = "UINavWidget")
 	void OnHorizCompUpdated(UUINavComponent* Component);
 	
 	virtual void OnHorizCompUpdated_Implementation(UUINavComponent* Component);
@@ -651,7 +647,7 @@ public:
 		return GetOuterObject<T>(Object->GetOuter());
 	}
 
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "UINavWidget")
 	UUINavWidget* GetMostOuterUINavWidget();
 
 	UUINavWidget* GetChildUINavWidget(const int ChildIndex) const;
@@ -668,7 +664,7 @@ public:
 
 	void RemovedComponent(UUINavComponent* Component);
 
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "UINavWidget")
 	bool IsSelectorValid();
 
 	/**
@@ -679,7 +675,7 @@ public:
 	*	@param  bDestroyParent  Whether to destruct the parent widget (this widget)
 	*	@param  ZOrder Order to display the widget
 	*/
-	UFUNCTION(BlueprintCallable, Category = UINavWidget, meta = (AdvancedDisplay = 2, DeterminesOutputType="NewWidgetClass"))
+	UFUNCTION(BlueprintCallable, Category = "UINavWidget", meta = (AdvancedDisplay = 2, DeterminesOutputType="NewWidgetClass"))
 	UUINavWidget* GoToWidget(TSubclassOf<UUINavWidget> NewWidgetClass, const bool bRemoveParent = true, const bool bDestroyParent = false, const int ZOrder = 0);
 
 	/**
@@ -690,7 +686,7 @@ public:
 	*	@param  bDestroyParent  Whether to destruct the parent widget (this widget)
 	*	@param  ZOrder Order to display the widget
 	*/
-	UFUNCTION(BlueprintCallable, Category = UINavWidget, meta = (AdvancedDisplay = 4, DeterminesOutputType = "NewWidgetClass"))
+	UFUNCTION(BlueprintCallable, Category = "UINavWidget", meta = (AdvancedDisplay = 4, DeterminesOutputType = "NewWidgetClass"))
 	UUINavWidget* GoToPromptWidget(TSubclassOf<UUINavPromptWidget> NewWidgetClass, const FPromptWidgetDecided& Event, const FText Title = FText(), const FText Message = FText(), const bool bRemoveParent = false, const int ZOrder = 0);
 
 	/**
@@ -701,14 +697,14 @@ public:
 	*	@param  bDestroyParent  Whether to destruct the parent widget (this widget)
 	*	@param  ZOrder Order to display the widget
 	*/
-	UFUNCTION(BlueprintCallable, Category = UINavWidget, meta = (AdvancedDisplay = 2, DeterminesOutputType = "NewWidgetClass"))
+	UFUNCTION(BlueprintCallable, Category = "UINavWidget", meta = (AdvancedDisplay = 2, DeterminesOutputType = "NewWidgetClass"))
 	UUINavWidget* GoToBuiltWidget(UUINavWidget* NewWidget, const bool bRemoveParent, const bool bDestroyParent = false, const int ZOrder = 0);
 
 	/**
 	*	Adds this widget's parent to the viewport (if applicable)
 	*	and removes this widget from viewport
 	*/
-	UFUNCTION(BlueprintCallable, Category = UINavWidget, meta = (AdvancedDisplay = 1))
+	UFUNCTION(BlueprintCallable, Category = "UINavWidget", meta = (AdvancedDisplay = 1))
 	virtual void ReturnToParent(const bool bRemoveAllParents = false, const int ZOrder = 0);
 
 	void RemoveSelfAndAllParents();
