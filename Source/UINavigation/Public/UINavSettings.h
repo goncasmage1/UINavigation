@@ -87,20 +87,24 @@ public:
 	UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	bool bLoadInputIconsAsync = false;
 
+	// Increment by 1 everytime your project's default inputs change
+	UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = "Settings|Rebinding")
+	uint8 CurrentInputVersion = 0;
+
 	// The amount of mouse movement delta that will trigger a rebind attempt when listening to a new key for input rebinding
-	UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = "Settings")
+	UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = "Settings|Rebinding")
 	float MouseMoveRebindThreshold = 2.0f;
 
 	// The amount of time the player needs to hold a key in order to rebind to a hold input
-	UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = "Settings")
+	UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = "Settings|Rebinding")
 	float HoldRebindThreshold = 0.5f;
 
 	// The amount of mouse movement delta that will trigger the input type being changed to mouse
-	UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = "Settings")
+	UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = "Settings|InputType")
 	float MouseInputChangeThreshold = 0.5f;
 
 	// The amount of analog movement that will trigger the input type being changed to gamepad
-	UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = "Settings")
+	UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = "Settings|InputType")
 	float AnalogInputChangeThreshold = 0.1f;
 
 	// What relative button position to move the mouse cursor to when navigating to that button (None if you don't want this to happen).
@@ -108,12 +112,16 @@ public:
 	* What relative button position to move the mouse cursor to when navigating to that button (None if you don't want this to happen).
 	* This can be useful to displaying button tooltips when using the gamepad/keyboard.
 	*/
-	UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = "Settings")
+	UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = "Settings|MoveMouseToButton")
 	ESelectorPosition MoveMouseToButtonPosition = ESelectorPosition::None;
 
 	// The offset to use when moving the mouse cursor to the button's position.
-	UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = "Settings")
+	UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = "Settings|MoveMouseToButton")
 	FVector2D MoveMouseToButtonOffset = FVector2D(-1.0f, 1.0f);
+
+	// Whether to move the mouse to the button's position when using either the keyboard or the gamepad, or just the gamepad.
+	UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = "Settings|MoveMouseToButton")
+	bool bMoveMouseToButtonForKeyboard = true;
 
 	// The list of widget types (Slate names) to allow to be focused
 	UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = "Settings")
@@ -125,10 +133,6 @@ public:
 		TEXT("SEditableText"),
 		TEXT("SMultilineEditableText")
 	};
-
-	// Increment by 1 everytime your project's default inputs change
-	UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = "Settings")
-	uint8 CurrentInputVersion = 0;
 
 	// The input data used for each platform
 	UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = "Settings")
