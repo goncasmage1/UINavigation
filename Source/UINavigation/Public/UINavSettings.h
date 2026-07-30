@@ -108,12 +108,16 @@ public:
 	* What relative button position to move the mouse cursor to when navigating to that button (None if you don't want this to happen).
 	* This can be useful to displaying button tooltips when using the gamepad/keyboard.
 	*/
-	UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = "Settings")
+	UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = "Settings|MoveMouseToButton")
 	ESelectorPosition MoveMouseToButtonPosition = ESelectorPosition::None;
 
 	// The offset to use when moving the mouse cursor to the button's position.
-	UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = "Settings")
+	UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = "Settings|MoveMouseToButton")
 	FVector2D MoveMouseToButtonOffset = FVector2D(-1.0f, 1.0f);
+
+	// Whether to move the mouse to the button's position when using either the keyboard or the gamepad, or just the gamepad.
+	UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = "Settings|MoveMouseToButton")
+	bool bMoveMouseToButtonForKeyboard = true;
 
 	// The list of widget types (Slate names) to allow to be focused
 	UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = "Settings")

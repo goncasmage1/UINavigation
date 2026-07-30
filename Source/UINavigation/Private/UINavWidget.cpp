@@ -1937,8 +1937,9 @@ void UUINavWidget::NavigatedTo(UUINavComponent* NavigatedToComponent, const bool
 		bHoverRestoredNavigation = false;
 	}
 
-	const ESelectorPosition MouseRelativePosition = GetDefault<UUINavSettings>()->MoveMouseToButtonPosition;
-	if (MouseRelativePosition != ESelectorPosition::None && UINavPC->GetCurrentInputType() != EInputType::Mouse)
+	if (GetDefault<UUINavSettings>()->MoveMouseToButtonPosition != ESelectorPosition::None &&
+		UINavPC->GetCurrentInputType() != EInputType::Mouse &&
+		(GetDefault<UUINavSettings>()->bMoveMouseToButtonForKeyboard || UINavPC->GetCurrentInputType() != EInputType::Keyboard))
 	{
 		bUpdateMousePositionNextFrame = true;
 	}
@@ -2164,7 +2165,10 @@ void UUINavWidget::OnHoveredComponent(UUINavComponent* Component)
 {
 	if (!IsValid(Component) || UINavPC == nullptr) return;
 
-	if (UINavPC->HidingMouseCursor() && !UINavPC->OverrideConsiderHover() && GetDefault<UUINavSettings>()->MoveMouseToButtonPosition == ESelectorPosition::None)
+	if (UINavPC->HidingMouseCursor() &&
+		!UINavPC->OverrideConsiderHover() &&
+		(GetDefault<UUINavSettings>()->MoveMouseToButtonPosition == ESelectorPosition::None ||
+		(!GetDefault<UUINavSettings>()->bMoveMouseToButtonForKeyboard && UINavPC->GetCurrentInputType() == EInputType::Keyboard)))
 	{
 		Component->SwitchButtonStyle(EButtonStyle::Normal);
 		return;
