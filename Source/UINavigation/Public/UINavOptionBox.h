@@ -25,7 +25,7 @@ public:
 
 	/*If set to false, will use StringOptions, otherwise will use
 	all integers in designated range (from MinRange to MaxRange, inclusive)*/
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavOptionBox)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavOptionBox)
 	bool bUseNumberRange = false;
 
 	//The list of Names to display as options in this slider

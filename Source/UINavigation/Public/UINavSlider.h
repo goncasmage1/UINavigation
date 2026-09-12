@@ -64,22 +64,22 @@ protected:
 
 public:
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavSlider)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavSlider)
 	float MinValue = 0.0f;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavSlider)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavSlider)
 	float MaxValue = 1.0f;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavSlider, meta = (ClampMin="0"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavSlider, meta = (ClampMin="0"))
 	float Interval = 0.1f;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavSlider, meta = (ClampMin="0"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavSlider, meta = (ClampMin="0"))
 	int MaxDecimalDigits = 1;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavSlider, meta = (ClampMin="0"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavSlider, meta = (ClampMin="0"))
 	int MinDecimalDigits = 0;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavSlider)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = UINavSlider)
 	bool bUseComma = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UINavSlider)
