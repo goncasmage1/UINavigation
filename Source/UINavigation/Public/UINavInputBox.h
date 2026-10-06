@@ -72,7 +72,7 @@ public:
 	int32 FinishUpdateNewKey(const bool bIsHold = false, const int32 MappingIndexToIgnore = -1, const TObjectPtr<UInputTrigger> TriggerToUse = nullptr);
 	int32 FinishUpdateNewEnhancedInputKey(const FKey& PressedKey, int Index, const bool bIsHold = false, const int32 MappingIndexToIgnore = -1, const TObjectPtr<UInputTrigger> TriggerToUse = nullptr);
 	void TryMapEnhancedAxisKey(const FKey& NewKey, const int32 Index);
-	void TryMap2DAxisKey(const FKey& NewMappingKey, const int Index);
+	void TryMap2DAxisKey(const FKey NewMappingKey, const int Index);
 	void UnmapEnhancedAxisKey(const FKey& NewAxisKey, const FKey& OldAxisKey, const FKey& NewKey, const int32 Index, const bool bNegateX, const bool bNegateY, const bool bNegateZ);
 	void AddRelevantModifiers(const FInputContainerEnhancedActionData& ActionData, FEnhancedActionKeyMapping& Mapping);
 	void ApplyNegateModifiers(UUINavInputBox* InputBox, FEnhancedActionKeyMapping& Mapping, const bool bNegateX, const bool bNegateY, const bool bNegateZ);
