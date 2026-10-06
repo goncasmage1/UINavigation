@@ -1545,17 +1545,20 @@ FKey UUINavPCComponent::GetEnhancedInputKey(const UInputAction* Action, const EI
 	if (UUINavBlueprintFunctionLibrary::IsUINavInputAction(Action))
 	{
 		const UInputMappingContext* const UINavInputContext = GetDefault<UUINavSettings>()->EnhancedInputContext.LoadSynchronous();
-		for (const FEnhancedActionKeyMapping& Mapping : UINavInputContext->GetMappings())
+		if (IsValid(UINavInputContext))
 		{
-			if (Mapping.Action == Action && UUINavBlueprintFunctionLibrary::RespectsRestriction(Mapping.Key, InputRestriction))
+			for (const FEnhancedActionKeyMapping& Mapping : UINavInputContext->GetMappings())
 			{
-				if (Action->ValueType == EInputActionValueType::Boolean || Scale == EAxisType::None)
+				if (Mapping.Action == Action && UUINavBlueprintFunctionLibrary::RespectsRestriction(Mapping.Key, InputRestriction))
 				{
-					return Mapping.Key;
-				}
-				else
-				{
-					return GetKeyFromAxis(Mapping.Key, Scale == EAxisType::Positive, Axis);
+					if (Action->ValueType == EInputActionValueType::Boolean || Scale == EAxisType::None)
+					{
+						return Mapping.Key;
+					}
+					else
+					{
+						return GetKeyFromAxis(Mapping.Key, Scale == EAxisType::Positive, Axis);
+					}
 				}
 			}
 		}
@@ -1685,11 +1688,14 @@ void UUINavPCComponent::GetEnhancedInputKeys(const UInputAction* Action, TArray<
 	if (UUINavBlueprintFunctionLibrary::IsUINavInputAction(Action))
 	{
 		const UInputMappingContext* const UINavInputContext = GetDefault<UUINavSettings>()->EnhancedInputContext.LoadSynchronous();
-		for (const FEnhancedActionKeyMapping& Mapping : UINavInputContext->GetMappings())
+		if (IsValid(UINavInputContext))
 		{
-			if (Mapping.Action == Action && UUINavBlueprintFunctionLibrary::RespectsRestriction(Mapping.Key, EInputRestriction::None))
+			for (const FEnhancedActionKeyMapping& Mapping : UINavInputContext->GetMappings())
 			{
-				OutKeys.Add(Mapping.Key);
+				if (Mapping.Action == Action && UUINavBlueprintFunctionLibrary::RespectsRestriction(Mapping.Key, EInputRestriction::None))
+				{
+					OutKeys.Add(Mapping.Key);
+				}
 			}
 		}
 	}
@@ -1823,7 +1829,10 @@ const FKey UUINavPCComponent::GetOppositeAxis2DAxis(const FKey& Key) const
 void UUINavPCComponent::GetAxisPropertiesFromMapping(const FEnhancedActionKeyMapping& ActionMapping, bool& bOutPositive, EInputAxis& OutAxis) const
 {
 	TArray<UInputModifier*> Modifiers(ActionMapping.Modifiers);
-	Modifiers.Append(ActionMapping.Action->Modifiers);
+	if (IsValid(ActionMapping.Action))
+	{
+		Modifiers.Append(ActionMapping.Action->Modifiers);
+	}
 	bOutPositive = true;
 	if (!IsAxis2D(ActionMapping.Key))
 	{
