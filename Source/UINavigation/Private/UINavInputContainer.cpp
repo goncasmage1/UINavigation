@@ -17,6 +17,8 @@
 #include "Components/RichTextBlock.h"
 #include "IImageWrapper.h"
 #include "EnhancedInputComponent.h"
+#include "InputAction.h"
+#include "InputMappingContext.h"
 #include "UINavMacros.h"
 #include "Internationalization/Internationalization.h"
 #include "HAL/Platform.h"
@@ -176,10 +178,10 @@ void UUINavInputContainer::CreateInputBoxes()
 	for (int i = 0; i < NumberOfInputs; ++i)
 	{
 		UUINavInputBox* NewInputBox = CreateWidget<UUINavInputBox>(this, InputBox_BP);
-		InputBoxes.Add(NewInputBox);
 		NewInputBox->Container = this;
 		NewInputBox->KeysPerInput = KeysPerInput;
 
+		bool bInputContextsValid = true;
 		int Index = i;
 		for (const TPair<UInputMappingContext*, FInputContainerEnhancedActionDataArray>& Context : EnhancedInputs)
 		{
@@ -187,17 +189,27 @@ void UUINavInputContainer::CreateInputBoxes()
 			{
 				Index -= Context.Value.Actions.Num();
 			}
-			else
+			else if (IsValid(Context.Key) && IsValid(Context.Value.Actions[Index].Action))
 			{
 				NewInputBox->InputContext = Context.Key;
 				NewInputBox->InputActionData = Context.Value.Actions[Index];
 				NewInputBox->EnhancedInputGroups = Context.Value.Actions[Index].InputGroupsOverride.Num() > 0 ? Context.Value.Actions[Index].InputGroupsOverride : Context.Value.InputGroups;
 				break;
 			}
+			else
+			{
+				bInputContextsValid = false;
+				break;
+			}
+		}
+		
+		if (bInputContextsValid)
+		{
+			InputBoxes.Add(NewInputBox);
 		}
 	}
 
-	for (int i = 0; i < NumberOfInputs; ++i)
+	for (int i = 0; i < InputBoxes.Num(); ++i)
 	{
 		UUINavInputBox* const InputBox = InputBoxes[i];
 		InputBox->CreateKeyWidgets();

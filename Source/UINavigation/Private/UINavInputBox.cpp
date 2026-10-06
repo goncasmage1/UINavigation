@@ -357,6 +357,8 @@ int32 UUINavInputBox::FinishUpdateNewEnhancedInputKey(const FKey& PressedKey, co
 				ApplyNegateModifiers(this, NewMapping, bNegateX != bIsNegativeXAxis, bNegateY != bIsNegativeYAxis, bNegateZ != bIsNegativeZAxis);
 			}
 		}
+
+		const FKey NewMappingKey = NewMapping.Key;
 		if (NewAxisKey.IsValid())
 		{
 			InputContext->UnmapKey(InputActionData.Action, Keys[Index]);
@@ -372,7 +374,7 @@ int32 UUINavInputBox::FinishUpdateNewEnhancedInputKey(const FKey& PressedKey, co
 		InputButtons[Index]->SetText(GetKeyText(Index));
 
 		// Try to merge 2 1D axes into a 2D axis
-		TryMap2DAxisKey(NewMapping.Key, Index);
+		TryMap2DAxisKey(NewMappingKey, Index);
 	}
 	else
 	{
@@ -439,7 +441,7 @@ void UUINavInputBox::TryMapEnhancedAxisKey(const FKey& NewKey, const int32 Index
 	}
 }
 
-void UUINavInputBox::TryMap2DAxisKey(const FKey& NewMappingKey, const int Index)
+void UUINavInputBox::TryMap2DAxisKey(const FKey NewMappingKey, const int Index)
 {
 	const FKey OppositeAxis = Container->UINavPC->GetOppositeAxis2DAxis(NewMappingKey);
 	if (OppositeAxis.IsValid())
