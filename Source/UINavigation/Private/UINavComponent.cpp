@@ -48,7 +48,7 @@ void UUINavComponent::NativeConstruct()
 
 	if (!IsValid(ParentWidget))
 	{
-		ParentWidget = UUINavWidget::GetOuterObject<UUINavWidget>(this);
+		ParentWidget = Cast<UUINavWidget>(UUINavBlueprintFunctionLibrary::FindParentWidgetOfType(this, UUINavWidget::StaticClass()));
 
 		if (!IsValid(ParentWidget))
 		{
@@ -70,7 +70,7 @@ void UUINavComponent::NativeConstruct()
 			}
 		}
 
-		ParentScrollBox = Cast<UScrollBox>(UUINavBlueprintFunctionLibrary::GetParentPanelWidget(this, UScrollBox::StaticClass()));
+		ParentScrollBox = Cast<UScrollBox>(UUINavBlueprintFunctionLibrary::FindParentWidgetOfType(this, UScrollBox::StaticClass()));
 	}
 	else
 	{

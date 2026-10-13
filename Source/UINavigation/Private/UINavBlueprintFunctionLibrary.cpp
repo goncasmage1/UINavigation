@@ -372,6 +372,43 @@ UPanelWidget* UUINavBlueprintFunctionLibrary::GetParentPanelWidget(const UWidget
 	return PanelWidget;
 }
 
+UWidget* UUINavBlueprintFunctionLibrary::FindParentWidgetOfType(const UWidget* const StartingWidget, TSubclassOf<UWidget> Type)
+{
+    const UWidget* CurrentWidget = StartingWidget;
+    
+    while (CurrentWidget)
+    {
+        const UWidget* LocalRoot = CurrentWidget;
+        UWidget* LocalParent = LocalRoot->GetParent();
+        
+        while (LocalParent)
+        {
+            if (LocalParent->IsA(Type))
+            {
+                return LocalParent;
+            }
+            LocalRoot = LocalParent;
+            LocalParent = LocalParent->GetParent();
+        }
+
+        UWidgetTree* WidgetTree = Cast<UWidgetTree>(LocalRoot->GetOuter());
+        if (WidgetTree == nullptr)
+        {
+            break;
+        }
+
+        // Move to the outer UserWidget
+        CurrentWidget = Cast<UUserWidget>(WidgetTree->GetOuter());
+        if (CurrentWidget && CurrentWidget->IsA(Type))
+        {
+            // Return non-const pointer by const_cast (safe because the underlying object isn't const)
+            return const_cast<UWidget*>(CurrentWidget);
+        }
+    }
+
+    return nullptr;
+}
+
 void UUINavBlueprintFunctionLibrary::GetIndexInUniformGridWidget(const UWidget* const Widget, int& Column, int& Row)
 {
 	Column = -1;

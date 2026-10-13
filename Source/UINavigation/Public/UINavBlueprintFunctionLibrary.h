@@ -93,6 +93,10 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
 	static UPanelWidget* GetParentPanelWidget(const UWidget* const Widget, TSubclassOf<UPanelWidget> PanelWidgetSubclass);
 
+	// Returns the topmost parent of this widget thats a Panel Widget of the specified class
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
+	static UWidget* FindParentWidgetOfType(const UWidget* const StartingWidget, TSubclassOf<UWidget> Type);
+
 	// Returns the index of the given widget in its parent panel widget
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavWidget)
 	static void GetIndexInUniformGridWidget(const UWidget* const Widget, int& Column, int& Row);
