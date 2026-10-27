@@ -524,9 +524,9 @@ void UUINavWidget::LoseNavigation(UUINavWidget* NewActiveWidget)
 		return;
 	}
 
-	if ((IsValid(NewActiveWidget) && !NewActiveWidget->bMaintainNavigationForChild) || !bNewWidgetIsChild)
+	if (!IsValid(NewActiveWidget))
 	{
-		UpdateNavigationVisuals(nullptr, true, false, true);
+		UpdateNavigationVisuals(nullptr, true, false, false);
 	}
 
 	CallOnNavigate(CurrentComponent, nullptr);
@@ -1915,7 +1915,8 @@ void UUINavWidget::NavigatedTo(UUINavComponent* NavigatedToComponent, const bool
 
 	if (IsForcingNavigation() || (CurrentComponent != NavigatedToComponent && CurrentComponent != nullptr))
 	{
-		UpdateNavigationVisuals(NavigatedToComponent, !bHoverRestoredNavigation, /*bBypassForcedNavigation*/ false, /*bFinishInstantly*/ HoveredComponent == NavigatedToComponent);
+		const bool bFinishInstantly = HoveredComponent == NavigatedToComponent && CurrentComponent->ParentWidget == NavigatedToComponent->ParentWidget;
+		UpdateNavigationVisuals(NavigatedToComponent, !bHoverRestoredNavigation, /*bBypassForcedNavigation*/ false, bFinishInstantly);
 	}
 	else
 	{
