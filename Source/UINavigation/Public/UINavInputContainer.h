@@ -189,4 +189,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (MultiLine = true), Category = "UINav Input")
 	FText SwapKeysMessageText = FText::FromString(TEXT("{CollidingKey} is already being used by {CollidingAction}.\nDo you want to swap it with {OtherKey}?"));
 
+private:
+
+	bool SharesInputGroup(const UUINavInputBox* InputBox, const UUINavInputBox* OtherInputBox) const;
 };
