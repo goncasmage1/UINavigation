@@ -1832,8 +1832,6 @@ void UUINavWidget::ReturnToParent(const bool bRemoveAllParents, const int ZOrder
 		{
 			if (bRemoveAllParents)
 			{
-				IUINavPCReceiver::Execute_OnRootWidgetRemoved(UINavPC->GetOwner());
-
 				UUINavWidget* const ActiveWidget = UINavPC->GetActiveWidget();
 				if (IsValid(ActiveWidget) && ActiveWidget != this && ActiveWidget->GetMostOuterUINavWidget() == this)
 				{
