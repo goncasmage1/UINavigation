@@ -511,8 +511,6 @@ void UUINavWidget::LoseNavigation(UUINavWidget* NewActiveWidget)
 {
 	if (!bHasNavigation || !IsValid(UINavPC)) return;
 
-	UINavPC->RemoveInputContextFromUINavWidget(this);
-
 	const bool bHaveSameOuter = IsValid(NewActiveWidget) ? NewActiveWidget->GetMostOuterUINavWidget() == GetMostOuterUINavWidget() : false;
 
 	const bool bNewWidgetIsChild = NewActiveWidget != nullptr && NewActiveWidget->GetUINavWidgetPath().Num() > 0 ?
@@ -523,6 +521,8 @@ void UUINavWidget::LoseNavigation(UUINavWidget* NewActiveWidget)
 	{
 		return;
 	}
+
+	UINavPC->RemoveInputContextFromUINavWidget(this);
 
 	if (!IsValid(NewActiveWidget))
 	{
@@ -1829,6 +1829,13 @@ void UUINavWidget::ReturnToParent(const bool bRemoveAllParents, const int ZOrder
 			if (bRemoveAllParents)
 			{
 				IUINavPCReceiver::Execute_OnRootWidgetRemoved(UINavPC->GetOwner());
+
+				UUINavWidget* const ActiveWidget = UINavPC->GetActiveWidget();
+				if (IsValid(ActiveWidget) && ActiveWidget != this && ActiveWidget->GetMostOuterUINavWidget() == this)
+				{
+					ActiveWidget->PropagateLoseNavigation(nullptr, ActiveWidget, this);
+				}
+
 				UINavPC->SetActiveWidget(nullptr);
 				RemoveSelfAndAllParents();
 			}
