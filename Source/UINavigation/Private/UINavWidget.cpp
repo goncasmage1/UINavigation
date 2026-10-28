@@ -1780,8 +1780,12 @@ void UUINavWidget::ReturnToParent(const bool bRemoveAllParents, const int ZOrder
 	{
 		if (bAllowRemoveIfRoot && UINavPC != nullptr)
 		{
-			UINavPC->GetActiveWidget()->PropagateLoseNavigation(nullptr, UINavPC->GetActiveWidget(), nullptr);
-			UINavPC->SetActiveWidget(nullptr);
+			UUINavWidget* const ActiveWidget = UINavPC->GetActiveWidget();
+			if (IsValid(ActiveWidget) && ActiveWidget->GetMostOuterUINavWidget() == GetMostOuterUINavWidget())
+			{
+				ActiveWidget->PropagateLoseNavigation(nullptr, ActiveWidget, nullptr);
+				UINavPC->SetActiveWidget(nullptr);
+			}
 
 			NonMouseSelectCount = 0;
 			bPressingMouse = false;
