@@ -14,10 +14,10 @@ void UUINavSliderBox::NativePreConstruct()
 
 	if (!IsDesignTime())
 	{
-		if (!LeftButton->OnClicked.IsBound())
-			LeftButton->OnClicked.AddDynamic(this, &UUINavSliderBox::NavigateLeft);
-		if (!RightButton->OnClicked.IsBound())
-			RightButton->OnClicked.AddDynamic(this, &UUINavSliderBox::NavigateRight);
+		if (LeftButton != nullptr)
+			LeftButton->OnClicked.AddUniqueDynamic(this, &UUINavSliderBox::NavigateLeft);
+		if (RightButton != nullptr)
+			RightButton->OnClicked.AddUniqueDynamic(this, &UUINavSliderBox::NavigateRight);
 	}
 }
 
