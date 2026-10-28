@@ -833,23 +833,21 @@ void UUINavInputBox::AddHoldModifier(FEnhancedActionKeyMapping& ActionMapping)
 
 void UUINavInputBox::RemoveHoldModifier(FEnhancedActionKeyMapping& ActionMapping, const TObjectPtr<UInputTrigger> TriggerToAdd /*= nullptr*/)
 {
-	for (const TObjectPtr<UInputTrigger>& Trigger : ActionMapping.Triggers)
+	const int32 HoldTriggerIndex = ActionMapping.Triggers.IndexOfByPredicate([](const TObjectPtr<UInputTrigger>& Trigger)
 	{
-		if (!IsValid(Trigger))
-		{
-			continue;
-		}
+		return IsValid(Trigger) &&
+			(Trigger->IsA<UInputTriggerHold>() || Trigger->IsA<UInputTriggerHoldAndRelease>());
+	});
 
-		if (Trigger->IsA<UInputTriggerHold>() ||
-			Trigger->IsA<UInputTriggerHoldAndRelease>())
-		{
-			ActionMapping.Triggers.Remove(Trigger);
-			if (IsValid(TriggerToAdd))
-			{
-				ActionMapping.Triggers.Add(DuplicateObject<UInputTrigger>(TriggerToAdd, InputContext));
-			}
-			return;
-		}
+	if (HoldTriggerIndex == INDEX_NONE)
+	{
+		return;
+	}
+
+	ActionMapping.Triggers.RemoveAt(HoldTriggerIndex);
+	if (IsValid(TriggerToAdd))
+	{
+		ActionMapping.Triggers.Add(DuplicateObject<UInputTrigger>(TriggerToAdd, InputContext));
 	}
 }
 
