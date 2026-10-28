@@ -1051,12 +1051,23 @@ void UUINavPCComponent::SetAllowAllMenuInput(const bool bAllowInput)
 	bAllowReturnInput = bAllowInput;
 	bAllowSectionInput = bAllowInput;
 
+	if (!bAllowInput)
+	{
+		ClearNavigationTimer();
+	}
+
 	RefreshNavigationKeys();
 }
 
 void UUINavPCComponent::SetAllowDirectionalInput(const bool bAllowInput)
 {
 	bAllowDirectionalInput = bAllowInput;
+
+	if (!bAllowInput)
+	{
+		ClearNavigationTimer();
+	}
+
 	RefreshNavigationKeys();
 }
 
