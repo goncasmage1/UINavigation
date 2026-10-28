@@ -81,6 +81,8 @@ UUINavPCComponent::UUINavPCComponent()
 
 void UUINavPCComponent::Activate(bool bReset)
 {
+	Super::Activate(bReset);
+
 	PC = Cast<APlayerController>(GetOwner());
 	if (PC == nullptr)
 	{

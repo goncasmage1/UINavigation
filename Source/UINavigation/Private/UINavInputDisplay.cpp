@@ -38,12 +38,7 @@ void UUINavInputDisplay::NativeConstruct()
 
 void UUINavInputDisplay::NativeDestruct()
 {
-	if (!IsValid(UINavPC))
-	{
-		return;
-	}
-
-	if (InputTypeRestriction == EInputRestriction::None)
+	if (IsValid(UINavPC))
 	{
 		UINavPC->UpdateInputIconsDelegate.RemoveDynamic(this, &UUINavInputDisplay::UpdateInputVisuals);
 	}
