@@ -1143,6 +1143,7 @@ void UUINavWidget::GoToNextSection()
 		}
 
 		GoToSection(0);
+		return;
 	}
 
 	GoToSection(ActiveIndex + 1);
@@ -1165,6 +1166,7 @@ void UUINavWidget::GoToPreviousSection()
 		}
 
 		GoToSection(NumSections - 1);
+		return;
 	}
 
 	GoToSection(ActiveIndex - 1);
