@@ -2030,13 +2030,12 @@ UInputMappingContext* UUINavPCComponent::GetUINavInputContext(const UUINavWidget
 
 void UUINavPCComponent::NavigateInDirection(const EUINavigation InDirection, const int32 UserIndex /*= 0*/)
 {
-	AllowDirection = InDirection;
-
 	if (!IsValid(ActiveWidget) || !IsValid(ActiveWidget->GetCurrentComponent()) || ActiveWidget->GetCurrentComponent()->GetCachedWidget() == nullptr)
 	{
 		return;
 	}
 
+	AllowDirection = InDirection;
 	bAutomaticNavigation = true;
 
 	FSlateApplication& SlateApplication = FSlateApplication::Get();
@@ -2050,6 +2049,8 @@ void UUINavPCComponent::NavigateInDirection(const EUINavigation InDirection, con
 		nullptr,
 		nullptr,
 		UserIndex);
+
+	AllowDirection = EUINavigation::Invalid;
 }
 
 void UUINavPCComponent::MenuNext()
