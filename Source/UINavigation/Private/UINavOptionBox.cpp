@@ -15,11 +15,8 @@ void UUINavOptionBox::NativePreConstruct()
 
 	if (!IsDesignTime() && LeftButton != nullptr && RightButton != nullptr)
 	{
-		if (!LeftButton->OnClicked.IsBound())
-			LeftButton->OnClicked.AddDynamic(this, &UUINavHorizontalComponent::NavigateLeft);
-
-		if (!RightButton->OnClicked.IsBound())
-			RightButton->OnClicked.AddDynamic(this, &UUINavHorizontalComponent::NavigateRight);
+		LeftButton->OnClicked.AddUniqueDynamic(this, &UUINavHorizontalComponent::NavigateLeft);
+		RightButton->OnClicked.AddUniqueDynamic(this, &UUINavHorizontalComponent::NavigateRight);
 	}
 }
 

@@ -404,7 +404,11 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "UINavController")
 	FORCEINLINE bool AllowsSectionInput() const { return bAllowSectionInput; }
 
-	FORCEINLINE bool AllowsNavigatingDirection(const EUINavigation Direction) const { return AllowsDirectionalInput() || (AllowDirection != EUINavigation::Invalid && AllowDirection != Direction); }
+	FORCEINLINE bool AllowsNavigatingDirection(const EUINavigation Direction) const
+	{
+		const bool bIsSectionDirection = Direction == EUINavigation::Next || Direction == EUINavigation::Previous;
+		return bIsSectionDirection || AllowsDirectionalInput() || AllowDirection == Direction;
+	}
 	
 	EThumbstickAsMouse UsingThumbstickAsMouse() const;
 

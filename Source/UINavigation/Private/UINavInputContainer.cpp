@@ -237,47 +237,39 @@ bool UUINavInputContainer::CanUseKey(UUINavInputBox* InputBox, const FKey Compar
 
 	for (int i = 0; i < InputBoxes.Num(); ++i)
 	{
-		if (InputBox == InputBoxes[i]) continue;
+		UUINavInputBox* const OtherInputBox = InputBoxes[i];
+		if (InputBox == OtherInputBox || !SharesInputGroup(InputBox, OtherInputBox)) continue;
 
-		const int KeyIndex = InputBoxes[i]->ContainsKey(CompareKey);
-		if (KeyIndex != INDEX_NONE)
+		for (int KeyIndex = 0; KeyIndex < OtherInputBox->KeysPerInput; ++KeyIndex)
 		{
-			bool bIsCollidingInputBox = false;
-			if (InputBox->EnhancedInputGroups.Contains(-1) ||
-				InputBoxes[i]->EnhancedInputGroups.Contains(-1))
-			{
-				bIsCollidingInputBox = true;
-			}
-
-			if (!bIsCollidingInputBox)
-			{
-				for (int InputGroup : InputBox->EnhancedInputGroups)
-				{
-					if (InputBoxes[i]->EnhancedInputGroups.Contains(InputGroup))
-					{
-						bIsCollidingInputBox = true;
-						break;
-					}
-				}
-			}
-
-			if (bIsHold != InputBoxes[i]->bIsHoldInput[KeyIndex])
-			{
-				return true;
-			}
-
-			if (bIsCollidingInputBox)
+			if (OtherInputBox->GetKey(KeyIndex) == CompareKey && OtherInputBox->bIsHoldInput[KeyIndex] == bIsHold)
 			{
 				OutCollidingActionIndex = i;
 				OutCollidingKeyIndex = KeyIndex;
 				return false;
 			}
-
-			return true;
 		}
 	}
 
 	return true;
+}
+
+bool UUINavInputContainer::SharesInputGroup(const UUINavInputBox* InputBox, const UUINavInputBox* OtherInputBox) const
+{
+	if (InputBox->EnhancedInputGroups.Contains(-1) || OtherInputBox->EnhancedInputGroups.Contains(-1))
+	{
+		return true;
+	}
+
+	for (const int InputGroup : InputBox->EnhancedInputGroups)
+	{
+		if (OtherInputBox->EnhancedInputGroups.Contains(InputGroup))
+		{
+			return true;
+		}
+	}
+
+	return false;
 }
 
 bool UUINavInputContainer::RespectsRestriction(const FKey CompareKey, const int Index)

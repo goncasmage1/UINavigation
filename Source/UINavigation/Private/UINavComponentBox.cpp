@@ -10,10 +10,10 @@ void UUINavComponentBox::NativePreConstruct()
 
 	if (!IsDesignTime())
 	{
-		if (LeftButton != nullptr && !LeftButton->OnClicked.IsBound())
-			LeftButton->OnClicked.AddDynamic(this, &UUINavComponentBox::NavigateLeft);	
-		if (RightButton != nullptr && !RightButton->OnClicked.IsBound())
-			RightButton->OnClicked.AddDynamic(this, &UUINavComponentBox::NavigateRight);
+		if (LeftButton != nullptr)
+			LeftButton->OnClicked.AddUniqueDynamic(this, &UUINavComponentBox::NavigateLeft);
+		if (RightButton != nullptr)
+			RightButton->OnClicked.AddUniqueDynamic(this, &UUINavComponentBox::NavigateRight);
 	}
 }
 
