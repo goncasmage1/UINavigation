@@ -511,8 +511,6 @@ void UUINavWidget::LoseNavigation(UUINavWidget* NewActiveWidget)
 {
 	if (!bHasNavigation || !IsValid(UINavPC)) return;
 
-	UINavPC->RemoveInputContextFromUINavWidget(this);
-
 	const bool bHaveSameOuter = IsValid(NewActiveWidget) ? NewActiveWidget->GetMostOuterUINavWidget() == GetMostOuterUINavWidget() : false;
 
 	const bool bNewWidgetIsChild = NewActiveWidget != nullptr && NewActiveWidget->GetUINavWidgetPath().Num() > 0 ?
@@ -524,9 +522,11 @@ void UUINavWidget::LoseNavigation(UUINavWidget* NewActiveWidget)
 		return;
 	}
 
-	if ((IsValid(NewActiveWidget) && !NewActiveWidget->bMaintainNavigationForChild) || !bNewWidgetIsChild)
+	UINavPC->RemoveInputContextFromUINavWidget(this);
+
+	if (!IsValid(NewActiveWidget))
 	{
-		UpdateNavigationVisuals(nullptr, true, false, true);
+		UpdateNavigationVisuals(nullptr, true, false, false);
 	}
 
 	CallOnNavigate(CurrentComponent, nullptr);
@@ -1143,6 +1143,7 @@ void UUINavWidget::GoToNextSection()
 		}
 
 		GoToSection(0);
+		return;
 	}
 
 	GoToSection(ActiveIndex + 1);
@@ -1165,6 +1166,7 @@ void UUINavWidget::GoToPreviousSection()
 		}
 
 		GoToSection(NumSections - 1);
+		return;
 	}
 
 	GoToSection(ActiveIndex - 1);
@@ -1780,8 +1782,12 @@ void UUINavWidget::ReturnToParent(const bool bRemoveAllParents, const int ZOrder
 	{
 		if (bAllowRemoveIfRoot && UINavPC != nullptr)
 		{
-			UINavPC->GetActiveWidget()->PropagateLoseNavigation(nullptr, UINavPC->GetActiveWidget(), nullptr);
-			UINavPC->SetActiveWidget(nullptr);
+			UUINavWidget* const ActiveWidget = UINavPC->GetActiveWidget();
+			if (IsValid(ActiveWidget) && ActiveWidget->GetMostOuterUINavWidget() == GetMostOuterUINavWidget())
+			{
+				ActiveWidget->PropagateLoseNavigation(nullptr, ActiveWidget, nullptr);
+				UINavPC->SetActiveWidget(nullptr);
+			}
 
 			NonMouseSelectCount = 0;
 			bPressingMouse = false;
@@ -1828,7 +1834,12 @@ void UUINavWidget::ReturnToParent(const bool bRemoveAllParents, const int ZOrder
 		{
 			if (bRemoveAllParents)
 			{
-				IUINavPCReceiver::Execute_OnRootWidgetRemoved(UINavPC->GetOwner());
+				UUINavWidget* const ActiveWidget = UINavPC->GetActiveWidget();
+				if (IsValid(ActiveWidget) && ActiveWidget != this && ActiveWidget->GetMostOuterUINavWidget() == this)
+				{
+					ActiveWidget->PropagateLoseNavigation(nullptr, ActiveWidget, this);
+				}
+
 				UINavPC->SetActiveWidget(nullptr);
 				RemoveSelfAndAllParents();
 			}
@@ -1915,7 +1926,8 @@ void UUINavWidget::NavigatedTo(UUINavComponent* NavigatedToComponent, const bool
 
 	if (IsForcingNavigation() || (CurrentComponent != NavigatedToComponent && CurrentComponent != nullptr))
 	{
-		UpdateNavigationVisuals(NavigatedToComponent, !bHoverRestoredNavigation, /*bBypassForcedNavigation*/ false, /*bFinishInstantly*/ HoveredComponent == NavigatedToComponent);
+		const bool bFinishInstantly = HoveredComponent == NavigatedToComponent && CurrentComponent->ParentWidget == NavigatedToComponent->ParentWidget;
+		UpdateNavigationVisuals(NavigatedToComponent, !bHoverRestoredNavigation, /*bBypassForcedNavigation*/ false, bFinishInstantly);
 	}
 	else
 	{

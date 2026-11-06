@@ -81,6 +81,8 @@ UUINavPCComponent::UUINavPCComponent()
 
 void UUINavPCComponent::Activate(bool bReset)
 {
+	Super::Activate(bReset);
+
 	PC = Cast<APlayerController>(GetOwner());
 	if (PC == nullptr)
 	{
@@ -1049,12 +1051,23 @@ void UUINavPCComponent::SetAllowAllMenuInput(const bool bAllowInput)
 	bAllowReturnInput = bAllowInput;
 	bAllowSectionInput = bAllowInput;
 
+	if (!bAllowInput)
+	{
+		ClearNavigationTimer();
+	}
+
 	RefreshNavigationKeys();
 }
 
 void UUINavPCComponent::SetAllowDirectionalInput(const bool bAllowInput)
 {
 	bAllowDirectionalInput = bAllowInput;
+
+	if (!bAllowInput)
+	{
+		ClearNavigationTimer();
+	}
+
 	RefreshNavigationKeys();
 }
 
@@ -1982,7 +1995,9 @@ void UUINavPCComponent::NotifyInputTypeChange(const EInputType NewInputType, con
 			ActiveWidget->AttemptUnforceNavigation(CurrentInputType);
 		}
 
-		if (IsValid(ActiveWidget) && AutoHideMouse != EAutoHideMouse::Never)
+		if (IsValid(ActiveWidget) &&
+			((AutoHideMouse == EAutoHideMouse::Gamepad && NewInputType == EInputType::Gamepad) ||
+			AutoHideMouse == EAutoHideMouse::GamepadAndKeyboard))
 		{
 			SetShowMouseCursor(!ShouldHideMouseCursor());
 		}
@@ -2015,13 +2030,12 @@ UInputMappingContext* UUINavPCComponent::GetUINavInputContext(const UUINavWidget
 
 void UUINavPCComponent::NavigateInDirection(const EUINavigation InDirection, const int32 UserIndex /*= 0*/)
 {
-	AllowDirection = InDirection;
-
 	if (!IsValid(ActiveWidget) || !IsValid(ActiveWidget->GetCurrentComponent()) || ActiveWidget->GetCurrentComponent()->GetCachedWidget() == nullptr)
 	{
 		return;
 	}
 
+	AllowDirection = InDirection;
 	bAutomaticNavigation = true;
 
 	FSlateApplication& SlateApplication = FSlateApplication::Get();
@@ -2035,6 +2049,8 @@ void UUINavPCComponent::NavigateInDirection(const EUINavigation InDirection, con
 		nullptr,
 		nullptr,
 		UserIndex);
+
+	AllowDirection = EUINavigation::Invalid;
 }
 
 void UUINavPCComponent::MenuNext()

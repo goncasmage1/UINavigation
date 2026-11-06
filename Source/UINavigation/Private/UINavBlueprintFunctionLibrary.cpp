@@ -393,7 +393,7 @@ void UUINavBlueprintFunctionLibrary::GetIndexInUniformGridWidget(const UWidget* 
 		GridPanelWidget = Cast<UGridPanel>(Widget->GetParent());
 		if (!IsValid(GridPanelWidget))
 		{
-			return GetIndexInUniformGridWidget(GridPanelWidget, Column, Row);
+			return GetIndexInUniformGridWidget(Widget->GetParent(), Column, Row);
 		}
 	}
 
