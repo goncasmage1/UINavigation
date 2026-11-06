@@ -1,4 +1,4 @@
-// Copyright (C) 2023 Gonçalo Marques - All Rights Reserved
+// Copyright (C) 2023 GonÃ§alo Marques - All Rights Reserved
 
 #include "ComponentActions/GoToWidgetAction.h"
 #include "UINavComponent.h"
