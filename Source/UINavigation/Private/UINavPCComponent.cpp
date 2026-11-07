@@ -1780,8 +1780,8 @@ const FKey UUINavPCComponent::GetAxisFromScaledKey(const FKey& Key, const bool b
 
 	if (bInclude1DAxis)
 	{
-		return GetAxisFromKey(Key);
 		OutbPositive = true;
+		return GetAxisFromKey(Key);
 	}
 
 	return FKey();
